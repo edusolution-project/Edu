@@ -1,0 +1,9 @@
+E:\Dashbroad\Project_True\DashBoard_Final\CoreLogs\bin\Release\netstandard2.0\CoreLogs.deps.json
+E:\Dashbroad\Project_True\DashBoard_Final\CoreLogs\bin\Release\netstandard2.0\CoreLogs.dll
+E:\Dashbroad\Project_True\DashBoard_Final\CoreLogs\bin\Release\netstandard2.0\CoreLogs.pdb
+E:\Dashbroad\Project_True\DashBoard_Final\CoreLogs\obj\Release\netstandard2.0\CoreLogs.csprojAssemblyReference.cache
+E:\Dashbroad\Project_True\DashBoard_Final\CoreLogs\obj\Release\netstandard2.0\CoreLogs.csproj.CoreCompileInputs.cache
+E:\Dashbroad\Project_True\DashBoard_Final\CoreLogs\obj\Release\netstandard2.0\CoreLogs.AssemblyInfoInputs.cache
+E:\Dashbroad\Project_True\DashBoard_Final\CoreLogs\obj\Release\netstandard2.0\CoreLogs.AssemblyInfo.cs
+E:\Dashbroad\Project_True\DashBoard_Final\CoreLogs\obj\Release\netstandard2.0\CoreLogs.dll
+E:\Dashbroad\Project_True\DashBoard_Final\CoreLogs\obj\Release\netstandard2.0\CoreLogs.pdb

@@ -1,0 +1,11 @@
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.deps.json
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.runtimeconfig.json
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.runtimeconfig.dev.json
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.dll
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.csproj.CoreCompileInputs.cache
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.AssemblyInfoInputs.cache
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.AssemblyInfo.cs
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.pdb
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.dll
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.pdb
+E:\Dashbroad\Project_True\DashBoard_Final_v2\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.csprojAssemblyReference.cache

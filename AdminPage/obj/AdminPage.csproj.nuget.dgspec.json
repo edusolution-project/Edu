@@ -1,0 +1,382 @@
+{
+  "format": 1,
+  "restore": {
+    "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\AdminPage\\AdminPage.csproj": {}
+  },
+  "projects": {
+    "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\AdminPage\\AdminPage.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\AdminPage\\AdminPage.csproj",
+        "projectName": "AdminPage",
+        "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\AdminPage\\AdminPage.csproj",
+        "packagesPath": "C:\\Users\\longht\\.nuget\\packages\\",
+        "outputPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\AdminPage\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\longht\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net461"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://www.nuget.org/api/v2/": {}
+        },
+        "frameworks": {
+          "net461": {
+            "projectReferences": {
+              "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj": {
+                "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj"
+              },
+              "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreLogs\\CoreLogs.csproj": {
+                "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreLogs\\CoreLogs.csproj"
+              },
+              "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\EntityBaseFW\\EntityBaseFW.csproj": {
+                "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\EntityBaseFW\\EntityBaseFW.csproj"
+              },
+              "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\MVCBase\\MVCBase.csproj": {
+                "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\MVCBase\\MVCBase.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net461": {
+          "dependencies": {
+            "Microsoft.AspNetCore": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.AspNetCore.CookiePolicy": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.AspNetCore.HttpsPolicy": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.AspNetCore.Mvc": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.AspNetCore.StaticFiles": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.VisualStudio.Web.BrowserLink": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win7-x64": {
+          "#import": []
+        }
+      }
+    },
+    "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\BaseModels.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\BaseModels.csproj",
+        "projectName": "BaseModels",
+        "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\BaseModels.csproj",
+        "packagesPath": "C:\\Users\\longht\\.nuget\\packages\\",
+        "outputPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\longht\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://www.nuget.org/api/v2/": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "projectReferences": {
+              "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj": {
+                "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "dependencies": {
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    },
+    "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj",
+        "projectName": "CoreEDB",
+        "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj",
+        "packagesPath": "C:\\Users\\longht\\.nuget\\packages\\",
+        "outputPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\longht\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://www.nuget.org/api/v2/": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "dependencies": {
+            "Microsoft.AspNetCore.Hosting": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            },
+            "System.Configuration.ConfigurationManager": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
+            "System.Data.SqlClient": {
+              "target": "Package",
+              "version": "[4.6.0, )"
+            },
+            "System.Runtime.Caching": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
+            "Z.EntityFramework.Plus.EFCore": {
+              "target": "Package",
+              "version": "[1.8.18, )"
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    },
+    "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreLogs\\CoreLogs.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreLogs\\CoreLogs.csproj",
+        "projectName": "CoreLogs",
+        "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreLogs\\CoreLogs.csproj",
+        "packagesPath": "C:\\Users\\longht\\.nuget\\packages\\",
+        "outputPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreLogs\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\longht\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://www.nuget.org/api/v2/": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "dependencies": {
+            "Microsoft.AspNetCore.Hosting": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    },
+    "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\EntityBaseFW\\EntityBaseFW.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\EntityBaseFW\\EntityBaseFW.csproj",
+        "projectName": "EntityBaseFW",
+        "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\EntityBaseFW\\EntityBaseFW.csproj"
+      },
+      "frameworks": {
+        "net461": {}
+      }
+    },
+    "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\MVCBase\\MVCBase.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\MVCBase\\MVCBase.csproj",
+        "projectName": "MVCBase",
+        "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\MVCBase\\MVCBase.csproj",
+        "packagesPath": "C:\\Users\\longht\\.nuget\\packages\\",
+        "outputPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\MVCBase\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\longht\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://www.nuget.org/api/v2/": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "projectReferences": {
+              "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\BaseModels.csproj": {
+                "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\BaseModels.csproj"
+              },
+              "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj": {
+                "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj"
+              },
+              "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreLogs\\CoreLogs.csproj": {
+                "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreLogs\\CoreLogs.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "dependencies": {
+            "Microsoft.AspNetCore.Mvc": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            },
+            "System.Runtime.Caching": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    }
+  }
+}
