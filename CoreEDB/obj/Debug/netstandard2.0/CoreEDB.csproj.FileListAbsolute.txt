@@ -52,3 +52,12 @@ E:\Dashbroad\Project_True\DashBoard_Final_v2\CoreEDB\obj\Debug\netstandard2.0\Co
 E:\Dashbroad\Project_True\DashBoard_Final_v2\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.dll
 E:\Dashbroad\Project_True\DashBoard_Final_v2\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.pdb
 E:\Dashbroad\Project_True\DashBoard_Final_v2\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.csprojAssemblyReference.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\bin\Debug\netstandard2.0\CoreEDB.deps.json
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\bin\Debug\netstandard2.0\CoreEDB.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\bin\Debug\netstandard2.0\CoreEDB.pdb
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.csprojAssemblyReference.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.csproj.CoreCompileInputs.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.AssemblyInfoInputs.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.AssemblyInfo.cs
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.pdb
