@@ -1,0 +1,16 @@
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\bin\Release\netstandard2.0\CoreMongoDB.deps.json
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\bin\Release\netstandard2.0\CoreMongoDB.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\bin\Release\netstandard2.0\CoreMongoDB.pdb
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\bin\Release\netstandard2.0\System.Runtime.Caching.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\bin\Release\netstandard2.0\System.Configuration.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\bin\Release\netstandard2.0\System.Security.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\bin\Release\netstandard2.0\System.Runtime.Caching.xml
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\bin\Release\netstandard2.0\System.Configuration.xml
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\bin\Release\netstandard2.0\System.Security.xml
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Release\netstandard2.0\CoreMongoDB.csprojAssemblyReference.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Release\netstandard2.0\CoreMongoDB.csproj.CoreCompileInputs.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Release\netstandard2.0\CoreMongoDB.AssemblyInfoInputs.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Release\netstandard2.0\CoreMongoDB.AssemblyInfo.cs
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Release\netstandard2.0\CoreMongoDB.csproj.CopyComplete
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Release\netstandard2.0\CoreMongoDB.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Release\netstandard2.0\CoreMongoDB.pdb

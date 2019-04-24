@@ -1,0 +1,16 @@
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\bin\Release\netstandard2.0\BaseMVC.deps.json
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\bin\Release\netstandard2.0\BaseMVC.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\bin\Release\netstandard2.0\BaseMVC.pdb
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\bin\Release\netstandard2.0\BaseMongoDB.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\bin\Release\netstandard2.0\CoreLogs.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\bin\Release\netstandard2.0\CoreMongoDB.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\bin\Release\netstandard2.0\BaseMongoDB.pdb
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\bin\Release\netstandard2.0\CoreLogs.pdb
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\bin\Release\netstandard2.0\CoreMongoDB.pdb
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csprojAssemblyReference.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csproj.CoreCompileInputs.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.AssemblyInfoInputs.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.AssemblyInfo.cs
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csproj.CopyComplete
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.pdb

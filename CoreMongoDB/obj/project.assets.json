@@ -5067,6 +5067,7 @@
       "Microsoft.Extensions.Configuration.Abstractions >= 2.2.0",
       "MongoDB.Bson >= 2.8.0",
       "MongoDB.Driver >= 2.8.0",
+      "MongoDB.Driver.Core >= 2.8.0",
       "NETStandard.Library >= 2.0.3"
     ]
   },
@@ -5120,6 +5121,10 @@
             "version": "[2.8.0, )"
           },
           "MongoDB.Driver": {
+            "target": "Package",
+            "version": "[2.8.0, )"
+          },
+          "MongoDB.Driver.Core": {
             "target": "Package",
             "version": "[2.8.0, )"
           },

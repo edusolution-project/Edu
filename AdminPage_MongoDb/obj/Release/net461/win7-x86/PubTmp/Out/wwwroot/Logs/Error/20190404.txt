@@ -1,0 +1,49 @@
+Time :  2019-04-04 16:15:30======================
+Function : UpdateTemplate
+Param : {"ID":0,"ParrentLayout":"vswMain","PartialView":"_Logo","LayoutName":"1 thằng ất ơ(ĐK : Quảng cáo/liên kết)","CModule":"BaseMVC.ClientControllers.CAdvController","Record":1,"IsDynamic":true,"Order":0,"IsBody":false,"PartialID":"6821307a-090b-466e-8758-b79663436cf7","Name":null,"Command":"UpdateInfoItemDynamic","TypeView":"CAdv"}
+Message : The stream is currently in use by a previous operation on the stream.
+Source : mscorlib
+TargetSite : Void CheckAsyncTaskInProgress()
+InnerException : 
+StackTrace :    at System.IO.StreamWriter.CheckAsyncTaskInProgress()
+   at System.IO.StreamWriter.Dispose(Boolean disposing)
+   at System.IO.TextWriter.Dispose()
+   at CoreLogs.Logs.WriteLogsAsync(String path, String msg)
+   at CoreLogs.Logs.WriteLogsInfo(String msg)
+   at BaseMVC.AdminControllers.CPApiController.UpdateTemplate(TemplateApiModel model)
+HResult : -2146233079
+HelpLink : 
+
+End =======================================Time :  2019-04-04 16:39:34======================
+Function : UpdateTemplate
+Param : {"ID":0,"ParrentLayout":"vswMain","PartialView":"_Logo","LayoutName":"2222222(ĐK : Quảng cáo/liên kết)","CModule":"BaseMVC.ClientControllers.CAdvController","Record":1,"IsDynamic":true,"Order":0,"IsBody":false,"PartialID":"46fa5adf-55c8-4589-a2e2-2b52fec0cc60","Name":null,"Command":"UpdateInfoItemDynamic","TypeView":"CAdv"}
+Message : The stream is currently in use by a previous operation on the stream.
+Source : mscorlib
+TargetSite : Void CheckAsyncTaskInProgress()
+InnerException : 
+StackTrace :    at System.IO.StreamWriter.CheckAsyncTaskInProgress()
+   at System.IO.StreamWriter.Dispose(Boolean disposing)
+   at System.IO.TextWriter.Dispose()
+   at CoreLogs.Logs.WriteLogsAsync(String path, String msg)
+   at CoreLogs.Logs.WriteLogsInfo(String msg)
+   at BaseMVC.AdminControllers.CPApiController.UpdateTemplate(TemplateApiModel model)
+HResult : -2146233079
+HelpLink : 
+
+End ============================================Time :  2019-04-04 16:42:44======================
+Function : UpdateTemplate
+Param : {"ID":0,"ParrentLayout":"vswMain","PartialView":"_Slider","LayoutName":"2222222(ĐK : Quảng cáo/liên kết)","CModule":"BaseMVC.ClientControllers.CAdvController","Record":1,"IsDynamic":true,"Order":0,"IsBody":false,"PartialID":"46fa5adf-55c8-4589-a2e2-2b52fec0cc60","Name":null,"Command":"UpdateInfoItemDynamic","TypeView":"CAdv"}
+Message : The stream is currently in use by a previous operation on the stream.
+Source : mscorlib
+TargetSite : Void CheckAsyncTaskInProgress()
+InnerException : 
+StackTrace :    at System.IO.StreamWriter.CheckAsyncTaskInProgress()
+   at System.IO.StreamWriter.Dispose(Boolean disposing)
+   at System.IO.TextWriter.Dispose()
+   at CoreLogs.Logs.WriteLogsAsync(String path, String msg)
+   at CoreLogs.Logs.WriteLogsInfo(String msg)
+   at BaseMVC.AdminControllers.CPApiController.UpdateTemplate(TemplateApiModel model)
+HResult : -2146233079
+HelpLink : 
+
+End ==========================================

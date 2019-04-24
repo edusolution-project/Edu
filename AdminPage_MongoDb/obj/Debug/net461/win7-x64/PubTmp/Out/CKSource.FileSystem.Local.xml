@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CKSource.FileSystem.Local</name>
+    </assembly>
+    <members>
+        <member name="T:CKSource.FileSystem.Local.LocalStorage">
+            <summary>
+            A local file system.
+            </summary>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.#ctor(System.String)">
+            <summary>
+            Constructs a new instance of <see cref="T:CKSource.FileSystem.Local.LocalStorage"/>.
+            </summary>
+            <param name="root">A path to the root of the file system.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.#ctor(System.String,System.String)">
+            <summary>
+            Constructs a new instance of <see cref="T:CKSource.FileSystem.Local.LocalStorage"/>.
+            </summary>
+            <param name="root">A path to the root of the file system.</param>
+            <param name="baseUrl">A base URL for accessing files over the network.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.CreateFolderAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously creates new folder.
+            </summary>
+            <param name="path">A path to the new folder.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.DeleteFileAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously deletes a file.
+            </summary>
+            <param name="path">A path to the file.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.DeleteFolderAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously deletes a folder.
+            </summary>
+            <param name="path">A path to the folder.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.DeleteFolderAsync(System.String,System.Action{System.Int32,System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously deletes a folder.
+            </summary>
+            <param name="path">A path to the folder.</param>
+            <param name="progressAction">An action fired when progress is updated.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.MoveFileAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously moves a file.
+            </summary>
+            <param name="srcPath">A path to the file.</param>
+            <param name="destPath">A path to the destination file.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.MoveFolderAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously moves a folder.
+            </summary>
+            <param name="srcPath">A path to the folder.</param>
+            <param name="destPath">A path to the destination folder.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.MoveFolderAsync(System.String,System.String,System.Action{System.Int32,System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously moves a folder.
+            </summary>
+            <param name="srcPath">A path to the folder.</param>
+            <param name="destPath">A path to the destination folder.</param>
+            <param name="progressAction">An action fired when progress is updated.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.CopyFileAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously copies a file.
+            </summary>
+            <param name="srcPath">A path to the file.</param>
+            <param name="destPath">A path to the destination file.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.FileExistsAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously checks whether a file exists.
+            </summary>
+            <param name="path">A path to the file.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>True if file exists, false otherwise.</returns>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.FolderExistsAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously checks whether a folder exists.
+            </summary>
+            <param name="path">A path to the folder.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>True if folder exists, false otherwise.</returns>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.WriteAsync(System.IO.Stream,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously writes file content.
+            </summary>
+            <param name="fileStream">A stream with content to write.</param>
+            <param name="path">A path to the file.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.ReadAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously reads file content.
+            </summary>
+            <param name="path">A path to the file.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A stream with file content.</returns>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.GetFolderInfosAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously lists folder informations.
+            </summary>
+            <param name="path">A path to the folder.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A folder list result.</returns>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.GetFolderInfosAsync(CKSource.FileSystem.IFolderListContinuation,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously lists folder informations.
+            </summary>
+            <param name="folderListContinuation">A folder list continuation.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A folder list result.</returns>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.GetFileInfosAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously lists file informations.
+            </summary>
+            <param name="path">A path to the folder.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A file list result.</returns>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.GetFileInfosAsync(CKSource.FileSystem.IFileListContinuation,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously lists file informations.
+            </summary>
+            <param name="fileListContinuation">A file list continuation.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A file list result.</returns>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.GetFolderInfoAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asychronously gets folder information.
+            </summary>
+            <param name="path">A path to the folder.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A folder information.</returns>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.GetFileInfoAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asychronously gets file information.
+            </summary>
+            <param name="path">A path to the file.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>A file information.</returns>
+        </member>
+        <member name="M:CKSource.FileSystem.Local.LocalStorage.GetUrlAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Asynchronously gets resource URL. May return null if URL is not available.
+            </summary>
+            <param name="path">A path to the resource.</param>
+            <param name="cancellationToken">A cancellation token.</param>
+            <returns>An URL to the resource or null if URL is not available.</returns>
+        </member>
+    </members>
+</doc>

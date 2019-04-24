@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\BaseModels.csproj": {}
+    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\BaseModels.csproj": {}
   },
   "projects": {
-    "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\BaseModels.csproj": {
+    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\BaseModels.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\BaseModels.csproj",
+        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\BaseModels.csproj",
         "projectName": "BaseModels",
-        "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\BaseModels.csproj",
-        "packagesPath": "C:\\Users\\longht\\.nuget\\packages\\",
-        "outputPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\BaseModels\\obj\\",
+        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\BaseModels.csproj",
+        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
+        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\longht\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -25,13 +25,13 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://www.nuget.org/api/v2/": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netstandard2.0": {
             "projectReferences": {
-              "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj": {
-                "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj"
+              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj": {
+                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj"
               }
             }
           }
@@ -60,20 +60,20 @@
         }
       }
     },
-    "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj": {
+    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj",
+        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj",
         "projectName": "CoreEDB",
-        "projectPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\CoreEDB.csproj",
-        "packagesPath": "C:\\Users\\longht\\.nuget\\packages\\",
-        "outputPath": "E:\\Dashbroad\\Project_True\\DashBoard_Final_v2\\CoreEDB\\obj\\",
+        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj",
+        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
+        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\longht\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -81,7 +81,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://www.nuget.org/api/v2/": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netstandard2.0": {

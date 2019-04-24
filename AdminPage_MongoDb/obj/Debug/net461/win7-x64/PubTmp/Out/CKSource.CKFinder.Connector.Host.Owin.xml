@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CKSource.CKFinder.Connector.Host.Owin</name>
+    </assembly>
+    <members>
+        <member name="T:CKSource.CKFinder.Connector.Host.Owin.AppBuilderExtensions">
+            <summary>
+            Extension class for <c>IAppBuilder</c> interface.
+            </summary>
+        </member>
+        <member name="M:CKSource.CKFinder.Connector.Host.Owin.AppBuilderExtensions.UseConnector(Owin.IAppBuilder,CKSource.CKFinder.Connector.Host.Owin.OwinConnector)">
+            <summary>
+            Adds a CKFinder connector middleware to your web application pipeline.
+            </summary>
+            <remarks>
+            <see cref="T:CKSource.CKFinder.Connector.Host.Owin.ConnectorMiddleware"/> is final and it doesn't call the next middleware.
+            </remarks>
+            <param name="appBuilder">The application builder.</param>
+            <param name="connector">The connector.</param>
+        </member>
+        <member name="T:CKSource.CKFinder.Connector.Host.Owin.ConnectorMiddleware">
+            <summary>
+            Defines the connector middleware.
+            </summary>
+            <remarks>
+            This middleware doesn't call next middleware in the pipeline.
+            </remarks>
+        </member>
+        <member name="M:CKSource.CKFinder.Connector.Host.Owin.ConnectorMiddleware.#ctor(Microsoft.Owin.OwinMiddleware,CKSource.CKFinder.Connector.Host.Owin.OwinConnector)">
+            <summary>
+            Constructs a new instance of <see cref="T:CKSource.CKFinder.Connector.Host.Owin.ConnectorMiddleware"/>.
+            </summary>
+            <param name="next">This parameter is ignored.</param>
+            <param name="owinConnector">The connector.</param>
+        </member>
+        <member name="M:CKSource.CKFinder.Connector.Host.Owin.ConnectorMiddleware.Invoke(Microsoft.Owin.IOwinContext)">
+            <summary>
+            Process an individual request.
+            </summary>
+            <param name="context">An <c>Owin</c> context.</param>
+        </member>
+        <member name="T:CKSource.CKFinder.Connector.Host.Owin.OwinConnector">
+            <summary>
+            The connector definition for <c>Owin</c> hosting.
+            </summary>
+        </member>
+        <member name="P:CKSource.CKFinder.Connector.Host.Owin.OwinConnector.ComponentResolver">
+            <summary>
+            Gets the component resolver.
+            </summary>
+        </member>
+        <member name="P:CKSource.CKFinder.Connector.Host.Owin.OwinConnector.ConfigurationAction">
+            <summary>
+            Gets action for configuration of the connector.
+            </summary>
+        </member>
+        <member name="T:CKSource.CKFinder.Connector.Host.Owin.OwinConnectorFactory">
+            <summary>
+            Defines connector factory for <c>Owin</c>.
+            </summary>
+        </member>
+        <member name="M:CKSource.CKFinder.Connector.Host.Owin.OwinConnectorFactory.Create(Autofac.ContainerBuilder,System.Action{CKSource.CKFinder.Connector.Core.ICommandRequest,CKSource.CKFinder.Connector.Core.Builders.ConnectorConfiguration},Autofac.IContainer@)">
+            <summary>
+            Creates new connector.
+            </summary>
+            <param name="containerBuilder">An <c>Autofac</c> container builder.</param>
+            <param name="configurationAction">A configuration action invoked for each request.</param>
+            <param name="container">A container built during creation of the connector.</param>
+            <returns>The connector.</returns>
+        </member>
+    </members>
+</doc>

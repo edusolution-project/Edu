@@ -1,0 +1,25 @@
+﻿
+@{
+    ViewData["Title"] = "File Manager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="tesst">
+    <a href="@Url.Action("index","cphome")" class="btn btn-fab btn-sm btn-danger"><i class="material-icons">reply</i></a>
+</div>
+<div id="ckfinder-widget" style="
+    width: 100%;
+    float: left;
+    height:calc(100vh - 70px);
+    overflow:hidden;
+"></div>
+@section Scripts{
+    <script src="~/Lib/ckfinder/ckfinder.js"></script>
+    <script src="~/Lib/ckfinder/config.js"></script>
+    <script>
+        CKFinder.widget('ckfinder-widget', {
+            width: '100%',
+            height: '100%'
+        });
+    </script>
+}
+

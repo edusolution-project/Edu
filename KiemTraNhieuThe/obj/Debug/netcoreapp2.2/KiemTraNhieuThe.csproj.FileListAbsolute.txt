@@ -29,3 +29,14 @@ E:\Dashbroad\Project_True\DashBoard_Final_v2\KiemTraNhieuThe\obj\Debug\netcoreap
 E:\Dashbroad\Project_True\DashBoard_Final_v2\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.AssemblyInfo.cs
 E:\Dashbroad\Project_True\DashBoard_Final_v2\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
 E:\Dashbroad\Project_True\DashBoard_Final_v2\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.deps.json
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.runtimeconfig.json
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.runtimeconfig.dev.json
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.csproj.CoreCompileInputs.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.AssemblyInfoInputs.cache
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.AssemblyInfo.cs
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb
+F:\Project_Final\DashBoard_Final_v2\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.csprojAssemblyReference.cache

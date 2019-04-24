@@ -1,7 +1,9 @@
 ﻿using CoreMongoDB.Interfaces;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace CoreMongoDB.Repositories
@@ -46,12 +48,28 @@ namespace CoreMongoDB.Repositories
         }
         public void Add(T item)
         {
-            _collection.InsertOne(item);
+            var data = _collection.Find(o => o.ID == item.ID).SingleOrDefault();
+            if(data == null)
+            {
+                _collection.InsertOne(item);
+            }
+            else
+            {
+                _collection.FindOneAndReplace(o => o.ID == item.ID, item);
+            }
         }
 
         public async Task AddAsync(T item)
         {
-            await _collection.InsertOneAsync(item);
+            var data = _collection.Find(o => o.ID == item.ID).SingleOrDefault();
+            if (data == null)
+            {
+                await _collection.InsertOneAsync(item);
+            }
+            else
+            {
+                await _collection.FindOneAndReplaceAsync(o => o.ID == item.ID, item);
+            }
         }
 
         public void AddRange(List<T> listItem)
@@ -105,6 +123,92 @@ namespace CoreMongoDB.Repositories
         public async Task RemveRangeAsync(List<string> listItem)
         {
             await _collection.DeleteManyAsync(o => listItem.Contains(o.ID));
+        }
+
+        public IEnumerable<T> Find(bool check,Expression<Func<T, bool>> filter)
+        {
+            if (check)
+            {
+                return _collection.Find(filter)?.ToEnumerable();
+            }
+            else
+            {
+                return _collection.Find(o => !string.IsNullOrEmpty(o.ID))?.ToEnumerable();
+            }
+        }
+        public IFindFluent<T,T> FindIn(bool check, Expression<Func<T, bool>> filter)
+        {
+            if (check)
+            {
+                return _collection.Find(filter);
+            }
+            else
+            {
+                return _collection.Find(o => !string.IsNullOrEmpty(o.ID));
+            }
+        }
+        public async Task<IEnumerable<T>> WhereAsync(bool check, Expression<Func<T, bool>> filter)
+        {
+            if (check)
+            {
+                var data = await _collection.FindAsync(filter);
+                return data?.ToEnumerable();
+            }
+            else
+            {
+                var data = await _collection.FindAsync(o => !string.IsNullOrEmpty(o.ID));
+                return data?.ToEnumerable();
+            }
+        }
+        public async Task<IAsyncCursor<T>> FindInAsync(bool check, Expression<Func<T, bool>> filter)
+        {
+            if (check)
+            {
+                var data = await _collection.FindAsync(filter);
+                return data;
+            }
+            else
+            {
+                return await _collection.FindAsync(o => !string.IsNullOrEmpty(o.ID));
+            }
+        }
+
+        public void SetItemCache(T item)
+        {
+            _dbQueryCache.SetObjectFromCache<T>("Single" + _tableName, item);
+        }
+        public void SetListCache(List<T> item)
+        {
+            _dbQueryCache.SetObjectFromCache("List" + _tableName, item);
+        }
+        public void SetItemCache(string key,T item)
+        {
+            _dbQueryCache.SetObjectFromCache<T>(key, item);
+        }
+        public void SetListCache(string key,List<T> item)
+        {
+            _dbQueryCache.SetObjectFromCache(key, item);
+        }
+        public List<T> GetListCache()
+        {
+            return _dbQueryCache.GetDataFromCache<List<T>>("List" + _tableName);
+        }
+        public List<T> GetListCache(string key)
+        {
+            return _dbQueryCache.GetDataFromCache<List<T>>(key);
+        }
+        public T GetItemCache()
+        {
+            return _dbQueryCache.GetDataFromCache<T>("Single" + _tableName);
+        }
+        public T GetItemCache(string key)
+        {
+            return _dbQueryCache.GetDataFromCache<T>(key);
+        }
+        public void ClearCache()
+        {
+            _dbQueryCache.ClearCache("List" + _tableName);
+            _dbQueryCache.ClearCache("Single" + _tableName);
         }
     }
 }

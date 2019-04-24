@@ -1,7 +1,11 @@
 ﻿using CoreMongoDB.Interfaces;
+using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.Caching;
+using System.Threading.Tasks;
 
 namespace CoreMongoDB.Repositories
 {
@@ -83,5 +87,78 @@ namespace CoreMongoDB.Repositories
             }
         }
         #endregion
+    }
+    public static class DbQuery
+    {
+        private static IDbQueryCache _dbQueryCache = new DbQueryCache();
+        public static List<TDocument> ToListCache<TDocument>(this IAsyncCursor<TDocument> source)
+        {
+            string key = "List" + typeof(TDocument).Name.Replace("entity", string.Empty);
+            var data = _dbQueryCache.GetDataFromCache<List<TDocument>>(key);
+            if (data != null) return data;
+            else
+            {
+                data = source.ToList();
+                _dbQueryCache.SetObjectFromCache(key, data);
+                return data;
+            }
+
+        }
+        public static List<TDocument> ToListCache<TDocument>(this IAsyncCursor<TDocument> source,string key)
+        {
+            var data = _dbQueryCache.GetDataFromCache<List<TDocument>>(key);
+            if (data != null) return data;
+            else
+            {
+                data = source.ToList();
+                _dbQueryCache.SetObjectFromCache(key, data);
+                return data;
+            }
+        }
+        public static List<TDocument> ToListCache<TDocument>(this IAsyncCursor<TDocument> source, string key,int expire)
+        {
+            var data = _dbQueryCache.GetDataFromCache<List<TDocument>>(key);
+            if (data != null) return data;
+            else
+            {
+                data = source.ToList();
+                _dbQueryCache.SetObjectFromCache(key,expire,data);
+                return data;
+            }
+        }
+        public static Task<IAsyncCursor<TDocument>> FindAsync<TDocument>(this IMongoCollection<TDocument> collection,bool check, FilterDefinition<TDocument> filter, FindOptions<TDocument, TDocument> options = null)
+        {
+            if (check)
+            {
+
+                return options != null ? collection.FindAsync(filter, options) : collection.FindAsync(filter);
+            }
+            else
+            {
+                return options != null ? collection.FindAsync(o=>o != null,options) : collection.FindAsync(o => o != null);
+            }
+        }
+        public static IFindFluent<TDocument, TDocument> Find<TDocument>(this IMongoCollection<TDocument> collection,bool check, FilterDefinition<TDocument> filter, FindOptions options = null)
+        {
+            if (check)
+            {
+                return options == null ? collection.Find(filter) : collection.Find(filter, options);
+            }
+            else
+            {
+                return options == null ? collection.Find(o => o != null) : collection.Find(o => o != null, options);
+            }
+        }
+        public static List<TDocument> FindList<TDocument>(this IMongoCollection<TDocument> collection, bool check, Expression<Func<TDocument, bool>> predicate, FindOptions options = null)
+        {
+            if (check)
+            {
+                return options == null ? collection.Find(predicate)?.ToList() : collection.Find(predicate, options)?.ToList();
+            }
+            else
+            {
+                return options == null ? collection.Find(o => o != null)?.ToList() : collection.Find(o => o != null, options)?.ToList();
+            }
+        }
     }
 }

@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using CoreEDB.CoreModels;
-using System.Linq;
 using System;
-using System.Threading.Tasks;
 
 namespace BaseModels
 {
