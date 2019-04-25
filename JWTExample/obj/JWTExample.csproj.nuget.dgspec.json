@@ -1,24 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\JWTExample\\JWTExample.csproj": {}
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\JWTExample.csproj": {}
   },
   "projects": {
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\JWTExample\\JWTExample.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\JWTExample.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\JWTExample\\JWTExample.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\JWTExample.csproj",
         "projectName": "JWTExample",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\JWTExample\\JWTExample.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\JWTExample\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\JWTExample.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp2.2"

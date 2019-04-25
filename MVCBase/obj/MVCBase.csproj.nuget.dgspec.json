@@ -1,24 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\MVCBase\\MVCBase.csproj": {}
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\MVCBase\\MVCBase.csproj": {}
   },
   "projects": {
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\BaseModels.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseModels\\BaseModels.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\BaseModels.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseModels\\BaseModels.csproj",
         "projectName": "BaseModels",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\BaseModels.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseModels\\BaseModels.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseModels\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
@@ -30,8 +32,8 @@
         "frameworks": {
           "netstandard2.0": {
             "projectReferences": {
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreEDB\\CoreEDB.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreEDB\\CoreEDB.csproj"
               }
             }
           }
@@ -60,21 +62,23 @@
         }
       }
     },
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreEDB\\CoreEDB.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreEDB\\CoreEDB.csproj",
         "projectName": "CoreEDB",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreEDB\\CoreEDB.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreEDB\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
@@ -140,21 +144,23 @@
         }
       }
     },
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj",
         "projectName": "CoreLogs",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
@@ -196,21 +202,23 @@
         }
       }
     },
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\MVCBase\\MVCBase.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\MVCBase\\MVCBase.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\MVCBase\\MVCBase.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\MVCBase\\MVCBase.csproj",
         "projectName": "MVCBase",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\MVCBase\\MVCBase.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\MVCBase\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\MVCBase\\MVCBase.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\MVCBase\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
@@ -222,14 +230,14 @@
         "frameworks": {
           "netstandard2.0": {
             "projectReferences": {
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\BaseModels.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseModels\\BaseModels.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseModels\\BaseModels.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseModels\\BaseModels.csproj"
               },
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreEDB\\CoreEDB.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreEDB\\CoreEDB.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreEDB\\CoreEDB.csproj"
               },
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj"
               }
             }
           }

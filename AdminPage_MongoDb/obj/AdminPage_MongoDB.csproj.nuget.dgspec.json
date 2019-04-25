@@ -1,24 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj": {}
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj": {}
   },
   "projects": {
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
         "projectName": "AdminPage_MongoDB",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\AdminPage_MongoDb\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\AdminPage_MongoDb\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net461"
@@ -30,17 +32,17 @@
         "frameworks": {
           "net461": {
             "projectReferences": {
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMongoDB\\BaseMongoDB.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMongoDB\\BaseMongoDB.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj"
               },
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMVC\\BaseMVC.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMVC\\BaseMVC.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj"
               },
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj"
               },
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\EntityBaseFW\\EntityBaseFW.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\EntityBaseFW\\EntityBaseFW.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\EntityBaseFW\\EntityBaseFW.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\EntityBaseFW\\EntityBaseFW.csproj"
               }
             }
           }
@@ -105,21 +107,23 @@
         }
       }
     },
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMongoDB\\BaseMongoDB.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMongoDB\\BaseMongoDB.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj",
         "projectName": "BaseMongoDB",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMongoDB\\BaseMongoDB.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMongoDB\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
@@ -131,8 +135,8 @@
         "frameworks": {
           "netstandard2.0": {
             "projectReferences": {
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreMongoDB\\CoreMongoDB.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreMongoDB\\CoreMongoDB.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreMongoDB\\CoreMongoDB.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreMongoDB\\CoreMongoDB.csproj"
               }
             }
           }
@@ -169,21 +173,23 @@
         }
       }
     },
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMVC\\BaseMVC.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMVC\\BaseMVC.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj",
         "projectName": "BaseMVC",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMVC\\BaseMVC.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMVC\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
@@ -195,11 +201,11 @@
         "frameworks": {
           "netstandard2.0": {
             "projectReferences": {
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMongoDB\\BaseMongoDB.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\BaseMongoDB\\BaseMongoDB.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj"
               },
-              "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj": {
-                "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj"
+              "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj": {
+                "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj"
               }
             }
           }
@@ -236,21 +242,23 @@
         }
       }
     },
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj",
         "projectName": "CoreLogs",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\CoreLogs.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreLogs\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
@@ -292,21 +300,23 @@
         }
       }
     },
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreMongoDB\\CoreMongoDB.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreMongoDB\\CoreMongoDB.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreMongoDB\\CoreMongoDB.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreMongoDB\\CoreMongoDB.csproj",
         "projectName": "CoreMongoDB",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreMongoDB\\CoreMongoDB.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\CoreMongoDB\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreMongoDB\\CoreMongoDB.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreMongoDB\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
@@ -360,12 +370,12 @@
         }
       }
     },
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\EntityBaseFW\\EntityBaseFW.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\EntityBaseFW\\EntityBaseFW.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\EntityBaseFW\\EntityBaseFW.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\EntityBaseFW\\EntityBaseFW.csproj",
         "projectName": "EntityBaseFW",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\EntityBaseFW\\EntityBaseFW.csproj"
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\EntityBaseFW\\EntityBaseFW.csproj"
       },
       "frameworks": {
         "net461": {}

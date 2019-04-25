@@ -1,24 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\ClientPage\\ClientPage.csproj": {}
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj": {}
   },
   "projects": {
-    "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\ClientPage\\ClientPage.csproj": {
+    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\ClientPage\\ClientPage.csproj",
+        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj",
         "projectName": "ClientPage",
-        "projectPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\ClientPage\\ClientPage.csproj",
-        "packagesPath": "C:\\Users\\long\\.nuget\\packages\\",
-        "outputPath": "F:\\Project_Final\\DashBoard_Final_v2\\iShare\\ClientPage\\obj\\",
+        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
+          "C:\\ProgramData\\Xamarin\\NuGet\\",
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\long\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp2.2"
