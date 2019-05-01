@@ -16,5 +16,9 @@ namespace BaseMongoDB.Database
         {
 
         }
+
+        public SysTemplateService(IConfiguration config, string tableName) : base(config, tableName)
+        {
+        }
     }
 }

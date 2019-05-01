@@ -6,7 +6,7 @@
     Layout = "~/Views/Shared/_LayoutDefaults.cshtml";
     var data = ViewBag.Data as List<CPUserEntity>;
     var model = ViewBag.Model as DefaultModel;
-    var role = BaseMongoDB.Factory.Instance.CreateInstanceCPRole();
+    var role = BaseMongoDB.Factory.Instance.CreateInstanceCPRole("CPRoles");
     string SearchText = string.IsNullOrEmpty(model.SearchText) ? string.Empty : model.SearchText;
 }
 <div class="row">

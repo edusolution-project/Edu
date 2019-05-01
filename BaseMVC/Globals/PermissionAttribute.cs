@@ -33,7 +33,7 @@ namespace BaseMVC.Globals
                 else
                 {
                     var res = context.HttpContext.Response;
-                    var access = Instance.CreateInstanceCPAccess();
+                    var access = Instance.CreateInstanceCPAccess("CPAccess");
                     var claimRole = user.Claims.SingleOrDefault(o => o.Type == "RoleID");
                     if(claimRole != null)
                     {

@@ -27,6 +27,11 @@ namespace BaseMongoDB.Database
         {
 
         }
+
+        public CPMenuService(IConfiguration config, string tableName) : base(config, tableName)
+        {
+        }
+
         public List<CPMenuEntity> GetItemByType(string type, string langID)
         {
             var data = CreateQuery().Find(o => o.Type == type && o.LangID == langID)?.ToList();

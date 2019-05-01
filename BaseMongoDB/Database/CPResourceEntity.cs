@@ -19,6 +19,11 @@ namespace BaseMongoDB.Database
         {
 
         }
+
+        public CPResourceService(IConfiguration config, string tableName) : base(config, tableName)
+        {
+        }
+
         public CPResourceEntity GetItemByCode(string code)
         {
             return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();

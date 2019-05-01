@@ -26,6 +26,11 @@ namespace BaseMongoDB.Database
         {
 
         }
+
+        public CPUserService(IConfiguration config, string tableName) : base(config, tableName)
+        {
+        }
+
         public CPUserEntity GetItemByEmail(string email)
         {
             return CreateQuery().Find(o => o.Email == email)?.SingleOrDefault();

@@ -20,6 +20,11 @@ namespace BaseMongoDB.Database
         {
 
         }
+
+        public CPRoleService(IConfiguration config, string tableName) : base(config, tableName)
+        {
+        }
+
         public CPRoleEntity GetItemByCode(string code)
         {
             return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();

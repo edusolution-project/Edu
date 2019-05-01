@@ -39,7 +39,7 @@ namespace BaseMVC
                     else
                     {
                         List<MenuControlAttribute> menuControls = new List<MenuControlAttribute>();
-                        var access = Instance.CreateInstanceCPAccess();
+                        var access = Instance.CreateInstanceCPAccess("CPAccess");
                         int count = data.Count;
                         var cl = User.Claims.FirstOrDefault(o => o.Type == "RoleID");
                         if (cl == null) return null;

@@ -3,6 +3,7 @@ using CoreMongoDB.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace BaseMongoDB.Factory
 {
@@ -27,7 +28,14 @@ namespace BaseMongoDB.Factory
             services.AddScoped<SysPageService>();
             services.AddScoped<SysTemplateService>();
             services.AddScoped<SysTemplateDetailService>();
-            services.AddScoped<SysTemplatePropertyService>();
+
+            services.AddScoped<ModProgramService>();
+            services.AddScoped<ModBookService>();
+            services.AddScoped<ModSubjectService>();
+            services.AddScoped<ModGradeService>();
+            services.AddScoped<ModUnitService>();
+            services.AddScoped<ModLessonService>();
+            services.AddScoped<ModLessonPartService>();
             return services;
         }
         /// <summary>
@@ -35,11 +43,12 @@ namespace BaseMongoDB.Factory
         /// </summary>
         /// <param name="app"></param>
         /// <param name="configuration"></param>
-        public static void GetConfiguration(this IApplicationBuilder app, IConfiguration configuration)
+        public static IApplicationBuilder GetConfiguration(this IApplicationBuilder app, IConfiguration configuration)
         {
             _configuration = configuration;
             var data = QueryCache.GetDataFromCache<IConfiguration>("Configuration_Instance");
             if (data == null) QueryCache.SetObjectFromCache("Configuration_Instance", 480, _configuration);
+            return app;
         }
         /// <summary>
         /// lấy Configuration khi cần
@@ -52,50 +61,86 @@ namespace BaseMongoDB.Factory
                 return data??_configuration;
             }
         }
-        #region Khởi tạo service => kiến trúc IoC
-        public static CPAccessService CreateInstanceCPAccess()
+        #region Khởi tạo service 
+
+        public static T CreateInstance<T>(this IServiceProvider serviceProvider)
         {
-            return new CPAccessService(_configuration);
+            var service = (T)serviceProvider.GetService(typeof(T));
+            return service;
         }
-        public static CPLangService CreateInstanceCPLang()
+
+        public static ModProgramService CreateInstanceModProgram(string tableName)
         {
-            return new CPLangService(_configuration);
+            return new ModProgramService(_configuration, tableName);
         }
-        public static CPLoginLogService CreateInstanceCPLoginLog()
+        public static ModUnitService CreateInstanceModUnit(string tableName)
         {
-            return new CPLoginLogService(_configuration);
+            return new ModUnitService(_configuration, tableName);
         }
-        public static CPMenuService CreateInstanceCPMenu()
+        public static ModSubjectService CreateInstanceModSubject(string tableName)
         {
-            return new CPMenuService(_configuration);
+            return new ModSubjectService(_configuration, tableName);
         }
-        public static CPResourceService CreateInstanceCPResource()
+        public static ModLessonPartService CreateInstanceModLessonPart(string tableName)
         {
-            return new CPResourceService(_configuration);
+            return new ModLessonPartService(_configuration, tableName);
         }
-        public static CPRoleService CreateInstanceCPRole()
+        public static ModLessonService CreateInstanceModLesson(string tableName)
         {
-            return new CPRoleService(_configuration);
+            return new ModLessonService(_configuration, tableName);
         }
-        public static CPUserService CreateInstanceCPUser()
+        public static ModGradeService CreateInstanceModGrade(string tableName)
         {
-            return new CPUserService(_configuration);
+            return new ModGradeService(_configuration, tableName);
         }
-        public static SysPageService CreateInstanceSysPage()
+        public static ModBookService CreateInstanceModBook(string tableName)
         {
-            return new SysPageService(_configuration);
+            return new ModBookService(_configuration, tableName);
         }
-        public static SysTemplateService CreateInstanceSysTemplate()
+
+        public static CPAccessService CreateInstanceCPAccess(string tableName)
         {
-            return new SysTemplateService(_configuration);
+            return new CPAccessService(_configuration, tableName);
         }
-        public static SysTemplateDetailService CreateInstanceSysTemplateDetail()
+        public static CPLangService CreateInstanceCPLang(string tableName)
         {
-            return new SysTemplateDetailService(_configuration);
+            return new CPLangService(_configuration, tableName);
         }
-        public static SysTemplatePropertyService CreateInstanceSysTemplateProperty()
+        public static CPLoginLogService CreateInstanceCPLoginLog(string tableName)
         {
-            return new SysTemplatePropertyService(_configuration);
+            return new CPLoginLogService(_configuration, tableName);
+        }
+        public static CPMenuService CreateInstanceCPMenu(string tableName)
+        {
+            return new CPMenuService(_configuration, tableName);
+        }
+        public static CPResourceService CreateInstanceCPResource(string tableName)
+        {
+            return new CPResourceService(_configuration, tableName);
+        }
+        public static CPRoleService CreateInstanceCPRole(string tableName)
+        {
+            return new CPRoleService(_configuration, tableName);
+        }
+        public static CPUserService CreateInstanceCPUser(string tableName)
+        {
+            return new CPUserService(_configuration, tableName);
+        }
+        public static SysPageService CreateInstanceSysPage(string tableName)
+        {
+            return new SysPageService(_configuration, tableName);
+        }
+        public static SysTemplateService CreateInstanceSysTemplate(string tableName)
+        {
+            return new SysTemplateService(_configuration, tableName);
+        }
+        public static SysTemplateDetailService CreateInstanceSysTemplateDetail(string tableName)
+        {
+            return new SysTemplateDetailService(_configuration, tableName);
+        }
+        public static SysTemplatePropertyService CreateInstanceSysTemplateProperty(string tableName)
+        {
+            return new SysTemplatePropertyService(_configuration, tableName);
         }
         #endregion
     }

@@ -14,3 +14,19 @@ F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\Ba
 F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csproj.CopyComplete
 F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.dll
 F:\Project_Final\DashBoard_Final_v2\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\bin\Release\netstandard2.0\BaseMVC.deps.json
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\bin\Release\netstandard2.0\BaseMVC.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\bin\Release\netstandard2.0\BaseMVC.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\bin\Release\netstandard2.0\BaseMongoDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\bin\Release\netstandard2.0\CoreLogs.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\bin\Release\netstandard2.0\CoreMongoDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\bin\Release\netstandard2.0\BaseMongoDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\bin\Release\netstandard2.0\CoreLogs.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\bin\Release\netstandard2.0\CoreMongoDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csprojAssemblyReference.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csproj.CoreCompileInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.AssemblyInfoInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.AssemblyInfo.cs
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csproj.CopyComplete
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.pdb

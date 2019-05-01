@@ -29,7 +29,8 @@ namespace BaseMVC.AdminControllers
         {
             _service = userService;
             _roleService = roleService;
-            _listRoles = _roleService.GetAll();
+            var data = _roleService.GetAll();
+            _listRoles = data?.ToList();
         }
         public ActionResult Index(DefaultModel model)
         {

@@ -52,9 +52,9 @@ F:\Project_Final\DashBoard_Final_v2\iShare\CoreLogs\obj\Debug\netstandard2.0\Cor
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\bin\Debug\netstandard2.0\CoreLogs.deps.json
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\bin\Debug\netstandard2.0\CoreLogs.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\bin\Debug\netstandard2.0\CoreLogs.pdb
-F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.csprojAssemblyReference.cache
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.csproj.CoreCompileInputs.cache
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.AssemblyInfoInputs.cache
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.AssemblyInfo.cs
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.csprojAssemblyReference.cache

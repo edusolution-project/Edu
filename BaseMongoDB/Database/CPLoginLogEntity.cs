@@ -21,6 +21,11 @@ namespace BaseMongoDB.Database
         {
 
         }
+
+        public CPLoginLogService(IConfiguration config, string tableName) : base(config, tableName)
+        {
+        }
+
         public CPLoginLogEntity GetItemByCode(string token)
         {
             return CreateQuery().Find(o => o.Token == token)?.SingleOrDefault();
