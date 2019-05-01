@@ -90,7 +90,7 @@ namespace CoreMongoDB.Repositories
     }
     public static class DbQuery
     {
-        private static IDbQueryCache _dbQueryCache = new DbQueryCache();
+        private static readonly IDbQueryCache _dbQueryCache = new DbQueryCache();
         public static List<TDocument> ToListCache<TDocument>(this IAsyncCursor<TDocument> source)
         {
             string key = "List" + typeof(TDocument).Name.Replace("entity", string.Empty);
@@ -126,7 +126,7 @@ namespace CoreMongoDB.Repositories
                 return data;
             }
         }
-        public static Task<IAsyncCursor<TDocument>> FindAsync<TDocument>(this IMongoCollection<TDocument> collection,bool check, FilterDefinition<TDocument> filter, FindOptions<TDocument, TDocument> options = null)
+        public static Task<IAsyncCursor<TDocument>> FindAsync<TDocument>(this IMongoCollection<TDocument> collection,bool check, Expression<Func<TDocument, bool>> filter, FindOptions<TDocument, TDocument> options = null)
         {
             if (check)
             {
@@ -138,7 +138,7 @@ namespace CoreMongoDB.Repositories
                 return options != null ? collection.FindAsync(o=>o != null,options) : collection.FindAsync(o => o != null);
             }
         }
-        public static IFindFluent<TDocument, TDocument> Find<TDocument>(this IMongoCollection<TDocument> collection,bool check, FilterDefinition<TDocument> filter, FindOptions options = null)
+        public static IFindFluent<TDocument, TDocument> Find<TDocument>(this IMongoCollection<TDocument> collection,bool check, Expression<Func<TDocument, bool>> filter, FindOptions options = null)
         {
             if (check)
             {
