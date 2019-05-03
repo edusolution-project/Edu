@@ -2158,3 +2158,129 @@ a.ui-button:active,
 .card .form-check{
     white-space:nowrap;
 }
+.box-item > a {
+    padding: 20px;
+    display: block;
+    text-align: center;
+    line-height: 30px;
+    margin: 10px 0;
+    color:antiquewhite;
+    font-weight:500;
+}
+.main-panel > .content{
+    padding:0;
+}
+
+/*bg*/
+.bg-cyan {
+    background-color: #1ba1e2 !important;
+}
+.bg-cyan-active:active {
+    background-color: #1ba1e2 !important;
+}
+
+.bg-cyan-hover:hover {
+    background-color: #1ba1e2 !important;
+}
+
+.bg-cyan-focus:focus {
+    background-color: #1ba1e2 !important;
+}
+
+.bd-cyan-focus:focus {
+    border-color: #1ba1e2 !important;
+}
+.bg-red {
+    background-color: #CE352C !important;
+}
+.bg-red-active:active {
+    background-color: #CE352C !important;
+}
+
+.bg-red-hover:hover {
+    background-color: #CE352C !important;
+}
+
+.bg-red-focus:focus {
+    background-color: #CE352C !important;
+}
+
+.bd-red-focus:focus {
+    border-color: #CE352C !important;
+}
+.bg-teal {
+    background-color: #00aba9 !important;
+}
+
+.bg-teal-active:active {
+    background-color: #00aba9 !important;
+}
+
+.bg-teal-hover:hover {
+    background-color: #00aba9 !important;
+}
+
+.bg-teal-focus:focus {
+    background-color: #00aba9 !important;
+}
+.bg-indigo {
+    background-color: #6a00ff !important;
+}
+
+.bg-indigo-active:active {
+    background-color: #6a00ff !important;
+}
+
+.bg-indigo-hover:hover {
+    background-color: #6a00ff !important;
+}
+
+.bg-indigo-focus:focus {
+    background-color: #6a00ff !important;
+}
+
+.bg-violet {
+    background-color: #aa00ff !important;
+}
+.bg-violet-active:active {
+    background-color: #aa00ff !important;
+}
+
+.bg-violet-hover:hover {
+    background-color: #aa00ff !important;
+}
+
+.bg-violet-focus:focus {
+    background-color: #aa00ff !important;
+}
+
+.bd-green {
+    border-color: #60a917 !important;
+}
+
+.bg-green-active:active {
+    background-color: #60a917 !important;
+}
+
+.bg-green-hover:hover {
+    background-color: #60a917 !important;
+}
+
+.bg-green-focus:focus {
+    background-color: #60a917 !important;
+}
+.bg-emerald {
+    background-color: #008a00 !important;
+}
+
+.bg-emerald-active:active {
+    background-color: #008a00 !important;
+}
+
+.bg-emerald-hover:hover {
+    background-color: #008a00 !important;
+}
+
+.bg-emerald-focus:focus {
+    background-color: #008a00 !important;
+}

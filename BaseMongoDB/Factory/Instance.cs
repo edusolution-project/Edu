@@ -28,6 +28,7 @@ namespace BaseMongoDB.Factory
             services.AddScoped<SysPageService>();
             services.AddScoped<SysTemplateService>();
             services.AddScoped<SysTemplateDetailService>();
+            services.AddScoped<SysTemplatePropertyService>();
 
             services.AddScoped<ModProgramService>();
             services.AddScoped<ModBookService>();

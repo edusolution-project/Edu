@@ -335,7 +335,6 @@ F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\bin\Debu
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\bin\Debug\netcoreapp2.2\ClientPage.pdb
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\bin\Debug\netcoreapp2.2\ClientPage.Views.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\bin\Debug\netcoreapp2.2\ClientPage.Views.pdb
-F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.csprojAssemblyReference.cache
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.csproj.CoreCompileInputs.cache
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.RazorAssemblyInfo.cache
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.RazorAssemblyInfo.cs
@@ -358,3 +357,4 @@ F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\obj\Debu
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.pdb
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.csproj.CopyComplete
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.csprojAssemblyReference.cache

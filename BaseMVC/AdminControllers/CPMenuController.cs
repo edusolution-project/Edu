@@ -32,9 +32,10 @@ namespace BaseMVC.AdminControllers
             DateTime startDate = model.StartDate > DateTime.MinValue ? new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0) : DateTime.MinValue;
             DateTime endDate = model.EndDate > DateTime.MinValue ? new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59) : DateTime.MinValue;
 
-            var data = _service.CreateQuery().FindList(!string.IsNullOrEmpty(model.SearchText), o => o.Name.Contains(model.SearchText) || o.Type.Contains(model.SearchText))
+            var data = _service.Find(!string.IsNullOrEmpty(model.SearchText), o => o.Name.Contains(model.SearchText) || o.Type.Contains(model.SearchText))
                 .Where(!string.IsNullOrEmpty(model.ID), o => o.ID == model.ID)
-                .Where(string.IsNullOrEmpty(model.Record),o => o.ParentID == model.Record)
+                .Where(string.IsNullOrEmpty(model.Record), o => o.ParentID.Equals("0"))
+                .Where(!string.IsNullOrEmpty(model.Record),o => o.ParentID == model.Record)
                 .Where(_currentLang != null,o=>o.LangID == _currentLang.ID)
                 .Where(startDate > DateTime.MinValue, o => o.Created >= startDate)
                 .Where(endDate > DateTime.MinValue, o => o.Created <= endDate)
@@ -53,7 +54,7 @@ namespace BaseMVC.AdminControllers
             {
                 return RedirectToAction("Edit", new { model.ID });
             }
-            ViewBag.Root = _service.CreateQuery().FindList(true,o=>o.Activity == true && string.IsNullOrEmpty(o.ParentID))
+            ViewBag.Root = _service.Find(true,o=>o.Activity == true && o.ParentID.Equals("0"))
                 .Where(_currentLang != null, o => o.LangID == _currentLang.ID).ToList();
             return View();
         }
@@ -68,7 +69,7 @@ namespace BaseMVC.AdminControllers
             }
             else
             {
-                if(string.IsNullOrEmpty(item.ParentID))
+                if(!item.ParentID.Equals("0"))
                 {
                     var root = _service.GetByID(item.ParentID);
                     if (root != null)
@@ -80,7 +81,7 @@ namespace BaseMVC.AdminControllers
                 item.Code = UnicodeName.ConvertUnicodeToCode(item.Name, "-", true);
                 await _service.AddAsync(item);
             }
-            ViewBag.Root = _service.CreateQuery().FindList(true,o => string.IsNullOrEmpty(o.ParentID) && o.Activity == true)
+            ViewBag.Root = _service.Find(true,o => o.ParentID.Equals("0") && o.Activity == true)
                 .Where(_currentLang != null, o => o.LangID == _currentLang.ID).ToList();
             return View();
         }

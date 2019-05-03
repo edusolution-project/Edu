@@ -29,11 +29,12 @@ namespace AdminPage_MongoDB
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
+                //options.MinimumSameSitePolicy = SameSiteMode.None;
             });
             // thay doi theo request
             services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<ILogs,Logs>();
+            services.AddScoped<Security>();
             services.AddServiceBase();
             // 1 nguoi - ko doi
 

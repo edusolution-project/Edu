@@ -340,7 +340,7 @@ namespace BaseMVC.Globals
             for (int i = 0; i < count; i++)
             {
                 var item = data[i];
-                if (currentLang.Code == item.Code)
+                if (currentLang != null && currentLang.Code == item.Code)
                 {
                     html += "<a href=\"javascript:void(0)\" class=\"btn btn-sm btn-success\" style=\"padding:3px\">" + item.Code.ToUpper() + "</a>";
                 }

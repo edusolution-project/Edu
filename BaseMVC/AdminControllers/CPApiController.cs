@@ -14,7 +14,6 @@ using MongoDB.Driver;
 
 namespace BaseMVC.AdminControllers
 {
-    [Route("/[controller]/[action]")]
     public class CPApiController : ControllerBase
     {
         protected const string regexElement = @"<\s*static-layout[^>]*>(.*?)\<\s*\/\s*static-layout>|<\s*dynamic-layout[^>]*>(.*?)\<\s*\/\s*dynamic-layout>";
@@ -27,18 +26,36 @@ namespace BaseMVC.AdminControllers
         private readonly SysTemplatePropertyService _propertyService;
         private readonly SysTemplateService _templateService;
         private readonly CPMenuService _menuService;
-        private CPLangEntity currentLang;
+        private readonly CPUserService _userService;
+        private readonly CPRoleService _roleService;
+        private readonly CPLangEntity _currentLang;
+        private readonly CPLangService _langService;
+        private readonly Security _security;
         private readonly IConfiguration _configuration;
-        public CPApiController(ILogs logs, IConfiguration configuration)
+        public CPApiController(ILogs logs
+            , IConfiguration configuration
+            , SysTemplateDetailService templateDetailService
+            , SysTemplateService templateService
+            , SysTemplatePropertyService templatePropertyService
+            , CPMenuService menuService
+            , CPUserService userService
+            , CPRoleService roleService
+            , CPLangService langService
+            , Security security)
         {
             _configuration = configuration;
             _logs = logs;
             _menu = new WebMenu();
-            _templateDetailsService = new SysTemplateDetailService(configuration);
-            _templateService = new SysTemplateService(configuration);
-            _menuService = new CPMenuService(configuration);
-            _propertyService = new SysTemplatePropertyService(configuration);
-            currentLang = StartUp.CurrentLang;
+            _security = security;
+            _templateDetailsService = templateDetailService;
+            _templateService = templateService;
+            _menuService = menuService;
+            _propertyService = templatePropertyService;
+            _userService = userService;
+            _roleService = roleService;
+            _langService = langService;
+
+            _currentLang = StartUp.CurrentLang;
         }
         public Response GetLayoutList()
         {
@@ -68,7 +85,7 @@ namespace BaseMVC.AdminControllers
         {
             try
             {
-                var data = _menuService.GetItemByType(type, currentLang.ID);
+                var data = _menuService.GetItemByType(type, _currentLang.ID);
                 if (data == null) return new Response()
                 {
                     Code = 404,
@@ -533,6 +550,66 @@ namespace BaseMVC.AdminControllers
             };
             return response;
         }
+        #region Create Begin
+        public Response StartPage()
+        {
+            var listRole = new List<CPRoleEntity>()
+            {
+                new CPRoleEntity()
+                {
+                    Name = "Administrator",
+                    Code = "administrator",
+                    Lock = true
+                },
+                new CPRoleEntity()
+                {
+                    Name = "Member",
+                    Code = "member",
+                    Lock = true
+                }
+            };
+            _roleService.AddRange(listRole);
+            List<CPUserEntity> listUser = new List<CPUserEntity>();
+            for(int i = 0; i < listRole.Count; i++)
+            {
+                var user = new CPUserEntity()
+                {
+                    Activity = true,
+                    BirthDay = DateTime.Now,
+                    Created = DateTime.Now,
+                    Email = listRole[i].Code+"@gmail.com",
+                    Name = listRole[i].Name,
+                    RoleID = listRole[i].ID,
+                    Phone = "0976497928",
+                    Skype = "breakingdawn1235",
+                    Pass = Security.Encrypt("123")
+                };
+                _userService.Add(user);
+                listUser.Add(user);
+            }
+            List<CPLangEntity> listLang = new List<CPLangEntity>()
+            {
+                new CPLangEntity()
+                {
+                    Activity =true,
+                    Code = "VN",
+                    Name = "Việt Nam"
+                },
+                new CPLangEntity()
+                {
+                    Activity =true,
+                    Code = "EN",
+                    Name = "English"
+                }
+            };
+            _langService.AddRange(listLang);
+            IDictionary<string, dynamic> data = new Dictionary<string, dynamic>();
+            data.Add("Role", listRole);
+            data.Add("User", listUser);
+            data.Add("Lang", listLang);
+            return new Response(201, "Create Success", data);
+        }
+        #endregion
     }
     public class Response
     {

@@ -862,3 +862,4 @@ F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\AdminPage_MongoDb\o
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\AdminPage_MongoDb\obj\Debug\net461\AdminPage_MongoDB.csproj.CopyComplete
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\AdminPage_MongoDb\obj\Debug\net461\AdminPage_MongoDB.exe
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\AdminPage_MongoDb\obj\Debug\net461\AdminPage_MongoDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\AdminPage_MongoDb\obj\Debug\net461\Razor\Views\ModBooks\Index.g.cshtml.cs

@@ -18,6 +18,7 @@
     <Compile Remove="Views\Module\**" />
     <Compile Remove="Views\System\**" />
     <Compile Remove="Views\WebMenu\**" />
+    <Compile Remove="wwwroot\Contents\Fonts\**" />
     <Content Remove="Controllers\**" />
     <Content Remove="Views\Chat\**" />
     <Content Remove="Views\CHome\**" />
@@ -26,6 +27,7 @@
     <Content Remove="Views\Module\**" />
     <Content Remove="Views\System\**" />
     <Content Remove="Views\WebMenu\**" />
+    <Content Remove="wwwroot\Contents\Fonts\**" />
     <EmbeddedResource Remove="Controllers\**" />
     <EmbeddedResource Remove="Views\Chat\**" />
     <EmbeddedResource Remove="Views\CHome\**" />
@@ -34,6 +36,7 @@
     <EmbeddedResource Remove="Views\Module\**" />
     <EmbeddedResource Remove="Views\System\**" />
     <EmbeddedResource Remove="Views\WebMenu\**" />
+    <EmbeddedResource Remove="wwwroot\Contents\Fonts\**" />
     <None Remove="Controllers\**" />
     <None Remove="Views\Chat\**" />
     <None Remove="Views\CHome\**" />
@@ -42,6 +45,7 @@
     <None Remove="Views\Module\**" />
     <None Remove="Views\System\**" />
     <None Remove="Views\WebMenu\**" />
+    <None Remove="wwwroot\Contents\Fonts\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -63,11 +67,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Folder Include="wwwroot\Contents\Fonts\" />
   </ItemGroup>
 
 

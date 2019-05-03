@@ -2992,8 +2992,8 @@ F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\bin\De
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\bin\Debug\System.Text.Encodings.Web.xml
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\bin\Debug\System.Threading.Tasks.Extensions.xml
-F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\Debug\EntityBaseFW.csprojAssemblyReference.cache
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\Debug\EntityBaseFW.csproj.CoreCompileInputs.cache
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\Debug\EntityBaseFW.csproj.CopyComplete
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\Debug\EntityBaseFW.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\Debug\EntityBaseFW.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\Debug\EntityBaseFW.csprojAssemblyReference.cache

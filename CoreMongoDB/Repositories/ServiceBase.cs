@@ -171,7 +171,7 @@ namespace CoreMongoDB.Repositories
             }
             else
             {
-                return Collection.Find(o => !string.IsNullOrEmpty(o.ID))?.ToList();
+                return Collection.AsQueryable()?.ToList();
             }
         }
         public async Task<IEnumerable<T>> WhereAsync(bool check, Expression<Func<T, bool>> filter)
@@ -196,7 +196,7 @@ namespace CoreMongoDB.Repositories
             }
             else
             {
-                var data = await Collection.FindAsync(o => !string.IsNullOrEmpty(o.ID));
+                var data = Collection.AsQueryable();
                 return data?.ToList();
             }
         }
