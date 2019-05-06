@@ -29,4 +29,3 @@ F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Deb
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csproj.CopyComplete
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.pdb
-F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csprojAssemblyReference.cache
