@@ -61,3 +61,12 @@ F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\obj\Debug\netstandard2.0\Core
 F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.AssemblyInfo.cs
 F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.dll
 F:\Project_Final\DashBoard_Final_v2\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreEDB\bin\Debug\netstandard2.0\CoreEDB.deps.json
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreEDB\bin\Debug\netstandard2.0\CoreEDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreEDB\bin\Debug\netstandard2.0\CoreEDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.csprojAssemblyReference.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.csproj.CoreCompileInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.AssemblyInfoInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.AssemblyInfo.cs
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreEDB\obj\Debug\netstandard2.0\CoreEDB.pdb

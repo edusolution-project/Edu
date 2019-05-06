@@ -2,7 +2,7 @@
 @using BaseMongoDB.Factory
 @using MongoDB.Driver;
 @{
-    var lang = Instance.CreateInstanceCPLang();
+    var lang = Instance.CreateInstanceCPLang("CPLangs");
     var data = lang.CreateQuery().Find(o => o.Activity == true).ToList();
     string searchText = ViewBag.Model != null ? ViewBag.Model.SearchText : string.Empty;
     var test = Model;

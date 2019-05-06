@@ -11,7 +11,7 @@ namespace BaseMVC.Globals
         [JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
         [JsonProperty(PropertyName = "color")]
-        public string Color { get; set; } = "success";
+        public string Color { get; set; }
         [JsonProperty(PropertyName = "order")]
         public int Order { get; set; }
         [JsonProperty(PropertyName = "icon")]
@@ -30,4 +30,22 @@ namespace BaseMVC.Globals
         Mod, // ClientCtroller
         Sys  // AdminController
     }
+    public class GetColor{
+        public string RandomColor()
+        {
+            var _color = new List<string>();
+            var cacle = CacheExtends.GetDataFromCache<List<string>>("colorGet");
+            if(_color.Count == 0)
+            {
+                _color = cacle != null && cacle.Count > 0? cacle : new List<string>() { "cyan", "red", "emerald", "indigo", "violet", "teal" };
+            }
+            Random random = new Random();
+            int id = random.Next(0, _color.Count);
+            var colorReturn = _color[id].ToString();
+            _color.Remove(colorReturn);
+            CacheExtends.SetObjectFromCache("colorGet", 240,_color);
+            return colorReturn;
+        }
+    }
 }
+

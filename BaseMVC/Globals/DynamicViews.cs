@@ -50,7 +50,7 @@ namespace BaseMVC.Globals
             if (cache != null) return cache;
             else
             {
-                var chuyenmuc = Instance.CreateInstanceCPMenu();
+                var chuyenmuc = Instance.CreateInstanceCPMenu("CPMenus");
                 var data = chuyenmuc.GetItemByType(type,langID);
                 string Html = "<div class=\"mdc-select\"><i class=\"mdc-select__dropdown-icon\"></i><select name=\"MenuID\" class=\"mdc-select__native-control\"><option value=\"\">------ Chọn chuyên mục -----</option>";
                 for(int i = 0; data != null && i < data.Count; i++)
@@ -340,7 +340,7 @@ namespace BaseMVC.Globals
             for (int i = 0; i < count; i++)
             {
                 var item = data[i];
-                if (currentLang.Code == item.Code)
+                if (currentLang != null && currentLang.Code == item.Code)
                 {
                     html += "<a href=\"javascript:void(0)\" class=\"btn btn-sm btn-success\" style=\"padding:3px\">" + item.Code.ToUpper() + "</a>";
                 }

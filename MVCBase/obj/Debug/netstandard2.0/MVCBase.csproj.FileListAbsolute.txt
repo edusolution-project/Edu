@@ -114,3 +114,19 @@ F:\Project_Final\DashBoard_Final_v2\iShare\MVCBase\bin\Debug\netstandard2.0\Base
 F:\Project_Final\DashBoard_Final_v2\iShare\MVCBase\bin\Debug\netstandard2.0\CoreEDB.pdb
 F:\Project_Final\DashBoard_Final_v2\iShare\MVCBase\bin\Debug\netstandard2.0\CoreLogs.pdb
 F:\Project_Final\DashBoard_Final_v2\iShare\MVCBase\obj\Debug\netstandard2.0\MVCBase.csproj.CopyComplete
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\bin\Debug\netstandard2.0\MVCBase.deps.json
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\bin\Debug\netstandard2.0\MVCBase.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\bin\Debug\netstandard2.0\MVCBase.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\bin\Debug\netstandard2.0\BaseModels.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\bin\Debug\netstandard2.0\CoreEDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\bin\Debug\netstandard2.0\CoreLogs.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\bin\Debug\netstandard2.0\BaseModels.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\bin\Debug\netstandard2.0\CoreEDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\bin\Debug\netstandard2.0\CoreLogs.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\obj\Debug\netstandard2.0\MVCBase.csprojAssemblyReference.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\obj\Debug\netstandard2.0\MVCBase.csproj.CoreCompileInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\obj\Debug\netstandard2.0\MVCBase.AssemblyInfoInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\obj\Debug\netstandard2.0\MVCBase.AssemblyInfo.cs
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\obj\Debug\netstandard2.0\MVCBase.csproj.CopyComplete
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\obj\Debug\netstandard2.0\MVCBase.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\MVCBase\obj\Debug\netstandard2.0\MVCBase.pdb

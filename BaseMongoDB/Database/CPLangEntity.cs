@@ -17,6 +17,10 @@ namespace BaseMongoDB.Database
         {
 
         }
+        public CPLangService(IConfiguration config,string tableName) : base(config, tableName)
+        {
+
+        }
         public CPLangEntity GetItemByCode(string code)
         {
             return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();

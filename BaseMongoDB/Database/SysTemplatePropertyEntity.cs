@@ -21,6 +21,11 @@ namespace BaseMongoDB.Database
         {
 
         }
+
+        public SysTemplatePropertyService(IConfiguration config, string tableName) : base(config, tableName)
+        {
+        }
+
         public List<SysTemplatePropertyEntity> GetItemByParentID(string TemplateDetailID)
         {
             return CreateQuery().Find(o => o.TemplateDetailID == TemplateDetailID)?.ToList();

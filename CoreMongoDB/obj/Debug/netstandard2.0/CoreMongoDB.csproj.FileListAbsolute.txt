@@ -14,3 +14,19 @@ F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Debug\netstandard2.0\
 F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.dll
 F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.pdb
 F:\Project_Final\DashBoard_Final_v2\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csprojAssemblyReference.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\bin\Debug\netstandard2.0\CoreMongoDB.deps.json
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\bin\Debug\netstandard2.0\CoreMongoDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\bin\Debug\netstandard2.0\CoreMongoDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\bin\Debug\netstandard2.0\System.Runtime.Caching.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\bin\Debug\netstandard2.0\System.Configuration.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\bin\Debug\netstandard2.0\System.Security.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\bin\Debug\netstandard2.0\System.Runtime.Caching.xml
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\bin\Debug\netstandard2.0\System.Configuration.xml
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\bin\Debug\netstandard2.0\System.Security.xml
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csproj.CoreCompileInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.AssemblyInfoInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.AssemblyInfo.cs
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csproj.CopyComplete
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csprojAssemblyReference.cache

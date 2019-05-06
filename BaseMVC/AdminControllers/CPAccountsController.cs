@@ -117,8 +117,7 @@ namespace BaseMVC.AdminControllers
                                     new Claim("RoleID", role.ID.ToString()),
                                 };
                                 var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
-
-                                var authenProperties = new AuthenticationProperties
+                                _ = new AuthenticationProperties
                                 {
                                     IsPersistent = true,
                                     ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)

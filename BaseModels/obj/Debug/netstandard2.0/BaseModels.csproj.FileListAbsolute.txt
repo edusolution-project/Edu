@@ -84,3 +84,15 @@ F:\Project_Final\DashBoard_Final_v2\iShare\BaseModels\obj\Debug\netstandard2.0\B
 F:\Project_Final\DashBoard_Final_v2\iShare\BaseModels\obj\Debug\netstandard2.0\BaseModels.csproj.CopyComplete
 F:\Project_Final\DashBoard_Final_v2\iShare\BaseModels\obj\Debug\netstandard2.0\BaseModels.dll
 F:\Project_Final\DashBoard_Final_v2\iShare\BaseModels\obj\Debug\netstandard2.0\BaseModels.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\bin\Debug\netstandard2.0\BaseModels.deps.json
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\bin\Debug\netstandard2.0\BaseModels.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\bin\Debug\netstandard2.0\BaseModels.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\bin\Debug\netstandard2.0\CoreEDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\bin\Debug\netstandard2.0\CoreEDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\obj\Debug\netstandard2.0\BaseModels.csprojAssemblyReference.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\obj\Debug\netstandard2.0\BaseModels.csproj.CoreCompileInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\obj\Debug\netstandard2.0\BaseModels.AssemblyInfoInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\obj\Debug\netstandard2.0\BaseModels.AssemblyInfo.cs
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\obj\Debug\netstandard2.0\BaseModels.csproj.CopyComplete
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\obj\Debug\netstandard2.0\BaseModels.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseModels\obj\Debug\netstandard2.0\BaseModels.pdb

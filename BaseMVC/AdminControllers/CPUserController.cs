@@ -29,14 +29,16 @@ namespace BaseMVC.AdminControllers
         {
             _service = userService;
             _roleService = roleService;
-            _listRoles = _roleService.GetAll();
+            var data = _roleService.GetAll();
+            _listRoles = data?.ToList();
         }
         public ActionResult Index(DefaultModel model)
         {
             DateTime startDate = model.StartDate > DateTime.MinValue ? new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0) : DateTime.MinValue;
             DateTime endDate = model.EndDate > DateTime.MinValue ? new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59) : DateTime.MinValue;
 
-            var data = _service.CreateQuery().FindList(!string.IsNullOrEmpty(model.SearchText), o => o.Name.Contains(model.SearchText) || o.Email.Contains(model.SearchText))
+            var data = _service.CreateQuery()
+                .FindList(!string.IsNullOrEmpty(model.SearchText), o => o.Name.Contains(model.SearchText) || o.Email.Contains(model.SearchText))
                 .Where(!string.IsNullOrEmpty(model.ID), o => o.ID == model.ID)
                 .Where(startDate > DateTime.MinValue, o => o.Created >= startDate)
                 .Where(endDate > DateTime.MinValue, o => o.Created <= endDate)

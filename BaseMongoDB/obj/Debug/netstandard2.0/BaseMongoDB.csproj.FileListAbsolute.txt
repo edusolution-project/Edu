@@ -16,3 +16,21 @@ F:\Project_Final\DashBoard_Final_v2\iShare\BaseMongoDB\obj\Debug\netstandard2.0\
 F:\Project_Final\DashBoard_Final_v2\iShare\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.csproj.CopyComplete
 F:\Project_Final\DashBoard_Final_v2\iShare\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.dll
 F:\Project_Final\DashBoard_Final_v2\iShare\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\BaseMongoDB.deps.json
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\BaseMongoDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\BaseMongoDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\CoreMongoDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\System.Runtime.Caching.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\System.Configuration.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\System.Security.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\CoreMongoDB.pdb
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\System.Runtime.Caching.xml
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\System.Configuration.xml
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\bin\Debug\netstandard2.0\System.Security.xml
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.csprojAssemblyReference.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.csproj.CoreCompileInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.AssemblyInfoInputs.cache
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.AssemblyInfo.cs
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.csproj.CopyComplete
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.dll
+F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.pdb

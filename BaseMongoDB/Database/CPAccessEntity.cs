@@ -19,6 +19,10 @@ namespace BaseMongoDB.Database
         {
 
         }
+        public CPAccessService(IConfiguration config,string tableName) : base(config, tableName)
+        {
+
+        }
         public bool GetPermission(string roleID, string ctrlName, string actName)
         {
             var data = GetItem(roleID, ctrlName, actName);

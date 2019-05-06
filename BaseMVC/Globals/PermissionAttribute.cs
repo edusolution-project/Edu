@@ -13,77 +13,85 @@ namespace BaseMVC.Globals
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            Controller controller = (Controller)context.Controller;
             string ctrlName = context.RouteData.Values["Controller"].ToString();
             string actName = context.RouteData.Values["Action"].ToString();
-            var user = controller.User;
-            if((ctrlName.ToLower()=="cpaccounts" && (actName.ToLower()=="signin" || actName == "signout" || actName == "register"))
-                ||(ctrlName.ToLower() == "cphome" && (user != null && user.Identity.IsAuthenticated))
-                ||(user != null && user.Identity.IsAuthenticated && user.IsInRole("administrator")))
+
+            if (ctrlName.ToLower() == "cpapi" && actName.ToLower() == "startpage")
             {
                 base.OnActionExecuting(context);
             }
             else
             {
-                if (user == null || !user.Identity.IsAuthenticated)
+                Controller controller = (Controller)context.Controller;
+                var user = controller.User;
+                if ((ctrlName.ToLower() == "cpaccounts" && (actName.ToLower() == "signin" || actName == "signout" || actName == "register"))
+                    || (ctrlName.ToLower() == "cphome" && (user != null && user.Identity.IsAuthenticated))
+                    || (user != null && user.Identity.IsAuthenticated && user.IsInRole("administrator")))
                 {
-                    string _returnUrl = System.Net.WebUtility.UrlEncode(ctrlName + "/" + actName);
-                    context.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "cpaccounts", action = "signin", returnurl = _returnUrl }));
+                    base.OnActionExecuting(context);
                 }
                 else
                 {
-                    var res = context.HttpContext.Response;
-                    var access = Instance.CreateInstanceCPAccess();
-                    var claimRole = user.Claims.SingleOrDefault(o => o.Type == "RoleID");
-                    if(claimRole != null)
+                    if (user == null || !user.Identity.IsAuthenticated)
                     {
-                        string roleID = claimRole.Value;
-                        if (access.GetPermission(roleID, ctrlName, actName))
+                        string _returnUrl = System.Net.WebUtility.UrlEncode(ctrlName + "/" + actName);
+                        context.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "cpaccounts", action = "signin", returnurl = _returnUrl }));
+                    }
+                    else
+                    {
+                        var res = context.HttpContext.Response;
+                        var access = Instance.CreateInstanceCPAccess("CPAccess");
+                        var claimRole = user.Claims.SingleOrDefault(o => o.Type == "RoleID");
+                        if (claimRole != null)
                         {
-                            base.OnActionExecuting(context);
-                        }
-                        else
-                        {
-                            var error = new Dictionary<string, string>
+                            string roleID = claimRole.Value;
+                            if (access.GetPermission(roleID, ctrlName, actName))
+                            {
+                                base.OnActionExecuting(context);
+                            }
+                            else
+                            {
+                                var error = new Dictionary<string, string>
                             {
                                 { "code", "403" },
                                 { "msg", "bạn không đủ quyền hạn để thực hiện chức năng này !!" }
                             };
-                            controller.TempData["error"] = error;
-                            if(controller.HttpContext.Request.Method.ToLower() != "get")
-                            {
-                                context.Result = new RedirectToRouteResult(
-                                new RouteValueDictionary(new
+                                controller.TempData["error"] = error;
+                                if (controller.HttpContext.Request.Method.ToLower() != "get")
                                 {
-                                    controller = ctrlName,
-                                    action = "index"
-                                }));
+                                    context.Result = new RedirectToRouteResult(
+                                    new RouteValueDictionary(new
+                                    {
+                                        controller = ctrlName,
+                                        action = "index"
+                                    }));
+                                }
+                                else
+                                {
+                                    context.Result = new RedirectToRouteResult(
+                                    new RouteValueDictionary(new
+                                    {
+                                        controller = "cphome",
+                                        action = "index"
+                                    }));
+                                }
                             }
-                            else
-                            {
-                                context.Result = new RedirectToRouteResult(
+                        }
+                        else
+                        {
+                            var error = new Dictionary<string, string>
+                        {
+                            { "code", "403" },
+                            { "msg", "bạn không đủ quyền hạn để thực hiện chức năng này!!" }
+                        };
+                            controller.TempData["error"] = error;
+                            context.Result = new RedirectToRouteResult(
                                 new RouteValueDictionary(new
                                 {
                                     controller = "cphome",
                                     action = "index"
                                 }));
-                            }
                         }
-                    }
-                    else
-                    {
-                        var error = new Dictionary<string, string>
-                        {
-                            { "code", "403" },
-                            { "msg", "bạn không đủ quyền hạn để thực hiện chức năng này!!" }
-                        };
-                        controller.TempData["error"] = error;
-                        context.Result = new RedirectToRouteResult(
-                            new RouteValueDictionary(new
-                            {
-                                controller = "cphome",
-                                action = "index"
-                            }));
                     }
                 }
             }

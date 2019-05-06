@@ -97,6 +97,7 @@ namespace BaseMVC.Globals
                             attribute.ActionName.Add(m.ToLower());
                         }
                     }
+                    attribute.Color = string.IsNullOrEmpty(attribute.Color) ? new GetColor().RandomColor() : attribute.Color;
                     cusMenus.Add(attribute);
                 }
                 CacheExtends.SetObjectFromCache(CacheExtends.DefaultAdminController, 360 * 24 * 60, cusMenus);

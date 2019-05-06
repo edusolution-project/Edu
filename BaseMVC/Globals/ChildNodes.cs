@@ -9,7 +9,7 @@ namespace BaseMVC.Globals
 {
     public class ChildNodes
     {
-        protected static CPMenuService _menuService = Instance.CreateInstanceCPMenu();
+        protected static CPMenuService _menuService = Instance.CreateInstanceCPMenu("CPMenus");
         public static List<string> GetChildMenuByRoot(string RootID)
         {
             var data = _menuService.CreateQuery().Find(o => o.ParentID == RootID || o.ID == RootID)?.ToList();

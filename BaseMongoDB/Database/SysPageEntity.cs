@@ -34,6 +34,11 @@ namespace BaseMongoDB.Database
         {
 
         }
+
+        public SysPageService(IConfiguration config, string tableName) : base(config, tableName)
+        {
+        }
+
         public SysPageEntity GetItemByCode(string code)
         {
             return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();
