@@ -6,6 +6,7 @@ namespace BasePublisherModels.Database
 {
     public class ModLessonPartEntity : EntityBase
     {
+        public string LessionID { get; set; }
         public string Name { get; set; }
         public bool IsAnswer { get; set; }
         public string Media { get; set; }

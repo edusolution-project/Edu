@@ -35,9 +35,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdminPage_MongoDB", "AdminP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseMVC", "BaseMVC\BaseMVC.csproj", "{3EC36A9A-E117-4D68-B80D-F2902314D71E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasePublisherModels", "BasePublisherModels\BasePublisherModels.csproj", "{C87C961A-7F20-4609-A03A-DE6B28C37983}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BasePublisherModels", "BasePublisherModels\BasePublisherModels.csproj", "{C87C961A-7F20-4609-A03A-DE6B28C37983}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasePublisherMVC", "BasePublisherMVC\BasePublisherMVC.csproj", "{289276E3-42BB-4321-82B0-A86AD5C56842}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BasePublisherMVC", "BasePublisherMVC\BasePublisherMVC.csproj", "{289276E3-42BB-4321-82B0-A86AD5C56842}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherPage", "PublisherPage\PublisherPage.csproj", "{810E4220-0FB6-41DF-9A68-456522D653B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,6 +91,10 @@ Global
 		{289276E3-42BB-4321-82B0-A86AD5C56842}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{289276E3-42BB-4321-82B0-A86AD5C56842}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{289276E3-42BB-4321-82B0-A86AD5C56842}.Release|Any CPU.Build.0 = Release|Any CPU
+		{810E4220-0FB6-41DF-9A68-456522D653B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{810E4220-0FB6-41DF-9A68-456522D653B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{810E4220-0FB6-41DF-9A68-456522D653B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{810E4220-0FB6-41DF-9A68-456522D653B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +111,7 @@ Global
 		{3EC36A9A-E117-4D68-B80D-F2902314D71E} = {41C3BDCD-A0B7-4EB7-A833-5BAB2B8EAC80}
 		{C87C961A-7F20-4609-A03A-DE6B28C37983} = {41C3BDCD-A0B7-4EB7-A833-5BAB2B8EAC80}
 		{289276E3-42BB-4321-82B0-A86AD5C56842} = {41C3BDCD-A0B7-4EB7-A833-5BAB2B8EAC80}
+		{810E4220-0FB6-41DF-9A68-456522D653B5} = {D6733407-1104-4EDD-A7B9-05B1BCA864E6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {366F4E1B-3316-4A63-BDBD-AB06A9DB34E8}
