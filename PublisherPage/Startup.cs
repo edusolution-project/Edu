@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BasePublisherModels.Factory;
+using BasePublisherMVC.Globals;
+using CoreLogs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -30,7 +33,10 @@ namespace PublisherPage
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
+            services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<ILogs, Logs>();
+            services.AddScoped<Security>();
+            services.AddServiceBase();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -57,7 +63,7 @@ namespace PublisherPage
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=CPHome}/{action=Index}/{id?}");
             });
         }
     }
