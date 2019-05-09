@@ -1,0 +1,121 @@
+// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// for details on configuring this project to bundle and minify static web assets.
+
+// Write your JavaScript code.
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+      // AMD
+    define([], factory);
+  } else if (typeof exports === 'object') {
+      // CommonJS
+    module.exports = factory(require());
+  } else {
+    // Browser globals (Note: root is window)
+    root.LibraryCourse = factory();
+  }
+}(this,function(){
+    "use strict";
+    var defaults = {
+        url:"",
+        contain_id:"",
+        userid:"",
+        token:"",
+        disabled_features: [],
+        enabled_features: [],
+        debug: !1,
+        logo: {},
+        api_version:"1.0",
+        fullscreen: !1,
+        autosize: !1,
+        sortby:[],
+        search:""
+    };
+    // required
+    function version(){
+        return "1.0 lession create by longht 2019-05-06";
+    };
+    function onReady(thisFunc){
+        window.addEventListener("DOMContentLoaded",thisFunc,!1);
+    };
+    var groupOptions = Object.assign || function (data) {
+        for (var e, o = arguments, i = 1, n = arguments.length; i < n; i++) {
+            e = o[i];
+            for (var s in e)
+                Object.prototype.hasOwnProperty.call(e, s) && (data[s] = e[s])
+        }
+        return data;
+    };
+    var proccessObj = Object.assign || function (data) {
+        for (var item, obj = arguments, i = 1, count = arguments.length; i < count; i++) {
+            item = obj[i];
+            for (var property in item)
+                Object.prototype.hasOwnProperty.call(item, property) && (data[property] = item[property])
+        }
+        return data;
+    };
+    var exchanges = function(defaults,options){
+        var obj = proccessObj({},defaults);
+        for(var property in options)
+            "object" != typeof defaults[property] || null === defaults[property] || Array.isArray(defaults[property])
+            ? void 0 !== options[property] && (obj[property] = options[property])
+            : obj[property] = proccessObj(defaults[property], options[property]);
+        return obj;
+    },
+    _self
+    //end required
+    ,
+    Lession = function(){
+        var excute = function(options){
+            var option = exchanges(defaults,options);
+            _self = this;
+            var lessionOld = _self._loadGetApiF5Unsave();
+            if(lessionOld == null){
+            	_self._createLessionNew(option);
+        	}else{
+        		_self._createLessionOld(lessionOld);
+        	}
+        }
+        return excute.prototype._createLessionNew=function(data){
+            // tạo mục lục
+            console.log("_createLessionNew",data);
+        }
+        ,excute.prototype._createLessionOld=function(){
+            // tạo danh mục bài tập
+            console.log("_createLessionOld");
+        }
+        ,excute.prototype._loadGetApiF5Unsave=function(){
+            // tạo chi tiết bài tập
+            console.log("_loadGetApiF5Unsave");
+        },excute.prototype._save = function(){
+
+        },excute.prototype._render = function(data){
+        	console.log("_render");
+        },excute.prototype._popUp = function(data){
+
+        }
+        ,excute
+    }(),
+    publish = Lession;
+    window.Library = window.library || {},
+    window.Library.version = version,
+    window.Library.onReady = onReady,
+    window.Library.lession = publish
+}));
+window.Library.onReady(function(){
+          var widget = new Library.lession({
+            url:"/api/",
+            contain_id:"xxx",
+            userid:"xxx",
+            token:"222",
+            disabled_features: [],
+            enabled_features: [],
+            debug: !1,
+            logo: {},
+            api_version:"1.0",
+            fullscreen: !1,
+            autosize: !1,
+            sortby:[],
+            search:""
+          })
+          console.log(widget);
+     });
