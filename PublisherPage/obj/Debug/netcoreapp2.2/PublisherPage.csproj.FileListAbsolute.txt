@@ -72,3 +72,6 @@ D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\PublisherPage\obj\D
 D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\PublisherPage\obj\Debug\netcoreapp2.2\Razor\Views\ModGrades\Create.g.cshtml.cs
 D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\PublisherPage\obj\Debug\netcoreapp2.2\Razor\Views\ModGrades\Edit.g.cshtml.cs
 D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\PublisherPage\obj\Debug\netcoreapp2.2\Razor\Views\ModGrades\Index.g.cshtml.cs
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\PublisherPage\obj\Debug\netcoreapp2.2\Razor\Views\CPAccounts\Index.g.cshtml.cs
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\PublisherPage\obj\Debug\netcoreapp2.2\Razor\Views\CPAccounts\SignIn.g.cshtml.cs
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\PublisherPage\obj\Debug\netcoreapp2.2\Razor\Views\Shared\_LayoutLogin.g.cshtml.cs

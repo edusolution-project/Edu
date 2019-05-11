@@ -3266,3 +3266,4 @@ D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\De
 D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\Debug\EntityBaseFW.csproj.CopyComplete
 D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\Debug\EntityBaseFW.dll
 D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\Debug\EntityBaseFW.pdb
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\EntityBaseFW\obj\Debug\EntityBaseFW.csprojAssemblyReference.cache

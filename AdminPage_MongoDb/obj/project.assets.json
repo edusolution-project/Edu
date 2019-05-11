@@ -2729,7 +2729,7 @@
         }
       }
     },
-    ".NETFramework,Version=v4.6.1/win7-x64": {
+    ".NETFramework,Version=v4.6.1/win7-x86": {
       "DnsClient/1.2.0": {
         "type": "package",
         "dependencies": {
@@ -4296,7 +4296,7 @@
           "lib/net461/dotnet-aspnet-codegenerator-design.exe": {}
         },
         "runtime": {
-          "runtimes/win7-x64/lib/net461/dotnet-aspnet-codegenerator-design.exe": {}
+          "runtimes/win7-x86/lib/net461/dotnet-aspnet-codegenerator-design.exe": {}
         }
       },
       "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore/2.2.0": {
@@ -10503,7 +10503,7 @@
       }
     },
     "runtimes": {
-      "win7-x64": {
+      "win7-x86": {
         "#import": []
       }
     }
