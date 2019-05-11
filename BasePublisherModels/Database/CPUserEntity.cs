@@ -35,5 +35,11 @@ namespace BasePublisherModels.Database
         {
             return CreateQuery().Find(o => o.Email == email)?.SingleOrDefault();
         }
+        [Obsolete]
+        public async Task CreateIndexAsync()
+        {
+            var builder = Builders<CPUserEntity>.IndexKeys.Ascending(o => new { o.Activity,o.Email });
+            await Collection.Indexes.CreateOneAsync(builder);
+        }
     }
 }

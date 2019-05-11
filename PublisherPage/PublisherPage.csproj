@@ -18,4 +18,11 @@
     <ProjectReference Include="..\BasePublisherMVC\BasePublisherMVC.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="Views\ModPrograms\" />
+    <Folder Include="Views\ModSubjects\" />
+    <Folder Include="Views\ModUnits\" />
+  </ItemGroup>
+
 </Project>

@@ -14,14 +14,16 @@ namespace BasePublisherMVC.Globals
     public static class StartUp
     {
         private static CPLangEntity _currentLang;
+        private static CPUserEntity _currentUser;
         private static List<CPResourceEntity> _currentResource;
+        public static CPUserEntity CurrentUser => _currentUser;
         public static CPLangEntity CurrentLang => _currentLang;
         public static List<CPResourceEntity> CurrentResource => _currentResource;
         public static IApplicationBuilder UseAuthention(this IApplicationBuilder app,IConfiguration configuration)
         {
             app.Use(next => context =>
             {
-                context.User = context.GetCurrentUser(configuration);
+                context.User = context.GetCurrentUser(configuration,ref _currentUser);
                 
                 return next(context);
             });
@@ -41,7 +43,7 @@ namespace BasePublisherMVC.Globals
         private static void GetCurrentResource(this HttpContext context,IConfiguration configuration,ref List<CPResourceEntity> currentResource, ref CPLangEntity currentLang)
         {
             string cookie = context.GetValue(Cookies.DefaultLang,false);
-            if (string.IsNullOrEmpty(cookie)) cookie = "vn";
+            if (string.IsNullOrEmpty(cookie)) { cookie = "VN"; context.SetCurrentLang("VN"); }
             var lang = new CPLangService(configuration);
             currentLang = lang.CreateQuery().Find(o => o.Activity == true && o.Code == cookie)?.SingleOrDefault();
             if (currentLang != null)
@@ -55,7 +57,7 @@ namespace BasePublisherMVC.Globals
                 currentResource = res.GetByLangID(currentLang.ID);
             }
         }
-        private static ClaimsPrincipal GetCurrentUser(this HttpContext context, IConfiguration configuration)
+        private static ClaimsPrincipal GetCurrentUser(this HttpContext context, IConfiguration configuration, ref CPUserEntity user)
         {
             string token = context.GetValue(Cookies.DefaultLogin, false);
             if (string.IsNullOrEmpty(token)) return null;
@@ -74,7 +76,7 @@ namespace BasePublisherMVC.Globals
                 else
                 {
                     var account = new CPUserService(configuration);
-                    var user = account.GetItemByEmail(email);
+                        user = account.GetItemByEmail(email);
                     if (user == null) return null;
                     else
                     {

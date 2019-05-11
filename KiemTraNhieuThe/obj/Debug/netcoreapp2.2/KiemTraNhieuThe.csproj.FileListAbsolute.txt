@@ -51,3 +51,13 @@ F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.csprojAssemblyReference.cache
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.deps.json
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.runtimeconfig.json
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.runtimeconfig.dev.json
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.csproj.CoreCompileInputs.cache
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.AssemblyInfoInputs.cache
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.AssemblyInfo.cs
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
+D:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb

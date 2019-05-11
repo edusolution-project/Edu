@@ -12,10 +12,12 @@ namespace BasePublisherMVC
     {
         protected readonly WebMenu _menu;
         protected readonly CPLangEntity _currentLang;
+        protected readonly CPUserEntity _currentUser;
         public AdminController()
         {
             _menu = new WebMenu();
             _currentLang = StartUp.CurrentLang;
+            _currentUser = StartUp.CurrentUser;
         }
         
         protected List<MenuControlAttribute> GetMenuForUser(ClaimsPrincipal user , List<MenuControlAttribute> data)

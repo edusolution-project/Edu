@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj": {}
+    "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj": {}
   },
   "projects": {
-    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj": {
+    "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj",
+        "projectUniqueName": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj",
         "projectName": "ClientPage",
-        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj",
+        "projectPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj",
         "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\obj\\",
+        "outputPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

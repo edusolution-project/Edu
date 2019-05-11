@@ -5508,11 +5508,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\JWTExample.csproj",
+      "projectUniqueName": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\JWTExample.csproj",
       "projectName": "JWTExample",
-      "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\JWTExample.csproj",
+      "projectPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\JWTExample.csproj",
       "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-      "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\obj\\",
+      "outputPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\JWTExample\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

@@ -20,12 +20,7 @@ namespace BasePublisherMVC.AdminControllers
             ViewBag.Message = TempData["error"];
             return View();
         }
-
-        public ActionResult ok(string data)
-        {
-            return PartialView("_NavBar",data);
-        }
-
+        
         [HttpGet]
         public ActionResult<List<MenuControlAttribute>> GetMenu()
         {

@@ -1,5 +1,6 @@
 ﻿using CoreMongoDB.Repositories;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using System;
 
 namespace BasePublisherModels.Database
@@ -14,6 +15,7 @@ namespace BasePublisherModels.Database
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
         public int Order { get; set; }
+        public string Code { get; internal set; }
     }
     public class ModLessonPartService : ServiceBase<ModLessonPartEntity>
     {
@@ -24,6 +26,10 @@ namespace BasePublisherModels.Database
         public ModLessonPartService(IConfiguration config, string tableName) : base(config, tableName)
         {
 
+        }
+        public object GetItemByCode(string code)
+        {
+            return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();
         }
     }
 }

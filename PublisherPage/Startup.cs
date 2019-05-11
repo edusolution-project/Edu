@@ -38,7 +38,9 @@ namespace PublisherPage
             services.AddScoped<Security>();
             services.AddServiceBase();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(options => {
+                options.Filters.Add<PermissionAttribute>();
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,11 +56,15 @@ namespace PublisherPage
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+            app.GetConfiguration(Configuration);
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
-
+            // lấy user authentication (tự customer) =)))
+            app.UseAuthention(Configuration);
+            // ngôn ngữ mặc định 
+            app.UseResource(Configuration);
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

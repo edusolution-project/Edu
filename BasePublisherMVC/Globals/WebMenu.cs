@@ -32,11 +32,9 @@ namespace BasePublisherMVC.Globals
     {
         protected List<CModule> _listControl;
         protected List<MenuControlAttribute> _currentAdmin;
-        protected List<MenuControlAttribute> _currentClient;
         public WebMenu()
         {
             _currentAdmin = GetAdminContrller();
-            GetClientContrller(ref _currentClient,ref _listControl);
         }
         public  List<MenuControlAttribute> GetAdminMenu {
             get
@@ -46,17 +44,6 @@ namespace BasePublisherMVC.Globals
                     new WebMenu();
                 }
                 return _currentAdmin;
-            }
-        }
-        public  List<MenuControlAttribute> GetClientMenu
-        {
-            get
-            {
-                if (_currentClient == null)
-                {
-                    new WebMenu();
-                }
-                return _currentClient;
             }
         }
         public List<CModule> GetControl
@@ -88,7 +75,7 @@ namespace BasePublisherMVC.Globals
                     if (attribute == null) continue;
                     var getmetho = item.GetMethods();
                     var method = getmetho
-                        .Where(o => o.Module.Name == "BasePublisherMVC.dll")
+                        .Where(o => o.Module.Name == typeof(AdminController).Module.Name)
                         .Select(o => o.Name).ToList();
                     if (method != null)
                     {
@@ -103,70 +90,6 @@ namespace BasePublisherMVC.Globals
                 CacheExtends.SetObjectFromCache(CacheExtends.DefaultAdminController, 360 * 24 * 60, cusMenus);
 
                 return cusMenus;
-            }
-        }
-
-        protected void GetClientContrller(ref List<MenuControlAttribute> cusMenus,ref List<CModule> modules)
-        {
-            var cacheControl = CacheExtends.GetDataFromCache<List<CModule>>(CacheExtends.DefaultIsControl);
-            var cacheMenu = CacheExtends.GetDataFromCache<List<MenuControlAttribute>>(CacheExtends.DefaultClientController);
-            if (cacheMenu != null && cacheControl != null) {
-                cusMenus = cacheMenu;
-                modules = cacheControl;
-            }
-            else
-            {
-                modules = new List<CModule>();
-                cusMenus = new List<MenuControlAttribute>();
-                var assembly = Assembly.GetAssembly(typeof(ClientController)).GetTypes()
-                    .Where(o => o.BaseType.FullName == typeof(ClientController).FullName)
-                    .ToList();
-                int count = assembly != null ? assembly.Count : 0;
-                for (int i = 0; i < count; i++)
-                {
-                    var item = assembly[i];
-                    var attribute = item.GetCustomAttribute<MenuControlAttribute>();
-                    if (attribute == null) continue;
-                    if (attribute.IsControl)
-                    {
-                        var fields =  item.GetFields();
-                        List<ProperyCModule> pp = new List<ProperyCModule>();
-                        if(fields != null)
-                        {
-                            foreach(var field in fields)
-                            {
-                                var attr = field.GetCustomAttribute<PropertyAttribute>();
-                                string name = attr.Name;
-                                string key = field.Name;
-                                string type = attr.Type;
-                                pp.Add(new ProperyCModule(key, type, name));
-                            }
-                        }
-                        modules.Add(new CModule() {
-                            Code = attribute.CModule,
-                            Name = attribute.Name,
-                            FullName = item.FullName,
-                            Properties = pp
-                        });
-                    }
-                    else
-                    {
-                        var getmetho = item.GetMethods();
-                        var method = getmetho
-                            .Where(o => o.Module.Name == "BasePublisherMVC.dll")
-                            .Select(o => o.Name).ToList();
-                        if (method != null)
-                        {
-                            foreach (var m in method)
-                            {
-                                attribute.ActionName.Add(m.ToLower());
-                            }
-                        }
-                        cusMenus.Add(attribute);
-                    }
-                }
-                CacheExtends.SetObjectFromCache(CacheExtends.DefaultIsControl, 360 * 24 * 60, modules);
-                CacheExtends.SetObjectFromCache(CacheExtends.DefaultClientController, 360 * 24 * 60, cusMenus);
             }
         }
     }

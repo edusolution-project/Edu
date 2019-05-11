@@ -14136,7 +14136,7 @@ h2.title {
 .dropdown-menu a:hover,
 .dropdown-menu a:focus,
 .dropdown-menu a:active {
-  box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(156, 39, 176, 0.4);
+  /*box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(156, 39, 176, 0.4);*/
   background-color: #f44336;
   color: #FFFFFF;
 }
@@ -14478,7 +14478,7 @@ fieldset[disabled] .form-group.is-focused .togglebutton label {
   z-index: 2;
   width: 260px;
   background: #fff;
-  box-shadow: 0 16px 38px -12px rgba(0, 0, 0, 0.56), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);
+  /*box-shadow: 0 16px 38px -12px rgba(0, 0, 0, 0.56), 0 4px 25px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 0, 0, 0.2);*/
 }
 
 .sidebar .caret {
@@ -14774,43 +14774,43 @@ fieldset[disabled] .form-group.is-focused .togglebutton label {
 
 .sidebar[data-color="purple"] li.active>a {
   background-color: #f44336;
-  box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(156, 39, 176, 0.4);
+  /*box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(156, 39, 176, 0.4);*/
 }
 
 .sidebar[data-color="azure"] li.active>a {
   background-color: #00bcd4;
-  box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(0, 188, 212, 0.4);
+  /*box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(0, 188, 212, 0.4);*/
 }
 
 .sidebar[data-color="green"] li.active>a {
   background-color: #4caf50;
-  box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(76, 175, 80, 0.4);
+  /*box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(76, 175, 80, 0.4);*/
 }
 
 .sidebar[data-color="orange"] li.active>a {
   background-color: #ff9800;
-  box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(255, 152, 0, 0.4);
+  /*box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(255, 152, 0, 0.4);*/
 }
 
 .sidebar[data-color="danger"] li.active>a {
   background-color: #f44336;
-  box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(244, 67, 54, 0.4);
+  /*box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(244, 67, 54, 0.4);*/
 }
 
 .sidebar[data-color="rose"] li.active>a {
   background-color: #e91e63;
-  box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(233, 30, 99, 0.4);
+  /*box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(233, 30, 99, 0.4);*/
 }
 
 .sidebar[data-color="white"] li.active>a {
   background-color: #fff;
-  box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(255, 255, 255, 0.4);
+  /*box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(255, 255, 255, 0.4);*/
 }
 
 .sidebar[data-color="white"] .nav .nav-item.active>a:not([data-toggle="collapse"]) {
   color: #3C4858;
   opacity: 1;
-  box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(60, 72, 88, 0.4);
+  /*box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(60, 72, 88, 0.4);*/
 }
 
 .sidebar[data-color="white"] .nav .nav-item.active>a:not([data-toggle="collapse"]) i {
@@ -14884,7 +14884,7 @@ fieldset[disabled] .form-group.is-focused .togglebutton label {
 
 .main-panel>.content {
   margin-top: 70px;
-  padding: 30px 15px;
+  padding:0 5px;
   min-height: calc(100vh - 123px);
 }
 

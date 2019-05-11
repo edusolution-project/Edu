@@ -16,20 +16,33 @@ namespace BasePublisherMVC.AdminControllers
         CModule = "ModGrades",
         Name = "MO : Quản lý cấp độ",
         Order = 40,
+        Icon = "grade",
         IShow = true,
         Type = MenuType.Mod
     )]
     public class ModGradesController : AdminController
     {
         private readonly ModGradeService _service;
-        public ModGradesController(ModGradeService service)
+        private readonly CPUserService _userService;
+        public ModGradesController(ModGradeService service,CPUserService userService)
         {
             _service = service;
+            _userService = userService;
         }
         public ActionResult Index(DefaultModel model)
         {
-            var data = _service.CreateQuery().FindList(!string.IsNullOrEmpty(model.SearchText), o => o.Name.Contains(model.SearchText) || o.Code.Contains(model.SearchText))
+            DateTime startDate = model.StartDate > DateTime.MinValue ? new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0) : DateTime.MinValue;
+            DateTime endDate = model.EndDate > DateTime.MinValue ? new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59) : DateTime.MinValue;
+           
+            var data = _service
+                .Find(!string.IsNullOrEmpty(model.SearchText), o => (o.Name.Contains(model.SearchText) || o.Code.Contains(model.SearchText)))
+                .Where(o=>o.CreateUser == _currentUser.ID)
                 .Where(!string.IsNullOrEmpty(model.ID), o => o.ID == model.ID)
+                .Where(startDate > DateTime.MinValue, o => o.Created >= startDate)
+                .Where(endDate > DateTime.MinValue, o => o.Created <= endDate)
+                .Where(!string.IsNullOrEmpty(model.ID), o => o.ID == model.ID)
+                .Where(string.IsNullOrEmpty(model.Record), o => (o.ParrentID.Equals("0") ||string.IsNullOrEmpty(o.ParrentID)))
+                .Where(!string.IsNullOrEmpty(model.Record), o => o.ParrentID == model.Record)
                 .OrderByDescending(o => o.ID)
                 .ToList();
 
@@ -41,6 +54,8 @@ namespace BasePublisherMVC.AdminControllers
         public IActionResult Create(DefaultModel model)
         {
             ViewBag.Title = "Thêm mới";
+            string userID = _currentUser.ID;
+            ViewBag.Root = _service.Find(true, o => o.Activity == true && (o.ParrentID.Equals("0") || string.IsNullOrEmpty(o.ParrentID))).ToList();
             if (!string.IsNullOrEmpty(model.ID))
             {
                 return RedirectToAction("Edit", new { model.ID });
@@ -52,6 +67,7 @@ namespace BasePublisherMVC.AdminControllers
         public async Task<IActionResult> Create(DefaultModel model, ModGradeEntity item)
         {
             ViewBag.Title = "Thêm mới";
+            ViewBag.Root = _service.Find(true, o => o.Activity == true && (o.ParrentID.Equals("0")||string.IsNullOrEmpty(o.ParrentID))).ToList();
             if (!string.IsNullOrEmpty(model.ID) || !string.IsNullOrEmpty(item.ID))
             {
                 return RedirectToAction("Edit", new { model.ID });
@@ -66,7 +82,11 @@ namespace BasePublisherMVC.AdminControllers
                 else
                 {
                     item.Code = UnicodeName.ConvertUnicodeToCode(item.Name, "-", true);
-
+                    item.Created = DateTime.Now;
+                    item.Updated = DateTime.Now;
+                    item.IsAdmin = true;
+                    item.Activity = true;
+                    item.CreateUser = _currentUser.ID;
                     if (_service.GetItemByCode(item.Code) == null)
                     {
                         await _service.AddAsync(item);
@@ -153,7 +173,17 @@ namespace BasePublisherMVC.AdminControllers
                 {
                     string ID = arr[i];
                     var item = _service.GetByID(ID);
-                    if (item != null) { await _service.RemoveAsync(item.ID); delete++; }
+                    if (item != null)
+                    {
+                        var listChild = _service.Find(true,o => o.ParrentID == item.ID).ToList();
+                        _service.Remove(item.ID);
+                        if (listChild != null)
+                        {
+                            await _service.RemveRangeAsync(listChild.Select(o => o.ID).ToList());
+                        }
+                        delete++;
+                    }
+
                 }
                 if (delete > 0)
                 {

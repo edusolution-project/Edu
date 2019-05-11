@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace BasePublisherModels.Database
 {
-    public class ModBookEntity : EntityBase
+    public class ModCourseEntity : EntityBase
     {
         public string Name { get; set; }
         public string Code { get; set; }
@@ -17,13 +17,13 @@ namespace BasePublisherModels.Database
         public bool Activity { get; set; }
         public int Order { get; set; }
     }
-    public class ModBookService : ServiceBase<ModBookEntity>
+    public class ModCourseService : ServiceBase<ModCourseEntity>
     {
-        public ModBookService(IConfiguration config) : base(config, "ModBooks")
+        public ModCourseService(IConfiguration config) : base(config, "ModCourses")
         {
 
         }
-        public ModBookService(IConfiguration config, string tableName) : base(config, tableName)
+        public ModCourseService(IConfiguration config, string tableName) : base(config, tableName)
         {
 
         }

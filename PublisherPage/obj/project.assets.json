@@ -14098,11 +14098,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\PublisherPage.csproj",
+      "projectUniqueName": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\PublisherPage.csproj",
       "projectName": "PublisherPage",
-      "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\PublisherPage.csproj",
+      "projectPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\PublisherPage.csproj",
       "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-      "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\obj\\",
+      "outputPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -14120,11 +14120,11 @@
       "frameworks": {
         "netcoreapp2.2": {
           "projectReferences": {
-            "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherModels\\BasePublisherModels.csproj": {
-              "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherModels\\BasePublisherModels.csproj"
+            "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherModels\\BasePublisherModels.csproj": {
+              "projectPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherModels\\BasePublisherModels.csproj"
             },
-            "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherMVC\\BasePublisherMVC.csproj": {
-              "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherMVC\\BasePublisherMVC.csproj"
+            "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherMVC\\BasePublisherMVC.csproj": {
+              "projectPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherMVC\\BasePublisherMVC.csproj"
             }
           }
         }

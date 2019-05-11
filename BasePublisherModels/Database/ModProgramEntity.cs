@@ -1,5 +1,6 @@
 ﻿using CoreMongoDB.Repositories;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using System;
 
 namespace BasePublisherModels.Database
@@ -24,6 +25,10 @@ namespace BasePublisherModels.Database
         public ModProgramService(IConfiguration config, string tableName) : base(config, tableName)
         {
 
+        }
+        public object GetItemByCode(string code)
+        {
+            return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();
         }
     }
 }

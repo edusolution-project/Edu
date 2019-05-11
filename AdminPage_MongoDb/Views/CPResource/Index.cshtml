@@ -5,7 +5,6 @@
     ViewData["Title"] = "Quản lý tài nguyên";
     Layout = "~/Views/Shared/_LayoutDefaults.cshtml";
     var data = ViewBag.Data as List<CPResourceEntity>;
-
     var model = ViewBag.Model as DefaultModel;
     string SearchText = string.IsNullOrEmpty(model.SearchText) ? string.Empty : model.SearchText;
 }

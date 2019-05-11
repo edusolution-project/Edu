@@ -8833,11 +8833,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj",
+      "projectUniqueName": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj",
       "projectName": "BaseMVC",
-      "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj",
+      "projectPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj",
       "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-      "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\obj\\",
+      "outputPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -8855,11 +8855,11 @@
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj": {
-              "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj"
+            "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj": {
+              "projectPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj"
             },
-            "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj": {
-              "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj"
+            "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj": {
+              "projectPath": "D:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj"
             }
           }
         }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 
 namespace BasePublisherModels.Database
 {
@@ -9,6 +10,7 @@ namespace BasePublisherModels.Database
     {
         public string Name { get; set; }
         public string Code { get; set; }
+        public string ParrentID { get; set; }
         public string CreateUser { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
