@@ -19,6 +19,7 @@ function checkall(t, cmd) {
         }
     }
 }
+
 function checkAllThat(t, cmd) {
     var check = t.checked;
     var listCheckbox = document.querySelectorAll("input[tel=" + cmd + "]");
@@ -44,35 +45,37 @@ function AddPermisstion() {
     frm.submit();
 }
 
-function excuteOnly(id, cmd) {
+function executeOnly(id, cmd) {
     var frm = window.myform;
     var ctrl = frm.querySelector("#ctrl");
-
     var arrID = document.getElementById("ArrID");
-
     arrID.value = id;
-
     frm.action = "/" + ctrl.value + "/" + cmd
     frm.method = "POST";
     frm.submit();
 }
 
-function excute(action) {
+function execute(action, param) {
     var arraction = ["active", "nonactive", "delete", "export"];
     var frm = window.myform;
     var ctrl = frm.querySelector("#ctrl");
     if (arraction.indexOf(action) > -1) {
-        var listcheck = frm.querySelectorAll("input[name='cid']");
-        var arrID = document.getElementById("ArrID");
-        var count = listcheck.length;
-        var cmdParam = "";
-        for (var i = 0; i < count; i++) {
-            var item = listcheck[i];
-            if (item.checked) {
-                cmdParam += (cmdParam === '' ? '' : ',') + item.value;
+        if (param) {
+            var arrID = document.getElementById("ArrID");
+            arrID.value = param;
+        } else {
+            var listcheck = frm.querySelectorAll("input[name='cid']");
+            var arrID = document.getElementById("ArrID");
+            var count = listcheck.length;
+            var cmdParam = "";
+            for (var i = 0; i < count; i++) {
+                var item = listcheck[i];
+                if (item.checked) {
+                    cmdParam += (cmdParam === '' ? '' : ',') + item.value;
+                }
             }
+            arrID.value = cmdParam;
         }
-        arrID.value = cmdParam;
     }
     frm.action = "/" + ctrl.value + "/" + action;
     frm.method = "post";
@@ -81,12 +84,13 @@ function excute(action) {
 
 function redirect(action, name, value) {
     var href = window.location.pathname.split("/");
-    debugger;
     var control = document.getElementById("ctrl").value;
+
     var search = "";
+    debugger;
     if (action != "create" && action != "edit" && action != "import") {
         var source = window.location;
-        search = groupSearch(source.search, name, value);
+        //search = groupSearch(source.search, name, value);
         if (typeof (window.Search) != 'undefined') {
             for (var i = 0; i < window.Search.length; i++) {
                 if (i === window.Search.length - 1) break;
@@ -94,6 +98,7 @@ function redirect(action, name, value) {
                 if (obj != null) {
                     var objValue = obj.value;
                     if (!CheckSearchDefault(objValue, window.Search[i + 1])) {
+                        
                         search = groupSearch(search, window.Search[i + 1], objValue);
                     }
                 }
@@ -113,6 +118,7 @@ function groupSearch(search, name, value) {
     }
     else {
         var arr = search.match(regex);
+        debugger;
         console.log(arr);
         var count = arr == null ? 0 : arr.length;
         var str = '';
@@ -153,7 +159,7 @@ function CheckSearchDefault(value, name) {
 var ControlPage = {
     createCommand() {
         const arrAction = ["create", "delete", "active", "nonactive", "export", "import", "clear"]
-        const arrFn = ["redirect", "excute", "excute", "excute", "excute", "redirect", "excute"];
+        const arrFn = ["redirect", "execute", "execute", "execute", "execute", "redirect", "execute"];
         const arrTitle = ["Thêm mới", "Xóa", "Hoạt động", "Dừng hoạt động", "Xuất excel", "Excel to DB", "Xóa cache"]
         const arrClass = [
             "btn btn-sm btn-success",
