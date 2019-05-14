@@ -1,6 +1,6 @@
 ﻿@using BasePublisherModels.Database
 @{
-    ViewData["Title"] = "Tạo cấp độ mới";
+    ViewData["Title"] = "Tạo mới danh mục môn học";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var data = ViewBag.Root as List<ModGradeEntity>;
 }
@@ -17,7 +17,7 @@
         <form name="myform" asp-action="Create" method="post" enctype="application/x-www-form-urlencoded">
             @Html.AntiForgeryToken()
             <input type="hidden" id="ArrID" name="ArrID" value="" />
-            <input type="hidden" id="ctrl" value="ModGrades" />
+            <input type="hidden" id="ctrl" value="ModSubjects" />
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
@@ -28,32 +28,15 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label class="bmd-label-floating">Code :</label>
-                        <input type="text" name="Code" class="form-control" autocomplete="off" disabled="disabled" value="Tự động">
+                        <input type="text" name="Code" class="form-control" autocomplete="off" disabled="disabled">
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <label class=""> Cấp độ trên : </label>
-                    <select class="form-control" name="ParentID">
-                        <option value="0">Root</option>
-                        @{
-                            if (data != null)
-                            {
-                                int count = data.Count;
-                                for (int i = 0; i < count; i++)
-                                {
-                                    var item = data[i];
-                                    <option value="@item.ID">@item.Name</option>
-                                }
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <input type="hidden" name="IsActive" value="false">
+                    <input type="hidden" name="IsActive" value="true">
                     <div class="form-group">
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" value="false">
+                                <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" checked="checked">
                                 <span class="form-check-sign" style="white-space:nowrap; min-width:150px;">
                                     <span class="text-left" style="position:relative;top:-5px;display:inline-block;"> Hoạt động :</span>  <span class="check"></span>
                                 </span>

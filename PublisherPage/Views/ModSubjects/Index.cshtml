@@ -1,10 +1,10 @@
 ﻿@using BasePublisherMVC.Models;
 @using BasePublisherMVC.Globals;
-@using BasePublisherMVC.ViewModel;
+@using BasePublisherModels.Database;
 @{
-    ViewData["Title"] = "Quản lý cấp độ";
+    ViewData["Title"] = "Quản lý môn học";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var data = ViewBag.Data as List<ModGradeViewModel>
+    var data = ViewBag.Data as List<ModSubjectEntity>
     ;
 
     var model = ViewBag.Model as DefaultModel;
@@ -24,7 +24,7 @@
             <form name="myform" method="post" enctype="application/x-www-form-urlencoded">
                 @Html.AntiForgeryToken()
                 <input type="hidden" id="ArrID" name="ArrID" value="" />
-                <input type="hidden" id="ctrl" value="ModGrades" />
+                <input type="hidden" id="ctrl" value="ModSubjects" />
 
                 <script type="text/javascript">
                     var Search = [
@@ -37,7 +37,8 @@
                         "1", "LangID",
                         "20", "PageSize"
                     ];
-                </script>
+
+/**/</script>
                 <div class="card-header card-header-image text-right">
                     <div class="container-fluid">
                         <div class="row">
@@ -66,8 +67,6 @@
                                     </th>
                                     <th>Tên</th>
                                     <th>Mã</th>
-                                    <th>Cấp độ trên</th>
-                                    <th>Cấp độ dưới</th>
                                     <th>Ngày tạo</th>
                                     <th>Ngày cập nhật</th>
                                     <th>Trạng thái</th>
@@ -93,31 +92,7 @@
                                                     </div>
                                                 </td>
                                                 <td align="center"><a class="text-info" href="@Url.Action("edit", new { ID=item.ID })">@item.Name</a></td>
-                                                <td align="center"><a class="text-info" href="@Url.Action("edit", new { ID=item.ID })">@item.Code</a></td>
-                                                <td align="center">
-                                                    @{
-                                                        if (string.IsNullOrEmpty(item.ParentID) || item.ParentID == "0" || item.Parent == null)
-                                                        {
-                                                            <span style="color:#CCC">Root</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <a class="text-info" href="@Url.Action("index", new {Record= item.Parent.ID})">@item.Parent.Name</a>
-                                                        }
-                                                    }
-                                                </td>
-                                                <td align="center">
-                                                    @{
-                                                        if (item.SubGradeCount > 0)
-                                                        {
-                                                            <a class="text-info" href="@Url.Action("index", new {Record = item.ID})">@item.SubGradeCount</a>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span style="color:#CCC">0</span>
-                                                        }
-                                                    }
-                                                </td>
+                                                <td align="center"><a class="text-info" href="@Url.Action("edit",new { ID=item.ID })">@item.Code</a></td>
                                                 <td align="center">
                                                     @string.Format("{0:dd-M-yyyy hh:mm:ss}", item.Created)
                                                 </td>

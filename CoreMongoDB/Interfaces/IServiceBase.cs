@@ -21,7 +21,7 @@ namespace CoreMongoDB.Interfaces
         void Remove(string ID);
         Task RemoveAsync(string ID);
         void RemoveRange(IEnumerable<string> listItem);
-        Task RemveRangeAsync(IEnumerable<string> listItem);
+        Task RemoveRangeAsync(IEnumerable<string> listItem);
         IMongoCollection<T> CreateQuery();
     }
 }

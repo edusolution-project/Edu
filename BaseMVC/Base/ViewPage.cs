@@ -103,7 +103,7 @@ namespace BaseMVC.MVC
 
                 var template = _templateService.GetByID(_pageEntity.TemplateID);
 
-                var listDetails = _templateDetailsService.CreateQuery().Find(o => o.TemplateID == template.ID && o.IsDynamic == true && o.ParrentID == nameLayout).ToList();
+                var listDetails = _templateDetailsService.CreateQuery().Find(o => o.TemplateID == template.ID && o.IsDynamic == true && o.ParentID == nameLayout).ToList();
                 int limit = listDetails != null ? listDetails.Count : 0;
                 var _html = new HtmlContentBuilder();
                 for (int i = 0; i < limit; i++)

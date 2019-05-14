@@ -42,7 +42,7 @@ namespace BasePublisherMVC.Globals
             Random random = new Random();
             int id = random.Next(0, _color.Count);
             var colorReturn = _color[id].ToString();
-            _color.Remove(colorReturn);
+            //_color.Remove(colorReturn);
             CacheExtends.SetObjectFromCache("colorGet", 240,_color);
             return colorReturn;
         }

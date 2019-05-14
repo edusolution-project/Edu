@@ -1,13 +1,14 @@
 ﻿@using BasePublisherMVC.Models;
 @using BasePublisherMVC.Globals;
-@using BasePublisherMVC.ViewModel;
+@using BasePublisherModels.Database;
 @{
-    ViewData["Title"] = "Quản lý cấp độ";
+    ViewData["Title"] = "Quản lý giáo trình";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var data = ViewBag.Data as List<ModGradeViewModel>
-    ;
+    var grades = ViewBag.GradeData as List<ModGradeEntity>;
+    var subjects = ViewBag.SubjectData as List<ModSubjectEntity>;
+    var data = ViewBag.Data as List<ModProgramEntity>;
 
-    var model = ViewBag.Model as DefaultModel;
+    var model = ViewBag.Model as ModProgramModel;
     string SearchText = string.IsNullOrEmpty(model.SearchText) ? string.Empty : model.SearchText;
 }
 <style>
@@ -24,24 +25,67 @@
             <form name="myform" method="post" enctype="application/x-www-form-urlencoded">
                 @Html.AntiForgeryToken()
                 <input type="hidden" id="ArrID" name="ArrID" value="" />
-                <input type="hidden" id="ctrl" value="ModGrades" />
+                <input type="hidden" id="ctrl" value="ModPrograms" />
 
                 <script type="text/javascript">
                     var Search = [
                         "filter_Search", "SearchText",
-                        "filter_StartDate", "StartDate",
-                        "filter_EndDate", "EndDate",
+                        "filter_Subject", "Subject",
+                        "filter_Grade", "Grade",
                     ];
                     var SearchDefault = [
                         "1", "PageIndex",
                         "1", "LangID",
-                        "20", "PageSize"
+                        "20", "PageSize",
+                        "0", "Grade",
+                        "0", "Subject"
                     ];
                 </script>
                 <div class="card-header card-header-image text-right">
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-sm-12 col-md-6 col-lg-5">
+                                <div class="row">
+                                    <select class="form-control" name="Grade" id="filter_Grade" style="width: 45%;margin-right: 3%" onchange="redirect('Index')">
+                                        <option value="0">Cấp độ</option>
+                                        @{
+                                            if (grades != null)
+                                            {
+                                                int count = grades.Count;
+                                                for (int i = 0; i < count; i++)
+                                                {
+                                                    var item = grades[i];
+                                                    <option value="@item.ID">@item.Name</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+
+                                    <select class="form-control" name="Subject" id="filter_Subject" style="width: 45%;" onchange="redirect('Index')">
+                                        <option value="0">Môn học</option>
+                                        @{
+                                            if (subjects != null)
+                                            {
+                                                int count = subjects.Count;
+                                                for (int i = 0; i < count; i++)
+                                                {
+                                                    var item = subjects[i];
+                                                    <option value="@item.ID">@item.Name</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                <script>
+                                    @if (!String.IsNullOrEmpty(model.Grade))
+                                    {
+                                        @Html.Raw("$('#filter_Grade').val('" + model.Grade +  "');");
+                                    }
+                                    @if (!String.IsNullOrEmpty(model.Subject))
+                                    {
+                                        @Html.Raw("$('#filter_Subject').val('" + model.Subject +  "');");
+                                    }
+                                </script>
+                                </div>
                             </div>
                             <div class="col-sm-12 col-md-6 col-lg-7">
                                 @DynamicViews.GetCommand("create| Tạo mới,active|Kích hoạt,nonactive|Vô hiệu,export| Xuất ,delete|Xóa,clear|'Bỏ lọc'")
@@ -66,10 +110,9 @@
                                     </th>
                                     <th>Tên</th>
                                     <th>Mã</th>
-                                    <th>Cấp độ trên</th>
-                                    <th>Cấp độ dưới</th>
+                                    <th>Mô tả</th>
                                     <th>Ngày tạo</th>
-                                    <th>Ngày cập nhật</th>
+                                    <th>Cập nhật</th>
                                     <th>Trạng thái</th>
                                 </tr>
                             </thead>
@@ -92,32 +135,9 @@
                                                         </label>
                                                     </div>
                                                 </td>
-                                                <td align="center"><a class="text-info" href="@Url.Action("edit", new { ID=item.ID })">@item.Name</a></td>
-                                                <td align="center"><a class="text-info" href="@Url.Action("edit", new { ID=item.ID })">@item.Code</a></td>
-                                                <td align="center">
-                                                    @{
-                                                        if (string.IsNullOrEmpty(item.ParentID) || item.ParentID == "0" || item.Parent == null)
-                                                        {
-                                                            <span style="color:#CCC">Root</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <a class="text-info" href="@Url.Action("index", new {Record= item.Parent.ID})">@item.Parent.Name</a>
-                                                        }
-                                                    }
-                                                </td>
-                                                <td align="center">
-                                                    @{
-                                                        if (item.SubGradeCount > 0)
-                                                        {
-                                                            <a class="text-info" href="@Url.Action("index", new {Record = item.ID})">@item.SubGradeCount</a>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span style="color:#CCC">0</span>
-                                                        }
-                                                    }
-                                                </td>
+                                                <td align="center"><a class="text-info" href="@Url.Action("edit", new { id = item.ID })">@item.Name</a></td>
+                                                <td align="center"><a class="text-info" href="@Url.Action("edit",new { id =item.ID })">@item.Code</a></td>
+                                                <td align="center">@item.Description</td>
                                                 <td align="center">
                                                     @string.Format("{0:dd-M-yyyy hh:mm:ss}", item.Created)
                                                 </td>

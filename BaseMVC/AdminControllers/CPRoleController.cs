@@ -161,7 +161,7 @@ namespace BaseMVC.AdminControllers
                     {
                         var listAccess = _accessService.GetItemByRoleID(item.ID);
                         await _service.RemoveAsync(item.ID);
-                        await _accessService.RemveRangeAsync(listAccess.Select(o=>o.ID).ToList());
+                        await _accessService.RemoveRangeAsync(listAccess.Select(o=>o.ID).ToList());
                         
                         delete++;
                     }

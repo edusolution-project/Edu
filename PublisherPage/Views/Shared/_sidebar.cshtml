@@ -1,7 +1,7 @@
 ﻿@using BasePublisherMVC.Globals;
-@{ 
+@{
     var data = new WebMenu();
-    var menu = data.GetAdminMenu.Where(o=>o.Type == MenuType.Mod && o.IShow == true).OrderByDescending(o=>o.Order).ToList();
+    var menu = data.GetAdminMenu.Where(o => o.Type == MenuType.Mod && o.IShow == true).OrderBy(o => o.Order).ToList();
     string _action = @Url.Action().Split('/')[1] == null || @Url.Action().Split('/')[1] == "" ? "active" : string.Empty;
 }
 <div class="sidebar" data-color="danger" data-background-color="white">
@@ -11,7 +11,7 @@
         </a>
     </div>
     <div>
-        
+
     </div>
     <div class="sidebar-wrapper">
         <ul class="nav">
@@ -28,12 +28,12 @@
                     if (!string.IsNullOrEmpty(Url.Action("Index", item.CModule)))
                     {
                         string _active = Url.Action().Split('/')[1] == item.CModule ? "active" : string.Empty;
-                    <li class="nav-item @_active">
-                        <a class="nav-link" href="@Url.Action("Index", item.CModule)">
-                            <i class="material-icons">@item.Icon</i>
-                            <p>@item.Name</p>
-                        </a>
-                    </li>
+                <li class="nav-item @_active">
+                    <a class="nav-link" href="@Url.Action("Index", item.CModule)">
+                        <i class="material-icons">@item.Icon</i>
+                        <p>@item.Name</p>
+                    </a>
+                </li>
                     }
                 }
             }

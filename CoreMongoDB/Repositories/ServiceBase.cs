@@ -14,9 +14,9 @@ namespace CoreMongoDB.Repositories
     public class ServiceBase<T> : DbContextHelper<T>, IServiceBase<T> where T : EntityBase, new()
     {
         private readonly string _tableName;
-        public const string defaultConn = "DefaultConn";
+        public const string defaultConn = "VES";
         private readonly IDbQueryCache _dbQueryCache;
-        public ServiceBase(IConfiguration config) : base(config,defaultConn)
+        public ServiceBase(IConfiguration config) : base(config, defaultConn)
         {
             _tableName = typeof(T).Name.ToLower().Replace("entity", string.Empty).Replace("model", string.Empty);
             _dbQueryCache = new DbQueryCache();
@@ -27,7 +27,7 @@ namespace CoreMongoDB.Repositories
             _tableName = tableName;
             _dbQueryCache = new DbQueryCache();
         }
-        public ServiceBase(IConfiguration config, string tableName,string connStr = defaultConn) : base(config, tableName, connStr)
+        public ServiceBase(IConfiguration config, string tableName, string connStr = defaultConn) : base(config, tableName, connStr)
         {
             _tableName = tableName;
             _dbQueryCache = new DbQueryCache();
@@ -147,7 +147,7 @@ namespace CoreMongoDB.Repositories
             Collection.DeleteMany(o => listItem.Contains(o.ID));
         }
 
-        public async Task RemveRangeAsync(IEnumerable<string> listItem)
+        public async Task RemoveRangeAsync(IEnumerable<string> listItem)
         {
             await Collection.DeleteManyAsync(o => listItem.Contains(o.ID));
         }
@@ -160,9 +160,11 @@ namespace CoreMongoDB.Repositories
             }
             else
             {
-                return Collection.Find(o => !string.IsNullOrEmpty(o.ID))?.ToEnumerable();
+                //return Collection.Find(o => !string.IsNullOrEmpty(o.ID))?.ToEnumerable();
+                return Collection.AsQueryable().ToEnumerable();
             }
         }
+
         public IEnumerable<T> FindIn(bool check, Expression<Func<T, bool>> filter)
         {
             if (check)
@@ -174,6 +176,7 @@ namespace CoreMongoDB.Repositories
                 return Collection.AsQueryable()?.ToList();
             }
         }
+
         public async Task<IEnumerable<T>> WhereAsync(bool check, Expression<Func<T, bool>> filter)
         {
             if (check)
@@ -187,6 +190,7 @@ namespace CoreMongoDB.Repositories
                 return data?.ToEnumerable();
             }
         }
+
         public async Task<IEnumerable<T>> FindInAsync(bool check, Expression<Func<T, bool>> filter)
         {
             if (check)
