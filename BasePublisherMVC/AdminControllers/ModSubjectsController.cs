@@ -23,12 +23,12 @@ namespace BasePublisherMVC.AdminControllers
     public class ModSubjectsController : AdminController
     {
         private readonly ModSubjectService _service;
-        
+
         public ModSubjectsController(ModSubjectService service)
         {
             _service = service;
         }
-        
+
         public ActionResult Index(DefaultModel model)
         {
             var data = _service
@@ -45,7 +45,7 @@ namespace BasePublisherMVC.AdminControllers
             ViewBag.Model = model;
             return View();
         }
-        
+
         public IActionResult Create(DefaultModel model)
         {
             ViewBag.Title = "Thêm mới";
@@ -55,7 +55,7 @@ namespace BasePublisherMVC.AdminControllers
             }
             return View();
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DefaultModel model, ModSubjectEntity item)
@@ -96,7 +96,7 @@ namespace BasePublisherMVC.AdminControllers
             }
             return View();
         }
-       
+
         public IActionResult Edit(string ID)
         {
             DefaultModel model = new DefaultModel
@@ -121,7 +121,7 @@ namespace BasePublisherMVC.AdminControllers
             ViewBag.Model = model;
             return View();
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(DefaultModel model, ModSubjectEntity item)
@@ -148,7 +148,7 @@ namespace BasePublisherMVC.AdminControllers
             ViewBag.Model = model;
             return RedirectToAction("index");
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> Delete(DefaultModel model)
         {
@@ -198,7 +198,7 @@ namespace BasePublisherMVC.AdminControllers
             DataTable dt = data.ToDataTable();
 
             Response.Clear();
-            Response.Headers["content-disposition"] = "attachment;filename=Catalog.xls";
+            Response.Headers["content-disposition"] = "attachment;filename=DanhMucMonHoc.xls";
             Response.ContentType = "application/excel";
 
             string html = Query.ConvertDataTableToHTML(dt);
@@ -206,7 +206,7 @@ namespace BasePublisherMVC.AdminControllers
 
             Response.WriteAsync(html);
         }
-        
+
         [HttpGet]
         public void Export()
         {
@@ -226,7 +226,7 @@ namespace BasePublisherMVC.AdminControllers
 
             Response.WriteAsync(html);
         }
-       
+
         [HttpPost]
         public async Task<IActionResult> Active(DefaultModel model)
         {
@@ -244,7 +244,7 @@ namespace BasePublisherMVC.AdminControllers
             }
             return RedirectToAction("Index");
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> NonActive(DefaultModel model)
         {

@@ -246,7 +246,7 @@ namespace BasePublisherMVC.AdminControllers
             DataTable dt = data.ToDataTable();
 
             Response.Clear();
-            Response.Headers["content-disposition"] = "attachment;filename=Catalog.xls";
+            Response.Headers["content-disposition"] = "attachment;filename=DanhMucGiaoTrinh.xls";
             Response.ContentType = "application/excel";
 
             string html = Query.ConvertDataTableToHTML(dt);
