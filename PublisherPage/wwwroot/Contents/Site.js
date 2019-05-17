@@ -139,34 +139,16 @@ function redirectsub(action, name, value) {
     }
     //debugger;
     var url = "/" + control + "/" + action + search;
-    debugger;
+    //debugger;
     window.location.href = url;
 }
 
-function editchap() {
+function editchap(id) {
     var frm = window.myform;
     var ctrl = frm.querySelector("#chapctrl");
-
-    var search = "";
-    if (typeof (window.Search) != 'undefined') {
-        console.log(window.Search);
-        for (var i = 0; i < window.Search.length; i++) {
-            if (i === window.Search.length - 1) break;
-            var obj = document.getElementById(window.Search[i]);
-            if (obj != null) {
-                console.log(obj.value);
-                var objValue = obj.value;
-                if (!CheckSearchDefault(objValue, window.Search[i + 1])) {
-                    search = groupSearch(search, window.Search[i + 1], objValue);
-                }
-            }
-        }
-    }
-
+    var url = "/" + ctrl.value + "/edit/" + id;
     //debugger;
-    frm.action = "/" + ctrl.value + "/edit" + search;
-    frm.method = "post";
-    frm.submit();
+    window.location.href = url;
 }
 
 function createchap(courseid) {

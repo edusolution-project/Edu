@@ -153,11 +153,11 @@ namespace BasePublisherMVC.AdminControllers
             {
                 string ID = !string.IsNullOrEmpty(model.ID) ? model.ID : item.ID;
                 var _item = _service.GetByID(ID);
-                if (string.IsNullOrEmpty(item.Name))
+                if (!string.IsNullOrEmpty(item.Name))
                 {
                     _item.Name = item.Name;
-                    _item.Updated = DateTime.Now;
                 }
+                _item.Updated = DateTime.Now;
                 //TODO: tính toán xem có cần cập nhật lại code ko
                 _item.ParentID = item.ParentID;
                 _item.IsActive = item.IsActive;

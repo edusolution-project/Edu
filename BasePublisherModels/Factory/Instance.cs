@@ -28,6 +28,7 @@ namespace BasePublisherModels.Factory
 
             services.AddScoped<ModProgramService>();
             services.AddScoped<ModCourseService>();
+            services.AddScoped<ModChapterService>();
             services.AddScoped<ModSubjectService>();
             services.AddScoped<ModGradeService>();
             services.AddScoped<ModUnitService>();

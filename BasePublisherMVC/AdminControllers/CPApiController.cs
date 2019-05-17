@@ -588,7 +588,7 @@ namespace BasePublisherMVC.AdminControllers
                     var file = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files[0] : null;
                     if(file != null)
                     {
-                       await _fileProcess.Update(OldItem.OriginalFile, file);
+                       //await _fileProcess.Update(OldItem.OriginalFile, file);
                     }
                     await _lessionExtendService.AddAsync(item);
                     return new Response(200, "Success get all", item);
