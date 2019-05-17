@@ -11,7 +11,7 @@ namespace BaseMongoDB.Database
         public string CModule { get; set; }
         public string CMethod { get; set; }
         public string RoleID { get; set; }
-        public bool Activity { get; set; }
+        public bool IsActive { get; set; }
     }
     public class CPAccessService : ServiceBase<CPAccessEntity>
     {
@@ -27,7 +27,7 @@ namespace BaseMongoDB.Database
         {
             var data = GetItem(roleID, ctrlName, actName);
             if (data == null) return false;
-            else return data.Activity;
+            else return data.IsActive;
         }
         public CPAccessEntity GetItem(string roleID, string ctrlName, string actName)
         {
@@ -45,7 +45,7 @@ namespace BaseMongoDB.Database
                 for (int i = 0; i < count; i++)
                 {
                     var item = data[i];
-                    res.Add(item.CModule + "-" + item.CMethod, item.Activity);
+                    res.Add(item.CModule + "-" + item.CMethod, item.IsActive);
                 }
                 return res;
             }

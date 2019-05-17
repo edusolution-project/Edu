@@ -54,7 +54,7 @@ namespace BaseMVC.AdminControllers
             {
                 return RedirectToAction("Edit", new { model.ID });
             }
-            ViewBag.Root = _service.Find(true,o=>o.Activity == true && o.ParentID.Equals("0"))
+            ViewBag.Root = _service.Find(true,o=>o.IsActive == true && o.ParentID.Equals("0"))
                 .Where(_currentLang != null, o => o.LangID == _currentLang.ID).ToList();
             return View();
         }
@@ -81,7 +81,7 @@ namespace BaseMVC.AdminControllers
                 item.Code = UnicodeName.ConvertUnicodeToCode(item.Name, "-", true);
                 await _service.AddAsync(item);
             }
-            ViewBag.Root = _service.Find(true,o => o.ParentID.Equals("0") && o.Activity == true)
+            ViewBag.Root = _service.Find(true,o => o.ParentID.Equals("0") && o.IsActive == true)
                 .Where(_currentLang != null, o => o.LangID == _currentLang.ID).ToList();
             return View();
         }
@@ -105,7 +105,7 @@ namespace BaseMVC.AdminControllers
                 }
                 ViewBag.Data = item;
             }
-            ViewBag.Root = _service.CreateQuery().FindList(true,o => string.IsNullOrEmpty(o.ParentID) && o.Activity == true)
+            ViewBag.Root = _service.CreateQuery().FindList(true,o => string.IsNullOrEmpty(o.ParentID) && o.IsActive == true)
                 .Where(_currentLang != null, o => o.LangID == _currentLang.ID).ToList();
             ViewBag.Model = model;
             return View();
@@ -133,7 +133,7 @@ namespace BaseMVC.AdminControllers
 
                 ViewBag.Data = _service.GetByID(ID);
             }
-            ViewBag.Root = _service.CreateQuery().FindList(true,o => string.IsNullOrEmpty(o.ParentID) && o.Activity == true)
+            ViewBag.Root = _service.CreateQuery().FindList(true,o => string.IsNullOrEmpty(o.ParentID) && o.IsActive == true)
                 .Where(_currentLang != null, o => o.LangID == _currentLang.ID).ToList();
             ViewBag.Model = model;
             return RedirectToAction("index");
@@ -235,9 +235,9 @@ namespace BaseMVC.AdminControllers
             {
                 string ID = arr[i];
                 var item = _service.GetByID(ID);
-                if (item != null && !item.Activity)
+                if (item != null && !item.IsActive)
                 {
-                    item.Activity = true;
+                    item.IsActive = true;
                     await _service.AddAsync(item);
                 }
             }
@@ -253,9 +253,9 @@ namespace BaseMVC.AdminControllers
             {
                 string ID = arr[i];
                 var item = _service.GetByID(ID);
-                if (item != null && item.Activity)
+                if (item != null && item.IsActive)
                 {
-                    item.Activity = false;
+                    item.IsActive = false;
                     await _service.AddAsync(item);
                 }
             }

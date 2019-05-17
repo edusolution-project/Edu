@@ -99,7 +99,7 @@
                                                 <td align="center"><a class="text-info" href="@Url.Action("edit","ModBooks",new { id=item.ID })">@item.Name</a></td>
                                                 <td align="center">@item.Code</td>
                                                 <td align="center">
-                                                    @DynamicViews.GetActive(item.ID, item.Activity)
+                                                    @DynamicViews.GetActive(item.ID, item.IsActive)
                                                 </td>
                                             </tr>
                                         }

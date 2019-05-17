@@ -23,7 +23,7 @@ namespace BaseMongoDB.Database
         public string Title { get; set; }
         public string PageTitle { get; set; }
         public string Content { get; set; }
-        public bool Activity { get; set; }
+        public bool IsActive { get; set; }
         public int Order { get; set; }
         public string TemplateID { get; set; }
         public DateTime Created { get; set; }

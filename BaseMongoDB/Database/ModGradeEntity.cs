@@ -13,7 +13,7 @@ namespace BaseMongoDB.Database
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
         public bool IsAdmin { get; set; }
-        public bool Activity { get; set; }
+        public bool IsActive { get; set; }
         public int Order { get; set; }
     }
     public class ModGradeService : ServiceBase<ModGradeEntity>

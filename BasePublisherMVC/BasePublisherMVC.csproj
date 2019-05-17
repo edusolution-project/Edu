@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="AdminControllers\Mod2CoursesController.cs" />
+    <Compile Remove="AdminControllers\ModLessionsController.cs" />
     <Compile Remove="Base\ViewPage.cs" />
   </ItemGroup>
 

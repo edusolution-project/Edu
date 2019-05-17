@@ -1,6 +1,6 @@
-﻿using BaseMongoDB.Database;
-using BaseMVC.Globals;
-using BaseMVC.Models;
+﻿using BasePublisherModels.Database;
+using BasePublisherMVC.Globals;
+using BasePublisherMVC.Models;
 using CoreMongoDB.Repositories;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;
@@ -10,19 +10,19 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BaseMVC.AdminControllers
+namespace BasePublisherMVC.AdminControllers
 {
     [MenuControl(
-        CModule = "ModGrades",
-        Name = "MO : Quản lý cấp độ",
+        CModule = "ModLessions",
+        Name = "MO : Quản lý bài học",
         Order = 40,
-        IShow = true,
+        IShow = false,
         Type = MenuType.Mod
     )]
-    public class ModGradesController : AdminController
+    public class ModLessionsController : AdminController
     {
-        private readonly ModGradeService _service;
-        public ModGradesController(ModGradeService service)
+        private readonly ModLessonService _service;
+        public ModLessionsController(ModLessonService service)
         {
             _service = service;
         }
@@ -49,7 +49,7 @@ namespace BaseMVC.AdminControllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(DefaultModel model, ModGradeEntity item)
+        public async Task<IActionResult> Create(DefaultModel model, ModLessonEntity item)
         {
             ViewBag.Title = "Thêm mới";
             if (!string.IsNullOrEmpty(model.ID) || !string.IsNullOrEmpty(item.ID))
@@ -108,7 +108,7 @@ namespace BaseMVC.AdminControllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(DefaultModel model, ModGradeEntity item)
+        public async Task<IActionResult> Edit(DefaultModel model, ModLessonEntity item)
         {
             ViewBag.Title = "Chỉnh sửa";
             if (string.IsNullOrEmpty(model.ID) && string.IsNullOrEmpty(item.ID))
