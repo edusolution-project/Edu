@@ -52,7 +52,7 @@ namespace BasePublisherMVC.AdminControllers
                     var oldItem = _service.GetItem(model.ID, cname, aname);
                     if (oldItem != null)
                     {
-                        oldItem.Activity = isTrue;
+                        oldItem.IsActive = isTrue;
                         await _service.AddAsync(oldItem);
                     }
                     else
@@ -61,7 +61,7 @@ namespace BasePublisherMVC.AdminControllers
                         {
                             CModule = cname,
                             CMethod = aname,
-                            Activity = isTrue,
+                            IsActive = isTrue,
                             RoleID = model.ID
                         };
                         await _service.AddAsync(item);

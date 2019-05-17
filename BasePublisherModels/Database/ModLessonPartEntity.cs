@@ -7,15 +7,15 @@ namespace BasePublisherModels.Database
 {
     public class ModLessonPartEntity : EntityBase
     {
-        public string LessionID { get; set; }
-        public string Name { get; set; }
-        public bool IsAnswer { get; set; }
-        public string Media { get; set; }
-        public string CreateUser { get; set; }
+        public string ParentID { get; set; } // chính là lessonID
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public bool IsExample { get; set; } // laf bai tap thi co answer , 
+        public string Point { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
         public int Order { get; set; }
-        public string Code { get; internal set; }
+        
     }
     public class ModLessonPartService : ServiceBase<ModLessonPartEntity>
     {
@@ -26,10 +26,6 @@ namespace BasePublisherModels.Database
         public ModLessonPartService(IConfiguration config, string tableName) : base(config, tableName)
         {
 
-        }
-        public object GetItemByCode(string code)
-        {
-            return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();
         }
     }
 }

@@ -61,17 +61,17 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
-                        <input type="hidden" name="Activity" value="@data.Activity" />
+                        <input type="hidden" name="IsActive" value="@data.IsActive" />
                         <div class="form-check">
                             <label class="form-check-label">
                                 @{
-                                    if (data.Activity)
+                                    if (data.IsActive)
                                     {
-                                        <input class="form-check-input" type="checkbox" onclick="thatActive(this,'Activity')" checked/>
+                                        <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" checked/>
                                     }
                                     else
                                     {
-                                        <input class="form-check-input" type="checkbox" onclick="thatActive(this,'Activity')" />
+                                        <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" />
                                     }
                                 }
                                 <span class="form-check-sign">

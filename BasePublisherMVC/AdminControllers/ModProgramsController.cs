@@ -211,7 +211,7 @@ namespace BasePublisherMVC.AdminControllers
                     var item = _service.GetByID(ID);
                     if (item != null)
                     {
-                        _service.Remove(item.ID);
+                        await _service.RemoveAsync(item.ID);
                         delete++;
                     }
 

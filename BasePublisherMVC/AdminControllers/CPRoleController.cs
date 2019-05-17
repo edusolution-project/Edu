@@ -233,9 +233,9 @@ namespace BasePublisherMVC.AdminControllers
         //    {
         //        string ID = arr[i];
         //        var item = _service.GetByID(ID);
-        //        if (item != null && !item.Activity)
+        //        if (item != null && !item.IsActive)
         //        {
-        //            item.Activity = true;
+        //            item.IsActive = true;
         //            await _service.AddAsync(item);
         //        }
         //    }
@@ -250,9 +250,9 @@ namespace BasePublisherMVC.AdminControllers
         //    {
         //        string ID = arr[i];
         //        var item = _service.GetByID(ID);
-        //        if (item != null && item.Activity)
+        //        if (item != null && item.IsActive)
         //        {
-        //            item.Activity = false;
+        //            item.IsActive = false;
         //            await _service.AddAsync(item);
         //        }
         //    }

@@ -12,7 +12,7 @@ namespace BasePublisherModels.Database
         public string IP { get; set; }
         public string Email { get; set; }
         public string Token { get; set; }
-        public bool Activity { get; set; }
+        public bool IsActive { get; set; }
         public DateTime Created { get; set; }
     }
     public class CPLoginLogService : ServiceBase<CPLoginLogEntity>
@@ -59,7 +59,7 @@ namespace BasePublisherModels.Database
         }
         public string GetEmailFromDb(string token)
         {
-            var data = CreateQuery().Find(o => o.Activity == true && o.Token == token)?.SingleOrDefault();
+            var data = CreateQuery().Find(o => o.IsActive == true && o.Token == token)?.SingleOrDefault();
             return data == null ? string.Empty : data.Email;
         }
     }
