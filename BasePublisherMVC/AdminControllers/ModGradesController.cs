@@ -112,8 +112,6 @@ namespace BasePublisherMVC.AdminControllers
 
                 }
             }
-            ViewBag.Root = _service.GetRootItems();
-            return View();
         }
 
         public IActionResult Edit(string ID)

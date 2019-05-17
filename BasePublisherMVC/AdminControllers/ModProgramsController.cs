@@ -124,7 +124,6 @@ namespace BasePublisherMVC.AdminControllers
 
                 }
             }
-            return View();
         }
 
         public IActionResult Edit(string ID)
@@ -220,7 +219,7 @@ namespace BasePublisherMVC.AdminControllers
                             SetMessageWarning("Đang có khóa học thuộc giáo trình này, không xóa được");
                             return RedirectToAction("Index");
                         }
-                        _service.Remove(item.ID);
+                        await _service.RemoveAsync(item.ID);
                         delete++;
                     }
 

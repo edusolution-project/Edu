@@ -96,7 +96,6 @@ namespace BasePublisherMVC.AdminControllers
 
                 }
             }
-            return View();
         }
 
         public IActionResult Edit(string ID)

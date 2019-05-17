@@ -8,6 +8,7 @@ using BasePublisherModels.Database;
 using BasePublisherMVC.Models;
 using BasePublisherMVC.ViewModel;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 
 namespace BasePublisherMVC.AdminControllers
 {
@@ -37,46 +38,53 @@ namespace BasePublisherMVC.AdminControllers
 
         public ActionResult Index(ModCourseModel model)
         {
-            var programdata = _programService.Find(true, o => o.CreateUser == _currentUser.ID)
+            if (string.IsNullOrEmpty(model.ID)||model.ID.Equals("0")) {
+                var programdata = _programService.Find(true, o => o.CreateUser == _currentUser.ID)
                 .Where(!string.IsNullOrEmpty(model.Subject), o => o.Subjects.IndexOf(model.Subject) >= 0)
                 .Where(!string.IsNullOrEmpty(model.Grade), o => o.Grades.IndexOf(model.Grade) >= 0)
                 .OrderBy(o => o.Name).ToList();
-            ViewBag.ProgramData = programdata;
+                ViewBag.ProgramData = programdata;
 
-            if (!string.IsNullOrEmpty(model.Program))
-            {
-                if (programdata.Count(o => o.ID == model.Program) == 0)
-                    model.Program = null;
+                if (!string.IsNullOrEmpty(model.Program))
+                {
+                    if (programdata.Count(o => o.ID == model.Program) == 0)
+                        model.Program = null;
+                }
+
+                var result = new List<ModCourseViewModel>();
+                var data = _service
+                    .Find(!string.IsNullOrEmpty(model.SearchText), o => (o.Name.Contains(model.SearchText) || o.Code.Contains(model.SearchText)))
+                    .Where(o => o.CreateUser == _currentUser.ID)
+                    .Where(!string.IsNullOrEmpty(model.Program), o => o.ProgramID == model.Program)
+                    .Where(!string.IsNullOrEmpty(model.Subject), o => o.SubjectID == model.Subject)
+                    .Where(!string.IsNullOrEmpty(model.Grade), o => o.GradeID == model.Grade)
+                    .OrderBy(o => o.Name)
+                    .ToList();
+
+                var subjectdata = _subjectService.Find(true, o => o.IsActive).OrderBy(o => o.Name).ToList();
+                ViewBag.SubjectData = subjectdata;
+
+                var gradedata = _gradeService.Find(true, o => o.IsActive).OrderBy(o => o.Name).ToList();
+                ViewBag.GradeData = gradedata;
+
+                result.AddRange(data.Select(t => new ModCourseViewModel(t)
+                {
+                    Program = programdata.Find(o => o.ID == t.ProgramID),
+                    Grade = gradedata.Find(o => o.ID == t.GradeID),
+                    Subject = subjectdata.Find(o => o.ID == t.SubjectID),
+                    ChildNodeCount = 0//TODO: add chapter count here
+                }).ToList()
+                );
+
+                ViewBag.Data = result.ToList();
+
+                model.TotalRecord = result.Count;
             }
-
-            var result = new List<ModCourseViewModel>();
-            var data = _service
-                .Find(!string.IsNullOrEmpty(model.SearchText), o => (o.Name.Contains(model.SearchText) || o.Code.Contains(model.SearchText)))
-                .Where(o => o.CreateUser == _currentUser.ID)
-                .Where(!string.IsNullOrEmpty(model.Program), o => o.ProgramID == model.Program)
-                .Where(!string.IsNullOrEmpty(model.Subject), o => o.SubjectID == model.Subject)
-                .Where(!string.IsNullOrEmpty(model.Grade), o => o.GradeID == model.Grade)
-                .OrderBy(o => o.Name)
-                .ToList();
-
-            var subjectdata = _subjectService.Find(true, o => o.IsActive).OrderBy(o => o.Name).ToList();
-            ViewBag.SubjectData = subjectdata;
-
-            var gradedata = _gradeService.Find(true, o => o.IsActive).OrderBy(o => o.Name).ToList();
-            ViewBag.GradeData = gradedata;
-
-            result.AddRange(data.Select(t => new ModCourseViewModel(t)
+            else
             {
-                Program = programdata.Find(o => o.ID == t.ProgramID),
-                Grade = gradedata.Find(o => o.ID == t.GradeID),
-                Subject = subjectdata.Find(o => o.ID == t.SubjectID),
-                ChildNodeCount = 0//TODO: add chapter count here
-            }).ToList()
-            );
-
-            ViewBag.Data = result.ToList();
-
-            model.TotalRecord = result.Count;
+                var data = _service.CreateQuery().Find(o => o.ID == model.ID && o.CreateUser == _currentUser.ID).SingleOrDefault();
+                ViewBag.Data = data;
+            }
             ViewBag.Model = model;
             return View();
         }
@@ -281,7 +289,7 @@ namespace BasePublisherMVC.AdminControllers
                     var item = _service.GetByID(ID);
                     if (item != null)
                     {
-                        _service.Remove(item.ID);
+                       await _service.RemoveAsync(item.ID);
                         delete++;
                     }
 

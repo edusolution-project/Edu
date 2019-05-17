@@ -606,6 +606,12 @@ namespace BasePublisherMVC.AdminControllers
             }
         }
         #endregion
+        #region Chapter
+        //list
+        //details
+        //createorupdate
+        //remove
+        #endregion
         public Response GetMenuForWeb(string type)
         {
             try
