@@ -8,15 +8,15 @@ namespace BaseMongoDB.Database
 {
     public class SysTemplateDetailEntity : EntityBase
     {
-        public string ParrentID { get; set; } //ID layout - vswMain  LayoutID dynamic
+        public string ParentID { get; set; } //ID layout - vswMain  LayoutID dynamic
         public string LayoutName { get; set; } // name - Logo(ĐK : Quảng cáo/liên kết)
         public string TemplateID { get; set; } // templateid 1,2,3
         public string PartialID { get; set; } // ID layout - vswMain / vswLogo
         public string PartialView { get; set; } // view / _Nav
-        public string CModule { get; set; } // chucws nang /MVCBase.ClientControllers.CAdvController
+        public string CModule { get; set; } // chức năng /MVCBase.ClientControllers.CAdvController
         public string TypeView { get; set; } // CAdv ..
         public bool IsBody { get; set; } = false; //laf body khongo 
-        public bool IsDynamic { get; set; } = false; // cos phai dynamic khong
+        public bool IsDynamic { get; set; } = false; // có phai dynamic khong
         public int Order { get; set; } // sap xep trong isDynamic
     }
     public class SysTemplateDetailService : ServiceBase<SysTemplateDetailEntity>
@@ -30,7 +30,7 @@ namespace BaseMongoDB.Database
         {
         }
 
-        public List<SysTemplateDetailEntity> GetItemParrentID(string ID)
+        public List<SysTemplateDetailEntity> GetItemParentID(string ID)
         {
             return CreateQuery().Find(o => o.TemplateID == ID)?.ToList();
         }
@@ -41,12 +41,12 @@ namespace BaseMongoDB.Database
         }
         public List<SysTemplateDetailEntity> GetListItemDynamicByID(string templateID, string layoutID)
         {
-            var data = CreateQuery().Find(o => o.IsDynamic == true && o.TemplateID == templateID && o.ParrentID == layoutID)?.ToList();
+            var data = CreateQuery().Find(o => o.IsDynamic == true && o.TemplateID == templateID && o.ParentID == layoutID)?.ToList();
             return data;
         }
         public SysTemplateDetailEntity GetItemDynamicByID(string templateID, string partialID, string layoutParrent)
         {
-            var data = CreateQuery().Find(o => o.IsDynamic == true && o.TemplateID == templateID && o.PartialID == partialID && o.ParrentID == layoutParrent)?.SingleOrDefault();
+            var data = CreateQuery().Find(o => o.IsDynamic == true && o.TemplateID == templateID && o.PartialID == partialID && o.ParentID == layoutParrent)?.SingleOrDefault();
             return data;
         }
     }

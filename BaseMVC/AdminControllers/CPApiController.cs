@@ -191,7 +191,7 @@ namespace BaseMVC.AdminControllers
                 LayoutName = dItem.LayoutName,
                 CModule = dItem.CModule,
                 PartialID = dItem.PartialID,
-                ParrentLayout = dItem.ParrentID,
+                ParrentLayout = dItem.ParentID,
                 IsDynamic = true,
                 IsBody = dItem.IsBody,
                 PartialView = dItem.PartialView,
@@ -354,7 +354,7 @@ namespace BaseMVC.AdminControllers
                 TypeView = model.TypeView,
                 TemplateID = model.Record,
                 IsDynamic = true,
-                ParrentID = model.ParrentLayout,
+                ParentID = model.ParrentLayout,
                 PartialID = Guid.NewGuid().ToString()
             };
             _templateDetailsService.Add(item);
@@ -376,7 +376,7 @@ namespace BaseMVC.AdminControllers
                     LayoutName = model.LayoutName,
                     TemplateID = model.Record,
                     TypeView = model.TypeView,
-                    ParrentID = string.Empty,
+                    ParentID = string.Empty,
                     PartialView = model.PartialView
                 };
                 _templateDetailsService.Add(item);
@@ -413,7 +413,7 @@ namespace BaseMVC.AdminControllers
         {
             var item = _templateDetailsService.CreateQuery().Find(o => o.IsDynamic == true
                         && o.IsBody == false
-                        && o.ParrentID == model.ParrentLayout
+                        && o.ParentID == model.ParrentLayout
                         && o.PartialID == model.PartialID
                         && o.TemplateID == model.Record)?.SingleOrDefault();
             if (item == null)
@@ -491,7 +491,7 @@ namespace BaseMVC.AdminControllers
         {
             try
             {
-                var item = _templateDetailsService.CreateQuery().Find(o => o.ParrentID == model.ParrentLayout 
+                var item = _templateDetailsService.CreateQuery().Find(o => o.ParentID == model.ParrentLayout 
                 && o.PartialID == model.PartialID && o.TemplateID == model.Record)?.SingleOrDefault();
                 if(item != null)
                 {

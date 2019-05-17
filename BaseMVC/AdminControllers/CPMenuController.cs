@@ -162,7 +162,7 @@ namespace BaseMVC.AdminControllers
                         _service.Remove(item.ID);
                         if(listChild != null)
                         {
-                            await _service.RemveRangeAsync(listChild.Select(o=>o.ID).ToList());
+                            await _service.RemoveRangeAsync(listChild.Select(o=>o.ID).ToList());
                         }
                         delete++;
                     }

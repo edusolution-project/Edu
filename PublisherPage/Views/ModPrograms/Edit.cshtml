@@ -1,0 +1,116 @@
+﻿@using BasePublisherModels.Database
+@{
+    ViewData["Title"] = "Cập nhật giáo trình";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var subjects = ViewBag.SubjectData as List<ModSubjectEntity>;
+    var grades = ViewBag.GradeData as List<ModGradeEntity>;
+    var obj = ViewBag.Data as ModProgramEntity;
+}
+
+<div class="card">
+    <div class="card-header card-header-icon">
+        <h4 class="card-title">
+            <a href="@Url.Action("Index")" class="btn btn-sm btn-fab btn-danger"><i class="material-icons">reply</i></a>
+            <a href="javascript:void(0)" onclick="execute('edit')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Lưu</a>
+        </h4>
+
+    </div>
+    <div class="card-body">
+        <form name="myform" asp-action="Create" method="post" enctype="application/x-www-form-urlencoded">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="ctrl" value="ModPrograms" />
+            <input type="hidden" id="ID" name="ID" value="@obj.ID" />
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Tên :</label>
+                        <input type="text" name="Name" class="form-control" autocomplete="off" value="@obj.Name">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Mô tả :</label>
+                        <input type="text" name="Description" class="form-control" autocomplete="off" value="@obj.Description">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label> Môn học </label>
+                    </div>
+                </div>
+                <div class="col-md-12" style="top: -31px;">
+                    @{
+                        if (subjects != null)
+                        {
+                            int count = subjects.Count;
+                            for (int i = 0; i < count; i++)
+                            {
+                                var item = subjects[i];
+                                var ischeck = obj.Subjects.Any(o => o == item.ID);
+                                <input type="hidden" name="Subjects" id="@{ @Html.Raw(item.ID) }" style="display: none" value="@{ @Html.Raw(ischeck ? item.ID : "") }">
+                                <div class="form-group" style="display: inline-block; min-width: 150px;">
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" onclick="toggleID(this, '@{ @Html.Raw(item.ID) }')" @{ @Html.Raw(ischeck ? "checked='checked'" : "")  }>
+                                            <span class="form-check-sign" style="white-space: nowrap; min-width: 150px;">
+                                                <span class="check"></span> <span class="text-left" style="position: relative; top: -5px; display: inline-block;"> @item.Name</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+                <div class="col-md-12" style="margin-top: -31px;">
+                    <div class="form-group">
+                        <label> Cấp độ </label>
+                    </div>
+                </div>
+                <div class="col-md-12" style="top: -31px;">
+
+                    @{
+                        if (grades != null)
+                        {
+                            int count = grades.Count;
+                            for (int i = 0; i < count; i++)
+                            {
+                                var itemgrade = grades[i];
+                                var ischeck = obj.Grades.Any(o => o == itemgrade.ID);
+                                <input type="hidden" name="Grades" id="@{ @Html.Raw(itemgrade.ID) }" style="display: none" value="@{ @Html.Raw(ischeck ? itemgrade.ID : "") }">
+                                <div class="form-group" style="display: inline-block; min-width: 150px;">
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" onclick="toggleID(this, '@{ @Html.Raw(itemgrade.ID) }')" @{ @Html.Raw(ischeck ? "checked='checked'" : "")  }>
+                                            <span class="form-check-sign" style="white-space: nowrap; min-width: 150px;">
+                                                <span class="check"></span> <span class="text-left" style="position: relative; top: -5px; display: inline-block;"> @itemgrade.Name</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+                <div class="col-md-6">
+                    <input type="hidden" name="IsActive" value="@obj.IsActive">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" @if (obj.IsActive) { @Html.Raw("checked='checked'") }>
+                                <span class="form-check-sign" style="white-space:nowrap; min-width:150px;">
+                                    <span class="text-left" style="position:relative;top:-5px;display:inline-block;"> Hoạt động :</span>  <span class="check"></span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </form>
+    </div>
+</div>
+@section Scripts
+{
+    <script src="~/Contents/js/publisher.js"></script>
+}

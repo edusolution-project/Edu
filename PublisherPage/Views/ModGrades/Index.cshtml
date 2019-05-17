@@ -1,17 +1,18 @@
 ﻿@using BasePublisherMVC.Models;
 @using BasePublisherMVC.Globals;
-@using BasePublisherModels.Database;
+@using BasePublisherMVC.ViewModel;
 @{
     ViewData["Title"] = "Quản lý cấp độ";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var data = ViewBag.Data as List<ModGradeEntity>;
+    var data = ViewBag.Data as List<ModGradeViewModel>
+    ;
 
     var model = ViewBag.Model as DefaultModel;
     string SearchText = string.IsNullOrEmpty(model.SearchText) ? string.Empty : model.SearchText;
 }
 <style>
-    span.bmd-form-group{
-        display:block;
+    span.bmd-form-group {
+        display: block;
     }
 </style>
 <div class="row">
@@ -41,20 +42,9 @@
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-sm-12 col-md-6 col-lg-5">
-                                <div class="row">
-                                    <div class="col-sm-12 col-md-5">
-                                        <input id="filter_StartDate" type='text' class="form-control datepicker" name="StartDate" placeholder="từ ngày" autocomplete="off"/>
-                                    </div>
-                                    <div class="col-sm-12 col-md-5">
-                                        <input id="filter_EndDate" type='text' class="form-control datepicker" name="EndDate" placeholder="đến ngày" autocomplete="off"/>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <a href="javascript:void(0)" class="btn btn-sm btn-primary btn-fab" onclick="redirect('Index')"><i class="material-icons">search</i></a>
-                                    </div>
-                                </div>
                             </div>
                             <div class="col-sm-12 col-md-6 col-lg-7">
-                                @DynamicViews.GetCommand("create| add,active|duyệt,nonactive|bỏ duyệt,export| export,delete|xóa,clear| xóa cache")
+                                @DynamicViews.GetCommand("create| Tạo mới,active|Kích hoạt,nonactive|Vô hiệu,export| Xuất ,delete|Xóa,clear|'Bỏ lọc'")
                             </div>
                         </div>
                     </div>
@@ -74,12 +64,13 @@
                                             </label>
                                         </div>
                                     </th>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Code</th>
-                                    <th>Created</th>
-                                    <th>Updated</th>
-                                    <th>Publish</th>
+                                    <th>Tên</th>
+                                    <th>Mã</th>
+                                    <th>Cấp độ trên</th>
+                                    <th>Cấp độ dưới</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Ngày cập nhật</th>
+                                    <th>Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -101,9 +92,32 @@
                                                         </label>
                                                     </div>
                                                 </td>
-                                                <td align="center"><a class="text-info" href="@Url.Action("index", new { Record = item.ID })">@item.ID</a></td>
-                                                <td align="center"><a class="text-info" href="@Url.Action("edit",new { id=item.ID })">@item.Name</a></td>
-                                                <td align="center">@item.Code</td>
+                                                <td align="center"><a class="text-info" href="@Url.Action("edit", new { ID=item.ID })">@item.Name</a></td>
+                                                <td align="center"><a class="text-info" href="@Url.Action("edit", new { ID=item.ID })">@item.Code</a></td>
+                                                <td align="center">
+                                                    @{
+                                                        if (string.IsNullOrEmpty(item.ParentID) || item.ParentID == "0" || item.Parent == null)
+                                                        {
+                                                            <span style="color:#CCC">Root</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a class="text-info" href="@Url.Action("index", new {Record= item.Parent.ID})">@item.Parent.Name</a>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td align="center">
+                                                    @{
+                                                        if (item.SubGradeCount > 0)
+                                                        {
+                                                            <a class="text-info" href="@Url.Action("index", new {Record = item.ID})">@item.SubGradeCount</a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span style="color:#CCC">0</span>
+                                                        }
+                                                    }
+                                                </td>
                                                 <td align="center">
                                                     @string.Format("{0:dd-M-yyyy hh:mm:ss}", item.Created)
                                                 </td>
@@ -111,7 +125,7 @@
                                                     @string.Format("{0:dd-M-yyyy hh:mm:ss}", item.Updated)
                                                 </td>
                                                 <td align="center">
-                                                    @DynamicViews.GetActive(item.ID, item.Activity)
+                                                    @DynamicViews.GetActive(item.ID, item.IsActive)
                                                 </td>
                                             </tr>
                                         }

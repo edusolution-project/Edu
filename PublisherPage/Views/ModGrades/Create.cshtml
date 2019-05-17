@@ -1,6 +1,6 @@
 ﻿@using BasePublisherModels.Database
 @{
-    ViewData["Title"] = "Tạo mới danh mục cấp độ";
+    ViewData["Title"] = "Tạo cấp độ mới";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var data = ViewBag.Root as List<ModGradeEntity>;
 }
@@ -9,7 +9,7 @@
     <div class="card-header card-header-icon">
         <h4 class="card-title">
             <a href="@Url.Action("Index")" class="btn btn-sm btn-fab btn-danger"><i class="material-icons">reply</i></a>
-            <a href="javascript:void(0)" onclick="excute('create')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Save</a>
+            <a href="javascript:void(0)" onclick="execute('create')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Save</a>
         </h4>
 
     </div>
@@ -28,12 +28,12 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label class="bmd-label-floating">Code :</label>
-                        <input type="text" name="Code" class="form-control" autocomplete="off">
+                        <input type="text" name="Code" class="form-control" autocomplete="off" disabled="disabled" value="Tự động">
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <label class=""> Chuyên mục : </label>
-                    <select class="form-control" name="ParrentID">
+                    <label class=""> Cấp độ trên : </label>
+                    <select class="form-control" name="ParentID">
                         <option value="0">Root</option>
                         @{
                             if (data != null)
@@ -49,13 +49,13 @@
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <input type="hidden" name="Activity" value="false">
+                    <input type="hidden" name="IsActive" value="false">
                     <div class="form-group">
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input class="form-check-input" type="checkbox" onclick="thatActive(this,'Activity')">
+                                <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" value="false">
                                 <span class="form-check-sign" style="white-space:nowrap; min-width:150px;">
-                                    <span class="text-left" style="position:relative;top:-5px;display:inline-block;"> Activity :</span>  <span class="check"></span>
+                                    <span class="text-left" style="position:relative;top:-5px;display:inline-block;"> Hoạt động :</span>  <span class="check"></span>
                                 </span>
                             </label>
                         </div>
@@ -66,3 +66,7 @@
         </form>
     </div>
 </div>
+@section Scripts
+{
+    <script src="~/Contents/js/publisher.js"></script>
+}

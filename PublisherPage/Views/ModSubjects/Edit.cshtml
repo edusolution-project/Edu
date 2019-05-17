@@ -1,0 +1,54 @@
+﻿@using BasePublisherModels.Database
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var data = ViewBag.Root as List<ModSubjectEntity>;
+    var obj = ViewBag.Data as ModSubjectEntity;
+}
+
+<div class="card">
+    <div class="card-header card-header-icon">
+        <h4 class="card-title">
+            <a href="@Url.Action("Index")" class="btn btn-sm btn-fab btn-danger"><i class="material-icons">reply</i></a>
+            <a href="javascript:void(0)" onclick="execute('edit')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Lưu</a>
+        </h4>
+
+    </div>
+    <div class="card-body">
+        <form name="myform" asp-action="Create" method="post" enctype="application/x-www-form-urlencoded">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="ArrID" name="ArrID" value="" />
+            <input type="hidden" id="ctrl" value="ModSubjects" />
+            <input type="hidden" id="ID" name="ID" value="@obj.ID" />
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Tên :</label>
+                        <input type="text" name="Name" class="form-control" autocomplete="off" value="@obj.Name">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Mã :</label>
+                        <input type="text" name="Code" class="form-control" autocomplete="off" disabled="disabled" value="@obj.Code">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <input type="hidden" name="IsActive" value="@obj.IsActive">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" @if (obj.IsActive){ @Html.Raw("checked='checked'")} >
+                                <span class="form-check-sign" style="white-space:nowrap; min-width:150px;">
+                                    <span class="text-left" style="position:relative;top:-5px;display:inline-block;"> Hoạt động :</span>  <span class="check"></span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </form>
+    </div>
+</div>
+

@@ -193,7 +193,7 @@ namespace BaseMVC.Globals
                                 "</a>";
                         break;
                     case "export":
-                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-primary\" onclick=\"excute('" + key + "')\">" +
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-primary\" onclick=\"execute('" + key + "')\">" +
                                 "<i class=\"material-icons\">airplay</i>" + name + "<div class=\"ripple-container\"></div>" +
                                 "</a>";
                         break;
@@ -202,19 +202,19 @@ namespace BaseMVC.Globals
                         break;
                     case "delete":
                         html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-fab btn-danger\" " +
-                            "onclick=\"javascript:if(confirm('Bạn chắc là mình muốn xóa chứ !')){excute('delete')}\"><i class=\"material-icons\">delete_sweep</i></a>";
+                            "onclick=\"javascript:if(confirm('Bạn chắc là mình muốn xóa chứ !')){execute('delete')}\"><i class=\"material-icons\">delete_sweep</i></a>";
                         break;
                     case "nonactive":
-                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-fab btn-dark\" onclick=\"excute('" + key + "')\"><i class=\"material-icons\">lock</i></a>";
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-fab btn-dark\" onclick=\"execute('" + key + "')\"><i class=\"material-icons\">lock</i></a>";
                         break;
                     case "active":
-                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-fab btn-success\" onclick=\"excute('" + key + "')\"><i class=\"material-icons\">lock_open</i></a>";
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-fab btn-success\" onclick=\"execute('" + key + "')\"><i class=\"material-icons\">lock_open</i></a>";
                         break;
                     case "clear":
-                        html += "<a href=\"javascript:void(0)\" title=" + name + " class=\"btn btn-sm btn-link\" onclick=\"excute('clear')\"><i class=\"material-icons\">block</i> clear</a>";
+                        html += "<a href=\"javascript:void(0)\" title=" + name + " class=\"btn btn-sm btn-link\" onclick=\"execute('clear')\"><i class=\"material-icons\">block</i> clear</a>";
                         break;
                     default:
-                        html += "<a href=\"javascript:void(0);\" onclick=\"excute('" + key + "')\" class=\"btn btn-default btn-" + key.ToLower() + "\"></a>";
+                        html += "<a href=\"javascript:void(0);\" onclick=\"execute('" + key + "')\" class=\"btn btn-default btn-" + key.ToLower() + "\"></a>";
                         break;
                 }
             }

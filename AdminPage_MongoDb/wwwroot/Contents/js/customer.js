@@ -19388,7 +19388,7 @@ function AddPermisstion() {
     frm.submit();
 }
 
-function excuteOnly(id, cmd) {
+function executeOnly(id, cmd) {
     var frm = window.myform;
     var ctrl = frm.querySelector("#ctrl");
 
@@ -19401,7 +19401,7 @@ function excuteOnly(id, cmd) {
     frm.submit();
 }
 
-function excute(action) {
+function execute(action) {
     var arraction = ["active", "nonactive", "delete","export"];
     var frm = window.myform;
     var ctrl = frm.querySelector("#ctrl");
@@ -19497,7 +19497,7 @@ function CheckSearchDefault(value, name) {
 var ControlPage = {
     createCommand() {
         const arrAction = ["create", "delete", "active", "nonactive", "export", "import", "clear"]
-        const arrFn = ["redirect", "excute", "excute", "excute", "excute", "redirect", "excute"];
+        const arrFn = ["redirect", "execute", "execute", "execute", "execute", "redirect", "execute"];
         const arrTitle = ["Thêm mới", "Xóa", "Hoạt động", "Dừng hoạt động", "Xuất excel", "Excel to DB", "Xóa cache"]
         const arrClass = [
             "btn btn-sm btn-success",
