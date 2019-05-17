@@ -32,6 +32,7 @@ namespace CoreMongoDB.Repositories
             _tableName = tableName;
             _dbQueryCache = new DbQueryCache();
         }
+
         public void Add(T item)
         {
             var data = Collection.Find(o => o.ID == item.ID).SingleOrDefault();

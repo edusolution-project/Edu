@@ -36,6 +36,7 @@ namespace PublisherPage
             services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<ILogs, Logs>();
             services.AddScoped<Security>();
+            services.AddScoped<FileProcess>();
             services.AddServiceBase();
 
             services.AddMvc(options => {

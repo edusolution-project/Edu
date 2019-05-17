@@ -87,18 +87,18 @@ function redirect(action, name, value) {
     var control = document.getElementById("ctrl").value;
 
     var search = "";
-    debugger;
     if (action != "create" && action != "edit" && action != "import") {
         var source = window.location;
-        //search = groupSearch(source.search, name, value);
+        search = groupSearch(source.search, name, value);
         if (typeof (window.Search) != 'undefined') {
+            console.log(window.Search);
             for (var i = 0; i < window.Search.length; i++) {
                 if (i === window.Search.length - 1) break;
                 var obj = document.getElementById(window.Search[i]);
                 if (obj != null) {
+                    console.log(obj.value);
                     var objValue = obj.value;
                     if (!CheckSearchDefault(objValue, window.Search[i + 1])) {
-                        
                         search = groupSearch(search, window.Search[i + 1], objValue);
                     }
                 }
@@ -107,8 +107,74 @@ function redirect(action, name, value) {
     } else {
         search = groupSearch("", name, value);
     }
+    //debugger;
     var url = "/" + control + "/" + action + search;
     window.location.href = url;
+}
+
+function redirectsub(action, name, value) {
+
+    var control = document.getElementById("ctrl").value;
+
+    var search = "";
+    if (action != "createsub") {
+        var source = window.location;
+        search = groupSearch(source.search, name, value);
+        if (typeof (window.Search) != 'undefined') {
+            console.log(window.Search);
+            for (var i = 0; i < window.Search.length; i++) {
+                if (i === window.Search.length - 1) break;
+                var obj = document.getElementById(window.Search[i]);
+                if (obj != null) {
+                    console.log(obj.value);
+                    var objValue = obj.value;
+                    if (!CheckSearchDefault(objValue, window.Search[i + 1])) {
+                        search = groupSearch(search, window.Search[i + 1], objValue);
+                    }
+                }
+            }
+        }
+    } else {
+        search = groupSearch("", name, value);
+    }
+    //debugger;
+    var url = "/" + control + "/" + action + search;
+    debugger;
+    window.location.href = url;
+}
+
+function editchap() {
+    var frm = window.myform;
+    var ctrl = frm.querySelector("#chapctrl");
+
+    var search = "";
+    if (typeof (window.Search) != 'undefined') {
+        console.log(window.Search);
+        for (var i = 0; i < window.Search.length; i++) {
+            if (i === window.Search.length - 1) break;
+            var obj = document.getElementById(window.Search[i]);
+            if (obj != null) {
+                console.log(obj.value);
+                var objValue = obj.value;
+                if (!CheckSearchDefault(objValue, window.Search[i + 1])) {
+                    search = groupSearch(search, window.Search[i + 1], objValue);
+                }
+            }
+        }
+    }
+
+    //debugger;
+    frm.action = "/" + ctrl.value + "/edit" + search;
+    frm.method = "post";
+    frm.submit();
+}
+
+function createchap(courseid) {
+    var frm = window.myform;
+    var ctrl = frm.querySelector("#ctrl");
+    frm.action = "/" + ctrl.value + "/create?CourseID=" + courseid;
+    frm.method = "post";
+    frm.submit();
 }
 /***********filter**********/
 function groupSearch(search, name, value) {
@@ -118,8 +184,6 @@ function groupSearch(search, name, value) {
     }
     else {
         var arr = search.match(regex);
-        debugger;
-        console.log(arr);
         var count = arr == null ? 0 : arr.length;
         var str = '';
         var iscontains = false;
@@ -131,7 +195,7 @@ function groupSearch(search, name, value) {
                 iscontains = true;
             } else {
                 if (sitem[1] != null && sitem[1] != '' && sitem[1] !== void 0) {
-                    console.log(item);
+                    //console.log(item);
                     str += item;
                 }
             }
@@ -154,7 +218,6 @@ function CheckSearchDefault(value, name) {
     return false;
 }
 /************ end *****************/
-
 
 var ControlPage = {
     createCommand() {

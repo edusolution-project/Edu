@@ -1,6 +1,9 @@
 ﻿using CoreMongoDB.Repositories;
 using Microsoft.Extensions.Configuration;
 using System;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+
 
 namespace BaseMongoDB.Database
 {
@@ -23,7 +26,7 @@ namespace BaseMongoDB.Database
         }
         public ModProgramService(IConfiguration config, string tableName) : base(config, tableName)
         {
-
         }
+
     }
 }

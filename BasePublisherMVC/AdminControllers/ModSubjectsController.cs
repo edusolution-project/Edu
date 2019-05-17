@@ -23,10 +23,12 @@ namespace BasePublisherMVC.AdminControllers
     public class ModSubjectsController : AdminController
     {
         private readonly ModSubjectService _service;
+        private readonly ModProgramService _programService;
 
-        public ModSubjectsController(ModSubjectService service)
+        public ModSubjectsController(ModSubjectService service, ModProgramService programService)
         {
             _service = service;
+            _programService = programService;
         }
 
         public ActionResult Index(DefaultModel model)
@@ -69,12 +71,11 @@ namespace BasePublisherMVC.AdminControllers
             {
                 if (string.IsNullOrEmpty(item.Name))
                 {
-                    ViewBag.Message = "Bạn chưa điện tên môn học";
+                    SetMessageWarning("Bạn chưa điện tên môn học");
                     return View();
                 }
                 else
                 {
-
                     item.Code = UnicodeName.ConvertUnicodeToCode(item.Name, "-", true);
                     item.Created = DateTime.Now;
                     item.Updated = DateTime.Now;
@@ -84,11 +85,12 @@ namespace BasePublisherMVC.AdminControllers
                     if (_service.GetItemByCode(item.Code) == null)
                     {
                         await _service.AddAsync(item);
-                        ViewBag.Message = "Thêm thành công";
+                        SetMessageSuccess("Thêm mới thành công");
+                        return RedirectToAction("Index");
                     }
                     else
                     {
-                        ViewBag.Message = "Môn học đã tồn tại";
+                        SetMessageWarning("Môn học đã tồn tại");
                         return View();
                     }
 
@@ -113,7 +115,7 @@ namespace BasePublisherMVC.AdminControllers
                 var item = _service.GetByID(ID);
                 if (item == null)
                 {
-                    ViewBag.Message = "Not Found Data";
+                    SetMessageError("Không tìm thấy đối tượng");
                 }
                 ViewBag.Data = item;
             }
@@ -129,7 +131,7 @@ namespace BasePublisherMVC.AdminControllers
             ViewBag.Title = "Cập nhật thông tin";
             if (string.IsNullOrEmpty(model.ID) && string.IsNullOrEmpty(item.ID))
             {
-                ViewBag.Message = "Chưa chọn đối tượng để sửa";
+                SetMessageWarning("Chưa chọn đối tượng chỉnh sửa");
             }
             else
             {
@@ -144,6 +146,7 @@ namespace BasePublisherMVC.AdminControllers
                 _item.IsActive = item.IsActive;
                 await _service.AddAsync(_item);
                 ViewBag.Data = _service.GetByID(ID);
+                SetMessageSuccess("Cập nhật thành công");
             }
             ViewBag.Model = model;
             return RedirectToAction("index");
@@ -166,7 +169,18 @@ namespace BasePublisherMVC.AdminControllers
                 {
                     string ID = arr[i];
                     var item = _service.GetByID(ID);
-                    if (item != null) { await _service.RemoveAsync(item.ID); delete++; }
+
+                    if (item != null)
+                    {
+
+                        //Kiểm tra giáo trình có môn học này, nếu có thì không cho xóa
+                        if (_programService.FindBySubject(item.ID) != null)
+                        {
+                            SetMessageWarning("Môn học đang được sử dụng, không xóa được!");
+                            return RedirectToAction("Index");
+                        }
+                        await _service.RemoveAsync(item.ID); delete++;
+                    }
                 }
                 if (delete > 0)
                 {
@@ -192,7 +206,7 @@ namespace BasePublisherMVC.AdminControllers
                 .Where(!string.IsNullOrEmpty(model.ID), o => o.ID == model.ID)
                 .Where(startDate > DateTime.MinValue, o => o.Created >= startDate)
                 .Where(endDate > DateTime.MinValue, o => o.Created <= endDate)
-                .OrderByDescending(o => o.ID)
+                .OrderBy(o => o.Name)
                 .ToList();
 
             DataTable dt = data.ToDataTable();
@@ -242,6 +256,7 @@ namespace BasePublisherMVC.AdminControllers
                     await _service.AddAsync(item);
                 }
             }
+            SetMessageSuccess("Cập nhật thành công");
             return RedirectToAction("Index");
         }
 
@@ -260,8 +275,10 @@ namespace BasePublisherMVC.AdminControllers
                     await _service.AddAsync(item);
                 }
             }
+            SetMessageSuccess("Cập nhật thành công");
             return RedirectToAction("Index");
         }
+
         public IActionResult Clear()
         {
             _service.ClearCache();

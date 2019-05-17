@@ -18,9 +18,6 @@
 </style>
 <div class="row">
     <div class="col-md-12">
-
-        @TempData["Messager"]
-
         <div class="card">
             <form name="myform" method="post" enctype="application/x-www-form-urlencoded">
                 @Html.AntiForgeryToken()
@@ -40,7 +37,8 @@
                         "0", "Grade",
                         "0", "Subject"
                     ];
-                </script>
+
+/**/</script>
                 <div class="card-header card-header-image text-right">
                     <div class="container-fluid">
                         <div class="row">
@@ -75,7 +73,7 @@
                                             }
                                         }
                                     </select>
-                                <script>
+                                    <script>
                                     @if (!String.IsNullOrEmpty(model.Grade))
                                     {
                                         @Html.Raw("$('#filter_Grade').val('" + model.Grade +  "');");
@@ -84,7 +82,7 @@
                                     {
                                         @Html.Raw("$('#filter_Subject').val('" + model.Subject +  "');");
                                     }
-                                </script>
+                                    </script>
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-6 col-lg-7">
@@ -111,8 +109,8 @@
                                     <th>Tên</th>
                                     <th>Mã</th>
                                     <th>Mô tả</th>
-                                    <th>Ngày tạo</th>
-                                    <th>Cập nhật</th>
+                                    @*<th>Ngày tạo</th>
+                                        <th>Cập nhật</th>*@
                                     <th>Trạng thái</th>
                                 </tr>
                             </thead>
@@ -138,12 +136,6 @@
                                                 <td align="center"><a class="text-info" href="@Url.Action("edit", new { id = item.ID })">@item.Name</a></td>
                                                 <td align="center"><a class="text-info" href="@Url.Action("edit",new { id =item.ID })">@item.Code</a></td>
                                                 <td align="center">@item.Description</td>
-                                                <td align="center">
-                                                    @string.Format("{0:dd-M-yyyy hh:mm:ss}", item.Created)
-                                                </td>
-                                                <td align="center">
-                                                    @string.Format("{0:dd-M-yyyy hh:mm:ss}", item.Updated)
-                                                </td>
                                                 <td align="center">
                                                     @DynamicViews.GetActive(item.ID, item.IsActive)
                                                 </td>

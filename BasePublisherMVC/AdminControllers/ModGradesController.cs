@@ -26,11 +26,13 @@ namespace BasePublisherMVC.AdminControllers
     {
         private readonly ModGradeService _service;
         private readonly CPUserService _userService;
+        private readonly ModProgramService _programService;
 
-        public ModGradesController(ModGradeService service, CPUserService userService)
+        public ModGradesController(ModGradeService service, CPUserService userService, ModProgramService programService)
         {
             _service = service;
             _userService = userService;
+            _programService = programService;
         }
 
         public ActionResult Index(DefaultModel model)
@@ -43,12 +45,12 @@ namespace BasePublisherMVC.AdminControllers
                 //.Where(!string.IsNullOrEmpty(model.ID), o => o.ID == model.ID)
                 //.Where(string.IsNullOrEmpty(model.Record), o => (o.ParentID.Equals("0") || string.IsNullOrEmpty(o.ParentID)))
                 .Where(!string.IsNullOrEmpty(model.Record), o => o.ParentID == model.Record)
-                .OrderByDescending(o => o.Name)
+                .OrderBy(o => o.Name)
                 .ToList();
 
             results.AddRange(data.Select(t => new ModGradeViewModel(t)
             {
-                Parent = (string.IsNullOrEmpty(t.ParentID) || t.ParentID == "0") ? null : _service.GetItemByID(t.ParentID),
+                Parent = (string.IsNullOrEmpty(t.ParentID) || t.ParentID == "0") ? null : _service.GetByID(t.ParentID),
                 SubGradeCount = _service.CountSubGradeByID(t.ID)
             }));
 
@@ -85,7 +87,7 @@ namespace BasePublisherMVC.AdminControllers
             {
                 if (string.IsNullOrEmpty(item.Name))
                 {
-                    ViewBag.Message = "Bạn chưa điền tên của cấp độ";
+                    SetMessageWarning("Bạn chưa điền tên của cấp độ");
                     return View();
                 }
                 else
@@ -98,11 +100,12 @@ namespace BasePublisherMVC.AdminControllers
                     if (_service.GetItemByCode(item.Code) == null)
                     {
                         await _service.AddAsync(item);
-                        ViewBag.Message = "Thêm thành công";
+                        SetMessageSuccess("Thêm mới thành công");
+                        return RedirectToAction("Index");
                     }
                     else
                     {
-                        ViewBag.Message = "Cấp độ đã tồn tại";
+                        SetMessageWarning("Cấp độ đã tồn tại!");
                         ViewBag.Root = _service.GetRootItems();
                         return View();
                     }
@@ -130,7 +133,7 @@ namespace BasePublisherMVC.AdminControllers
                 var item = _service.GetByID(ID);
                 if (item == null)
                 {
-                    ViewBag.Message = "Not Found Data";
+                    SetMessageError("Không tìm thấy đối tượng");
                 }
                 ViewBag.Data = item;
             }
@@ -144,7 +147,7 @@ namespace BasePublisherMVC.AdminControllers
             ViewBag.Title = "Cập nhật thông tin";
             if (string.IsNullOrEmpty(model.ID) && string.IsNullOrEmpty(item.ID))
             {
-                ViewBag.Message = "Chưa chọn đối tượng để sửa";
+                SetMessageWarning("Chưa chọn đối tượng chỉnh sửa");
             }
             else
             {
@@ -161,6 +164,7 @@ namespace BasePublisherMVC.AdminControllers
                 await _service.AddAsync(_item);
                 ViewBag.Root = _service.GetRootItems();
                 ViewBag.Data = _service.GetByID(ID);
+                SetMessageSuccess("Cập nhật thành công");
             }
             ViewBag.Model = model;
             return RedirectToAction("index");
@@ -186,14 +190,21 @@ namespace BasePublisherMVC.AdminControllers
                     if (item != null)
                     {
                         var listChild = _service.GetItemsByParentID(ID).ToList();
-                        _service.Remove(item.ID);
-                        if (listChild != null)
+                        if (listChild.Count > 0)
                         {
-                            await _service.RemoveRangeAsync(listChild.Select(o => o.ID).ToList());
+                            SetMessageWarning("Đang có các cấp độ phụ thuộc vào cấp độ này, không được xóa!");
+                            return RedirectToAction("Index");
                         }
+
+                        //Kiểm tra giáo trình có môn học này, nếu có thì không cho xóa
+                        if (_programService.FindByGrade(item.ID) != null)
+                        {
+                            SetMessageWarning("Đang có giáo trình sử dụng cấp độ này, không được xóa!");
+                            return RedirectToAction("Index");
+                        }
+                        await _service.RemoveAsync(item.ID); delete++;
                         delete++;
                     }
-
                 }
                 if (delete > 0)
                 {
@@ -269,6 +280,7 @@ namespace BasePublisherMVC.AdminControllers
                     await _service.AddAsync(item);
                 }
             }
+            SetMessageSuccess("Cập nhật thành công");
             return RedirectToAction("Index");
         }
 
@@ -287,6 +299,7 @@ namespace BasePublisherMVC.AdminControllers
                     await _service.AddAsync(item);
                 }
             }
+            SetMessageSuccess("Cập nhật thành công");
             return RedirectToAction("Index");
         }
 

@@ -31,7 +31,7 @@ namespace BasePublisherModels.Database
         }
 
 
-        public ModGradeEntity GetItemByID(string id)
+        public ModGradeEntity GetByID(string id)
         {
             return base.Find(true, o => o.ID == id).SingleOrDefault();
         }

@@ -7,7 +7,6 @@
     var obj = ViewBag.Data as ModGradeEntity;
 }
 
-
 <div class="card">
     <div class="card-header card-header-icon">
         <h4 class="card-title">
@@ -56,7 +55,7 @@
                     </script>
                 </div>
                 <div class="col-md-6">
-                    <input type="hidden" name="IsActive" value="@obj.IsActive">
+                    <input type="hidden" name="IsActive" value="@if (obj.IsActive) { @Html.Raw("true") } else { @Html.Raw("false") }">
                     <div class="form-group">
                         <div class="form-check">
                             <label class="form-check-label">

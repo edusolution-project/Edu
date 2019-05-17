@@ -163,7 +163,7 @@ namespace BasePublisherMVC.AdminControllers
             {
                 var user = new CPUserEntity()
                 {
-                    Activity = true,
+                    IsActive = true,
                     BirthDay = DateTime.Now,
                     Created = DateTime.Now,
                     Email = listRole[i].Code+"@gmail.com",
@@ -180,13 +180,13 @@ namespace BasePublisherMVC.AdminControllers
             {
                 new CPLangEntity()
                 {
-                    Activity =true,
+                    IsActive =true,
                     Code = "VN",
                     Name = "Việt Nam"
                 },
                 new CPLangEntity()
                 {
-                    Activity =true,
+                    IsActive =true,
                     Code = "EN",
                     Name = "English"
                 }

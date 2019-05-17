@@ -11,3 +11,7 @@ toggleID = function (_this, id) {
         that.value = _this.checked ? id : "";
     }
 }
+
+function showNotify(id) {
+    alert(1);
+}

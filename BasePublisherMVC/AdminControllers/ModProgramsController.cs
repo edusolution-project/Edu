@@ -28,12 +28,14 @@ namespace BasePublisherMVC.AdminControllers
         private readonly ModProgramService _service;
         private readonly ModSubjectService _subjectService;
         private readonly ModGradeService _gradeService;
+        private readonly ModCourseService _courseService;
 
-        public ModProgramsController(ModProgramService service, ModSubjectService subjectService, ModGradeService gradeService)
+        public ModProgramsController(ModProgramService service, ModSubjectService subjectService, ModGradeService gradeService, ModCourseService courseService)
         {
             _service = service;
             _subjectService = subjectService;
             _gradeService = gradeService;
+            _courseService = courseService;
         }
 
         public ActionResult Index(ModProgramModel model)
@@ -44,7 +46,7 @@ namespace BasePublisherMVC.AdminControllers
                 .Where(!String.IsNullOrEmpty(model.Subject), o => o.Subjects.IndexOf(model.Subject) >= 0)
                 .Where(!String.IsNullOrEmpty(model.Grade), o => o.Grades.IndexOf(model.Grade) >= 0)
                 //.Where(string.IsNullOrEmpty(model.Record), o => (o.ParentID.Equals("0") || string.IsNullOrEmpty(o.ParentID)))
-                .OrderByDescending(o => o.Name)
+                .OrderBy(o => o.Name)
                 .ToList();
             ViewBag.Data = data.ToList();
 
@@ -96,7 +98,7 @@ namespace BasePublisherMVC.AdminControllers
             {
                 if (string.IsNullOrEmpty(item.Name))
                 {
-                    ViewBag.Message = "Bạn chưa điền tên giáo trình";
+                    SetMessageWarning("Bạn chưa điền tên giáo trình");
                     return View();
                 }
                 else
@@ -111,11 +113,12 @@ namespace BasePublisherMVC.AdminControllers
                     if (_service.GetItemByCode(item.Code) == null)
                     {
                         await _service.AddAsync(item);
-                        ViewBag.Message = "Thêm thành công";
+                        SetMessageSuccess("Thêm mới thành công");
+                        return RedirectToAction("Index");
                     }
                     else
                     {
-                        ViewBag.Message = "Giáo trình đã tồn tại";
+                        SetMessageWarning("Giáo trình đã tồn tại");
                         return View();
                     }
 
@@ -143,10 +146,10 @@ namespace BasePublisherMVC.AdminControllers
 
                 var gradedata = _gradeService.Find(true, o => o.IsActive).OrderBy(o => o.Name).ToList();
                 ViewBag.GradeData = gradedata;
-               
+
                 if (item == null)
                 {
-                    ViewBag.Message = "Not Found Data";
+                    SetMessageError("Không tìm thấy đối tượng");
                 }
                 ViewBag.Data = item;
             }
@@ -165,7 +168,7 @@ namespace BasePublisherMVC.AdminControllers
             ViewBag.GradeData = gradedata;
             if (string.IsNullOrEmpty(model.ID) && string.IsNullOrEmpty(item.ID))
             {
-                ViewBag.Message = "Chưa chọn đối tượng để sửa";
+                SetMessageWarning("Chưa chọn đối tượng chỉnh sửa");
             }
             else
             {
@@ -187,6 +190,7 @@ namespace BasePublisherMVC.AdminControllers
                 _item.IsActive = item.IsActive;
                 await _service.AddAsync(_item);
                 ViewBag.Data = _service.GetByID(ID);
+                SetMessageSuccess("Cập nhật thành công");
             }
             ViewBag.Model = model;
             return RedirectToAction("index");
@@ -211,6 +215,11 @@ namespace BasePublisherMVC.AdminControllers
                     var item = _service.GetByID(ID);
                     if (item != null)
                     {
+                        if (_courseService.Find(true, o => o.ProgramID == item.ID).Any())
+                        {
+                            SetMessageWarning("Đang có khóa học thuộc giáo trình này, không xóa được");
+                            return RedirectToAction("Index");
+                        }
                         _service.Remove(item.ID);
                         delete++;
                     }
@@ -290,6 +299,7 @@ namespace BasePublisherMVC.AdminControllers
                     await _service.AddAsync(item);
                 }
             }
+            SetMessageSuccess("Cập nhật thành công");
             return RedirectToAction("Index");
         }
 
@@ -308,6 +318,7 @@ namespace BasePublisherMVC.AdminControllers
                     await _service.AddAsync(item);
                 }
             }
+            SetMessageSuccess("Cập nhật thành công");
             return RedirectToAction("Index");
         }
 

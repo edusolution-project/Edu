@@ -37,4 +37,17 @@ namespace BasePublisherMVC.Models
         public string Subject { get; set; }
         public string Grade { get; set; }
     }
+
+    public class ModCourseModel : DefaultModel
+    {
+        public string Program { get; set; }
+        public string Subject { get; set; }
+        public string Grade { get; set; }
+    }
+
+    public class ModChapterModel : DefaultModel
+    {
+        public string CourseID { get; set; }
+        public string ParentID { get; set; }
+    }
 }

@@ -11,6 +11,7 @@ namespace CoreMongoDB.Repositories
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
         private readonly IMongoCollection<T> _collection;
+
         public DbContextHelper(IConfiguration config, string tableName, string dbName)
         {
             _config = config;

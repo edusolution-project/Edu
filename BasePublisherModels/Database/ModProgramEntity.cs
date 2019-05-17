@@ -30,8 +30,21 @@ namespace BasePublisherModels.Database
         }
         public ModProgramService(IConfiguration config, string tableName) : base(config, tableName)
         {
-
         }
+
+        public List<ModProgramEntity> FindBySubject(string id)
+        {
+            var filter = Builders<ModProgramEntity>.Filter.AnyEq("Subjects", id);
+            return CreateQuery().Find(filter).ToList();
+        }
+
+        public List<ModProgramEntity> FindByGrade(string id)
+        {
+            var filter = Builders<ModProgramEntity>.Filter.AnyEq("Grades", id);
+            return CreateQuery().Find(filter).ToList();
+        }
+
+
         public object GetItemByCode(string code)
         {
             return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();

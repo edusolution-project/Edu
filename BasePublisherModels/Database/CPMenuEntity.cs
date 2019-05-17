@@ -18,7 +18,7 @@ namespace BasePublisherModels.Database
         public string LangID { get; set; }
         public string Files { get; set; }
         public string Content { get; set; }
-        public bool Activity { get; set; }
+        public bool IsActive { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
     }
     public class CPMenuService : ServiceBase<CPMenuEntity>
@@ -44,7 +44,7 @@ namespace BasePublisherModels.Database
         }
         public CPMenuEntity GetRoot(string type)
         {
-            return CreateQuery().Find(o => o.Activity == true && string.IsNullOrEmpty(o.ParentID) && o.Type == type)?.SingleOrDefault();
+            return CreateQuery().Find(o => o.IsActive == true && string.IsNullOrEmpty(o.ParentID) && o.Type == type)?.SingleOrDefault();
         }
     }
 }

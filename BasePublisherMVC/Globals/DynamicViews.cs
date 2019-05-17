@@ -193,6 +193,11 @@ namespace BasePublisherMVC.Globals
                                 "<i class=\"material-icons\">add_circle</i>" + name + "<div class=\"ripple-container\"></div>" +
                                 "</a>";
                         break;
+                    case "createsub":
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-success\" onclick=\"redirectsub('create')\">" +
+                                "<i class=\"material-icons\">add_circle</i>" + name + "<div class=\"ripple-container\"></div>" +
+                                "</a>";
+                        break;
                     case "export":
                         html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-primary\" onclick=\"execute('" + key + "')\">" +
                                 "<i class=\"material-icons\">airplay</i>" + name + "<div class=\"ripple-container\"></div>" +

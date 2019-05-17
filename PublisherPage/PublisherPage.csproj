@@ -3,7 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+	<PreserveCompilationContext>true</PreserveCompilationContext>	
+	<MvcRazorCompileOnPublish>false</MvcRazorCompileOnPublish>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
 
 
   <ItemGroup>
@@ -21,6 +27,13 @@
 
   <ItemGroup>
     <Folder Include="Views\ModUnits\" />
+    <Folder Include="wwwroot\Files\AUDIO\" />
+    <Folder Include="wwwroot\Files\IMG\" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
   </ItemGroup>
 
 </Project>

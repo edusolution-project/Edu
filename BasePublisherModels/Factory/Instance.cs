@@ -31,8 +31,11 @@ namespace BasePublisherModels.Factory
             services.AddScoped<ModSubjectService>();
             services.AddScoped<ModGradeService>();
             services.AddScoped<ModUnitService>();
+            services.AddScoped<ModChapterService>();
             services.AddScoped<ModLessonService>();
             services.AddScoped<ModLessonPartService>();
+            services.AddScoped<ModLessonExtendService>();
+            services.AddScoped<ModGroupLessionService>();
             return services;
         }
         /// <summary>
