@@ -33,3 +33,4 @@ BaseMongoDB/bin/
 AdminPage_MongoDb/obj/
 AdminPage_MongoDb/bin/
 PublisherPage/appsettings.json
+/PublisherPage/wwwroot/Logs/Info
