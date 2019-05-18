@@ -1,9 +1,4 @@
-﻿using CoreMongoDB.Repositories;
-using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using BasePublisherModels.Database;
+﻿using BasePublisherModels.Database;
 
 namespace BasePublisherMVC.ViewModel
 {

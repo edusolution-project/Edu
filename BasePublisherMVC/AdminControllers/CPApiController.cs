@@ -582,15 +582,22 @@ namespace BasePublisherMVC.AdminControllers
             {
                 if (CheckLogin(UserID, ClientID))
                 {
+                    bool isUpdateSuccess = false;
                     var OldItem = _lessionExtendService.GetByID(item.ID);
                     if (OldItem == null) return new Response(404, "no data found", null);
 
                     var file = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files[0] : null;
                     if(file != null)
                     {
-                       //await _fileProcess.Update(OldItem.OriginalFile, file);
+                       isUpdateSuccess = await _fileProcess.UpdateAsync(OldItem.OriginalFile, file);
                     }
                     await _lessionExtendService.AddAsync(item);
+                    IDictionary<string, object> keyValues = new Dictionary<string, object>()
+                    {
+                        {"LessonExtend",item },
+                        {"FileUpdate", isUpdateSuccess}
+                    };
+
                     return new Response(200, "Success get all", item);
                 }
                 else

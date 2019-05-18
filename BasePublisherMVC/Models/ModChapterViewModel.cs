@@ -1,17 +1,25 @@
 ﻿using BasePublisherModels.Database;
 
-namespace BasePublisherMVC.AdminControllers
+namespace BasePublisherMVC.Models
 {
-    internal class ModChapterViewModel
+    public class ModChapterViewModel : ModChapterEntity
     {
-        private ModChapterEntity o;
+        public ModChapterEntity Parent { get; set; }
 
-        public ModChapterViewModel(ModChapterEntity o)
+        public ModChapterViewModel(ModChapterEntity entity)
         {
-            this.o = o;
+            ID = entity.ID;
+            ParentID = entity.ParentID;
+            IsActive = entity.IsActive;
+            Code = entity.Code;
+            CreateUser = entity.CreateUser;
+            Name = entity.Name;
+            Parent = null;
+            Created = entity.Created;
+            Updated = entity.Updated;
+            Order = entity.Order;
+            CourseID = entity.CourseID;
         }
 
-        public ModChapterEntity Parent { get; set; }
-        public object Order { get; internal set; }
     }
 }

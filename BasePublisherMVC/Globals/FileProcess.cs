@@ -53,6 +53,19 @@ namespace BasePublisherMVC.Globals
                 }
             }
         }
+        public async Task<bool> UpdateAsync(string link, IFormFile file)
+        {
+            string path = Path.Combine(RootPath, link);
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+            using (var fileStream = new FileStream(Path.Combine(RootPath, link), FileMode.Open))
+            {
+                await file.CopyToAsync(fileStream);
+                return true;
+            }
+        }
         public void DeleteFile(string linkFile)
         {
             var item = linkFile;
