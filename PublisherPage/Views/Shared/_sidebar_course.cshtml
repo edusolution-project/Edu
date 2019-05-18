@@ -1,0 +1,50 @@
+﻿@using BasePublisherModels.Database
+@using BasePublisherMVC.Globals;
+@using BasePublisherMVC.ViewModel
+@using Microsoft.AspNetCore.Mvc
+@{
+    var obj = ViewBag.Course as ModCourseEntity;
+    var chapters = ViewBag.Chapters as List<ModChapterViewModel>;
+    var currentChapter = (ViewBag.CurrentChapter ?? "0");
+}
+<div class="sidebar" data-color="danger" data-background-color="white">
+    <div class="logo">
+        <a href="#" class="simple-text logo-normal">
+            Publisher Manager
+        </a>
+    </div>
+    <div>
+
+    </div>
+    <div class="sidebar-wrapper">
+        <ul class="nav home">
+            <li class="nav-item @if(currentChapter == "0"){ @Html.Raw("active")}">
+                <a class="nav-link " href="@Url.Action("Detail","ModCourses", new {obj.ID})">
+                    <i class="material-icons">home</i>
+                    <p style="font-weight: 900">@obj.Name</p>
+                </a>
+            </li>
+            @{
+                if (chapters != null)
+                {
+                    for (int i = 0; chapters != null && i < chapters.Count; i++)
+                    {
+                        var item = chapters[i];
+                        <li class="nav-item @if(currentChapter == item.ID){ @Html.Raw("active")}">
+                            <a class="nav-link" href="@Url.Action("Detail", "ModChapters", new {item.ID})">
+                                <p>
+                                    @if (item.Parent.Order == item.Order) // root chapter
+                                    {@Html.Raw("-")}
+                                else
+                                {@Html.Raw("----")}
+                                    @item.Name
+                                </p>
+                            </a>
+                        </li>
+                    }
+                }
+
+            }
+        </ul>
+    </div>
+</div>

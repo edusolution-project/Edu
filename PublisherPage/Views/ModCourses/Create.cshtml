@@ -1,0 +1,115 @@
+﻿@using BasePublisherModels.Database
+@{
+    ViewData["Title"] = "Tạo mới khóa học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var subjects = ViewBag.SubjectData as List<ModSubjectEntity>
+    ;
+    var grades = ViewBag.GradeData as List<ModGradeEntity>
+        ;
+    var programs = ViewBag.ProgramData as List<ModProgramEntity>
+        ;
+}
+
+<div class="card">
+    <div class="card-header card-header-icon">
+        <h4 class="card-title">
+            <a href="@Url.Action("Index")" class="btn btn-sm btn-fab btn-danger"><i class="material-icons">reply</i></a>
+            <a href="javascript:void(0)" onclick="execute('create')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Lưu</a>
+        </h4>
+
+    </div>
+    <div class="card-body">
+        <form name="myform" asp-action="Create" method="post" enctype="application/x-www-form-urlencoded">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="ctrl" value="ModCourses" />
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Tên :</label>
+                        <input type="text" name="Name" class="form-control" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Mô tả :</label>
+                        <input type="text" name="Description" class="form-control" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Môn học :</label>
+                        <select class="form-control" name="SubjectID">
+                            @{
+                                if (subjects != null)
+                                {
+                                    int count = subjects.Count;
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        var item = subjects[i];
+                                        <option value="@item.ID">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Cấp độ :</label>
+                        <select class="form-control" name="GradeID">
+                            @{
+                                if (grades != null)
+                                {
+                                    int count = grades.Count;
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        var item = grades[i];
+                                        <option value="@item.ID">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Giáo trình :</label>
+                        <select class="form-control" name="ProgramID">
+                            @{
+                                if (programs != null)
+                                {
+                                    int count = programs.Count;
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        var item = programs[i];
+                                        <option value="@item.ID">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <input type="hidden" name="IsActive" value="true">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" checked="checked" />
+                                <span class="form-check-sign" style="white-space:nowrap; min-width:150px;">
+                                    <span class="text-left" style="position:relative;top:-5px;display:inline-block;"> Hoạt động :</span>  <span class="check"></span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </form>
+    </div>
+</div>
+@section Scripts
+            {
+    <script src="~/Contents/js/publisher.js"></script>
+}

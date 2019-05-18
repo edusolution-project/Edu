@@ -1,0 +1,1 @@
+﻿.notify{border:solid 2px #fff;display:inline-block;padding:20px;border-radius:20px;font-weight:bold;font-size:100%;color:#fff;opacity:.8;position:fixed;z-index:99999;}.notify.warning{background-color:#ffa500;}.notify.error{background-color:#f00;}.notify.success{background-color:#008000;}
