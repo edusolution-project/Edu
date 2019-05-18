@@ -1,0 +1,76 @@
+﻿@using BasePublisherModels.Database
+@using BasePublisherMVC.ViewModel
+
+@{
+    ViewData["Title"] = "Cập nhật thông tin";
+    Layout = "~/Views/Shared/_LayoutCourse.cshtml";
+    var data = (ViewBag.Chapters as List<ModChapterViewModel>
+    );
+    var obj = ViewBag.Data as ModChapterEntity;
+
+}
+
+<div class="card">
+    <div class="card-header card-header-icon">
+        <h4 class="card-title">
+            <a href="@Url.Action("Detail","ModChapters", new {obj.ID})" class="btn btn-sm btn-fab btn-danger"><i class="material-icons">reply</i></a>
+            <a href="javascript:void(0)" onclick="execute('edit')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Lưu</a>
+        </h4>
+
+    </div>
+    <div class="card-body">
+        <form name="myform" asp-action="Create" method="post" enctype="application/x-www-form-urlencoded">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="ArrID" name="ArrID" value="" />
+            <input type="hidden" id="ctrl" value="ModChapters" />
+            <input type="hidden" id="ID" name="ID" value="@obj.ID" />
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Tên :</label>
+                        <input type="text" name="Name" class="form-control" autocomplete="off" value="@obj.Name">
+                    </div>
+                </div>
+                @*<div class="col-md-12">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Mã :</label>
+                            <input type="text" name="Code" class="form-control" autocomplete="off" disabled="disabled" value="@obj.Code">
+                        </div>
+                    </div>*@
+                <div class="col-md-6">
+                    <label class=""> Gốc : </label>
+                    <select class="form-control" name="ParentID">
+                        <option value="0">---</option>
+                        @{
+                            if (data != null)
+                            {
+                                int count = data.Count;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    var item = data[i];
+                                    if (item.ID == obj.ID || item.ParentID == obj.ID)
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.ID">@item.Name</option>
+                                    }
+                                }
+                            }
+                        }
+                    </select>
+                    <script>
+                        $('select[name="ParentID"]').val('@obj.ParentID');
+                    </script>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts
+    {
+    <script src="~/Contents/js/publisher.js"></script>
+}

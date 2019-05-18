@@ -10,7 +10,8 @@ namespace BasePublisherModels.Database
         public string Name { get; set; }
         public string Code { get; set; }
         public string CourseID { get; set; }
-        public string ParentID { get; set; } = "0";
+        public string ParentID { get; set; }
+        public int ParentType { get; set; }
         public string CreateUser { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
@@ -28,9 +29,14 @@ namespace BasePublisherModels.Database
         {
 
         }
-        public object GetItemByCode(string code)
+        public object GetByCode(string code)
         {
             return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();
         }
+    }
+
+    public static class PARENT_TYPE_CODE
+    {
+        public const int COURSE = 1, CHAPTER = 2;
     }
 }

@@ -1,8 +1,13 @@
-﻿using BasePublisherModels.Database;
+﻿using CoreMongoDB.Repositories;
+using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
+using System;
+using System.Collections.Generic;
+using BasePublisherModels.Database;
 
-namespace BasePublisherMVC.Models
+namespace BasePublisherMVC.ViewModel
 {
-    public class ModCourseViewModel: ModCourseEntity
+    public class ModCourseViewModel : ModCourseEntity
     {
         public ModProgramEntity Program { get; set; }
         public ModGradeEntity Grade { get; set; }
@@ -24,5 +29,6 @@ namespace BasePublisherMVC.Models
             Updated = entity.Updated;
             Description = entity.Description;
         }
+
     }
 }

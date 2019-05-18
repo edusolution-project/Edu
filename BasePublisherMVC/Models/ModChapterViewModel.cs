@@ -1,6 +1,11 @@
-﻿using BasePublisherModels.Database;
+﻿using CoreMongoDB.Repositories;
+using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
+using System;
+using System.Collections.Generic;
+using BasePublisherModels.Database;
 
-namespace BasePublisherMVC.Models
+namespace BasePublisherMVC.ViewModel
 {
     public class ModChapterViewModel : ModChapterEntity
     {
