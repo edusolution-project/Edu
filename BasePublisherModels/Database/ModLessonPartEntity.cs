@@ -9,7 +9,9 @@ namespace BasePublisherModels.Database
     {
         public string ParentID { get; set; } // chính là lessonID
         public string Title { get; set; }
+        public int Timer { get; set; }
         public string Content { get; set; }
+        public int TemplateType { get; set; }
         public bool IsExample { get; set; } // laf bai tap thi co answer , 
         public string Point { get; set; }
         public DateTime Created { get; set; }

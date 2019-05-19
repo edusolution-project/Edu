@@ -13,6 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="AdminControllers\ModChapterViewModel.cs" />
+    <Compile Remove="AdminControllers\ModCourseViewModel.cs" />
     <Compile Remove="AdminControllers\ModLessionsController.cs" />
     <Compile Remove="Base\ViewPage.cs" />
   </ItemGroup>

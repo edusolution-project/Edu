@@ -19685,3 +19685,130 @@ Copyright (c) 2015 Daniel Eden
 }
 
 /*# sourceMappingURL=dashboard-free.css.map */
+.template_type {
+    margin: 0;
+    padding: 0;
+    float: left;
+}
+
+ul.template_type > li {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+}
+
+.template_type > .template_type_item {
+    width: 50%;
+    float: left;
+    padding: 10px;
+    position: relative;
+    height: 150px;
+    cursor: pointer;
+}
+
+.template_type_item:hover {
+    box-shadow: 0 0 10px #ccc;
+    border-radius: 40px;
+    overflow: hidden;
+    color: #f44336;
+    font-weight: 600;
+}
+
+.template_type > .template_type_item > img {
+    width: 100px;
+    margin: auto;
+    left: 0;
+    right: 0;
+    bottom: 15px;
+    position: absolute;
+}
+
+.template_type {
+    width: 100%;
+    float: left;
+}
+
+    .template_type > .template_type_item > span {
+        background: #fff;
+        display: block;
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        padding: 1px 1px;
+        top: -5px;
+    }
+
+.p-fixed {
+    position: fixed;
+    z-index: 30;
+    max-width: 100%;
+    width: 992px;
+    background: #fff;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 80vh;
+    box-shadow: 0 0 2000px;
+    border-radius: 10px;
+}
+
+.lesson-container {
+    padding: 40px 10px;
+}
+
+    .lesson-container > .lesson-header, .part-item-header {
+        text-align: center;
+        font-weight: 500;
+        position: relative;
+    }
+
+.part-box {
+    display: block;
+    width: 100%;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+    box-shadow: 9px 11px 10px #ddd;
+    margin-bottom: 10px;
+}
+
+.part-item-header {
+    text-align: justify;
+}
+
+    .part-item-header > .title {
+        display: inline-block;
+        border-bottom: 1px solid;
+        padding: 5px;
+    }
+
+.body-content {
+    padding: 20px 10px;
+}
+
+.lesson-container > .lesson-header > .timer, .lesson-container > .lesson-header > .point, .lesson-container > .lesson-header > .btn-close, .part-item-header > .btn-close {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.lesson-container > .lesson-header > .point {
+    right: 0;
+    left: auto;
+}
+
+.lesson-container > .lesson-header > .btn-close, .part-item-header > .btn-close {
+    top: -40px;
+    right: 0;
+    left: auto;
+    z-index: 40;
+}
+
+.part-item-header > .btn-close {
+    top: 0;
+}

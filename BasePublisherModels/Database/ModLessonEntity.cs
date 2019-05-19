@@ -10,6 +10,9 @@ namespace BasePublisherModels.Database
         public string CourseID { get; set; }
         public string ChapterID { get; set; }
         public bool IsParentCourse { get; set; } // có phải là course hay không ?
+        public int TemplateType { get; set; }
+        public int Point { get; set; }
+        public int Timer { get; set; }
         public string CreateUser { get; set; }
         public string Title { get; set; }
         public string Code { get; set; }

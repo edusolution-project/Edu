@@ -1,8 +1,9 @@
 ﻿@using BasePublisherModels.Database
-@using BasePublisherMVC.Globals;
-@using BasePublisherMVC.ViewModel
+@using BasePublisherMVC.Globals
+@using BasePublisherMVC.Models
 @using Microsoft.AspNetCore.Mvc
 @{
+    var listLesson = ViewBag.LessonCourse as List<ModLessonEntity>;
     var obj = ViewBag.Course as ModCourseEntity;
     var chapters = ViewBag.Chapters as List<ModChapterViewModel>;
     var currentChapter = (ViewBag.CurrentChapter ?? "0");
@@ -18,12 +19,27 @@
     </div>
     <div class="sidebar-wrapper">
         <ul class="nav home">
-            <li class="nav-item @if(currentChapter == "0"){ @Html.Raw("active")}">
-                <a class="nav-link " href="@Url.Action("Detail","ModCourses", new {obj.ID})">
+            <li class="nav-item @if (currentChapter == "0") { @Html.Raw("active")}">
+                <a class="nav-link " href="@Url.Action("Detail", "ModCourses", new { obj.ID })">
                     <i class="material-icons">home</i>
                     <p style="font-weight: 900">@obj.Name</p>
                 </a>
             </li>
+            @{ if (listLesson != null)
+                {
+                    for (int i = 0; i < listLesson.Count; i++)
+                    {
+                        var item = listLesson[i];
+                        <li class="nav-item @if(currentChapter == item.ID){ @Html.Raw("active")}">
+                            <a class="nav-link" href="javascript:void(0)" onclick="load.lesson('@item.ID')">
+                                <p>
+                                    @item.Title
+                                </p>
+                            </a>
+                        </li>
+                    }
+                }
+            }
             @{
                 if (chapters != null)
                 {
@@ -40,6 +56,26 @@
                                     @item.Name
                                 </p>
                             </a>
+                            @{ 
+                                if (item.ItemChild != null)
+                                {
+                                    <ul>
+                                       @{ 
+                                           for (var x = 0; item.ItemChild != null && x < item.ItemChild.Count; x++)
+                                           {
+                                               var lesson = item.ItemChild[x];
+                                                <li>
+                                                    <a class="nav-link" href="javascript:void(0)" onclick="load.lesson('@lesson.ID')">
+                                                        <p>
+                                                            @lesson.Title
+                                                        </p>
+                                                    </a>
+                                                </li>
+                                           }
+                                        }
+                                    </ul>
+                                }
+                            }
                         </li>
                     }
                 }

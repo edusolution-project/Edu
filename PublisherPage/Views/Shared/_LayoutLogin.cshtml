@@ -14,8 +14,8 @@
     <link href="~/Contents/Css/LoginPage.css" rel="stylesheet" />
 </head>
 <body>
+    @await Html.PartialAsync("_CookieConsentPartial")
     <div class="wrapper" style="overflow:hidden">
-        <partial name="_CookieConsentPartial" />
         <div class="container-fluid">
             @RenderBody()
         </div>

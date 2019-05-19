@@ -5,13 +5,14 @@ using System;
 using System.Collections.Generic;
 using BasePublisherModels.Database;
 
-namespace BasePublisherMVC.ViewModel
+namespace BasePublisherMVC.Models
 {
     public class ModCourseViewModel : ModCourseEntity
     {
         public ModProgramEntity Program { get; set; }
         public ModGradeEntity Grade { get; set; }
         public ModSubjectEntity Subject { get; set; }
+        public List<ModLessonEntity> ListLesson { get; set; }
         public int ChildNodeCount { get; set; }
 
         public ModCourseViewModel(ModCourseEntity entity)

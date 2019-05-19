@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using BasePublisherModels.Database;
 
-namespace BasePublisherMVC.ViewModel
+namespace BasePublisherMVC.Models
 {
     public class ModChapterViewModel : ModChapterEntity
     {
@@ -25,6 +25,7 @@ namespace BasePublisherMVC.ViewModel
             Order = entity.Order;
             CourseID = entity.CourseID;
         }
-
+        public List<ModLessonEntity> ItemChild { get; set; }
+        public List<ModChapterEntity> ChildNode { get; set; }
     }
 }

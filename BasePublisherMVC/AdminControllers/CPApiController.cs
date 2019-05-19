@@ -194,6 +194,7 @@ namespace BasePublisherMVC.AdminControllers
                         item.CreateUser = _currentUser.ID;
                         item.IsAdmin = true;
                         item.IsActive = false;
+                        item.IsParentCourse = item.ChapterID.Equals("0");
                         item.Updated = DateTime.Now;
                         var list = _lessionService.CreateQuery().Find(o => o.Code == item.Code).ToList();
                         if (list != null && list.Count > 0)
@@ -341,12 +342,13 @@ namespace BasePublisherMVC.AdminControllers
             {
                 if (CheckLogin(UserID, ClientID))
                 {
-                    if(item.ID == "0")
+                    if(item.ID == "0" || item.ID == null)
                     {
                         var listItem = _lessionPartService.CreateQuery().Find(o => o.ParentID == item.ParentID).ToList();
                         item.Created = DateTime.Now;
                         item.Order = listItem != null ? listItem.Count : 0;
                         item.Updated = DateTime.Now;
+                        item.IsExample = item.TemplateType == 2;
                     }
                     else
                     {
@@ -498,12 +500,14 @@ namespace BasePublisherMVC.AdminControllers
             {
                 if (CheckLogin(UserID, ClientID))
                 {
-                    if (item.ID == "0")
+                    if(item.ID == "0" || item.ID == null)
                     {
                         var listItem = _answerService.CreateQuery().Find(o => o.ParentID == item.ParentID).ToList();
                         item.Created = DateTime.Now;
                         item.Order = listItem != null ? listItem.Count : 0;
                         item.Updated = DateTime.Now;
+                        item.CreateUser = _currentUser.ID;
+                        item.Order = listItem == null ? 0 : listItem.Count;
                     }
                     else
                     {
@@ -561,7 +565,30 @@ namespace BasePublisherMVC.AdminControllers
                 {
                     var item = _answerService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
                     if (item == null) return new Response(404, "data not found", ID);
-                    return new Response(200, "Success get all", ID);
+                    return new Response(200, "Success get all", item);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _logs.WriteLogsError("CreateOrUpdateLesson", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        [HttpGet]
+        public async Task<Response> GetListLessonExtends(string ID, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    var item = _lessionExtendService.CreateQuery().Find(o => o.LessonPartID == ID).ToList();
+                    if (item == null) return new Response(404, "data not found", ID);
+                    return new Response(200, "Success get all", item);
                 }
                 else
                 {

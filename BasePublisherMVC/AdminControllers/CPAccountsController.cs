@@ -11,7 +11,7 @@ using BasePublisherModels.Database;
 
 namespace BasePublisherMVC.AdminControllers
 {
-    public class CPAccountsController : Controller
+    public class CPAccountsController : AdminController
     {
         protected CPUserEntity currentUser;
         private readonly CPUserService _userService;
@@ -22,7 +22,8 @@ namespace BasePublisherMVC.AdminControllers
         public CPAccountsController(IHostingEnvironment environment,
             CPUserService userService, 
             CPLoginLogService loginLogService,
-            CPRoleService roleService)
+            CPRoleService roleService,
+            Security security)
         {
             _hostingEnvironment = environment;
             _userService = userService;
@@ -108,7 +109,7 @@ namespace BasePublisherMVC.AdminControllers
                             if (role != null)
                             {
                                 HttpContext.SetValue(Cookies.DefaultLogin, _token,Cookies.ExpiresLogin,false);
-                                //_ilogs.WriteLogsInfo(_token);
+                                _ilogs.WriteLogsInfo(_token);
                                 var claims = new List<Claim>
                                 {
                                     new Claim(ClaimTypes.Email, user.Email),
@@ -135,6 +136,7 @@ namespace BasePublisherMVC.AdminControllers
                                 };
                                 var url = string.IsNullOrEmpty(returnurl) ? null : System.Net.WebUtility.UrlDecode(returnurl).Split('/');
                                 _loginLogService.SetLogin(login);
+                                _ilogs.WriteLogsInfo(url[1]+"-"+url[0]);
                                 return url == null
                                     ? RedirectToAction("Index", "CPHome")
                                     : RedirectToAction(url[1], url[0]);

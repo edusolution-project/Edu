@@ -188,6 +188,11 @@ namespace BasePublisherMVC.Globals
                 var name = _arr[1];
                 switch (key.ToLower())
                 {
+                    case "createlesson":
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-success\" onclick=\"Create.lesson()\">" +
+                                "<i class=\"material-icons\">add_circle</i>" + name + "<div class=\"ripple-container\"></div>" +
+                                "</a>";
+                        break;
                     case "create":
                         html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-success\" onclick=\"redirect('" + key + "')\">" +
                                 "<i class=\"material-icons\">add_circle</i>" + name + "<div class=\"ripple-container\"></div>" +

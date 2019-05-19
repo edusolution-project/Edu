@@ -1,6 +1,6 @@
 ﻿using BasePublisherModels.Database;
 
-namespace BasePublisherMVC.ViewModel
+namespace BasePublisherMVC.Models
 {
     public class ModGradeViewModel : ModGradeEntity
     {

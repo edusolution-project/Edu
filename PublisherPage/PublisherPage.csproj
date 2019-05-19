@@ -36,4 +36,11 @@
     <Folder Include="Views\ModUnits\" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Content Update="Views\Shared\_CookieConsentPartial.cshtml">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

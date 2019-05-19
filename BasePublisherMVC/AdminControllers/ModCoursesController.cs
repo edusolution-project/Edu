@@ -2,11 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using BasePublisherModels.Database;
 using BasePublisherMVC.Models;
-using BasePublisherMVC.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 
@@ -26,19 +24,20 @@ namespace BasePublisherMVC.AdminControllers
         private readonly ModGradeService _gradeService;
         private readonly ModProgramService _programService;
         private readonly ModChapterService _chapterService;
+        private readonly ModLessonService _lessonService;
 
-        public ModCoursesController(ModCourseService service, ModProgramService programService, ModSubjectService subjectService, ModGradeService gradeService, ModChapterService chapterService)
+        public ModCoursesController(ModCourseService service, ModProgramService programService, ModSubjectService subjectService, ModGradeService gradeService, ModChapterService chapterService, ModLessonService lessonService)
         {
             _service = service;
             _subjectService = subjectService;
             _gradeService = gradeService;
             _programService = programService;
             _chapterService = chapterService;
+            _lessonService = lessonService;
         }
 
         public ActionResult Index(ModCourseModel model)
         {
-            if (string.IsNullOrEmpty(model.ID)||model.ID.Equals("0")) {
                 var programdata = _programService.Find(true, o => o.CreateUser == _currentUser.ID)
                 .Where(!string.IsNullOrEmpty(model.Subject), o => o.Subjects.IndexOf(model.Subject) >= 0)
                 .Where(!string.IsNullOrEmpty(model.Grade), o => o.Grades.IndexOf(model.Grade) >= 0)
@@ -79,12 +78,7 @@ namespace BasePublisherMVC.AdminControllers
                 ViewBag.Data = result.ToList();
 
                 model.TotalRecord = result.Count;
-            }
-            else
-            {
-                var data = _service.CreateQuery().Find(o => o.ID == model.ID && o.CreateUser == _currentUser.ID).SingleOrDefault();
-                ViewBag.Data = data;
-            }
+
             ViewBag.Model = model;
             return View();
         }
@@ -253,19 +247,25 @@ namespace BasePublisherMVC.AdminControllers
                 }
                 ViewBag.Title = item.Name;
                 ViewBag.Course = item;
+                var lessonsCourse = _lessonService.CreateQuery().Find(o => o.CreateUser == _currentUser.ID && o.IsParentCourse == true && o.CourseID == item.ID).ToList();
+                ViewBag.LessonCourse = lessonsCourse;
                 ViewBag.Data = new ModCourseViewModel(item)
                 {
                     Program = _programService.GetByID(item.ProgramID),
                     Grade = _gradeService.GetByID(item.GradeID),
-                    Subject = _subjectService.GetByID(item.SubjectID)
+                    Subject = _subjectService.GetByID(item.SubjectID),
+                    ListLesson = lessonsCourse
                 };
                 var chapters = _chapterService.Find(true, o => o.CourseID == item.ID);
                 ViewBag.Chapters = chapters.Select(o => new ModChapterViewModel(o)
                 {
                     Parent = (!string.IsNullOrEmpty(o.ParentID) && o.ParentID != "0")
                         ? chapters.FirstOrDefault(t => t.ID == o.ParentID)
-                        : new ModChapterEntity {Order = o.Order}
+                        : new ModChapterEntity { Order = o.Order },
+                    ChildNode = _chapterService.CreateQuery().Find(x => x.ParentID == ID).ToList(),
+                    ItemChild = _lessonService.CreateQuery().Find(x=>x.IsParentCourse == false && x.ChapterID == ID).ToList()
                 }).OrderBy(o => o.Parent.Order).ThenBy(o => o.Order).ToList();
+                
             }
             return View();
         }

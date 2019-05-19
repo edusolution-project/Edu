@@ -2,13 +2,10 @@
 using BasePublisherMVC.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using BasePublisherModels.Database;
-using BasePublisherMVC.ViewModel;
 using CoreMongoDB.Repositories;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;

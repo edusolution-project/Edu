@@ -21,87 +21,85 @@
     <div class="col-md-12">
         <div class="card">
             @{
-                if (string.IsNullOrEmpty(model.ID) || model.ID.Equals("0"))
-                {
-                    <form name="myform" method="post" enctype="application/x-www-form-urlencoded">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" id="ArrID" name="ArrID" value="" />
-                        <input type="hidden" id="ctrl" value="ModCourses" />
+                <form name="myform" method="post" enctype="application/x-www-form-urlencoded">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="ArrID" name="ArrID" value="" />
+                    <input type="hidden" id="ctrl" value="ModCourses" />
 
-                        <script type="text/javascript">
-                            var Search = [
-                                "filter_Search", "SearchText",
-                                "filter_Subject", "Subject",
-                                "filter_Grade", "Grade",
-                                "fitter_Program", "Program"
-                            ];
-                            var SearchDefault = [
-                                "1", "PageIndex",
-                                "1", "LangID",
-                                "20", "PageSize",
-                                "0", "Grade",
-                                "0", "Subject",
-                                "0", "Program"
-                            ];
+                    <script type="text/javascript">
+                        var Search = [
+                            "filter_Search", "SearchText",
+                            "filter_Subject", "Subject",
+                            "filter_Grade", "Grade",
+                            "fitter_Program", "Program"
+                        ];
+                        var SearchDefault = [
+                            "1", "PageIndex",
+                            "1", "LangID",
+                            "20", "PageSize",
+                            "0", "Grade",
+                            "0", "Subject",
+                            "0", "Program"
+                        ];
 
 /**/</script>
-                        <div class="card-header card-header-image text-right">
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <div class="col-sm-12 col-md-6 col-lg-5">
-                                    </div>
-                                    <div class="col-sm-12 col-md-6 col-lg-7">
-                                        @DynamicViews.GetCommand("create| Tạo mới,active|Kích hoạt,nonactive|Vô hiệu,export| Xuất ,delete|Xóa,clear|'Bỏ lọc'")
-                                    </div>
+                    <div class="card-header card-header-image text-right">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6 col-lg-5">
                                 </div>
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div class="row">
-                                            <select class="form-control" name="Subject" id="filter_Subject" style="width: 20%; margin-right: 2%" onchange="redirect('Index')">
-                                                <option value="0">Môn học</option>
-                                                @{
-                                                    if (subjects != null)
+                                <div class="col-sm-12 col-md-6 col-lg-7">
+                                    @DynamicViews.GetCommand("create| Tạo mới,active|Kích hoạt,nonactive|Vô hiệu,export| Xuất ,delete|Xóa,clear|'Bỏ lọc'")
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="row">
+                                        <select class="form-control" name="Subject" id="filter_Subject" style="width: 20%; margin-right: 2%" onchange="redirect('Index')">
+                                            <option value="0">Môn học</option>
+                                            @{
+                                                if (subjects != null)
+                                                {
+                                                    int count = subjects.Count;
+                                                    for (int i = 0; i < count; i++)
                                                     {
-                                                        int count = subjects.Count;
-                                                        for (int i = 0; i < count; i++)
-                                                        {
-                                                            var item = subjects[i];
-                                                            <option value="@item.ID">@item.Name</option>
-                                                        }
+                                                        var item = subjects[i];
+                                                        <option value="@item.ID">@item.Name</option>
                                                     }
                                                 }
-                                            </select>
+                                            }
+                                        </select>
 
-                                            <select class="form-control" name="Grade" id="filter_Grade" style="width: 20%; margin-right: 2%" onchange="redirect('Index')">
-                                                <option value="0">Cấp độ</option>
-                                                @{
-                                                    if (grades != null)
+                                        <select class="form-control" name="Grade" id="filter_Grade" style="width: 20%; margin-right: 2%" onchange="redirect('Index')">
+                                            <option value="0">Cấp độ</option>
+                                            @{
+                                                if (grades != null)
+                                                {
+                                                    int count = grades.Count;
+                                                    for (int i = 0; i < count; i++)
                                                     {
-                                                        int count = grades.Count;
-                                                        for (int i = 0; i < count; i++)
-                                                        {
-                                                            var item = grades[i];
-                                                            <option value="@item.ID">@item.Name</option>
-                                                        }
+                                                        var item = grades[i];
+                                                        <option value="@item.ID">@item.Name</option>
                                                     }
                                                 }
-                                            </select>
+                                            }
+                                        </select>
 
-                                            <select class="form-control" name="Program" id="filter_Program" style="width: 50%;" onchange="redirect('Index')">
-                                                <option value="0">Giáo trình</option>
-                                                @{
-                                                    if (programs != null)
+                                        <select class="form-control" name="Program" id="filter_Program" style="width: 50%;" onchange="redirect('Index')">
+                                            <option value="0">Giáo trình</option>
+                                            @{
+                                                if (programs != null)
+                                                {
+                                                    int count = programs.Count;
+                                                    for (int i = 0; i < count; i++)
                                                     {
-                                                        int count = programs.Count;
-                                                        for (int i = 0; i < count; i++)
-                                                        {
-                                                            var item = programs[i];
-                                                            <option value="@item.ID">@item.Name</option>
-                                                        }
+                                                        var item = programs[i];
+                                                        <option value="@item.ID">@item.Name</option>
                                                     }
                                                 }
-                                            </select>
-                                            <script>
+                                            }
+                                        </select>
+                                        <script>
                                         @if (!String.IsNullOrEmpty(model.Grade))
                                         {
                                             @Html.Raw("$('#filter_Grade').val('" + model.Grade + "');")
@@ -117,80 +115,75 @@
                                             @Html.Raw("$('#filter_Program').val('" + model.Program + "');")
                                             ;
                                         }
-                                            </script>
-                                        </div>
+                                        </script>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="">
-                                <table class="table table-bordered">
-                                    <thead class="text-center">
-                                        <tr>
-                                            <th width="5%">
-                                                <div class="form-check">
-                                                    <label class="form-check-label">
-                                                        <input class="form-check-input" type="checkbox" onclick="checkall(this)" />
-                                                        <span class="form-check-sign">
-                                                            <span class="check"></span>
-                                                        </span>
-                                                    </label>
-                                                </div>
-                                            </th>
-                                            <th>Tên</th>
-                                            <th>Mã</th>
-                                            <th>Môn học</th>
-                                            <th>Giáo trình</th>
-                                            <th>Cấp độ</th>
-                                            <th>Mô tả</th>
-                                            @*<th>Ngày tạo</th>
-                                        <th>Cập nhật</th>*@
-                                            <th>Trạng thái</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @{
-                                            if (data != null)
+                    </div>
+                    <div class="card-body">
+                        <div class="">
+                            <table class="table table-bordered">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th width="5%">
+                                            <div class="form-check">
+                                                <label class="form-check-label">
+                                                    <input class="form-check-input" type="checkbox" onclick="checkall(this)" />
+                                                    <span class="form-check-sign">
+                                                        <span class="check"></span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </th>
+                                        <th>Tên</th>
+                                        <th>Mã</th>
+                                        <th>Môn học</th>
+                                        <th>Giáo trình</th>
+                                        <th>Cấp độ</th>
+                                        <th>Mô tả</th>
+                                        @*<th>Ngày tạo</th>
+                                            <th>Cập nhật</th>*@
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        if (data != null)
+                                        {
+                                            int count = data.Count;
+                                            for (int i = 0; i < count; i++)
                                             {
-                                                int count = data.Count;
-                                                for (int i = 0; i < count; i++)
-                                                {
-                                                    var item = data[i];
-                                                    <tr>
-                                                        <td align="center">
-                                                            <div class="form-check">
-                                                                <label class="form-check-label">
-                                                                    <input name="cid" class="form-check-input" value="@item.ID" type="checkbox" />
-                                                                    <span class="form-check-sign">
-                                                                        <span class="check"></span>
-                                                                    </span>
-                                                                </label>
-                                                            </div>
-                                                        </td>
-                                                        <td align="center"><a class="text-info" href="@Url.Action("detail", new { id = item.ID })">@item.Name</a></td>
-                                                        <td align="center"><a class="text-info" href="@Url.Action("edit", new { id = item.ID })">@item.Code</a></td>
-                                                        <td align="center">@item.Subject.Name</td>
-                                                        <td align="center">@item.Program.Name</td>
-                                                        <td align="center">@item.Grade.Name</td>
-                                                        <td align="center">@item.Description</td>
-                                                        <td align="center">
-                                                            @DynamicViews.GetActive(item.ID, item.IsActive)
-                                                        </td>
-                                                    </tr>
-                                                }
+                                                var item = data[i];
+                                                <tr>
+                                                    <td align="center">
+                                                        <div class="form-check">
+                                                            <label class="form-check-label">
+                                                                <input name="cid" class="form-check-input" value="@item.ID" type="checkbox" />
+                                                                <span class="form-check-sign">
+                                                                    <span class="check"></span>
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                    <td align="center"><a class="text-info" href="@Url.Action("detail", new { id = item.ID })">@item.Name</a></td>
+                                                    <td align="center"><a class="text-info" href="@Url.Action("edit", new { id = item.ID })">@item.Code</a></td>
+                                                    <td align="center">@item.Subject.Name</td>
+                                                    <td align="center">@item.Program.Name</td>
+                                                    <td align="center">@item.Grade.Name</td>
+                                                    <td align="center">@item.Description</td>
+                                                    <td align="center">
+                                                        @DynamicViews.GetActive(item.ID, item.IsActive)
+                                                    </td>
+                                                </tr>
                                             }
                                         }
-                                    </tbody>
-                                </table>
-                            </div>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
-                    </form>
-                }
-                else
-                {
-                    <div id="course"></div>
-                }
+                    </div>
+                </form>
             }
         </div>
     </div>
@@ -214,6 +207,8 @@
         </div>
     </div>
 </div>
-@section Scripts{ 
+@section Scripts{
+    <script src="~/Contents/js/publisher.js"></script>
     <script src="~/Contents/js/lesson.js"></script>
+    
 }
