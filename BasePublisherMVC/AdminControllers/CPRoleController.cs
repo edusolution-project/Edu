@@ -49,7 +49,6 @@ namespace BasePublisherMVC.AdminControllers
             return View();
         }
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DefaultModel model, CPRoleEntity item)
         {
             ViewBag.Title = "Thêm mới";
@@ -108,7 +107,6 @@ namespace BasePublisherMVC.AdminControllers
             return View();
         }
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(DefaultModel model, CPRoleEntity item)
         {
             ViewBag.Title = "Chỉnh sửa";

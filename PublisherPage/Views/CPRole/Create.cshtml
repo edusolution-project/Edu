@@ -1,6 +1,6 @@
 ﻿
 @{
-    Layout = "~/Views/Shared/_LayoutDefaults.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="alert-info">
     @ViewBag.Message
@@ -15,7 +15,6 @@
     </div>
     <div class="card-body">
         <form name="myform" asp-action="Create" asp-controller="Roles" method="post" enctype="application/x-www-form-urlencoded">
-            @Html.AntiForgeryToken()
             <input type="hidden" id="ArrID" name="ArrID" value="" />
             <input type="hidden" id="ctrl" value="cprole" />
             <div class="row">

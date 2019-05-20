@@ -1,0 +1,100 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var data = ViewBag.RoleData as List<BasePublisherModels.Database.CPRoleEntity>;
+}
+<div class="alert-info">
+    @ViewBag.Message
+</div>
+<div class="card">
+    <div class="card-header card-header-icon">
+        <h4 class="card-title">
+           <a href="@Url.Action("Index")" class="btn btn-sm btn-fab btn-danger"><i class="material-icons">reply</i></a>
+            <a href="javascript:void(0)" onclick="execute('create')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Save</a>
+        </h4>
+        
+    </div>
+    <div class="card-body">
+        @*public string Name { get; set; }
+        public int RoleID { get; set; } = 2;
+        public string Email { get; set; }
+        public string Pass { get; set; }
+        public DateTime BirthDay { get; set; }
+        public string Skype { get; set; }
+        public string Phone { get; set; }
+        public bool IsActive { get; set; }*@
+        <form name="myform" asp-action="Create" asp-controller="cpuser" method="post" enctype="application/x-www-form-urlencoded">
+            <input type="hidden" id="ArrID" name="ArrID" value="" />
+            <input type="hidden" id="ctrl" value="cpuser" />
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Tên :</label>
+                        <input type="text" name="Name" class="text-light form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Email :</label>
+                        <input type="email" name="Email" class="text-light form-control" required autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class=""> Chuyên mục : </label>
+                    <select class="form-control" name="RoleID">
+                        <option value="0">Root</option>
+                        @{
+                            if (data != null)
+                            {
+                                int count = data.Count;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    var item = data[i];
+                                    <option value="@item.ID">@item.Name</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">PassWord :</label>
+                        <input type="password" name="Pass" class="text-light form-control" required autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">BirthDay :</label>
+                        <input type='text' class="form-control datetimepicker" name="BirthDay" />
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <input type="hidden" name="IsActive" value="false" />
+                    <div class="form-group">
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" />
+                                <span class="form-check-sign">
+                                    <span class="check"></span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Phone :</label>
+                        <input type="tel" name="Phone" class="text-light form-control" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Skype :</label>
+                        <input type="text" name="Skype" class="text-light form-control" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </form>
+    </div>
+</div>
