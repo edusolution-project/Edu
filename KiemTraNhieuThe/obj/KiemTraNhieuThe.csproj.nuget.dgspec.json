@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj": {}
+    "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj": {}
   },
   "projects": {
-    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj": {
+    "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj",
+        "projectUniqueName": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj",
         "projectName": "KiemTraNhieuThe",
-        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj",
+        "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj",
         "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\KiemTraNhieuThe\\obj\\",
+        "outputPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\KiemTraNhieuThe\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

@@ -12965,11 +12965,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj",
+      "projectUniqueName": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\ClientPage\\ClientPage.csproj",
       "projectName": "ClientPage",
-      "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\ClientPage.csproj",
+      "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\ClientPage\\ClientPage.csproj",
       "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-      "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\ClientPage\\obj\\",
+      "outputPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\ClientPage\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

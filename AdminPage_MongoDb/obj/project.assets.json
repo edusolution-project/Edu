@@ -10411,11 +10411,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
+      "projectUniqueName": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
       "projectName": "AdminPage_MongoDB",
-      "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
+      "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
       "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-      "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\AdminPage_MongoDb\\obj\\",
+      "outputPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\AdminPage_MongoDb\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -10433,17 +10433,17 @@
       "frameworks": {
         "net461": {
           "projectReferences": {
-            "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj": {
-              "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj"
+            "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
+              "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
             },
-            "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj": {
-              "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMVC\\BaseMVC.csproj"
+            "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj": {
+              "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj"
             },
-            "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj": {
-              "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj"
+            "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj": {
+              "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj"
             },
-            "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\EntityBaseFW\\EntityBaseFW.csproj": {
-              "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\EntityBaseFW\\EntityBaseFW.csproj"
+            "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\EntityBaseFW\\EntityBaseFW.csproj": {
+              "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\EntityBaseFW\\EntityBaseFW.csproj"
             }
           }
         }

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\PublisherPage.csproj": {}
+    "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\PublisherPage\\PublisherPage.csproj": {}
   },
   "projects": {
-    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\PublisherPage.csproj": {
+    "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\PublisherPage\\PublisherPage.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\PublisherPage.csproj",
+        "projectUniqueName": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\PublisherPage\\PublisherPage.csproj",
         "projectName": "PublisherPage",
-        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\PublisherPage.csproj",
+        "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\PublisherPage\\PublisherPage.csproj",
         "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\PublisherPage\\obj\\",
+        "outputPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\PublisherPage\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

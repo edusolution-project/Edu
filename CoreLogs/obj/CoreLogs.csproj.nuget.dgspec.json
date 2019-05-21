@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj": {}
+    "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj": {}
   },
   "projects": {
-    "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj": {
+    "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj",
+        "projectUniqueName": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj",
         "projectName": "CoreLogs",
-        "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\CoreLogs.csproj",
+        "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj",
         "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-        "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreLogs\\obj\\",
+        "outputPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreLogs\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

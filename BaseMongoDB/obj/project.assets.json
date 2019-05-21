@@ -5200,11 +5200,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj",
+      "projectUniqueName": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
       "projectName": "BaseMongoDB",
-      "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\BaseMongoDB.csproj",
+      "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
       "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-      "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BaseMongoDB\\obj\\",
+      "outputPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\BaseMongoDB\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -5222,8 +5222,8 @@
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreMongoDB\\CoreMongoDB.csproj": {
-              "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreMongoDB\\CoreMongoDB.csproj"
+            "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
+              "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
             }
           }
         }

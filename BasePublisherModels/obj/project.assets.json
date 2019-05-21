@@ -5115,11 +5115,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherModels\\BasePublisherModels.csproj",
+      "projectUniqueName": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\BasePublisherModels\\BasePublisherModels.csproj",
       "projectName": "BasePublisherModels",
-      "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherModels\\BasePublisherModels.csproj",
+      "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\BasePublisherModels\\BasePublisherModels.csproj",
       "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
-      "outputPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\BasePublisherModels\\obj\\",
+      "outputPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\BasePublisherModels\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -5137,8 +5137,8 @@
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreMongoDB\\CoreMongoDB.csproj": {
-              "projectPath": "F:\\Users\\Hoang Thai Long\\Source\\Repos\\hoang-thai-long\\iShare\\CoreMongoDB\\CoreMongoDB.csproj"
+            "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
+              "projectPath": "C:\\Users\\Hoang Thai Long\\source\\repos\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
             }
           }
         }
