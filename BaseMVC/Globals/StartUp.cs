@@ -43,7 +43,7 @@ namespace BaseMVC.Globals
             string cookie = context.GetValue(Cookies.DefaultLang,false);
             if (string.IsNullOrEmpty(cookie)) { cookie = "vn"; context.SetCurrentLang("VN"); }
             var lang = new CPLangService(configuration);
-            currentLang = lang.CreateQuery().Find(o => o.IsActive == true && o.Code == cookie)?.SingleOrDefault();
+            currentLang = lang.CreateQuery().Find(o => o.IsActive == true && o.Code == cookie)?.FirstOrDefault();
             if (currentLang != null)
             {
                 // cache

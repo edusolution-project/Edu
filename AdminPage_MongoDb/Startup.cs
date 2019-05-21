@@ -88,7 +88,7 @@ namespace AdminPage_MongoDB
             // get sqlconfig cho core entity framework =)))
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseCookiePolicy();
+          //  app.UseCookiePolicy();
             // lấy user authentication (tự customer) =)))
             app.UseAuthention(Configuration);
             // ngôn ngữ mặc định 
