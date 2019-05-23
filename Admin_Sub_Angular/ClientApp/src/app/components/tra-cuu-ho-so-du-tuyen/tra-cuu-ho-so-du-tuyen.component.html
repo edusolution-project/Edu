@@ -1,0 +1,107 @@
+<div class="col-md-12">
+    <ul class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/">Trang chủ </a></li>
+      <li class="breadcrumb-item active">Tra cứu kết quả</li>
+    </ul>
+</div>
+<div class="container clear">
+  <div ng-hide="isShowDetail">
+    <div class="row" id="rowin">
+      <div class="col-md-10 offset-1">
+        <h3 class="head text-uppercase">Tra cứu kết quả</h3>
+        <div class="box-search">
+          <div class="row">
+            <div class="col-md-6 offset-3 m-t-15">
+              <form  *ngIf="1==1" class="form-horizontal p-b-5 vt-form" #f="ngForm" novalidate
+                    (ngSubmit)="
+                    f.form.valid ?
+                    search() :
+                    (!MaHoSo.valid && showErrorAlert('Chưa nhập mã đăng ký tuyển sinh'));
+                     (!Captcha.valid && showErrorAlert('Chưa nhập mã xác nhận'))">
+                <div class="form-group">
+                  <div class="col-md-12">
+                    <div class="listBox">
+                      <input [(ngModel)]="dataSearch.maHoSo" name="MaHoSo" placeholder="NHẬP MÃ ĐĂNG KÝ TUYỂN SINH" class="form-control text-uppercase"
+                             required maxlength="10" #MaHoSo="ngModel" autofocus />
+                      <span class="validate red p-l-25" *ngIf="f.submitted && !MaHoSo.valid ">Chưa nhập mã đăng ký tuyển sinh</span>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="form-group">
+                  <div class="col-md-12">
+                    <div class="input-group">
+                      <input class="form-control" maxlength="10" [(ngModel)]="dataSearch?.captcha.captcha" name="Captcha" aria-label="Text input with multiple buttons"
+                             required placeholder="NHẬP MÃ XÁC NHẬN" #Captcha="ngModel" />
+                      <div class="input-group-btn capcha">
+                        <button type="button" class="btn1 btn-default" aria-label="Help"><img [src]="image" alt="" /></button>
+                        <button title="Tải lại mã xác nhận" type="button" (click)="refreshCapcha()" class="btn btn-default"><span class="fa fa-refresh"></span></button>
+                      </div>
+                    </div>
+                    <span class="validate red p-l-25" *ngIf="f.submitted && !Captcha.valid">Chưa nhập mã xác nhận</span>
+                  </div>
+                </div>
+
+                <div class="form-group text-center">
+                  <button type="submit" id="btnSearchEdu" class="btn btn-warning font01"><i class="fa fa-search"></i> Tra cứu </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-10 offset-1" *ngIf="isShow">
+        <div class="form-content reportBox" id="InfoSchool" *ngIf="HoSo.capHoc != null">
+          <div class="inner">
+            <h4 class="tit-admission text-uppercase"><b>Thông tin hồ sơ:</b></h4>
+            <div class="row">
+              <div class="col-md-12" id="accordion" role="tablist" aria-multiselectable="true">
+                <form action="form-horizontal">
+                  <div class="form-group clear">
+                    <div class="row">
+                      <label class="col-md-2">Thủ tục:</label>
+                      <div class="col-md-4"> Đăng ký dự tuyển lớp {{HoSo.capHoc === 1 ? '1' : (HoSo.capHoc === 2?'6':'Mầm non')}} {{HoSo.dungTuyen === 1 ? 'đúng tuyến' : 'trái tuyến'}}</div>
+                      <label class="col-md-2">Trường đăng ký:</label>
+                      <div class="col-md-4">{{HoSo.truongDangKy}}</div>
+                    </div>
+                  </div>
+                  <div class="form-group clear">
+                    <div class="row">
+                      <label for="" class="col-md-2">Học sinh:</label>
+                      <div class="col-md-4">{{HoSo.tenHocSinh}}</div>
+                      <label for="" class="col-md-2">Ngày sinh:</label>
+                      <div class="col-md-4">{{HoSo.ngaySinh | date:'dd/MM/yyyy'}}</div>
+                    </div>
+                  </div>
+                  <div class="form-group clear">
+                    <div class="row">
+                      <label for="" class="col-md-2">Ngày đăng ký:</label>
+                      <div class="col-md-4">{{HoSo.ngayCapNhat | date:'dd/MM/yyyy'}}</div>
+                      <label for="" class="col-md-2">Trạng thái hồ sơ:</label>
+                      <div class="col-md-4">
+                        <span>{{convertTrangThaiHoSo(HoSo.trangThai)}}</span>
+                      </div>
+                    </div>
+                    </div>
+                    <div class="form-group clear" *ngIf="HoSo.trangThai == 5">
+                      <label for="" class="col-md-2">Lý do từ chối:</label>
+                      <div class="col-md-10">
+                        {{HoSo.lyDoTuChoi}}
+                      </div>
+                    </div>
+                    <div class="form-group m-t-20 clear">
+                      <div class="col-md-12 text-center">
+                        <!--<button type="button" ng-click="viewChitietHoso(HoSo.HoSoDuTuyenIdMaHoa, HoSo.DotTuyenSinhId)" class="btn btn-primary font01"><i class="fa fa-file-o"></i> Xem hồ sơ</button>-->
+                        <a routerLink="/" class="btn btn-default font01 m-l-10"><i class="fa fa-long-arrow-left"></i> Về trang chủ</a>
+                      </div>
+                    </div>
+                  </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

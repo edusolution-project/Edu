@@ -1,0 +1,65 @@
+<div class="col-md-12">
+  <ul class="breadcrumb">
+    <li class="breadcrumb-item"><a routerLink="/">Trang chủ</a></li>
+    <li class="breadcrumb-item active">Đăng ký tuyển sinh</li>
+  </ul>
+</div>
+<div class="container">
+  <div class="row" id="rowin">
+    <div class="col-md-10 offset-1">
+      <h1 class="head green text-uppercase">Phụ huynh đã nộp hồ sơ đăng ký tuyển sinh thành công!</h1>
+    </div>
+    <div class="col-md-10 offset-1">
+      <div class="form-content reportBox" id="InfoSchool">
+        <div class="inner">
+
+          <div class="row">
+            <div class="col-md-12" id="accordion" role="tablist" aria-multiselectable="true">
+              <form action="form-horizontal">
+                <div class="form-group  row clear">
+                  <label for="" class="col-md-2 offset-2" style="padding-top: 5px;">Mã hồ sơ:</label>
+                  <div class="col-md-8 blue" style="font-size:20px"><b>{{item.MaHoSo}}</b></div>
+                </div>
+                <div class="form-group row clear">
+                  <div class="col-md-10 offset-2 text-bold">Ông/bà vui lòng mang hồ sơ đến trường đối chiếu thực tế để hoàn tất thủ tục đăng ký tuyển sinh.</div>
+                </div>
+                <div class="form-group row clear">
+                  <label for="" class="col-md-2 offset-2">Hồ sơ gồm có:</label>
+                  <div class="col-md-8">
+                    - Phiếu đăng ký nhập học in ra từ hệ thống (có thể in tại trường)<br><br>
+                    - Bản sao giấy khai sinh<br><br>
+                    - Bản photocopy hộ khẩu hoặc giấy tạm trú (có bản chính để đối chiếu)<br><br>
+                    &nbsp;&nbsp;<strong>Đối với lớp 6, cần thêm:</strong><br><br>
+                    - Bản chính học bạ tiểu học hoặc các hồ sơ khác có giá trị thay thế học bạ<br><br>
+                    - Các loại giấy tờ hưởng chế độ ưu tiên, khuyến khích (nếu có)<br><br>
+                  </div>
+                </div>
+                <div class="form-group row clear">
+                  <label for="" class="col-md-2 offset-2">Địa điểm:</label>
+                  <div class="col-md-8">{{item.DiaDiem}}</div>
+                </div>
+                <div class="form-group row clear">
+                  <label for="" class="col-md-2 offset-2">Thời gian:</label>
+                  <div class="col-md-8">{{item.NgayHen | date:'dd/MM/yyyy'}}</div>
+                </div>
+              </form>
+            </div>
+            <div class="col-md-12 m-t-15">
+              <div class="col-md-4 offset-2">
+                <!--<a class="btn2" href="javascript:void(0)" ng-click="openPdf(item.MaHoSoMaHoa)">
+                  <i class="fa fa-print"></i> In phiếu đăng ký trực tuyến
+                </a>-->
+              </div>
+              <div class="col-md-4 ">
+                <!--<a class="btn2" href="javascript:void(0)" ng-click="email(item.MaHoSoMaHoa)">
+                  <i class="fa fa-envelope"></i> Nhận email đơn đăng ký
+                </a>-->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

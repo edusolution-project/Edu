@@ -31,3 +31,14 @@ F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\JWTExample\obj\Debu
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.pdb
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.csprojAssemblyReference.cache
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.deps.json
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.runtimeconfig.json
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.runtimeconfig.dev.json
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.dll
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.pdb
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.csprojAssemblyReference.cache
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.csproj.CoreCompileInputs.cache
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.AssemblyInfoInputs.cache
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.AssemblyInfo.cs
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.dll
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.pdb

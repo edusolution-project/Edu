@@ -1,0 +1,8 @@
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Business\bin\Debug\netcoreapp2.2\Business.deps.json
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Business\bin\Debug\netcoreapp2.2\Business.dll
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Business\bin\Debug\netcoreapp2.2\Business.pdb
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Business\obj\Debug\netcoreapp2.2\Business.csproj.CoreCompileInputs.cache
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Business\obj\Debug\netcoreapp2.2\Business.AssemblyInfoInputs.cache
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Business\obj\Debug\netcoreapp2.2\Business.AssemblyInfo.cs
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Business\obj\Debug\netcoreapp2.2\Business.dll
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Business\obj\Debug\netcoreapp2.2\Business.pdb

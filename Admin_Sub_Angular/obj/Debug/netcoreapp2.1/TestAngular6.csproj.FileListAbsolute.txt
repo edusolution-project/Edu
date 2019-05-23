@@ -1,0 +1,78 @@
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.deps.json
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.runtimeconfig.json
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.runtimeconfig.dev.json
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.dll
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.pdb
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.Views.dll
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.Views.pdb
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\DAL.dll
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\DAL.pdb
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.csprojAssemblyReference.cache
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.csproj.CoreCompileInputs.cache
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorAssemblyInfo.cache
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorAssemblyInfo.cs
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.AssemblyInfoInputs.cache
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.AssemblyInfo.cs
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.TagHelpers.input.cache
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.TagHelpers.output.cache
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorCoreGenerate.cache
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\Razor\Pages\Error.g.cshtml.cs
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\Razor\Pages\_ViewImports.g.cshtml.cs
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorTargetAssemblyInfo.cache
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorTargetAssemblyInfo.cs
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.Views.pdb
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.csproj.CopyComplete
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.dll
+C:\Users\laptop 2\source\repos\TestAngular6\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.pdb
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.csprojAssemblyReference.cache
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.csproj.CoreCompileInputs.cache
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorAssemblyInfo.cache
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorAssemblyInfo.cs
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.AssemblyInfoInputs.cache
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.AssemblyInfo.cs
+D:\Repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.deps.json
+D:\Repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.runtimeconfig.json
+D:\Repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.runtimeconfig.dev.json
+D:\Repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.dll
+D:\Repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.pdb
+D:\Repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.Views.dll
+D:\Repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.Views.pdb
+D:\Repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\DAL.dll
+D:\Repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\DAL.pdb
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.TagHelpers.input.cache
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.TagHelpers.output.cache
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorCoreGenerate.cache
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\Razor\Pages\Error.g.cshtml.cs
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\Razor\Pages\_ViewImports.g.cshtml.cs
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorTargetAssemblyInfo.cache
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorTargetAssemblyInfo.cs
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.Views.pdb
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.csproj.CopyComplete
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.dll
+D:\Repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.pdb
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.deps.json
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.runtimeconfig.json
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.runtimeconfig.dev.json
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.dll
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.pdb
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.Views.dll
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\TestAngular6.Views.pdb
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\DAL.dll
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\bin\Debug\netcoreapp2.1\DAL.pdb
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.csprojAssemblyReference.cache
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.csproj.CoreCompileInputs.cache
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorAssemblyInfo.cache
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorAssemblyInfo.cs
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.AssemblyInfoInputs.cache
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.AssemblyInfo.cs
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.TagHelpers.input.cache
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.TagHelpers.output.cache
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorCoreGenerate.cache
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\Razor\Pages\Error.g.cshtml.cs
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\Razor\Pages\_ViewImports.g.cshtml.cs
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorTargetAssemblyInfo.cache
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.RazorTargetAssemblyInfo.cs
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.Views.pdb
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.csproj.CopyComplete
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.dll
+C:\Users\nghiepnc\source\repos\angular6_example\TestAngular6\TestAngular6\obj\Debug\netcoreapp2.1\TestAngular6.pdb

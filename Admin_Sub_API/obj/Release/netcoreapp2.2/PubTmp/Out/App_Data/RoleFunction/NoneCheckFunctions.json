@@ -1,0 +1,123 @@
+﻿[
+  {
+    "Controller": "Authentication",
+    "Action": "LogIn"
+  },
+  {
+    "Controller": "Authentication",
+    "Action": "SSOLogIn"
+  },
+  {
+    "Controller": "Authentication",
+    "Action": "LogOut"
+  },
+  {
+    "Controller": "Authentication",
+    "Action": "KeepAlive"
+  },
+  {
+    "Controller": "Util",
+    "Action": "GetCurrentYear"
+  },
+  {
+    "Controller": "Util",
+    "Action": "GetCaptcha"
+  },
+  {
+    "Controller": "Util",
+    "Action": "IsValidCaptcha"
+  },
+  {
+    "Controller": "HoSoDuTuyenController",
+    "Action": "Export"
+  },
+  {
+    "Controller": "NguoiDung",
+    "Action": "GetAllTruongHoc"
+  },
+  {
+    "Controller": "HoSoDuTuyenController",
+    "Action": "GetTTinTsHocSinhByHoSoId"
+  },
+  {
+    "Controller": "NguoiDung",
+    "Action": "GetAllDonVi"
+  },
+  {
+    "Controller": "NguoiDung",
+    "Action": "AddUser"
+  },
+  {
+    "Controller": "TaiLieu",
+    "Action": "DownloadFile"
+  },
+  {
+    "Controller": "Dashboard",
+    "Action": "Get"
+  },
+  {
+    "Controller": "Dashboard",
+    "Action": "GetSchool"
+  },
+  {
+    "Controller": "TraCuuGiaoVien",
+    "Action": "GetDanhMuc"
+  },
+  {
+    "Controller": "CommonReport",
+    "Action": "GetVaiTroByUser"
+  },
+  {
+    "Controller": "CommonReport",
+    "Action": "GetCapHoc"
+  },
+  {
+    "Controller": "CommonReport",
+    "Action": "GetDonVi"
+  },
+  {
+    "Controller": "CommonReport",
+    "Action": "GetAllCapHocByDonVi"
+  },
+  {
+    "Controller": "TruongHoc",
+    "Action": "GetAllTruongHocByDonVi"
+  },
+  {
+    "Controller": "TruongHoc",
+    "Action": "getAllTruongHocByCapHoc"
+  },
+  {
+    "Controller": "TruongHoc",
+    "Action": "GetAllTruongHocByDonViVaCapHoc"
+  },
+  {
+    "Controller": "CommonReport",
+    "Action": "GetNamHoc"
+  },
+  {
+    "Controller": "CommonReport",
+    "Action": "GetKhoiHoc"
+  },
+  {
+    "Controller": "CommonReport",
+    "Action": "GetDonViVaTruongHoc"
+  },
+  {
+    "Controller": "MatKhau",
+    "Action": "ChangePass"
+  },
+  {
+    "Controller": "NamHoc",
+    "Action": "GetNamHoc"
+  },
+  {
+    "Controller": "CNganhDT",
+    "Action": "GetAll"
+  },
+  {
+    "Controller": "DanToc",
+    "Action": "GetAll"
+  }
+  
+]

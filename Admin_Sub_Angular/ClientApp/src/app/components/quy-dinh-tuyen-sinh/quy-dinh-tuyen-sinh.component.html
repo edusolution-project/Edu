@@ -1,0 +1,51 @@
+<div class="col-md-12">
+  <ul class="breadcrumb" style="margin:0">
+    <li class="breadcrumb-item"><a [routerLink]="['/dang-ky-tuyen-sinh',100]">Trang chủ</a></li>
+    <li class="breadcrumb-item active">Quy định tuyển sinh</li>
+  </ul>
+</div>
+<div class="container">
+  <div class="row" id="rowin">
+    <div class="col-sm-4">
+      <div class="v-menu">
+        <div class="col-md-12">
+          <div class="form-content reportBox" id="InfoSchool">
+            <div class="inner panel-group accord-info" id="accordion" role="tablist" aria-multiselectable="true">
+              <div class="panel" ng-class="{'active': show1}">
+                <div class="panel-heading">
+                  <h4 class="panel-title text-uppercase">
+                  <a role="button" class="collapsed" data-toggle="collapse" data-target="#collapse-0" style="background-color: #235599; border: 1px solid #235599; color: #fff;" >Quy định tuyển sinh</a></h4>
+                </div>
+                <div class="panel-collapse" *ngIf="show1">
+                  <div class="panel-body">
+                    <div class="admission-info">
+                      <ul class="detail">
+                        <li class="clear"  [ngClass]="{'active' : item.active}"  *ngFor="let item of listDotTuyenSinh1">
+                          <div class="col-sm-12">
+                            <a (click)="chonDotTS(item)"
+                               href="javascript:void(0)">
+                              <div class="text-bold">{{item.TenQuanHuyen}}</div>
+                            </a>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <h3 class="head-hd text-bold">{{Header}}</h3>
+      <div class="main-body">
+        <div>
+          <iframe [src]="viewUrlPDF()" width="100%" height="1024px"></iframe>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

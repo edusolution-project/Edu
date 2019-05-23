@@ -1,0 +1,1043 @@
+<style>
+  .border {
+    border: 2px solid #dee2e6 !important
+  }
+</style>
+<div class="row">
+  <div class="col-md-12">
+    <ul class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/">Trang chủ</a></li>
+      <li class="breadcrumb-item"><a routerLink="/dang-ky-tuyen-sinh">Đăng ký tuyển sinh </a></li>
+      <li class="breadcrumb-item active">Đơn xin nhập học</li>
+    </ul>
+  </div>
+</div>
+<div class="container main-container main-body">
+  <div class="register-form">
+    <div class="card .card.text-white.bg-info">
+      <div class=".card-body" id="divDangKyHoSo">
+        <form *ngIf="formResetToggle" #f="ngForm" novalidate class="form-group vt-form" (ngSubmit)="f.form.valid ? SearchHocsinh(f) :
+                showErrorAlert('Bạn chưa nhập đầy đủ thông tin');" name="formSearch">
+          <div class="row">
+            <div class="col-md-12 text-center">
+              <h3 class="p-10">ĐƠN XIN NHẬP HỌC VÀO LỚP 6 - NĂM HỌC {{currentYear}} - {{+currentYear + 1}}</h3>
+              <em>(Thời gian đăng ký: {{ThoiGianDky.NgayBatDau | date:'dd/MM/yyyy'}} - {{ThoiGianDky.NgayKetThuc | date:'dd/MM/yyyy'}})</em>
+            </div>
+          </div>
+          <div class="clear">
+            <div class="box-search-hs clear">
+              <div class="form-group">
+                <div class="row">
+                  <label class="col-md-2 col-form-label vt-required">1. Họ tên</label>
+                  <div class="col-md-4">
+                    <input name="TenHocSinh" class="form-control text-uppercase vt-required" required [pattern]="regexName"
+                           maxlength="1000" [(ngModel)]="entity.TenHocSinh" #TenHocSinh="ngModel" type="text">
+                    <span class="vt-require text-danger" *ngIf="f.submitted && TenHocSinh.errors?.required"></span>
+                    <span class="vt-invalid-name text-danger" *ngIf="TenHocSinh.errors?.pattern"></span>
+                  </div>
+                  <label class="col-md-2 col-form-label vt-required">2. Ngày sinh</label>
+                  <div class="col-md-2">
+                    <div class="input-group date" bootstrapDatepicker>
+                      <input bootstrapDatepicker autocomplete="off" class="form-control" required #NgaySinh="ngModel" [(ngModel)]="entity.NgaySinhSearchUTC" name="NgaySinh">
+                      <span class="input-group-addon">
+                        <i class="fa fa-calendar fa-lger"></i>
+                      </span>
+                    </div>
+                    <span class="vt-require text-danger" *ngIf="f.submitted && NgaySinh.errors?.required"></span>
+                  </div>
+                  <div class="col-md-2 pt10">
+                    <button class="btn btn-info" type="submit">
+                      <i class="fa fa-search"></i> Tìm kiếm
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-10 offset-2 p-0">
+                <i>Phụ huynh học sinh có thể tìm kiếm thông tin học sinh trong cơ sở dữ liệu của Tỉnh/Thành phố, nếu có thông tin sẽ được tự động điền vào form bên dưới</i>
+              </div>
+            </div>
+          </div>
+        </form>
+        <form novalidate #registerForm="ngForm" class="form-horizontal vt-form" (ngSubmit)="chuyenDangKy(registerForm)" name="formDky">
+          <div ng-hide="">
+            <div class="row">
+              <div class="col-md-12">
+                <h4 class="text-primary">A. THÔNG TIN HỌC SINH</h4>
+              </div>
+            </div>
+            <ng-container *ngFor="let item of config;">
+              <ng-container [ngTemplateOutlet]="this[item.name]">
+              </ng-container>
+            </ng-container>
+
+            <div class="row">
+              <div class="col-md-12 text-center p-20">
+                <button class="btn btn-primary btn-lg" type="submit"><i class="fa fa-pencil-square-o"></i> Đăng ký</button>
+              </div>
+            </div>
+
+          </div>
+          <ng-template #tempHoTen>
+            <div class="clear">
+              <div class="form-group">
+                <div class="row">
+                  <label class="col-md-2 col-form-label vt-required">1. Họ tên</label>
+                  <div class="col-md-4">
+                    <input name="TenHocSinh" class="form-control text-uppercase vt-required" required [pattern]="regexName"
+                           maxlength="1000" [(ngModel)]="entity.TenHocSinh" #TenHocSinh="ngModel" type="text">
+                    <span class="vt-require text-danger" *ngIf="registerForm.submitted && TenHocSinh.errors?.required"></span>
+                    <span class="vt-invalid-name text-danger" *ngIf=" TenHocSinh.errors?.pattern"></span>
+                  </div>
+                  <label class="col-md-2 col-form-label vt-required">2. Ngày sinh</label>
+                  <div class="col-md-2">
+                    <div class="input-group date" bootstrapDatepicker>
+                      <input bootstrapDatepicker autocomplete="off" class="form-control" required #NgaySinh="ngModel" [(ngModel)]="entity.NgaySinhUTC" name="NgaySinh">
+                      <span class="input-group-addon">
+                        <i class="fa fa-calendar fa-lger"></i>
+                      </span>
+                    </div>
+                    <span class="vt-require text-danger" *ngIf=" registerForm.submitted && NgaySinh.errors?.required"></span>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template #tempNoiSinh>
+            <div class="clear">
+              <div class="form-group">
+                <div class="row">
+                  <label class="col-md-2 col-form-label vt-required">3. Nơi sinh</label>
+                  <div class="col-md-2">
+                    <div>
+                      <ngx-select [items]="lstTinhThanh" name="NoiSinh" #NoiSinh="ngModel" required [(ngModel)]="entity.NoiSinh"></ngx-select>
+                    </div>
+                    <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && NoiSinh.errors?.required">
+                    </span>
+                  </div>
+                  <label class="col-md-2 col-form-label vt-required">4. Dân tộc</label>
+                  <div class="col-md-2">
+                    <div>
+                      <ngx-select [items]="lstDanToc" name="MaDanToc" #MaDanToc="ngModel" required [(ngModel)]="entity.MaDanToc"></ngx-select>
+                    </div>
+                    <span class="vt-require-select text-danger" *ngIf=" registerForm.submitted && MaDanToc.errors?.required">
+                    </span>
+                  </div>
+                  <label class="col-md-2 col-form-label vt-required p-l0">5. Giới tính</label>
+                  <div class="col-md-2 p10">
+                    <div>
+                      <ngx-select [items]="lstGioiTinh" name="GioiTinh" #GioiTinh="ngModel" required [(ngModel)]="entity.GioiTinh"></ngx-select>
+                    </div>
+                    <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && GioiTinh.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template #tempHoKhauThuongTru>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label class="control-label col-md-2">6. Hộ khẩu thường trú</label>
+                </div>
+              </div>
+            </div>
+            <!--thuong tru tinh thanh, quan huyen-->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="row form-group">
+                  <label class="col-md-4 col-form-label vt-required f-w-400">Tỉnh thành</label>
+                  <div class="col-md-8">
+                    <div>
+                      <ngx-select [items]="lstTinhThanh" name="MaTthanhThtru" #MaTthanhThtru="ngModel"
+                                  required
+                                  [(ngModel)]="entity.MaTthanhThtru"
+                                  (selectionChanges)="doMaTthanhThtru($event)"
+                                  noResultsFound="Không có kết quả">
+
+                      </ngx-select>
+                    </div>
+                    <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && MaTthanhThtru.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="row form-group">
+                  <label class="col-md-4 col-form-label vt-required f-w-400">Quận huyện</label>
+                  <div class="col-md-8">
+                    <div>
+                      <ngx-select id="dsQuanHuyen" [items]="lstQuanHuyen" name="MaQhuyenThtru"
+                                  #MaQhuyenThtru="ngModel"
+                                  required [(ngModel)]="entity.MaQhuyenThtru"
+                                  (selectionChanges)="doMaQhuyenThtru($event)"
+                                  noResultsFound="Không có kết quả">
+                      </ngx-select>
+                    </div>
+                    <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && MaQhuyenThtru.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--thuong tru phuong xa, to ap-->
+            <div class="row ">
+              <div class="col-md-6">
+                <div class="row form-group">
+                  <label class="col-md-4 col-form-label vt-required f-w-400">Xã phường</label>
+                  <div class="col-md-8">
+                    <div>
+                      <ngx-select [items]="lstPhuongXa" id="dsPhuongXa" name="MaPxaThtru" #MaPxaThtru="ngModel"
+                                  required [(ngModel)]="entity.MaPxaThtru"
+                                  (selectionChanges)="doMaPxaThtru($event)"
+                                  noResultsFound="Không có kết quả">
+                      </ngx-select>
+                    </div>
+                    <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && MaPxaThtru.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="row form-group">
+                  <label class="col-md-4 col-form-label f-w-400" ng-class="{'vt-required': entity.MaTthanhThtru===MaDaNang}">Tổ/Thôn/Ấp</label>
+                  <div class="col-md-8">
+                    <div>
+                      <ngx-select [items]="lstToThon" id="dsToThon" name="MaTthonThtru" #MaTthonThtru="ngModel"
+                                  required [(ngModel)]="entity.MaTthonThtru"
+                                  (selectionChanges)="doMaTthonThtru($event)"
+                                  noResultsFound="Không có kết quả">
+                      </ngx-select>
+                    </div>
+                    <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && MaTthonThtru.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--thuong tru dia chi thuong tru -->
+            <div class="row">
+              <div class="col-md-12">
+                <div class="row form-group">
+                  <label class="col-md-2 col-form-label vt-required f-w-400">Địa chỉ</label>
+                  <div class="col-md-10">
+                    <input name="DchiThtru" maxlength="500" class="form-control" [(ngModel)]="entity.DchiThtru" (ngModelChange)="DchiThtruChange(oldVal,$event);oldVal = $event;" required #DchiThtru="ngModel" type="text">
+                    <span class="vt-require text-danger" *ngIf="registerForm.submitted && DchiThtru.errors?.required"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template #tempHoKhauTamTru>
+            <div class="row p-b-10">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label class="col-md-2 text-right">7. Hiện đang cư trú tại</label>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label vt-required f-w-400">Tỉnh thành</label>
+                  <div class="col-md-8">
+                    <ngx-select [items]="lstTinhThanhCuTru" name="MaTthanhCuTru" #MaTthanhCuTru="ngModel"
+                                required
+                                [(ngModel)]="entity.MaTthanhCuTru"
+                                (selectionChanges)="doMaTthanhCuTru($event)"
+                                noResultsFound="Không có kết quả">
+                    </ngx-select>
+                    <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && MaTthanhCuTru.errors?.required">
+                    </span>
+                  </div>
+
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label vt-required f-w-400">Quận huyện</label>
+                  <div class="col-md-8">
+                    <ngx-select id="dsQuanHuyenCuTru" [items]="lstQuanHuyenCuTru" name="MaQhuyenCuTru"
+                                #MaQhuyenCuTru="ngModel"
+                                required [(ngModel)]="entity.MaQhuyenCuTru"
+                                (selectionChanges)="doMaQhuyenCuTru($event)"
+                                noResultsFound="Không có kết quả">
+                    </ngx-select>
+                    <span class="vt-require-select text-danger" *ngIf=" registerForm.submitted  && MaQhuyenCuTru.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--thuong tru phuong xa, to ap-->
+            <div class="row ">
+              <div class="col-md-6">
+                <div class="row form-group">
+                  <label class="col-md-4 col-form-label vt-required f-w-400">Xã phường</label>
+                  <div class="col-md-8">
+                    <div>
+                      <ngx-select [items]="lstPhuongXaCuTru" id="dsPhuongXaCuTru" name="MaPxaCuTru" #MaPxaCuTru="ngModel"
+                                  required [(ngModel)]="entity.MaPxaCuTru"
+                                  (selectionChanges)="doMaPxaCuTru($event)"
+                                  noResultsFound="Không có kết quả">
+                      </ngx-select>
+                    </div>
+                    <span class="vt-require-select text-danger" *ngIf=" registerForm.submitted && MaPxaCuTru.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="row form-group">
+                  <label class="col-md-4 col-form-label f-w-400" ng-class="{'vt-required': entity.MaTthanhThtru===MaDaNang}">Tổ/Thôn/Ấp</label>
+                  <div class="col-md-8">
+                    <div>
+                      <ngx-select [items]="lstToThonCuTru" id="dsToThonCuTru" name="MaTthonCuTru" #MaTthonCuTru="ngModel"
+                                  required [(ngModel)]="entity.MaTthonCuTru"
+                                  (selectionChanges)="doMaTthonCuTru($event)"
+                                  noResultsFound="Không có kết quả">
+                      </ngx-select>
+                    </div>
+                    <span class="vt-require-select text-danger" *ngIf=" registerForm.submitted && MaTthonCuTru.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--thuong tru dia chi tam tru -->
+            <div class="row">
+              <div class="col-md-12">
+                <div class="row form-group">
+                  <label class="col-md-2 col-form-label vt-required f-w-400">Địa chỉ</label>
+                  <div class="col-md-10">
+                    <input name="DchiCuTru" maxlength="500" class="form-control" [(ngModel)]="entity.DchiCuTru" required #DchiCuTru="ngModel" type="text">
+                    <span class="vt-require text-danger" *ngIf="registerForm.submitted && DchiCuTru.errors?.required"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+          <ng-template #tempSoDienThoaiNhaRieng>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <label class="col-md-2 col-form-label p-l0">8. Số điện thoại</label>
+                  <div class="col-md-10">
+                    <input class="form-control" maxlength="15" name="SoDthoaiCdinh" [(ngModel)]="entity.SoDthoaiCdinh" #SoDthoaiCdinh="ngModel"
+                           [pattern]="regexPhone">
+                    <span class="vt-invalid-number text-danger" *ngIf="SoDthoaiCdinh.errors?.pattern"></span>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template #tempDaQuaMauGiao>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <div class="col-md-3 m-b-10">
+                    <label class="text-right">9. Đã học lớp 5 tại? </label>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label vt-required f-w-400">Tỉnh thành</label>
+                  <div class="col-md-8">
+                    <ngx-select [items]="lstTinhThanh" id="dsTthanhTruongCu" name="MaTthanhTruongCu" #MaTthanhTruongCu="ngModel"
+                                required [(ngModel)]="entity.MaTthanhTruongCu"
+                                (selectionChanges)="doMaTthanhTruongCu($event)"
+                                noResultsFound="Không có kết quả">
+                    </ngx-select>
+                    <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && MaTthanhTruongCu.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label vt-required f-w-400">Quận huyện</label>
+                  <div class="col-md-8">
+                    <ngx-select [items]="lstQhuyenTruongCu" id="dsQhuyenTruongCu" name="MaQhuyenTruongCu" #MaQhuyenTruongCu="ngModel"
+                                required [(ngModel)]="entity.MaQhuyenTruongCu"
+                                (selectionChanges)="doMaQhuyenTruongCu($event)"
+                                noResultsFound="Không có kết quả">
+                    </ngx-select>
+                    <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && MaQhuyenTruongCu.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <label class="col-md-2 col-form-label vt-required f-w-400">Tại trường </label>
+                  <div class="col-md-10">
+                    <ngx-select [items]="lstTruongTieuHoc" id="dsTruongTieuHoc" name="MaTruongTieuHoc" #MaTruongTieuHoc="ngModel"
+                                required [(ngModel)]="entity.TenTruongCu"
+                                (selectionChanges)="doMaTruongTieuHoc($event)"
+                                noResultsFound="Không có kết quả">
+                    </ngx-select>
+                    <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && MaTruongTieuHoc.errors?.required">
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+          <ng-template #tempThongTinBo>
+            <div class="row">
+              <div class="col-md-12">
+                <h4 class="text-primary">B. THÔNG TIN CHA MẸ</h4>
+              </div>
+            </div>
+            <!--ho ten bo-->
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <label class="col-md-2 col-form-label">11. Họ tên bố</label>
+                  <div class="col-md-10">
+                    <input class="form-control" maxlength="1000" [(ngModel)]="entity.TenCha" name="TenCha" type="text">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--nam sinh, so dien thoai-->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label f-w-400">Năm sinh</label>
+                  <div class="col-md-8">
+                    <ngx-select [items]="lstNamSinh" name="NamSinhCuaCha" [(ngModel)]="entity.NamSinhCuaCha">
+                    </ngx-select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label f-w-400">Số điện thoại</label>
+                  <div class="col-md-8">
+                    <input class="form-control" maxlength="15" name="DthoaiCuaCha" [pattern]="regexPhone" #DthoaiCuaCha="ngModel" [(ngModel)]="entity.DthoaiCuaCha" type="text">
+                    <span class="vt-invalid-number text-danger" *ngIf="DthoaiCuaCha.errors?.pattern"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--nghe nghiep, noi cong tac-->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label f-w-400">Nghề nghiệp</label>
+                  <div class="col-md-8">
+                    <input class="form-control" maxlength="1000" [(ngModel)]="entity.NnghiepCuaCha" name="NnghiepCuaCha" type="text">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label f-w-400">Nơi công tác</label>
+                  <div class="col-md-8">
+                    <input class="form-control" maxlength="1000" [(ngModel)]="entity.NoiCtacCuaCha" name="NoiCtacCuaCha" type="text">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template #tempThongTinMe>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <label class="col-md-2 col-form-label">12. Họ tên mẹ</label>
+                  <div class="col-md-10">
+                    <input class="form-control" maxlength="1000" [(ngModel)]="entity.TenMe" name="TenMe" type="text">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--nam sinh, so dien thoai-->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label f-w-400">Năm sinh</label>
+                  <div class="col-md-8">
+                    <ngx-select [items]="lstNamSinh" name="NamSinhCuaMe" [(ngModel)]="entity.NamSinhCuaMe">
+                    </ngx-select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label f-w-400">Số điện thoại</label>
+                  <div class="col-md-8">
+                    <input class="form-control" maxlength="15" name="DthoaiCuaMe" [pattern]="regexPhone" #DthoaiCuaMe="ngModel" [(ngModel)]="entity.DthoaiCuaMe" type="text">
+                    <span class="vt-invalid-number text-danger" *ngIf="DthoaiCuaMe.errors?.pattern"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--nghe nghiep, noi cong tac-->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label f-w-400">Nghề nghiệp</label>
+                  <div class="col-md-8">
+                    <input class="form-control" maxlength="1000" [(ngModel)]="entity.NnghiepCuaMe" name="NnghiepCuaMe" type="text">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label class="col-md-4 col-form-label f-w-400">Nơi công tác</label>
+                  <div class="col-md-8">
+                    <input class="form-control" maxlength="1000" [(ngModel)]="entity.NoiCtacCuaMe" name="NoiCtacCuaMe" type="text">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+          <ng-template #tempKetQuaHocTap>
+
+            <div class="row">
+              <div class="col-md-12">
+                <h4 class="text-primary">C. KẾT QUẢ HỌC TẬP, RÈN LUYỆN</h4>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <div class="col-md-2">
+                  </div>
+                  <label class="col-md-10 f-w-400">a. Xếp loại/ Đánh giá cuối năm</label>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <div class="col-md-2">
+                  </div>
+                  <div class="col-md-10">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <table class="table borderless" style="border: 2px solid #dee2e6 !important;">
+                          <thead>
+                            <tr>
+                              <th class="text-center border">Lớp 1</th>
+                              <th class="text-center border">Lớp 2</th>
+                              <th class="text-center border">Lớp 3</th>
+                              <th class="text-center border">Lớp 4</th>
+                              <th class="text-center border">Lớp 5</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr class="">
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       maxlength="50" [(ngModel)]="entity.XepLoaiLop1"
+                                       name="XepLoaiLop1"
+                                       placeholder="Xếp loại">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.XepLoaiLop1.$invalid"></span>-->
+                              </td>
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       maxlength="50" [(ngModel)]="entity.XepLoaiLop2"
+                                       name="XepLoaiLop2"
+                                       placeholder="Xếp loại">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.XepLoaiLop2.$invalid"></span>-->
+                              </td>
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       maxlength="50" [(ngModel)]="entity.XepLoaiLop3"
+                                       name="XepLoaiLop3"
+                                       placeholder="Xếp loại">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.XepLoaiLop3.$invalid"></span>-->
+                              </td>
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       maxlength="50" [(ngModel)]="entity.XepLoaiLop4"
+                                       name="XepLoaiLop4"
+                                       placeholder="Xếp loại">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.XepLoaiLop4.$invalid"></span>-->
+                              </td>
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       maxlength="50" [(ngModel)]="entity.XepLoaiLop5"
+                                       name="XepLoaiLop5"
+                                       placeholder="Xếp loại">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.XepLoaiLop5.$invalid"></span>-->
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <div class="col-md-2">
+                  </div>
+                  <label class="col-md-10 f-w-400">b. Điểm bài kiểm tra định ký cuối năm lớp 5</label>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <div class="col-md-2">
+                  </div>
+                  <div class="col-md-10">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <table class="table borderless">
+                          <thead>
+                            <tr>
+                              <th class="text-center border">Tiếng Việt</th>
+                              <th class="text-center border">Toán</th>
+                              <th class="text-center border">Khoa học</th>
+                              <th class="text-center border">Lịch sử và địa lý</th>
+                              <th class="text-center border">Ngoại ngữ</th>
+                              <th class="text-center border">Tin học</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr class="">
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       name="DiemTiengViet"
+                                       maxlength="2" [(ngModel)]="entity.DiemTiengViet"
+                                       ng-pattern="/^(0|[1-9]|10)$/"
+                                       type="number"
+                                       placeholder="Điểm tiếng việt">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.DiemTiengViet.$error.required"></span>-->
+                                <span class="vt-invalid-mark red"
+                                      ng-show="invalidate && formDky.DiemTiengViet.$error.pattern"></span>
+                              </td>
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       name="DiemToan"
+                                       maxlength="2" [(ngModel)]="entity.DiemToan"
+                                       type="number"
+                                       ng-pattern="/^(0|[1-9]|10)$/"
+                                       placeholder="Điểm toán">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.DiemToan.$error.required"></span>-->
+                                <span class="vt-invalid-mark red"
+                                      ng-show="invalidate && formDky.DiemToan.$error.pattern"></span>
+                              </td>
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       name="DiemKhoaHoc"
+                                       maxlength="2" [(ngModel)]="entity.DiemKhoaHoc"
+                                       type="number"
+                                       ng-pattern="/^(0|[1-9]|10)$/"
+                                       placeholder="Điểm khoa học">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.DiemKhoaHoc.$error.required"></span>-->
+                                <span class="vt-invalid-mark red"
+                                      ng-show="invalidate && formDky.DiemKhoaHoc.$error.pattern"></span>
+                              </td>
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       name="DiemLichSu"
+                                       maxlength="2" [(ngModel)]="entity.DiemLichSu"
+                                       type="number"
+                                       ng-pattern="/^(0|[1-9]|10)$/"
+                                       placeholder="Điểm lịch sử địa lý">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.DiemLichSu.$error.required"></span>-->
+                                <span class="vt-invalid-mark red"
+                                      ng-show="invalidate && formDky.DiemLichSu.$error.pattern"></span>
+                              </td>
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       name="DiemNgoaiNgu"
+                                       maxlength="2" [(ngModel)]="entity.DiemNgoaiNgu"
+                                       type="number"
+                                       ng-pattern="/^(0|[1-9]|10)$/"
+                                       placeholder="Điểm ngoại ngữ">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.DiemNgoaiNgu.$error.required"></span>-->
+                                <span class="vt-invalid-mark red"
+                                      ng-show="invalidate && formDky.DiemNgoaiNgu.$error.pattern"></span>
+                              </td>
+                              <td class="no-margin no-padding">
+                                <input class="control "
+                                       name="DiemTinHoc"
+                                       maxlength="2" [(ngModel)]="entity.DiemTinHoc"
+                                       type="number"
+                                       ng-pattern="/^(0|[1-9]|10)$/"
+                                       placeholder="Điểm tin học">
+                                <!--<span class="vt-require red"
+                        ng-show="invalidate && formDky.DiemTinHoc.$error.required"></span>-->
+                                <span class="vt-invalid-mark red"
+                                      ng-show="invalidate && formDky.DiemTinHoc.$error.pattern"></span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="form-group row">
+              <div class="col-md-10 offset-2">
+                <label class="control-label f-w-400">
+                  c. Giải các cuộc thi, hội thi, giao lưu, năng khiếu, ...đã đạt trong năm học lớp 5
+                </label>
+              </div>
+            </div>
+            <div class=" form-group row">
+              <div class="col-md-10 offset-2 f-w-400">
+                <textarea class="form-control" rows="3" 
+                          placeholder="Môn: ...............................................	Giải: .........................	Cấp: ......................................."
+                          [(ngModel)]="entity.ThanhTich" name="ThanhTich"></textarea>
+              </div>
+            </div>
+            <!--Dien huong che do uu tien-->
+            <div class="form-group row">
+              <div class="col-md-10 offset-2">
+                <label class="control-label f-w-400">
+                  d. Diện được hưởng chế độ ưu tiên:
+                </label>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-10 offset-2 f-w-400">
+                <textarea class="form-control" rows="3" 
+                         [(ngModel)]="entity.DienUuTien" name="DienUuTien"></textarea>
+              </div>
+            </div>
+          </ng-template>
+
+
+          <ng-template #tempNgoaiNgu1>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <label class="col-md-4">12. Đăng ký học ngoại ngữ 1</label>
+                  <div class="col-md-1">
+                    <label class="hover-c-p">
+                      <input name="DkNgoaiNgu1" [(ngModel)]="entity.DkNgoaiNgu1" value="0"
+                             type="radio" checked="checked"> Không
+                    </label>
+                  </div>
+                  <div class="col-md-1">
+                    <label class="hover-c-p">
+                      <input name="DkNgoaiNgu1" [(ngModel)]="entity.DkNgoaiNgu1" value="1"
+                             type="radio"> Anh
+                    </label>
+                  </div>
+                  <div class="col-md-1">
+                    <label class="hover-c-p">
+                      <input name="DkNgoaiNgu1" [(ngModel)]="entity.DkNgoaiNgu1" value="2"
+                             type="radio"> Pháp
+                    </label>
+                  </div>
+                  <div class="col-md-1">
+                    <label class="hover-c-p">
+                      <input name="DkNgoaiNgu1" [(ngModel)]="entity.DkNgoaiNgu1" value="3"
+                             type="radio"> Nhật
+                    </label>
+                  </div>
+                  <div class="col-md-1">
+                  </div>
+                  <div class="col-md-1">
+                  </div>
+                  <div class="col-md-2">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </ng-template>
+
+          <ng-template #tempNgoaiNgu2>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <label class="col-md-4" >
+                    13. Đăng ký học ngoại ngữ 2
+                    <br />
+                    <em class="f-w-400">(Đối với các trường có ngoại ngữ 2)</em>
+                  </label>
+                  <div class="col-md-1">
+                    <label class="hover-c-p">
+                      <input name="DkNgoaiNgu2" [(ngModel)]="entity.DkNgoaiNgu2" value="0"
+                             type="radio" checked="checked"> Không
+                    </label>
+                  </div>
+                  <div class="col-md-1">
+                    <label class="hover-c-p">
+                      <input name="DkNgoaiNgu2" [(ngModel)]="entity.DkNgoaiNgu2" value="1"
+                             type="radio"> Anh
+                    </label>
+                  </div>
+                  <div class="col-md-1">
+                    <label class="hover-c-p">
+                      <input name="DkNgoaiNgu2" [(ngModel)]="entity.DkNgoaiNgu2" value="2"
+                             type="radio"> Pháp
+                    </label>
+                  </div>
+                  <div class="col-md-1">
+                    <label class="hover-c-p">
+                      <input name="DkNgoaiNgu2" [(ngModel)]="entity.DkNgoaiNgu2" value="3"
+                             type="radio"> Nhật
+                    </label>
+                  </div>
+                  <div class="col-md-1">
+                    <label class="hover-c-p">
+                      <input name="DkNgoaiNgu2" [(ngModel)]="entity.DkNgoaiNgu2" value="4"
+                             type="radio"> Đức
+                    </label>
+                  </div>
+                  <div class="col-md-1">
+                    <label class="hover-c-p">
+                      <input name="DkNgoaiNgu2" [(ngModel)]="entity.DkNgoaiNgu2" value="5"
+                             type="radio"> Hàn
+                    </label>
+                  </div>
+                  <div class="col-md-2">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </ng-template>
+
+
+          <ng-template #tempChonTruong>
+            <div class="row">
+              <div class="col-md-12">
+                <h4 class="text-primary">D. CHỌN TRƯỜNG ĐĂNG KÝ</h4>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <label class="col-md-2 col-form-label vt-required ">14. Chọn trường </label>
+                  <div class="col-md-10">
+                    <ngx-select [items]="lstTruongHocSelect2" name="MaTruong" #MaTruong="ngModel"
+                                required [(ngModel)]="entity.MaTruong"
+                                (selectionChanges)="doChonTruong($event)"
+                                noResultsFound="Không có kết quả">
+                    </ngx-select>
+                    <span class="vt-require-select text-danger" *ngIf=" registerForm.submitted && MaTruong.errors?.required">
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="col-md-12 text-white text-center" style="background-color:#f2dede" *ngIf="dungTuyen">
+              <h5 class="text-primary">
+                <i class="fa fa-ban text-danger" *ngIf="camTraiTuyen===1"></i>
+                Đây là trường
+                <strong class="text-danger" *ngIf="camTraiTuyen===1">
+                  CẤM TRÁI TUYỂN !
+                </strong>
+                <strong *ngIf="camTraiTuyen!==1" class="text-danger">TRÁI  TUYỂN.</strong>
+                Anh chị vui lòng kiểm tra kỹ lại thông tin trước khi đăng ký!
+              </h5>
+            </div>
+
+          </ng-template>
+
+          <ng-template #tempTepDinhKem>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <label class="col-md-2 col-form-label">15. Thêm tập tin đính kèm </label>
+                  <div class="col-md-10">
+                    <div class="row">
+                      <div class="col-md-5">
+                        <div class="alert alert-info" role="alert">
+                          <label class="btn btn-default btn-file">
+                            <i class="fa fa-cloud-upload"></i> Lựa chọn file định dạng .pdf, .jpg
+                            <br />
+                            <small class="text-primary"><em>Cho phép lựa chọn nhiều file</em></small>
+                            <br />
+                            <small class="text-primary"><em>Tổng dung lượng không quá 10MB</em></small>
+                            <input (change)="addFile($event.target.files)" name="file" multiple type="file" style="display:none" accept="image/*,application/pdf">
+                          </label>
+                        </div>
+                      </div>
+                      <div class="col-md-7 attack">
+                        <ul>
+                          <li *ngFor="let item of lstFile;  index as i">
+                            <span class="blue">{{item.name}}</span>
+                            <a class="text-danger" role="button" ng-show="$index >= 0" (click)="deleteFile(i)"><i class="fa fa-times"></i></a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+          <ng-template #tempEmail>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group row">
+                  <label class="col-md-2 col-form-label">16. Email</label>
+                  <div class="col-md-10">
+                    <input class="form-control" [(ngModel)]="entity.Email" #Email="ngModel" name="Email" maxlength="50" [pattern]="regexEmail" type="text">
+                    <span class="vt-invalid-email text-danger" *ngIf="Email.errors?.pattern"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template #tempCamKet>
+            <div class="row">
+              <div class="col-md-10 offset-md-2">
+                <label class="hover-c-p">
+                  <input [(ngModel)]="accept" name="chkAccept" type="checkbox" required>
+                  <em>
+                    Gia đình xin cam kết sẽ kết hợp cùng nhà trường chăm sóc, quản lý, giáo dục con em thực hiện
+                    tốt nội quy của nhà trường ./
+                  </em>
+                </label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-10 offset-md-2">
+                <span class="vt-require-select text-danger" *ngIf="registerForm.submitted && !accept"></span>
+              </div>
+            </div>
+          </ng-template>
+        </form>
+
+      </div>
+      <div class=".card-body" *ngIf="!showdetail">
+        <div class="Detail-form">
+          <!--<vt-view-dk-tuyen-sinh-cap1 vt-item="entity" vt-dot="ThoiGianDky" vt-files="lstFile"></vt-view-dk-tuyen-sinh-cap1>-->
+          <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-5">
+              <div class="input-group input-group">
+                <input class="form-control" maxlength="10" [(ngModel)]="entity?.Captcha.Captcha" name="Captcha" aria-label="Text input with multiple buttons"
+                       required placeholder="NHẬP MÃ XÁC NHẬN" #Captcha="ngModel" />
+                <div class="input-group-btn capcha">
+                  <button type="button" class="btn1 btn-default" aria-label="Help"><img [src]="image" alt="" /></button>
+                  <button title="Tải lại mã xác nhận" type="button" (click)="refreshCapcha()" style=" padding: 4px 10px 4px 10px;" class="btn btn-default"><span class="fa fa-refresh"></span></button>
+                </div>
+              </div>
+              <span class="text-danger" *ngIf="Captcha.errors?.required">Chưa nhập.</span>
+            </div>
+            <div class="col-md-5"></div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12 text-center m-t-20">
+              <button class="btn btn-default" (click)="quaylai()">← Quay lại</button>
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              <button class="btn btn-primary" (click)="xacNhanDangKy()"><i class="fa fa-pencil-square-o"></i> Gửi thông tin</button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #ChonHocSinh>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Chọn học sinh <span style="text-transform:none;">(click vào dòng để chọn học sinh)</span></h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table table0">
+          <thead>
+            <tr>
+              <td>
+                STT
+              </td>
+              <td>
+                Mã học sinh
+              </td>
+              <td>
+                Họ tên
+              </td>
+              <td>
+                Ngày sinh
+              </td>
+              <td>
+                Giới tính
+              </td>
+              <td>
+                Địa chỉ
+              </td>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr *ngFor="let item of lstHocSinh; let i = index" (click)="chooseHocSinh(item)" style="cursor:pointer">
+              <td>
+                {{i+1}}
+              </td>
+              <td>
+                {{item.MaHocSinh}}
+              </td>
+              <td>
+                {{item.TenHocSinh}}
+              </td>
+              <td>
+                {{item.NgaySinh | date:'dd/MM/yyyy'}}
+              </td>
+              <td *ngIf="item.GioiTinh==0">
+                Nữ
+              </td>
+              <td *ngIf="!item.GioiTinh==0">
+                Nam
+              </td>
+              <td>
+                {{item.DchiThtru}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+
+
+
+

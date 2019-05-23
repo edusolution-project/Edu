@@ -1,0 +1,167 @@
+
+<div class="panel" [ngClass]="{'active': true}">
+  <div class="panel-heading" ng-click="changeTruongHocState()">
+    <h4 class="panel-title">
+      <a class="collapsed" data-toggle="collapse" data-target="#collapse-0">
+        {{item.TenTruongHoc}}
+        <span class="arrow"></span>
+      </a>
+    </h4>
+  </div>
+
+</div>
+<div class="panel-body box-loader" *ngIf="isLoading" style="cursor:pointer;">
+  <div class="status"><i class="fa fa-spinner fa-spin"></i></div>
+</div>
+<div class="panel-collapse">
+  <div *ngIf="ttinTSinhTheoTruong === undefined ||ttinTSinhTheoTruong === null">
+    <p>Không có thông tin tuyển sinh</p>
+  </div>
+  <div class="panel-body">
+    <div class="admission-info">
+      <div class="item">
+        <strong>1. Chỉ tiêu tuyển sinh:</strong>
+        <ul class="detail detail-no-li">
+          <li>
+            - Số lớp học: {{ttinTSinhTheoTruong.ChiTieuSoLop}}<br>
+            - Số học sinh: {{ttinTSinhTheoTruong.ChiTieuSoHs}}<br>
+            - Số học sinh trái tuyến: {{ttinTSinhTheoTruong.ChiTieuTraiTuyen}}
+          </li>
+        </ul>
+      </div>
+      <div class="item">
+        <strong>2. Quyết định tuyển sinh:</strong>
+        &nbsp;
+        <!--<a ng-if="ttinTSinhTheoTruong.HuongDanTuyenSinhEncryptId" style="cursor: pointer"
+                 vt-download-file="{{ttinTSinhTheoTruong.HuongDanTuyenSinhEncryptId}}">
+          Xem
+          file
+        </a>-->
+        <ul class="detail detail-no-li">
+          <li></li>
+        </ul>
+      </div>
+      <div class="item">
+        <strong>3. Hướng dẫn tuyển sinh:</strong>
+        <ul class="detail detail-no-li">
+          <li>
+            {{ttinTSinhTheoTruong.HuongDanTsinh}}
+          </li>
+        </ul>
+      </div>
+      <div class="item">
+        <strong>4. Tuyến tuyển sinh:</strong>
+        <nav>
+          <div class="nav nav-pills" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home-{{item.MaTruongHoc}}" role="tab" aria-controls="nav-home" aria-selected="true">Thường trú</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile-{{item.MaTruongHoc}}" role="tab" aria-controls="nav-profile" aria-selected="false">Tạm trú</a>
+            <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact-{{item.MaTruongHoc}}" role="tab" aria-controls="nav-contact" aria-selected="false">KT3</a>
+          </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+          <div class="tab-pane fade show active" id="nav-home-{{item.MaTruongHoc}}" role="tabpanel" aria-labelledby="nav-home-tab">
+            <table class="table table-bordered table-stripped">
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Quận huyện</th>
+                  <th>Xã phường</th>
+                  <th>Tổ dân phố</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!ttinTSinhTheoTruong.LstCauHinhChinhTuyenThuongTru">
+                  <td colspan="4">
+                    Không có dữ liệu
+                  </td>
+                </tr>
+                <tr *ngFor="let subItem of ttinTSinhTheoTruong.LstCauHinhChinhTuyenThuongTru;let i = index">
+                  <td>{{i+1}}</td>
+                  <td>{{subItem.TenQhuyen}}</td>
+                  <td>{{subItem.TenPxa}}</td>
+                  <td>{{subItem.TenTthon}}</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+          <div class="tab-pane fade" id="nav-profile-{{item.MaTruongHoc}}" role="tabpanel" aria-labelledby="nav-profile-tab">
+            <table class="table table-bordered table-stripped">
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Quận huyện</th>
+                  <th>Xã phường</th>
+                  <th>Tổ dân phố</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!ttinTSinhTheoTruong.LstCauHinhChinhTuyenTamTru || ttinTSinhTheoTruong.LstCauHinhChinhTuyenTamTru.length === 0">
+                  <td colspan="4">
+                    Không có dữ liệu
+                  </td>
+                </tr>
+                <tr *ngFor="let subItem of ttinTSinhTheoTruong.LstCauHinhChinhTuyenTamTru;let i=index">
+                  <td>{{i + 1}}</td>
+                  <td>{{subItem.TenQhuyen}}</td>
+                  <td>{{subItem.TenPxa}}</td>
+                  <td>{{subItem.TenTthon}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="nav-contact-{{item.MaTruongHoc}}" role="tabpanel" aria-labelledby="nav-contact-tab">
+            <table class="table table-bordered table-stripped">
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Quận huyện</th>
+                  <th>Xã phường</th>
+                  <th>Tổ dân phố</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="!ttinTSinhTheoTruong.LstCauHinhChinhTuyenKt3 || ttinTSinhTheoTruong.LstCauHinhChinhTuyenKt3.length === 0">
+                  <td colspan="4">
+                    Không có dữ liệu
+                  </td>
+                </tr>
+                <tr *ngFor="let subItem of ttinTSinhTheoTruong.LstCauHinhChinhTuyenKt3;let i=index">
+                  <td>{{i + 1}}</td>
+                  <td>{{subItem.TenQhuyen}}</td>
+                  <td>{{subItem.TenPxa}}</td>
+                  <td>{{subItem.TenTthon}}</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+
+        <!--<uib-tab index="0" heading="Thường trú">
+
+        </uib-tab>-->
+        <!--<uib-tab index="1" heading="Tạm trú">
+
+        </uib-tab>
+        <uib-tab index="2" heading="KT3">
+          
+        </uib-tab>-->
+
+
+      </div>
+    
+
+    </div>
+    <div class="item">
+      <strong>5. Điều kiện tuyển sinh:</strong>
+      <ul class="detail detail-no-li">
+        <li>
+          {{ttinTSinhTheoTruong.DieuKienTsinh}}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+

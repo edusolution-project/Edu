@@ -1,0 +1,208 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+    <IsPackable>false</IsPackable>
+    <SpaRoot>ClientApp\</SpaRoot>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
+
+    <!-- Set this to true if you enable server-side prerendering -->
+    <BuildServerSideRenderer>false</BuildServerSideRenderer>
+    <Description>ASPNET Core 2.1 - Angular6 startup template for Quick Application Development</Description>
+    <Copyright>Copyright © 2018 www.ebenmonney.com</Copyright>
+    <PackageProjectUrl>https://github.com/emonney/QuickApp</PackageProjectUrl>
+    <Company>EBENMONNEY</Company>
+    <Version>2.6.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Compile Remove="Controllers\**" />
+    <Compile Remove="wwwroot\assets\**" />
+    <Content Remove="$(SpaRoot)**" />
+    <Content Remove="Controllers\**" />
+    <Content Remove="wwwroot\assets\**" />
+    <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Controllers\**" />
+    <EmbeddedResource Remove="wwwroot\assets\**" />
+    <None Remove="Controllers\**" />
+    <None Remove="wwwroot\assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="ClientApp\src\app\assets\styles\bangstyle.css" />
+    <None Remove="ClientApp\src\app\components\bang\bang.component.html" />
+    <None Remove="ClientApp\src\app\components\bang\bang.component.ts" />
+    <None Remove="ClientApp\src\app\components\controls\HocSinh.component.ts" />
+    <None Remove="ClientApp\src\app\components\dang-ky-tuyen-sinh\dk-thanh-cong.component.ts" />
+    <None Remove="ClientApp\src\app\components\tra-cuu-dung-tuyen\view-ttin-tsinh-truong.component.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ClientApp\node_modules\bootstrap\dist\css\bootstrap-theme.css" />
+    <Content Include="ClientApp\node_modules\bootstrap\dist\css\bootstrap-theme.min.css" />
+    <Content Include="ClientApp\node_modules\bootstrap\dist\css\bootstrap.css" />
+    <Content Include="ClientApp\node_modules\bootstrap\dist\css\bootstrap.min.css" />
+    <Content Include="ClientApp\node_modules\bootstrap\dist\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="ClientApp\node_modules\bootstrap\dist\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="ClientApp\node_modules\bootstrap\dist\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="ClientApp\node_modules\bootstrap\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="ClientApp\node_modules\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="ClientApp\node_modules\bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="ClientApp\node_modules\bootstrap\grunt\configBridge.json" />
+    <Content Include="ClientApp\node_modules\bootstrap\grunt\npm-shrinkwrap.json" />
+    <Content Include="ClientApp\node_modules\bootstrap\package.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ClientApp\node_modules\bootstrap\CHANGELOG.md" />
+    <None Include="ClientApp\node_modules\bootstrap\dist\css\bootstrap-theme.css.map" />
+    <None Include="ClientApp\node_modules\bootstrap\dist\css\bootstrap-theme.min.css.map" />
+    <None Include="ClientApp\node_modules\bootstrap\dist\css\bootstrap.css.map" />
+    <None Include="ClientApp\node_modules\bootstrap\dist\css\bootstrap.min.css.map" />
+    <None Include="ClientApp\node_modules\bootstrap\dist\fonts\glyphicons-halflings-regular.svg" />
+    <None Include="ClientApp\node_modules\bootstrap\dist\fonts\glyphicons-halflings-regular.woff2" />
+    <None Include="ClientApp\node_modules\bootstrap\dist\js\bootstrap.js" />
+    <None Include="ClientApp\node_modules\bootstrap\dist\js\bootstrap.min.js" />
+    <None Include="ClientApp\node_modules\bootstrap\dist\js\npm.js" />
+    <None Include="ClientApp\node_modules\bootstrap\fonts\glyphicons-halflings-regular.svg" />
+    <None Include="ClientApp\node_modules\bootstrap\fonts\glyphicons-halflings-regular.woff2" />
+    <None Include="ClientApp\node_modules\bootstrap\Gruntfile.js" />
+    <None Include="ClientApp\node_modules\bootstrap\grunt\.jshintrc" />
+    <None Include="ClientApp\node_modules\bootstrap\grunt\bs-commonjs-generator.js" />
+    <None Include="ClientApp\node_modules\bootstrap\grunt\bs-glyphicons-data-generator.js" />
+    <None Include="ClientApp\node_modules\bootstrap\grunt\bs-lessdoc-parser.js" />
+    <None Include="ClientApp\node_modules\bootstrap\grunt\bs-raw-files-generator.js" />
+    <None Include="ClientApp\node_modules\bootstrap\grunt\change-version.js" />
+    <None Include="ClientApp\node_modules\bootstrap\grunt\sauce_browsers.yml" />
+    <None Include="ClientApp\node_modules\bootstrap\js\affix.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\alert.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\button.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\carousel.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\collapse.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\dropdown.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\modal.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\popover.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\scrollspy.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\tab.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\tooltip.js" />
+    <None Include="ClientApp\node_modules\bootstrap\js\transition.js" />
+    <None Include="ClientApp\node_modules\bootstrap\less\alerts.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\badges.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\bootstrap.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\breadcrumbs.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\button-groups.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\buttons.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\carousel.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\close.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\code.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\component-animations.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\dropdowns.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\forms.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\glyphicons.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\grid.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\input-groups.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\jumbotron.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\labels.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\list-group.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\media.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\alerts.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\background-variant.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\border-radius.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\buttons.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\center-block.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\clearfix.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\forms.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\gradients.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\grid-framework.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\grid.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\hide-text.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\image.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\labels.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\list-group.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\nav-divider.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\nav-vertical-align.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\opacity.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\pagination.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\panels.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\progress-bar.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\reset-filter.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\reset-text.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\resize.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\responsive-visibility.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\size.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\tab-focus.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\table-row.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\text-emphasis.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\text-overflow.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\mixins\vendor-prefixes.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\modals.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\navbar.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\navs.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\normalize.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\pager.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\pagination.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\panels.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\popovers.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\print.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\progress-bars.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\responsive-embed.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\responsive-utilities.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\scaffolding.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\tables.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\theme.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\thumbnails.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\tooltip.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\type.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\utilities.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\variables.less" />
+    <None Include="ClientApp\node_modules\bootstrap\less\wells.less" />
+    <None Include="ClientApp\node_modules\bootstrap\LICENSE" />
+    <None Include="ClientApp\node_modules\bootstrap\README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\app\assets\styles\bangstyle.css" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\bang\bang.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\bang\bang.component.html" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\dang-ky-tuyen-sinh\dk-thanh-cong.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\tra-cuu-dung-tuyen\view-ttin-tsinh-truong.component.ts" />
+  </ItemGroup>
+
+  <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
+    <!-- Ensure Node.js is installed -->
+    <Exec Command="node --version" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+    </Exec>
+    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+    <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+  </Target>
+
+  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+    <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition=" '$(BuildServerSideRenderer)' == 'true' " />
+
+    <!-- Include the newly-built files in the publish output -->
+    <ItemGroup>
+      <DistFiles Include="$(SpaRoot)dist\**; $(SpaRoot)dist-server\**" />
+      <DistFiles Include="$(SpaRoot)node_modules\**" Condition="'$(BuildServerSideRenderer)' == 'true'" />
+      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>%(DistFiles.Identity)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+</Project>

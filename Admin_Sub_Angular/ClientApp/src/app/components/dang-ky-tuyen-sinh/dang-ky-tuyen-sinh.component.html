@@ -1,0 +1,107 @@
+<style>
+    a.time-nonstart {
+        cursor: default;
+    }
+
+    a.time-end {
+        cursor: default;
+    }
+    </style>
+<div class="col-md-12">
+  <ul class="breadcrumb" style="margin:0">
+    <li class="breadcrumb-item"><a routerLink="/">Trang chủ</a></li>
+    <li class="breadcrumb-item active">Đăng ký tuyển sinh</li>
+  </ul>
+</div>
+<div class="container">
+  <div class="row" id="rowin">
+    <div class="col-md-12">
+      <h1 class="head">ĐĂNG KÝ TUYỂN SINH NĂM HỌC {{currentYear}} - {{+currentYear + 1}}</h1>
+    </div>
+    <div class="col-md-12">
+      <div class="form-content reportBox" id="InfoSchool">
+        <div class="inner">
+          <div class="panel-group accord-info" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel" [ngClass]="{'active' : showMN}">
+              <div class="panel-heading" (click)="changeView(3)">
+                <h4 class="panel-title text-uppercase"><a role="button" class="collapsed" data-toggle="collapse" data-target="#collapselopMN">Đăng ký tuyển sinh lớp Mầm non<span class="arrow"></span></a></h4>
+              </div>
+              <div class="panel-collapse collapse show" id="collapselopMN">
+                <div class="panel-body">
+                  <div class="admission-info">
+                    <ul class="detail detail-sl">
+                      <li class="clear" *ngFor="let item of listDotTuyenSinhMamNon">
+                        <div class="col-sm-12">
+                          <a (click)="chonDotTS(item, 1)"
+                             href="javascript:void(0)"
+                             class="{{item.TinhTrang == 0 ? 'time-active' : item.TinhTrang == 2 ? 'time-end' : 'time-nonstart'}}">
+                            <div class="row">
+                              <div class="col-md-4 text-bold">{{item.TenQuanHuyen}}</div>
+                              <div class="col-md-5">Thời gian đăng ký: <b class="font13">{{item.NgayBatDau | date:'dd/MM/yyyy'}} {{item.NgayBatDau != null ? '-' : ''}} {{item.NgayKetThuc | date:'dd/MM/yyyy'}}</b> </div>
+                              <div class="col-md-3 {{item.TinhTrang == 2 ? 'red' : item.TinhTrang == 1 ? 'green' : 'blue'}}">{{item.TinhTrang == 0 ? 'Đăng ký' : item.TinhTrang == 2 ? 'Đã kết thúc' : 'Chưa bắt đầu'}}</div>
+                            </div>
+                          </a>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel" [ngClass]="{'active' : show1}">
+              <div class="panel-heading" (click)="changeView(1)">
+                <h4 class="panel-title text-uppercase"><a role="button" class="collapsed" data-toggle="collapse" data-target="#collapselop1">Đăng ký tuyển sinh lớp 1<span class="arrow"></span></a></h4>
+              </div>
+              <div class="panel-collapse collapse show" id="collapselop1">
+                <div class="panel-body">
+                  <div class="admission-info">
+                    <ul class="detail detail-sl">
+                      <li class="clear" *ngFor="let item of listDotTuyenSinh1">
+                        <div class="col-sm-12">
+                          <a (click)="chonDotTS(item, 1)"
+                             href="javascript:void(0)"
+                             class="{{item.TinhTrang == 0 ? 'time-active' : item.TinhTrang == 2 ? 'time-end' : 'time-nonstart'}}">
+                            <div class="row">
+                              <div class="col-md-4 text-bold">{{item.TenQuanHuyen}}</div>
+                              <div class="col-md-5">Thời gian đăng ký: <b class="font13">{{item.NgayBatDau | date:'dd/MM/yyyy'}} {{item.NgayBatDau != null ? '-' : ''}} {{item.NgayKetThuc | date:'dd/MM/yyyy'}}</b> </div>
+                              <div class="col-md-3 {{item.TinhTrang == 2 ? 'red' : item.TinhTrang == 1 ? 'green' : 'blue'}}">{{item.TinhTrang == 0 ? 'Đăng ký' : item.TinhTrang == 2 ? 'Đã kết thúc' : 'Chưa bắt đầu'}}</div>
+                            </div>
+                          </a>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel" [ngClass]="{'active' : show2}">
+              <div class="panel-heading" (click)="changeView(2)">
+                <h4 class="panel-title text-uppercase"><a role="button" class="collapsed" data-toggle="collapse" data-target="#collapselop6">Đăng ký tuyển sinh lớp 6<span class="arrow"></span></a></h4>
+              </div>
+              <div class="panel-collapse collapse show" id="collapselop6">
+                <div class="panel-body">
+                  <div class="admission-info">
+                    <ul class="detail detail-sl">
+                      <li class="clear" *ngFor="let item of listDotTuyenSinh2">
+                        <div class="col-sm-12">
+                          <a (click)="chonDotTS(item, 2)" href="javascript:void(0)" class="{{item.TinhTrang == 0 ? 'time-active' : item.TinhTrang == 2 ? 'time-end' : 'time-nonstart'}}">
+                            <div class="row">
+                              <div class="col-md-4 text-bold">{{item.TenQuanHuyen}}</div>
+                              <div class="col-md-5">Thời gian đăng ký: <b class="font13">{{item.NgayBatDau | date:'dd/MM/yyyy'}} {{item.NgayBatDau != null ? '-' : ''}} {{item.NgayKetThuc | date:'dd/MM/yyyy'}}</b> </div>
+                              <div class="col-md-3 {{item.TinhTrang == 2 ? 'red' : item.TinhTrang == 1 ? 'green' : 'blue'}}">{{item.TinhTrang == 0 ? 'Đăng ký' : item.TinhTrang == 2 ? 'Đã kết thúc' : 'Chưa bắt đầu'}}</div>
+                            </div>
+                          </a>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="lineBottom2"></div>
+</div>

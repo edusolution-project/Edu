@@ -1,0 +1,55 @@
+.gridBang {
+    background-color: #fff;
+    margin: 0px 0 0px 0;
+    border-collapse: collapse;
+}
+
+    .gridBang td {
+        padding: 2px;
+        border: solid 1px #c1c1c1;
+        color: #000;
+        text-align: right;
+        font-size: 12px;
+    }
+
+    .gridBang th {
+        padding: 2px;
+        border: solid 1px #999;
+        color: #fff;
+        background: #006666;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    .gridBang tr {
+        height: 25px;
+    }
+
+        .gridBang tr.hangcha {
+            font-weight: bold;
+        }
+
+        .gridBang tr.removed {
+            background: #006600;
+        }
+
+    .gridBang td.focus {
+        background: #DDD
+    }
+
+    .gridBang td.focus_edit {
+        background: #EE0
+    }
+
+    .gridBang td input {
+        margin: 0px;
+        padding: 0px;
+        border: solid 0px red;
+        font-size: 14px;
+    }
+
+    .gridBang span {
+        display: inline-block;
+        overflow: hidden;
+        white-space: nowrap;
+    }

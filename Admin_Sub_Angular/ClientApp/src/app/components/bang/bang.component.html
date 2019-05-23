@@ -1,0 +1,117 @@
+
+
+
+<div width="100%" height="538px">
+  <div id="{{Bang_ID}}_div" style="width: 100%;padding:0px;" [ngStyle]="{'height.px':Bang_Height}">
+
+    <table id="{{Bang_ID}}" cellspacing="0" cellpadding="0" border="0" style="width: 100%; background-color: #fff; margin: 0px;">
+      <tr style="background-color: #006666; background-repeat: repeat;">
+        <!--tieu de fix-->
+        <td valign="top" align="left"
+            style="border: solid 1px #525252;" [ngStyle]="{'width.px':Bang_Width_Fixed}">
+          <table id="{{Bang_ID}}_TB00" class="gridBang"
+                 [ngStyle]="{'width.px':Bang_Width_Fixed, 'height.px':Bang_FixedRow_Height}">
+            <tr>
+              <th *ngFor="let item of bangFixed" [ngStyle]="
+                {
+                'width.px':item.Width,
+                'max-width.px':item.Width,
+                'min-width.px':item.Width
+                }">
+                <span [ngStyle]="
+                {
+                'width.px':item.Width,
+                'max-width.px':item.Width,
+                'min-width.px':item.Width
+                }">
+                {{item.TieuDe}}</span>
+              </th>
+            </tr>
+          </table>
+        </td>
+
+        <!--tieu de dong-->
+        <td valign="top" align="left" style="border: solid 1px #525252;">
+          <div id="{{Bang_ID}}_TB01_div" style="overflow:hidden;position:relative;width:460px;">
+            <table id="{{Bang_ID}}_TB01" class="gridBang" [ngStyle]="{ 'height.px':Bang_FixedRow_Height}">
+              <tr>
+                <th *ngFor="let item of bangSlied" [ngStyle]="
+                {
+                'width.px':item.Width,
+                'max-width.px':item.Width,
+                'min-width.px':item.Width
+                }">
+                  <span [ngStyle]="
+                {
+                'width.px':item.Width,
+                'max-width.px':item.Width,
+                'min-width.px':item.Width
+                }">{{item.TieuDe}}</span>
+                </th>
+              </tr>
+            </table>
+          </div>
+
+        </td>
+
+        <td valign="top" align="left" style="min-width:17px; max-width:17px; width:17px; border: solid 1px #525252;">
+          <table class="gridBang" [ngStyle]="{'height.px':Bang_FixedRow_Height}" style="width:100%;">
+            <tr>
+              <th></th>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <!--data tĩnh-->
+        <td valign="top" align="left" style="border: solid 1px #525252;">
+          <cdk-virtual-scroll-viewport  id="{{Bang_ID}}_TB20_div" itemSize="10" style="height:416px;overflow:hidden;"  class="example-viewport" #viewSlied>
+            <div id="{{Bang_ID}}_TB10_div" style="overflow:hidden;position:relative;width:100%; height:100%;">
+              <div style="width:510px;height:100%;">
+                <table id="{{Bang_ID}}_TB10" class="gridBang" style="width:100%;">
+                  <tr *cdkVirtualFor="let item of arrTest;  let i = index" [ngStyle]="{'display':item}">
+                    <td *ngFor="let item of bangFixed" style="text-align:left"[ngStyle]="
+                {
+                      'width.px':item.Width,
+                'max-width.px':item.Width,
+                'min-width.px':item.Width
+}"> 
+                      <span>{{item.Width}}</span>
+                    </td>
+                  </tr>
+                </table>
+
+              </div>
+            </div>
+          </cdk-virtual-scroll-viewport>
+        </td>
+        <!--data dong-->
+        <td colspan="2" valign="top" align="left" style="border: solid 1px #525252;">
+          <cdk-virtual-scroll-viewport id="{{Bang_ID}}_TB21_div" itemSize="10" style="height:416px" class="example-viewport" (scrolledIndexChange)="Bang_fnScroll($event)">
+            <div id="{{Bang_ID}}_TB11_div" style="position:relative;width:100%;height:100%;">
+              <div style="width:510px;height:100%;">
+                <table id="{{Bang_ID}}_TB11" class="gridBang">
+                  <tr *cdkVirtualFor="let item of arrTest;  let i = index"
+                      [ngStyle]="{'display':item}">
+                    <td *ngFor="let item of bangSlied" style="text-align:left" [ngStyle]="
+                {
+                      'width.px':item.Width,
+                'max-width.px':item.Width,
+                'min-width.px':item.Width
+
+                }">
+                      <span>{{i}}</span>
+
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </cdk-virtual-scroll-viewport>
+        </td>
+      </tr>
+
+    </table>
+  </div>
+</div>

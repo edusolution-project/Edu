@@ -23,12 +23,14 @@ namespace BaseMVC.AdminControllers
     public class CPUserController : AdminController
     {
         private readonly CPUserService _service;
+        private readonly CPUserSubService _UserSubservice;
         private readonly CPRoleService _roleService;
         private readonly List<CPRoleEntity> _listRoles;
-        public CPUserController(CPUserService userService, CPRoleService roleService)
+        public CPUserController(CPUserService userService, CPRoleService roleService,CPUserSubService userSubService)
         {
             _service = userService;
             _roleService = roleService;
+            _UserSubservice = userSubService;
             var data = _roleService.GetAll();
             _listRoles = data?.ToList();
         }
@@ -78,6 +80,20 @@ namespace BaseMVC.AdminControllers
             {
                 item.Pass = Security.Encrypt(item.Pass);
                 await _service.AddAsync(item);
+
+                var roleName = _roleService.GetByID(item.RoleID).Name;
+
+                if (roleName == "SUBUSER")
+                {
+                    CPUserSubEntity userSub = new CPUserSubEntity();
+                    userSub.Email = item.Email;
+                    userSub.Pass = item.Pass;
+                    userSub.RoleID = item.RoleID;
+                    userSub.Activity = item.Activity;
+                    userSub.Name = item.Name;
+                    await _UserSubservice.AddAsync(userSub);
+                }
+
             }
             ViewBag.RoleData = _listRoles;
             return View();

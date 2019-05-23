@@ -51,3 +51,14 @@ F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.csprojAssemblyReference.cache
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.deps.json
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.runtimeconfig.json
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.runtimeconfig.dev.json
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.csprojAssemblyReference.cache
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.csproj.CoreCompileInputs.cache
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.AssemblyInfoInputs.cache
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.AssemblyInfo.cs
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb

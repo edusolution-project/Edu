@@ -25,6 +25,7 @@ namespace BaseMongoDB.Factory
             services.AddScoped<CPResourceService>();
             services.AddScoped<CPRoleService>();
             services.AddScoped<CPUserService>();
+            services.AddScoped<CPUserSubService>();
             services.AddScoped<SysPageService>();
             services.AddScoped<SysTemplateService>();
             services.AddScoped<SysTemplateDetailService>();
@@ -37,6 +38,10 @@ namespace BaseMongoDB.Factory
             services.AddScoped<ModUnitService>();
             services.AddScoped<ModLessonService>();
             services.AddScoped<ModLessonPartService>();
+
+
+            //nghiepnc add
+            services.AddScoped<AccessTokenService>();
             return services;
         }
         /// <summary>
@@ -126,6 +131,10 @@ namespace BaseMongoDB.Factory
         public static CPUserService CreateInstanceCPUser(string tableName)
         {
             return new CPUserService(_configuration, tableName);
+        }
+        public static CPUserSubService CreateInstanceCPUserSub(string tableName)
+        {
+            return new CPUserSubService(_configuration, tableName);
         }
         public static SysPageService CreateInstanceSysPage(string tableName)
         {
