@@ -2663,6 +2663,7 @@
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
+          "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "2.2.0"
@@ -2688,6 +2689,16 @@
         },
         "runtime": {
           "bin/placeholder/BaseMVC.dll": {}
+        }
+      },
+      "Business/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/Business.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Business.dll": {}
         }
       },
       "CoreLogs/1.0.0": {
@@ -5229,6 +5240,7 @@
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
+          "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "2.2.0"
@@ -5254,6 +5266,16 @@
         },
         "runtime": {
           "bin/placeholder/BaseMVC.dll": {}
+        }
+      },
+      "Business/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/Business.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Business.dll": {}
         }
       },
       "CoreLogs/1.0.0": {
@@ -10368,6 +10390,11 @@
       "type": "project",
       "path": "../BaseMVC/BaseMVC.csproj",
       "msbuildProject": "../BaseMVC/BaseMVC.csproj"
+    },
+    "Business/1.0.0": {
+      "type": "project",
+      "path": "../Business/Business.csproj",
+      "msbuildProject": "../Business/Business.csproj"
     },
     "CoreLogs/1.0.0": {
       "type": "project",

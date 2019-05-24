@@ -1472,6 +1472,16 @@
           "lib/netstandard1.3/System.Threading.ThreadPool.dll": {}
         }
       },
+      "Business/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/Business.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Business.dll": {}
+        }
+      },
       "CoreMongoDB/1.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
@@ -5179,6 +5189,11 @@
         "system.threading.threadpool.nuspec"
       ]
     },
+    "Business/1.0.0": {
+      "type": "project",
+      "path": "../Business/Business.csproj",
+      "msbuildProject": "../Business/Business.csproj"
+    },
     "CoreMongoDB/1.0.0": {
       "type": "project",
       "path": "../CoreMongoDB/CoreMongoDB.csproj",
@@ -5187,6 +5202,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v2.0": [
+      "Business >= 1.0.0",
       "CoreMongoDB >= 1.0.0",
       "Microsoft.AspNetCore.Http.Abstractions >= 2.2.0",
       "Microsoft.Extensions.DependencyInjection.Abstractions >= 2.2.0",
@@ -5224,6 +5240,9 @@
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
+            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Business\\Business.csproj": {
+              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Business\\Business.csproj"
+            },
             "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
               "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
             }

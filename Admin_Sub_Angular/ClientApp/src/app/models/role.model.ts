@@ -1,7 +1,7 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { Permission } from './permission.model';
 
@@ -18,6 +18,6 @@ export class Role {
     public id: string;
     public name: string;
     public description: string;
-    public usersCount: string;
+    public usersCount: number;
     public permissions: Permission[];
 }

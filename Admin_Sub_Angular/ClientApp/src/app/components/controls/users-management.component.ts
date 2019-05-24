@@ -1,26 +1,27 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { Component, OnInit, AfterViewInit, TemplateRef, ViewChild, Input } from '@angular/core';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 
 import { AlertService, DialogType, MessageSeverity } from '../../services/alert.service';
-import { AppTranslationService } from "../../services/app-translation.service";
-import { AccountService } from "../../services/account.service";
-import { Utilities } from "../../services/utilities";
+import { AppTranslationService } from '../../services/app-translation.service';
+import { AccountService } from '../../services/account.service';
+import { Utilities } from '../../services/utilities';
 import { User } from '../../models/user.model';
 import { Role } from '../../models/role.model';
 import { Permission } from '../../models/permission.model';
 import { UserEdit } from '../../models/user-edit.model';
-import { UserInfoComponent } from "./user-info.component";
+import { UserInfoComponent } from './user-info.component';
+import { Restangular } from 'ngx-restangular';
 
 
 @Component({
     selector: 'users-management',
     templateUrl: './users-management.component.html',
-    styleUrls: ['./users-management.component.css']
+    styleUrls: ['./users-management.component.scss']
 })
 export class UsersManagementComponent implements OnInit, AfterViewInit {
     columns: any[] = [];
@@ -32,7 +33,7 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
     loadingIndicator: boolean;
 
     allRoles: Role[] = [];
-
+    services:any;
 
     @ViewChild('indexTemplate')
     indexTemplate: TemplateRef<any>;
@@ -52,26 +53,25 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
     @ViewChild('userEditor')
     userEditor: UserInfoComponent;
 
-    constructor(private alertService: AlertService, private translationService: AppTranslationService, private accountService: AccountService) {
+    constructor(private restangular: Restangular,private alertService: AlertService, private translationService: AppTranslationService, private accountService: AccountService) {
     }
 
 
     ngOnInit() {
-
-        let gT = (key: string) => this.translationService.getTranslation(key);
+        this.services = this.restangular.all('Account');
 
         this.columns = [
-            { prop: "index", name: '#', width: 40, cellTemplate: this.indexTemplate, canAutoResize: false },
-            { prop: 'jobTitle', name: gT('users.management.Title'), width: 50 },
-            { prop: 'userName', name: gT('users.management.UserName'), width: 90, cellTemplate: this.userNameTemplate },
-            { prop: 'fullName', name: gT('users.management.FullName'), width: 120 },
-            { prop: 'email', name: gT('users.management.Email'), width: 140 },
-            { prop: 'roles', name: gT('users.management.Roles'), width: 120, cellTemplate: this.rolesTemplate },
-            { prop: 'phoneNumber', name: gT('users.management.PhoneNumber'), width: 100 }
+            { prop: 'index', name: '#', width: 40, cellTemplate: this.indexTemplate, canAutoResize: false },
+            { prop: 'email', name: 'Tên đăng nhập', width: 200 },
+            { prop: 'name', name: 'Họ và tên', width: 120 },
+            { prop: 'roleID', name: 'Nhóm người dùng', width: 120 },
+            { prop: 'phone', name: 'Số điện thoại', width: 100 },
+            { prop: 'skype', name: 'Skype', width: 100 },
         ];
 
-        if (this.canManageUsers)
-            this.columns.push({ name: '', width: 130, cellTemplate: this.actionsTemplate, resizeable: false, canAutoResize: false, sortable: false, draggable: false });
+        if (this.canManageUsers) {
+            this.columns.push({ name: '', width: 160, cellTemplate: this.actionsTemplate, resizeable: false, canAutoResize: false, sortable: false, draggable: false });
+        }
 
         this.loadData();
     }
@@ -97,25 +97,27 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
             Object.assign(this.sourceUser, this.editedUser);
 
             let sourceIndex = this.rowsCache.indexOf(this.sourceUser, 0);
-            if (sourceIndex > -1)
+            if (sourceIndex > -1) {
                 Utilities.moveArrayItem(this.rowsCache, sourceIndex, 0);
+            }
 
             sourceIndex = this.rows.indexOf(this.sourceUser, 0);
-            if (sourceIndex > -1)
+            if (sourceIndex > -1) {
                 Utilities.moveArrayItem(this.rows, sourceIndex, 0);
+            }
 
             this.editedUser = null;
             this.sourceUser = null;
-        }
-        else {
-            let user = new User();
+        } else {
+            const user = new User();
             Object.assign(user, this.editedUser);
             this.editedUser = null;
 
             let maxIndex = 0;
-            for (let u of this.rowsCache) {
-                if ((<any>u).index > maxIndex)
+            for (const u of this.rowsCache) {
+                if ((<any>u).index > maxIndex) {
                     maxIndex = (<any>u).index;
+                }
             }
 
             (<any>user).index = maxIndex + 1;
@@ -130,13 +132,21 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
     loadData() {
         this.alertService.startLoadingMessage();
         this.loadingIndicator = true;
-
-        if (this.canViewRoles) {
-            this.accountService.getUsersAndRoles().subscribe(results => this.onDataLoadSuccessful(results[0], results[1]), error => this.onDataLoadFailed(error));
-        }
-        else {
-            this.accountService.getUsers().subscribe(users => this.onDataLoadSuccessful(users, this.accountService.currentUser.roles.map(x => new Role(x))), error => this.onDataLoadFailed(error));
-        }
+        this.services.all("getSubUser").post().subscribe(
+            response => {
+              console.log(response);
+              this.rows = response;
+              this.loadingIndicator = false;
+            }, error => {
+            
+              this.loadingIndicator = false;
+            }
+          );
+        // if (this.canViewRoles) {
+        //     this.accountService.getUsersAndRoles().subscribe(results => this.onDataLoadSuccessful(results[0], results[1]), error => this.onDataLoadFailed(error));
+        // } else {
+        //     this.accountService.getUsers().subscribe(users => this.onDataLoadSuccessful(users, this.accountService.currentUser.roles.map(x => new Role(x))), error => this.onDataLoadFailed(error));
+        // }
     }
 
 
@@ -159,7 +169,7 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
         this.alertService.stopLoadingMessage();
         this.loadingIndicator = false;
 
-        this.alertService.showStickyMessage("Load Error", `Unable to retrieve users from the server.\r\nErrors: "${Utilities.getHttpResponseMessage(error)}"`,
+        this.alertService.showStickyMessage('Load Error', `Unable to retrieve users from the server.\r\nErrors: "${Utilities.getHttpResponseMessages(error)}"`,
             MessageSeverity.error, error);
     }
 
@@ -197,7 +207,7 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
 
     deleteUserHelper(row: UserEdit) {
 
-        this.alertService.startLoadingMessage("Deleting...");
+        this.alertService.startLoadingMessage('Deleting...');
         this.loadingIndicator = true;
 
         this.accountService.deleteUser(row)
@@ -205,14 +215,14 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
                 this.alertService.stopLoadingMessage();
                 this.loadingIndicator = false;
 
-                this.rowsCache = this.rowsCache.filter(item => item !== row)
-                this.rows = this.rows.filter(item => item !== row)
+                this.rowsCache = this.rowsCache.filter(item => item !== row);
+                this.rows = this.rows.filter(item => item !== row);
             },
             error => {
                 this.alertService.stopLoadingMessage();
                 this.loadingIndicator = false;
 
-                this.alertService.showStickyMessage("Delete Error", `An error occured whilst deleting the user.\r\nError: "${Utilities.getHttpResponseMessage(error)}"`,
+                this.alertService.showStickyMessage('Delete Error', `An error occured whilst deleting the user.\r\nError: "${Utilities.getHttpResponseMessages(error)}"`,
                     MessageSeverity.error, error);
             });
     }
@@ -224,7 +234,7 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
     }
 
     get canViewRoles() {
-        return this.accountService.userHasPermission(Permission.viewRolesPermission)
+        return this.accountService.userHasPermission(Permission.viewRolesPermission);
     }
 
     get canManageUsers() {

@@ -1,10 +1,12 @@
-﻿using CoreMongoDB.Repositories;
+﻿using Business.Dto.Util;
+using CoreMongoDB.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+//using Business.Dto.Util;
 //using SME.Utils.Common;
 namespace BaseMongoDB.Database
 {
@@ -29,11 +31,11 @@ namespace BaseMongoDB.Database
         {
         }
 
-        public string GetNewToken(long nguoiDungId, string userAgent, string username)
+        public string GetNewToken(string nguoiDungId, string userAgent, string username)
         {
-           // AccessTokenService accessTokenService = GetService<AccessTokenService>();
-            //string token = GlobalUtil.GenerateAccessToken();
-            //string encryptedToken = EncryptUtils.SHA256Encrypt(token, username);
+          // AccessTokenService accessTokenService = GetService<AccessTokenService>();
+            string token = GlobalUtil.GenerateAccessToken();
+            string encryptedToken = EncryptUtils.SHA256Encrypt(token, username);
             //while (accessTokenService.Find(encryptedToken) != null)
             //{
             //    token = GlobalUtil.GenerateAccessToken();
@@ -52,7 +54,7 @@ namespace BaseMongoDB.Database
             //string token = GlobalUtil.GenerateAccessToken();
             //string encryptedToken = EncryptUtils.SHA256Encrypt(token, username);
             //var data = CreateQuery().Find(o=>o.ACCESS_TOKEN_KEY== encryptedToken)
-            return "";
+            return token;
         }
     }
 }

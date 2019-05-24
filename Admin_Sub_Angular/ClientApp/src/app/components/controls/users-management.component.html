@@ -1,72 +1,89 @@
 <div>
-    <div class="row control-box">
-        <div class="col-sm-8">
-            <div class="form-group search-box">
-                <search-box (searchChange)="onSearchChanged($event)" placeholder="{{'users.management.Search' | translate}}">></search-box>
-            </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="navbar action-box">
-                <ul class="nav navbar-nav navbar-right">
-                    <li *ngIf="canManageUsers && canAssignRoles" class="toolbaritem">
-                        <a href="javascript:;" (click)="newUser(row)">
-                            <i class="fa fa-plus-circle"></i> {{'users.management.NewUser' | translate}}
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+  <div class="row control-box">
+    <div class="col-lg-8">
+      <div class="form-group search-box">
+        <search-box (searchChange)="onSearchChanged($event)" placeholder="{{'users.management.Search' | translate}}">></search-box>
+      </div>
+    </div>
+    <div class="col-lg-4 pr-lg-5">
+      <ul class="nav flex-column flex-lg-row justify-content-end">
+        <li class="nav-item toolbaritem">
+          <a class="nav-link" href="javascript:;" (click)="newUser(row)">
+            <i class="fa fa-plus-circle"></i> Tạo mới
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <td>
+              STT
+            </td>
+            <td>
+              Tên đăng nhập/email
+            </td>
+            <td>
+              Họ tên
+            </td>
+            <td>
+              RoleID
+            </td>
+            <td>
+              Số điện thoại
+            </td>
+            <td>
+              Skype
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+        
+          <tr *ngFor="let item of rows; let i = index"  style="cursor:pointer">
+            <td>
+              {{i+1}}
+            </td>
+            <td>
+              {{item.email}}
+            </td>
+            <td>
+              {{item.name}}
+            </td>
+            <td>
+              {{item.roleID}}
+            </td>
+           
+            <td>
+              {{item.phone}}
+            </td>
+            <td>
+                {{item.skype}}
+              </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <ngx-datatable class="material colored-header sm table table-striped table-hover"
-                   [loadingIndicator]="loadingIndicator"
-                   [rows]="rows"
-                   [rowHeight]="35"
-                   [headerHeight]="35"
-                   [footerHeight]="35"
-                   [columns]="columns"
-                   [scrollbarV]="true"
-                   [columnMode]="'force'">
-    </ngx-datatable>
 
-    <ng-template #indexTemplate let-value="value">
-        <strong>{{value}}</strong>
-    </ng-template>
 
-    <ng-template #userNameTemplate let-row="row" let-value="value">
-        <span [class.locked-out]="row.isLockedOut" [class.user-disabled]="!row.isEnabled">
-            <i *ngIf="row.isLockedOut" class="fa fa-exclamation-triangle"> </i>
-            <i *ngIf="!row.isEnabled" class="fa fa-exclamation"> </i>
-            {{value}}
-        </span>
-    </ng-template>
 
-    <ng-template #rolesTemplate let-row="row" let-value="value" let-i="index">
-        <span class="user-role badge" *ngFor="let role of value">{{role}}</span>
-    </ng-template>
-
-    <ng-template #actionsTemplate let-row="row" let-value="value" let-i="index">
-        <div *ngIf="canManageUsers">
-            <a class="btn btn-link btn-xs" href="javascript:;" (click)="editUser(row)"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> {{'users.management.Edit' | translate}}</a>
-            |
-            <a class="btn btn-link btn-xs" href="javascript:;" (click)="deleteUser(row)"><i class="fa fa-trash-o" aria-hidden="true"></i> {{'users.management.Delete' | translate}}</a>
+  <div class="modal fade" bsModal #editorModal="bs-modal" (onHidden)="onEditorModalHidden()" [config]="{backdrop: 'static'}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 *ngIf="!editingUserName" class="modal-title float-left"><i class="fa fa-user-plus"></i> Tạo tải khoản</h4>
+          <h4 *ngIf="editingUserName" class="modal-title float-left"><i class="fa fa-user-circle-o"></i> Chỉnh sửa tài khoản</h4>
+          <button type="button" class="close float-right" title="Close" (click)="editorModal.hide()">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
-    </ng-template>
-
-
-    <div class="modal fade" bsModal #editorModal="bs-modal" (onHidden)="onEditorModalHidden()" [config]="{backdrop: 'static'}" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title pull-left"><i class="fa fa-user-circle-o"></i> {{editingUserName ? ('users.management.EditUser' | translate:editingUserName) : ('users.management.NewUser' | translate)}}</h4>
-                    <button type="button" class="close pull-right" title="Close" (click)="editorModal.hide()">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <user-info #userEditor [isGeneralEditor]="true"></user-info>
-                </div>
-            </div>
+        <div class="modal-body">
+          <user-info #userEditor [isGeneralEditor]="true"></user-info>
         </div>
+      </div>
     </div>
+  </div>
 </div>

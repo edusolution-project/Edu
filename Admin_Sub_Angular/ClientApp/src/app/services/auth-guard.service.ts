@@ -1,7 +1,7 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot, CanActivateChild, NavigationExtras, CanLoad, Route } from '@angular/router';
@@ -14,7 +14,7 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
 
-        let url: string = state.url;
+        const url: string = state.url;
         return this.checkLogin(url);
     }
 
@@ -24,13 +24,12 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
 
     canLoad(route: Route): boolean {
 
-        let url = `/${route.path}`;
+        const url = `/${route.path}`;
         return this.checkLogin(url);
     }
 
-  checkLogin(url: string): boolean {
-    console.log(1);
-      
+    checkLogin(url: string): boolean {
+
         if (this.authService.isLoggedIn) {
             return true;
         }

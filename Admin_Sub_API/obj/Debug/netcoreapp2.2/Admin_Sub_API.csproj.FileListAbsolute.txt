@@ -28,3 +28,5 @@ C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\n
 C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BaseMongoDB.pdb
 C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\CoreMongoDB.pdb
 C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\System.Runtime.Caching.xml
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\Business.dll
+C:\Users\nghiepnc\source\repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\Business.pdb

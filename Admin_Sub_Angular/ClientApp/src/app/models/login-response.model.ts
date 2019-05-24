@@ -1,27 +1,36 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { PermissionValues } from './permission.model';
 
 
 export interface LoginResponse {
     access_token: string;
-    id_token: string;
     refresh_token: string;
     expires_in: number;
+    token_type: string;
 }
 
 
-export interface IdToken {
+export interface AccessToken {
+    nbf: number;
+    exp: number;
+    iss: string;
+    aud: string | string[];
+    client_id: string;
     sub: string;
-    name: string;
-    fullname: string;
-    jobtitle: string;
-    email: string;
-    phone: string;
+    auth_time: number;
+    idp: string;
     role: string | string[];
     permission: PermissionValues | PermissionValues[];
+    name: string;
+    email: string;
+    phone_number: string;
+    fullname: string;
+    jobtitle: string;
     configuration: string;
+    scope: string | string[];
+    amr: string[];
 }

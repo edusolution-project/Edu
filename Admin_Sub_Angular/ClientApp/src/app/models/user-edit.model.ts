@@ -1,7 +1,7 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { User } from './user.model';
 
@@ -12,7 +12,7 @@ export class UserEdit extends User {
 
         this.currentPassword = currentPassword;
         this.newPassword = newPassword;
-        this.confirmPassword = confirmPassword
+        this.confirmPassword = confirmPassword;
     }
 
     public currentPassword: string;

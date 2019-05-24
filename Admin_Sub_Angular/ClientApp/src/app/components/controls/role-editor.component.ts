@@ -1,12 +1,12 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { Component, ViewChild } from '@angular/core';
 
 import { AlertService, MessageSeverity } from '../../services/alert.service';
-import { AccountService } from "../../services/account.service";
+import { AccountService } from '../../services/account.service';
 import { Role } from '../../models/role.model';
 import { Permission } from '../../models/permission.model';
 
@@ -14,13 +14,13 @@ import { Permission } from '../../models/permission.model';
 @Component({
     selector: 'role-editor',
     templateUrl: './role-editor.component.html',
-    styleUrls: ['./role-editor.component.css']
+    styleUrls: ['./role-editor.component.scss']
 })
 export class RoleEditorComponent {
 
     private isNewRole = false;
     private isSaving: boolean;
-    private showValidationErrors: boolean = true;
+    private showValidationErrors = true;
     private editingRoleName: string;
     private roleEdit: Role = new Role();
     private allPermissions: Permission[] = [];
@@ -50,14 +50,13 @@ export class RoleEditorComponent {
 
     private save() {
         this.isSaving = true;
-        this.alertService.startLoadingMessage("Saving changes...");
+        this.alertService.startLoadingMessage('Saving changes...');
 
         this.roleEdit.permissions = this.getSelectedPermissions();
 
         if (this.isNewRole) {
             this.accountService.newRole(this.roleEdit).subscribe(role => this.saveSuccessHelper(role), error => this.saveFailedHelper(error));
-        }
-        else {
+        } else {
             this.accountService.updateRole(this.roleEdit).subscribe(response => this.saveSuccessHelper(), error => this.saveFailedHelper(error));
         }
     }
@@ -66,28 +65,32 @@ export class RoleEditorComponent {
 
 
     private saveSuccessHelper(role?: Role) {
-        if (role)
+        if (role) {
             Object.assign(this.roleEdit, role);
+        }
 
         this.isSaving = false;
         this.alertService.stopLoadingMessage();
         this.showValidationErrors = false;
 
-        if (this.isNewRole)
-            this.alertService.showMessage("Success", `Role \"${this.roleEdit.name}\" was created successfully`, MessageSeverity.success);
-        else
-            this.alertService.showMessage("Success", `Changes to role \"${this.roleEdit.name}\" was saved successfully`, MessageSeverity.success);
+        if (this.isNewRole) {
+            this.alertService.showMessage('Success', `Role \"${this.roleEdit.name}\" was created successfully`, MessageSeverity.success);
+        } else {
+            this.alertService.showMessage('Success', `Changes to role \"${this.roleEdit.name}\" was saved successfully`, MessageSeverity.success);
+        }
 
 
         this.roleEdit = new Role();
         this.resetForm();
 
 
-        if (!this.isNewRole && this.accountService.currentUser.roles.some(r => r == this.editingRoleName))
+        if (!this.isNewRole && this.accountService.currentUser.roles.some(r => r == this.editingRoleName)) {
             this.refreshLoggedInUser();
+        }
 
-        if (this.changesSavedCallback)
+        if (this.changesSavedCallback) {
             this.changesSavedCallback();
+        }
     }
 
 
@@ -96,7 +99,7 @@ export class RoleEditorComponent {
             .subscribe(user => { },
             error => {
                 this.alertService.resetStickyMessage();
-                this.alertService.showStickyMessage("Refresh failed", "An error occured whilst refreshing logged in user information from the server", MessageSeverity.error, error);
+                this.alertService.showStickyMessage('Refresh failed', 'An error occured whilst refreshing logged in user information from the server', MessageSeverity.error, error);
             });
     }
 
@@ -105,11 +108,12 @@ export class RoleEditorComponent {
     private saveFailedHelper(error: any) {
         this.isSaving = false;
         this.alertService.stopLoadingMessage();
-        this.alertService.showStickyMessage("Save Error", "The below errors occured whilst saving your changes:", MessageSeverity.error, error);
+        this.alertService.showStickyMessage('Save Error', 'The below errors occured whilst saving your changes:', MessageSeverity.error, error);
         this.alertService.showStickyMessage(error, null, MessageSeverity.error);
 
-        if (this.changesFailedCallback)
+        if (this.changesFailedCallback) {
             this.changesFailedCallback();
+        }
     }
 
 
@@ -119,11 +123,12 @@ export class RoleEditorComponent {
         this.showValidationErrors = false;
         this.resetForm();
 
-        this.alertService.showMessage("Cancelled", "Operation cancelled by user", MessageSeverity.default);
+        this.alertService.showMessage('Cancelled', 'Operation cancelled by user', MessageSeverity.default);
         this.alertService.resetStickyMessage();
 
-        if (this.changesCancelledCallback)
+        if (this.changesCancelledCallback) {
             this.changesCancelledCallback();
+        }
     }
 
 
@@ -142,11 +147,13 @@ export class RoleEditorComponent {
         let firstMemberValue: boolean;
 
         this.allPermissions.forEach(p => {
-            if (p.groupName != groupName)
+            if (p.groupName != groupName) {
                 return;
+            }
 
-            if (firstMemberValue == null)
+            if (firstMemberValue == null) {
                 firstMemberValue = this.selectedValues[p.value] == true;
+            }
 
             this.selectedValues[p.value] = !firstMemberValue;
         });
@@ -162,8 +169,7 @@ export class RoleEditorComponent {
 
         if (!replace) {
             this.form.reset();
-        }
-        else {
+        } else {
             this.formResetToggle = false;
 
             setTimeout(() => {
@@ -198,8 +204,7 @@ export class RoleEditorComponent {
             Object.assign(this.roleEdit, role);
 
             return this.roleEdit;
-        }
-        else {
+        } else {
             return this.newRole(allPermissions);
         }
     }
@@ -207,6 +212,6 @@ export class RoleEditorComponent {
 
 
     get canManageRoles() {
-        return this.accountService.userHasPermission(Permission.manageRolesPermission)
+        return this.accountService.userHasPermission(Permission.manageRolesPermission);
     }
 }

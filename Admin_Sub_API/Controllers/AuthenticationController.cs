@@ -6,7 +6,6 @@ using System.Web.Http;
 using SME.Bussiness.Lib.Dto;
 using System.Text;
 using SME.Utils.Common;
-using SME.Bussiness.Lib.Service;
 using Newtonsoft.Json;
 using SME.Utils.Common.SMEException;
 using SME.API.CustomFilter;
@@ -39,11 +38,13 @@ namespace SME.API.Controllers
         //{
         //}
         CPUserService _userService;
+      AccessTokenService _accessTokenService;
         public AuthenticationController(
-        CPUserService userService
+        CPUserService userService, AccessTokenService accessTokenService
        )
         {
             _userService = userService;
+            _accessTokenService = accessTokenService;
         }
         [HttpGet]
         public List<string> test()
@@ -171,6 +172,7 @@ namespace SME.API.Controllers
             //return res;
             LoginResultForm res = new LoginResultForm();
             res.UserName = user.Name;
+            res.Token = _accessTokenService.GetNewToken(user.ID,"",user.Name);
             //string token = base.GetService<AccessTokenService>().GetNewToken(nguoiDung.NGUOI_DUNG_ID,
             //    GetHeader(GlobalConstants.HEADER_USER_AGENT), form.Username);
             return res;

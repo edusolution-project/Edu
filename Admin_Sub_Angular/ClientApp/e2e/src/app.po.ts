@@ -1,16 +1,16 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { browser, by, element } from 'protractor';
 
 export class AppPage {
-  navigateTo() {
-    return browser.get('/');
-  }
+    navigateTo() {
+        return browser.get('/');
+    }
 
-  getAppTitle() {
-    return element(by.css('app-root .appTitle')).getText();
-  }
+    getAppTitle() {
+        return element(by.css('app-root .appTitle')).getText();
+    }
 }

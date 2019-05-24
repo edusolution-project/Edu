@@ -1,7 +1,7 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { Directive, forwardRef, Attribute } from '@angular/core';
 import { Validator, AbstractControl, NG_VALIDATORS } from '@angular/forms';
@@ -20,16 +20,17 @@ export class EqualValidator implements Validator {
     }
 
     validate(c: AbstractControl): { [key: string]: any } {
-        let other = c.root.get(this.validateEqual);
+        const other = c.root.get(this.validateEqual);
 
-        if (!other)
+        if (!other) {
             return null;
+        }
 
         return this.reverse === 'true' ? this.validateReverse(c, other) : this.validateNoReverse(c, other);
     }
 
     private validateNoReverse(c: AbstractControl, other: AbstractControl): { [key: string]: any } {
-        return other.value === c.value ? null : { validateEqual: true }
+        return other.value === c.value ? null : { validateEqual: true };
     }
 
     private validateReverse(c: AbstractControl, other: AbstractControl): { [key: string]: any } {
@@ -39,7 +40,7 @@ export class EqualValidator implements Validator {
 
                 if (Object.keys(other.errors).length == 0) {
                     other.setErrors(null);
-                };
+                }
             }
         } else {
             other.setErrors({ validateEqual: true });

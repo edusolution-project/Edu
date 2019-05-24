@@ -1,23 +1,23 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { Component, OnInit, OnDestroy, TemplateRef, ViewChild, Input } from '@angular/core';
 
 import { AlertService, DialogType, MessageSeverity } from '../../services/alert.service';
-import { AppTranslationService } from "../../services/app-translation.service";
-import { NotificationService } from "../../services/notification.service";
-import { AccountService } from "../../services/account.service";
+import { AppTranslationService } from '../../services/app-translation.service';
+import { NotificationService } from '../../services/notification.service';
+import { AccountService } from '../../services/account.service';
 import { Permission } from '../../models/permission.model';
-import { Utilities } from "../../services/utilities";
+import { Utilities } from '../../services/utilities';
 import { Notification } from '../../models/notification.model';
 
 
 @Component({
     selector: 'notifications-viewer',
     templateUrl: './notifications-viewer.component.html',
-    styleUrls: ['./notifications-viewer.component.css']
+    styleUrls: ['./notifications-viewer.component.scss']
 })
 export class NotificationsViewerComponent implements OnInit, OnDestroy {
     columns: any[] = [];
@@ -32,7 +32,7 @@ export class NotificationsViewerComponent implements OnInit, OnDestroy {
     isViewOnly: boolean;
 
     @Input()
-    verticalScrollbar: boolean = false;
+    verticalScrollbar = false;
 
 
     @ViewChild('statusHeaderTemplate')
@@ -64,12 +64,11 @@ export class NotificationsViewerComponent implements OnInit, OnDestroy {
                 { prop: 'date', cellTemplate: this.dateTemplate, width: 100, resizeable: false, canAutoResize: false, sortable: false, draggable: false },
                 { prop: 'header', cellTemplate: this.contentHeaderTemplate, width: 200, resizeable: false, sortable: false, draggable: false },
             ];
-        }
-        else {
-            let gT = (key: string) => this.translationService.getTranslation(key);
+        } else {
+            const gT = (key: string) => this.translationService.getTranslation(key);
 
             this.columns = [
-                { prop: "", name: '', width: 10, headerTemplate: this.statusHeaderTemplate, cellTemplate: this.statusTemplate, resizeable: false, canAutoResize: false, sortable: false, draggable: false },
+                { prop: '', name: '', width: 10, headerTemplate: this.statusHeaderTemplate, cellTemplate: this.statusTemplate, resizeable: false, canAutoResize: false, sortable: false, draggable: false },
                 { prop: 'date', name: gT('notifications.Date'), cellTemplate: this.dateTemplate, width: 30 },
                 { prop: 'body', name: gT('notifications.Notification'), cellTemplate: this.contenBodytTemplate, width: 500 },
                 { name: '', width: 80, cellTemplate: this.actionsTemplate, resizeable: false, canAutoResize: false, sortable: false, draggable: false }
@@ -82,8 +81,9 @@ export class NotificationsViewerComponent implements OnInit, OnDestroy {
 
 
     ngOnDestroy() {
-        if (this.dataLoadingSubscription)
+        if (this.dataLoadingSubscription) {
             this.dataLoadingSubscription.unsubscribe();
+        }
     }
 
 
@@ -95,37 +95,35 @@ export class NotificationsViewerComponent implements OnInit, OnDestroy {
             return;
         }
 
-
-        this.alertService.startLoadingMessage();
         this.loadingIndicator = true;
 
-        let dataLoadTask = this.isViewOnly ? this.notificationService.getNewNotifications() : this.notificationService.getNewNotificationsPeriodically()
+        const dataLoadTask = this.isViewOnly ? this.notificationService.getNewNotifications() : this.notificationService.getNewNotificationsPeriodically();
 
         this.dataLoadingSubscription = dataLoadTask
             .subscribe(notifications => {
-                this.alertService.stopLoadingMessage();
                 this.loadingIndicator = false;
                 this.dataLoadingConsecutiveFailurs = 0;
 
                 this.rows = this.processResults(notifications);
             },
             error => {
-                this.alertService.stopLoadingMessage();
                 this.loadingIndicator = false;
 
-                this.alertService.showMessage("Load Error", "Loading new notifications from the server failed!", MessageSeverity.warn);
+                this.alertService.showMessage('Load Error', 'Loading new notifications from the server failed!', MessageSeverity.warn);
                 this.alertService.logError(error);
 
-                if (this.dataLoadingConsecutiveFailurs++ < 5)
+                if (this.dataLoadingConsecutiveFailurs++ < 5) {
                     setTimeout(() => this.initDataLoading(), 5000);
-                else
-                    this.alertService.showStickyMessage("Load Error", "Loading new notifications from the server failed!", MessageSeverity.error);
+                } else {
+                    this.alertService.showStickyMessage('Load Error', 'Loading new notifications from the server failed!', MessageSeverity.error);
+                }
 
             });
 
 
-        if (this.isViewOnly)
+        if (this.isViewOnly) {
             this.dataLoadingSubscription = null;
+        }
     }
 
 
@@ -143,8 +141,9 @@ export class NotificationsViewerComponent implements OnInit, OnDestroy {
 
 
     getPrintedDate(value: Date) {
-        if (value)
-            return Utilities.printTimeOnly(value) + " on " + Utilities.printDateOnly(value);
+        if (value) {
+            return Utilities.printTimeOnly(value) + ' on ' + Utilities.printDateOnly(value);
+        }
     }
 
 
@@ -155,7 +154,7 @@ export class NotificationsViewerComponent implements OnInit, OnDestroy {
 
     deleteNotificationHelper(row: Notification) {
 
-        this.alertService.startLoadingMessage("Deleting...");
+        this.alertService.startLoadingMessage('Deleting...');
         this.loadingIndicator = true;
 
         this.notificationService.deleteNotification(row)
@@ -163,13 +162,13 @@ export class NotificationsViewerComponent implements OnInit, OnDestroy {
                 this.alertService.stopLoadingMessage();
                 this.loadingIndicator = false;
 
-                this.rows = this.rows.filter(item => item.id != row.id)
+                this.rows = this.rows.filter(item => item.id != row.id);
             },
             error => {
                 this.alertService.stopLoadingMessage();
                 this.loadingIndicator = false;
 
-                this.alertService.showStickyMessage("Delete Error", `An error occured whilst deleting the notification.\r\nError: "${Utilities.getHttpResponseMessage(error)}"`,
+                this.alertService.showStickyMessage('Delete Error', `An error occured whilst deleting the notification.\r\nError: "${Utilities.getHttpResponseMessages(error)}"`,
                     MessageSeverity.error, error);
             });
     }
@@ -177,10 +176,10 @@ export class NotificationsViewerComponent implements OnInit, OnDestroy {
 
     togglePin(row: Notification) {
 
-        let pin = !row.isPinned;
-        let opText = pin ? "Pinning" : "Unpinning";
+        const pin = !row.isPinned;
+        const opText = pin ? 'Pinning' : 'Unpinning';
 
-        this.alertService.startLoadingMessage(opText + "...");
+        this.alertService.startLoadingMessage(opText + '...');
         this.loadingIndicator = true;
 
         this.notificationService.pinUnpinNotification(row, pin)
@@ -194,14 +193,14 @@ export class NotificationsViewerComponent implements OnInit, OnDestroy {
                 this.alertService.stopLoadingMessage();
                 this.loadingIndicator = false;
 
-                this.alertService.showStickyMessage(opText + " Error", `An error occured whilst ${opText} the notification.\r\nError: "${Utilities.getHttpResponseMessage(error)}"`,
+                this.alertService.showStickyMessage(opText + ' Error', `An error occured whilst ${opText} the notification.\r\nError: "${Utilities.getHttpResponseMessages(error)}"`,
                     MessageSeverity.error, error);
             });
     }
 
 
     get canManageNotifications() {
-        return this.accountService.userHasPermission(Permission.manageRolesPermission); //Todo: Consider creating separate permission for notifications
+        return this.accountService.userHasPermission(Permission.manageRolesPermission); // Todo: Consider creating separate permission for notifications
     }
 
 }

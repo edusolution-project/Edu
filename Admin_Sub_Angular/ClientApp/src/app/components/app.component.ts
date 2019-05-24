@@ -1,35 +1,31 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
-import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChildren, AfterViewInit, QueryList, ElementRef } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChildren, AfterViewInit, QueryList, ElementRef } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
 import { ToastaService, ToastaConfig, ToastOptions, ToastData } from 'ngx-toasta';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 
-import { AlertService, AlertDialog, DialogType, AlertMessage, MessageSeverity } from '../services/alert.service';
-import { NotificationService } from "../services/notification.service";
-import { AppTranslationService } from "../services/app-translation.service";
+import { AlertService, AlertDialog, DialogType, AlertCommand, AlertMessage, MessageSeverity } from '../services/alert.service';
+import { NotificationService } from '../services/notification.service';
+import { AppTranslationService } from '../services/app-translation.service';
 import { AccountService } from '../services/account.service';
 import { LocalStoreManager } from '../services/local-store-manager.service';
 import { AppTitleService } from '../services/app-title.service';
 import { AuthService } from '../services/auth.service';
 import { ConfigurationService } from '../services/configuration.service';
 import { Permission } from '../models/permission.model';
-import { LoginComponent } from "../components/login/login.component";
-import { Restangular } from "ngx-restangular";
-import { forEach } from "@angular/router/src/utils/collection";
-import { GlobalService } from "../services/global.service";
+import { LoginComponent } from '../components/login/login.component';
 
-var alertify: any = require('../assets/scripts/alertify.js');
+const alertify: any = require('../assets/scripts/alertify.js');
 
 
 @Component({
-  selector: "app-root",
+  selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, AfterViewInit {
 
@@ -38,58 +34,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   shouldShowLoginModal: boolean;
   removePrebootScreen: boolean;
   newNotificationCount = 0;
-  appTitle = "Hệ thống học trực tuyến";
-  appLogo = "";
-  soGiaoDucData: SoGiaoDucData;
-  parentMessage = "message from parent"
-  lstMenu = [
-    {
-      'name': 'Quy định tuyển sinh',
-      'class': 'fa fa-file-text',
-      'link': 'quy-Dinh-Tuyen-Sinh',
-      'active': false
-    },
-    {
-      'name': 'Tra cứu đúng tuyến',
-      'class': 'fa fa-search',
-      'link': 'tra-cuu-dung-tuyen',
-      'active': false
-    },
-    {
-      'name': 'Thông tin tuyển sinh',
-      'class': 'fa fa-graduation-cap',
-      'link': 'tra-cuu-theo-truong',
-      'active': false
-    },
-    {
-      'name': 'Đăng ký tuyển sinh',
-      'class': 'fa fa-pencil',
-      'link': 'dang-ky-tuyen-sinh',
-      'active': false
-    },
-    {
-      'name': 'Hướng dẫn',
-      'class': 'fa fa-file-text',
-      'link': 'huong-dan',
-      'active': false
-    },
-    {
+  appTitle = 'Edu IES';
+  appLogo = require('../assets/images/logo-white.png');
 
-      'name': 'Tra cứu kết quả',
-      'class': 'fa fa-search',
-      'link': 'tra-cuu-ho-so-du-tuyen',
-      'active': false
-    }
-  ];
-  test: SoGiaoDucData = new SoGiaoDucData();
-  isViewContentLoading = false ;
-  
   stickyToasties: number[] = [];
 
-  dataLoadingConsecutiveFailurs = 0;
+  dataLoadingConsecutiveFailures = 0;
   notificationsLoadingSubscription: any;
-  currentYear: number =0;
-
 
   @ViewChildren('loginModal,loginControl')
   modalLoginControls: QueryList<any>;
@@ -97,43 +48,50 @@ export class AppComponent implements OnInit, AfterViewInit {
   loginModal: ModalDirective;
   loginControl: LoginComponent;
 
+  gT = (key: string | Array<string>, interpolateParams?: Object) => this.translationService.getTranslation(key, interpolateParams);
 
   get notificationsTitle() {
-
-    let gT = (key: string) => this.translationService.getTranslation(key);
-
-    if (this.newNotificationCount)
-      return `${gT("app.Notifications")} (${this.newNotificationCount} ${gT("app.New")})`;
-    else
-      return gT("app.Notifications");
+    if (this.newNotificationCount) {
+      return `${this.gT('app.Notifications')} (${this.newNotificationCount} ${this.gT('app.New')})`;
+    } else {
+      return this.gT('app.Notifications');
+    }
   }
 
 
-  constructor(storageManager: LocalStoreManager, private toastaService: ToastaService, private toastaConfig: ToastaConfig,
-    private accountService: AccountService, private alertService: AlertService, private notificationService: NotificationService, private appTitleService: AppTitleService,
-    private authService: AuthService, private translationService: AppTranslationService, public configurations: ConfigurationService, public router: Router, private restangular: Restangular,
-    private globalService: GlobalService) {
+  constructor(
+    storageManager: LocalStoreManager,
+    private toastaService: ToastaService,
+    private toastaConfig: ToastaConfig,
+    private accountService: AccountService,
+    private alertService: AlertService,
+    private notificationService: NotificationService,
+    private appTitleService: AppTitleService,
+    private authService: AuthService,
+    private translationService: AppTranslationService,
+    public configurations: ConfigurationService,
+    public router: Router) {
+
     storageManager.initialiseStorageSyncListener();
-    translationService.addLanguages(["en", "fr", "de", "pt", "ar", "ko"]);
-    translationService.setDefaultLanguage('en');
+
     this.toastaConfig.theme = 'bootstrap';
     this.toastaConfig.position = 'top-right';
     this.toastaConfig.limit = 100;
     this.toastaConfig.showClose = true;
+
     this.appTitleService.appName = this.appTitle;
-    
   }
 
 
   ngAfterViewInit() {
+
     this.modalLoginControls.changes.subscribe((controls: QueryList<any>) => {
       controls.forEach(control => {
         if (control) {
           if (control instanceof LoginComponent) {
             this.loginControl = control;
             this.loginControl.modalClosedCallback = () => this.loginModal.hide();
-          }
-          else {
+          } else {
             this.loginModal = control;
             this.loginModal.show();
           }
@@ -144,7 +102,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
   onLoginModalShown() {
-    this.alertService.showStickyMessage("Session Expired", "Your Session has expired. Please log in again", MessageSeverity.info);
+    this.alertService.showStickyMessage('Session Expired', 'Your Session has expired. Please log in again', MessageSeverity.info);
   }
 
 
@@ -153,8 +111,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.loginControl.reset();
     this.shouldShowLoginModal = false;
 
-    if (this.authService.isSessionExpired)
-      this.alertService.showStickyMessage("Session Expired", "Your Session has expired. Please log in again to renew your session", MessageSeverity.warn);
+    if (this.authService.isSessionExpired) {
+      this.alertService.showStickyMessage('Session Expired', 'Your Session has expired. Please log in again to renew your session', MessageSeverity.warn);
+    }
   }
 
 
@@ -162,15 +121,28 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.alertService.resetStickyMessage();
   }
 
-  
-   ngOnInit() {
-     this.isUserLoggedIn = this.authService.isLoggedIn;
-     //this.soGiaoDucData = this.globalService.soGiaoDucData;
-     this.soGiaoDucData = JSON.parse(localStorage.getItem("SoGiaoDuc"));
-     //this.appLogo = this.soGiaoDucData.LogoUrl;
+
+  ngOnInit() {
+    this.isUserLoggedIn = this.authService.isLoggedIn;
+
+    // 0.5 extra sec to display preboot/loader information. Preboot screen is removed 0.5 sec later
+    setTimeout(() => this.isAppLoaded = true, 500);
+    setTimeout(() => this.removePrebootScreen = true, 1000);
+
+    setTimeout(() => {
+      if (this.isUserLoggedIn) {
+        this.alertService.resetStickyMessage();
+
+        // if (!this.authService.isSessionExpired)
+        this.alertService.showMessage('Login', `Welcome back ${this.userName}!`, MessageSeverity.default);
+        // else
+        //    this.alertService.showStickyMessage("Session Expired", "Your Session has expired. Please log in again", MessageSeverity.warn);
+      }
+    }, 2000);
+
+
     this.alertService.getDialogEvent().subscribe(alert => this.showDialog(alert));
-    this.alertService.getMessageEvent().subscribe(message => this.showToast(message, false));
-    this.alertService.getStickyMessageEvent().subscribe(message => this.showToast(message, true));
+    this.alertService.getMessageEvent().subscribe(message => this.showToast(message));
 
     this.authService.reLoginDelegate = () => this.shouldShowLoginModal = true;
 
@@ -180,26 +152,15 @@ export class AppComponent implements OnInit, AfterViewInit {
 
       if (this.isUserLoggedIn) {
         this.initNotificationsLoading();
-      }
-      else {
+      } else {
         this.unsubscribeNotifications();
       }
 
       setTimeout(() => {
         if (!this.isUserLoggedIn) {
-          this.alertService.showMessage("Session Ended!", "", MessageSeverity.default);
+          this.alertService.showMessage('Session Ended!', '', MessageSeverity.default);
         }
       }, 500);
-    });
-
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        let url = (<NavigationStart>event).url;
-
-        if (url !== url.toLowerCase()) {
-          this.router.navigateByUrl((<NavigationStart>event).url.toLowerCase());
-        }
-      }
     });
   }
 
@@ -210,36 +171,40 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
   private unsubscribeNotifications() {
-    if (this.notificationsLoadingSubscription)
+    if (this.notificationsLoadingSubscription) {
       this.notificationsLoadingSubscription.unsubscribe();
+    }
   }
+
+
 
   initNotificationsLoading() {
 
     this.notificationsLoadingSubscription = this.notificationService.getNewNotificationsPeriodically()
       .subscribe(notifications => {
-        this.dataLoadingConsecutiveFailurs = 0;
+        this.dataLoadingConsecutiveFailures = 0;
         this.newNotificationCount = notifications.filter(n => !n.isRead).length;
       },
         error => {
           this.alertService.logError(error);
 
-          if (this.dataLoadingConsecutiveFailurs++ < 20)
-            setTimeout(() => this.initNotificationsLoading(), 5000000);
-          else
-            this.alertService.showStickyMessage("Load Error", "Loading new notifications from the server failed!", MessageSeverity.error);
+          if (this.dataLoadingConsecutiveFailures++ < 20) {
+            setTimeout(() => this.initNotificationsLoading(), 5000);
+          } else {
+            this.alertService.showStickyMessage('Load Error', 'Loading new notifications from the server failed!', MessageSeverity.error);
+          }
         });
   }
 
 
   markNotificationsAsRead() {
 
-    let recentNotifications = this.notificationService.recentNotifications;
+    const recentNotifications = this.notificationService.recentNotifications;
 
     if (recentNotifications.length) {
       this.notificationService.readUnreadNotification(recentNotifications.map(n => n.id), true)
         .subscribe(response => {
-          for (let n of recentNotifications) {
+          for (const n of recentNotifications) {
             n.isRead = true;
           }
 
@@ -247,7 +212,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         },
           error => {
             this.alertService.logError(error);
-            this.alertService.showMessage("Notification Error", "Marking read notifications failed", MessageSeverity.error);
+            this.alertService.showMessage('Notification Error', 'Marking read notifications failed', MessageSeverity.error);
 
           });
     }
@@ -259,8 +224,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     alertify.set({
       labels: {
-        ok: dialog.okLabel || "OK",
-        cancel: dialog.cancelLabel || "Cancel"
+        ok: dialog.okLabel || 'OK',
+        cancel: dialog.cancelLabel || 'Cancel'
       }
     });
 
@@ -268,16 +233,16 @@ export class AppComponent implements OnInit, AfterViewInit {
       case DialogType.alert:
         alertify.alert(dialog.message);
 
-        break
+        break;
       case DialogType.confirm:
         alertify
           .confirm(dialog.message, (e) => {
             if (e) {
               dialog.okCallback();
-            }
-            else {
-              if (dialog.cancelCallback)
+            } else {
+              if (dialog.cancelCallback) {
                 dialog.cancelCallback();
+              }
             }
           });
 
@@ -287,10 +252,10 @@ export class AppComponent implements OnInit, AfterViewInit {
           .prompt(dialog.message, (e, val) => {
             if (e) {
               dialog.okCallback(val);
-            }
-            else {
-              if (dialog.cancelCallback)
+            } else {
+              if (dialog.cancelCallback) {
                 dialog.cancelCallback();
+              }
             }
           }, dialog.defaultValue);
 
@@ -300,42 +265,49 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
 
+  showToast(alert: AlertCommand) {
 
-
-  showToast(message: AlertMessage, isSticky: boolean) {
-
-    if (message == null) {
-      for (let id of this.stickyToasties.slice(0)) {
+    if (alert.operation == 'clear') {
+      for (const id of this.stickyToasties.slice(0)) {
         this.toastaService.clear(id);
       }
 
       return;
     }
 
-    let toastOptions: ToastOptions = {
-      title: message.summary,
-      msg: message.detail,
-      timeout: isSticky ? 0 : 4000
+    const toastOptions: ToastOptions = {
+      title: alert.message.summary,
+      msg: alert.message.detail,
     };
 
 
-    if (isSticky) {
-      toastOptions.onAdd = (toast: ToastData) => this.stickyToasties.push(toast.id);
+    if (alert.operation == 'add_sticky') {
+      toastOptions.timeout = 0;
+
+      toastOptions.onAdd = (toast: ToastData) => {
+        this.stickyToasties.push(toast.id);
+      };
 
       toastOptions.onRemove = (toast: ToastData) => {
-        let index = this.stickyToasties.indexOf(toast.id, 0);
+        const index = this.stickyToasties.indexOf(toast.id, 0);
 
         if (index > -1) {
           this.stickyToasties.splice(index, 1);
         }
 
+        if (alert.onRemove) {
+          alert.onRemove();
+        }
+
         toast.onAdd = null;
         toast.onRemove = null;
       };
+    } else {
+      toastOptions.timeout = 4000;
     }
 
 
-    switch (message.severity) {
+    switch (alert.message.severity) {
       case MessageSeverity.default: this.toastaService.default(toastOptions); break;
       case MessageSeverity.info: this.toastaService.info(toastOptions); break;
       case MessageSeverity.success: this.toastaService.success(toastOptions); break;
@@ -344,8 +316,6 @@ export class AppComponent implements OnInit, AfterViewInit {
       case MessageSeverity.wait: this.toastaService.wait(toastOptions); break;
     }
   }
-
-
 
 
 
@@ -359,76 +329,27 @@ export class AppComponent implements OnInit, AfterViewInit {
     return new Date().getUTCFullYear();
   }
 
-  test1() {
-    alert("1");
-  }
 
   get userName(): string {
-    return "Nguyễn Chí Nghiệp";
-    //return this.authService.currentUser ? this.authService.currentUser.userName : "";
+    return this.authService.currentUser ? this.authService.currentUser.userName : '';
   }
 
 
   get fullName(): string {
-    return this.authService.currentUser ? this.authService.currentUser.fullName : "";
+    return this.authService.currentUser ? this.authService.currentUser.fullName : '';
   }
 
 
 
   get canViewCustomers() {
-    return this.accountService.userHasPermission(Permission.viewUsersPermission); //eg. viewCustomersPermission
+    return this.accountService.userHasPermission(Permission.viewUsersPermission); // eg. viewCustomersPermission
   }
 
   get canViewProducts() {
-    return this.accountService.userHasPermission(Permission.viewUsersPermission); //eg. viewProductsPermission
+    return this.accountService.userHasPermission(Permission.viewUsersPermission); // eg. viewProductsPermission
   }
 
   get canViewOrders() {
-    return true; //eg. viewOrdersPermission
+    return true; // eg. viewOrdersPermission
   }
-
-
-  selectMenu(item) {
-    this.router.navigate([item.link]);
-    this.lstMenu.forEach((item1) => {
-      item1.active = false;
-    });
-    item.active = true;
-  }
-  get isShow() {
-
-    if (this.router.url == "/") {
-      return true;
-    }
-    else
-      return false;
-  }
-
-  set(key: string, data: any): void {
-    try {
-      localStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {
-      console.error('Error saving to localStorage', e);
-    }
-  }
-  get(key: string) {
-    try {
-      return JSON.parse(localStorage.getItem(key));
-    } catch (e) {
-      console.error('Error getting data from localStorage', e);
-      return null;
-    }
-  }
- 
-
-
-}
-export  class SoGiaoDucData {
-    
-  public MaSo: string;
-  public TieuDe2: string;
-  public TieuDe1: string;
-  public LogoUrl: string;
-  public DiaChiSoGd: string;
-
 }

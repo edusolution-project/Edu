@@ -1,7 +1,7 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { Injectable } from '@angular/core';
 import { Observable, interval } from 'rxjs';
@@ -11,13 +11,15 @@ import { AuthService } from './auth.service';
 import { NotificationEndpoint } from './notification-endpoint.service';
 import { Notification } from '../models/notification.model';
 
-
-
 @Injectable()
 export class NotificationService {
 
   private lastNotificationDate: Date;
   private _recentNotifications: Notification[];
+
+  get currentUser() {
+    return this.authService.currentUser;
+  }
 
   get recentNotifications() {
     return this._recentNotifications;
@@ -79,8 +81,7 @@ export class NotificationService {
 
     if (typeof notificationOrNotificationId === 'number' || notificationOrNotificationId instanceof Number) {
       return this.notificationEndpoint.getPinUnpinNotificationEndpoint(<number>notificationOrNotificationId, isPinned);
-    }
-    else {
+    } else {
       return this.pinUnpinNotification(notificationOrNotificationId.id);
     }
   }
@@ -96,14 +97,13 @@ export class NotificationService {
 
   deleteNotification(notificationOrNotificationId: number | Notification): Observable<Notification> {
 
-    if (typeof notificationOrNotificationId === 'number' || notificationOrNotificationId instanceof Number) { //Todo: Test me if its check is valid
+    if (typeof notificationOrNotificationId === 'number' || notificationOrNotificationId instanceof Number) { // Todo: Test me if its check is valid
       return this.notificationEndpoint.getDeleteNotificationEndpoint(<number>notificationOrNotificationId).pipe(
         map(response => {
           this.recentNotifications = this.recentNotifications.filter(n => n.id != notificationOrNotificationId);
           return Notification.Create(response);
         }));
-    }
-    else {
+    } else {
       return this.deleteNotification(notificationOrNotificationId.id);
     }
   }
@@ -112,11 +112,12 @@ export class NotificationService {
 
 
   private processNewNotificationsFromResponse(response) {
-    let notifications = this.getNotificationsFromResponse(response);
+    const notifications = this.getNotificationsFromResponse(response);
 
-    for (let n of notifications) {
-      if (n.date > this.lastNotificationDate)
+    for (const n of notifications) {
+      if (n.date > this.lastNotificationDate) {
         this.lastNotificationDate = n.date;
+      }
     }
 
     return notifications;
@@ -124,9 +125,9 @@ export class NotificationService {
 
 
   private getNotificationsFromResponse(response) {
-    let notifications: Notification[] = [];
+    const notifications: Notification[] = [];
 
-    for (let i in response) {
+    for (const i in response) {
       notifications[i] = Notification.Create(response[i]);
     }
 
@@ -136,11 +137,5 @@ export class NotificationService {
     this.recentNotifications = notifications;
 
     return notifications;
-  }
-
-
-
-  get currentUser() {
-    return this.authService.currentUser;
   }
 }

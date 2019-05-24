@@ -1,16 +1,16 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 export class UserLogin {
-    constructor(email?: string, password?: string, rememberMe?: boolean) {
-        this.email = email;
+    constructor(userName?: string, password?: string, rememberMe?: boolean) {
+        this.userName = userName;
         this.password = password;
         this.rememberMe = rememberMe;
     }
 
-    email: string;
+    userName: string;
     password: string;
     rememberMe: boolean;
 }

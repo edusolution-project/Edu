@@ -1,24 +1,24 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { Component, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
     selector: 'search-box',
     templateUrl: './search-box.component.html',
-    styleUrls: ['./search-box.component.css']
+    styleUrls: ['./search-box.component.scss']
 })
 export class SearchBoxComponent {
 
     @Input()
-    placeholder: string = "Search...";
+    placeholder = 'Search...';
 
     @Output()
     searchChange = new EventEmitter<string>();
 
-    @ViewChild("searchInput")
+    @ViewChild('searchInput')
     searchInput: ElementRef;
 
 

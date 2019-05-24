@@ -1,16 +1,11 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { Injectable } from '@angular/core';
-import { Router, NavigationExtras } from "@angular/router";
-import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, forkJoin } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-
-
-
 
 import { AccountEndpoint } from './account-endpoint.service';
 import { AuthService } from './auth.service';
@@ -19,28 +14,22 @@ import { Role } from '../models/role.model';
 import { Permission, PermissionNames, PermissionValues } from '../models/permission.model';
 import { UserEdit } from '../models/user-edit.model';
 
-
-
-export type RolesChangedOperation = "add" | "delete" | "modify";
-export type RolesChangedEventArg = { roles: Role[] | string[], operation: RolesChangedOperation };
-
-
+export type RolesChangedOperation = 'add' | 'delete' | 'modify';
+export interface RolesChangedEventArg { roles: Role[] | string[]; operation: RolesChangedOperation; }
 
 @Injectable()
 export class AccountService {
-
-  public static readonly roleAddedOperation: RolesChangedOperation = "add";
-  public static readonly roleDeletedOperation: RolesChangedOperation = "delete";
-  public static readonly roleModifiedOperation: RolesChangedOperation = "modify";
+  public static readonly roleAddedOperation: RolesChangedOperation = 'add';
+  public static readonly roleDeletedOperation: RolesChangedOperation = 'delete';
+  public static readonly roleModifiedOperation: RolesChangedOperation = 'modify';
 
   private _rolesChanged = new Subject<RolesChangedEventArg>();
 
-
-  constructor(private router: Router, private http: HttpClient, private authService: AuthService,
+  constructor(
+    private authService: AuthService,
     private accountEndpoint: AccountEndpoint) {
 
   }
-
 
   getUser(userId?: string) {
     return this.accountEndpoint.getUserEndpoint<User>(userId);
@@ -69,16 +58,14 @@ export class AccountService {
   updateUser(user: UserEdit) {
     if (user.id) {
       return this.accountEndpoint.getUpdateUserEndpoint(user, user.id);
-    }
-    else {
-      //return this.accountEndpoint.getUserByUserNameEndpoint<User>(user.userName).pipe<User>(
-      //  mergeMap(foundUser => {
-      //    user.id = foundUser.id;
-      //    return this.accountEndpoint.getUpdateUserEndpoint(user, user.id)
-      //  }));
+    } else {
+      return this.accountEndpoint.getUserByUserNameEndpoint<User>(user.userName).pipe(
+        mergeMap(foundUser => {
+          user.id = foundUser.id;
+          return this.accountEndpoint.getUpdateUserEndpoint(user, user.id);
+        }));
     }
   }
-
 
   newUser(user: UserEdit) {
     return this.accountEndpoint.getNewUserEndpoint<User>(user);
@@ -94,18 +81,16 @@ export class AccountService {
   }
 
 
-  deleteUser(userOrUserId: string | UserEdit): Observable<User> {
+  deleteUser(userOrUserId: string | User): Observable<User> {
 
     if (typeof userOrUserId === 'string' || userOrUserId instanceof String) {
       return this.accountEndpoint.getDeleteUserEndpoint<User>(<string>userOrUserId).pipe<User>(
         tap(data => this.onRolesUserCountChanged(data.roles)));
-    }
-    else {
+    } else {
 
       if (userOrUserId.id) {
         return this.deleteUser(userOrUserId.id);
-      }
-      else {
+      } else {
         return this.accountEndpoint.getUserByUserNameEndpoint<User>(userOrUserId.userName).pipe<User>(
           mergeMap(user => this.deleteUser(user.id)));
       }
@@ -127,9 +112,6 @@ export class AccountService {
     return this.authService.refreshLogin();
   }
 
-
-
-
   getRoles(page?: number, pageSize?: number) {
 
     return this.accountEndpoint.getRolesEndpoint<Role[]>(page, pageSize);
@@ -148,15 +130,14 @@ export class AccountService {
     if (role.id) {
       return this.accountEndpoint.getUpdateRoleEndpoint(role, role.id).pipe(
         tap(data => this.onRolesChanged([role], AccountService.roleModifiedOperation)));
+    } else {
+      return this.accountEndpoint.getRoleByRoleNameEndpoint<Role>(role.name).pipe(
+        mergeMap(foundRole => {
+          role.id = foundRole.id;
+          return this.accountEndpoint.getUpdateRoleEndpoint(role, role.id);
+        }),
+        tap(data => this.onRolesChanged([role], AccountService.roleModifiedOperation)));
     }
-    //else {
-    //  return this.accountEndpoint.getRoleByRoleNameEndpoint<Role>(role.name).pipe<Role>(
-    //    mergeMap(foundRole => {
-    //      role.id = foundRole.id;
-    //      return this.accountEndpoint.getUpdateRoleEndpoint(role, role.id)
-    //    }),
-    //    tap(data => this.onRolesChanged([role], AccountService.roleModifiedOperation)));
-    //}
   }
 
 
@@ -171,13 +152,11 @@ export class AccountService {
     if (typeof roleOrRoleId === 'string' || roleOrRoleId instanceof String) {
       return this.accountEndpoint.getDeleteRoleEndpoint<Role>(<string>roleOrRoleId).pipe<Role>(
         tap(data => this.onRolesChanged([data], AccountService.roleDeletedOperation)));
-    }
-    else {
+    } else {
 
       if (roleOrRoleId.id) {
         return this.deleteRole(roleOrRoleId.id);
-      }
-      else {
+      } else {
         return this.accountEndpoint.getRoleByRoleNameEndpoint<Role>(roleOrRoleId.name).pipe<Role>(
           mergeMap(role => this.deleteRole(role.id)));
       }

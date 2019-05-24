@@ -1,7 +1,7 @@
-// ====================================================
-// More Templates: https://www.ebenmonney.com/templates
-// Email: support@ebenmonney.com
-// ====================================================
+// =============================
+// Email: info@ebenmonney.com
+// www.ebenmonney.com/templates
+// =============================
 
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
@@ -23,4 +23,4 @@ if (environment.production) {
 }
 
 platformBrowserDynamic(providers).bootstrapModule(AppModule)
-  .catch(err => console.log(err));
+  .catch(err => console.error(err));
