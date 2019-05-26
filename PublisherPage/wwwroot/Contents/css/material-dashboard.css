@@ -19700,7 +19700,7 @@ img {
 }
 
 .template_type > .template_type_item {
-    width: 50%;
+    width: calc(100%/3);
     float: left;
     padding: 10px;
     position: relative;
@@ -19742,7 +19742,7 @@ img {
 
 .p-fixed {
     position: fixed;
-    z-index: 30;
+    z-index: 500;
     max-width: 100%;
     width: 992px;
     background: #fff;
@@ -19759,12 +19759,14 @@ img {
 }
 
 .lesson-container {
-    padding: 40px 10px;
+    padding: 0px 10px;
+    position: relative;
 }
 
     .lesson-container > .lesson-header, .part-item-header {
         text-align: center;
         font-weight: 500;
+        padding-bottom: 5px;
         position: relative;
     }
 
@@ -19796,6 +19798,9 @@ img {
     left: 0;
     top: 0;
 }
+.lesson-container > .lesson-header{
+    height: 50px;
+}
 
 .lesson-container > .lesson-header > .point {
     right: 0;
@@ -19811,4 +19816,88 @@ img {
 
 .part-item-header > .btn-close {
     top: 0;
+}
+#lesson-fn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+.modal .modal-dialog.modal-signup {
+    max-width: 900px;
+}
+.lesson-header-title {
+    display: inline-block;
+    padding: 0 10px;
+    width: 100%;
+}
+.lesson-header-title input{
+    text-align: center;
+}
+.fn-lesson-btn {
+    position: absolute;
+    top: -40px;
+    right: -5px;
+    border-bottom: 1px solid #cccc;
+}
+.lesson-header-extends{
+    border: 1px solid #ccc;
+    position: relative;
+    top: -35px;
+    left: 5px;
+}
+.lb-body-item-part {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    box-shadow: 0 0 20px #ddd;
+    padding: 10px;
+    position: relative;
+}
+
+
+/* width */
+.lesson-box::-webkit-scrollbar {
+  width: 1px;
+}
+
+/* Track */
+.lesson-box::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey; 
+  border-radius: 10px;
+}
+
+/* Handle */
+.lesson-box::-webkit-scrollbar-thumb {
+  background: #d6443c; 
+  border-radius: 5px;
+}
+.lb-item-question,.lb-item-answer {
+    padding: 10px;
+    box-shadow: 0 0 20px #ccc;
+}
+.lesson-box,.lesson-body{
+    padding: 10px;
+}
+.fn-lb-item-body {
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 40px;
+ } 
+.lesson form{
+    position: relative;
+    margin-top: 40px;
+}
+.lesson-body .fn-lesson-btn{
+    left: 0;
+    right: auto;
+}
+.lb-item-header-extends {
+    position: relative;
+    top: -37px;
+}
+form.complete input, form.complete textarea, form.complete select{
+    border: none;
+    box-shadow: none;
+    pointer-events: none;
+    background: none;
+    display: none;
 }

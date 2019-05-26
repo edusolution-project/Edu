@@ -83,85 +83,100 @@ namespace BasePublisherMVC.AdminControllers
         [HttpPost]
         public ActionResult SignIn(string username, string password, string returnurl)
         {
-            _ilogs.WriteLogsInfo(username + "-" + password + "-" + returnurl);
-            if(string.IsNullOrEmpty(username)|| string.IsNullOrEmpty(password))
+            try
             {
-                ViewBag.MessageError = "Không thể bỏ trống các trường bắt buộc";
-                return View();
-            }
-            else
-            {
-                var user = _userService.GetItemByEmail(username);
-                if(user == null)
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
                 {
-                    ViewBag.MessageError = "Email không tồn tại";
+                    ViewBag.MessageError = "Không thể bỏ trống các trường bắt buộc";
                     return View();
                 }
                 else
                 {
-                    if(user.Pass == Security.Encrypt(password))
+                    var user = _userService.GetItemByEmail(username);
+                    if (user == null)
                     {
-                        if (user.IsActive)
+                        ViewBag.MessageError = "Email không tồn tại";
+                        return View();
+                    }
+                    else
+                    {
+                        if (user.Pass == Security.Encrypt(password))
                         {
-                            TempData["success"] = "Xin chào " + user.Name;
-                            string _token = Guid.NewGuid().ToString();
-                            var role = _roleService.GetByID(user.RoleID);
-                            if (role != null)
+                            if (user.IsActive)
                             {
-                                HttpContext.SetValue(Cookies.DefaultLogin, _token,Cookies.ExpiresLogin,false);
-                                _ilogs.WriteLogsInfo(_token);
-                                var claims = new List<Claim>
+                                TempData["success"] = "Xin chào " + user.Name;
+                                string _token = Guid.NewGuid().ToString();
+                                var role = _roleService.GetByID(user.RoleID);
+                                if (role != null)
+                                {
+                                    HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
+                                    _ilogs.WriteLogsInfo(_token);
+                                    var claims = new List<Claim>
                                 {
                                     new Claim(ClaimTypes.Email, user.Email),
                                     new Claim(ClaimTypes.Name, user.Name),
                                     new Claim(ClaimTypes.Role, role.Code),
                                     new Claim("RoleID", role.ID.ToString()),
                                 };
-                                var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
-                                _ = new AuthenticationProperties
-                                {
-                                    IsPersistent = true,
-                                    ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
-                                };
-                                ClaimsPrincipal claim = new ClaimsPrincipal();
-                                claim.AddIdentity(claimsIdentity);
+                                    var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
+                                    _ = new AuthenticationProperties
+                                    {
+                                        IsPersistent = true,
+                                        ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
+                                    };
+                                    ClaimsPrincipal claim = new ClaimsPrincipal();
+                                    claim.AddIdentity(claimsIdentity);
 
-                                CPLoginLogEntity login = new CPLoginLogEntity()
+                                    CPLoginLogEntity login = new CPLoginLogEntity()
+                                    {
+                                        IP = HttpContext.Connection.RemoteIpAddress.ToString(),
+                                        Email = user.Email,
+                                        Token = _token,
+                                        IsActive = true,
+                                        Created = DateTime.Now
+                                    };
+                                    _loginLogService.SetLogin(login);
+                                    return RedirectToAction("Index", "CPHome");
+                                }
+                                else
                                 {
-                                    IP = HttpContext.Connection.RemoteIpAddress.ToString(),
-                                    Email = user.Email,
-                                    Token = _token,
-                                    IsActive = true,
-                                    Created = DateTime.Now
-                                };
-                                var url = string.IsNullOrEmpty(returnurl) ? null : System.Net.WebUtility.UrlDecode(returnurl).Split('/');
-                                _loginLogService.SetLogin(login);
-                                _ilogs.WriteLogsInfo(url[1]+"-"+url[0]);
-                                return url == null
-                                    ? RedirectToAction("Index", "CPHome")
-                                    : RedirectToAction(url[1], url[0]);
+                                    ViewBag.MessageError = "Bạn không có quyền hạn vào quản trị viện";
+                                    return View();
+                                }
                             }
                             else
                             {
-                                ViewBag.MessageError = "Bạn không có quyền hạn vào quản trị viện";
+                                ViewBag.MessageError = "Tài khoản của bạn đã bị khóa";
                                 return View();
                             }
+
                         }
                         else
                         {
-                            ViewBag.MessageError = "Tài khoản của bạn đã bị khóa";
+                            ViewBag.MessageError = "PassWord không chính xác";
                             return View();
                         }
-
-                    }
-                    else
-                    {
-                        ViewBag.MessageError = "PassWord không chính xác";
-                        return View();
                     }
                 }
+            }catch(Exception ex)
+            {
+                ViewBag.MessageError = ex.Message;
+                _ilogs.WriteLogsError(ex);
+                return View();
             }
-
+        }
+        private string[] GetReturnUrl(string returnUrl)
+        {
+            try
+            {
+                var url = string.IsNullOrEmpty(returnUrl) ? null : System.Net.WebUtility.UrlDecode(returnUrl).Split('/');
+                return url;
+            }
+            catch(Exception ex)
+            {
+                _ilogs.WriteLogsError(ex);
+                return null;
+            }
         }
 
         [HttpGet]

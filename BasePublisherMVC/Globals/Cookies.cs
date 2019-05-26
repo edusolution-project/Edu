@@ -58,7 +58,6 @@ namespace BasePublisherMVC.Globals
                     {
                         Secure = secure,
                         HttpOnly = true,
-                       //Domain = context.Request.Host.Host,
                         Path = "/"
                     };
 
@@ -73,7 +72,6 @@ namespace BasePublisherMVC.Globals
                 string encodedValue = secure ? Security.Encrypt(value) : value;
                 var template = new SetCookieHeaderValue(key)
                 {
-                    //Domain = option.Domain,
                     Expires = option.Expires,
                     HttpOnly = option.HttpOnly,
                     Path = option.Path,

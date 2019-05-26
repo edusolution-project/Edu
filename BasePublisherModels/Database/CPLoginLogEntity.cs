@@ -44,18 +44,18 @@ namespace BasePublisherModels.Database
         public Task SetLogin(CPLoginLogEntity item)
         {
             if (item == null) return Task.CompletedTask;
-            var current = GetItemByEmail(item.Email);
-            if (current == null)
-            {
+            //var current = GetItemByEmail(item.Email);
+            //if (current == null)
+            //{
                 Add(item);
                 return Task.CompletedTask;
-            }
-            else
-            {
-                item.ID = current.ID;
-                Add(item);
-                return Task.CompletedTask;
-            }
+            //}
+            //else
+            //{
+            //    item.ID = current.ID;
+            //    Add(item);
+            //    return Task.CompletedTask;
+            //}
         }
         public string GetEmailFromDb(string token)
         {

@@ -30,7 +30,7 @@ namespace PublisherPage
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
+                //options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
             services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
@@ -38,7 +38,6 @@ namespace PublisherPage
             services.AddScoped<Security>();
             services.AddScoped<FileProcess>();
             services.AddServiceBase();
-
             services.AddMvc(options => {
                 options.Filters.Add<PermissionAttribute>();
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -54,7 +53,7 @@ namespace PublisherPage
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                //// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
             app.GetConfiguration(Configuration);

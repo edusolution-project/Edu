@@ -8,9 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\ModUnits\**" />
     <Compile Remove="wwwroot\Files\**" />
+    <Content Remove="Views\ModUnits\**" />
     <Content Remove="wwwroot\Files\**" />
+    <EmbeddedResource Remove="Views\ModUnits\**" />
     <EmbeddedResource Remove="wwwroot\Files\**" />
+    <None Remove="Views\ModUnits\**" />
     <None Remove="wwwroot\Files\**" />
   </ItemGroup>
 
@@ -29,11 +33,6 @@
   <ItemGroup>
     <ProjectReference Include="..\BasePublisherModels\BasePublisherModels.csproj" />
     <ProjectReference Include="..\BasePublisherMVC\BasePublisherMVC.csproj" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Folder Include="Views\ModUnits\" />
   </ItemGroup>
 
 

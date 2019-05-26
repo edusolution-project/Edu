@@ -189,7 +189,7 @@ namespace BasePublisherMVC.Globals
                 switch (key.ToLower())
                 {
                     case "createlesson":
-                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-success\" onclick=\"Create.lesson()\">" +
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-success\" onclick=\"formCreate.chooseTemplateLesson()\">" +
                                 "<i class=\"material-icons\">add_circle</i>" + name + "<div class=\"ripple-container\"></div>" +
                                 "</a>";
                         break;

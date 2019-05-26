@@ -155,6 +155,10 @@
                                             for (int i = 0; i < count; i++)
                                             {
                                                 var item = data[i];
+                                                if (item == null) { continue; }
+                                                var sname = item.Subject != null ? item.Subject.Name : string.Empty;
+                                                var pname = item.Program != null ? item.Program.Name : string.Empty;
+                                                var gname = item.Grade != null ? item.Grade.Name : string.Empty;
                                                 <tr>
                                                     <td align="center">
                                                         <div class="form-check">
@@ -168,9 +172,9 @@
                                                     </td>
                                                     <td align="center"><a class="text-info" href="@Url.Action("detail", new { id = item.ID })">@item.Name</a></td>
                                                     <td align="center"><a class="text-info" href="@Url.Action("edit", new { id = item.ID })">@item.Code</a></td>
-                                                    <td align="center">@item.Subject.Name</td>
-                                                    <td align="center">@item.Program.Name</td>
-                                                    <td align="center">@item.Grade.Name</td>
+                                                    <td align="center">@sname</td>
+                                                    <td align="center">@pname</td>
+                                                    <td align="center">@gname</td>
                                                     <td align="center">@item.Description</td>
                                                     <td align="center">
                                                         @DynamicViews.GetActive(item.ID, item.IsActive)

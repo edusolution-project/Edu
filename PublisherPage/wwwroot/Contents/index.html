@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<link rel="stylesheet" href="css/material-dashboard.css">
+	<link rel="stylesheet" href="css/publisher.css">
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="js/core/jquery.min.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<body>
+	<div class="wrapper ">
+        <div class="main-panel">
+            <!-- Navbar -->
+            <!-- End Navbar -->
+            <div class="content">
+                <div class="container-fluid">
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+	<div id="template-lesson">
+		<div class="lesson lesson-box p-fixed">
+			<div class="lesson-container">
+				<div class="lesson-header">
+					<div class="lesson-header-title">
+						Tiêu đề của lesson biên tập
+					</div>
+					<div class="lesson-header-extends__left">
+						<div class="timer"> 20 phút </div>
+						<div class="pointer"> 10 điểm </div>
+					</div>
+					<div class="fn-btn">
+						<a href="#" class="btn btn-sm btn-fab text-light"><i class="material-icons">border_color</i></a>
+						<a href="#" class="btn btn-sm btn-fab text-light"><i class="material-icons">delete_sweep</i></a>
+						<a href="#" class="btn btn-sm btn-fab text-light"><i class="material-icons">minimize</i></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="LessonExample">
+	    <input type="hidden" sid="CourseID" value="@obj.ID" />
+	    <input type="hidden" sid="ChapterID" value="0"/>
+	    <input type="hidden" id="action" value="" />
+	    <div class="modal-dialog modal-signup" role="document">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+	                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                    <span aria-hidden="true">&times;</span>
+	                </button>
+	            </div>
+	            <div class="modal-body">
+	                <form action="#" id="modal-body" name="modalForm" enctype="multipart/form-data">
+	                    <ul class="template_type">
+	                        <li class="template_type_item">
+	                            <span>Nội dung bài giảng</span>
+	                            <img src="" alt="">
+	                        </li>
+	                        <li class="lesson-part__type__item">
+	                            <span>Nội dung bài tập</span>
+	                            <i class="fa fa-check-square-o"></i>
+
+	                        </li>
+	                    </ul>
+	                </form>
+	            </div>
+	            <div class="modal-footer">
+	                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	                <button type="button" class="btn btn-primary" onclick="submitForm(event)">Save changes</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+
+    <script src="js/core/popper.min.js"></script>
+    <script src="js/core/bootstrap-material-design.min.js"></script>
+    <script src="js/plugins/perfect-scrollbar.jquery.min.js"></script>
+    <!-- Plugin for the momentJs  -->
+    <script src="js/plugins/moment.min.js"></script>
+    <!--  Plugin for Sweet Alert -->
+    <script src="js/plugins/sweetalert2.js"></script>
+    <!-- Forms Validations Plugin -->
+    <script src="js/plugins/jquery.validate.min.js"></script>
+    <!-- Plugin for the Wizard, full documentation here: https://github.com/VinceG/twitter-bootstrap-wizard -->
+    <script src="js/plugins/jquery.bootstrap-wizard.js"></script>
+    <!--	Plugin for Select, full documentation here: http://silviomoreto.github.io/bootstrap-select -->
+    <script src="js/plugins/bootstrap-selectpicker.js"></script>
+    <!--  Plugin for the DateTimePicker, full documentation here: https://eonasdan.github.io/bootstrap-datetimepicker/ -->
+    <script src="js/plugins/bootstrap-datetimepicker.min.js"></script>
+    <!--  DataTables.net Plugin, full documentation here: https://datatables.net/  -->
+    <script src="js/plugins/jquery.dataTables.min.js"></script>
+    <!--	Plugin for Tags, full documentation here: https://github.com/bootstrap-tagsinput/bootstrap-tagsinputs  -->
+    <script src="js/plugins/bootstrap-tagsinput.js"></script>
+    <!-- Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
+    <script src="js/plugins/jasny-bootstrap.min.js"></script>
+    <!--  Full Calendar Plugin, full documentation here: https://github.com/fullcalendar/fullcalendar    -->
+    <script src="js/plugins/fullcalendar.min.js"></script>
+    <!-- Vector Map plugin, full documentation here: http://jvectormap.com/documentation/ -->
+    <script src="js/plugins/jquery-jvectormap.js"></script>
+    <!--  Notifications Plugin    -->
+    <script src="js/plugins/bootstrap-notify.js"></script>
+    <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
+    <script src="js/material-dashboard.js?v=2.1.1" type="text/javascript"></script>
+    <script src="Site.js"></script>
+    <script>
+        $('.datepicker').datetimepicker({
+            format: 'YYYY-MM-DD',
+            icons: {
+                time: "fa fa-clock-o",
+                date: "fa fa-calendar",
+                up: "fa fa-chevron-up",
+                down: "fa fa-chevron-down",
+                previous: 'fa fa-chevron-left',
+                next: 'fa fa-chevron-right',
+                today: 'fa fa-screenshot',
+                clear: 'fa fa-trash',
+                close: 'fa fa-remove'
+            }
+        });
+    </script>
+</body>
+</html>

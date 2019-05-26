@@ -31,8 +31,10 @@ namespace BasePublisherMVC.AdminControllers
         private readonly IConfiguration _configuration;
         private readonly ModLessonService _lessionService;
         private readonly ModLessonPartService _lessionPartService;
-        private readonly ModLessonExtendService _lessionExtendService;
-        private readonly ModLessonPartAnswerService _answerService;
+        private readonly ModLessonMediaService _lessionExtendService;
+        private readonly ModAnswerService _answerService;
+        private readonly ModQuestionService _questionService;
+        private readonly ModQuestionMediaService _questionMediaService;
         private readonly CPLoginLogService _loginLogService;
         private readonly CPLangEntity _currentLang;
         private readonly CPUserEntity _currentUser;
@@ -46,8 +48,10 @@ namespace BasePublisherMVC.AdminControllers
             , Security security
             , ModLessonService lessonService
             , ModLessonPartService lessonPartService
-            , ModLessonExtendService lessonExtendService
-            , ModLessonPartAnswerService answerService
+            , ModLessonMediaService lessonExtendService
+            , ModAnswerService answerService
+            , ModQuestionService questionService
+            , ModQuestionMediaService questionMediaService
             , CPLoginLogService loginLogService
             , FileProcess fileProcess)
         {
@@ -58,12 +62,14 @@ namespace BasePublisherMVC.AdminControllers
             _menuService = menuService;
             _userService = userService;
             _roleService = roleService;
+            _questionMediaService = questionMediaService;
             _langService = langService;
             _lessionService = lessonService;
             _lessionPartService = lessonPartService;
             _lessionExtendService = lessonExtendService;
             _loginLogService = loginLogService;
             _answerService = answerService;
+            _questionService = questionService;
             _fileProcess = fileProcess;
             _currentLang = StartUp.CurrentLang;
             _currentUser = StartUp.CurrentUser;
@@ -91,11 +97,11 @@ namespace BasePublisherMVC.AdminControllers
                 return false;
             }
         }
-        private async Task<IEnumerable<ModLessonExtendEntity>> CreateLessonExtends(IFormCollection form, string LessonPartID)
+        private async Task<IEnumerable<ModLessonMediaEntity>> CreateLessonExtends(IFormCollection form, string LessonPartID)
         {
             try
             {
-                List<ModLessonExtendEntity> extendEntities = new List<ModLessonExtendEntity>();
+                List<ModLessonMediaEntity> extendEntities = new List<ModLessonMediaEntity>();
                 if (form != null)
                 {
                     var listFiles = form.Files;
@@ -106,7 +112,7 @@ namespace BasePublisherMVC.AdminControllers
                         {
                             i++;
                             string link = await _fileProcess.SaveMediaAsync(file);
-                            var extends = new ModLessonExtendEntity()
+                            var extends = new ModLessonMediaEntity()
                             {
                                 IsActive = true,
                                 NameOriginal = file.FileName,
@@ -186,14 +192,14 @@ namespace BasePublisherMVC.AdminControllers
             {
                 if (CheckLogin(UserID, ClientID))
                 {
-                    var data = await _lessionService.CreateQuery().Find(o => o.ID == item.ID && o.CreateUser == _currentUser.ID).SingleOrDefaultAsync();
-                    if (data == null)
+                    //var data = await _lessionService.CreateQuery().Find(o => o.ID == item.ID && o.CreateUser == _currentUser.ID).SingleOrDefaultAsync();
+                    if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
                     {
                         item.Code = _currentUser.ID + "_" + item.CourseID + "_" + item.ChapterID + "_" + UnicodeName.ConvertUnicodeToCode(item.Title, "-", true);
                         item.Created = DateTime.Now;
                         item.CreateUser = _currentUser.ID;
                         item.IsAdmin = true;
-                        item.IsActive = false;
+                        item.IsActive = true;
                         item.IsParentCourse = item.ChapterID.Equals("0");
                         item.Updated = DateTime.Now;
                         var list = _lessionService.CreateQuery().Find(o => o.Code == item.Code).ToList();
@@ -309,11 +315,13 @@ namespace BasePublisherMVC.AdminControllers
                     if (root != null)
                     {
                         var listMedia = _lessionExtendService.CreateQuery().Find(o => o.LessonPartID == item.ID);
-                        var listChild = _answerService.CreateQuery().Find(o => o.ParentID == item.ID);
+                        var listChild = _answerService.CreateQuery().Find(o => o.LessonPartID == item.ID);
+                        var listQuestion = _questionService.CreateQuery().Find(o => o.LessonPartID == item.ID);
                         IDictionary<string, object> keyValues = new Dictionary<string, object>()
                         {
                             {"LessonPart",item },
                             {"Answer",listChild},
+                            {"Question",listQuestion },
                             {"Media",listMedia }
                         };
                         return new Response(200, "Success", keyValues);
@@ -342,13 +350,12 @@ namespace BasePublisherMVC.AdminControllers
             {
                 if (CheckLogin(UserID, ClientID))
                 {
-                    if(item.ID == "0" || item.ID == null)
+                    if(item.ID == "0" || string.IsNullOrEmpty(item.ID))
                     {
                         var listItem = _lessionPartService.CreateQuery().Find(o => o.ParentID == item.ParentID).ToList();
                         item.Created = DateTime.Now;
                         item.Order = listItem != null ? listItem.Count : 0;
                         item.Updated = DateTime.Now;
-                        item.IsExample = item.TemplateType == 2;
                     }
                     else
                     {
@@ -358,7 +365,7 @@ namespace BasePublisherMVC.AdminControllers
                     if (ourItem != null)
                     {
                         await _lessionPartService.AddAsync(item);
-                        IEnumerable<ModLessonExtendEntity> files = new List<ModLessonExtendEntity>();
+                        IEnumerable<ModLessonMediaEntity> files = new List<ModLessonMediaEntity>();
                         if (HttpContext.Request.Form != null)
                         {
                             if (HttpContext.Request.Form.Files != null && HttpContext.Request.Form.Files.Count > 0)
@@ -436,9 +443,349 @@ namespace BasePublisherMVC.AdminControllers
             }
         }
         #endregion
+        
+        #region LessonExtends
+        [HttpGet]
+        public async Task<Response> GetDetailsLessonExtends(string ID, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    var item = _lessionExtendService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                    if (item == null) return new Response(404, "data not found", ID);
+                    return new Response(200, "Success get all", item);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _logs.WriteLogsError("CreateOrUpdateLesson", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        [HttpGet]
+        public async Task<Response> GetListLessonExtends(string ID, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    var item = _lessionExtendService.CreateQuery().Find(o => o.LessonPartID == ID).ToList();
+                    if (item == null) return new Response(404, "data not found", ID);
+                    return new Response(200, "Success get all", item);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _logs.WriteLogsError("CreateOrUpdateLesson", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        [HttpPost]
+        public async Task<Response> UpdateLessonExtends(ModLessonMediaEntity item, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    bool isUpdateSuccess = false;
+                    var OldItem = _lessionExtendService.GetByID(item.ID);
+                    if (OldItem == null) return new Response(404, "no data found", null);
+
+                    var file = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files[0] : null;
+                    if(file != null)
+                    {
+                       isUpdateSuccess = await _fileProcess.UpdateAsync(OldItem.OriginalFile, file);
+                    }
+                    await _lessionExtendService.AddAsync(item);
+                    IDictionary<string, object> keyValues = new Dictionary<string, object>()
+                    {
+                        {"LessonExtend",item },
+                        {"FileUpdate", isUpdateSuccess}
+                    };
+
+                    return new Response(200, "Success get all", item);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _logs.WriteLogsError("CreateOrUpdateLesson", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        #endregion
+        #region Question
+        //list
+        [HttpGet]
+        public Response GetListQuestion(string LessonPartID, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    var data = _questionService.CreateQuery().Find(o => o.LessonPartID == LessonPartID).ToList();
+                    if (data == null) return new Response(404, "Data not Found", null);
+                    return new Response(200, "Success get all", data);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logs.WriteLogsError("GetListLesson", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        //details
+        [HttpGet]
+        public Response GetDetailQuestion(string ID, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    var data = _questionService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                    if (data == null) return new Response(404, "Data not Found", null);
+                    return new Response(200, "Success get all", data);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logs.WriteLogsError("GetListLesson", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        //createorupdate
+        [HttpPost]
+        public async Task<Response> CreateOrUpdateQuestion(ModQuestionEntity item, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    item.Updated = DateTime.Now;
+                    if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
+                    {
+                        var listOrder = _questionService.CreateQuery().Find(o => o.LessonPartID == item.LessonPartID);
+                        item.Created = DateTime.Now;
+                        item.Order = listOrder == null ? 0 : listOrder.ToList().Count;
+
+                        await _questionService.AddAsync(item);
+
+                        var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
+                        if (files != null)
+                        {
+                            var ListMedia = new List<ModQuestionMediaEntity>();
+                            for(var i = 0; i < files.Count; i++)
+                            {
+                                var iFile = files[i];
+                                var link = await _fileProcess.SaveMediaAsync(iFile);
+                                var itemMedia = new ModQuestionMediaEntity()
+                                {
+                                    LinkHost = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host,
+                                    LinkFile = link,
+                                    OriginalName = iFile.FileName,
+                                    Created = DateTime.Now,
+                                    Order = i,
+                                    QuestionID = item.ID,
+                                    Updated = DateTime.Now
+                                };
+                                await _questionMediaService.AddAsync(itemMedia);
+                                ListMedia.Add(itemMedia);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var OldItem = _questionService.GetByID(item.ID);
+                        if (OldItem == null) return new Response(404, "no data found", null);
+                        await _questionService.AddAsync(item);
+                    }
+
+                    return new Response(200, "Success get all", item);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _logs.WriteLogsError("CreateOrUpdateLesson", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        //remove
+        [HttpPost]
+        public async Task<Response> RemoveQuestion(string ID, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    var Item = _questionService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                    if (Item == null) return new Response(404, "data not found", ID);
+                    
+                        var item = Item;
+                        var media = _questionMediaService.CreateQuery().Find(o => o.QuestionID == item.ID).ToList();
+                        if (media != null && media.Count > 0)
+                        {
+                            _fileProcess.DeleteFiles(media.Select(o => o.LinkFile).ToList());
+                            await _questionMediaService.RemoveRangeAsync(media.Select(o => o.ID));
+                        }
+                        await _questionService.RemoveAsync(item.ID);
+
+                        return new Response(200, "Success get all", ID);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _logs.WriteLogsError("RemoveQuestion" +
+                    "", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        #endregion
+        #region QuestionMedia
+        [HttpGet]
+        public async Task<Response> GetDetailsQuestionMedia(string ID, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    var item = _questionMediaService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                    if (item == null) return new Response(404, "data not found", ID);
+                    return new Response(200, "Success get all", item);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _logs.WriteLogsError("CreateOrUpdateLesson", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        [HttpGet]
+        public async Task<Response> GetListQuestionMedia(string QuestionID, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    var item = _questionMediaService.CreateQuery().Find(o => o.QuestionID == QuestionID).ToList();
+                    if (item == null) return new Response(404, "data not found", QuestionID);
+                    return new Response(200, "Success get all", item);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _logs.WriteLogsError("GetListQuestionMedia", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        [HttpPost]
+        public async Task<Response> UpdateQuestionMedia(ModQuestionMediaEntity item, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    bool isUpdateSuccess = false;
+                    var OldItem = _questionMediaService.GetByID(item.ID);
+                    if (OldItem == null) return new Response(404, "no data found", null);
+
+                    var file = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files[0] : null;
+                    if (file != null)
+                    {
+                        isUpdateSuccess = await _fileProcess.UpdateAsync(OldItem.LinkFile, file);
+                    }
+                    await _questionMediaService.AddAsync(item);
+                    IDictionary<string, object> keyValues = new Dictionary<string, object>()
+                    {
+                        {"QuestionMedia",item },
+                        {"FileUpdate", isUpdateSuccess}
+                    };
+
+                    return new Response(200, "Success get all", item);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _logs.WriteLogsError("UpdateQuestionMedia", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        #endregion
         #region Lesson Answer
         [HttpGet]
-        public async Task<Response> GetListAnswer(string LessonPartID, string UserID, string ClientID)
+        public async Task<Response> GetListAnswerByQuestionID(string QuestionID, string UserID, string ClientID)
+        {
+            try
+            {
+                if (CheckLogin(UserID, ClientID))
+                {
+                    var question = _questionService.CreateQuery().Find(o => o.ID == QuestionID).SingleOrDefault();
+                    if (question == null) return new Response(404, "data not found", null);
+                    var listAnswer = _answerService.CreateQuery().Find(o => o.QuestionID == QuestionID).ToList();
+                    if (listAnswer == null || listAnswer.Count <= 0) return new Response(404, "data not found", null);
+                    return new Response(200, "Success", listAnswer);
+                }
+                else
+                {
+                    return new Response(301, "Lỗi xác thực", null);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await _logs.WriteLogsError("GetListLessonPart", ex);
+                return new Response(500, ex.Message, null);
+            }
+        }
+        [HttpGet]
+        public async Task<Response> GetListAnswer(string LessonPartID,string UserID, string ClientID)
         {
             try
             {
@@ -449,7 +796,7 @@ namespace BasePublisherMVC.AdminControllers
                     var root = _lessionService.CreateQuery().Find(o => o.ID == lessonPart.ParentID && o.CreateUser == UserID).SingleOrDefault();
                     if (root != null)
                     {
-                        var listAnswer = _answerService.CreateQuery().Find(o => o.ParentID == LessonPartID).ToList();
+                        var listAnswer = _answerService.CreateQuery().Find(o => o.LessonPartID == LessonPartID).ToList();
                         if (listAnswer == null || listAnswer.Count <= 0) return new Response(404, "data not found", null);
                         return new Response(200, "Success", listAnswer);
                     }
@@ -494,17 +841,16 @@ namespace BasePublisherMVC.AdminControllers
             }
         }
         [HttpPost]
-        public async Task<Response> CreateOrUpdateLessonAnswer(ModLessonPartAnswerEntity item, string UserID, string ClientID)
+        public async Task<Response> CreateOrUpdateLessonAnswer(ModAnswerEntity item, string UserID, string ClientID)
         {
             try
             {
                 if (CheckLogin(UserID, ClientID))
                 {
-                    if(item.ID == "0" || item.ID == null)
+                    if (item.ID == "0" || item.ID == null)
                     {
-                        var listItem = _answerService.CreateQuery().Find(o => o.ParentID == item.ParentID).ToList();
+                        var listItem = _answerService.CreateQuery().Find(o => o.LessonPartID == item.LessonPartID).ToList();
                         item.Created = DateTime.Now;
-                        item.Order = listItem != null ? listItem.Count : 0;
                         item.Updated = DateTime.Now;
                         item.CreateUser = _currentUser.ID;
                         item.Order = listItem == null ? 0 : listItem.Count;
@@ -530,7 +876,7 @@ namespace BasePublisherMVC.AdminControllers
         }
 
         [HttpPost]
-        public async Task<Response> RemoveLessonAnswer(string ID, string UserID, string ClientID)
+        public async Task<Response> RemoveAnswer(string ID, string UserID, string ClientID)
         {
             try
             {
@@ -554,97 +900,6 @@ namespace BasePublisherMVC.AdminControllers
                 return new Response(500, ex.Message, null);
             }
         }
-        #endregion
-        #region LessonExtends
-        [HttpGet]
-        public async Task<Response> GetDetailsLessonExtends(string ID, string UserID, string ClientID)
-        {
-            try
-            {
-                if (CheckLogin(UserID, ClientID))
-                {
-                    var item = _answerService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
-                    if (item == null) return new Response(404, "data not found", ID);
-                    return new Response(200, "Success get all", item);
-                }
-                else
-                {
-                    return new Response(301, "Lỗi xác thực", null);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                await _logs.WriteLogsError("CreateOrUpdateLesson", ex);
-                return new Response(500, ex.Message, null);
-            }
-        }
-        [HttpGet]
-        public async Task<Response> GetListLessonExtends(string ID, string UserID, string ClientID)
-        {
-            try
-            {
-                if (CheckLogin(UserID, ClientID))
-                {
-                    var item = _lessionExtendService.CreateQuery().Find(o => o.LessonPartID == ID).ToList();
-                    if (item == null) return new Response(404, "data not found", ID);
-                    return new Response(200, "Success get all", item);
-                }
-                else
-                {
-                    return new Response(301, "Lỗi xác thực", null);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                await _logs.WriteLogsError("CreateOrUpdateLesson", ex);
-                return new Response(500, ex.Message, null);
-            }
-        }
-        [HttpPost]
-        public async Task<Response> UpdateLessonExtends(ModLessonExtendEntity item, string UserID, string ClientID)
-        {
-            try
-            {
-                if (CheckLogin(UserID, ClientID))
-                {
-                    bool isUpdateSuccess = false;
-                    var OldItem = _lessionExtendService.GetByID(item.ID);
-                    if (OldItem == null) return new Response(404, "no data found", null);
-
-                    var file = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files[0] : null;
-                    if(file != null)
-                    {
-                       isUpdateSuccess = await _fileProcess.UpdateAsync(OldItem.OriginalFile, file);
-                    }
-                    await _lessionExtendService.AddAsync(item);
-                    IDictionary<string, object> keyValues = new Dictionary<string, object>()
-                    {
-                        {"LessonExtend",item },
-                        {"FileUpdate", isUpdateSuccess}
-                    };
-
-                    return new Response(200, "Success get all", item);
-                }
-                else
-                {
-                    return new Response(301, "Lỗi xác thực", null);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                await _logs.WriteLogsError("CreateOrUpdateLesson", ex);
-                return new Response(500, ex.Message, null);
-            }
-        }
-        #endregion
-        #region Chapter
-        //list
-        //details
-        //createorupdate
-        //remove
         #endregion
         public Response GetMenuForWeb(string type)
         {

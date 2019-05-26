@@ -6,6 +6,12 @@
     Layout = "~/Views/Shared/_LayoutCourse.cshtml";
     var obj = ViewBag.Data as ModCourseViewModel;
     var chapterdata = ViewBag.Chapters as List<ModChapterViewModel>;
+    var subject = obj!= null ? obj.Subject : null;
+    var program = obj != null ? obj.Program : null;
+    var grade = obj != null ? obj.Grade : null;
+    string pName = program != null ? program.Name : string.Empty;
+    string sName = subject != null ? subject.Name : string.Empty;
+    string gName = grade != null ? grade.Name : string.Empty;
 }
 <div class="card">
     <div class="card-header card-header-icon">
@@ -26,7 +32,7 @@
                 </div>
                 <div class="col-md-12" style="margin-top: 10px">
                     <div>
-                        <label class="bmd-label-floating">Bộ giáo trình: <b>@obj.Program.Name</b> - Môn học: <b>@obj.Subject.Name</b> - Cấp độ: <b>@obj.Grade.Name</b> </label>
+                        <label class="bmd-label-floating">Bộ giáo trình: <b>@pName</b> - Môn học: <b>@sName</b> - Cấp độ: <b>@gName</b> </label>
                     </div>
                 </div>
             </div>
@@ -131,12 +137,448 @@
         </div>
     </div>
 </div>
-<div id="template-lesson"></div>
+<div id="template-lesson">
+    <div class="lesson lesson-box p-fixed">
+        <div class="lesson-container" id="lesson_id">
+            <div class="lesson-header">
+                <form name="lesson_id" enctype="multipart/form-data">
+                    <input type="hidden" name="ID" value="lesson_id">
+                    <input type="hidden" name="CourseID" value="">
+                    <input type="hidden" name="ChapterID" value="">
+                    <input type="hidden" name="UserID" value="">
+                    <input type="hidden" name="ClientID" value="">  
+                    <div class="row">
+                         <div class="lesson-header-extends col-2">
+                            <div class="timer"> 
+                                <input class="form-control" type="number" name="title" value="" placeholder="thời gian làm bài"/>
+                            </div>
+                            <div class="pointer"> 
+                                <input class="form-control" type="number" name="title" value="" placeholder="điểm làm bài"/> 
+                            </div>
+                        </div>
+                        <div class="lesson-header-title col-10">
+                          <input class="form-control" name="title" value="" placeholder="Tiêu đề của lesson biên tập"/>
+                        </div>
+                    </div>
+                    
+                    <div class="fn-lesson-btn">
+                        <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                        <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                        <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                        <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                        <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                    </div>
+                </form>
+            </div>
+            <div class="lesson-body">
+                <div class="lesson-body-item">
+                    <div class="fn-lesson-add-part">
+                        <a href="#" class="btn btn-sm btn-success text-light" title="Thêm part mới" onclick=""><i class="material-icons">add</i> Thêm nội dung</a>
+                    </div>
+                    <div id="lessonpart_id" class="lb-body-item-part">
+                        <form name="lessonpart_id" enctype="multipart/form-data">
+                            <input type="hidden" name="ID" value="lessonpart_id">
+                            <input type="hidden" name="UserID" value="">
+                            <input type="hidden" name="ClientID" value="">
+                            <input type="hidden" name="LessonID" value="">
+                            <input type="hidden" name="TypeTemplate" value="">
+                            <input type="hidden" name="IsExample" value="">
+                            <div class="lb-item-header row">
+                                <div class="lb-item-header-title col-10">
+                                    <input type="text" class="form-control" name="Title" placeholder=" Ex : Câu 1 : Hãy hoàn thành các câu hỏi sau : ">
+                                </div>
+                                <div class="lb-item-header-extends col-2">
+                                     <div class="timer"> 
+                                        <input class="form-control" type="number" name="title" value="" placeholder="thời gian làm bài"/> 
+                                    </div>
+                                    <div class="pointer"> 
+                                        <input class="form-control" type="number" name="title" value="" placeholder="điểm làm bài"/>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <textarea row=1 class="form-control" name="Content" placeholder=" Ex : Nội dung câu hỏi được mô tả "></textarea>
+                                </div>
+                                <div class="fn-lesson-btn">
+                                    <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                    <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                    <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                    <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                    <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="lessonpart_id" class="lb-body-item-part">
+                        <form name="lessonpart_id" enctype="multipart/form-data">
+                            <input type="hidden" name="ID" value="lessonpart_id">
+                            <input type="hidden" name="UserID" value="">
+                            <input type="hidden" name="ClientID" value="">
+                            <input type="hidden" name="LessonID" value="">
+                            <input type="hidden" name="TypeTemplate" value="">
+                            <input type="hidden" name="IsExample" value="">
+                            <div class="lb-item-header row">
+                                <div class="lb-item-header-title col-10">
+                                    <input type="text" class="form-control" name="Title" placeholder=" Ex : Câu 1 : Hãy hoàn thành các câu hỏi sau : ">
+                                </div>
+                                <div class="lb-item-header-extends col-2">
+                                     <div class="timer"> 
+                                        <input class="form-control" type="number" name="title" value="" placeholder="thời gian làm bài"/> 
+                                    </div>
+                                    <div class="pointer"> 
+                                        <input class="form-control" type="number" name="title" value="" placeholder="điểm làm bài"/>
+                                    </div>
+                                </div>
+                                <div class="lb-item-header-content col-12">
+                                     <div class="row">
+                                        <div class="col-4">
+                                            <div class="avatar">
+                                              <div class="image-preview" onclick="loadFiles(this)">
+                                                <img src="https://cdn3.iconfinder.com/data/icons/web-document-icons/512/Upload_Document-512.png" alt="">
+                                              </div>
+                                              <input type="file" id="file" name="files" style="display: none;" accept="image/x-png,image/gif,image/jpeg">
+                                            </div>
+                                        </div>
+                                        <div class="col-8">
+                                            <textarea row=1 class="form-control" name="Content" placeholder=" Ex : Nội dung câu hỏi được mô tả "></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="fn-lesson-btn">
+                                    <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                    <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                    <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                    <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                    <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="lessonpart_id" class="lb-body-item-part">
+                        <form name="lessonpart_id" enctype="multipart/form-data">
+                            <input type="hidden" name="ID" value="lessonpart_id">
+                            <input type="hidden" name="UserID" value="">
+                            <input type="hidden" name="ClientID" value="">
+                            <input type="hidden" name="LessonID" value="">
+                            <input type="hidden" name="TypeTemplate" value="">
+                            <input type="hidden" name="IsExample" value="">
+                            <div class="lb-item-header row">
+                                <div class="lb-item-header-title col-10">
+                                    <input type="text" class="form-control" name="Title" placeholder=" Ex : Câu 1 : Hãy hoàn thành các câu hỏi sau : ">
+                                </div>
+                                <div class="lb-item-header-extends col-2">
+                                     <div class="timer"> 
+                                        <input class="form-control" type="number" name="title" value="" placeholder="thời gian làm bài"/> 
+                                    </div>
+                                    <div class="pointer"> 
+                                        <input class="form-control" type="number" name="title" value="" placeholder="điểm làm bài"/>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="avatar">
+                                      <div class="image-preview" onclick="loadFiles(this)">
+                                        <img src="https://cdn.tuoitre.vn/thumb_w/980/2018/2-1516744982920.jpg" alt="">
+                                      </div>
+                                      <input type="file" id="file" name="files" style="display: none;" accept="image/x-png,image/gif,image/jpeg">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <textarea row=1 class="form-control" name="Content" placeholder=" Ex : Nội dung câu hỏi được mô tả "></textarea>
+                                </div>
+                                <div class="fn-lesson-btn">
+                                    <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                    <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                    <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                    <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                    <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="lessonpart_id" class="lb-body-item-part">
+                        <form name="lessonpart_id" enctype="multipart/form-data">
+                            <input type="hidden" name="ID" value="lessonpart_id">
+                            <input type="hidden" name="UserID" value="">
+                            <input type="hidden" name="ClientID" value="">
+                            <input type="hidden" name="LessonID" value="">
+                            <input type="hidden" name="TypeTemplate" value="">
+                            <input type="hidden" name="IsExample" value="">
+                            <div class="lb-item-header row">
+                                <div class="lb-item-header-title col-10">
+                                    <input type="text" class="form-control" name="Title" placeholder=" Ex : Câu 1 : Hãy hoàn thành các câu hỏi sau : ">
+                                </div>
+                                <div class="lb-item-header-extends col-2">
+                                     <div class="timer"> 
+                                        <input class="form-control" type="number" name="title" value="" placeholder="thời gian làm bài"/> 
+                                    </div>
+                                    <div class="pointer"> 
+                                        <input class="form-control" type="number" name="title" value="" placeholder="điểm làm bài"/>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <textarea row=1 class="form-control" name="Content" placeholder=" Ex : Nội dung câu hỏi được mô tả "></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <div class="avatar">
+                                      <div class="image-preview" onclick="loadFiles(this)">
+                                        <img src="https://cdn.tuoitre.vn/thumb_w/980/2018/2-1516744982920.jpg" alt="">
+                                      </div>
+                                      <input type="file" id="file" name="files" style="display: none;" accept="image/x-png,image/gif,image/jpeg">
+                                    </div>
+                                </div>
+                                <div class="fn-lesson-btn">
+                                    <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                    <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                    <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                    <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                    <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="lb-item-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="fn-lb-item-body">
+                                        <a href="#" class="btn btn-sm btn-success text-light" title="Thêm part mới" onclick=""><i class="material-icons">add</i>Thêm câu hỏi </a>
+                                    <a href="#" class="btn btn-sm btn-success text-light" title="Thêm part mới" onclick=""><i class="material-icons">add</i>Thêm câu trả lời </a>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="lb-item-questions">
+                                        <div id="question_id" class="lb-item-question">
+                                            <div class="fn-question">
+                                                <a href="#" class="btn btn-sm btn-success text-light" title="Thêm part mới" onclick=""><i class="material-icons">add</i>Thêm câu trả lời </a>
+                                            </div>
+                                            <form name="question_id" enctype="mutilpart/form-data">
+                                                <input type="hidden" name="ID" value="question_id">
+                                                <input type="hidden" name="UserID" value="">
+                                                <input type="hidden" name="ClientID" value="">
+                                                <input type="hidden" name="LessonPartID" value="">
+                                                <div class="question-header row">
+                                                    <div class="col-10">
+                                                        <input type="text" class="form-control" name="Title" placeholder=" Ex : Câu hỏi số 1 : ">
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <input type="number" class="form-control" name="Point" placeholder="Điểm">
+                                                    </div>
+                                                </div>
+                                                <div class="fn-lesson-btn">
+                                                    <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                                    <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                                    <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                                    <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                                    <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                                                </div>
+                                            </form>
+                                            <div id="anwser_id" class="lb-item-answer">
+                                                <form name="anwser_id" enctype="mutilpart/form-data">
+                                                    <input type="hidden" name="ID" value="anwser_id">
+                                                    <input type="hidden" name="UserID" value="">
+                                                    <input type="hidden" name="ClientID" value="">
+                                                    <input type="hidden" name="LessonPartID" value="">
+                                                    <input type="hidden" name="QuestionID" value="">
+                                                    <div class="question-header row">
+                                                        <div class="col-12">
+                                                            <input type="text" class="form-control" name="Title" placeholder=" Ex : Câu trả lời ">
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="form-check" style="margin-top: 15px;">
+                                                                <label class="form-check-label">
+                                                                    <input class="form-check-input" type="checkbox" name="IsAnswer"> Đây là câu trả lời 
+                                                                    <span class="form-check-sign">
+                                                                        <span class="check"></span>
+                                                                    </span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="fn-lesson-btn">
+                                                        <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                                        <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                                        <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                                        <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                                        <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="lb-item-answers">
+                                        <div id="anwser_id" class="lb-item-answer">
+                                            <form name="anwser_id" enctype="mutilpart/form-data">
+                                                <input type="hidden" name="ID" value="anwser_id">
+                                                <input type="hidden" name="UserID" value="">
+                                                <input type="hidden" name="ClientID" value="">
+                                                <input type="hidden" name="LessonPartID" value="">
+                                                <input type="hidden" name="QuestionID" value="">
+                                                <div class="question-header row">
+                                                    <div class="col-12">
+                                                        <input type="text" class="form-control" name="Title" placeholder=" Ex : Câu trả lời ">
+                                                    </div>
+                                                    
+                                                    <div class="col-6">
+                                                        <select name="QuestionID" class="form-control">
+                                                            <option value="">----------- Chọn câu hỏi -----------</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="form-check" style="margin-top: 15px;">
+                                                            <label class="form-check-label">
+                                                                <input class="form-check-input" type="checkbox" name="IsAnswer"> Đây là câu trả lời 
+                                                                <span class="form-check-sign">
+                                                                    <span class="check"></span>
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="fn-lesson-btn">
+                                                    <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                                    <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                                    <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                                    <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                                    <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="lessonpart_id" class="lb-body-item-part">
+                        <form name="lessonpart_id" enctype="multipart/form-data">
+                            <input type="hidden" name="ID" value="lessonpart_id">
+                            <input type="hidden" name="UserID" value="">
+                            <input type="hidden" name="ClientID" value="">
+                            <input type="hidden" name="LessonID" value="">
+                            <input type="hidden" name="TypeTemplate" value="">
+                            <input type="hidden" name="IsExample" value="">
+                            <div class="lb-item-header row">
+                                <div class="lb-item-header-title col-12">
+                                    <input type="text" class="form-control" name="Title" placeholder=" Ex : Câu 1 : Hãy hoàn thành các câu hỏi sau : ">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <textarea row=1 class="form-control" name="Content" placeholder=" Ex : Nội dung câu hỏi được mô tả "></textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="avatar">
+                                              <div class="image-preview" onclick="loadFiles(this)">
+                                                <img src="https://cdn.tuoitre.vn/thumb_w/980/2018/2-1516744982920.jpg" alt="">
+                                              </div>
+                                              <input type="file" id="file" name="files" style="display: none;" accept="image/x-png,image/gif,image/jpeg">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="fn-lesson-btn">
+                                    <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                    <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                    <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                    <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                    <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                                </div>
+                            </div>
+                            <div class="fn-lesson-btn">
+                                <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                            </div>
+                        </form>
+                        <div class="lb-item-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="fn-lb-item-body">
+                                        <a href="#" class="btn btn-sm btn-success text-light" title="Thêm part mới" onclick=""><i class="material-icons">add</i>Thêm câu hỏi </a>
+                                    <a href="#" class="btn btn-sm btn-success text-light" title="Thêm part mới" onclick=""><i class="material-icons">add</i>Thêm câu trả lời </a>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="lb-item-questions">
+                                                <div id="question_id" class="lb-item-question">
+                                                    <form name="question_id" enctype="mutilpart/form-data">
+                                                        <input type="hidden" name="ID" value="question_id">
+                                                        <input type="hidden" name="UserID" value="">
+                                                        <input type="hidden" name="ClientID" value="">
+                                                        <input type="hidden" name="LessonPartID" value="">
+                                                        <div class="question-header row">
+                                                            <div class="col-12">
+                                                                <input type="text" class="form-control" name="Title" placeholder=" Ex : Câu hỏi số 1 : ">
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <input type="number" class="form-control" name="Point" placeholder="Điểm">
+                                                            </div>
+                                                        </div>
+                                                        <div class="fn-lesson-btn">
+                                                            <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                                            <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                                            <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                                            <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                                            <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="lb-item-answers">
+                                                <div id="anwser_id" class="lb-item-answer">
+                                                    <form name="anwser_id" enctype="mutilpart/form-data">
+                                                        <input type="hidden" name="ID" value="anwser_id">
+                                                        <input type="hidden" name="UserID" value="">
+                                                        <input type="hidden" name="ClientID" value="">
+                                                        <input type="hidden" name="LessonPartID" value="">
+                                                        <input type="hidden" name="QuestionID" value="">
+                                                        <div class="question-header row">
+                                                            <div class="col-12">
+                                                                <input type="text" class="form-control" name="Title" placeholder=" Ex : Câu trả lời ">
+                                                            </div>
+                                                            
+                                                            <div class="col-6">
+                                                                <select name="QuestionID" class="form-control">
+                                                                    <option value="">----------- Chọn câu hỏi -----------</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-check" style="margin-top: 15px;">
+                                                                    <label class="form-check-label">
+                                                                        <input class="form-check-input" type="checkbox" name="IsAnswer"> Đây là câu trả lời 
+                                                                        <span class="form-check-sign">
+                                                                            <span class="check"></span>
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="fn-lesson-btn">
+                                                            <a href="#" class="btn btn-sm btn-info btn-fab text-light" title="Sửa" onclick=""><i class="material-icons">border_color</i></a>
+                                                            <a href="#" class="btn btn-sm btn-fab btn-muted text-light" title="Xóa" onclick=""><i class="material-icons">delete_sweep</i></a>
+                                                            <a href="#" class="btn btn-sm btn-warning btn-fab text-light" title="Thu gọn" onclick=""><i class="material-icons">minimize</i></a>
+                                                            <a href="#" class="btn btn-sm btn-danger btn-fab text-light" title="Hủy" onclick=""><i class="material-icons">cancel</i></a>
+                                                            <a href="#" class="btn btn-sm btn-success btn-fab text-light" title="Lưu" onclick=""><i class="material-icons">done</i></a>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="LessonExample">
     <input type="hidden" sid="CourseID" value="@obj.ID" />
     <input type="hidden" sid="ChapterID" value="0"/>
     <input type="hidden" id="action" value="" />
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-signup" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
@@ -170,4 +612,21 @@
 {
     <script src="~/Contents/js/publisher.js"></script>
     <script src="~/Contents/js/lesson.js"></script>
+    <script type="text/javascript">
+        var loadFiles = function(_this){
+            var parent = _this.parentElement;
+            var file = parent.querySelector('input[type="file"]');
+            file.click();
+            file.onchange =function(){
+                var input = this;
+                if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                    reader.onload = function(e) {
+                        _this.querySelector("img").setAttribute('src', e.target.result);
+                    }
+                  reader.readAsDataURL(input.files[0]);
+                }
+            };
+        }
+    </script>
 }
