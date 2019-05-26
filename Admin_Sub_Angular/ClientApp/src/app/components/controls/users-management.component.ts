@@ -16,6 +16,7 @@ import { Permission } from '../../models/permission.model';
 import { UserEdit } from '../../models/user-edit.model';
 import { UserInfoComponent } from './user-info.component';
 import { Restangular } from 'ngx-restangular';
+import { PagerService } from 'src/app/services/pager.service';
 
 
 @Component({
@@ -53,34 +54,36 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
     @ViewChild('userEditor')
     userEditor: UserInfoComponent;
 
-    constructor(private restangular: Restangular,private alertService: AlertService, private translationService: AppTranslationService, private accountService: AccountService) {
+    constructor( private pagerService: PagerService,private restangular: Restangular,private alertService: AlertService, private translationService: AppTranslationService, private accountService: AccountService) {
     }
+    private allItems: any[];
 
+    // pager object
+    pager: any = {};
+
+    // paged items
+    pagedItems: any[];
+    totalPageTemp:number=100;
 
     ngOnInit() {
         this.services = this.restangular.all('Account');
 
-        this.columns = [
-            { prop: 'index', name: '#', width: 40, cellTemplate: this.indexTemplate, canAutoResize: false },
-            { prop: 'email', name: 'Tên đăng nhập', width: 200 },
-            { prop: 'name', name: 'Họ và tên', width: 120 },
-            { prop: 'roleID', name: 'Nhóm người dùng', width: 120 },
-            { prop: 'phone', name: 'Số điện thoại', width: 100 },
-            { prop: 'skype', name: 'Skype', width: 100 },
-        ];
 
         if (this.canManageUsers) {
             this.columns.push({ name: '', width: 160, cellTemplate: this.actionsTemplate, resizeable: false, canAutoResize: false, sortable: false, draggable: false });
         }
+      
 
-        this.loadData();
+        this.loadData(1);
+      
     }
+
 
 
     ngAfterViewInit() {
 
         this.userEditor.changesSavedCallback = () => {
-            this.addNewUserToList();
+            this.loadData(1);
             this.editorModal.hide();
         };
 
@@ -129,19 +132,47 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
     }
 
 
-    loadData() {
+    loadData(page: number) {
         this.alertService.startLoadingMessage();
         this.loadingIndicator = true;
-        this.services.all("getSubUser").post().subscribe(
+
+        
+        this.pager = this.pagerService.getPager(this.rows.length, page);
+       
+        if (page < 1 || page > this.totalPageTemp) {
+            this.loadingIndicator = false;
+          this.alertService.stopLoadingMessage();
+          return;
+      }
+        this.services.all("getSubUser").post(
+            {'currentPage':page,
+        'pageSize':this.pager.pageSize,
+        'userName':this.accountService.currentUser.userName}
+        ).subscribe(
             response => {
-              console.log(response);
-              this.rows = response;
-              this.loadingIndicator = false;
-            }, error => {
+              this.rows = response.data;
+              this.rowsCache=response.data;
             
+              this.loadingIndicator = false;
+              this.alertService.stopLoadingMessage();
+              
+         
+            // get pager object from service
+            this.pager = this.pagerService.getPager(response.totalPage, page);
+            if (page < 1 || page > this.pager.totalPages) {
+               
+              return;
+          }
+           
+            // get current page of items
+            this.pagedItems = this.rows.slice(this.pager.startIndex, this.pager.endIndex + 1);
+            this.totalPageTemp=this.pager.totalPages;
+            }, error => {
+                this.alertService.stopLoadingMessage();
               this.loadingIndicator = false;
             }
           );
+          
         // if (this.canViewRoles) {
         //     this.accountService.getUsersAndRoles().subscribe(results => this.onDataLoadSuccessful(results[0], results[1]), error => this.onDataLoadFailed(error));
         // } else {
@@ -175,7 +206,7 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
 
 
     onSearchChanged(value: string) {
-        this.rows = this.rowsCache.filter(r => Utilities.searchArray(value, false, r.userName, r.fullName, r.email, r.phoneNumber, r.jobTitle, r.roles));
+        this.rows = this.rowsCache.filter(r => Utilities.searchArray(value, false, r.userName, r.fullName, r.email));
     }
 
     onEditorModalHidden() {
@@ -193,6 +224,12 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
 
 
     editUser(row: UserEdit) {
+     
+        if(row.roleID=="SUPERADMIN")
+        {
+        this.alertService.showMessage("","Không thể sửa tài khoản quản tri", MessageSeverity.warn);
+        return;
+        }
         this.editingUserName = { name: row.userName };
         this.sourceUser = row;
         this.editedUser = this.userEditor.editUser(row, this.allRoles);
@@ -201,11 +238,18 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
 
 
     deleteUser(row: UserEdit) {
-        this.alertService.showDialog('Are you sure you want to delete \"' + row.userName + '\"?', DialogType.confirm, () => this.deleteUserHelper(row));
+        this.alertService.showDialog('Bạn có muốn dừng hoạt động tài khoản \"' + row.userName + '\"?', DialogType.confirm, () => this.deleteUserHelper(row));
     }
 
 
     deleteUserHelper(row: UserEdit) {
+      
+        if(row.roleID=="SUPERADMIN")
+        {
+            this.alertService.showStickyMessage('Delete Error', 'Không thể dừng hoạt động tài khoản quản trị',
+                    MessageSeverity.error, "");
+                    return;
+        }
 
         this.alertService.startLoadingMessage('Deleting...');
         this.loadingIndicator = true;
@@ -215,8 +259,8 @@ export class UsersManagementComponent implements OnInit, AfterViewInit {
                 this.alertService.stopLoadingMessage();
                 this.loadingIndicator = false;
 
-                this.rowsCache = this.rowsCache.filter(item => item !== row);
-                this.rows = this.rows.filter(item => item !== row);
+                this.loadData(1);
+                this.alertService.showMessage('Success', `Tài khoản \"${row.userName}\" được cập nhật thành công`, MessageSeverity.success);
             },
             error => {
                 this.alertService.stopLoadingMessage();

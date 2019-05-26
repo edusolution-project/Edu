@@ -65,7 +65,11 @@ import { RoleEditorComponent } from './components/controls/role-editor.component
 import { RestangularModule, Restangular } from 'ngx-restangular';
 import { GlobalService } from './services/global.service';
 import { NgxSelectModule, INgxSelectOptions } from 'ngx-select-ex';
-
+import { PagerService } from './services/pager.service';
+import { TeachersManagementComponent } from './components/teacher-management/teacher-management.component';
+import { TeacherInfoComponent } from './components/teacher-management/teacher-info.component';
+import { MyDatePickerModule } from 'mydatepicker';
+import { TeacherService } from './services/teacher.service';
 
 @NgModule({
   imports: [
@@ -89,7 +93,8 @@ import { NgxSelectModule, INgxSelectOptions } from 'ngx-select-ex';
     CarouselModule.forRoot(),
     ModalModule.forRoot(),
     ChartsModule,
-    NgxSelectModule
+    NgxSelectModule,
+    MyDatePickerModule
   ],
   declarations: [
     AppComponent,
@@ -113,7 +118,9 @@ import { NgxSelectModule, INgxSelectOptions } from 'ngx-select-ex';
     BootstrapToggleDirective,
     BootstrapSelectDirective,
     BootstrapDatepickerDirective,
-    GroupByPipe
+    GroupByPipe,
+    TeachersManagementComponent,
+    TeacherInfoComponent
   ],
   providers: [
     { provide: ErrorHandler, useClass: AppErrorHandler },
@@ -129,6 +136,8 @@ import { NgxSelectModule, INgxSelectOptions } from 'ngx-select-ex';
     LocalStoreManager,
     EndpointFactory,
     GlobalService,
+    PagerService,
+    TeacherService
   ],
   bootstrap: [AppComponent]
 })

@@ -62,3 +62,14 @@ C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\obj\Debug
 C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.AssemblyInfo.cs
 C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
 C:\Users\nghiepnc\source\repos\edusolution-project\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.deps.json
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.runtimeconfig.json
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.runtimeconfig.dev.json
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\bin\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.csproj.CoreCompileInputs.cache
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.AssemblyInfoInputs.cache
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.AssemblyInfo.cs
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.dll
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.pdb
+C:\Users\laptop2\source\repos\Edu\KiemTraNhieuThe\obj\Debug\netcoreapp2.2\KiemTraNhieuThe.csprojAssemblyReference.cache

@@ -12,6 +12,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="CustomFilter\**" />
+    <Content Remove="CustomFilter\**" />
+    <EmbeddedResource Remove="CustomFilter\**" />
+    <None Remove="CustomFilter\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\BaseController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DotNetCore.NPOI" Version="1.2.1" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.1" />
@@ -33,6 +44,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BaseMongoDB\BaseMongoDB.csproj" />
+    <ProjectReference Include="..\BaseMVC\BaseMVC.csproj" />
   </ItemGroup>
 
   <ItemGroup>

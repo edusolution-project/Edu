@@ -12,12 +12,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 //using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using Data.Access.Object.Entities.Model;
 using NLog.Extensions.Logging;
 using NLog.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using SME.Bussiness.Lib.Service;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Net;
 using SMERest.Common;
@@ -103,7 +101,7 @@ namespace SMERest
             app.UseCors("AllowAllHeaders");
 
             //app.UseMiddleware(typeof(CorsMiddleware));
-            RoleManagementService.Init(env);
+           // RoleManagementService.Init(env);
             //app.UseCors(builder =>
             //builder.WithOrigins("http://localhost:58434"));
             //.AllowAnyHeader()

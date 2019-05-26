@@ -4,7 +4,7 @@
 // =============================
 
 import { Injectable } from '@angular/core';
-import { Observable, Subject, forkJoin } from 'rxjs';
+import { Observable, Subject, forkJoin, Subscriber } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 
 import { AccountEndpoint } from './account-endpoint.service';
@@ -13,6 +13,7 @@ import { User } from '../models/user.model';
 import { Role } from '../models/role.model';
 import { Permission, PermissionNames, PermissionValues } from '../models/permission.model';
 import { UserEdit } from '../models/user-edit.model';
+import { Restangular } from 'ngx-restangular';
 
 export type RolesChangedOperation = 'add' | 'delete' | 'modify';
 export interface RolesChangedEventArg { roles: Role[] | string[]; operation: RolesChangedOperation; }
@@ -27,7 +28,8 @@ export class AccountService {
 
   constructor(
     private authService: AuthService,
-    private accountEndpoint: AccountEndpoint) {
+    private accountEndpoint: AccountEndpoint,
+    private restangular: Restangular) {
 
   }
 
@@ -66,10 +68,14 @@ export class AccountService {
         }));
     }
   }
-
-  newUser(user: UserEdit) {
-    return this.accountEndpoint.getNewUserEndpoint<User>(user);
+newUser(user: User) {
+   return this.restangular.all('Account').all('Create').post(user);
   }
+
+
+  // newUser(user: UserEdit) {
+  //   return this.accountEndpoint.getNewUserEndpoint<User>(user);
+  // }
 
 
   getUserPreferences() {
@@ -81,21 +87,9 @@ export class AccountService {
   }
 
 
-  deleteUser(userOrUserId: string | User): Observable<User> {
-
-    if (typeof userOrUserId === 'string' || userOrUserId instanceof String) {
-      return this.accountEndpoint.getDeleteUserEndpoint<User>(<string>userOrUserId).pipe<User>(
-        tap(data => this.onRolesUserCountChanged(data.roles)));
-    } else {
-
-      if (userOrUserId.id) {
-        return this.deleteUser(userOrUserId.id);
-      } else {
-        return this.accountEndpoint.getUserByUserNameEndpoint<User>(userOrUserId.userName).pipe<User>(
-          mergeMap(user => this.deleteUser(user.id)));
-      }
-    }
-  }
+  deleteUser(user: UserEdit) {
+    return this.restangular.all('Account').all('delete').post(user);
+   }
 
 
   unblockUser(userId: string) {

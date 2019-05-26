@@ -83,14 +83,16 @@ namespace BaseMVC.AdminControllers
 
                 var roleName = _roleService.GetByID(item.RoleID).Name;
 
-                if (roleName == "SUBUSER")
+                if (roleName == "SUPERADMIN")
                 {
                     CPUserSubEntity userSub = new CPUserSubEntity();
                     userSub.Email = item.Email;
                     userSub.Pass = item.Pass;
                     userSub.RoleID = item.RoleID;
                     userSub.Activity = item.Activity;
-                    userSub.Name = item.Name;
+                    userSub.FullName = item.Name;
+                    userSub.UserName = item.Email;
+                    userSub.UserNameManager = item.Email;
                     await _UserSubservice.AddAsync(userSub);
                 }
 

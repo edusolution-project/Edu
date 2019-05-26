@@ -8,7 +8,7 @@
     <div class="col-lg-4 pr-lg-5">
       <ul class="nav flex-column flex-lg-row justify-content-end">
         <li class="nav-item toolbaritem">
-          <a class="nav-link" href="javascript:;" (click)="newUser(row)">
+          <a class="nav-link" href="javascript:;" (click)="newUser()">
             <i class="fa fa-plus-circle"></i> Tạo mới
           </a>
         </li>
@@ -24,7 +24,10 @@
               STT
             </td>
             <td>
-              Tên đăng nhập/email
+              Tên đăng nhập
+            </td>
+            <td>
+              email
             </td>
             <td>
               Họ tên
@@ -33,10 +36,10 @@
               RoleID
             </td>
             <td>
-              Số điện thoại
+             Trạng thái
             </td>
             <td>
-              Skype
+              Thao tác
             </td>
           </tr>
         </thead>
@@ -44,27 +47,49 @@
         
           <tr *ngFor="let item of rows; let i = index"  style="cursor:pointer">
             <td>
-              {{i+1}}
+              {{i+1+(pager.currentPage-1) *pager.pageSize}} 
+            </td>
+            <td>
+              {{item.userName}}
             </td>
             <td>
               {{item.email}}
             </td>
             <td>
-              {{item.name}}
+              {{item.fullName}}
             </td>
             <td>
               {{item.roleID}}
             </td>
            
             <td>
-              {{item.phone}}
+              {{item.activity==false?'Không hoạt đông':"Hoạt động"}}
             </td>
             <td>
-                {{item.skype}}
-              </td>
+              <a  title="Sửa" ng-if="isEdit(item)" (click)="editUser(item)"><i class="fa fa-pencil-square-o blue big120"> &nbsp;&nbsp;</i></a>
+              
+              <a  title="Xóa" ng-if="isEdit(item)" (click)="deleteUser(item)"><i class="fa fa-trash blue big120">   </i></a>
+            </td>
           </tr>
         </tbody>
       </table>
+      <ul *ngIf="pager.pages && pager.pages.length" class="pagination">
+        <li [ngClass]="{disabled:pager.currentPage === 1}">
+            <a (click)="loadData(1)">Trang đầu</a>
+        </li>
+        <li [ngClass]="{disabled:pager.currentPage === 1}">
+            <a (click)="loadData(pager.currentPage - 1)">Trang trước</a>
+        </li>
+        <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}">
+            <a (click)="loadData(page)">{{page}}</a>
+        </li>
+        <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+            <a (click)="loadData(pager.currentPage + 1)">Trang tiếp</a>
+        </li>
+        <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+            <a (click)="loadData(pager.totalPages)">Trang cuối</a>
+        </li>
+    </ul>
     </div>
 
 
@@ -74,7 +99,7 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 *ngIf="!editingUserName" class="modal-title float-left"><i class="fa fa-user-plus"></i> Tạo tải khoản</h4>
+          <h4 *ngIf="!editingUserName" class="modal-title float-left"><i class="fa fa-user-plus"></i> Tạo tài khoản</h4>
           <h4 *ngIf="editingUserName" class="modal-title float-left"><i class="fa fa-user-circle-o"></i> Chỉnh sửa tài khoản</h4>
           <button type="button" class="close float-right" title="Close" (click)="editorModal.hide()">
             <span aria-hidden="true">&times;</span>
@@ -87,3 +112,5 @@
     </div>
   </div>
 </div>
+
+

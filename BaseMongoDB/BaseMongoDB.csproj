@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BasePublisherMVC\BasePublisherMVC.csproj" />
     <ProjectReference Include="..\Business\Business.csproj" />
     <ProjectReference Include="..\CoreMongoDB\CoreMongoDB.csproj" />
   </ItemGroup>

@@ -18,6 +18,7 @@ import { AuthService } from './services/auth.service';
 import { AuthGuard } from './services/auth-guard.service';
 import { Utilities } from './services/utilities';
 import { UsersManagementComponent } from './components/controls/users-management.component';
+import { TeachersManagementComponent } from './components/teacher-management/teacher-management.component';
 
 
 
@@ -50,7 +51,9 @@ const routes: Routes = [
   { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard], data: { title: 'Orders' } },
   { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard], data: { title: 'Settings' } },
   { path: 'about', component: AboutComponent, data: { title: 'About Us' } },
-  { path: 'users', component: UsersManagementComponent, data: { title: 'About Us' } },
+  { path: 'users', component: UsersManagementComponent, data: { title: 'Quản lý tài khoản' } },
+  { path: 'teacher-manager', component: TeachersManagementComponent, data: { title: 'Quản lý giáo viên' } },
+  { path: 'student-manager', component: TeachersManagementComponent, data: { title: 'Quản lý học viên' } },
   { path: 'home', redirectTo: '/', pathMatch: 'full' },
   { path: '**', component: NotFoundComponent, data: { title: 'Page Not Found' } }
 ];

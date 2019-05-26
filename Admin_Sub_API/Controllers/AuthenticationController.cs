@@ -3,25 +3,22 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
-using SME.Bussiness.Lib.Dto;
 using System.Text;
-using SME.Utils.Common;
-using Newtonsoft.Json;
-using SME.Utils.Common.SMEException;
-using SME.API.CustomFilter;
+
 using System;
 using NLog;
 using Microsoft.AspNetCore.Mvc;
-using Data.Access.Object.Entities.Model;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.Configuration;
-using ConfigurationManager = SME.Utils.Common.ConfigurationManager;
+
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using BaseMongoDB.Database;
 
 using Business.Dto.Form;
+using BaseMVC.Globals;
 
 namespace SME.API.Controllers
 {
@@ -37,10 +34,10 @@ namespace SME.API.Controllers
         //    IHostingEnvironment hostingEnvironment) : base(httpContextAccessor, context, configuration, hostingEnvironment)
         //{
         //}
-        CPUserService _userService;
+        CPUserSubService _userService;
       AccessTokenService _accessTokenService;
         public AuthenticationController(
-        CPUserService userService, AccessTokenService accessTokenService
+        CPUserSubService userService, AccessTokenService accessTokenService
        )
         {
             _userService = userService;
@@ -56,22 +53,22 @@ namespace SME.API.Controllers
         // [SMEActionAuditFilter]
         public LoginResultForm LogIn([FromBody]AuthenticationForm form)
         {
-            SMEEntities ss = new SMEEntities();
+          
             //NguoiDungService service = GetService<NguoiDungService>();
 
 
-            if (string.IsNullOrWhiteSpace(form.Username))
-            {
-                throw new InvalidUsernameOrPasswordException();
-            }
-            else
-            {
-                form.Username = form.Username.ToLower();
-            }
+            //if (string.IsNullOrWhiteSpace(form.Username))
+            //{
+            //    throw new InvalidUsernameOrPasswordException();
+            //}
+            //else
+            //{
+            //    form.Username = form.Username.ToLower();
+            //}
 
             // _ilogs.WriteLogsInfo(username + "-" + password + "-" + returnurl);
 
-            var user = _userService.GetItemByEmail(form.Username);
+            var user = _userService.GetItemByUserName(form.Username);
             //    if (user == null)
             //    {
             //        ViewBag.MessageError = "Email không tồn tại";
@@ -171,15 +168,18 @@ namespace SME.API.Controllers
             // LoginResultForm res = SetDataToReturn(form, nguoiDung);
             //return res;
             LoginResultForm res = new LoginResultForm();
-            res.UserName = user.Name;
-            res.Token = _accessTokenService.GetNewToken(user.ID,"",user.Name);
+            res.UserName = user.UserName;
+            res.Token = _accessTokenService.GetNewToken(user.ID,"",user.UserName);
+            var pass= Security.Encrypt(form.Password);
+            if (pass.Equals(user.Pass))
+                return res;
             //string token = base.GetService<AccessTokenService>().GetNewToken(nguoiDung.NGUOI_DUNG_ID,
             //    GetHeader(GlobalConstants.HEADER_USER_AGENT), form.Username);
-            return res;
+            return null;
         }
 
-        private LoginResultForm SetDataToReturn(AuthenticationForm form, NGUOI_DUNG nguoiDung)
-        {
+       // private LoginResultForm SetDataToReturn(AuthenticationForm form, NGUOI_DUNG nguoiDung)
+       // {
             //Insert vao Database de quan ly
 
             //string token = base.GetService<AccessTokenService>().GetNewToken(nguoiDung.NGUOI_DUNG_ID,
@@ -244,11 +244,11 @@ namespace SME.API.Controllers
             //res.UserName = nguoiDung.TEN_DANG_NHAP;
             //res.LstMaChucNang = RoleManagementService.GetListMaChucNang(res.VaiTro);
             //return res;
-            return null;
-        }
+          //  return null;
+       // }
 
        
-        [SMEAuthorizeFilter]
+        //[SMEAuthorizeFilter]
         [HttpPost]
         public void LogOut()
         {
@@ -257,7 +257,7 @@ namespace SME.API.Controllers
             //    , GetHeader(GlobalConstants.HEADER_USERNAME));
         }
 
-        [SMEAuthorizeFilter]
+        //[SMEAuthorizeFilter]
         [HttpGet]
         public void KeepAlive()
         {

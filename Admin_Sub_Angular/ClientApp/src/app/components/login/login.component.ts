@@ -85,13 +85,23 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.alertService.startLoadingMessage("", "Attempting login...");
     this.services.all("LogIn").post(this.userLogin).subscribe(
       response => {
-        console.log(response);
+       
         this.isLoading = false;
         let user = new User(
           "name"
         );
-        console.log(user);
-        this.authService.savetest(user);
+        if(response.token!=null)
+        {
+        this.authService.savetest(response);
+        }
+        else
+        {
+          this.alertService.showMessage("Không đúng thông tin tên đăng nhập và mật khẩu","", MessageSeverity.error);
+        }
+        setTimeout(() => {
+    this.isLoading = false;
+    this.router.navigate(['/']);
+        }, 500);
       }, error => {
             
         console.log(error);
@@ -101,11 +111,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     );
 
     setTimeout(() => {
-            this.alertService.stopLoadingMessage();
-      this.isLoading = false;
-      
-      this.router.navigate(['/']);
-          }, 500);
+      this.alertService.stopLoadingMessage();
+    }, 500);
 
     
 

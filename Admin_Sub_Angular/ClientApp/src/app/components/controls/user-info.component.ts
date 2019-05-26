@@ -31,6 +31,7 @@ export class UserInfoComponent implements OnInit {
   private editingUserName: string;
   private uniqueId: string = Utilities.uniqueId();
   private user: User = new User();
+  private userCreate: User = new User();
   private userEdit: UserEdit;
   private allRoles: Role[] = [];
 
@@ -40,13 +41,13 @@ export class UserInfoComponent implements OnInit {
   public changesFailedCallback: () => void;
   public changesCancelledCallback: () => void;
   lstRole:any;
-  @Input()
+    @Input()
   isViewOnly: boolean;
 
   @Input()
   isGeneralEditor = false;
 
-
+private disabledUserName=false;
 
 
 
@@ -83,45 +84,22 @@ export class UserInfoComponent implements OnInit {
   }
 
   ngOnInit() {
+    let range:Role[] =[
+  ];
+  let item = new Role();
+  item.roleID="CANBO";
+  item.name="Cán bộ";
+  range.push(item);
 
-    let range = [];
-    
-      range.push(1);
-      range.push(2);
-      range.push(3);
+  item = new Role();
+  item.roleID="LANHDAO";
+  item.name="Lãnh đạo";
+  range.push(item);
 
-    this.lstRole=this.globalService.convertArrayToSelect2(range);
-    console.log(range);
-    if (!this.isGeneralEditor) {
-      this.loadCurrentUserData();
-    }
-  }
-
-
-
-  private loadCurrentUserData() {
-    this.alertService.startLoadingMessage();
-
-    if (this.canViewAllRoles) {
-      this.accountService.getUserAndRoles().subscribe(results => this.onCurrentUserDataLoadSuccessful(results[0], results[1]), error => this.onCurrentUserDataLoadFailed(error));
-    } else {
-      this.accountService.getUser().subscribe(user => this.onCurrentUserDataLoadSuccessful(user, user.roles.map(x => new Role(x))), error => this.onCurrentUserDataLoadFailed(error));
-    }
-  }
-
-
-  private onCurrentUserDataLoadSuccessful(user: User, roles: Role[]) {
-    this.alertService.stopLoadingMessage();
-    this.user = user;
-    this.allRoles = roles;
-  }
-
-  private onCurrentUserDataLoadFailed(error: any) {
-    this.alertService.stopLoadingMessage();
-    this.alertService.showStickyMessage('Load Error', `Unable to retrieve user data from the server.\r\nErrors: "${Utilities.getHttpResponseMessages(error)}"`,
-      MessageSeverity.error, error);
-
-    this.user = new User();
+    this.lstRole=this.globalService.convertObjectToSelect2(range,"roleID","name");
+    this.userCreate.roleID="CANBO";
+    this.userCreate.activity=true;;
+   
   }
 
 
@@ -147,10 +125,12 @@ export class UserInfoComponent implements OnInit {
 
 
   private edit() {
+  
     if (!this.isGeneralEditor) {
       this.isEditingSelf = true;
       this.userEdit = new UserEdit();
       Object.assign(this.userEdit, this.user);
+     
     } else {
       if (!this.userEdit) {
         this.userEdit = new UserEdit();
@@ -158,7 +138,7 @@ export class UserInfoComponent implements OnInit {
 
       this.isEditingSelf = this.accountService.currentUser ? this.userEdit.id == this.accountService.currentUser.id : false;
     }
-
+    
     this.isEditMode = true;
     this.showValidationErrors = true;
     this.isChangePassword = false;
@@ -169,17 +149,18 @@ export class UserInfoComponent implements OnInit {
     this.isSaving = true;
     this.alertService.startLoadingMessage('Saving changes...');
 
+this.userCreate.userNameManager=this.accountService.currentUser.userName;
     if (this.isNewUser) {
-      this.accountService.newUser(this.userEdit).subscribe(user => this.saveSuccessHelper(user), error => this.saveFailedHelper(error));
+      this.accountService.newUser(this.userCreate).subscribe(response => this.saveSuccessHelper(), error => this.saveFailedHelper(error));
     } else {
-      this.accountService.updateUser(this.userEdit).subscribe(response => this.saveSuccessHelper(), error => this.saveFailedHelper(error));
+      this.accountService.newUser(this.userCreate).subscribe(response => this.saveSuccessHelper(), error => this.saveFailedHelper(error));
     }
+    this.isSaving = false;
+    this.alertService.stopLoadingMessage();
   }
 
 
   private saveSuccessHelper(user?: User) {
-    this.testIsRoleUserCountChanged(this.user, this.userEdit);
-
     if (user) {
       Object.assign(this.userEdit, user);
     }
@@ -188,29 +169,13 @@ export class UserInfoComponent implements OnInit {
     this.alertService.stopLoadingMessage();
     this.isChangePassword = false;
     this.showValidationErrors = false;
-
-    this.deletePasswordFromUser(this.userEdit);
-    Object.assign(this.user, this.userEdit);
-    this.userEdit = new UserEdit();
-    this.resetForm();
-
-
-    if (this.isGeneralEditor) {
-      if (this.isNewUser) {
-        this.alertService.showMessage('Success', `User \"${this.user.userName}\" was created successfully`, MessageSeverity.success);
-      } else if (!this.isEditingSelf) {
-        this.alertService.showMessage('Success', `Changes to user \"${this.user.userName}\" was saved successfully`, MessageSeverity.success);
-           }
-    }
-
-    if (this.isEditingSelf) {
-      this.alertService.showMessage('Success', 'Changes to your User Profile was saved successfully', MessageSeverity.success);
-      this.refreshLoggedInUser();
-    }
-
-    this.isEditMode = false;
-
-
+    if(this.userCreate.id==null)
+    this.alertService.showMessage('Success', `Tài khoản \"${this.userCreate.userName}\" được tạo thành công`, MessageSeverity.success);
+    else
+    this.alertService.showMessage('Success', `Tài khoản \"${this.userCreate.userName}\" được cập nhật thành công`, MessageSeverity.success);
+    this.userCreate= new User();
+    this.userCreate.roleID="CANBO";
+    this.userCreate.activity=true;
     if (this.changesSavedCallback) {
       this.changesSavedCallback();
     }
@@ -220,8 +185,9 @@ export class UserInfoComponent implements OnInit {
   private saveFailedHelper(error: any) {
     this.isSaving = false;
     this.alertService.stopLoadingMessage();
-    this.alertService.showStickyMessage('Save Error', 'The below errors occured whilst saving your changes:', MessageSeverity.error, error);
-    this.alertService.showStickyMessage(error, null, MessageSeverity.error);
+   this.alertService.showMessage("",error.data,MessageSeverity.error);
+    //this.alertService.showStickyMessage('Save Error', 'The below errors occured whilst saving your changes:', MessageSeverity.error, error);
+    //this.alertService.showStickyMessage(error, null, MessageSeverity.error);
 
     if (this.changesFailedCallback) {
       this.changesFailedCallback();
@@ -254,7 +220,6 @@ export class UserInfoComponent implements OnInit {
     this.showValidationErrors = false;
     this.resetForm();
 
-    this.alertService.showMessage('Cancelled', 'Operation cancelled by user', MessageSeverity.default);
     this.alertService.resetStickyMessage();
 
     if (!this.isGeneralEditor) {
@@ -267,29 +232,10 @@ export class UserInfoComponent implements OnInit {
   }
 
 
-  private close() {
-    this.userEdit = this.user = new UserEdit();
-    this.showValidationErrors = false;
-    this.resetForm();
-    this.isEditMode = false;
-
-    if (this.changesSavedCallback) {
-      this.changesSavedCallback();
-    }
-  }
+ 
 
 
 
-  private refreshLoggedInUser() {
-    this.accountService.refreshLoggedInUser()
-      .subscribe(user => {
-        this.loadCurrentUserData();
-      },
-        error => {
-          this.alertService.resetStickyMessage();
-          this.alertService.showStickyMessage('Refresh failed', 'An error occured whilst refreshing logged in user information from the server', MessageSeverity.error, error);
-        });
-  }
 
 
   private changePassword() {
@@ -347,16 +293,21 @@ export class UserInfoComponent implements OnInit {
   }
 
   editUser(user: User, allRoles: Role[]) {
+    if(user.roleID=="SUPERADMIN")
+    {
+      return;
+    }
     if (user) {
       this.isGeneralEditor = true;
       this.isNewUser = false;
-
+      this.disabledUserName=true;
       this.setRoles(user, allRoles);
       this.editingUserName = user.userName;
       this.user = new User();
       this.userEdit = new UserEdit();
       Object.assign(this.user, user);
       Object.assign(this.userEdit, user);
+      Object.assign(this.userCreate, user);
       this.edit();
 
       return this.userEdit;

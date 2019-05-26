@@ -4630,6 +4630,29 @@
           "ref/netstandard1.5/System.Runtime.dll": {}
         }
       },
+      "System.Runtime.Caching/4.5.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "2.0.0",
+          "System.Configuration.ConfigurationManager": "4.5.0"
+        },
+        "compile": {
+          "ref/netstandard2.0/System.Runtime.Caching.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.Runtime.Caching.dll": {}
+        },
+        "runtimeTargets": {
+          "runtimes/unix/lib/netcoreapp2.0/System.Runtime.Caching.dll": {
+            "assetType": "runtime",
+            "rid": "unix"
+          },
+          "runtimes/win/lib/netcoreapp2.0/System.Runtime.Caching.dll": {
+            "assetType": "runtime",
+            "rid": "win"
+          }
+        }
+      },
       "System.Runtime.CompilerServices.Unsafe/4.5.1": {
         "type": "package",
         "compile": {
@@ -5460,6 +5483,7 @@
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
+          "BasePublisherMVC": "1.0.0",
           "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
@@ -5472,6 +5496,51 @@
           "bin/placeholder/BaseMongoDB.dll": {}
         }
       },
+      "BaseMVC/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "BaseMongoDB": "1.0.0",
+          "CoreLogs": "1.0.0",
+          "Microsoft.AspNetCore.Mvc": "2.2.0",
+          "System.Runtime.Caching": "4.5.0"
+        },
+        "compile": {
+          "bin/placeholder/BaseMVC.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BaseMVC.dll": {}
+        }
+      },
+      "BasePublisherModels/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "CoreMongoDB": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/BasePublisherModels.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BasePublisherModels.dll": {}
+        }
+      },
+      "BasePublisherMVC/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "BasePublisherModels": "1.0.0",
+          "CoreLogs": "1.0.0",
+          "Microsoft.AspNetCore.Mvc": "2.2.0",
+          "System.Runtime.Caching": "4.5.0"
+        },
+        "compile": {
+          "bin/placeholder/BasePublisherMVC.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BasePublisherMVC.dll": {}
+        }
+      },
       "Business/1.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
@@ -5480,6 +5549,19 @@
         },
         "runtime": {
           "bin/placeholder/Business.dll": {}
+        }
+      },
+      "CoreLogs/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "Microsoft.AspNetCore.Hosting": "2.2.0"
+        },
+        "compile": {
+          "bin/placeholder/CoreLogs.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/CoreLogs.dll": {}
         }
       },
       "CoreMongoDB/1.0.0": {
@@ -9293,11 +9375,12 @@
       ]
     },
     "runtime.native.System.IO.Compression/4.3.0": {
-      "sha512": "b+V9JC/Ii3sR659flBeaBJww111425tgjcDS1k+hqV4sGh9FALRDBvJnDtQ895gAzpPTUOFDHdqaZ2Et7BpZMg==",
+      "sha512": "INBPonS5QPEgn7naufQFXJEp3zX6L4bwHgJ/ZH78aBTpeNfQMtf7C6VrAFhlq2xxWBveIOWyFzQjJ8XzHMhdOQ==",
       "type": "package",
       "path": "runtime.native.system.io.compression/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/netstandard1.0/_._",
@@ -9387,11 +9470,12 @@
       ]
     },
     "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.Apple/4.3.0": {
-      "sha512": "Kh9W4agE0r/hK8AX1LvyQI2NrKHBL8pO0gRoDTdDb0LL6Ta1Z2OtFx3lOaAE0ZpCUc/dt9Wzs3rA7a3IsKdOVA==",
+      "sha512": "kVXCuMTrTlxq4XOOMAysuNwsXWpYeboGddNGpIgNSZmv1b6r/s/DPk0fYMB7Q5Qo4bY68o48jt4T4y5BVecbCQ==",
       "type": "package",
       "path": "runtime.osx.10.10-x64.runtime.native.system.security.cryptography.apple/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "runtime.osx.10.10-x64.runtime.native.system.security.cryptography.apple.4.3.0.nupkg.sha512",
@@ -9808,11 +9892,12 @@
       ]
     },
     "System.Collections.Specialized/4.3.0": {
-      "sha512": "NoPBj0ykejqAWW4p4gGtrrL+3c84ZLSvGnHgq422ew1Rj4WKj1FA8/BCybqC111EtgcqUl6ZJNFYYS22HLgbjA==",
+      "sha512": "Epx8PoVZR0iuOnJJDzp7pWvdfMMOAvpUo95pC4ScH2mJuXkKA2Y4aR3cG9qt2klHgSons1WFh4kcGW7cSXvrxg==",
       "type": "package",
       "path": "system.collections.specialized/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/MonoAndroid10/_._",
@@ -12763,6 +12848,40 @@
         "system.runtime.nuspec"
       ]
     },
+    "System.Runtime.Caching/4.5.0": {
+      "sha512": "95j9KShuaAENf2gLbQ/9YoJDHIWAnoaFYA71xo4QVQyLkOMginn34cD1+6RcYIrqJamLkMXgvgUnOzwzBk+U0w==",
+      "type": "package",
+      "path": "system.runtime.caching/4.5.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net45/_._",
+        "lib/netstandard2.0/System.Runtime.Caching.dll",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "lib/xamarintvos10/_._",
+        "lib/xamarinwatchos10/_._",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net45/_._",
+        "ref/netstandard2.0/System.Runtime.Caching.dll",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "ref/xamarintvos10/_._",
+        "ref/xamarinwatchos10/_._",
+        "runtimes/unix/lib/netcoreapp2.0/System.Runtime.Caching.dll",
+        "runtimes/win/lib/net45/_._",
+        "runtimes/win/lib/netcoreapp2.0/System.Runtime.Caching.dll",
+        "system.runtime.caching.4.5.0.nupkg.sha512",
+        "system.runtime.caching.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
+      ]
+    },
     "System.Runtime.CompilerServices.Unsafe/4.5.1": {
       "sha512": "Zh8t8oqolRaFa9vmOZfdQm/qKejdqz0J9kr7o2Fu0vPeoH3BL1EOXipKWwkWtLT1JPzjByrF19fGuFlNbmPpiw==",
       "type": "package",
@@ -13116,11 +13235,12 @@
       ]
     },
     "System.Runtime.Serialization.Primitives/4.3.0": {
-      "sha512": "2Z5t70a2SwMsfQDp9KOclaZNyQhfIga2gppq9lIUDM1A4ohTshn4JqT7ir8bvIhXgorWKYDAr6rPzEbi/nTGKg==",
+      "sha512": "Wz+0KOukJGAlXjtKr+5Xpuxf8+c8739RI1C+A2BoQZT+wMCCoMDDdO8/4IRHfaVINqL78GO8dW8G2lW/e45Mcw==",
       "type": "package",
       "path": "system.runtime.serialization.primitives/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/MonoAndroid10/_._",
@@ -13443,11 +13563,12 @@
       ]
     },
     "System.Security.Cryptography.Csp/4.3.0": {
-      "sha512": "yO2k5o+Z+DiFRBvvB9vdRRAGHi6bm02M9OWXfCqQ8K0UxD3Woc3svQheZfb7PoTEFs0kGacO0IzzMWsb6Mkeow==",
+      "sha512": "X4s/FCkEUnRGnwR3aSfVIkldBmtURMhmexALNTwpjklzxWU7yjMk7GHLKOZTNkgnWnE0q7+BCf9N2LVRWxewaA==",
       "type": "package",
       "path": "system.security.cryptography.csp/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/MonoAndroid10/_._",
@@ -13514,11 +13635,12 @@
       ]
     },
     "System.Security.Cryptography.OpenSsl/4.3.0": {
-      "sha512": "vOYy7Jv9KsG3ld2hLt0GoERd82SZi4BelrbXLwI9yFBYX7kpbvUCWYo4eyevk47cuJXZ9ZLVAryANcc7iY71aA==",
+      "sha512": "h4CEgOgv5PKVF/HwaHzJRiVboL2THYCou97zpmhjghx5frc7fIvlkY1jL+lnIQyChrJDMNEXS6r7byGif8Cy4w==",
       "type": "package",
       "path": "system.security.cryptography.openssl/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/netstandard1.6/System.Security.Cryptography.OpenSsl.dll",
@@ -14915,10 +15037,30 @@
       "path": "../BaseMongoDB/BaseMongoDB.csproj",
       "msbuildProject": "../BaseMongoDB/BaseMongoDB.csproj"
     },
+    "BaseMVC/1.0.0": {
+      "type": "project",
+      "path": "../BaseMVC/BaseMVC.csproj",
+      "msbuildProject": "../BaseMVC/BaseMVC.csproj"
+    },
+    "BasePublisherModels/1.0.0": {
+      "type": "project",
+      "path": "../BasePublisherModels/BasePublisherModels.csproj",
+      "msbuildProject": "../BasePublisherModels/BasePublisherModels.csproj"
+    },
+    "BasePublisherMVC/1.0.0": {
+      "type": "project",
+      "path": "../BasePublisherMVC/BasePublisherMVC.csproj",
+      "msbuildProject": "../BasePublisherMVC/BasePublisherMVC.csproj"
+    },
     "Business/1.0.0": {
       "type": "project",
       "path": "../Business/Business.csproj",
       "msbuildProject": "../Business/Business.csproj"
+    },
+    "CoreLogs/1.0.0": {
+      "type": "project",
+      "path": "../CoreLogs/CoreLogs.csproj",
+      "msbuildProject": "../CoreLogs/CoreLogs.csproj"
     },
     "CoreMongoDB/1.0.0": {
       "type": "project",
@@ -14928,6 +15070,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v2.2": [
+      "BaseMVC >= 1.0.0",
       "BaseMongoDB >= 1.0.0",
       "DotNetCore.NPOI >= 1.2.1",
       "Microsoft.AspNetCore.App >= 2.2.1",
@@ -14950,23 +15093,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\nghiepnc\\.nuget\\packages\\": {},
+    "C:\\Users\\laptop2\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Admin_Sub_API\\Admin_Sub_API.csproj",
+      "projectUniqueName": "C:\\Users\\laptop2\\source\\repos\\Edu\\Admin_Sub_API\\Admin_Sub_API.csproj",
       "projectName": "Admin_Sub_API",
-      "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Admin_Sub_API\\Admin_Sub_API.csproj",
-      "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Admin_Sub_API\\obj\\",
+      "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\Admin_Sub_API\\Admin_Sub_API.csproj",
+      "packagesPath": "C:\\Users\\laptop2\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\Admin_Sub_API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\laptop2\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -14974,14 +15117,16 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Users\\nghiepnc\\Desktop\\flexcelnugets-trial": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netcoreapp2.2": {
           "projectReferences": {
-            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
+            "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
+              "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
+            },
+            "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj": {
+              "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj"
             }
           }
         }

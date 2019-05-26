@@ -42,3 +42,14 @@ C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\obj\Debug\netc
 C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.AssemblyInfo.cs
 C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.dll
 C:\Users\nghiepnc\source\repos\edusolution-project\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.pdb
+C:\Users\laptop2\source\repos\Edu\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.deps.json
+C:\Users\laptop2\source\repos\Edu\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.runtimeconfig.json
+C:\Users\laptop2\source\repos\Edu\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.runtimeconfig.dev.json
+C:\Users\laptop2\source\repos\Edu\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.dll
+C:\Users\laptop2\source\repos\Edu\JWTExample\bin\Debug\netcoreapp2.2\JWTExample.pdb
+C:\Users\laptop2\source\repos\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.csproj.CoreCompileInputs.cache
+C:\Users\laptop2\source\repos\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.AssemblyInfoInputs.cache
+C:\Users\laptop2\source\repos\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.AssemblyInfo.cs
+C:\Users\laptop2\source\repos\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.dll
+C:\Users\laptop2\source\repos\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.pdb
+C:\Users\laptop2\source\repos\Edu\JWTExample\obj\Debug\netcoreapp2.2\JWTExample.csprojAssemblyReference.cache

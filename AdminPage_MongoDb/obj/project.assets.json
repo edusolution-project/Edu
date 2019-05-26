@@ -2663,6 +2663,7 @@
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
+          "BasePublisherMVC": "1.0.0",
           "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
@@ -2689,6 +2690,35 @@
         },
         "runtime": {
           "bin/placeholder/BaseMVC.dll": {}
+        }
+      },
+      "BasePublisherModels/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "CoreMongoDB": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/BasePublisherModels.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BasePublisherModels.dll": {}
+        }
+      },
+      "BasePublisherMVC/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "BasePublisherModels": "1.0.0",
+          "CoreLogs": "1.0.0",
+          "Microsoft.AspNetCore.Mvc": "2.2.0",
+          "System.Runtime.Caching": "4.5.0"
+        },
+        "compile": {
+          "bin/placeholder/BasePublisherMVC.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BasePublisherMVC.dll": {}
         }
       },
       "Business/1.0.0": {
@@ -5240,6 +5270,7 @@
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
+          "BasePublisherMVC": "1.0.0",
           "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
@@ -5266,6 +5297,35 @@
         },
         "runtime": {
           "bin/placeholder/BaseMVC.dll": {}
+        }
+      },
+      "BasePublisherModels/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "CoreMongoDB": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/BasePublisherModels.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BasePublisherModels.dll": {}
+        }
+      },
+      "BasePublisherMVC/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "BasePublisherModels": "1.0.0",
+          "CoreLogs": "1.0.0",
+          "Microsoft.AspNetCore.Mvc": "2.2.0",
+          "System.Runtime.Caching": "4.5.0"
+        },
+        "compile": {
+          "bin/placeholder/BasePublisherMVC.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BasePublisherMVC.dll": {}
         }
       },
       "Business/1.0.0": {
@@ -9711,11 +9771,12 @@
       ]
     },
     "System.Text.Encoding.CodePages/4.3.0": {
-      "sha512": "6ENnyNU7cdmUVYblQ9GzLuJlLs9HWyoSInm+JZyCBHFUTaSQZolLIdGSZWGw5VOhjbFop+u/pU0AbKiHQKheqw==",
+      "sha512": "IRiEFUa5b/Gs5Egg8oqBVoywhtOeaO2KOx3j0RfcYY/raxqBuEK7NXRDgOwtYM8qbi+7S4RPXUbNt+ZxyY0/NQ==",
       "type": "package",
       "path": "system.text.encoding.codepages/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/MonoAndroid10/_._",
@@ -10391,6 +10452,16 @@
       "path": "../BaseMVC/BaseMVC.csproj",
       "msbuildProject": "../BaseMVC/BaseMVC.csproj"
     },
+    "BasePublisherModels/1.0.0": {
+      "type": "project",
+      "path": "../BasePublisherModels/BasePublisherModels.csproj",
+      "msbuildProject": "../BasePublisherModels/BasePublisherModels.csproj"
+    },
+    "BasePublisherMVC/1.0.0": {
+      "type": "project",
+      "path": "../BasePublisherMVC/BasePublisherMVC.csproj",
+      "msbuildProject": "../BasePublisherMVC/BasePublisherMVC.csproj"
+    },
     "Business/1.0.0": {
       "type": "project",
       "path": "../Business/Business.csproj",
@@ -10431,23 +10502,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\nghiepnc\\.nuget\\packages\\": {},
+    "C:\\Users\\laptop2\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
+      "projectUniqueName": "C:\\Users\\laptop2\\source\\repos\\Edu\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
       "projectName": "AdminPage_MongoDB",
-      "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
-      "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\AdminPage_MongoDb\\obj\\",
+      "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
+      "packagesPath": "C:\\Users\\laptop2\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\AdminPage_MongoDb\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\laptop2\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -10455,23 +10526,22 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Users\\nghiepnc\\Desktop\\flexcelnugets-trial": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net461": {
           "projectReferences": {
-            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
+            "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
+              "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
             },
-            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMVC\\BaseMVC.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMVC\\BaseMVC.csproj"
+            "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj": {
+              "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj"
             },
-            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj"
+            "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj": {
+              "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj"
             },
-            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\EntityBaseFW\\EntityBaseFW.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\EntityBaseFW\\EntityBaseFW.csproj"
+            "C:\\Users\\laptop2\\source\\repos\\Edu\\EntityBaseFW\\EntityBaseFW.csproj": {
+              "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\EntityBaseFW\\EntityBaseFW.csproj"
             }
           }
         }

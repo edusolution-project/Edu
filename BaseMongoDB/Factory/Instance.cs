@@ -25,7 +25,7 @@ namespace BaseMongoDB.Factory
             services.AddScoped<CPResourceService>();
             services.AddScoped<CPRoleService>();
             services.AddScoped<CPUserService>();
-            services.AddScoped<CPUserSubService>();
+           
             services.AddScoped<SysPageService>();
             services.AddScoped<SysTemplateService>();
             services.AddScoped<SysTemplateDetailService>();
@@ -42,6 +42,9 @@ namespace BaseMongoDB.Factory
 
             //nghiepnc add
             services.AddScoped<AccessTokenService>();
+            services.AddScoped<TeacherService>();
+            services.AddScoped<StudentEntityService>();
+            services.AddScoped<CPUserSubService>();
             return services;
         }
         /// <summary>

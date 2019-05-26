@@ -2200,6 +2200,8 @@
       },
       "BaseMongoDB/1.0.0": {
         "dependencies": {
+          "BasePublisherMVC": "1.0.0",
+          "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "2.2.0"
@@ -2217,6 +2219,30 @@
         },
         "compile": {
           "BaseMVC.dll": {}
+        }
+      },
+      "BasePublisherModels/1.0.0": {
+        "dependencies": {
+          "CoreMongoDB": "1.0.0"
+        },
+        "compile": {
+          "BasePublisherModels.dll": {}
+        }
+      },
+      "BasePublisherMVC/1.0.0": {
+        "dependencies": {
+          "BasePublisherModels": "1.0.0",
+          "CoreLogs": "1.0.0",
+          "Microsoft.AspNetCore.Mvc": "2.2.0",
+          "System.Runtime.Caching": "4.5.0"
+        },
+        "compile": {
+          "BasePublisherMVC.dll": {}
+        }
+      },
+      "Business/1.0.0": {
+        "compile": {
+          "Business.dll": {}
         }
       },
       "CoreLogs/1.0.0": {
@@ -3807,6 +3833,8 @@
       },
       "BaseMongoDB/1.0.0": {
         "dependencies": {
+          "BasePublisherMVC": "1.0.0",
+          "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "2.2.0"
@@ -3824,6 +3852,30 @@
         },
         "runtime": {
           "BaseMVC.dll": {}
+        }
+      },
+      "BasePublisherModels/1.0.0": {
+        "dependencies": {
+          "CoreMongoDB": "1.0.0"
+        },
+        "runtime": {
+          "BasePublisherModels.dll": {}
+        }
+      },
+      "BasePublisherMVC/1.0.0": {
+        "dependencies": {
+          "BasePublisherModels": "1.0.0",
+          "CoreLogs": "1.0.0",
+          "Microsoft.AspNetCore.Mvc": "2.2.0",
+          "System.Runtime.Caching": "4.5.0"
+        },
+        "runtime": {
+          "BasePublisherMVC.dll": {}
+        }
+      },
+      "Business/1.0.0": {
+        "runtime": {
+          "Business.dll": {}
         }
       },
       "CoreLogs/1.0.0": {
@@ -5162,7 +5214,7 @@
     "System.Text.Encoding.CodePages/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-6ENnyNU7cdmUVYblQ9GzLuJlLs9HWyoSInm+JZyCBHFUTaSQZolLIdGSZWGw5VOhjbFop+u/pU0AbKiHQKheqw==",
+      "sha512": "sha512-IRiEFUa5b/Gs5Egg8oqBVoywhtOeaO2KOx3j0RfcYY/raxqBuEK7NXRDgOwtYM8qbi+7S4RPXUbNt+ZxyY0/NQ==",
       "path": "system.text.encoding.codepages/4.3.0",
       "hashPath": "system.text.encoding.codepages.4.3.0.nupkg.sha512"
     },
@@ -5263,6 +5315,21 @@
       "sha512": ""
     },
     "BaseMVC/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BasePublisherModels/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BasePublisherMVC/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Business/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

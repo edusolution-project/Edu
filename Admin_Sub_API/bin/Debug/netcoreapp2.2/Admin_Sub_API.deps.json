@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.2",
-    "signature": "80b6dc8384d0e0347c86d44c550ab089457df2e3"
+    "signature": "0b813a2fa66a60da53214fef9567dcdbc61a883f"
   },
   "compilationOptions": {
     "defines": [
@@ -24,6 +24,7 @@
     ".NETCoreApp,Version=v2.2": {
       "Admin_Sub_API/1.0.0": {
         "dependencies": {
+          "BaseMVC": "1.0.0",
           "BaseMongoDB": "1.0.0",
           "DotNetCore.NPOI": "1.2.1",
           "Microsoft.AspNetCore.App": "2.2.1",
@@ -42,10 +43,7 @@
           "Newtonsoft.Json": "12.0.1",
           "System.Configuration.ConfigurationManager": "4.5.0",
           "System.Runtime.Extensions": "4.3.0",
-          "log4net": "2.0.8",
-          "Data.Access.Object": "1.0.0.0",
-          "SME.Bussiness.Lib": "1.0.0.0",
-          "SME.Utils": "1.0.0.0"
+          "log4net": "2.0.8"
         },
         "runtime": {
           "Admin_Sub_API.dll": {}
@@ -1042,6 +1040,35 @@
           "System.Runtime.Extensions": "4.3.0"
         }
       },
+      "System.Runtime.Caching/4.5.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "2.2.0",
+          "System.Configuration.ConfigurationManager": "4.5.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.Runtime.Caching.dll": {
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.6.26515.6"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/unix/lib/netcoreapp2.0/System.Runtime.Caching.dll": {
+            "rid": "unix",
+            "assetType": "runtime",
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.6.26515.6"
+          },
+          "runtimes/win/lib/netcoreapp2.0/System.Runtime.Caching.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.6.26515.6"
+          }
+        },
+        "compile": {
+          "ref/netstandard2.0/System.Runtime.Caching.dll": {}
+        }
+      },
       "System.Runtime.Serialization.Formatters/4.3.0": {
         "dependencies": {
           "System.Collections": "4.3.0",
@@ -1122,6 +1149,7 @@
       },
       "BaseMongoDB/1.0.0": {
         "dependencies": {
+          "BasePublisherMVC": "1.0.0",
           "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
@@ -1134,6 +1162,45 @@
           "BaseMongoDB.dll": {}
         }
       },
+      "BaseMVC/1.0.0": {
+        "dependencies": {
+          "BaseMongoDB": "1.0.0",
+          "CoreLogs": "1.0.0",
+          "Microsoft.AspNetCore.Mvc": "2.2.0",
+          "System.Runtime.Caching": "4.5.0"
+        },
+        "runtime": {
+          "BaseMVC.dll": {}
+        },
+        "compile": {
+          "BaseMVC.dll": {}
+        }
+      },
+      "BasePublisherModels/1.0.0": {
+        "dependencies": {
+          "CoreMongoDB": "1.0.0"
+        },
+        "runtime": {
+          "BasePublisherModels.dll": {}
+        },
+        "compile": {
+          "BasePublisherModels.dll": {}
+        }
+      },
+      "BasePublisherMVC/1.0.0": {
+        "dependencies": {
+          "BasePublisherModels": "1.0.0",
+          "CoreLogs": "1.0.0",
+          "Microsoft.AspNetCore.Mvc": "2.2.0",
+          "System.Runtime.Caching": "4.5.0"
+        },
+        "runtime": {
+          "BasePublisherMVC.dll": {}
+        },
+        "compile": {
+          "BasePublisherMVC.dll": {}
+        }
+      },
       "Business/1.0.0": {
         "runtime": {
           "Business.dll": {}
@@ -1142,60 +1209,29 @@
           "Business.dll": {}
         }
       },
+      "CoreLogs/1.0.0": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Hosting": "2.2.0"
+        },
+        "runtime": {
+          "CoreLogs.dll": {}
+        },
+        "compile": {
+          "CoreLogs.dll": {}
+        }
+      },
       "CoreMongoDB/1.0.0": {
         "dependencies": {
           "Microsoft.Extensions.Configuration.Abstractions": "2.2.0",
           "MongoDB.Bson": "2.8.0",
           "MongoDB.Driver": "2.8.0",
-          "MongoDB.Driver.Core": "2.8.0",
-          "System.Runtime.Caching": "4.0.0.0"
+          "MongoDB.Driver.Core": "2.8.0"
         },
         "runtime": {
           "CoreMongoDB.dll": {}
         },
         "compile": {
           "CoreMongoDB.dll": {}
-        }
-      },
-      "Data.Access.Object/1.0.0.0": {
-        "runtime": {
-          "Data.Access.Object.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        },
-        "compile": {
-          "Data.Access.Object.dll": {}
-        }
-      },
-      "SME.Bussiness.Lib/1.0.0.0": {
-        "runtime": {
-          "SME.Bussiness.Lib.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        },
-        "compile": {
-          "SME.Bussiness.Lib.dll": {}
-        }
-      },
-      "SME.Utils/1.0.0.0": {
-        "runtime": {
-          "SME.Utils.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        },
-        "compile": {
-          "SME.Utils.dll": {}
-        }
-      },
-      "System.Runtime.Caching.Reference/4.0.0.0": {
-        "runtime": {
-          "System.Runtime.Caching.dll": {
-            "assemblyVersion": "4.0.0.0",
-            "fileVersion": "4.6.1055.0"
-          }
         }
       },
       "Microsoft.AspNet.WebApi.Client/5.2.6": {
@@ -4793,6 +4829,13 @@
       "path": "system.net.webheadercollection/4.0.1",
       "hashPath": "system.net.webheadercollection.4.0.1.nupkg.sha512"
     },
+    "System.Runtime.Caching/4.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-95j9KShuaAENf2gLbQ/9YoJDHIWAnoaFYA71xo4QVQyLkOMginn34cD1+6RcYIrqJamLkMXgvgUnOzwzBk+U0w==",
+      "path": "system.runtime.caching/4.5.0",
+      "hashPath": "system.runtime.caching.4.5.0.nupkg.sha512"
+    },
     "System.Runtime.Serialization.Formatters/4.3.0": {
       "type": "package",
       "serviceable": true,
@@ -4840,33 +4883,33 @@
       "serviceable": false,
       "sha512": ""
     },
+    "BaseMVC/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BasePublisherModels/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BasePublisherMVC/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
     "Business/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "CoreLogs/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
     "CoreMongoDB/1.0.0": {
       "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Data.Access.Object/1.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "SME.Bussiness.Lib/1.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "SME.Utils/1.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "System.Runtime.Caching.Reference/4.0.0.0": {
-      "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
@@ -6105,7 +6148,7 @@
     "runtime.native.System.IO.Compression/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-b+V9JC/Ii3sR659flBeaBJww111425tgjcDS1k+hqV4sGh9FALRDBvJnDtQ895gAzpPTUOFDHdqaZ2Et7BpZMg==",
+      "sha512": "sha512-INBPonS5QPEgn7naufQFXJEp3zX6L4bwHgJ/ZH78aBTpeNfQMtf7C6VrAFhlq2xxWBveIOWyFzQjJ8XzHMhdOQ==",
       "path": "runtime.native.system.io.compression/4.3.0",
       "hashPath": "runtime.native.system.io.compression.4.3.0.nupkg.sha512"
     },
@@ -6126,7 +6169,7 @@
     "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.Apple/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Kh9W4agE0r/hK8AX1LvyQI2NrKHBL8pO0gRoDTdDb0LL6Ta1Z2OtFx3lOaAE0ZpCUc/dt9Wzs3rA7a3IsKdOVA==",
+      "sha512": "sha512-kVXCuMTrTlxq4XOOMAysuNwsXWpYeboGddNGpIgNSZmv1b6r/s/DPk0fYMB7Q5Qo4bY68o48jt4T4y5BVecbCQ==",
       "path": "runtime.osx.10.10-x64.runtime.native.system.security.cryptography.apple/4.3.0",
       "hashPath": "runtime.osx.10.10-x64.runtime.native.system.security.cryptography.apple.4.3.0.nupkg.sha512"
     },
@@ -6196,7 +6239,7 @@
     "System.Collections.Specialized/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-NoPBj0ykejqAWW4p4gGtrrL+3c84ZLSvGnHgq422ew1Rj4WKj1FA8/BCybqC111EtgcqUl6ZJNFYYS22HLgbjA==",
+      "sha512": "sha512-Epx8PoVZR0iuOnJJDzp7pWvdfMMOAvpUo95pC4ScH2mJuXkKA2Y4aR3cG9qt2klHgSons1WFh4kcGW7cSXvrxg==",
       "path": "system.collections.specialized/4.3.0",
       "hashPath": "system.collections.specialized.4.3.0.nupkg.sha512"
     },
@@ -6532,7 +6575,7 @@
     "System.Runtime.Serialization.Primitives/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-2Z5t70a2SwMsfQDp9KOclaZNyQhfIga2gppq9lIUDM1A4ohTshn4JqT7ir8bvIhXgorWKYDAr6rPzEbi/nTGKg==",
+      "sha512": "sha512-Wz+0KOukJGAlXjtKr+5Xpuxf8+c8739RI1C+A2BoQZT+wMCCoMDDdO8/4IRHfaVINqL78GO8dW8G2lW/e45Mcw==",
       "path": "system.runtime.serialization.primitives/4.3.0",
       "hashPath": "system.runtime.serialization.primitives.4.3.0.nupkg.sha512"
     },
@@ -6574,7 +6617,7 @@
     "System.Security.Cryptography.Csp/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-yO2k5o+Z+DiFRBvvB9vdRRAGHi6bm02M9OWXfCqQ8K0UxD3Woc3svQheZfb7PoTEFs0kGacO0IzzMWsb6Mkeow==",
+      "sha512": "sha512-X4s/FCkEUnRGnwR3aSfVIkldBmtURMhmexALNTwpjklzxWU7yjMk7GHLKOZTNkgnWnE0q7+BCf9N2LVRWxewaA==",
       "path": "system.security.cryptography.csp/4.3.0",
       "hashPath": "system.security.cryptography.csp.4.3.0.nupkg.sha512"
     },
@@ -6588,7 +6631,7 @@
     "System.Security.Cryptography.OpenSsl/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-vOYy7Jv9KsG3ld2hLt0GoERd82SZi4BelrbXLwI9yFBYX7kpbvUCWYo4eyevk47cuJXZ9ZLVAryANcc7iY71aA==",
+      "sha512": "sha512-h4CEgOgv5PKVF/HwaHzJRiVboL2THYCou97zpmhjghx5frc7fIvlkY1jL+lnIQyChrJDMNEXS6r7byGif8Cy4w==",
       "path": "system.security.cryptography.openssl/4.3.0",
       "hashPath": "system.security.cryptography.openssl.4.3.0.nupkg.sha512"
     },
