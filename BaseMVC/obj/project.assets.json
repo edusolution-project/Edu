@@ -2863,7 +2863,6 @@
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
-          "BasePublisherMVC": "1.0.0",
           "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
@@ -2874,35 +2873,6 @@
         },
         "runtime": {
           "bin/placeholder/BaseMongoDB.dll": {}
-        }
-      },
-      "BasePublisherModels/1.0.0": {
-        "type": "project",
-        "framework": ".NETStandard,Version=v2.0",
-        "dependencies": {
-          "CoreMongoDB": "1.0.0"
-        },
-        "compile": {
-          "bin/placeholder/BasePublisherModels.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/BasePublisherModels.dll": {}
-        }
-      },
-      "BasePublisherMVC/1.0.0": {
-        "type": "project",
-        "framework": ".NETStandard,Version=v2.0",
-        "dependencies": {
-          "BasePublisherModels": "1.0.0",
-          "CoreLogs": "1.0.0",
-          "Microsoft.AspNetCore.Mvc": "2.2.0",
-          "System.Runtime.Caching": "4.5.0"
-        },
-        "compile": {
-          "bin/placeholder/BasePublisherMVC.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/BasePublisherMVC.dll": {}
         }
       },
       "Business/1.0.0": {
@@ -8850,16 +8820,6 @@
       "type": "project",
       "path": "../BaseMongoDB/BaseMongoDB.csproj",
       "msbuildProject": "../BaseMongoDB/BaseMongoDB.csproj"
-    },
-    "BasePublisherModels/1.0.0": {
-      "type": "project",
-      "path": "../BasePublisherModels/BasePublisherModels.csproj",
-      "msbuildProject": "../BasePublisherModels/BasePublisherModels.csproj"
-    },
-    "BasePublisherMVC/1.0.0": {
-      "type": "project",
-      "path": "../BasePublisherMVC/BasePublisherMVC.csproj",
-      "msbuildProject": "../BasePublisherMVC/BasePublisherMVC.csproj"
     },
     "Business/1.0.0": {
       "type": "project",

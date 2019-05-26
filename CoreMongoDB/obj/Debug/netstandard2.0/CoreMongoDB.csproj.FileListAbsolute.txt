@@ -54,7 +54,6 @@ C:\Users\laptop2\source\repos\Edu\CoreMongoDB\bin\Debug\netstandard2.0\System.Se
 C:\Users\laptop2\source\repos\Edu\CoreMongoDB\bin\Debug\netstandard2.0\System.Runtime.Caching.xml
 C:\Users\laptop2\source\repos\Edu\CoreMongoDB\bin\Debug\netstandard2.0\System.Configuration.xml
 C:\Users\laptop2\source\repos\Edu\CoreMongoDB\bin\Debug\netstandard2.0\System.Security.xml
-C:\Users\laptop2\source\repos\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csprojAssemblyReference.cache
 C:\Users\laptop2\source\repos\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csproj.CoreCompileInputs.cache
 C:\Users\laptop2\source\repos\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.AssemblyInfoInputs.cache
 C:\Users\laptop2\source\repos\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.AssemblyInfo.cs

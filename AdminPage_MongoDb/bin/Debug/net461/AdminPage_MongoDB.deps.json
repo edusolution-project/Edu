@@ -1,6 +1,6 @@
 {
   "runtimeTarget": {
-    "name": ".NETFramework,Version=v4.6.1/win7-x64",
+    "name": ".NETFramework,Version=v4.6.1/win7-x86",
     "signature": "b3ae029a4506e0910f2f98a5f2a1116a6750ce27"
   },
   "compilationOptions": {
@@ -11,14 +11,14 @@
       "NET461"
     ],
     "languageVersion": "",
-    "platform": "x64",
+    "platform": "AnyCPU",
     "allowUnsafe": false,
     "warningsAsErrors": false,
     "optimize": false,
     "keyFile": "",
     "emitEntryPoint": true,
     "xmlDoc": false,
-    "debugType": "full"
+    "debugType": "portable"
   },
   "targets": {
     ".NETFramework,Version=v4.6.1": {
@@ -2200,7 +2200,6 @@
       },
       "BaseMongoDB/1.0.0": {
         "dependencies": {
-          "BasePublisherMVC": "1.0.0",
           "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
@@ -2219,25 +2218,6 @@
         },
         "compile": {
           "BaseMVC.dll": {}
-        }
-      },
-      "BasePublisherModels/1.0.0": {
-        "dependencies": {
-          "CoreMongoDB": "1.0.0"
-        },
-        "compile": {
-          "BasePublisherModels.dll": {}
-        }
-      },
-      "BasePublisherMVC/1.0.0": {
-        "dependencies": {
-          "BasePublisherModels": "1.0.0",
-          "CoreLogs": "1.0.0",
-          "Microsoft.AspNetCore.Mvc": "2.2.0",
-          "System.Runtime.Caching": "4.5.0"
-        },
-        "compile": {
-          "BasePublisherMVC.dll": {}
         }
       },
       "Business/1.0.0": {
@@ -2280,7 +2260,7 @@
         }
       }
     },
-    ".NETFramework,Version=v4.6.1/win7-x64": {
+    ".NETFramework,Version=v4.6.1/win7-x86": {
       "AdminPage_MongoDB/1.0.0": {
         "dependencies": {
           "BaseMVC": "1.0.0",
@@ -3514,7 +3494,7 @@
           "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "2.2.0"
         },
         "runtime": {
-          "runtimes/win7-x64/lib/net461/dotnet-aspnet-codegenerator-design.exe": {}
+          "runtimes/win7-x86/lib/net461/dotnet-aspnet-codegenerator-design.exe": {}
         }
       },
       "Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore/2.2.0": {
@@ -3833,7 +3813,6 @@
       },
       "BaseMongoDB/1.0.0": {
         "dependencies": {
-          "BasePublisherMVC": "1.0.0",
           "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
@@ -3852,25 +3831,6 @@
         },
         "runtime": {
           "BaseMVC.dll": {}
-        }
-      },
-      "BasePublisherModels/1.0.0": {
-        "dependencies": {
-          "CoreMongoDB": "1.0.0"
-        },
-        "runtime": {
-          "BasePublisherModels.dll": {}
-        }
-      },
-      "BasePublisherMVC/1.0.0": {
-        "dependencies": {
-          "BasePublisherModels": "1.0.0",
-          "CoreLogs": "1.0.0",
-          "Microsoft.AspNetCore.Mvc": "2.2.0",
-          "System.Runtime.Caching": "4.5.0"
-        },
-        "runtime": {
-          "BasePublisherMVC.dll": {}
         }
       },
       "Business/1.0.0": {
@@ -5315,16 +5275,6 @@
       "sha512": ""
     },
     "BaseMVC/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "BasePublisherModels/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "BasePublisherMVC/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

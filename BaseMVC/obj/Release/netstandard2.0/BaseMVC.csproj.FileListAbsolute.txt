@@ -30,3 +30,25 @@ F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csproj.CopyComplete
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\BaseMVC\obj\Release\netstandard2.0\BaseMVC.pdb
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\BaseMVC.deps.json
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\BaseMVC.dll
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\BaseMVC.pdb
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\BaseMongoDB.dll
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\BasePublisherModels.dll
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\BasePublisherMVC.dll
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\Business.dll
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\CoreLogs.dll
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\CoreMongoDB.dll
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\BaseMongoDB.pdb
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\CoreLogs.pdb
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\BasePublisherModels.pdb
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\BasePublisherMVC.pdb
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\Business.pdb
+C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Release\netstandard2.0\CoreMongoDB.pdb
+C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csprojAssemblyReference.cache
+C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csproj.CoreCompileInputs.cache
+C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Release\netstandard2.0\BaseMVC.AssemblyInfoInputs.cache
+C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Release\netstandard2.0\BaseMVC.AssemblyInfo.cs
+C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Release\netstandard2.0\BaseMVC.csproj.CopyComplete
+C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Release\netstandard2.0\BaseMVC.dll
+C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Release\netstandard2.0\BaseMVC.pdb

@@ -68,9 +68,9 @@ C:\Users\laptop2\source\repos\Edu\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongo
 C:\Users\laptop2\source\repos\Edu\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.csproj.CopyComplete
 C:\Users\laptop2\source\repos\Edu\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.dll
 C:\Users\laptop2\source\repos\Edu\BaseMongoDB\obj\Debug\netstandard2.0\BaseMongoDB.pdb
-C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\BasePublisherModels.dll
-C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\BasePublisherMVC.dll
-C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\CoreLogs.dll
-C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\BasePublisherMVC.pdb
-C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\BasePublisherModels.pdb
-C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\CoreLogs.pdb
+C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\System.Runtime.Caching.dll
+C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\System.Configuration.dll
+C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\System.Security.dll
+C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\System.Runtime.Caching.xml
+C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\System.Configuration.xml
+C:\Users\laptop2\source\repos\Edu\BaseMongoDB\bin\Debug\netstandard2.0\System.Security.xml

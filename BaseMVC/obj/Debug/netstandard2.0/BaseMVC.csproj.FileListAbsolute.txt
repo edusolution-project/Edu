@@ -48,7 +48,3 @@ C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Debug\netstandard2.0\BaseMVC.Assem
 C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Debug\netstandard2.0\BaseMVC.csproj.CopyComplete
 C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Debug\netstandard2.0\BaseMVC.dll
 C:\Users\laptop2\source\repos\Edu\BaseMVC\obj\Debug\netstandard2.0\BaseMVC.pdb
-C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Debug\netstandard2.0\BasePublisherModels.dll
-C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Debug\netstandard2.0\BasePublisherMVC.dll
-C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Debug\netstandard2.0\BasePublisherModels.pdb
-C:\Users\laptop2\source\repos\Edu\BaseMVC\bin\Debug\netstandard2.0\BasePublisherMVC.pdb

@@ -88,7 +88,7 @@ namespace BaseMVC.AdminControllers
                     CPUserSubEntity userSub = new CPUserSubEntity();
                     userSub.Email = item.Email;
                     userSub.Pass = item.Pass;
-                    userSub.RoleID = item.RoleID;
+                    userSub.RoleID = roleName;
                     userSub.Activity = item.Activity;
                     userSub.FullName = item.Name;
                     userSub.UserName = item.Email;

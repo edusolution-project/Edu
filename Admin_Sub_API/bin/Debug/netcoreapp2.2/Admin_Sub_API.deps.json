@@ -1149,7 +1149,6 @@
       },
       "BaseMongoDB/1.0.0": {
         "dependencies": {
-          "BasePublisherMVC": "1.0.0",
           "Business": "1.0.0",
           "CoreMongoDB": "1.0.0",
           "Microsoft.AspNetCore.Http.Abstractions": "2.2.0",
@@ -1174,31 +1173,6 @@
         },
         "compile": {
           "BaseMVC.dll": {}
-        }
-      },
-      "BasePublisherModels/1.0.0": {
-        "dependencies": {
-          "CoreMongoDB": "1.0.0"
-        },
-        "runtime": {
-          "BasePublisherModels.dll": {}
-        },
-        "compile": {
-          "BasePublisherModels.dll": {}
-        }
-      },
-      "BasePublisherMVC/1.0.0": {
-        "dependencies": {
-          "BasePublisherModels": "1.0.0",
-          "CoreLogs": "1.0.0",
-          "Microsoft.AspNetCore.Mvc": "2.2.0",
-          "System.Runtime.Caching": "4.5.0"
-        },
-        "runtime": {
-          "BasePublisherMVC.dll": {}
-        },
-        "compile": {
-          "BasePublisherMVC.dll": {}
         }
       },
       "Business/1.0.0": {
@@ -4884,16 +4858,6 @@
       "sha512": ""
     },
     "BaseMVC/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "BasePublisherModels/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "BasePublisherMVC/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

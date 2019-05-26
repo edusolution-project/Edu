@@ -395,7 +395,6 @@ C:\Users\laptop2\source\repos\Edu\ClientPage\bin\Debug\netcoreapp2.2\ClientPage.
 C:\Users\laptop2\source\repos\Edu\ClientPage\bin\Debug\netcoreapp2.2\ClientPage.pdb
 C:\Users\laptop2\source\repos\Edu\ClientPage\bin\Debug\netcoreapp2.2\ClientPage.Views.dll
 C:\Users\laptop2\source\repos\Edu\ClientPage\bin\Debug\netcoreapp2.2\ClientPage.Views.pdb
-C:\Users\laptop2\source\repos\Edu\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.csprojAssemblyReference.cache
 C:\Users\laptop2\source\repos\Edu\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.csproj.CoreCompileInputs.cache
 C:\Users\laptop2\source\repos\Edu\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.RazorAssemblyInfo.cache
 C:\Users\laptop2\source\repos\Edu\ClientPage\obj\Debug\netcoreapp2.2\ClientPage.RazorAssemblyInfo.cs

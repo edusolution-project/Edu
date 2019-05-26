@@ -58,7 +58,3 @@ C:\Users\laptop2\source\repos\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BaseMVC.
 C:\Users\laptop2\source\repos\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\CoreLogs.dll
 C:\Users\laptop2\source\repos\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BaseMVC.pdb
 C:\Users\laptop2\source\repos\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\CoreLogs.pdb
-C:\Users\laptop2\source\repos\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BasePublisherModels.dll
-C:\Users\laptop2\source\repos\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BasePublisherMVC.dll
-C:\Users\laptop2\source\repos\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BasePublisherModels.pdb
-C:\Users\laptop2\source\repos\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BasePublisherMVC.pdb

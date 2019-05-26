@@ -25,3 +25,12 @@ F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Releas
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Release\netstandard2.0\CoreLogs.AssemblyInfo.cs
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Release\netstandard2.0\CoreLogs.dll
 F:\Users\Hoang Thai Long\Source\Repos\hoang-thai-long\iShare\CoreLogs\obj\Release\netstandard2.0\CoreLogs.pdb
+C:\Users\laptop2\source\repos\Edu\CoreLogs\bin\Release\netstandard2.0\CoreLogs.deps.json
+C:\Users\laptop2\source\repos\Edu\CoreLogs\bin\Release\netstandard2.0\CoreLogs.dll
+C:\Users\laptop2\source\repos\Edu\CoreLogs\bin\Release\netstandard2.0\CoreLogs.pdb
+C:\Users\laptop2\source\repos\Edu\CoreLogs\obj\Release\netstandard2.0\CoreLogs.csprojAssemblyReference.cache
+C:\Users\laptop2\source\repos\Edu\CoreLogs\obj\Release\netstandard2.0\CoreLogs.csproj.CoreCompileInputs.cache
+C:\Users\laptop2\source\repos\Edu\CoreLogs\obj\Release\netstandard2.0\CoreLogs.AssemblyInfoInputs.cache
+C:\Users\laptop2\source\repos\Edu\CoreLogs\obj\Release\netstandard2.0\CoreLogs.AssemblyInfo.cs
+C:\Users\laptop2\source\repos\Edu\CoreLogs\obj\Release\netstandard2.0\CoreLogs.dll
+C:\Users\laptop2\source\repos\Edu\CoreLogs\obj\Release\netstandard2.0\CoreLogs.pdb
