@@ -100,7 +100,7 @@ namespace BaseMVC.AdminControllers
                 {
                     if(user.Pass == Security.Encrypt(password))
                     {
-                        if (user.Activity)
+                        if (user.IsActive)
                         {
                             TempData["success"] = "Xin chào " + user.Name;
                             string _token = Guid.NewGuid().ToString();
@@ -130,7 +130,7 @@ namespace BaseMVC.AdminControllers
                                     IP = HttpContext.Connection.RemoteIpAddress.ToString(),
                                     Email = user.Email,
                                     Token = _token,
-                                    Activity = true,
+                                    IsActive = true,
                                     Created = DateTime.Now
                                 };
                                 var url = string.IsNullOrEmpty(returnurl) ? null : System.Net.WebUtility.UrlDecode(returnurl).Split('/');

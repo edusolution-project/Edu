@@ -161,7 +161,7 @@ namespace BaseMVC.AdminControllers
                     {
                         var listAccess = _accessService.GetItemByRoleID(item.ID);
                         await _service.RemoveAsync(item.ID);
-                        await _accessService.RemveRangeAsync(listAccess.Select(o=>o.ID).ToList());
+                        await _accessService.RemoveRangeAsync(listAccess.Select(o=>o.ID).ToList());
                         
                         delete++;
                     }
@@ -233,9 +233,9 @@ namespace BaseMVC.AdminControllers
         //    {
         //        string ID = arr[i];
         //        var item = _service.GetByID(ID);
-        //        if (item != null && !item.Activity)
+        //        if (item != null && !item.IsActive)
         //        {
-        //            item.Activity = true;
+        //            item.IsActive = true;
         //            await _service.AddAsync(item);
         //        }
         //    }
@@ -250,9 +250,9 @@ namespace BaseMVC.AdminControllers
         //    {
         //        string ID = arr[i];
         //        var item = _service.GetByID(ID);
-        //        if (item != null && item.Activity)
+        //        if (item != null && item.IsActive)
         //        {
-        //            item.Activity = false;
+        //            item.IsActive = false;
         //            await _service.AddAsync(item);
         //        }
         //    }

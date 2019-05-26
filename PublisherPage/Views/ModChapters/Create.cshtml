@@ -1,0 +1,55 @@
+﻿@using BasePublisherModels.Database
+@using BasePublisherMVC.Models
+@{
+    ViewData["Title"] = "Tạo chương mới";
+    Layout = "~/Views/Shared/_LayoutCourse.cshtml";
+    var data = ViewBag.Chapters as List<ModChapterViewModel>;
+    var model = ViewBag.Model as ModChapterModel;
+}
+S
+<div class="card">
+    <div class="card-header card-header-icon">
+        <h4 class="card-title">
+            <a href="@Url.Action("Detail", "ModCourses", new {ID = model.CourseID})" class="btn btn-sm btn-fab btn-danger"><i class="material-icons">reply</i></a>
+            <a href="javascript:void(0)" onclick="createchap('@Html.Raw(model.CourseID)')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Lưu</a>
+        </h4>
+
+    </div>
+    <div class="card-body">
+        <form name="myform" asp-action="Create" method="post" enctype="application/x-www-form-urlencoded">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="ArrID" name="ArrID" value="" />
+            <input type="hidden" id="ctrl" value="ModChapters" />
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Tên :</label>
+                        <input type="text" name="Name" class="form-control" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class=""> Gốc : </label>
+                    <select class="form-control" name="ParentID">
+                        <option value="0">---</option>
+                        @{
+                            if (data != null)
+                            {
+                                int count = data.Count;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    var item = data[i];
+                                    <option value="@item.ID">@item.Name</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </form>
+    </div>
+</div>
+@section Scripts
+{
+    <script src="~/Contents/js/publisher.js"></script>
+}

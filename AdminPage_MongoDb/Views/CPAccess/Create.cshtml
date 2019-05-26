@@ -105,7 +105,7 @@
                                                                     var acc = role.SingleOrDefault(o => o.CMethod.ToLower() == itemLA);
                                                                     if (item.ActionName.Contains(itemLA))
                                                                     {
-                                                                        if (acc != null && acc.Activity)
+                                                                        if (acc != null && acc.IsActive)
                                                                         {
                                                                             <td>
                                                                                 <div class="form-check">

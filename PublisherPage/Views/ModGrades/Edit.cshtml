@@ -1,0 +1,79 @@
+﻿@using BasePublisherModels.Database
+
+@{
+    ViewData["Title"] = "Cập nhật thông tin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var data = ViewBag.Root as List<ModGradeEntity>;
+    var obj = ViewBag.Data as ModGradeEntity;
+}
+
+<div class="card">
+    <div class="card-header card-header-icon">
+        <h4 class="card-title">
+            <a href="@Url.Action("Index")" class="btn btn-sm btn-fab btn-danger"><i class="material-icons">reply</i></a>
+            <a href="javascript:void(0)" onclick="execute('edit')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Lưu</a>
+        </h4>
+
+    </div>
+    <div class="card-body">
+        <form name="myform" asp-action="Create" method="post" enctype="application/x-www-form-urlencoded">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="ArrID" name="ArrID" value="" />
+            <input type="hidden" id="ctrl" value="ModGrades" />
+            <input type="hidden" id="ID" name="ID" value="@obj.ID" />
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Tên :</label>
+                        <input type="text" name="Name" class="form-control" autocomplete="off" value="@obj.Name">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Mã :</label>
+                        <input type="text" name="Code" class="form-control" autocomplete="off" disabled="disabled" value="@obj.Code">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class=""> Cấp độ trên : </label>
+                    <select class="form-control" name="ParentID">
+                        <option value="0">Root</option>
+                        @{
+                            if (data != null)
+                            {
+                                int count = data.Count;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    var item = data[i];
+                                    <option value="@item.ID">@item.Name</option>
+                                }
+                            }
+                        }
+                    </select>
+                    <script>
+                        $('select[name="ParentID"]').val('@obj.ParentID');
+                    </script>
+                </div>
+                <div class="col-md-6">
+                    <input type="hidden" name="IsActive" value="@if (obj.IsActive) { @Html.Raw("true") } else { @Html.Raw("false") }">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" @if (obj.IsActive){ @Html.Raw("checked='checked'")} >
+                                <span class="form-check-sign" style="white-space:nowrap; min-width:150px;">
+                                    <span class="text-left" style="position:relative;top:-5px;display:inline-block;"> Hoạt động :</span>  <span class="check"></span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="~/Contents/js/publisher.js"></script>
+}

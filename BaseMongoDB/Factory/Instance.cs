@@ -34,6 +34,7 @@ namespace BaseMongoDB.Factory
             services.AddScoped<ModBookService>();
             services.AddScoped<ModSubjectService>();
             services.AddScoped<ModGradeService>();
+            
             services.AddScoped<ModUnitService>();
             services.AddScoped<ModLessonService>();
             services.AddScoped<ModLessonPartService>();

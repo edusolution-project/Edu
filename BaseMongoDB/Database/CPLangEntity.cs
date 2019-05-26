@@ -9,7 +9,7 @@ namespace BaseMongoDB.Database
     {
         public string Name { get; set; }
         public string Code { get; set; }
-        public bool Activity { get; set; }
+        public bool IsActive { get; set; }
     }
     public class CPLangService : ServiceBase<CPLangEntity>
     {

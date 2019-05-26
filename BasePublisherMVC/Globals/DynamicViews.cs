@@ -45,23 +45,24 @@ namespace BasePublisherMVC.Globals
         //</div>
         public static IHtmlContent GetMenuForWeb(string type, string menuID, string langID)
         {
-            string keyCache = type+"_ChuyenMuc_" + langID;
+            string keyCache = type + "_ChuyenMuc_" + langID;
             var cache = CacheExtends.GetDataFromCache<IHtmlContent>(keyCache);
             if (cache != null) return cache;
             else
             {
                 var chuyenmuc = Instance.CreateInstanceCPMenu("CPMenus");
-                var data = chuyenmuc.GetItemByType(type,langID);
+                var data = chuyenmuc.GetItemByType(type, langID);
                 string Html = "<div class=\"mdc-select\"><i class=\"mdc-select__dropdown-icon\"></i><select name=\"MenuID\" class=\"mdc-select__native-control\"><option value=\"\">------ Chọn chuyên mục -----</option>";
-                for(int i = 0; data != null && i < data.Count; i++)
+                for (int i = 0; data != null && i < data.Count; i++)
                 {
                     var item = data[i];
-                    if(menuID == item.ID)
+                    if (menuID == item.ID)
                     {
-                        Html += "<option value ="+item.ID+" selected>"+item.Name+"</option>";
+                        Html += "<option value =" + item.ID + " selected>" + item.Name + "</option>";
                     }
-                    else{
-                        Html += "<option value ="+item.ID+">"+item.Name+"</option>";
+                    else
+                    {
+                        Html += "<option value =" + item.ID + ">" + item.Name + "</option>";
                     }
                 }
                 Html += "</select></div>";
@@ -76,7 +77,7 @@ namespace BasePublisherMVC.Globals
         /// <param name="ctrl"></param>
         /// <param name="properties"> key | value \r\n key | value \r\n  key | value</param>
         /// <returns></returns>
-        
+
         //public static IHtmlContent RenderWithData(this IHtmlHelper htmlHelper, string partialView,string ctrl,List<SysTemplatePropertyEntity> properties)
         //{
         //    string keyCache = ctrl + "_partialView_"+partialView;
@@ -153,7 +154,7 @@ namespace BasePublisherMVC.Globals
         //            {
         //                classInstance = Activator.CreateInstance(thisType,null);
         //            }
-                    
+
         //        }
         //        return theMethod.Invoke(classInstance, null);
         //    }
@@ -166,7 +167,7 @@ namespace BasePublisherMVC.Globals
         {
             return (T)data;
         }
-        
+
         #endregion
         #region reder html
         public static HtmlString GetCommand(string cmd)
@@ -187,13 +188,23 @@ namespace BasePublisherMVC.Globals
                 var name = _arr[1];
                 switch (key.ToLower())
                 {
+                    case "createlesson":
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-success\" onclick=\"Create.lesson()\">" +
+                                "<i class=\"material-icons\">add_circle</i>" + name + "<div class=\"ripple-container\"></div>" +
+                                "</a>";
+                        break;
                     case "create":
                         html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-success\" onclick=\"redirect('" + key + "')\">" +
                                 "<i class=\"material-icons\">add_circle</i>" + name + "<div class=\"ripple-container\"></div>" +
                                 "</a>";
                         break;
+                    case "createsub":
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-success\" onclick=\"redirectsub('create')\">" +
+                                "<i class=\"material-icons\">add_circle</i>" + name + "<div class=\"ripple-container\"></div>" +
+                                "</a>";
+                        break;
                     case "export":
-                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-primary\" onclick=\"excute('" + key + "')\">" +
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-primary\" onclick=\"execute('" + key + "')\">" +
                                 "<i class=\"material-icons\">airplay</i>" + name + "<div class=\"ripple-container\"></div>" +
                                 "</a>";
                         break;
@@ -202,19 +213,19 @@ namespace BasePublisherMVC.Globals
                         break;
                     case "delete":
                         html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-fab btn-danger\" " +
-                            "onclick=\"javascript:if(confirm('Bạn chắc là mình muốn xóa chứ !')){excute('delete')}\"><i class=\"material-icons\">delete_sweep</i></a>";
+                            "onclick=\"javascript:if(confirm('Bạn chắc là mình muốn xóa chứ !')){execute('delete')}\"><i class=\"material-icons\">delete_sweep</i></a>";
                         break;
                     case "nonactive":
-                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-fab btn-dark\" onclick=\"excute('" + key + "')\"><i class=\"material-icons\">lock</i></a>";
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-fab btn-dark\" onclick=\"execute('" + key + "')\"><i class=\"material-icons\">lock</i></a>";
                         break;
                     case "active":
-                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-fab btn-success\" onclick=\"excute('" + key + "')\"><i class=\"material-icons\">lock_open</i></a>";
+                        html += "<a href=\"javascript:void(0)\" title=\"" + name + "\" class=\"btn btn-sm btn-fab btn-success\" onclick=\"execute('" + key + "')\"><i class=\"material-icons\">lock_open</i></a>";
                         break;
                     case "clear":
-                        html += "<a href=\"javascript:void(0)\" title=" + name + " class=\"btn btn-sm btn-link\" onclick=\"excute('clear')\"><i class=\"material-icons\">block</i> clear</a>";
+                        html += "<a href=\"javascript:void(0)\" title=" + name + " class=\"btn btn-sm btn-link\" onclick=\"execute('clear')\"><i class=\"material-icons\">block</i> clear</a>";
                         break;
                     default:
-                        html += "<a href=\"javascript:void(0);\" onclick=\"excute('" + key + "')\" class=\"btn btn-default btn-" + key.ToLower() + "\"></a>";
+                        html += "<a href=\"javascript:void(0);\" onclick=\"execute('" + key + "')\" class=\"btn btn-default btn-" + key.ToLower() + "\"></a>";
                         break;
                 }
             }
@@ -222,13 +233,13 @@ namespace BasePublisherMVC.Globals
 
             return new HtmlString(html);
         }
-        public static HtmlString GetActive(string ID,bool active)
+        public static HtmlString GetActive(string ID, bool active)
         {
             string html = "";
 
-            html = active 
-                ? "<a href=\"javascript:void(0)\" title=\"bỏ duyệt\" class=\"btn btn-sm btn-fab btn-success\" onclick=\"active('nonactive',"+ ID + ")\"><i class=\"material-icons\">lock_open</i></a>"
-                : "<a href=\"javascript:void(0)\" title=\"duyệt\" class=\"btn btn-sm btn-fab btn-dark\" onclick=\"active('active'," + ID + ")\"><i class=\"material-icons\">lock</i></a>";
+            html = active
+                ? "<a href=\"javascript:void(0)\" title=\"bỏ duyệt\" class=\"btn btn-sm btn-fab btn-success\" onclick=\"execute('nonactive','" + ID + "')\"><i class=\"material-icons\">lock_open</i></a>"
+                : "<a href=\"javascript:void(0)\" title=\"duyệt\" class=\"btn btn-sm btn-fab btn-dark\" onclick=\"execute('active','" + ID + "')\"><i class=\"material-icons\">lock</i></a>";
 
             return new HtmlString(html);
         }
@@ -361,7 +372,7 @@ namespace BasePublisherMVC.Globals
         private readonly IRazorViewEngine _razorViewEngine;
         private readonly ITempDataProvider _tempDataProvider;
         private readonly IServiceProvider _serviceProvider;
-        public HtmlDynamicRender(IRazorViewEngine razorViewEngine,ITempDataProvider tempDataProvider,IServiceProvider serviceProvider)
+        public HtmlDynamicRender(IRazorViewEngine razorViewEngine, ITempDataProvider tempDataProvider, IServiceProvider serviceProvider)
         {
             _razorViewEngine = razorViewEngine;
             _tempDataProvider = tempDataProvider;
@@ -396,7 +407,7 @@ namespace BasePublisherMVC.Globals
             }
         }
 
-        public void Test(string ctrl,string act)
+        public void Test(string ctrl, string act)
         {
             Type thisType = Type.GetType(ctrl);
             MethodInfo theMethod = thisType.GetMethod(act);

@@ -12,10 +12,12 @@ namespace BasePublisherMVC
     {
         protected readonly WebMenu _menu;
         protected readonly CPLangEntity _currentLang;
+        protected readonly CPUserEntity _currentUser;
         public AdminController()
         {
             _menu = new WebMenu();
             _currentLang = StartUp.CurrentLang;
+            _currentUser = StartUp.CurrentUser;
         }
         
         protected List<MenuControlAttribute> GetMenuForUser(ClaimsPrincipal user , List<MenuControlAttribute> data)
@@ -77,7 +79,7 @@ namespace BasePublisherMVC
                 { "status", "error" },
                 { "msg" , content }
             };
-            this.TempData["error"] = message;
+            this.TempData["Message"] = message;
         }
         protected void SetMessageSuccess(string content)
         {
@@ -85,7 +87,7 @@ namespace BasePublisherMVC
             {
                 { "status", "success" },{ "msg" , content }
             };
-            this.TempData["success"] = message;
+            this.TempData["Message"] = message;
         }
         protected void SetMessageWarning(string content)
         {
@@ -93,7 +95,7 @@ namespace BasePublisherMVC
             {
                 { "status", "warning" },{ "msg" , content }
             };
-            this.TempData["warning"] = message;
+            this.TempData["Message"] = message;
         }
     }
 }

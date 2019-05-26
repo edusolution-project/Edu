@@ -1,0 +1,114 @@
+﻿@using BasePublisherMVC.Models;
+@using BasePublisherMVC.Globals;
+@using BasePublisherModels.Database;
+@{
+    ViewData["Title"] = "Quản lý môn học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var data = ViewBag.Data as List<ModSubjectEntity>
+    ;
+
+    var model = ViewBag.Model as DefaultModel;
+    string SearchText = string.IsNullOrEmpty(model.SearchText) ? string.Empty : model.SearchText;
+}
+<style>
+    span.bmd-form-group {
+        display: block;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="card">
+            <form name="myform" method="post" enctype="application/x-www-form-urlencoded">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="ArrID" name="ArrID" value="" />
+                <input type="hidden" id="ctrl" value="ModSubjects" />
+
+                <script type="text/javascript">
+                    var Search = [
+                        "filter_Search", "SearchText",
+                        "filter_StartDate", "StartDate",
+                        "filter_EndDate", "EndDate",
+                    ];
+                    var SearchDefault = [
+                        "1", "PageIndex",
+                        "1", "LangID",
+                        "20", "PageSize"
+                    ];
+
+/**/</script>
+                <div class="card-header card-header-image text-right">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6 col-lg-5">
+                            </div>
+                            <div class="col-sm-12 col-md-6 col-lg-7">
+                                @DynamicViews.GetCommand("create| Tạo mới,active|Kích hoạt,nonactive|Vô hiệu,export| Xuất ,delete|Xóa,clear|'Bỏ lọc'")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="">
+                        <table class="table table-bordered">
+                            <thead class="text-center">
+                                <tr>
+                                    <th width="5%">
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="checkbox" onclick="checkall(this)" />
+                                                <span class="form-check-sign">
+                                                    <span class="check"></span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </th>
+                                    <th>Tên</th>
+                                    <th>Mã</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Ngày cập nhật</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    if (data != null)
+                                    {
+                                        int count = data.Count;
+                                        for (int i = 0; i < count; i++)
+                                        {
+                                            var item = data[i];
+                                            <tr>
+                                                <td align="center">
+                                                    <div class="form-check">
+                                                        <label class="form-check-label">
+                                                            <input name="cid" class="form-check-input" value="@item.ID" type="checkbox" />
+                                                            <span class="form-check-sign">
+                                                                <span class="check"></span>
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                                <td align="center"><a class="text-info" href="@Url.Action(" edit", new { ID=item.ID })">@item.Name</a></td>
+                                                <td align="center"><a class="text-info" href="@Url.Action(" edit",new { ID=item.ID })">@item.Code</a></td>
+                                                <td align="center">
+                                                    @string.Format("{0:dd-M-yyyy hh:mm:ss}", item.Created)
+                                                </td>
+                                                <td align="center">
+                                                    @string.Format("{0:dd-M-yyyy hh:mm:ss}", item.Updated)
+                                                </td>
+                                                <td align="center">
+                                                    @DynamicViews.GetActive(item.ID, item.IsActive)
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

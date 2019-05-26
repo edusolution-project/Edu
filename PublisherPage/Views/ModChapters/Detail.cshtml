@@ -1,0 +1,243 @@
+﻿@using BasePublisherMVC.Models;
+@using BasePublisherMVC.Globals;
+@using BasePublisherModels.Database;
+@{
+    ViewData["Title"] = ViewBag.Title;
+    Layout = "~/Views/Shared/_LayoutCourse.cshtml";
+    var obj = ViewBag.Data as ModChapterEntity;
+    var chapterdata = ViewBag.Chapters as List<ModChapterViewModel>;
+}
+
+<div class="card">
+    <div class="card-header card-header-icon">
+        <h4 class="card-title">
+            <a href="@Url.Action("Detail","ModCourses", new {ID = obj.CourseID})" class="btn btn-sm btn-fab btn-danger"><i class="material-icons">reply</i></a>
+            <a href="javascript:void(0)" onclick="editchap('@{@Html.Raw(obj.ID)}')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Sửa</a>
+        </h4>
+    </div>
+    <div class="card-body">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                    <div>
+                        <label class="bmd-label-floating" style="font-size:200%"><b>@obj.Name</b></label>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </form>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header card-header-image text-right">
+        <form name="myform" asp-action="Create" method="post" enctype="application/x-www-form-urlencoded">
+            <input type="hidden" id="ctrl" value="ModLessons" />
+            <input type="hidden" id="chapctrl" value="ModChapters" />
+            <input type="hidden" id="filter_Course" value="@obj.CourseID" />
+            <input type="hidden" id="filter_Chapter" value="@obj.ID" />
+            <script type="text/javascript">
+                var Search = [
+                    "filter_Search", "SearchText",
+                    "filter_Course", "CourseID",
+                    "filter_Chapter", "ChapterID"
+                ];
+                var SearchDefault = [
+                    "1", "PageIndex",
+                    "1", "LangID",
+                    "20", "PageSize",
+                    "0", "CourseID",
+                    "0", "ChapterID"
+                ];
+
+                /**/</script>
+
+            @Html.AntiForgeryToken()
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-5">
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-7">
+                        <div id="command">
+                            <a href="javascript:void(0)" title="Tạo trang" class="btn btn-sm btn-success" onclick="Create.lesson()"><i class="material-icons">add_circle</i>Tạo trang<div class="ripple-container"></div><div class="ripple-container"></div></a>
+                            <a href="javascript:void(0)" title=" Tạo bài học mới" class="btn btn-sm btn-success" onclick="CreateLesson('@obj.CourseID','@obj.ID')">
+                                <i class="material-icons">add_circle</i> Tạo bài học mới
+                                <div class="ripple-container"></div>
+                                <div class="ripple-container"></div>
+                            </a>
+                            <a href="javascript:void(0)" title="Xóa" class="btn btn-sm btn-fab btn-danger" onclick="javascript:if (confirm('Bạn chắc là mình muốn xóa chứ !')) { execute('delete') }"><i class="material-icons">delete_sweep</i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-5">
+                        <div style="text-align: left; color: #999; font-size: 120%;"><b>Danh sách bài học</b></div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-7">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="card-body">
+        <div class="">
+            <table class="table table-bordered">
+                <thead class="text-center">
+                    <tr>
+                        <th width="5%">
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                    <input class="form-check-input" type="checkbox" onclick="checkall(this)" />
+                                    <span class="form-check-sign">
+                                        <span class="check"></span>
+                                    </span>
+                                </label>
+                            </div>
+                        </th>
+                        <th>Tên</th>
+                        <th>Vị trí</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (chapterdata != null)
+                        {
+                            int count = chapterdata.Count;
+                            for (int i = 0; i < count; i++)
+                            {
+                                var item = chapterdata[i];
+                                <tr>
+                                    <td align="center">
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input name="cid" class="form-check-input" value="@item.ID" type="checkbox" />
+                                                <span class="form-check-sign">
+                                                    <span class="check"></span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td align="center"><a class="text-info" href="@Url.Action("Detail","ModLessons", new { id = item.ID })">@item.Name</a></td>
+                                    <td align="center">@item.Order</td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div>
+    <style>
+        .course {
+            min-height: 100vh;
+            display: block;
+            width: 992px;
+            background: #fff;
+            padding: 10px;
+            max-width: 90%;
+            margin: auto;
+        }
+
+        .title {
+            text-align: center;
+            padding: 5px 0px;
+            display: inline-block;
+            border-bottom: 1px solid;
+            margin-bottom: 5px;
+        }
+
+        .lession-item__body {
+            overflow: hidden;
+        }
+
+        .course-item > .course-item__header {
+            text-align: center;
+        }
+
+            .course-item > .course-item__header > .title {
+                font-size: 20px;
+                text-transform: capitalize;
+            }
+
+        .course-item, .course-item__body, .chapter-item, .chapter-item__body, .lession-item__body {
+            padding: 10px;
+        }
+
+        .chapter-item {
+            border-bottom: 1px solid;
+            margin-bottom: 20px;
+        }
+
+        .lesson-item {
+            padding: 10px;
+            box-shadow: 0 0 10px;
+            margin-bottom: 10px;
+        }
+
+        .course .btn {
+            font-size: 10px;
+            padding: 2px 3px;
+        }
+    </style>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="#" name="frmLesson" enctype="multipart/form-data"></form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="submitForm(event)">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="template-lesson"></div>
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="LessonExample">
+    <input type="hidden" sid="CourseID" value="@obj.CourseID" />
+    <input type="hidden" sid="ChapterID" value="@obj.ID" />
+    <input type="hidden" id="action" value="" />
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="#" id="modal-body" name="modalForm" enctype="multipart/form-data">
+                    <ul class="template_type">
+                        <li class="template_type_item">
+                            <span>Nội dung bài giảng</span>
+                            <img src="" alt="">
+                        </li>
+                        <li class="lesson-part__type__item">
+                            <span>Nội dung bài tập</span>
+                            <i class="fa fa-check-square-o"></i>
+
+                        </li>
+                    </ul>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitForm(event)">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+    <script src="~/Contents/js/publisher.js"></script>
+    <script src="~/Contents/js/lesson.js"></script>
+}

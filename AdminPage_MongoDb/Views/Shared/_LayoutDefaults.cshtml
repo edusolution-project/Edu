@@ -58,6 +58,22 @@
     <script src="~/hubs" asp-append-version="true"></script>
     <script src="~/Contents/js/DesignTemplate.js" asp-append-version="true"></script>
     <script src="~/Contents/js/customer.js" asp-append-version="true"></script>
+    <script>
+        $('.datepicker').datetimepicker({
+          format: 'MM/DD/YYYY',
+          icons: {
+            time: "fa fa-clock-o",
+            date: "fa fa-calendar",
+            up: "fa fa-chevron-up",
+            down: "fa fa-chevron-down",
+            previous: 'fa fa-chevron-left',
+            next: 'fa fa-chevron-right',
+            today: 'fa fa-screenshot',
+            clear: 'fa fa-trash',
+            close: 'fa fa-remove'
+          }
+        });
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

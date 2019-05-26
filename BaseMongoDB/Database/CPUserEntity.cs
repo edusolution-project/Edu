@@ -17,7 +17,7 @@ namespace BaseMongoDB.Database
         public DateTime BirthDay { get; set; }
         public string Skype { get; set; }
         public string Phone { get; set; }
-        public bool Activity { get; set; }
+        public bool IsActive { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
     }
     public class CPUserService : ServiceBase<CPUserEntity>

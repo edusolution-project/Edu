@@ -88,7 +88,7 @@ namespace BaseMVC.Globals
                     if (attribute == null) continue;
                     var getmetho = item.GetMethods();
                     var method = getmetho
-                        .Where(o => o.Module.Name == "BaseMVC.dll")
+                        .Where(o => o.Module.Name == typeof(AdminController).Module.Name)
                         .Select(o => o.Name).ToList();
                     if (method != null)
                     {
@@ -153,7 +153,7 @@ namespace BaseMVC.Globals
                     {
                         var getmetho = item.GetMethods();
                         var method = getmetho
-                            .Where(o => o.Module.Name == "BaseMVC.dll")
+                            .Where(o => o.Module.Name == typeof(ClientController).Module.Name)
                             .Select(o => o.Name).ToList();
                         if (method != null)
                         {

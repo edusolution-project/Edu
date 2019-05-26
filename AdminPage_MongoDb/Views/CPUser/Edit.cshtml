@@ -13,7 +13,7 @@
     <div class="card-header card-header-icon">
         <h4 class="card-title">
             <a href="javascript:void(0)" onclick="@Url.Action("Index")" class="btn btn-sm btn-fab btn-danger"><i class="material-icons">reply</i></a>
-            <a href="javascript:void(0)" onclick="excute('edit')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Save</a>
+            <a href="javascript:void(0)" onclick="execute('edit')" class="btn btn-sm btn-success pull-right"><i class="material-icons">save</i> Save</a>
         </h4>
 
     </div>
@@ -73,13 +73,13 @@
                 </div>
                 <div class="col-md-12">
                     @{
-                        if (item.Activity)
+                        if (item.IsActive)
                         {
-                            <input type="hidden" name="Activity" value="true" />
+                            <input type="hidden" name="IsActive" value="true" />
                         }
                         else
                         {
-                            <input type="hidden" name="Activity" value="false" />
+                            <input type="hidden" name="IsActive" value="false" />
                         }
                     }
 
@@ -87,13 +87,13 @@
                         <div class="form-check">
                             <label class="form-check-label">
                                 @{
-                                    if (item.Activity)
+                                    if (item.IsActive)
                                     {
-                                        <input class="form-check-input" type="checkbox" onclick="thatActive(this,'Activity')" checked />
+                                        <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" checked />
                                     }
                                     else
                                     {
-                                        <input class="form-check-input" type="checkbox" onclick="thatActive(this,'Activity')" />
+                                        <input class="form-check-input" type="checkbox" onclick="thatActive(this,'IsActive')" />
                                     }
                                 }
                                 <span class="form-check-sign">

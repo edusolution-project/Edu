@@ -17,7 +17,7 @@ namespace BasePublisherModels.Database
         public DateTime BirthDay { get; set; }
         public string Skype { get; set; }
         public string Phone { get; set; }
-        public bool Activity { get; set; }
+        public bool IsActive { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
     }
     public class CPUserService : ServiceBase<CPUserEntity>
@@ -34,6 +34,12 @@ namespace BasePublisherModels.Database
         public CPUserEntity GetItemByEmail(string email)
         {
             return CreateQuery().Find(o => o.Email == email)?.SingleOrDefault();
+        }
+        [Obsolete]
+        public async Task CreateIndexAsync()
+        {
+            var builder = Builders<CPUserEntity>.IndexKeys.Ascending(o => new { o.IsActive,o.Email });
+            await Collection.Indexes.CreateOneAsync(builder);
         }
     }
 }

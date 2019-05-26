@@ -41,9 +41,9 @@ namespace BaseMVC.Globals
         private static void GetCurrentResource(this HttpContext context,IConfiguration configuration,ref List<CPResourceEntity> currentResource, ref CPLangEntity currentLang)
         {
             string cookie = context.GetValue(Cookies.DefaultLang,false);
-            if (string.IsNullOrEmpty(cookie)) cookie = "vn";
+            if (string.IsNullOrEmpty(cookie)) { cookie = "vn"; context.SetCurrentLang("VN"); }
             var lang = new CPLangService(configuration);
-            currentLang = lang.CreateQuery().Find(o => o.Activity == true && o.Code == cookie)?.SingleOrDefault();
+            currentLang = lang.CreateQuery().Find(o => o.IsActive == true && o.Code == cookie)?.SingleOrDefault();
             if (currentLang != null)
             {
                 // cache
@@ -86,11 +86,11 @@ namespace BaseMVC.Globals
                             new Claim(ClaimTypes.Email, user.Email),
                             new Claim(ClaimTypes.Name, user.Name),
                             new Claim(ClaimTypes.Role, irole.Code),
-                            new Claim("RoleID", irole.ID.ToString())
+                            new Claim("RoleID", irole.ID.ToString()),
+                            new Claim("UserID", user.ID)
                         };
                         var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
-
-                        var authenProperties = new AuthenticationProperties
+                        _ = new AuthenticationProperties
                         {
                             IsPersistent = true,
                             ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)

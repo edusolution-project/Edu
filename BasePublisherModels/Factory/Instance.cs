@@ -27,12 +27,15 @@ namespace BasePublisherModels.Factory
             services.AddScoped<CPUserService>();
 
             services.AddScoped<ModProgramService>();
-            services.AddScoped<ModBookService>();
+            services.AddScoped<ModCourseService>();
+            services.AddScoped<ModChapterService>();
             services.AddScoped<ModSubjectService>();
             services.AddScoped<ModGradeService>();
             services.AddScoped<ModUnitService>();
             services.AddScoped<ModLessonService>();
             services.AddScoped<ModLessonPartService>();
+            services.AddScoped<ModLessonExtendService>();
+            services.AddScoped<ModLessonPartAnswerService>();
             return services;
         }
         /// <summary>
@@ -60,12 +63,6 @@ namespace BasePublisherModels.Factory
         }
         #region Khởi tạo service 
 
-        public static T CreateInstance<T>(this IServiceProvider serviceProvider)
-        {
-            var service = (T)serviceProvider.GetService(typeof(T));
-            return service;
-        }
-
         public static ModProgramService CreateInstanceModProgram(string tableName)
         {
             return new ModProgramService(_configuration, tableName);
@@ -90,9 +87,9 @@ namespace BasePublisherModels.Factory
         {
             return new ModGradeService(_configuration, tableName);
         }
-        public static ModBookService CreateInstanceModBook(string tableName)
+        public static ModGradeService CreateInstanceModBook(string tableName)
         {
-            return new ModBookService(_configuration, tableName);
+            return new ModGradeService(_configuration, tableName);
         }
 
         public static CPAccessService CreateInstanceCPAccess(string tableName)
@@ -121,6 +118,97 @@ namespace BasePublisherModels.Factory
         }
         public static CPUserService CreateInstanceCPUser(string tableName)
         {
+            return new CPUserService(_configuration, tableName);
+        }
+        public static ModProgramService CreateInstanceModProgram()
+        {
+            string nameService = typeof(ModProgramService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new ModProgramService(_configuration, tableName);
+        }
+        public static ModUnitService CreateInstanceModUnit()
+        {
+            string nameService = typeof(ModUnitService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new ModUnitService(_configuration, tableName);
+        }
+        public static ModSubjectService CreateInstanceModSubject()
+        {
+            string nameService = typeof(ModSubjectService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new ModSubjectService(_configuration, tableName);
+        }
+        public static ModLessonPartService CreateInstanceModLessonPart()
+        {
+            string nameService = typeof(ModLessonPartService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new ModLessonPartService(_configuration, tableName);
+        }
+        public static ModLessonService CreateInstanceModLesson()
+        {
+            string nameService = typeof(ModLessonService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new ModLessonService(_configuration, tableName);
+        }
+        public static ModGradeService CreateInstanceModGrade()
+        {
+            string nameService = typeof(ModGradeService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new ModGradeService(_configuration, tableName);
+        }
+        public static CPAccessService CreateInstanceCPAccess()
+        {
+            string nameService = typeof(CPAccessService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new CPAccessService(_configuration, tableName);
+        }
+        public static CPLangService CreateInstanceCPLang()
+        {
+            string nameService = typeof(CPLangService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new CPLangService(_configuration, tableName);
+        }
+        public static CPLoginLogService CreateInstanceCPLoginLog()
+        {
+            string nameService = typeof(CPLoginLogService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new CPLoginLogService(_configuration, tableName);
+        }
+        public static CPMenuService CreateInstanceCPMenu()
+        {
+            string nameService = typeof(CPMenuService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new CPMenuService(_configuration, tableName);
+        }
+        public static CPResourceService CreateInstanceCPResource()
+        {
+            string nameService = typeof(CPResourceService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new CPResourceService(_configuration, tableName);
+        }
+        public static CPRoleService CreateInstanceCPRole()
+        {
+            string nameService = typeof(CPRoleService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
+            return new CPRoleService(_configuration, tableName);
+        }
+        public static CPUserService CreateInstanceCPUser()
+        {
+            string nameService = typeof(CPUserService).Name;
+            string tableName = nameService.Replace("Service", "").EndsWith("s")
+                ? nameService.Replace("Service", "") : nameService.Replace("Service", "s");
             return new CPUserService(_configuration, tableName);
         }
         #endregion

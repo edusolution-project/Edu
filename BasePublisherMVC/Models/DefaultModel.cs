@@ -6,6 +6,7 @@ namespace BasePublisherMVC.Models
     {
         public string Command { get; set; }
         public string SearchText { get; set; }
+
         private int _pageIndex;
 
         public int PageIndex
@@ -14,7 +15,7 @@ namespace BasePublisherMVC.Models
             set { _pageIndex = value - 1; }
         }
 
-        public int PageSize { get; set; } = 20;
+        public int PageSize { get; set; } = 50;
 
         public int TotalRecord { get; set; }
 
@@ -29,5 +30,24 @@ namespace BasePublisherMVC.Models
         public DateTime EndDate { get; set; }
 
         public string ArrID { get; set; }
+    }
+
+    public class ModProgramModel : DefaultModel
+    {
+        public string Subject { get; set; }
+        public string Grade { get; set; }
+    }
+
+    public class ModCourseModel : DefaultModel
+    {
+        public string Program { get; set; }
+        public string Subject { get; set; }
+        public string Grade { get; set; }
+    }
+
+    public class ModChapterModel : DefaultModel
+    {
+        public string CourseID { get; set; }
+        public string ParentID { get; set; }
     }
 }
