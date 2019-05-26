@@ -7,11 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityBaseFW", "EntityBaseF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientPage", "ClientPage\ClientPage.csproj", "{FBECCA29-8C88-4440-873F-89481BFAFD8E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5E4A8611-8216-4F8D-9027-D737B5FC5B98}"
-	ProjectSection(SolutionItems) = preProject
-		C:\Users\long\Desktop\script.sql = C:\Users\long\Desktop\script.sql
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{79E43CF4-517A-429A-98E5-0E10FDFB2296}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Base", "Base", "{41C3BDCD-A0B7-4EB7-A833-5BAB2B8EAC80}"
