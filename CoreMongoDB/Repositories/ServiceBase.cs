@@ -14,7 +14,7 @@ namespace CoreMongoDB.Repositories
     public class ServiceBase<T> : DbContextHelper<T>, IServiceBase<T> where T : EntityBase, new()
     {
         private readonly string _tableName;
-        public const string defaultConn = "VES";
+        public const string defaultConn = "iESTest";
         private readonly IDbQueryCache _dbQueryCache;
         public ServiceBase(IConfiguration config) : base(config,defaultConn)
         {

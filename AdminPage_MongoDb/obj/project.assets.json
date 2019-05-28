@@ -9736,12 +9736,11 @@
       ]
     },
     "System.Text.Encoding.CodePages/4.3.0": {
-      "sha512": "IRiEFUa5b/Gs5Egg8oqBVoywhtOeaO2KOx3j0RfcYY/raxqBuEK7NXRDgOwtYM8qbi+7S4RPXUbNt+ZxyY0/NQ==",
+      "sha512": "6ENnyNU7cdmUVYblQ9GzLuJlLs9HWyoSInm+JZyCBHFUTaSQZolLIdGSZWGw5VOhjbFop+u/pU0AbKiHQKheqw==",
       "type": "package",
       "path": "system.text.encoding.codepages/4.3.0",
       "files": [
         ".nupkg.metadata",
-        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/MonoAndroid10/_._",
@@ -10462,23 +10461,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\laptop2\\.nuget\\packages\\": {},
+    "C:\\Users\\nghiepnc\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\laptop2\\source\\repos\\Edu\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
+      "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
       "projectName": "AdminPage_MongoDB",
-      "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
-      "packagesPath": "C:\\Users\\laptop2\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\AdminPage_MongoDb\\obj\\",
+      "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\AdminPage_MongoDb\\AdminPage_MongoDB.csproj",
+      "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\AdminPage_MongoDb\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\laptop2\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -10491,17 +10490,17 @@
       "frameworks": {
         "net461": {
           "projectReferences": {
-            "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
-              "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
+            "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
+              "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
             },
-            "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj": {
-              "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj"
+            "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj": {
+              "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj"
             },
-            "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj": {
-              "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj"
+            "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj": {
+              "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj"
             },
-            "C:\\Users\\laptop2\\source\\repos\\Edu\\EntityBaseFW\\EntityBaseFW.csproj": {
-              "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\EntityBaseFW\\EntityBaseFW.csproj"
+            "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\EntityBaseFW\\EntityBaseFW.csproj": {
+              "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\EntityBaseFW\\EntityBaseFW.csproj"
             }
           }
         }

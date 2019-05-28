@@ -12,6 +12,9 @@ using BaseMVC.Globals;
 using System.Net;
 using BaseMVC.Models;
 using System.Threading.Tasks;
+//using OfficeOpenXml;
+using System.IO;
+using OfficeOpenXml;
 
 namespace SME.API.Controllers
 {
@@ -25,7 +28,7 @@ namespace SME.API.Controllers
 
         TeacherService teacherService;
         AccessTokenService _accessTokenService;
-        CPUserSubService  userService;
+        CPUserSubService userService;
         public TeacherController(
         TeacherService teacherService, AccessTokenService accessTokenService, CPUserSubService userService
        )
@@ -48,13 +51,13 @@ namespace SME.API.Controllers
         public async Task<IActionResult> Create([FromBody]TeacherEntity item)
         {
             var id = item.ID;
-            if(!string.IsNullOrEmpty(item.UserCreate))
+            if (!string.IsNullOrEmpty(item.UserCreate))
             {
-                try { 
-                var userItem=  userService.GetItemByUserName(item.UserCreate);
-                item.UserNameManager = userItem.UserNameManager;
+                try {
+                    var userItem = userService.GetItemByUserName(item.UserCreate);
+                    item.UserNameManager = userItem.UserNameManager;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     string s = ex.Message;
                 }
@@ -74,7 +77,7 @@ namespace SME.API.Controllers
             CPUserSubEntity userSub;
             if (string.IsNullOrEmpty(id))
             {
-                 userSub = new CPUserSubEntity();
+                userSub = new CPUserSubEntity();
                 userSub.Pass = "123";
                 userSub.Pass = Security.Encrypt(userSub.Pass);
                 userSub.UserName = item.TeacherId;
@@ -86,7 +89,7 @@ namespace SME.API.Controllers
             }
             else
             {
-                 userSub = userService.GetItemByUserName(item.TeacherId);
+                userSub = userService.GetItemByUserName(item.TeacherId);
                 userSub.FullName = item.FullName;
                 userSub.Activity = item.Activity;
 
@@ -103,12 +106,85 @@ namespace SME.API.Controllers
 
             //xoa bang subuser
 
-             var userItem =  userService.GetItemByUserName(item.TeacherId);
+            var userItem = userService.GetItemByUserName(item.TeacherId);
 
             await userService.RemoveAsync(userItem.ID);
 
             return NoContent();
 
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ImportExcel()
+        {
+            var httpRequest = HttpContext.Request.Form.Files[0];
+            var filePath = Path.GetTempFileName();
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await httpRequest.CopyToAsync(stream);
+                using (ExcelPackage package = new ExcelPackage(stream))
+                {
+                    ExcelWorksheet workSheet = package.Workbook.Worksheets["sheet_nghiepnc"];
+                         int totalRows = workSheet.Dimension.Rows;
+
+                    List<TeacherEntity> teacherList = new List<TeacherEntity>();
+                    for (int i = 2; i <= totalRows; i++)
+                    {
+                        teacherList.Add(new TeacherEntity
+                        {
+                            TeacherId = workSheet.Cells[i, 1].Value.ToString(),
+                            FullName = workSheet.Cells[i, 2].Value.ToString() + workSheet.Cells[i, 3].Value.ToString(),
+                           Technique= workSheet.Cells[i, 3].Value.ToString()
+                        });
+                    }
+                    //var listPro = _propertyService.GetItemByParentID(item.ID);
+                    //if (listPro != null)
+                    //{
+                    //    _propertyService.RemoveRange(listPro.Select(o => o.ID).ToList());
+                    //}
+                    //teacherService.RemoveRange(teacherList);
+                    await teacherService.AddRangeAsync(teacherList);
+
+
+                }
+            }
+
+           
+            return NoContent();
+
+        }
+
+        //[HttpPost]
+        //public IList<TeacherEntity> ImportCustomer()
+        //{
+
+
+        //  //  string rootFolder = _hostingEnvironment.WebRootPath;
+        //    string fileName = @"ImportCustomers.xlsx";
+        //    FileInfo file = new FileInfo(Path.Combine("", fileName));
+
+        //    using (ExcelPackage package = new ExcelPackage(file))
+        //    {
+        //        ExcelWorksheet workSheet = package.Workbook.Worksheets["Customer"];
+        //        int totalRows = workSheet.Dimension.Rows;
+
+        //        List<TeacherEntity> customerList = new List<TeacherEntity>();
+
+        //        for (int i = 2; i <= totalRows; i++)
+        //        {
+        //            //customerList.Add(new TeacherEntity
+        //            //{
+        //            //    CustomerName = workSheet.Cells[i, 1].Value.ToString(),
+        //            //    CustomerEmail = workSheet.Cells[i, 2].Value.ToString(),
+        //            //    CustomerCountry = workSheet.Cells[i, 3].Value.ToString()
+        //            //});
+        //        }
+
+        //       // _db.Customers.AddRange(customerList);
+        //       // _db.SaveChanges();
+
+        //        return customerList;
+        //    }
+        //}
     }
 }

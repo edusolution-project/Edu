@@ -15,3 +15,12 @@ C:\Users\laptop2\source\repos\Edu\Business\obj\Debug\netstandard2.0\Business.Ass
 C:\Users\laptop2\source\repos\Edu\Business\obj\Debug\netstandard2.0\Business.AssemblyInfo.cs
 C:\Users\laptop2\source\repos\Edu\Business\obj\Debug\netstandard2.0\Business.dll
 C:\Users\laptop2\source\repos\Edu\Business\obj\Debug\netstandard2.0\Business.pdb
+C:\Users\nghiepnc\Desktop\api\Edu\Business\bin\Debug\netstandard2.0\Business.deps.json
+C:\Users\nghiepnc\Desktop\api\Edu\Business\bin\Debug\netstandard2.0\Business.dll
+C:\Users\nghiepnc\Desktop\api\Edu\Business\bin\Debug\netstandard2.0\Business.pdb
+C:\Users\nghiepnc\Desktop\api\Edu\Business\obj\Debug\netstandard2.0\Business.csprojAssemblyReference.cache
+C:\Users\nghiepnc\Desktop\api\Edu\Business\obj\Debug\netstandard2.0\Business.csproj.CoreCompileInputs.cache
+C:\Users\nghiepnc\Desktop\api\Edu\Business\obj\Debug\netstandard2.0\Business.AssemblyInfoInputs.cache
+C:\Users\nghiepnc\Desktop\api\Edu\Business\obj\Debug\netstandard2.0\Business.AssemblyInfo.cs
+C:\Users\nghiepnc\Desktop\api\Edu\Business\obj\Debug\netstandard2.0\Business.dll
+C:\Users\nghiepnc\Desktop\api\Edu\Business\obj\Debug\netstandard2.0\Business.pdb

@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj": {}
+    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj": {}
   },
   "projects": {
-    "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
+    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
+        "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
         "projectName": "BaseMongoDB",
-        "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
-        "packagesPath": "C:\\Users\\laptop2\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\obj\\",
+        "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
+        "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\laptop2\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -30,11 +30,11 @@
         "frameworks": {
           "netstandard2.0": {
             "projectReferences": {
-              "C:\\Users\\laptop2\\source\\repos\\Edu\\Business\\Business.csproj": {
-                "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\Business\\Business.csproj"
+              "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj": {
+                "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj"
               },
-              "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
-                "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
+              "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
+                "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
               }
             }
           }
@@ -71,20 +71,20 @@
         }
       }
     },
-    "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj": {
+    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj",
+        "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj",
         "projectName": "BaseMVC",
-        "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\BaseMVC.csproj",
-        "packagesPath": "C:\\Users\\laptop2\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMVC\\obj\\",
+        "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj",
+        "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\laptop2\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -97,11 +97,11 @@
         "frameworks": {
           "netstandard2.0": {
             "projectReferences": {
-              "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
-                "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
+              "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
+                "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
               },
-              "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj": {
-                "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj"
+              "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj": {
+                "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj"
               }
             }
           }
@@ -138,20 +138,20 @@
         }
       }
     },
-    "C:\\Users\\laptop2\\source\\repos\\Edu\\Business\\Business.csproj": {
+    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\laptop2\\source\\repos\\Edu\\Business\\Business.csproj",
+        "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj",
         "projectName": "Business",
-        "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\Business\\Business.csproj",
-        "packagesPath": "C:\\Users\\laptop2\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\Business\\obj\\",
+        "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj",
+        "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\laptop2\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -190,20 +190,20 @@
         }
       }
     },
-    "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj": {
+    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj",
+        "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj",
         "projectName": "CoreLogs",
-        "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreLogs\\CoreLogs.csproj",
-        "packagesPath": "C:\\Users\\laptop2\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreLogs\\obj\\",
+        "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj",
+        "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\laptop2\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -246,20 +246,20 @@
         }
       }
     },
-    "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
+    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreMongoDB\\CoreMongoDB.csproj",
+        "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj",
         "projectName": "CoreMongoDB",
-        "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreMongoDB\\CoreMongoDB.csproj",
-        "packagesPath": "C:\\Users\\laptop2\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\CoreMongoDB\\obj\\",
+        "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj",
+        "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\laptop2\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [

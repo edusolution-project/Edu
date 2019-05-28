@@ -70,6 +70,7 @@ import { TeachersManagementComponent } from './components/teacher-management/tea
 import { TeacherInfoComponent } from './components/teacher-management/teacher-info.component';
 import { MyDatePickerModule } from 'mydatepicker';
 import { TeacherService } from './services/teacher.service';
+import { TeacherImportComponent } from './components/teacher-management/teacher-import.component';
 
 @NgModule({
   imports: [
@@ -120,7 +121,8 @@ import { TeacherService } from './services/teacher.service';
     BootstrapDatepickerDirective,
     GroupByPipe,
     TeachersManagementComponent,
-    TeacherInfoComponent
+    TeacherInfoComponent,
+    TeacherImportComponent
   ],
   providers: [
     { provide: ErrorHandler, useClass: AppErrorHandler },

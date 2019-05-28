@@ -12085,11 +12085,11 @@
   "project": {
     "version": "2.6.1",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Admin_Sub_Angular\\Admin_Sub_Angular.csproj",
+      "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Admin_Sub_Angular\\Admin_Sub_Angular.csproj",
       "projectName": "Admin_Sub_Angular",
-      "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Admin_Sub_Angular\\Admin_Sub_Angular.csproj",
+      "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Admin_Sub_Angular\\Admin_Sub_Angular.csproj",
       "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Admin_Sub_Angular\\obj\\",
+      "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Admin_Sub_Angular\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -12103,7 +12103,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Users\\nghiepnc\\Desktop\\flexcelnugets-trial": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

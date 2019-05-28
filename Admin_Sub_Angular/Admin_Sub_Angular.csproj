@@ -23,28 +23,36 @@
 
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Compile Remove="ClientApp\src\app\components\bang\**" />
+    <Compile Remove="ClientApp\src\app\components\dang-ky-tuyen-sinh\**" />
+    <Compile Remove="ClientApp\src\app\components\tra-cuu-dung-tuyen\**" />
     <Compile Remove="Controllers\**" />
     <Compile Remove="wwwroot\assets\**" />
     <Content Remove="$(SpaRoot)**" />
+    <Content Remove="ClientApp\src\app\components\bang\**" />
+    <Content Remove="ClientApp\src\app\components\dang-ky-tuyen-sinh\**" />
+    <Content Remove="ClientApp\src\app\components\tra-cuu-dung-tuyen\**" />
     <Content Remove="Controllers\**" />
     <Content Remove="wwwroot\assets\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Remove="ClientApp\src\app\components\bang\**" />
+    <EmbeddedResource Remove="ClientApp\src\app\components\dang-ky-tuyen-sinh\**" />
+    <EmbeddedResource Remove="ClientApp\src\app\components\tra-cuu-dung-tuyen\**" />
     <EmbeddedResource Remove="Controllers\**" />
     <EmbeddedResource Remove="wwwroot\assets\**" />
+    <None Remove="ClientApp\src\app\components\bang\**" />
+    <None Remove="ClientApp\src\app\components\dang-ky-tuyen-sinh\**" />
+    <None Remove="ClientApp\src\app\components\tra-cuu-dung-tuyen\**" />
     <None Remove="Controllers\**" />
     <None Remove="wwwroot\assets\**" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="ClientApp\src\app\assets\styles\bangstyle.css" />
-    <None Remove="ClientApp\src\app\components\bang\bang.component.html" />
-    <None Remove="ClientApp\src\app\components\bang\bang.component.ts" />
     <None Remove="ClientApp\src\app\components\controls\HocSinh.component.ts" />
-    <None Remove="ClientApp\src\app\components\dang-ky-tuyen-sinh\dk-thanh-cong.component.ts" />
-    <None Remove="ClientApp\src\app\components\tra-cuu-dung-tuyen\view-ttin-tsinh-truong.component.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -173,10 +181,6 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\assets\styles\bangstyle.css" />
-    <TypeScriptCompile Include="ClientApp\src\app\components\bang\bang.component.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\components\bang\bang.component.html" />
-    <TypeScriptCompile Include="ClientApp\src\app\components\dang-ky-tuyen-sinh\dk-thanh-cong.component.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\components\tra-cuu-dung-tuyen\view-ttin-tsinh-truong.component.ts" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

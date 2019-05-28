@@ -49,6 +49,9 @@ export class TeachersManagementComponent implements OnInit, AfterViewInit {
     @ViewChild('editorModal')
     editorModal: ModalDirective;
 
+  @ViewChild('editorModalExcel')
+  editorModalExcel: ModalDirective;
+
     @ViewChild('teacherEditor')
     userEditor: TeacherInfoComponent;
 
@@ -181,7 +184,11 @@ teacher.userName=this.accountService.currentUser.userName;
         this.editingUserName = null;
         this.sourceUser = null;
         this.editorModal.show();
-    }
+  }
+
+  importExcel() {
+    this.editorModalExcel.show();
+  }
 
 
     editUser(row: Teacher) {

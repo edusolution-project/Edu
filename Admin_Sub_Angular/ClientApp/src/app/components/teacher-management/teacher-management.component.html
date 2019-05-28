@@ -13,7 +13,7 @@
           </a>
         </li>
         <li class="nav-item toolbaritem">
-          <a class="nav-link" href="javascript:;" (click)="newUser()">
+          <a class="nav-link" href="javascript:;" (click)="importExcel()">
             <i class="fa fa-imdb"></i> Import
           </a>
         </li>
@@ -22,72 +22,72 @@
   </div>
 
   <div class="table-responsive">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <td>
-              STT
-            </td>
-            <td>
-             Mã giáo viên
-            </td>
-            
-            <td>
-              Họ Tên
-            </td>
-            <td>Ngày sinh</td>
-            <td>Chuyên môn</td>
-            <td> Trạng thái</td>
-            <td>  Thao tác</td>
-          </tr>
-        </thead>
-        <tbody>
-        
-          <tr *ngFor="let item of rows; let i = index"  style="cursor:pointer">
-            <td>
-              {{i+1+(pager.currentPage-1) *pager.pageSize}} 
-            </td>
-            <td>
-              {{item.teacherId}}
-            </td>
-            
-            <td>
-              {{item.fullName}}
-            </td>
-            <td>{{item.dateBorn}}</td>
-            <td>
-              {{item.technique}}
-            </td>
-           
-            <td>
-              {{item.activity==false?'Không hoạt đông':"Hoạt động"}}
-            </td>
-            <td>
-              <a  title="Sửa" ng-if="isEdit(item)" (click)="editUser(item)"><i class="fa fa-pencil-square-o blue big120"> &nbsp;&nbsp;</i></a>
-              
-              <a  title="Xóa" ng-if="isEdit(item)" (click)="deleteUser(item)"><i class="fa fa-trash blue big120">   </i></a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <ul *ngIf="pager.pages && pager.pages.length" class="pagination">
-        <li [ngClass]="{disabled:pager.currentPage === 1}">
-            <a (click)="loadData(1)">Trang đầu</a>
-        </li>
-        <li [ngClass]="{disabled:pager.currentPage === 1}">
-            <a (click)="loadData(pager.currentPage - 1)">Trang trước</a>
-        </li>
-        <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}">
-            <a (click)="loadData(page)">{{page}}</a>
-        </li>
-        <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
-            <a (click)="loadData(pager.currentPage + 1)">Trang tiếp</a>
-        </li>
-        <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
-            <a (click)="loadData(pager.totalPages)">Trang cuối</a>
-        </li>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <td>
+            STT
+          </td>
+          <td>
+            Mã giáo viên
+          </td>
+
+          <td>
+            Họ Tên
+          </td>
+          <td>Ngày sinh</td>
+          <td>Chuyên môn</td>
+          <td> Trạng thái</td>
+          <td>  Thao tác</td>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr *ngFor="let item of rows; let i = index" style="cursor:pointer">
+          <td>
+            {{i+1+(pager.currentPage-1) *pager.pageSize}}
+          </td>
+          <td>
+            {{item.teacherId}}
+          </td>
+
+          <td>
+            {{item.fullName}}
+          </td>
+          <td>{{item.dateBorn}}</td>
+          <td>
+            {{item.technique}}
+          </td>
+
+          <td>
+            {{item.activity==false?'Không hoạt đông':"Hoạt động"}}
+          </td>
+          <td>
+            <a title="Sửa" ng-if="isEdit(item)" (click)="editUser(item)"><i class="fa fa-pencil-square-o blue big120"> &nbsp;&nbsp;</i></a>
+
+            <a title="Xóa" ng-if="isEdit(item)" (click)="deleteUser(item)"><i class="fa fa-trash blue big120">   </i></a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ul *ngIf="pager.pages && pager.pages.length" class="pagination">
+      <li [ngClass]="{disabled:pager.currentPage === 1}">
+        <a (click)="loadData(1)">Trang đầu</a>
+      </li>
+      <li [ngClass]="{disabled:pager.currentPage === 1}">
+        <a (click)="loadData(pager.currentPage - 1)">Trang trước</a>
+      </li>
+      <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}">
+        <a (click)="loadData(page)">{{page}}</a>
+      </li>
+      <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+        <a (click)="loadData(pager.currentPage + 1)">Trang tiếp</a>
+      </li>
+      <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+        <a (click)="loadData(pager.totalPages)">Trang cuối</a>
+      </li>
     </ul>
-    </div>
+  </div>
 
 
 
@@ -103,11 +103,30 @@
           </button>
         </div>
         <div class="modal-body">
-          <teacher-info #teacherEditor ></teacher-info>
+          <teacher-info #teacherEditor></teacher-info>
         </div>
       </div>
     </div>
   </div>
+
+
+  <div class="modal fade" bsModal #editorModalExcel="bs-modal" (onHidden)="onEditorModalHidden()" [config]="{backdrop: 'static'}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title float-left"><i class="fa fa-user-plus"></i> Import danh sách giáo viên</h4>
+          <button type="button" class="close float-right" title="Close" (click)="editorModal.hide()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <teacher-import></teacher-import>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
+
 
 

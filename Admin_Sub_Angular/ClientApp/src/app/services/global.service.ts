@@ -23,7 +23,7 @@ export class GlobalService {
 //static getBaseUrl: any = 'http://10.60.157.111:8013/';
   //static getManUrl: any = 'http://10.60.157.111:8014/';
 
-  static getBaseUrl: any = 'http://localhost:9999/';
+  static getBaseUrl: any = 'http://103.101.161.22:9999/';
   static getManUrl: any = 'http://apiquanly.tuyensinhdaucap.edu.vn/';
 
   constructor(http: HttpClient) {
