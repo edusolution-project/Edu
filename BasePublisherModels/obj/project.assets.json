@@ -5113,11 +5113,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BasePublisherModels\\BasePublisherModels.csproj",
+      "projectUniqueName": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BasePublisherModels\\BasePublisherModels.csproj",
       "projectName": "BasePublisherModels",
-      "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BasePublisherModels\\BasePublisherModels.csproj",
+      "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BasePublisherModels\\BasePublisherModels.csproj",
       "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BasePublisherModels\\obj\\",
+      "outputPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BasePublisherModels\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -5131,13 +5131,14 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Users\\nghiepnc\\Desktop\\flexcelnugets-trial": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
+            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
+              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
             }
           }
         }

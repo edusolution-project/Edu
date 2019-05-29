@@ -5227,11 +5227,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
+      "projectUniqueName": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
       "projectName": "BaseMongoDB",
-      "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
+      "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
       "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\obj\\",
+      "outputPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMongoDB\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -5245,16 +5245,17 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Users\\nghiepnc\\Desktop\\flexcelnugets-trial": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj"
+            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Business\\Business.csproj": {
+              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Business\\Business.csproj"
             },
-            "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
+            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
+              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
             }
           }
         }

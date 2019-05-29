@@ -12964,11 +12964,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\ClientPage\\ClientPage.csproj",
+      "projectUniqueName": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\ClientPage\\ClientPage.csproj",
       "projectName": "ClientPage",
-      "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\ClientPage\\ClientPage.csproj",
+      "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\ClientPage\\ClientPage.csproj",
       "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\ClientPage\\obj\\",
+      "outputPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\ClientPage\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -12982,6 +12982,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Users\\nghiepnc\\Desktop\\flexcelnugets-trial": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

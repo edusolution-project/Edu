@@ -15228,11 +15228,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Admin_Sub_API\\Admin_Sub_API.csproj",
+      "projectUniqueName": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Admin_Sub_API\\Admin_Sub_API.csproj",
       "projectName": "Admin_Sub_API",
-      "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Admin_Sub_API\\Admin_Sub_API.csproj",
+      "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Admin_Sub_API\\Admin_Sub_API.csproj",
       "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Admin_Sub_API\\obj\\",
+      "outputPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Admin_Sub_API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -15246,16 +15246,17 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Users\\nghiepnc\\Desktop\\flexcelnugets-trial": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netcoreapp2.2": {
           "projectReferences": {
-            "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
+            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
+              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
             },
-            "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj"
+            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMVC\\BaseMVC.csproj": {
+              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BaseMVC\\BaseMVC.csproj"
             }
           }
         }

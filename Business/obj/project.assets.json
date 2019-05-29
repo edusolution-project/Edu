@@ -185,11 +185,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj",
+      "projectUniqueName": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Business\\Business.csproj",
       "projectName": "Business",
-      "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj",
+      "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Business\\Business.csproj",
       "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\obj\\",
+      "outputPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\Business\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -203,6 +203,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Users\\nghiepnc\\Desktop\\flexcelnugets-trial": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

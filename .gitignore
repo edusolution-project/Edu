@@ -263,3 +263,14 @@ obj\Debug
 *\obj\Debug
 obj/Debug
 */obj/Debug
+AdminPage_MongoDB/obj/
+BaseMVC/obj/
+BasePublisherModels/obj/
+BasePublisherMVC/obj/
+Business/obj/
+Admin_Sub_API/obj/
+ClientPage/obj/
+ClientPage/obj/
+JWTExample/obj/
+KiemTraNhieuThe/obj/
+.vs
