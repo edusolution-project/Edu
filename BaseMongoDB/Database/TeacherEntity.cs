@@ -49,5 +49,14 @@ namespace BaseMongoDB.Database
             return result;
 
         }
+
+        public List<TeacherEntity> getListByUserNameManager(string userNameManager)
+        {
+            var result = new List<TeacherEntity>();
+            var query = CreateQuery().Find(o => o.UserNameManager == userNameManager);
+            result = query.ToList();
+            return result;
+
+        }
     }
 }

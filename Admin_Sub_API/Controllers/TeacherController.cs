@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 //using OfficeOpenXml;
 using System.IO;
 using OfficeOpenXml;
+using System.Linq;
 
 namespace SME.API.Controllers
 {
@@ -137,12 +138,14 @@ namespace SME.API.Controllers
                            Technique= workSheet.Cells[i, 3].Value.ToString()
                         });
                     }
-                    //var listPro = _propertyService.GetItemByParentID(item.ID);
-                    //if (listPro != null)
-                    //{
-                    //    _propertyService.RemoveRange(listPro.Select(o => o.ID).ToList());
-                    //}
-                    //teacherService.RemoveRange(teacherList);
+
+                    string userMangeger = "nghiepnc";
+                   
+                    var listTeacher = teacherService.getListByUserNameManager(userMangeger);
+                    if(listTeacher!=null)
+                    {
+                        teacherService.RemoveRange(listTeacher.Select(o => o.ID).ToList());
+                    }
                     await teacherService.AddRangeAsync(teacherList);
 
 
