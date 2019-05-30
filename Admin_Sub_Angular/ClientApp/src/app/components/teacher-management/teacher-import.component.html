@@ -13,6 +13,13 @@
                 <input (change)="addFile($event.target.files)" name="file" type="file" style="display:none" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
               </label>
             </div>
+            <div class="col-md-7 attack">
+              <ul>
+                <li *ngFor="let item of lstFile;  index as i">
+                  <span class="blue">{{item.name}}</span>
+                </li>
+              </ul>
+            </div>
           </div>
 
         </div>

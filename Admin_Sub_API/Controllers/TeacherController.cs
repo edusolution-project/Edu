@@ -118,14 +118,20 @@ namespace SME.API.Controllers
         [HttpPost]
         public async Task<IActionResult> ImportExcel()
         {
-            var httpRequest = HttpContext.Request.Form.Files[0];
+            var httpRequest = HttpContext.Request.Form;
+            var httpRequestFile = httpRequest.Files[0];
+
             var filePath = Path.GetTempFileName();
+
+            var userCreate = httpRequest["userCreate"];
+
+            var userItem = userService.GetItemByUserName(userCreate);
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                await httpRequest.CopyToAsync(stream);
+                await httpRequestFile.CopyToAsync(stream);
                 using (ExcelPackage package = new ExcelPackage(stream))
                 {
-                    ExcelWorksheet workSheet = package.Workbook.Worksheets["sheet_nghiepnc"];
+                    ExcelWorksheet workSheet = package.Workbook.Worksheets["Sheet1"];
                          int totalRows = workSheet.Dimension.Rows;
 
                     List<TeacherEntity> teacherList = new List<TeacherEntity>();
@@ -133,15 +139,20 @@ namespace SME.API.Controllers
                     {
                         teacherList.Add(new TeacherEntity
                         {
-                            TeacherId = workSheet.Cells[i, 1].Value.ToString(),
-                            FullName = workSheet.Cells[i, 2].Value.ToString() + workSheet.Cells[i, 3].Value.ToString(),
-                           Technique= workSheet.Cells[i, 3].Value.ToString()
+                            TeacherId = workSheet.Cells[i, 2].Value.ToString(),
+                            FullName = workSheet.Cells[i, 3].Value.ToString() + " " + workSheet.Cells[i, 4].Value.ToString(),
+                            Technique = workSheet.Cells[i, 6].Value.ToString(),
+                            DateBorn = workSheet.Cells[i, 5].Value.ToString(),
+                            UserCreate = "nghiepnc",
+                            UserNameManager = userItem.UserNameManager,
+                            Activity = true
+
                         });
                     }
 
-                    string userMangeger = "nghiepnc";
                    
-                    var listTeacher = teacherService.getListByUserNameManager(userMangeger);
+                   
+                    var listTeacher = teacherService.getListByUserNameManager(userItem.UserNameManager);
                     if(listTeacher!=null)
                     {
                         teacherService.RemoveRange(listTeacher.Select(o => o.ID).ToList());

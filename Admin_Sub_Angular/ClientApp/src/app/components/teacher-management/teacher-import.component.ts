@@ -44,7 +44,7 @@ export class TeacherImportComponent implements OnInit {
   @Input()
   isViewOnly: boolean;
 
-
+  lstFile = [];
 
 
 
@@ -79,12 +79,16 @@ export class TeacherImportComponent implements OnInit {
     this.alertService.showMessage(caption, message, MessageSeverity.error);
   }
   private save() {
+
     this.isSaving = true;
     this.alertService.startLoadingMessage('Saving changes...');
-    if (this.entity.dateBornUTC != undefined)
-      this.entity.dateBorn = this.entity.dateBornUTC.formatted;
-    this.entity.userCreate = this.accoutService.currentUser.userName;
-    this.teacherService.newUser(this.entity).subscribe(response => this.saveSuccessHelper(), error => this.saveFailedHelper(error));
+
+    let formData = new FormData();
+    formData.append('file', this.lstFile[0], this.lstFile[0].name);
+    formData.append('userCreate', this.accoutService.currentUser.userName);
+    formData.append('userNameManager', this.accoutService.currentUser.userNameManager);
+    this.teacherService.importExcel(formData)
+      .subscribe(response => this.saveSuccessHelper(), error => this.saveFailedHelper(error));
     this.isSaving = false;
     this.alertService.stopLoadingMessage();
   }
@@ -93,23 +97,18 @@ export class TeacherImportComponent implements OnInit {
   private saveSuccessHelper() {
     this.isSaving = false;
     this.alertService.stopLoadingMessage();
-    this.isChangePassword = false;
     this.showValidationErrors = false;
-    if (this.entity.id == null)
-      this.alertService.showMessage('Success', `Tài khoản \"${this.entity.teacherId}\" được tạo thành công`, MessageSeverity.success);
-    else
-      this.alertService.showMessage('Success', `Tài khoản \"${this.entity.teacherId}\" được cập nhật thành công`, MessageSeverity.success);
-    this.entity = new Teacher();
-    this.entity.activity = true;
+    this.alertService.showMessage('Success', `Import thành công`, MessageSeverity.success);
     if (this.changesSavedCallback) {
       this.changesSavedCallback();
     }
+    this.lstFile = [];
   }
 
 
   private saveFailedHelper(error: any) {
     console.log(error);
-   // this.isSaving = false;
+    // this.isSaving = false;
     //this.alertService.stopLoadingMessage();
     this.alertService.showMessage("Error", error.data, MessageSeverity.error);
 
@@ -118,20 +117,13 @@ export class TeacherImportComponent implements OnInit {
     }
   }
 
-  lstFile = [];
+
   addFile(item) {
     this.lstFile.push(item[0]);
 
-    let formData = new FormData();
-    formData.append('file', this.lstFile[0], this.lstFile[0].name);
-    console.log(this.lstFile);
-    console.log(formData);
-    this.teacherService.importExcel(formData)
-      .subscribe(response => this.saveSuccessHelper(), error => this.saveFailedHelper(error));
-    
-
   }
-
+   
+ 
 
 
   private cancel() {

@@ -115,12 +115,12 @@
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title float-left"><i class="fa fa-user-plus"></i> Import danh sách giáo viên</h4>
-          <button type="button" class="close float-right" title="Close" (click)="editorModal.hide()">
+          <button type="button" class="close float-right" title="Close" (click)="editorModalExcel.hide()">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <teacher-import></teacher-import>
+          <teacher-import #teacherImport></teacher-import>
         </div>
       </div>
     </div>

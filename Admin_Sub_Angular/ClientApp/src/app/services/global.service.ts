@@ -17,13 +17,10 @@ export class GlobalService {
   private readonly _url: string;
   private readonly _urlSoGiaoDucData;
   http: any;
-  //static getBaseUrl: any = 'http://localhost:55264/';
-  //static getManUrl: any = 'http://localhost:8889/';
 
-//static getBaseUrl: any = 'http://10.60.157.111:8013/';
-  //static getManUrl: any = 'http://10.60.157.111:8014/';
+//  static getBaseUrl: any = 'http://103.101.161.22:9999/';
+  static getBaseUrl: any = 'http://localhost:9999/';
 
-  static getBaseUrl: any = 'http://103.101.161.22:9999/';
   static getManUrl: any = 'http://apiquanly.tuyensinhdaucap.edu.vn/';
 
   constructor(http: HttpClient) {

@@ -16,6 +16,7 @@ import { UserInfoComponent } from '../controls/user-info.component';
 import { TeacherInfoComponent } from './teacher-info.component';
 import { TeacherService } from 'src/app/services/teacher.service';
 import { Teacher } from 'src/app/models/teacher.model';
+import { TeacherImportComponent } from './teacher-import.component';
 
 
 @Component({
@@ -53,7 +54,10 @@ export class TeachersManagementComponent implements OnInit, AfterViewInit {
   editorModalExcel: ModalDirective;
 
     @ViewChild('teacherEditor')
-    userEditor: TeacherInfoComponent;
+  userEditor: TeacherInfoComponent;
+
+  @ViewChild('teacherImport')
+  teacherImport: TeacherImportComponent;
 
     constructor( private pagerService: PagerService,
         private alertService: AlertService, 
@@ -90,8 +94,17 @@ export class TeachersManagementComponent implements OnInit, AfterViewInit {
         this.userEditor.changesCancelledCallback = () => {
             this.editedUser = null;
             this.sourceUser = null;
-            this.editorModal.hide();
-        };
+          this.editorModal.hide();
+      };
+
+      this.teacherImport.changesSavedCallback = () => {
+        this.loadData(1);
+        this.editorModalExcel.hide();
+      };
+      this.teacherImport.changesCancelledCallback = () => {
+        this.editorModalExcel.hide();
+      }
+
     }
 
 
