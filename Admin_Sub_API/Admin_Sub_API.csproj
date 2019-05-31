@@ -64,16 +64,4 @@
     <PackageReference Update="Microsoft.NETCore.App" Version="2.2.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Data.Access.Object">
-      <HintPath>..\..\..\..\..\Downloads\abcd\ViettelSME\Data.Access.Object\bin\Debug\netcoreapp2.2\Data.Access.Object.dll</HintPath>
-    </Reference>
-    <Reference Include="SME.Bussiness.Lib">
-      <HintPath>..\..\..\..\..\Downloads\abcd\ViettelSME\SME.Bussiness.Lib\bin\Debug\netcoreapp2.2\SME.Bussiness.Lib.dll</HintPath>
-    </Reference>
-    <Reference Include="SME.Utils">
-      <HintPath>..\..\..\..\..\Downloads\abcd\ViettelSME\SME.Bussiness.Lib\bin\Debug\netcoreapp2.2\SME.Utils.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

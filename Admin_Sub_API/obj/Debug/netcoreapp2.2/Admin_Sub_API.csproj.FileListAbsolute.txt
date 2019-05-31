@@ -86,3 +86,31 @@ C:\Users\nghiepnc\Desktop\api\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Su
 C:\Users\nghiepnc\Desktop\api\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.csproj.CopyComplete
 C:\Users\nghiepnc\Desktop\api\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.dll
 C:\Users\nghiepnc\Desktop\api\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.pdb
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\NLog.config
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\log4net.config
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\appsettings.json
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\Admin_Sub_API.deps.json
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\Admin_Sub_API.runtimeconfig.json
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\Admin_Sub_API.runtimeconfig.dev.json
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\Admin_Sub_API.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\Admin_Sub_API.pdb
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BaseMongoDB.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BaseMVC.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\Business.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\CoreLogs.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\CoreMongoDB.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BaseMongoDB.pdb
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\BaseMVC.pdb
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\Business.pdb
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\CoreLogs.pdb
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\bin\Debug\netcoreapp2.2\CoreMongoDB.pdb
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.csprojAssemblyReference.cache
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.csproj.CoreCompileInputs.cache
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.RazorAssemblyInfo.cache
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.RazorAssemblyInfo.cs
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.AssemblyInfoInputs.cache
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.AssemblyInfo.cs
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.RazorTargetAssemblyInfo.cache
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.csproj.CopyComplete
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Admin_Sub_API\obj\Debug\netcoreapp2.2\Admin_Sub_API.pdb

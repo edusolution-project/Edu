@@ -1823,7 +1823,7 @@
       ]
     },
     "runtime.native.System.Net.Http/4.3.0": {
-      "sha512": "ZVuZJqnnegJhd2k/PtAbbIcZ3aZeITq3sj06oKfMBSfphW3HDmk/t4ObvbOk/JA/swGR0LNqMksAh/f7gpTROg==",
+      "sha512": "guqHgQOK2eUgtJae2VKjNawBn1xjC0hfOt5wASHa60XHbIdCsQlqtvMsFG+3hy7yp88V+gi9fZCjubuDkeakcQ==",
       "type": "package",
       "path": "runtime.native.system.net.http/4.3.0",
       "files": [
@@ -4447,11 +4447,12 @@
       ]
     },
     "System.Security.Cryptography.Csp/4.3.0": {
-      "sha512": "yO2k5o+Z+DiFRBvvB9vdRRAGHi6bm02M9OWXfCqQ8K0UxD3Woc3svQheZfb7PoTEFs0kGacO0IzzMWsb6Mkeow==",
+      "sha512": "X4s/FCkEUnRGnwR3aSfVIkldBmtURMhmexALNTwpjklzxWU7yjMk7GHLKOZTNkgnWnE0q7+BCf9N2LVRWxewaA==",
       "type": "package",
       "path": "system.security.cryptography.csp/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/MonoAndroid10/_._",
@@ -4518,11 +4519,12 @@
       ]
     },
     "System.Security.Cryptography.OpenSsl/4.3.0": {
-      "sha512": "vOYy7Jv9KsG3ld2hLt0GoERd82SZi4BelrbXLwI9yFBYX7kpbvUCWYo4eyevk47cuJXZ9ZLVAryANcc7iY71aA==",
+      "sha512": "h4CEgOgv5PKVF/HwaHzJRiVboL2THYCou97zpmhjghx5frc7fIvlkY1jL+lnIQyChrJDMNEXS6r7byGif8Cy4w==",
       "type": "package",
       "path": "system.security.cryptography.openssl/4.3.0",
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt",
         "lib/netstandard1.6/System.Security.Cryptography.OpenSsl.dll",
@@ -5107,38 +5109,36 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\nghiepnc\\.nuget\\packages\\": {},
+    "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BasePublisherModels\\BasePublisherModels.csproj",
+      "projectUniqueName": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BasePublisherModels\\BasePublisherModels.csproj",
       "projectName": "BasePublisherModels",
-      "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BasePublisherModels\\BasePublisherModels.csproj",
-      "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\BasePublisherModels\\obj\\",
+      "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BasePublisherModels\\BasePublisherModels.csproj",
+      "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BasePublisherModels\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netstandard2.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Users\\nghiepnc\\Desktop\\flexcelnugets-trial": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
-              "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
+            "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
+              "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
             }
           }
         }

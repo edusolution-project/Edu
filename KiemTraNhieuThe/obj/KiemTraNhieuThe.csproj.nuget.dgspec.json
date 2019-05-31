@@ -1,30 +1,29 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\laptop2\\source\\repos\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj": {}
+    "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj": {}
   },
   "projects": {
-    "C:\\Users\\laptop2\\source\\repos\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj": {
+    "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\laptop2\\source\\repos\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj",
+        "projectUniqueName": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj",
         "projectName": "KiemTraNhieuThe",
-        "projectPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj",
-        "packagesPath": "C:\\Users\\laptop2\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\laptop2\\source\\repos\\Edu\\KiemTraNhieuThe\\obj\\",
+        "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\KiemTraNhieuThe\\KiemTraNhieuThe.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\KiemTraNhieuThe\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\laptop2\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp2.2"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {

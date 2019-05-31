@@ -71,6 +71,9 @@ import { TeacherInfoComponent } from './components/teacher-management/teacher-in
 import { MyDatePickerModule } from 'mydatepicker';
 import { TeacherService } from './services/teacher.service';
 import { TeacherImportComponent } from './components/teacher-management/teacher-import.component';
+import { StudentManagementComponent } from './components/student-management/student-management.component';
+import { StudentInfoComponent } from './components/student-management/student-info/student-info.component';
+import { StudentImportComponent } from './components/student-management/student-import/student-import.component';
 
 @NgModule({
   imports: [
@@ -122,7 +125,10 @@ import { TeacherImportComponent } from './components/teacher-management/teacher-
     GroupByPipe,
     TeachersManagementComponent,
     TeacherInfoComponent,
-    TeacherImportComponent
+    TeacherImportComponent,
+    StudentManagementComponent,
+    StudentInfoComponent,
+    StudentImportComponent
   ],
   providers: [
     { provide: ErrorHandler, useClass: AppErrorHandler },

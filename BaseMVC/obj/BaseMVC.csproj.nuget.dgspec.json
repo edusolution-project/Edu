@@ -1,40 +1,39 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj": {}
+    "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMVC\\BaseMVC.csproj": {}
   },
   "projects": {
-    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
+    "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
+        "projectUniqueName": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
         "projectName": "BaseMongoDB",
-        "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
-        "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\obj\\",
+        "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMongoDB\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netstandard2.0": {
             "projectReferences": {
-              "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj": {
-                "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj"
+              "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\Business\\Business.csproj": {
+                "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\Business\\Business.csproj"
               },
-              "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
-                "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
+              "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
+                "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj"
               }
             }
           }
@@ -71,37 +70,36 @@
         }
       }
     },
-    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj": {
+    "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMVC\\BaseMVC.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj",
+        "projectUniqueName": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMVC\\BaseMVC.csproj",
         "projectName": "BaseMVC",
-        "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\BaseMVC.csproj",
-        "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMVC\\obj\\",
+        "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMVC\\BaseMVC.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMVC\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netstandard2.0": {
             "projectReferences": {
-              "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
-                "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
+              "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj": {
+                "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\BaseMongoDB\\BaseMongoDB.csproj"
               },
-              "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj": {
-                "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj"
+              "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj": {
+                "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj"
               }
             }
           }
@@ -138,27 +136,26 @@
         }
       }
     },
-    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj": {
+    "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\Business\\Business.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj",
+        "projectUniqueName": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\Business\\Business.csproj",
         "projectName": "Business",
-        "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\Business.csproj",
-        "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\Business\\obj\\",
+        "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\Business\\Business.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\Business\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -190,27 +187,26 @@
         }
       }
     },
-    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj": {
+    "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj",
+        "projectUniqueName": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj",
         "projectName": "CoreLogs",
-        "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\CoreLogs.csproj",
-        "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreLogs\\obj\\",
+        "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreLogs\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -246,27 +242,26 @@
         }
       }
     },
-    "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
+    "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj",
+        "projectUniqueName": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj",
         "projectName": "CoreMongoDB",
-        "projectPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\CoreMongoDB.csproj",
-        "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\nghiepnc\\Desktop\\api\\Edu\\CoreMongoDB\\obj\\",
+        "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreMongoDB\\CoreMongoDB.csproj",
+        "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreMongoDB\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netstandard2.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {

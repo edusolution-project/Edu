@@ -1221,31 +1221,29 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\nghiepnc\\.nuget\\packages\\": {},
+    "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj",
+      "projectUniqueName": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj",
       "projectName": "CoreLogs",
-      "projectPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj",
-      "packagesPath": "C:\\Users\\nghiepnc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\nghiepnc\\source\\repos\\edusolution-project\\Edu\\CoreLogs\\obj\\",
+      "projectPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreLogs\\CoreLogs.csproj",
+      "packagesPath": "C:\\Users\\Hoang Thai Long\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Hoang Thai Long\\Source\\Repos\\edusolution-project\\Edu\\CoreLogs\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\nghiepnc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Hoang Thai Long\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netstandard2.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Users\\nghiepnc\\Desktop\\flexcelnugets-trial": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

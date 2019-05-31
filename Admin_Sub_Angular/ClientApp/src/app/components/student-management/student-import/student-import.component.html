@@ -1,0 +1,31 @@
+<div>
+  <form *ngIf="formResetToggle" name="userInfoForm" #f="ngForm" novalidate
+        (ngSubmit)="f.form.valid?save():showErrorAlert('','Bạn chưa nhập đầy đủ thông tin');">
+
+    <div class="form-group row">
+      <label class="col-md-2 col-form-label"> Chọn file excel</label>
+      <div class="col-md-10">
+        <div class="row">
+          <div class="col-md-10">
+            <div class="alert alert-info" role="alert">
+              <label class="btn btn-default btn-file">
+                <i class="fa fa-cloud-upload"></i> Lựa chọn file định dạng .xlsx
+                <input (change)="addFile($event.target.files)" name="file" type="file" style="display:none" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+              </label>
+            </div>
+          </div>
+
+        </div>
+        <div class="col-sm-7">
+          <div ngPreserveWhitespaces class="float-right">
+
+            <button type="button" (click)="cancel()" class="btn btn-danger" [disabled]="isSaving"><i class='fa fa-times'></i> {{'users.editor.Cancel' | translate}}</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+              <i *ngIf="!isSaving" class='fa fa-save'></i><i *ngIf="isSaving" class='fa fa-circle-o-notch fa-spin'></i> {{isSaving ? ('users.editor.Saving' | translate) : ('users.editor.Save' | translate)}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

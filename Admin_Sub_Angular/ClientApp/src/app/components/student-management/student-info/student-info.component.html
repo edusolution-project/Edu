@@ -1,0 +1,92 @@
+<div>
+  <form *ngIf="formResetToggle" name="userInfoForm" #f="ngForm" novalidate
+        (ngSubmit)="f.form.valid?save():showErrorAlert('','Bạn chưa nhập đầy đủ thông tin');">
+
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false" />
+      </div>
+    </div>
+<!-- ten dang nhap -->
+    <div class="form-group row has-feedback-icon">
+      <label [class.col-lg-3]="isViewOnly" [class.col-lg-2]="!isViewOnly" class="col-form-label">Mã học viên</label>
+      
+      <div [class.col-lg-9]="isViewOnly" [class.col-lg-10]="!isViewOnly">
+        <input type="text" attr.id="userName-{{uniqueId}}" name="userName" 
+               class="form-control" [ngClass]="{'is-valid': f.submitted && userName.valid, 'is-invalid' : f.submitted && !userName.valid}"
+               [(ngModel)]="entity.studentId" [disabled]="disabledTeacherID" #userName="ngModel" required minlength="2" maxlength="200" />
+        <i *ngIf="showValidationErrors && f.submitted" class="fa form-control-feedback" [ngClass]="{'fa-check': userName.valid, 'fa-times' : !userName.valid}" aria-hidden="true"></i>
+        <span *ngIf="showValidationErrors && f.submitted && !userName.valid" class="invalid-feedback">
+         Mã học viên không được để trống
+        </span>
+      </div>
+    </div>
+
+   
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false"  />
+      </div>
+    </div>
+    <div class="form-group row">
+      <label [class.col-lg-3]="isViewOnly" [class.col-lg-2]="!isViewOnly" class="col-form-label" for="fullName-{{uniqueId}}">Họ và tên</label>
+      <div [class.col-lg-9]="isViewOnly" [class.col-lg-10]="!isViewOnly">
+        <input type="text" attr.id="fullName-{{uniqueId}}" name="fullName"  class="form-control" [(ngModel)]="entity.fullName" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false"  />
+      </div>
+    </div>
+  <div class="form-group row">
+      <label [class.col-lg-3]="isViewOnly" [class.col-lg-2]="!isViewOnly" class="col-form-label" for="phoneNumber-{{uniqueId}}">Ngày sinh</label>
+      
+      <div [class.col-lg-9]="isViewOnly" [class.col-lg-10]="!isViewOnly" >
+        <my-date-picker [(ngModel)]="entity.dateBornUTC" [options]="myDatePickerOptions"  #NgaySinh="ngModel" placeholder="Nhập ngày sinh vd 30/10/2014" name="NgaySinh"></my-date-picker>
+     
+      </div>
+    </div>
+
+    <div *ngIf="!isViewOnly" class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false"  />
+      </div>
+    </div>
+    <div class="form-group row">
+      <label [class.col-lg-3]="isViewOnly" [class.col-lg-2]="!isViewOnly" class="col-form-label" for="phoneNumber-{{uniqueId}}">Lớp học</label>
+      
+      <div [class.col-lg-9]="isViewOnly" [class.col-lg-10]="!isViewOnly">
+        <input type="text" attr.id="phoneNumber-{{uniqueId}}" name="phoneNumber" class="form-control" [(ngModel)]="entity.classes" />
+      </div>
+    </div>
+
+    <div  class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false"  />
+      </div>
+    </div>
+
+    <div  class="form-group row">
+      <div class="col-sm-5">
+        <div  class="float-left">
+          <div class="form-check user-enabled">
+            <input class="form-check-input" type="checkbox" id="idEnabled" name="isEnabled" checked [(ngModel)]="entity.activity">
+            <label for="idEnabled" class="form-check-label">Hoạt động</label>
+          </div>
+         
+        </div>
+      </div>
+      <div class="col-sm-7">
+        <div ngPreserveWhitespaces class="float-right">
+          
+          <button type="button" (click)="cancel()" class="btn btn-danger" [disabled]="isSaving"><i class='fa fa-times'></i> {{'users.editor.Cancel' | translate}}</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+            <i *ngIf="!isSaving" class='fa fa-save'></i><i *ngIf="isSaving" class='fa fa-circle-o-notch fa-spin'></i> {{isSaving ? ('users.editor.Saving' | translate) : ('users.editor.Save' | translate)}}
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="clearfix"></div>
+  </form>
+</div>
