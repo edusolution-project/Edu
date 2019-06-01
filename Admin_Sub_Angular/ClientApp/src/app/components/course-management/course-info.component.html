@@ -1,0 +1,161 @@
+<div>
+  <form *ngIf="formResetToggle" name="userInfoForm" #f="ngForm" novalidate
+        (ngSubmit)="f.form.valid?save():showErrorAlert('','Bạn chưa nhập đầy đủ thông tin');">
+
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false" />
+      </div>
+    </div>
+    <!-- ten dang nhap -->
+    <div class="form-group row has-feedback-icon">
+
+      <label class="col-form-label col-lg-2">Môn học</label>
+      <div class="col-lg-4">
+        <ngx-select [items]="listModSubject"
+                    [(ngModel)]="entity.subjectID"
+                    required #gradeID="ngModel"
+                    name="subjectID">
+        </ngx-select>
+        <span *ngIf="showValidationErrors && f.submitted && !userName.valid" class="invalid-feedback">
+          Mã giáo viên không được để trống
+        </span>
+      </div>
+      <label class="col-form-label col-lg-2">Cấp độ</label>
+      <div class="col-lg-4">
+        <ngx-select [items]="listModGradle"
+                    [(ngModel)]="entity.gradeID"
+                    required #gradeID="ngModel"
+                    name="gradeID">
+        </ngx-select>
+        
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false" />
+      </div>
+    </div>
+    <div class="form-group row has-feedback-icon">
+      <label class="col-form-label col-lg-2">Giáo trình</label>
+      <div class="col-lg-4">
+        <ngx-select [items]="listModProgram"
+                    [(ngModel)]="entity.programID"
+                    required #programID="ngModel"
+                    name="programID">
+        </ngx-select>
+        <span *ngIf="showValidationErrors && f.submitted && !userName.valid" class="invalid-feedback">
+          Giáo trình không được để trống
+        </span>
+      </div>
+      <label class="col-form-label col-lg-2">Khóa học</label>
+      <div class="col-lg-4">
+        <ngx-select [items]="listCourse"
+                    [(ngModel)]="entity.courseID"
+                    required #courseID="ngModel"
+                    name="courseID">
+        </ngx-select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false" />
+      </div>
+    </div>
+    <div class="form-group row">
+      <label [class.col-lg-3]="isViewOnly" [class.col-lg-2]="!isViewOnly" class="col-form-label">Mô tả</label>
+
+      <div [class.col-lg-9]="isViewOnly" [class.col-lg-10]="!isViewOnly">
+        <input type="text"  name="name" class="form-control" [(ngModel)]="entity.description" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false" />
+      </div>
+    </div>
+    <div class="form-group row has-feedback-icon">
+      <label class="col-form-label col-lg-2">Ngày bắt đầu</label>
+      <div class="col-lg-4">
+
+        <my-date-picker [(ngModel)]="entity.createdDateUTC" [options]="myDatePickerOptions" #createdDate="ngModel"  name="NgayBatDau"></my-date-picker>
+        <span *ngIf="showValidationErrors && f.submitted && !userName.valid" class="invalid-feedback">
+          Ngày bắt đầu không được để trống
+        </span>
+      </div>
+      <label class="col-form-label col-lg-2">Ngày kết thúc</label>
+      <div class="col-lg-4">
+        <my-date-picker [(ngModel)]="entity.endedDateUTC" [options]="myDatePickerOptions" #endedDate="ngModel" name="NgayKetThuc"></my-date-picker>
+      </div>
+      <span *ngIf="showValidationErrors && f.submitted && !userName.valid" class="invalid-feedback">
+        Ngày kết thúc không được để trống
+      </span>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false" />
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label [class.col-lg-3]="isViewOnly" [class.col-lg-2]="!isViewOnly" class="col-form-label">Giáo viên</label>
+
+      <div [class.col-lg-9]="isViewOnly" [class.col-lg-10]="!isViewOnly">
+        <ngx-select [items]="listTeacher"
+                    [(ngModel)]="entity.teacherID"
+                    required #teacherID="ngModel"
+                    name="teacherID">
+        </ngx-select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false" />
+      </div>
+    </div>
+    <div class="form-group row">
+      <label [class.col-lg-3]="isViewOnly" [class.col-lg-2]="!isViewOnly" class="col-form-label">Học viên</label>
+
+      <div [class.col-lg-9]="isViewOnly" [class.col-lg-10]="!isViewOnly">
+        <ngx-select [items]="listStudent"
+                    [(ngModel)]="entity.studentID"
+                     #studentID="ngModel" [multiple]="true"
+                    name="studentID">
+        </ngx-select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false" />
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="col-sm-5">
+        <div class="float-left">
+          <div class="form-check user-enabled">
+            <input class="form-check-input" type="checkbox" id="idEnabled" name="isEnabled" checked [(ngModel)]="entity.activity">
+            <label for="idEnabled" class="form-check-label">Hoạt động</label>
+          </div>
+
+        </div>
+      </div>
+      <div class="col-sm-7">
+        <div ngPreserveWhitespaces class="float-right">
+
+          <button type="button" (click)="cancel()" class="btn btn-danger" [disabled]="isSaving"><i class='fa fa-times'></i> {{'users.editor.Cancel' | translate}}</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+            <i *ngIf="!isSaving" class='fa fa-save'></i><i *ngIf="isSaving" class='fa fa-circle-o-notch fa-spin'></i> {{isSaving ? ('users.editor.Saving' | translate) : ('users.editor.Save' | translate)}}
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="clearfix"></div>
+  </form>
+</div>

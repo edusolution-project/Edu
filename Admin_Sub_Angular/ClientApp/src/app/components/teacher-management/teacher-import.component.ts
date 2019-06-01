@@ -107,7 +107,6 @@ export class TeacherImportComponent implements OnInit {
 
 
   private saveFailedHelper(error: any) {
-    console.log(error);
     // this.isSaving = false;
     //this.alertService.stopLoadingMessage();
     this.alertService.showMessage("Error", error.data, MessageSeverity.error);

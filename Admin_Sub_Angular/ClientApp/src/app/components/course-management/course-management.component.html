@@ -1,0 +1,114 @@
+<div>
+  <div class="row control-box">
+    <div class="col-lg-8">
+      <div class="form-group search-box">
+        <search-box (searchChange)="onSearchChanged($event)" placeholder="Tìm kiếm">></search-box>
+      </div>
+    </div>
+    <div class="col-lg-4 pr-lg-5">
+      <ul class="nav flex-column flex-lg-row justify-content-end">
+        <li class="nav-item toolbaritem">
+          <a class="nav-link" href="javascript:;" (click)="newUser()">
+            <i class="fa fa-plus-circle"></i> Tạo mới
+          </a>
+        </li>
+
+      </ul>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <td>
+            STT
+          </td>
+          <td>
+           Mã Khóa học
+          </td>
+
+          <td>
+            Mô tả
+          </td>
+          <td>Mã giáo viên</td>
+          <td>Ngày bắt đầu</td>
+          <td>Ngày kết thúc</td>
+          <td>Trạng thái</td>
+          <td>Thao tác</td>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr *ngFor="let item of rows; let i = index" style="cursor:pointer">
+          <td>
+            {{i+1+(pager.currentPage-1) *pager.pageSize}}
+          </td>
+          <td>
+            {{item.courseID}}
+          </td>
+
+          <td>
+            {{item.description}}
+          </td>
+          <td>{{item.teacherID}}</td>
+          <td>{{item.createdDate}}</td>
+          <td>
+            {{item.endedDate}}
+          </td>
+
+          <td>
+            {{item.activity==false?'Không hoạt đông':"Hoạt động"}}
+          </td>
+          <td>
+            <a title="Sửa" ng-if="isEdit(item)" (click)="edit(item)"><i class="fa fa-pencil-square-o blue big120"> &nbsp;&nbsp;</i></a>
+
+            <a title="Xóa" ng-if="isEdit(item)" (click)="delete(item)"><i class="fa fa-trash blue big120">   </i></a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ul *ngIf="pager.pages && pager.pages.length" class="pagination">
+      <li [ngClass]="{disabled:pager.currentPage === 1}">
+        <a (click)="loadData(1)">Trang đầu</a>
+      </li>
+      <li [ngClass]="{disabled:pager.currentPage === 1}">
+        <a (click)="loadData(pager.currentPage - 1)">Trang trước</a>
+      </li>
+      <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}">
+        <a (click)="loadData(page)">{{page}}</a>
+      </li>
+      <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+        <a (click)="loadData(pager.currentPage + 1)">Trang tiếp</a>
+      </li>
+      <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+        <a (click)="loadData(pager.totalPages)">Trang cuối</a>
+      </li>
+    </ul>
+  </div>
+
+
+
+
+  <div class="modal fade" bsModal #editorModal="bs-modal" (onHidden)="onEditorModalHidden()" [config]="{backdrop: 'static'}" tabindex="-1">
+    <div class="modal-dialog modal-lg" style="max-width:1000px">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 *ngIf="!editingUserName" class="modal-title float-left"><i class="fa fa-user-plus"></i> Tạo khóa học</h4>
+          <h4 *ngIf="editingUserName" class="modal-title float-left"><i class="fa fa-user-circle-o"></i> Chỉnh sửa khóa học</h4>
+          <button type="button" class="close float-right" title="Close" (click)="editorModal.hide()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <course-info #courseEditor></course-info>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+

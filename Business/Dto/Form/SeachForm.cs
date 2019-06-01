@@ -11,6 +11,9 @@ namespace Business.Dto.Form
         public string UserName { get; set; }
 
         public string Role { get; set; }
+        public string subjectID { get; set; }
+        public string gradleID { get; set; }
+        public string programID { get; set; }
         public int currentPage { get; set; }
         public int pageSize { get; set; }
 

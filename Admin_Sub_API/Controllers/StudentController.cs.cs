@@ -18,19 +18,24 @@ namespace SME.API.Controllers
 
     //[ApiController]
     // [SMEExceptionFilter]
-    public class AccountController : ControllerBase
+    public class StudentController : ControllerBase
     {
 
 
 
         CPUserSubService _userService;
         AccessTokenService _accessTokenService;
-        public AccountController(
-        CPUserSubService userService, AccessTokenService accessTokenService
+        StudentService studentSerVice;
+
+        public StudentController(
+        CPUserSubService userService, 
+        AccessTokenService accessTokenService,
+        StudentService studentSerVice
        )
         {
             _userService = userService;
             _accessTokenService = accessTokenService;
+            this.studentSerVice = studentSerVice;
         }
 
         [HttpPost]
@@ -41,7 +46,24 @@ namespace SME.API.Controllers
             return _userService.getListUserSub(seachForm);
         }
 
-        
+        [HttpPost]
+        public List<StudentEntity> getAll([FromBody]SeachForm seachForm)
+        {
+
+
+            return studentSerVice.getListALL();
+        }
+
+        [HttpPost]
+        public Task<BaseResponse<StudentEntity>> getList([FromBody]SeachForm seachForm)
+        {
+            var userItem = _userService.GetItemByUserName(seachForm.UserName);
+            seachForm.UserName = userItem.UserNameManager;
+
+            return studentSerVice.getList(seachForm);
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody]CPUserSubEntity item)
         {

@@ -19,6 +19,7 @@ import { AuthGuard } from './services/auth-guard.service';
 import { Utilities } from './services/utilities';
 import { UsersManagementComponent } from './components/controls/users-management.component';
 import { TeachersManagementComponent } from './components/teacher-management/teacher-management.component';
+import {  CourseManagementComponent } from './components/course-management/course-management.component';
 
 
 
@@ -54,6 +55,7 @@ const routes: Routes = [
   { path: 'users', component: UsersManagementComponent, data: { title: 'Quản lý tài khoản' } },
   { path: 'teacher-manager', component: TeachersManagementComponent, data: { title: 'Quản lý giáo viên' } },
   { path: 'student-manager', component: TeachersManagementComponent, data: { title: 'Quản lý học viên' } },
+  { path: 'course-manager', component: CourseManagementComponent, data: { title: 'Quản lý khóa học' } },
   { path: 'home', redirectTo: '/', pathMatch: 'full' },
   { path: '**', component: NotFoundComponent, data: { title: 'Page Not Found' } }
 ];

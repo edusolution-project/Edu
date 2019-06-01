@@ -71,6 +71,9 @@ import { TeacherInfoComponent } from './components/teacher-management/teacher-in
 import { MyDatePickerModule } from 'mydatepicker';
 import { TeacherService } from './services/teacher.service';
 import { TeacherImportComponent } from './components/teacher-management/teacher-import.component';
+import { CourseManagementComponent } from './components/course-management/course-management.component';
+import { CourseInfoComponent } from './components/course-management/course-info.component';
+import { CourseService } from './services/course.service';
 
 @NgModule({
   imports: [
@@ -122,7 +125,9 @@ import { TeacherImportComponent } from './components/teacher-management/teacher-
     GroupByPipe,
     TeachersManagementComponent,
     TeacherInfoComponent,
-    TeacherImportComponent
+    TeacherImportComponent,
+    CourseManagementComponent,
+    CourseInfoComponent
   ],
   providers: [
     { provide: ErrorHandler, useClass: AppErrorHandler },
@@ -139,7 +144,8 @@ import { TeacherImportComponent } from './components/teacher-management/teacher-
     EndpointFactory,
     GlobalService,
     PagerService,
-    TeacherService
+    TeacherService,
+    CourseService
   ],
   bootstrap: [AppComponent]
 })

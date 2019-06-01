@@ -11,43 +11,57 @@ namespace BaseMongoDB.Database
 {
     public class StudentEntity : EntityBase
     {
+        public string StudentId { get; set; }
+        
         public string UserName { get; set; }
         public string FullName { get; set; }
         public string UserNameManager { get; set; }
         public string DateBorn { get; set; }
         public string Technique { get; set; }
+        public string Classes { get; set; }
 
         public bool Activity { get; set; }
         public string UserCreate { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
     }
-    public class StudentEntityService : ServiceBase<StudentEntity>
+    public class StudentService : ServiceBase<StudentEntity>
     {
-        public StudentEntityService(IConfiguration config) : base(config, "Student")
+        public StudentService(IConfiguration config) : base(config, "Student")
         {
 
         }
 
-        public StudentEntityService(IConfiguration config, string tableName) : base(config, tableName)
+        public StudentService(IConfiguration config, string tableName) : base(config, tableName)
         {
         }
 
-
-
-        public StudentEntity GetItemByUserName(string UserName)
+        public async Task<BaseResponse<StudentEntity>> getList(SeachForm model)
         {
-            return CreateQuery().Find(o => o.UserName == UserName)?.FirstOrDefault();
+            try
+            {
+                BaseResponse<StudentEntity> result = new BaseResponse<StudentEntity>();
+                var query = CreateQuery().Find(o => o.UserNameManager == model.UserName);
+                result.TotalPage = query.Count();
+                await query.Skip(model.pageSize * (model.currentPage - 1)).Limit(model.pageSize).ToListAsync();
+                result.Data = query.ToList();
+                return result;
+
+
+            }
+            catch (Exception ex)
+            {
+                string s = ex.Message;
+            }
+            return null;
         }
-
-        public BaseResponse<StudentEntity> getListUserSub(SeachForm model)
+        public List<StudentEntity> getListALL()
         {
-            BaseResponse<StudentEntity> result = new BaseResponse<StudentEntity>();
-            var query = CreateQuery().Find(o => o.UserNameManager == model.UserName).ToList();
-            result.TotalPage = query.Count();
-            query = query.Skip(model.pageSize * (model.currentPage - 1)).Take(model.pageSize).ToList();
-            result.Data = query;
+            var result = new List<StudentEntity>();
+            var query = CreateQuery().Find(o => o.Activity == true);
+            result = query.ToList();
             return result;
-
         }
+
+
     }
 }

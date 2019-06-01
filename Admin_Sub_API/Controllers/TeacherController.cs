@@ -25,8 +25,6 @@ namespace SME.API.Controllers
     public class TeacherController : ControllerBase
     {
 
-
-
         TeacherService teacherService;
         AccessTokenService _accessTokenService;
         CPUserSubService userService;
@@ -42,9 +40,18 @@ namespace SME.API.Controllers
         [HttpPost]
         public Task<BaseResponse<TeacherEntity>> getList([FromBody]SeachForm seachForm)
         {
-
+            var userItem = userService.GetItemByUserName(seachForm.UserName);
+            seachForm.UserName = userItem.UserNameManager;
 
             return teacherService.getList(seachForm);
+        }
+
+
+        [HttpPost]
+        public List<TeacherEntity> getAll([FromBody]SeachForm seachForm)
+        {
+
+            return teacherService.getListAll();
         }
 
 
@@ -168,37 +175,6 @@ namespace SME.API.Controllers
 
         }
 
-        //[HttpPost]
-        //public IList<TeacherEntity> ImportCustomer()
-        //{
-
-
-        //  //  string rootFolder = _hostingEnvironment.WebRootPath;
-        //    string fileName = @"ImportCustomers.xlsx";
-        //    FileInfo file = new FileInfo(Path.Combine("", fileName));
-
-        //    using (ExcelPackage package = new ExcelPackage(file))
-        //    {
-        //        ExcelWorksheet workSheet = package.Workbook.Worksheets["Customer"];
-        //        int totalRows = workSheet.Dimension.Rows;
-
-        //        List<TeacherEntity> customerList = new List<TeacherEntity>();
-
-        //        for (int i = 2; i <= totalRows; i++)
-        //        {
-        //            //customerList.Add(new TeacherEntity
-        //            //{
-        //            //    CustomerName = workSheet.Cells[i, 1].Value.ToString(),
-        //            //    CustomerEmail = workSheet.Cells[i, 2].Value.ToString(),
-        //            //    CustomerCountry = workSheet.Cells[i, 3].Value.ToString()
-        //            //});
-        //        }
-
-        //       // _db.Customers.AddRange(customerList);
-        //       // _db.SaveChanges();
-
-        //        return customerList;
-        //    }
-        //}
+       
     }
 }

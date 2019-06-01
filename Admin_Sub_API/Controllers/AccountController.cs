@@ -18,14 +18,14 @@ namespace SME.API.Controllers
 
     //[ApiController]
     // [SMEExceptionFilter]
-    public class StudentController : ControllerBase
+    public class AccountController : ControllerBase
     {
 
 
 
         CPUserSubService _userService;
         AccessTokenService _accessTokenService;
-        public StudentController(
+        public AccountController(
         CPUserSubService userService, AccessTokenService accessTokenService
        )
         {

@@ -56,7 +56,14 @@ namespace BaseMongoDB.Database
             var query = CreateQuery().Find(o => o.UserNameManager == userNameManager);
             result = query.ToList();
             return result;
+        }
 
+        public List<TeacherEntity> getListAll()
+        {
+            var result = new List<TeacherEntity>();
+            var query = CreateQuery().Find(o => o.Activity == true);
+            result = query.ToList();
+            return result;
         }
     }
 }
