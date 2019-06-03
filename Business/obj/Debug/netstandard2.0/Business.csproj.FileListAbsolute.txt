@@ -32,3 +32,4 @@ C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Business\obj\Debug
 C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Business\obj\Debug\netstandard2.0\Business.AssemblyInfo.cs
 C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Business\obj\Debug\netstandard2.0\Business.dll
 C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Business\obj\Debug\netstandard2.0\Business.pdb
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\Business\obj\Debug\netstandard2.0\Business.csprojAssemblyReference.cache

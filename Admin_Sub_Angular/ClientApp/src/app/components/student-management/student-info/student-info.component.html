@@ -14,7 +14,7 @@
       <div [class.col-lg-9]="isViewOnly" [class.col-lg-10]="!isViewOnly">
         <input type="text" attr.id="userName-{{uniqueId}}" name="userName" 
                class="form-control" [ngClass]="{'is-valid': f.submitted && userName.valid, 'is-invalid' : f.submitted && !userName.valid}"
-               [(ngModel)]="entity.studentId" [disabled]="disabledTeacherID" #userName="ngModel" required minlength="2" maxlength="200" />
+               [(ngModel)]="entity.studentId" [disabled]="disabledStudentID" #userName="ngModel" required minlength="2" maxlength="200" />
         <i *ngIf="showValidationErrors && f.submitted" class="fa form-control-feedback" [ngClass]="{'fa-check': userName.valid, 'fa-times' : !userName.valid}" aria-hidden="true"></i>
         <span *ngIf="showValidationErrors && f.submitted && !userName.valid" class="invalid-feedback">
          Mã học viên không được để trống

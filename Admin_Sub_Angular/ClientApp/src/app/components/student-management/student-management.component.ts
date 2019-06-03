@@ -50,7 +50,7 @@ export class StudentManagementComponent implements OnInit {
 	@ViewChild('editorModalExcel')
 	editorModalExcel: ModalDirective;
 
-    @ViewChild('teacherEditor')
+    @ViewChild('studentEditor')
     userEditor: StudentInfoComponent;
   constructor(private pagerService: PagerService,
         private alertService: AlertService, 

@@ -41,8 +41,6 @@ namespace SME.API.Controllers
         [HttpPost]
         public Task<BaseResponse<TeacherEntity>> getList([FromBody]SeachForm seachForm)
         {
-
-
             return teacherService.getList(seachForm);
         }
 

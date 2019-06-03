@@ -29,7 +29,7 @@ export class StudentInfoComponent implements OnInit {
   private userCreate: User = new User();
   private userEdit: Student;
   private allRoles: Role[] = [];
-  private disabledTeacherID=false;
+  private disabledStudentID=false;
   public formResetToggle = true;
   public changesSavedCallback: () => void;
   public changesFailedCallback: () => void;
@@ -133,7 +133,7 @@ export class StudentInfoComponent implements OnInit {
       this.userEdit = new Student();
       
       Object.assign(this.entity, user);
-     this.disabledTeacherID=true;
+     this.disabledStudentID=true;
 	if(this.entity.dateBorn){
       let item=this.entity.dateBorn.split('/');
       let itemtemp=this.entity.dateBorn.split('/');
