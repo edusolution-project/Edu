@@ -12,17 +12,17 @@ export class StudentService {
   }
 
 
-  newUser(teacher: Student) {
-    return this.restangular.all('Student').all('Create').post(teacher);
+  newUser(student: Student) {
+    return this.restangular.all('Student').all('Create').post(student);
   }
 
-  getList(teacher: Student) {
-    return this.restangular.all('Student').all('getList').post(teacher);
+  getList(student: Student) {
+    return this.restangular.all('Student').all('getList').post(student);
   }
 
 
-  deleteUser(teacher: Student) {
-    return this.restangular.all('Student').all('Delete').post(teacher);
+  deleteUser(student: Student) {
+    return this.restangular.all('Student').all('Delete').post(student);
   }
 
   importExcel(formData: FormData) {
