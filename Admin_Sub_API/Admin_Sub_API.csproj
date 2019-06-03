@@ -26,10 +26,14 @@
     <PackageReference Include="DotNetCore.NPOI" Version="1.2.1" />
     <PackageReference Include="EPPlus.Core" Version="1.5.4" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.1" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.HttpOverrides" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="2.2.6" />
@@ -61,19 +65,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.NETCore.App" Version="2.2.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Data.Access.Object">
-      <HintPath>..\..\..\..\..\Downloads\abcd\ViettelSME\Data.Access.Object\bin\Debug\netcoreapp2.2\Data.Access.Object.dll</HintPath>
-    </Reference>
-    <Reference Include="SME.Bussiness.Lib">
-      <HintPath>..\..\..\..\..\Downloads\abcd\ViettelSME\SME.Bussiness.Lib\bin\Debug\netcoreapp2.2\SME.Bussiness.Lib.dll</HintPath>
-    </Reference>
-    <Reference Include="SME.Utils">
-      <HintPath>..\..\..\..\..\Downloads\abcd\ViettelSME\SME.Bussiness.Lib\bin\Debug\netcoreapp2.2\SME.Utils.dll</HintPath>
-    </Reference>
+    <PackageReference Update="Microsoft.NETCore.App" Version="2.2.0" />
   </ItemGroup>
 
 </Project>

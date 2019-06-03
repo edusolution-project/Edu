@@ -38,6 +38,7 @@ namespace SME.API.Controllers
         }
 
         [HttpPost]
+        [Obsolete]
         public Task<BaseResponse<TeacherEntity>> getList([FromBody]SeachForm seachForm)
         {
             var userItem = userService.GetItemByUserName(seachForm.UserName);

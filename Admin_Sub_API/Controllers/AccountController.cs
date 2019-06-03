@@ -34,6 +34,7 @@ namespace SME.API.Controllers
         }
 
         [HttpPost]
+        [Obsolete]
         public Task<BaseResponse<CPUserSubEntity>> getSubUser([FromBody]SeachForm seachForm)
         {
            
@@ -58,7 +59,7 @@ namespace SME.API.Controllers
 
             item.Pass = "123";
                 item.Pass = Security.Encrypt(item.Pass);
-                _userService.Add(item);
+                await _userService.AddAsync(item);
 
             return NoContent() ;
 
