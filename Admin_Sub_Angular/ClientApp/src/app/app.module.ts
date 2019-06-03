@@ -74,6 +74,10 @@ import { TeacherImportComponent } from './components/teacher-management/teacher-
 import { CourseManagementComponent } from './components/course-management/course-management.component';
 import { CourseInfoComponent } from './components/course-management/course-info.component';
 import { CourseService } from './services/course.service';
+import {StudentService}from'./services/student.service';
+import { StudentImportComponent } from'./components/student-management/student-import/student-import.component';
+import { StudentInfoComponent} from'./components/student-management/student-info/student-info.component';
+import { StudentManagementComponent} from'./components/student-management/student-management.component';
 
 @NgModule({
   imports: [
@@ -127,7 +131,10 @@ import { CourseService } from './services/course.service';
     TeacherInfoComponent,
     TeacherImportComponent,
     CourseManagementComponent,
-    CourseInfoComponent
+    CourseInfoComponent,
+    StudentImportComponent,
+    StudentInfoComponent,
+    StudentManagementComponent
   ],
   providers: [
     { provide: ErrorHandler, useClass: AppErrorHandler },
@@ -145,7 +152,8 @@ import { CourseService } from './services/course.service';
     GlobalService,
     PagerService,
     TeacherService,
-    CourseService
+    CourseService,
+    StudentService
   ],
   bootstrap: [AppComponent]
 })

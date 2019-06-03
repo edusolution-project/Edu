@@ -20,7 +20,7 @@ import { Utilities } from './services/utilities';
 import { UsersManagementComponent } from './components/controls/users-management.component';
 import { TeachersManagementComponent } from './components/teacher-management/teacher-management.component';
 import {  CourseManagementComponent } from './components/course-management/course-management.component';
-
+import {  StudentManagementComponent } from './components/student-management/student-management.component';
 
 
 export class LowerCaseUrlSerializer extends DefaultUrlSerializer {
@@ -54,7 +54,7 @@ const routes: Routes = [
   { path: 'about', component: AboutComponent, data: { title: 'About Us' } },
   { path: 'users', component: UsersManagementComponent, data: { title: 'Quản lý tài khoản' } },
   { path: 'teacher-manager', component: TeachersManagementComponent, data: { title: 'Quản lý giáo viên' } },
-  { path: 'student-manager', component: TeachersManagementComponent, data: { title: 'Quản lý học viên' } },
+  { path: 'student-manager', component: StudentManagementComponent, data: { title: 'Quản lý học viên' } },
   { path: 'course-manager', component: CourseManagementComponent, data: { title: 'Quản lý khóa học' } },
   { path: 'home', redirectTo: '/', pathMatch: 'full' },
   { path: '**', component: NotFoundComponent, data: { title: 'Page Not Found' } }
