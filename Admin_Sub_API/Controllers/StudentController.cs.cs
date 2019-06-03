@@ -20,12 +20,12 @@ namespace SME.API.Controllers
 
     //[ApiController]
     // [SMEExceptionFilter]
-    public class AccountController : ControllerBase
+    public class StudentController : ControllerBase
     {
         StudentEntityService _studentService;
         CPUserSubService _userService;
         AccessTokenService _accessTokenService;
-        public AccountController(
+        public StudentController(
         CPUserSubService userService, AccessTokenService accessTokenService, StudentEntityService studentEntityService
        )
         {
