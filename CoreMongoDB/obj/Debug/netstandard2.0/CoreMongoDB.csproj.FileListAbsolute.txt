@@ -76,3 +76,19 @@ C:\Users\nghiepnc\Desktop\api\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongo
 C:\Users\nghiepnc\Desktop\api\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csproj.CopyComplete
 C:\Users\nghiepnc\Desktop\api\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.dll
 C:\Users\nghiepnc\Desktop\api\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.pdb
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\bin\Debug\netstandard2.0\CoreMongoDB.deps.json
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\bin\Debug\netstandard2.0\CoreMongoDB.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\bin\Debug\netstandard2.0\CoreMongoDB.pdb
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\bin\Debug\netstandard2.0\System.Runtime.Caching.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\bin\Debug\netstandard2.0\System.Configuration.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\bin\Debug\netstandard2.0\System.Security.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\bin\Debug\netstandard2.0\System.Runtime.Caching.xml
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\bin\Debug\netstandard2.0\System.Configuration.xml
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\bin\Debug\netstandard2.0\System.Security.xml
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csprojAssemblyReference.cache
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csproj.CoreCompileInputs.cache
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.AssemblyInfoInputs.cache
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.AssemblyInfo.cs
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.csproj.CopyComplete
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.dll
+C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreMongoDB\obj\Debug\netstandard2.0\CoreMongoDB.pdb
