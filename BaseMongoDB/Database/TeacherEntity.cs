@@ -39,6 +39,7 @@ namespace BaseMongoDB.Database
             return CreateQuery().Find(o => o.TeacherId == UserName)?.FirstOrDefault();
         }
 
+        [Obsolete]
         public async Task<BaseResponse<TeacherEntity>> getList(SeachForm model)
         {
             BaseResponse<TeacherEntity> result = new BaseResponse<TeacherEntity>();

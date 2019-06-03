@@ -44,6 +44,7 @@ namespace BaseMongoDB.Database
             return CreateQuery().Find(o => o.UserName == UserName)?.FirstOrDefault();
         }
 
+        [Obsolete]
         public async Task<BaseResponse<CPUserSubEntity>> getListUserSub(SeachForm model)
         {
            

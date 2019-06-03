@@ -43,7 +43,7 @@ namespace BaseMongoDB.Factory
             //nghiepnc add
             services.AddScoped<AccessTokenService>();
             services.AddScoped<TeacherService>();
-            services.AddScoped<StudentService>();
+            services.AddScoped<StudentEntityService>();
             services.AddScoped<CPUserSubService>();
             services.AddScoped<CourseService>();
             services.AddScoped<ModCourseService_nghiepnc>();
