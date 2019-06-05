@@ -1,9 +1,0 @@
-C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreLogs\bin\Debug\netstandard2.0\CoreLogs.deps.json
-C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreLogs\bin\Debug\netstandard2.0\CoreLogs.dll
-C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreLogs\bin\Debug\netstandard2.0\CoreLogs.pdb
-C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.csprojAssemblyReference.cache
-C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.csproj.CoreCompileInputs.cache
-C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.AssemblyInfoInputs.cache
-C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.AssemblyInfo.cs
-C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.dll
-C:\Users\Hoang Thai Long\Source\Repos\edusolution-project\Edu\CoreLogs\obj\Debug\netstandard2.0\CoreLogs.pdb
