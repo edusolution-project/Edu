@@ -1,0 +1,15 @@
+
+Time :  2019-04-04 16:30:59======================
+{"ID":0,"ParrentLayout":"vswMain","PartialView":null,"LayoutName":"2222222","CModule":"MVCBase.ClientControllers.CAdvController","Record":1,"IsDynamic":true,"Order":0,"IsBody":false,"PartialID":null,"Name":"ĐK : Quảng cáo/liên kết","Command":"AddNewItemDynamic","TypeView":"CAdv"}
+[{"Key":"Record","Value":["1","1"]},{"Key":"ParrentLayout","Value":["vswMain"]},{"Key":"CModule","Value":["MVCBase.ClientControllers.CAdvController"]},{"Key":"TypeView","Value":["CAdv"]},{"Key":"name","Value":["ĐK : Quảng cáo/liên kết"]},{"Key":"LayoutName","Value":["2222222"]},{"Key":"IsDynamic","Value":["true"]},{"Key":"Command","Value":["AddNewItemDynamic"]}]
+
+End ======================================================================================== 
+Time :  2019-04-04 16:39:34======================
+{"ID":0,"ParrentLayout":"vswMain","PartialView":"_Logo","LayoutName":"2222222(ĐK : Quảng cáo/liên kết)","CModule":"MVCBase.ClientControllers.CAdvController","Record":1,"IsDynamic":true,"Order":0,"IsBody":false,"PartialID":"46fa5adf-55c8-4589-a2e2-2b52fec0cc60","Name":null,"Command":"UpdateInfoItemDynamic","TypeView":"CAdv"}
+[{"Key":"LayoutName","Value":["2222222(ĐK : Quảng cáo/liên kết)"]},{"Key":"Record","Value":["1"]},{"Key":"ParrentLayout","Value":["vswMain"]},{"Key":"CModule","Value":["MVCBase.ClientControllers.CAdvController","MVCBase.ClientControllers.CAdvController"]},{"Key":"Command","Value":["UpdateInfoItemDynamic"]},{"Key":"PartialID","Value":["46fa5adf-55c8-4589-a2e2-2b52fec0cc60"]},{"Key":"IsDynamic","Value":["true"]},{"Key":"TypeView","Value":["CAdv"]},{"Key":"PartialView","Value":["_Logo"]},{"Key":"Title","Value":["sđfdsf"]},{"Key":"MenuID","Value":["6"]}]
+
+End ==================================================================================Time :  2019-04-04 16:42:44======================
+{"ID":0,"ParrentLayout":"vswMain","PartialView":"_Slider","LayoutName":"2222222(ĐK : Quảng cáo/liên kết)","CModule":"MVCBase.ClientControllers.CAdvController","Record":1,"IsDynamic":true,"Order":0,"IsBody":false,"PartialID":"46fa5adf-55c8-4589-a2e2-2b52fec0cc60","Name":null,"Command":"UpdateInfoItemDynamic","TypeView":"CAdv"}
+[{"Key":"LayoutName","Value":["2222222(ĐK : Quảng cáo/liên kết)"]},{"Key":"Record","Value":["1"]},{"Key":"ParrentLayout","Value":["vswMain"]},{"Key":"CModule","Value":["MVCBase.ClientControllers.CAdvController","MVCBase.ClientControllers.CAdvController"]},{"Key":"Command","Value":["UpdateInfoItemDynamic"]},{"Key":"PartialID","Value":["46fa5adf-55c8-4589-a2e2-2b52fec0cc60"]},{"Key":"IsDynamic","Value":["true"]},{"Key":"TypeView","Value":["CAdv"]},{"Key":"PartialView","Value":["_Slider"]},{"Key":"Title","Value":["sđfdsffđgfd"]},{"Key":"MenuID","Value":["6"]}]
+
+End =========================================================================

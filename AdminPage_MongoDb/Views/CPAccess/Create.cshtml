@@ -1,0 +1,158 @@
+﻿@using BaseMongoDB.Database
+@using BaseMVC.Models
+@using BaseMVC.Globals
+@{
+    ViewData["Title"] = "Phân quyền";
+    Layout = "~/Views/Shared/_LayoutDefaults.cshtml";
+    var data = ViewBag.Data as List<CPAccessEntity>;
+    var menu = ViewBag.Control as List<MenuControlAttribute>;
+    var model = ViewBag.Model as DefaultModel;
+    string ID = model != null ? model.ID : string.Empty;
+
+    var listAction = new List<string>() { "index", "create", "edit", "delete", "export", "import", "active", "nonactive" };
+    int countLA = listAction.Count;
+    var listName = new List<string>() { "View", "Add", "Edit", "Delete", "Export", "Import", "Active", "Non-Active" };
+    int countLN = listName.Count;
+}
+@{
+    if (data != null)
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <form name="myform" asp-controller="cpaccess" asp-action="add" method="post" enctype="application/x-www-form-urlencoded">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="ArrID" name="ArrID" value="" />
+                        <input type="hidden" id="ID" name="ID" value="@ID" />
+                        <input type="hidden" id="ctrl" value="cpaccess" />
+
+                        <div class="card-header card-header-image text-right">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-6 col-lg-5">
+
+                                    </div>
+                                    <div class="col-sm-12 col-md-6 col-lg-7">
+                                        <div id="command">
+                                            <a href="javascript:void(0)" class="btn btn-sm btn-success" onclick="AddPermisstion()"><i class="material-icons">save</i> Save</a>
+                                            <a href="@Url.Action("Index","cprole")" class="btn btn-sm btn-danger"><i class="material-icons">cancel</i> Cancel</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered text-center table-responsive">
+                                    <thead class="bg-secondary text-light">
+                                        <tr>
+                                            <th width="15%">Danh mục\Chức năng</th>
+                                            @{
+                                                for (int i = 0; i < countLN; i++)
+                                                {
+                                                    string name = listName[i];
+                                                    string code = listAction[i];
+                                                    <th width="10%">
+                                                        <div class="form-check">
+                                                            <label class="form-check-label">
+                                                                <input class="form-check-input" type="checkbox" onclick="checkAllThat(this,'@code')" />
+                                                                <span class="form-check-sign">
+                                                                    <span class="check"></span>
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                        @name
+                                                    </th>
+                                                }
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            if (menu != null)
+                                            {
+                                                int count = menu.Count;
+                                                for (int i = 0; i < count; i++)
+                                                {
+                                                    var item = menu[i];
+                                                    var role = data.Where(true,o => o.CModule == item.CModule).ToList();
+                                                    <tr>
+                                                        <td align="left">
+                                                            <div class="form-check">
+                                                                <label class="form-check-label">
+                                                                    <input class="form-check-input" type="checkbox" onclick="checkall(this,'@item.CModule')" />
+                                                                    <span class="form-check-sign">
+                                                                        <span class="check"></span>
+                                                                    </span>
+                                                                </label>
+                                                                @item.Name
+                                                            </div>
+                                                        </td>
+                                                        @{
+                                                            if (role == null)
+                                                            {
+                                                                foreach (string action in item.ActionName)
+                                                                {
+                                                                    <td><input name="cid-@item.CModule" value="@item.CModule|@action" type="checkbox" /> <span>@action</span></td>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+
+                                                                for (int x = 0; x < countLA; x++)
+                                                                {
+                                                                    string itemLA = listAction[x];
+                                                                    var acc = role.SingleOrDefault(o => o.CMethod.ToLower() == itemLA);
+                                                                    if (item.ActionName.Contains(itemLA))
+                                                                    {
+                                                                        if (acc != null && acc.Activity)
+                                                                        {
+                                                                            <td>
+                                                                                <div class="form-check">
+                                                                                    <label class="form-check-label">
+                                                                                        <input name="cid-@item.CModule" tel="@itemLA" class="form-check-input" value="@item.CModule|@itemLA" type="checkbox" checked />
+                                                                                        <span class="form-check-sign">
+                                                                                            <span class="check"></span>
+                                                                                        </span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td>
+                                                                                <div class="form-check">
+                                                                                    <label class="form-check-label">
+                                                                                        <input name="cid-@item.CModule" tel="@itemLA" class="form-check-input" value="@item.CModule|@itemLA" type="checkbox" />
+                                                                                        <span class="form-check-sign">
+                                                                                            <span class="check"></span>
+                                                                                        </span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </td>
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <td>-</td>
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    </tr>
+                                                }
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    else{
+                                                                <p>No Data</p>
+    }
+}

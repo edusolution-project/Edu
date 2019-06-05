@@ -1,0 +1,46 @@
+﻿
+@{
+    ViewData["Title"] = "Chat";
+    Layout = "~/Views/Shared/_LayoutDefaults.cshtml";
+}
+
+<div class="group">
+    <ul>
+        
+    </ul>
+</div>
+
+@section Scripts{
+    <script>
+        $(function () {
+            // Declare a proxy to reference the hub.
+            var chat = $.connection.signalR;
+            $.connection.hub.url = "/hubs";
+            //// Create a function that the hub can call to broadcast messages.
+            chat.client.ReciverMessageAll = function (message) {
+                // Html encode display name and message.
+                //var encodedName = $('<div />').text(name).html();
+                var encodedMsg = $('<div />').text(message).html();
+                // Add the message to the page.
+                $('#discussion').append('<li><strong>' + "strong"
+                    + '</strong>:&nbsp;&nbsp;' + encodedMsg + '</li>');
+            };
+            chat.client.addListOnline = function (message) {
+                console.log(message);
+            };
+            $.connection.hub.start().done(function () {
+                chat.server.SendAllListOnline().done(function(data){
+                    if (data != null) {
+                        var listUser = 
+                    }
+                });
+                $('#sendmessage').click(function () {
+                    // Call the Send method on the hub.
+
+                    // Clear text box and reset focus for next comment.
+                    $('#message').val('').focus();
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,145 @@
+﻿@using BaseMongoDB.Database
+@using BaseMVC.Models
+@using BaseMVC.Globals
+@{
+    ViewData["Title"] = "Quản lý chuyên mục";
+    Layout = "~/Views/Shared/_LayoutDefaults.cshtml";
+    var data = ViewBag.Data as List<CPMenuEntity>;
+    var model = ViewBag.Model as DefaultModel;
+    string SearchText = string.IsNullOrEmpty(model.SearchText) ? string.Empty : model.SearchText;
+}
+<div class="row">
+    <div class="col-md-12">
+
+        <div id="message" style="display:none; opacity:0; pointer-events:none"> @ViewBag.Message </div>
+
+        <div class="card">
+            <form name="myform" asp-controller="cpmenu" method="post" enctype="application/x-www-form-urlencoded">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="ArrID" name="ArrID" value="" />
+                <input type="hidden" id="ctrl" value="cpmenu" />
+
+                <script type="text/javascript">
+                    var Search = [
+                        "filter_Search", "SearchText",
+                        "filter_StartDate", "StartDate",
+                        "filter_EndDate", "EndDate",
+                    ];
+                    var SearchDefault = [
+                        "1", "PageIndex",
+                        "1", "LangID",
+                        "20", "PageSize"
+                    ];
+                </script>
+
+                <div class="card-header card-header-image text-right">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6 col-lg-5">
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-5">
+                                        <input id="filter_StartDate" type='text' class="form-control datetimepicker" name="StartDate" placeholder="từ ngày" />
+                                    </div>
+                                    <div class="col-sm-12 col-md-5">
+                                        <input id="filter_EndDate" type='text' class="form-control datetimepicker" name="EndDate" placeholder="đến ngày" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="javascript:void(0)" class="btn btn-sm btn-primary btn-fab" onclick="redirect('Index')"><i class="material-icons">search</i></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-6 col-lg-7">
+                                @DynamicViews.GetCommand("create| add,delete|xóa,export| export,active|duyệt,nonactive|bỏ,clear| xóa cache")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered"> 
+                            <thead class="text-light text-center">
+                                <tr>
+                                    <th width="5%">
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="checkbox" onclick="checkall(this)" />
+                                                <span class="form-check-sign">
+                                                    <span class="check"></span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </th>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Publish</th>
+                                    <th>Create</th>
+                                    <th>ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    if (data != null)
+                                    {
+                                        int count = data.Count;
+                                        for (int i = 0; i < count; i++)
+                                        {
+                                            var item = data[i];
+                                <tr>
+                                    <td align="center">
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input name="cid" class="form-check-input" value="@item.ID" type="checkbox" />
+                                                <span class="form-check-sign">
+                                                    <span class="check"></span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td align="center">
+                                        <a class="btn btn-sm btn-primary btn-round p-sm-1" href="@Url.Action("edit","cpmenu",new { id=item.ID })">
+                                            <i class="material-icons">edit</i>
+                                        </a>
+                                    </td>
+                                    <td align="left">
+                                        <a class="" href="@Url.Action("index","cpmenu",new { Record=item.ID })">
+                                            @item.Name
+                                        </a>
+                                    </td>
+                                    <td align="center">@item.Type</td>
+                                    <td align="center">
+                                        @DynamicViews.GetActive(item.ID, item.Activity)
+                                    </td>
+                                    <td align="center">
+                                        @string.Format("{0:dd-MM-yyyy HH:mm:ss}", item.Created)
+                                    </td>
+                                    <td align="center">@item.ID</td>
+                                </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@{
+    if (ViewBag.Message != null)
+    {
+        string message = ViewBag.Message;
+        @section Scripts{
+            <script type="text/javascript">
+                $("#message").notify($("#message").html(), {
+                    position: 'top left',
+                    autoHide: false,
+                    clickToHide: true,
+                    className : '@ViewBag.TypeMsg'
+                });
+            </script>
+        }
+    }
+}

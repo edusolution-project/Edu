@@ -1,0 +1,56 @@
+﻿
+@{
+    ViewData["Title"] = "SignIn";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+@{
+    if (User != null && User.Identity.IsAuthenticated)
+    {
+        <div class="col-md-6">
+            <div class="alert alert-danger">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <i class="material-icons">close</i>
+                </button>
+                <span>
+                    <b> Danger - </b> This is a regular notification made with ".alert-danger"
+                </span>
+            </div>
+        </div>
+    }
+    else
+    {
+        if (!string.IsNullOrEmpty(ViewBag.Message))
+        {
+            <div class="col-md-6" style="padding-top:10px">
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <i class="material-icons">close</i>
+                    </button>
+                    <span>
+                        <b> Note - </b> @ViewBag.Message
+                    </span>
+                </div>
+            </div>
+        }
+        <div class="login-page">
+            <div class="form">
+                <form class="register-form" asp-action="SignIn" asp-controller="cpaccounts" method="post" asp-antiforgery="true">
+                    @Html.AntiForgeryToken()
+                    <input type="text" placeholder="name" name="Name" required />
+                    <input type="password" name="Pass" placeholder="password" required />
+                    <input type="email" name="Email" placeholder="email address" required />
+                    <input type="submit" class="button" value="Create" />
+                    <p class="message">Already registered? <a href="#">Sign In</a></p>
+                </form>
+                <form class="login-form" asp-action="SignIn" asp-controller="cpaccounts" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="email" name="username" placeholder="Email" required />
+                    <input type="hidden" name="returnurl" value="@ViewBag.ReturnURL"/>
+                    <input type="password" name="password" placeholder="password" required />
+                    <input type="submit" class="button" value="Login" />
+                    <p class="message">Not registered? <a href="#">Create an account</a></p>
+                </form>
+            </div>
+        </div>
+    }
+}

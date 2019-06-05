@@ -1,0 +1,146 @@
+﻿.o-sortable {
+    padding: 10px;
+    background: #ccc;
+    margin-bottom: 20px;
+    width: 100%;
+    display: block;
+}
+
+#Layout, .show-layout {
+    width: 100%;
+    text-align: center;
+    /*height: 100vh;*/
+}
+
+.o-sortable > .item {
+    cursor: move;
+}
+
+static-layout {
+    background: red;
+    display: block;
+    min-height: 50px;
+    border: 1px solid #fff;
+    position: relative;
+}
+
+dynamic-layout {
+    background: blue;
+    display: block;
+    min-height: 50px;
+    border: 1px solid #fff;
+    position: relative;
+}
+
+static-layout > form, dynamic-layout form {
+    display: none;
+}
+
+    static-layout > form.open-customer,dynamic-layout form.open-customer {
+        display: block;
+    }
+.item {
+    border: 1px solid;
+    margin: 5px;
+    position:relative;
+    min-height:42px;
+}
+
+.btn-dynamic {
+    position: absolute;
+    left: 0;
+    padding: 5px;
+    top: 0;
+    bottom: 0;
+    height: 24px;
+}
+
+button{
+    cursor:pointer;
+}
+.open-customer {
+    position: absolute;
+    width: 100%;
+    height: auto;
+    z-index: 1;
+    background: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-shadow: 5px 5px 20px 0px #000;
+    text-align: left;
+}
+dynamic-layout form.open-customer{
+    position:relative;
+}
+
+.open-customer label {
+    width: 100%;
+    padding: 5px 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+    .open-customer input, .open-customer select {
+        width: 100%;
+        text-align: center;
+        display: block;
+        box-shadow: none;
+        padding: 5px 10px;
+    }
+
+    .open-customer button {
+        float: right;
+        background: #0b9b09;
+        color: #fff;
+        border: none;
+    }
+
+.shadow, .modal-template {
+    background: #000;
+    opacity: 0.5;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.modal-template.modal-add-item{
+    opacity:1;
+    max-width:100%;
+    width:400px;
+    height:350px;
+    background:#fff;
+    margin:auto;
+}
+:invalid{
+    border-color:red;
+}
+:valid{
+    border-color:unset;
+}
+.notification {
+    position: fixed;
+    max-width: 300px;
+    white-space: nowrap;
+    min-height: 50px;
+    top: 90px;
+    right: 10px;
+    background: #ff6a00;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.5em;
+    display: none;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 90000;
+    -webkit-transition-property: display; /* Safari */
+    -webkit-transition-duration: 1s; /* Safari */
+    -webkit-transition-delay: 0.5s; /* Safari */
+    transition-property: display;
+    transition-duration: 1s;
+    transition-delay: 0.5s;
+}
+    .notification.show {
+        display: block;
+        
+    }

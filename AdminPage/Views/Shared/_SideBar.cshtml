@@ -1,0 +1,37 @@
+﻿<div class="sidebar" data-color="purple" data-background-color="black" data-image="AdminPAge/assets/img/sidebar-2.jpg">
+    <!--
+    <img src="~/assets/img/sidebar-2.jpg" />
+            Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
+            Sys,
+            Mod,
+            Global
+            Tip 2: you can also add an image using data-image tag
+        -->
+    <div class="logo">
+        <a href="#" class="simple-text logo-normal">
+            @User.Identity.Name
+        </a>
+    </div>
+    <div class="sidebar-wrapper">
+        <ul class="nav" id="loadMenu">
+            <li class="nav-item" id="home">
+                <a class="nav-link" href="@Url.Action("Index","CPHome")">
+                    <i class="material-icons">dashboard</i>
+                    <p>Trang chủ</p>
+                </a>
+            </li>
+            <li class="nav-item" id="module">
+                <a class="nav-link" href="@Url.Action("Index","Module")">
+                    <i class="material-icons">unarchive</i>
+                    <p>Quản lý</p>
+                </a>
+            </li>
+            <li class="nav-item" id="system">
+                <a class="nav-link" href="@Url.Action("Index","System")">
+                    <i class="material-icons">content_paste</i>
+                    <p>Hệ thống</p>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
