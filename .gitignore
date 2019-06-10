@@ -35,3 +35,6 @@ ClientPage/obj/
 JWTExample/obj/
 KiemTraNhieuThe/obj/
 .vs
+/JWT_Authentication
+/BaseApi_MongoDB
+/api_customer
