@@ -62,6 +62,12 @@ namespace Admin_Sub_API.Controllers
                 }
             }
         }
+        [HttpPost]
+        public async Task<IActionResult> Delete([FromBody]ModResultDetailEntity item)
+        {
+            await _resultDetailService.RemoveAsync(item.ID);
+            return NoContent();
+        }
         //get list
         //get Details
         //post list

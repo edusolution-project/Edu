@@ -36,13 +36,12 @@ namespace BaseMongoDB.Database
             result.TotalPage = query.Count();
             try
             {
-                await query.Skip(model.pageSize * (model.currentPage - 1)).Limit(model.pageSize).ToListAsync();
+                result.Data = await query.Skip(model.pageSize * (model.currentPage - 1)).Limit(model.pageSize).ToListAsync();
             }
             catch (Exception ex)
             {
                 string s = ex.ToString();
             }
-            result.Data = query.ToList();
             return result;
 
         }

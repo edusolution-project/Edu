@@ -52,6 +52,12 @@ namespace BaseMongoDB.Factory
             services.AddScoped<ModPointBoardService>();
             services.AddScoped<ModResultDetailService>();
 
+            services.AddScoped<ModLessonService>();
+            services.AddScoped<ModLessonPartService>();
+            services.AddScoped<ModLessonExtendService>();
+            services.AddScoped<ModLessonPartAnswerService>();
+            services.AddScoped<ModLessonPartQuestionService>();
+
             return services;
         }
         /// <summary>
