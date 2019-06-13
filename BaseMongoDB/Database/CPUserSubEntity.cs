@@ -44,6 +44,12 @@ namespace BaseMongoDB.Database
             return CreateQuery().Find(o => o.UserName == UserName)?.FirstOrDefault();
         }
 
+
+        public CPUserSubEntity GetItemByUserNameManager(string UserNameManager)
+        {
+            return CreateQuery().Find(o => o.UserNameManager == UserNameManager)?.FirstOrDefault();
+        }
+
         [Obsolete]
         public async Task<BaseResponse<CPUserSubEntity>> getListUserSub(SeachForm model)
         {

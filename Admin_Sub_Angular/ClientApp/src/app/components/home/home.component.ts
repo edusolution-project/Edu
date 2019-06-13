@@ -3,6 +3,7 @@
 import { Component } from '@angular/core';
 import { fadeInOut } from '../../services/animations';
 import { ConfigurationService } from '../../services/configuration.service';
+import { AccountService } from 'src/app/services/account.service';
 
 
 @Component({
@@ -12,6 +13,16 @@ import { ConfigurationService } from '../../services/configuration.service';
     animations: [fadeInOut]
 })
 export class HomeComponent {
-    constructor(public configurations: ConfigurationService) {
+
+
+  test = "";
+  condition = false;
+  constructor(public configurations: ConfigurationService, private accoutService: AccountService) {
+      
+    let user = accoutService.currentUser;
+    if (user.roleID == "GIAOVIEN") {
+      this.test = "212121212121";
+      this.condition == true;
+    }
     }
 }

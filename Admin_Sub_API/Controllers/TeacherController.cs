@@ -116,8 +116,8 @@ namespace SME.API.Controllers
             //xoa bang subuser
 
             var userItem = userService.GetItemByUserName(item.TeacherId);
-
-            await userService.RemoveAsync(userItem.ID);
+            if(userItem!=null)
+             await userService.RemoveAsync(userItem.ID);
 
             return NoContent();
 
@@ -143,6 +143,7 @@ namespace SME.API.Controllers
                          int totalRows = workSheet.Dimension.Rows;
 
                     List<TeacherEntity> teacherList = new List<TeacherEntity>();
+                    var userList = new List<CPUserSubEntity>();
                     for (int i = 2; i <= totalRows; i++)
                     {
                         teacherList.Add(new TeacherEntity
@@ -151,22 +152,36 @@ namespace SME.API.Controllers
                             FullName = workSheet.Cells[i, 3].Value.ToString() + " " + workSheet.Cells[i, 4].Value.ToString(),
                             Technique = workSheet.Cells[i, 6].Value.ToString(),
                             DateBorn = workSheet.Cells[i, 5].Value.ToString(),
-                            UserCreate = "nghiepnc",
+                            UserCreate = userCreate,
                             UserNameManager = userItem.UserNameManager,
                             Activity = true
 
                         });
+
+                        userList.Add(new CPUserSubEntity
+                        {
+                           
+                        Pass = Security.Encrypt("123"),
+                        UserName = workSheet.Cells[i, 2].Value.ToString(),
+                        FullName = workSheet.Cells[i, 3].Value.ToString() + " " + workSheet.Cells[i, 4].Value.ToString(),
+                        RoleID = "GIAOVIEN",
+                       UserNameManager = userItem.UserNameManager,
+                        Activity = true
+
+                    });
                     }
 
                    
                    
-                    var listTeacher = teacherService.getListByUserNameManager(userItem.UserNameManager);
-                    if(listTeacher!=null)
+                    var listTeacherRemove = teacherService.getListByUserNameManager(userItem.UserNameManager);
+                    if(listTeacherRemove != null)
                     {
-                        teacherService.RemoveRange(listTeacher.Select(o => o.ID).ToList());
+                        teacherService.RemoveRange(listTeacherRemove.Select(o => o.ID).ToList());
                     }
                     await teacherService.AddRangeAsync(teacherList);
 
+                    var listUserRemove = userService.GetItemByUserNameManager(userItem.UserNameManager);
+                    await userService.AddRangeAsync(userList);
 
                 }
             }

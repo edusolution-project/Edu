@@ -127,7 +127,6 @@ export class CourseInfoComponent implements OnInit {
     this.courseService.getListStudent(this.accoutService.currentUser.userName).subscribe(
       response => {
         this.listStudent = this.globalService.convertObjectToSelect2(response.data, "studentId", "fullName");
-        console.log(response.data);
       },
       error => {
         console.log(error);
@@ -158,7 +157,6 @@ export class CourseInfoComponent implements OnInit {
     if (this.entity.endedDateUTC != undefined)
       this.entity.endedDate = this.entity.endedDateUTC.formatted;
     this.entity.userCreate = this.accoutService.currentUser.userName;
-    console.log(this.entity);
     this.courseService.newUser(this.entity).subscribe(response => this.saveSuccessHelper(), error => this.saveFailedHelper(error));
     this.isSaving = false;
     this.alertService.stopLoadingMessage();

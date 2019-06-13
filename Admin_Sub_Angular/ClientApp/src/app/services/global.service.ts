@@ -18,8 +18,8 @@ export class GlobalService {
   private readonly _urlSoGiaoDucData;
   http: any;
 
-  static getBaseUrl: any = 'http://103.101.161.22:9999/';
-  //static getBaseUrl: any = 'http://localhost:9999/';
+  //static getBaseUrl: any = 'http://103.101.161.22:9999/';
+  static getBaseUrl: any = 'http://localhost:9999/';
 
   static getManUrl: any = 'http://apiquanly.tuyensinhdaucap.edu.vn/';
 

@@ -18,7 +18,7 @@ namespace BaseMongoDB.Database
         public string Description { get; set; }
         public string TeacherID { get; set; }
         public List<string> StudentID { get; set; }
-        
+
         public bool Activity { get; set; }
         public string UserCreate { get; set; }
         public string UserNameManager { get; set; }
@@ -49,13 +49,27 @@ namespace BaseMongoDB.Database
         public async Task<BaseResponse<CourseEntity>> getList(SeachForm model)
         {
             BaseResponse<CourseEntity> result = new BaseResponse<CourseEntity>();
-            var query = CreateQuery().Find(o => o.UserCreate == model.UserName);
+
+            var builder = Builders<CourseEntity>.Filter;
+            FilterDefinition<CourseEntity> filter=null; 
+            if (!string.IsNullOrEmpty(model.UserName))
+            {
+                 filter = builder.Eq("UserCreate", model.UserName);
+            }
+           
+            if (!string.IsNullOrEmpty(model.teacherID))
+            {
+                filter = filter & builder.Eq(o => o.TeacherID, model.teacherID);
+            }
+
+            var query = CreateQuery().Find(filter);
+
             result.TotalPage = query.Count();
             try
-            { 
-            await query.Skip(model.pageSize * (model.currentPage - 1)).Limit(model.pageSize).ToListAsync();
-        }
-            catch(Exception ex)
+            {
+                await query.Skip(model.pageSize * (model.currentPage - 1)).Limit(model.pageSize).ToListAsync();
+            }
+            catch (Exception ex)
             {
                 string s = ex.ToString();
             }

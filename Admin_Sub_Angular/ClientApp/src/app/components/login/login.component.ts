@@ -87,9 +87,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       response => {
        
         this.isLoading = false;
-        let user = new User(
-          "name"
-        );
         if(response.token!=null)
         {
         this.authService.savetest(response);

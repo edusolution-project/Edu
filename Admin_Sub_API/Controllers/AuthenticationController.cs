@@ -156,6 +156,7 @@ namespace SME.API.Controllers
             LoginResultForm res = new LoginResultForm();
             res.UserName = user.UserName;
             res.Token = _accessTokenService.GetNewToken(user.ID,"",user.UserName);
+            res.RoleID = user.RoleID;
             var pass= Security.Encrypt(form.Password);
             if (pass.Equals(user.Pass))
                 return res;
