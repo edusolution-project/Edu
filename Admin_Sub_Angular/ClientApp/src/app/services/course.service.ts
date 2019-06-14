@@ -23,6 +23,9 @@ export class CourseService {
   getList(course: Course) {
     return this.restangular.all('Course').all('getList').post(course);
   }
+  getListLeson(course: Course) {
+    return this.restangular.all('Course').all('getList').post(course);
+  }
 
 
   delete(course: Course) {

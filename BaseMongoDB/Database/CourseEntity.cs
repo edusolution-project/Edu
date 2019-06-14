@@ -51,10 +51,10 @@ namespace BaseMongoDB.Database
             BaseResponse<CourseEntity> result = new BaseResponse<CourseEntity>();
 
             var builder = Builders<CourseEntity>.Filter;
-            FilterDefinition<CourseEntity> filter=null; 
+            FilterDefinition<CourseEntity> filter= builder.Exists(o=>o.ID); 
             if (!string.IsNullOrEmpty(model.UserName))
             {
-                 filter = builder.Eq("UserCreate", model.UserName);
+                 filter = filter & builder.Eq("UserCreate", model.UserName);
             }
            
             if (!string.IsNullOrEmpty(model.teacherID))

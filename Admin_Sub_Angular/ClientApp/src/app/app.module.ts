@@ -78,6 +78,9 @@ import {StudentService}from'./services/student.service';
 import { StudentImportComponent } from'./components/student-management/student-import/student-import.component';
 import { StudentInfoComponent} from'./components/student-management/student-info/student-info.component';
 import { StudentManagementComponent} from'./components/student-management/student-management.component';
+import { CourseTeacherManagementComponent } from './components/course-management/course-teacher-management.component';
+import { Course } from './models/course.model';
+import { CourseTeacherConfigComponent } from './components/course-management/course-teacher-config.component';
 
 @NgModule({
   imports: [
@@ -134,7 +137,9 @@ import { StudentManagementComponent} from'./components/student-management/studen
     CourseInfoComponent,
     StudentImportComponent,
     StudentInfoComponent,
-    StudentManagementComponent
+    StudentManagementComponent,
+    CourseTeacherManagementComponent,
+    CourseTeacherConfigComponent
   ],
   providers: [
     { provide: ErrorHandler, useClass: AppErrorHandler },

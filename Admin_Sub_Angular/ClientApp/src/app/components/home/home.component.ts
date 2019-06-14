@@ -22,7 +22,8 @@ export class HomeComponent {
     let user = accoutService.currentUser;
     if (user.roleID == "GIAOVIEN") {
       this.test = "212121212121";
-      this.condition == true;
+      this.condition = true;
+
     }
     }
 }
