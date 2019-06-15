@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Business.Dto.Form;
+using System.Threading.Tasks;
+using MongoDB.Driver;
 
 namespace BaseMongoDB.Database
 {
@@ -16,12 +19,22 @@ namespace BaseMongoDB.Database
         public string PointString { get; set; } // A B C D E F
         public string Note { get; set; } // ghi chú nếu cần.
         public DateTime Created { get; set; }
-        public DateTime Update { get; set; }
+        public DateTime Updated { get; set; }
     }
     public class ModPointBoardService : ServiceBase<ModPointBoardEntity>
     {
         public ModPointBoardService(IConfiguration config) : base(config, "ModPointBoards")
         {
+
+        }
+        [Obsolete]
+        public async Task<BaseResponse<ModPointBoardEntity>> getList(SeachForm model)
+        {
+            BaseResponse<ModPointBoardEntity> result = new BaseResponse<ModPointBoardEntity>();
+            var query = CreateQuery().Find(_ => true);
+            result.TotalPage = query.Count();
+            result.Data = await query.Skip(model.pageSize * (model.currentPage - 1)).Limit(model.pageSize).ToListAsync();
+            return result;
 
         }
     }
