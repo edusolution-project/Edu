@@ -13,41 +13,28 @@ import { GlobalService } from 'src/app/services/global.service';
 import { Teacher } from 'src/app/models/teacher.model';
 import { TeacherService } from 'src/app/services/teacher.service';
 import { IMyDpOptions } from 'mydatepicker';
+import { CourseService } from 'src/app/services/course.service';
+import { Course } from 'src/app/models/course.model';
 
 
 @Component({
-  selector: 'teacher-import',
-  templateUrl: './teacher-import.component.html'
-
+  selector: 'course-config-edit',
+  templateUrl: './course-config-edit.component.html',
+  styleUrls: ['./course-config-edit.component.scss']
 })
-export class TeacherImportComponent implements OnInit {
+export class CourseConfigEditComponent implements OnInit {
 
   private isEditMode = false;
   private isNewUser = false;
   private isSaving = false;
-  private isChangePassword = false;
-  private isEditingSelf = false;
-  private showValidationErrors = false;
-  private editingUserName: string;
-  private uniqueId: string = Utilities.uniqueId();
-  private entity: Teacher = new Teacher();
+  private entity: Course = new Course();
   private userCreate: User = new User();
-  private userEdit: Teacher;
-  private allRoles: Role[] = [];
-  private disabledTeacherID = false;
+  private couseEdit: Course;
   public formResetToggle = true;
 
   public changesSavedCallback: () => void;
   public changesFailedCallback: () => void;
   public changesCancelledCallback: () => void;
-  lstRole: any;
-  @Input()
-  isViewOnly: boolean;
-
-  lstFile = [];
-
-
-
 
 
   @ViewChild('f')
@@ -55,15 +42,13 @@ export class TeacherImportComponent implements OnInit {
 
 
   constructor(private alertService: AlertService,
-    private teacherService: TeacherService,
+    private courseService: CourseService,
     private accoutService: AccountService,
     private globalService: GlobalService,
   ) {
   }
   public model: any = { date: { year: 2018, month: 10, day: 9 } };
   ngOnInit() {
-    this.entity.activity = true;
-
 
   }
   public myDatePickerOptions: IMyDpOptions = {
@@ -79,16 +64,17 @@ export class TeacherImportComponent implements OnInit {
     this.alertService.showMessage(caption, message, MessageSeverity.error);
   }
   private save() {
-
     this.isSaving = true;
     this.alertService.startLoadingMessage('Saving changes...');
+    if (this.entity.createdDateUTC != undefined)
+      this.entity.createdDate = this.entity.createdDateUTC.formatted;
 
-    let formData = new FormData();
-    formData.append('file', this.lstFile[0], this.lstFile[0].name);
-    formData.append('userCreate', this.accoutService.currentUser.userName);
-    formData.append('userNameManager', this.accoutService.currentUser.userNameManager);
-    this.teacherService.importExcel(formData)
-      .subscribe(response => this.saveSuccessHelper(), error => this.saveFailedHelper(error));
+    if (this.entity.endedDateUTC != undefined)
+      this.entity.endedDate = this.entity.endedDateUTC.formatted;
+    this.entity.userCreate = this.accoutService.currentUser.userName;
+    this.entity.lessonID = this.entity.id;
+    console.log(this.entity);
+    this.courseService.configCourse(this.entity).subscribe(response => this.saveSuccessHelper(), error => this.saveFailedHelper(error));
     this.isSaving = false;
     this.alertService.stopLoadingMessage();
   }
@@ -97,19 +83,19 @@ export class TeacherImportComponent implements OnInit {
   private saveSuccessHelper() {
     this.isSaving = false;
     this.alertService.stopLoadingMessage();
-    this.showValidationErrors = false;
-    this.alertService.showMessage('Success', `Import thành công`, MessageSeverity.success);
+    this.alertService.showMessage('Success', 'Cập nhật thành công', MessageSeverity.success);
+    this.entity = new Course();
+    this.entity.activity = true;
     if (this.changesSavedCallback) {
       this.changesSavedCallback();
     }
-    this.lstFile = [];
   }
 
 
   private saveFailedHelper(error: any) {
-    // this.isSaving = false;
-    //this.alertService.stopLoadingMessage();
-    this.alertService.showMessage("Error", error.data, MessageSeverity.error);
+    this.isSaving = false;
+    this.alertService.stopLoadingMessage();
+    this.alertService.showMessage("", error.data, MessageSeverity.error);
 
     if (this.changesFailedCallback) {
       this.changesFailedCallback();
@@ -117,17 +103,8 @@ export class TeacherImportComponent implements OnInit {
   }
 
 
-  addFile(item) {
-    this.lstFile.push(item[0]);
-
-  }
-   
- 
-
-
   private cancel() {
-
-    this.showValidationErrors = false;
+    
     this.resetForm();
     this.alertService.resetStickyMessage();
     if (this.changesCancelledCallback) {
@@ -149,17 +126,35 @@ export class TeacherImportComponent implements OnInit {
   }
 
 
-  editUser(user: Teacher, allRoles: Role[]) {
+  editUser(user: Course, ) {
     if (user) {
       this.isNewUser = false;
-      this.userEdit = new Teacher();
-
       Object.assign(this.entity, user);
-      this.disabledTeacherID = true;
-      
-      if (this.entity.dateBorn) {
-        let item = this.entity.dateBorn.split('/');
-        let itemtemp = this.entity.dateBorn.split('/');
+      console.log(this.entity.createdDate);
+      if (this.entity.createdDate) {
+        let item = this.entity.createdDate.split('/');
+        let itemtemp = this.entity.createdDate.split('/');
+
+       if(+item[1]<10)
+       {
+        item[1]=item[1].replace('0','');
+       }
+       if(+item[0]<10)
+       {
+        item[0]=item[0].replace('0','');
+       }
+       let item1= {
+        'date':{
+        'year': item[2],
+        'month': item[1],
+        'day': item[0]},
+      'formatted':itemtemp[0]+'/'+itemtemp[1]+'/'+itemtemp[2]};
+        this.entity.createdDateUTC=item1;
+      }
+
+      if (this.entity.endedDate) {
+        let item = this.entity.endedDate.split('/');
+        let itemtemp = this.entity.endedDate.split('/');
 
         if (+item[1] < 10) {
           item[1] = item[1].replace('0', '');
@@ -175,9 +170,9 @@ export class TeacherImportComponent implements OnInit {
           },
           'formatted': itemtemp[0] + '/' + itemtemp[1] + '/' + itemtemp[2]
         };
-        this.entity.dateBornUTC = item1;
+        this.entity.endedDateUTC = item1;
       }
     }
-    return new Teacher();
+    return new Course();
   }
 }

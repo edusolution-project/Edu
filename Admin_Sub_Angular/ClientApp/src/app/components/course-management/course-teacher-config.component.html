@@ -18,11 +18,6 @@
           <td>
         Bài học
           </td>
-
-          <td>
-            Mô tả
-          </td>
-          <td>Mã giáo viên</td>
           <td>Ngày bắt đầu</td>
           <td>Ngày kết thúc</td>
           <td>Trạng thái</td>
@@ -32,23 +27,20 @@
 
         <tr *ngFor="let item of rows; let i = index" style="cursor:pointer">
           <td>
-            {{i+1}
+            {{i+1}}
           </td>
           <td>
-            {{item.courseID}}
+         
+            <a (click)="edit(item)">    {{item.title}}</a>
           </td>
+          
+          <td>{{item.createdDate  }} </td>
+          <td>
+            {{item.endedDate  }}
+          </td>
+          <td>
+            {{item.isOpen==false?'Mở':"Đóng"}}
 
-          <td>
-            {{item.description}}
-          </td>
-          <td>{{item.teacherID}}</td>
-          <td>{{item.createdDate}}</td>
-          <td>
-            {{item.endedDate}}
-          </td>
-
-          <td>
-            {{item.activity==false?'Không hoạt đông':"Hoạt động"}}
           </td>
         </tr>
       </tbody>
@@ -59,17 +51,17 @@
 
 
   <div class="modal fade" bsModal #editorModal="bs-modal" (onHidden)="onEditorModalHidden()" [config]="{backdrop: 'static'}" tabindex="-1">
-    <div class="modal-dialog modal-lg" style="max-width:1000px">
+    <div class="modal-dialog modal-sm" style="max-width:1000px">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 *ngIf="!editingUserName" class="modal-title float-left"><i class="fa fa-user-plus"></i> Tạo khóa học</h4>
-          <h4 *ngIf="editingUserName" class="modal-title float-left"><i class="fa fa-user-circle-o"></i> Chỉnh sửa khóa học</h4>
+          <h4 class="modal-title float-left"><i class="fa fa-user-circle-o"></i>Đóng mở khóa học</h4>
           <button type="button" class="close float-right" title="Close" (click)="editorModal.hide()">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <course-info #courseEditor></course-info>
+          
+          <course-config-edit #courseEditor></course-config-edit>
         </div>
       </div>
     </div>

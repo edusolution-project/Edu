@@ -103,8 +103,7 @@ export class CourseManagementComponent implements OnInit, AfterViewInit {
       let course = new Course();
       course.currentPage=this.pager.currentPage;
       course.pageSize=this.pager.pageSize;
-      course.userName=this.accountService.currentUser.userName;
-
+      course.userName = this.accountService.currentUser.userName;
       this.courseService.getList(course)
            .subscribe(
             response => {

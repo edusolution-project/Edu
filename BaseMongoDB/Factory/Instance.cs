@@ -47,6 +47,8 @@ namespace BaseMongoDB.Factory
             services.AddScoped<CPUserSubService>();
             services.AddScoped<CourseService>();
             services.AddScoped<ModCourseService_nghiepnc>();
+            services.AddScoped<ModChapterService>();
+            services.AddScoped<CourseTeacherConfigService>();
             return services;
         }
         /// <summary>

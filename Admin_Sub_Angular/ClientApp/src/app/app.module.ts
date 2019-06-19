@@ -81,6 +81,7 @@ import { StudentManagementComponent} from'./components/student-management/studen
 import { CourseTeacherManagementComponent } from './components/course-management/course-teacher-management.component';
 import { Course } from './models/course.model';
 import { CourseTeacherConfigComponent } from './components/course-management/course-teacher-config.component';
+import { CourseConfigEditComponent } from './components/course-management/course-config-edit.component';
 
 @NgModule({
   imports: [
@@ -139,7 +140,8 @@ import { CourseTeacherConfigComponent } from './components/course-management/cou
     StudentInfoComponent,
     StudentManagementComponent,
     CourseTeacherManagementComponent,
-    CourseTeacherConfigComponent
+    CourseTeacherConfigComponent,
+    CourseConfigEditComponent
   ],
   providers: [
     { provide: ErrorHandler, useClass: AppErrorHandler },

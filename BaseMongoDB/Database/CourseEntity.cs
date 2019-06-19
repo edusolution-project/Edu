@@ -44,12 +44,10 @@ namespace BaseMongoDB.Database
         //{
         //    return CreateQuery().Find(o => o.TeacherId == UserName)?.FirstOrDefault();
         //}
-
-        [Obsolete]
+        
         public async Task<BaseResponse<CourseEntity>> getList(SeachForm model)
         {
             BaseResponse<CourseEntity> result = new BaseResponse<CourseEntity>();
-
             var builder = Builders<CourseEntity>.Filter;
             FilterDefinition<CourseEntity> filter= builder.Exists(o=>o.ID); 
             if (!string.IsNullOrEmpty(model.UserName))
@@ -77,6 +75,11 @@ namespace BaseMongoDB.Database
             return result;
 
         }
+
+
+
+       
+
 
         //public List<TeacherEntity> getListByUserNameManager(string userNameManager)
         //{

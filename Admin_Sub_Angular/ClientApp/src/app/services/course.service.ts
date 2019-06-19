@@ -20,9 +20,19 @@ export class CourseService {
     return this.restangular.all('Course').all('Create').post(course);
   }
 
+  configCourse(course: Course) {
+    return this.restangular.all('Course').all('ConfigCouse').post(course);
+  }
+
+
   getList(course: Course) {
     return this.restangular.all('Course').all('getList').post(course);
   }
+
+  getListLesson(course: Course) {
+    return this.restangular.all('Course').all('getListLesson').post(course);
+  }
+
   getListLeson(course: Course) {
     return this.restangular.all('Course').all('getList').post(course);
   }

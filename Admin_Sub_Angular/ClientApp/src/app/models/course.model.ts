@@ -16,6 +16,7 @@ export class Course {
   public subjectID: string;
   public gradeID: any;
   public programID: string;
+  public lessonID: string;
   public description: string;
   public teacherID: string;
   public studentID: boolean;

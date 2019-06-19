@@ -152,8 +152,10 @@ this.teacherService.newUser(this.entity).subscribe(response => this.saveSuccessH
       this.userEdit = new Teacher();
       
       Object.assign(this.entity, user);
-     this.disabledTeacherID=true;
-if(this.entity.dateBorn){
+      this.disabledTeacherID = true;
+      
+      if (this.entity.dateBorn) {
+        
       let item=this.entity.dateBorn.split('/');
       let itemtemp=this.entity.dateBorn.split('/');
     

@@ -1,15 +1,19 @@
-﻿using CoreMongoDB.Repositories;
+﻿using Business.Dto.Form;
+using CoreMongoDB.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BaseMongoDB.Database
 {
-    public class ModLessonEntity : EntityBase
+    public class CourseTeacherConfigEntity : EntityBase
     {
         public string CourseID { get; set; }
         public string ChapterID { get; set; }
+        public string LessonID { get; set; }
         public bool IsParentCourse { get; set; } // có phải là course hay không ?
         public int TemplateType { get; set; }
         public int Point { get; set; }
@@ -23,32 +27,35 @@ namespace BaseMongoDB.Database
         public Media Media { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
+
+        public string TeacherID { get; set; }
+        public string createdDate { get; set; }
+        public string endedDate { get; set; }
+
+        public bool IsOpen { get; set; }
+
+
     }
-    public class ModLessonService : ServiceBase<ModLessonEntity>
+    public class CourseTeacherConfigService : ServiceBase<CourseTeacherConfigEntity>
     {
-        public ModLessonService(IConfiguration config) : base(config, "ModLessons")
-        {
-
-        }
-        public ModLessonService(IConfiguration config, string tableName) : base(config, tableName)
+        public CourseTeacherConfigService(IConfiguration config) : base(config, "CourseTeacherConfig")
         {
 
         }
 
-        public List<ModLessonEntity> getListByCourseIdNoChapter(string courseId)
+        public CourseTeacherConfigService(IConfiguration config, string tableName) : base(config, tableName)
         {
-            var result = new List<ModLessonEntity>();
-            var query = CreateQuery().Find(o => o.CourseID == courseId );
+        }
+
+        public List<CourseTeacherConfigEntity> getListByCourseID(string courseID)
+        {
+            var result = new List<CourseTeacherConfigEntity>();
+            var query = CreateQuery().Find(o => o.CourseID == courseID);
             result = query.ToList();
             return result;
+
         }
 
-        public List<ModLessonEntity> getListByCourseIdHaveChapter(string courseId)
-        {
-            var result = new List<ModLessonEntity>();
-            var query = CreateQuery().Find(o => o.CourseID == courseId && o.ChapterID != "");
-            result = query.ToList();
-            return result;
-        }
+
     }
 }

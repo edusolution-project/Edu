@@ -1,0 +1,46 @@
+<div>
+  <form *ngIf="formResetToggle" name="userInfoForm" #f="ngForm" novalidate
+        (ngSubmit)="save()">
+
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false" />
+      </div>
+    </div>
+
+    <div class="form-group row has-feedback-icon">
+      <label class="col-form-label col-lg-2">Ngày bắt đầu</label>
+      <div class="col-lg-4">
+        <my-date-picker [(ngModel)]="entity.createdDateUTC" [options]="myDatePickerOptions" #createdDate="ngModel"  name="NgayBatDau"></my-date-picker>
+      </div>
+      <label class="col-form-label col-lg-2">Ngày kết thúc</label>
+      <div class="col-lg-4">
+        <my-date-picker [(ngModel)]="entity.endedDateUTC" [options]="myDatePickerOptions" #endedDate="ngModel" name="NgayKetThuc"></my-date-picker>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <hr [class.separator-hr]="false" />
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="col-form-label col-lg-2"></label>
+      <div class="col-lg-4">
+            <input class="form-check-input" type="checkbox" id="idEnabled" name="isOpen"  [(ngModel)]="entity.isOpen">
+            <label for="idEnabled" class="form-check-label">Mở</label>
+      </div>
+      <div class="col-sm-7">
+        <div ngPreserveWhitespaces class="float-right">
+
+          <button type="button" (click)="cancel()" class="btn btn-danger" [disabled]="isSaving"><i class='fa fa-times'></i> {{'users.editor.Cancel' | translate}}</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+            <i *ngIf="!isSaving" class='fa fa-save'></i><i *ngIf="isSaving" class='fa fa-circle-o-notch fa-spin'></i> Save
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="clearfix"></div>
+  </form>
+</div>

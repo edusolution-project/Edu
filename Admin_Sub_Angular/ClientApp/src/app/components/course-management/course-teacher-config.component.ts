@@ -9,6 +9,7 @@ import { CourseInfoComponent } from './course-info.component';
 import { Course } from 'src/app/models/course.model';
 import { CourseService } from 'src/app/services/course.service';
 import { ActivatedRoute } from '@angular/router';
+import { IMyDpOptions } from 'mydatepicker';
 
 
 @Component({
@@ -56,11 +57,12 @@ export class CourseTeacherConfigComponent implements OnInit {
 
     let course = new Course();
     course.teacherID = this.accountService.currentUser.userName;
-    this.courseService.getList(course)
+    course.courseID = this.courseID;
+    this.courseService.getListLesson(course)
       .subscribe(
         response => {
-          this.rows = response.data;
-          this.rowsCache = response.data;
+          this.rows = response;
+          this.rowsCache = response;
           this.loadingIndicator = false;
           this.alertService.stopLoadingMessage();
 
@@ -74,6 +76,35 @@ export class CourseTeacherConfigComponent implements OnInit {
   onSearchChanged(value: string) {
     this.rows = this.rowsCache.filter(r => Utilities.searchArray(value, false, r.courseID));
   }
+
+
+  ngAfterViewInit() {
+
+    //this.courseEditor.changesSavedCallback = () => {
+    //  this.loadData(1);
+    //  this.editorModal.hide();
+    //};
+
+    this.courseEditor.changesCancelledCallback = () => {
+      this.editorModal.hide();
+    };
+
+  }
+
+
+  edit(row: Course) {
+    this.editedCourse = this.courseEditor.editUser(row);
+    this.editorModal.show();
+  }
+  onEditorModalHidden() {
+    console.log('1');
+  }
+  public myDatePickerOptions: IMyDpOptions = {
+    inline: false,
+    editableDateField: false,
+    openSelectorOnInputClick: true,
+    dateFormat: 'dd/mm/yyyy'
+  };
 
 
 }

@@ -17,6 +17,7 @@ namespace Business.Dto.Form
         public int currentPage { get; set; }
         public int pageSize { get; set; }
         public string teacherID { get; set; }
+        public string courseID { get; set; }
 
 
     }

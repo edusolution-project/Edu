@@ -17,6 +17,7 @@ using System.IO;
 using OfficeOpenXml;
 using System.Linq;
 using MongoDB.Driver;
+using AutoMapper;
 
 namespace SME.API.Controllers
 {
@@ -35,14 +36,20 @@ namespace SME.API.Controllers
         ModSubjectService modSubjectService;
         ModGradeService modGradleService;
         ModProgramService modProgramService;
+        ModLessonService modLessonService;
+        ModChapterService modChapterService;
+        CourseTeacherConfigService courseTeacherConfigService;
         public CourseController(
         CourseService courseService,
         AccessTokenService accessTokenService,
         CPUserSubService userService,
-       ModCourseService_nghiepnc modCourseService,
+        ModCourseService_nghiepnc modCourseService,
         ModSubjectService modSubjectService,
-             ModGradeService modGradleService,
-             ModProgramService modProgramService
+        ModGradeService modGradleService,
+        ModProgramService modProgramService,
+        ModLessonService modLessonService,
+        ModChapterService modChapterService,
+        CourseTeacherConfigService courseTeacherConfigService
        )
         {
             this.courseService = courseService;
@@ -52,6 +59,9 @@ namespace SME.API.Controllers
             this.modSubjectService = modSubjectService;
             this.modGradleService = modGradleService;
             this.modProgramService = modProgramService;
+            this.modLessonService = modLessonService;
+            this.modChapterService = modChapterService;
+            this.courseTeacherConfigService = courseTeacherConfigService;
         }
 
         [HttpPost]
@@ -59,6 +69,58 @@ namespace SME.API.Controllers
         {
             return courseService.getList(seachForm);
         }
+        [HttpPost]
+        public List<CourseTeacherConfigEntity> getListLesson([FromBody]SeachForm model)
+        {
+           
+            // danh sach lesson theo courseID khong co chapter
+            var listLessonNoChapter = modLessonService.getListByCourseIdNoChapter(model.courseID);
+            var listCourseTeacherConfig = new List<CourseTeacherConfigEntity>();
+            try
+            {
+                var config = new MapperConfiguration(cfg => {
+                    cfg.CreateMap<ModLessonEntity,CourseTeacherConfigEntity>();
+                });
+
+                IMapper mapper = config.CreateMapper();
+                 listCourseTeacherConfig= mapper.Map<List<ModLessonEntity>, List<CourseTeacherConfigEntity>>(listLessonNoChapter);
+
+
+                var listConfigFromDB = courseTeacherConfigService.getListByCourseID(model.courseID);
+
+                foreach (var item in listCourseTeacherConfig)
+                {
+                    item.TeacherID = model.teacherID;
+                    foreach (var itemDb in listConfigFromDB)
+                    {
+                        if(item.ID == itemDb.ID)
+                        {
+                            item.endedDate = itemDb.endedDate;
+                            item.createdDate = itemDb.createdDate;
+                            item.IsOpen = itemDb.IsOpen;
+                            break;
+                        }
+                       
+                    }
+
+                   
+                }
+            }
+            catch(Exception ex)
+            {
+                string s = ex.Message;
+            }
+            //danh sach chapter theo courseid
+            // var listChapter = modChapterService.getListByCourseId(model.courseID);
+
+            //danh sach lesson theo courseid co chapter
+
+            // var listLessonHaveChapter = modLessonService.getListByCourseIdHaveChapter(model.courseID);
+
+            // noi lesson vao tung chapter
+            ; return listCourseTeacherConfig;
+        }
+
 
         [HttpPost]
         public List<ModCourseEntity_nghiepnc> getListModCourse([FromBody]SeachForm seachForm)
@@ -91,7 +153,18 @@ namespace SME.API.Controllers
 
 
         [HttpPost]
-        public List<ModSubjectEntity>getListModSubject()
+        public async Task<IActionResult> ConfigCouse([FromBody]CourseTeacherConfigEntity item)
+        {
+          
+
+            await courseTeacherConfigService.AddAsync(item);
+
+            return NoContent();
+
+        }
+
+        [HttpPost]
+        public List<ModSubjectEntity> getListModSubject()
         {
             var item = modSubjectService.CreateQuery().Find(o => o.IsActive == true).ToList();
             return item;
@@ -107,9 +180,9 @@ namespace SME.API.Controllers
         [HttpPost]
         public List<ModProgramEntity> getListModProgram()
         {
-           
-                var item = modProgramService.CreateQuery().Find(o => o.IsActive == true).ToList();
-           
+
+            var item = modProgramService.CreateQuery().Find(o => o.IsActive == true).ToList();
+
             return item;
         }
 
