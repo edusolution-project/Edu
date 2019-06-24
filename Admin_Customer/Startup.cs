@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BaseCustomerEntity.Globals;
+using BaseCustomerMVC.Globals;
+using Core_v2.Globals;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -31,8 +34,11 @@ namespace Admin_Customer
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddLogs();
+            services.AddServiceBase();
+            services.AddMvc(options=> {
+                options.Filters.Add<PermissionAttribute>();
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,16 +54,15 @@ namespace Admin_Customer
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+            app.GetConfiguration(Configuration);
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                    name: "default",
-                   template: "{controller=Home}/{action=Index}/{id?}"
+                   template: "{controller=home}/{action=index}/{id?}"
                  );
                 routes.MapRoute(
                    name: "areas",

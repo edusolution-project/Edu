@@ -4,5 +4,11 @@
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<h1>Index</h1>
+@using (Html.BeginForm("Add","Home",FormMethod.Post))
+{
+    <input name="SearchText" value=""/>
+    <input type="submit" value="ok"/>
+}
 
+@ViewBag.Model
+@TempData["Error"]

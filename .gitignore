@@ -38,3 +38,4 @@ KiemTraNhieuThe/obj/
 /JWT_Authentication
 /BaseApi_MongoDB
 /api_customer
+/Admin_Customer/wwwroot/lib/signalr/dist/browser
