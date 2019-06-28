@@ -1,0 +1,120 @@
+body {
+    font-family: "Roboto", sans-serif;
+}
+.bg-login-image {
+    background-image: url("/img/Luna-Blaise.jpg");
+    background-position: center;
+    background-size: cover;
+}
+#top-menu{
+    border-bottom: 1px solid #e3e7ed;
+}
+#accordionSidebar {
+    box-shadow: 0px 10px 10px rgba(28, 39, 60, 0.03);
+    -webkit-box-shadow: 0px 10px 10px rgba(28, 39, 60, 0.03);
+    -moz-box-shadow: 0px 10px 10px rgba(28, 39, 60, 0.03);
+}
+#scores-popup .item {
+    width: 100%;
+    padding: 10px 0 0;
+    border-bottom: solid 1px #ccc;
+    border-radius: 5px;
+}
+
+.card-header .text-primary,
+.card-header .text-primary a {
+    padding: 5px 0;
+    text-transform: uppercase;
+}
+    .header-title{
+ 	background: transparent;
+    }
+    .header-title .text-primary{
+ 	color: #a90329 !important;
+    }
+    .user .btn-user {
+ 	font-weight: bold;
+    }
+#thao-luan .title{
+ 	display: inline-flex;
+    }
+#thao-luan .date,
+#thao-luan .time{
+    margin: 0px 3px;
+}
+#thao-luan .text{
+    font-weight: bold;
+}
+#myTab .nav-item:first-child{
+    margin-left: 30px;
+}
+#myTab .nav-item .active{
+    color: #fff;
+    border-color: #a90329;
+    background: #a90329;
+    background: -moz-linear-gradient(top, #a90329 0%, #8f0222 44%, #6d0019 100%);
+    background: -webkit-linear-gradient(top, #a90329 0%,#8f0222 44%,#6d0019 100%);
+    background: linear-gradient(to bottom, #a90329 0%,#8f0222 44%,#6d0019 100%);
+}
+#myTab {
+    border-bottom: 1px solid #6d0019 !important;
+}
+#myTab .nav-item > a{
+	color: #333;
+}
+#myTab .nav-item > a:hover{
+	color: #fff !important;
+    border-color: #a90329;
+    background: #a90329;
+	background: -moz-linear-gradient(top, #a90329 0%, #8f0222 44%, #6d0019 100%);
+	background: -webkit-linear-gradient(top, #a90329 0%,#8f0222 44%,#6d0019 100%);
+	background: linear-gradient(to bottom, #a90329 0%,#8f0222 44%,#6d0019 100%);
+}
+
+.media-holder {
+    max-width: 100%;
+    min-width: 50%;
+    margin: 3px 0;
+}
+
+video, audio {
+    width: auto;
+    min-width: 80%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#check .float-right {
+    margin-top: -20px;
+    color: #fff;
+}
+#check .justify-content-center{
+    margin-top: 30px; 
+}
+#check .btn-primary{
+    width: 30%;
+    padding: 15px;
+    border-color: #a90329;
+    background: #a90329;
+    background: -moz-linear-gradient(top, #a90329 0%, #8f0222 44%, #6d0019 100%);
+    background: -webkit-linear-gradient(top, #a90329 0%,#8f0222 44%,#6d0019 100%);
+    background: linear-gradient(to bottom, #a90329 0%,#8f0222 44%,#6d0019 100%);
+}
+
+#dataTable .input-group input {
+    width: 25px;
+    height: 25px;
+    margin: auto;
+}
+
+.chose-file {
+    padding: 0.75rem 1.25rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+.navbar-light .navbar-nav .nav-link{
+    padding: 15px 20px;
+}

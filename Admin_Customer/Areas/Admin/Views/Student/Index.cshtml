@@ -1,0 +1,189 @@
+﻿@{
+    ViewData["Title"] = "Quản lý học viên";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    @using (Html.BeginForm(FormMethod.Post,new { name="FormControl"}))
+    {
+        <input type="hidden" name="ArrID" value=""/>
+        <!-- DataTales Example -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","student")','delete',LoadData);"> Xóa </button>
+                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> Thêm mới </button>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> Thêm nhanh từ file </button>
+                            <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "student")')"> Xuất danh sách </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã học viên</th>
+                                <th>Họ tên</th>
+                                <th>Ngày sinh</th>
+                                <th>Lớp</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /.container-fluid -->
+    }
+</div>
+<!-- Modal Create Form -->
+<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        @using (Html.BeginForm("Create", "student", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
+        {
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalCenterTitle">Tạo tài khoản</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control" name="StudentId" id="inputName" placeholder="mã học viên">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control" name="Class" id="inputText" placeholder="Lớp">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-group col-md-12">
+                                <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <input type="email" class="form-control" name="Email" id="inputEmail" placeholder="Email">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control" name="Phone" id="inputPhone" placeholder="Số điện thoại">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <input type="date" class="form-control" name="DateBorn" id="inputDate" placeholder="Ngày tháng năm sinh">
+                            </div>
+                            <div class="form-group row col-md-6">
+                                <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
+                                <div class="col-sm-8">
+                                    <select id="input-option" name="IsActive" class="form-control">
+                                        <option value="true" selected>Hoạt động</option>
+                                        <option value="false">Không hoạt động</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "student")','create',LoadData)">Lưu lại</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal chose file -->
+<div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            @using (Html.BeginForm("Import", "student", FormMethod.Post,new { enctype = "multipart/form-data",name="ImportForm" }))
+            {
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
+                            <div class="chose-file col-sm-9">
+                                <input type="file" name="file" class="form-control-file" id="FormControlFile">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="button-left">
+                        <button type="button" class="btn btn-secondary">Tải file mẫu</button>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script>
+    function LoadData() {
+        var searchText = $("#searchText").val();
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetList", "student")',
+            data: { SearchText: searchText },
+            dataType:"json",
+            success: function (data) {
+                var body = $('#dataTable tbody');
+                body.html("");
+                if (data.Data.length > 0)
+                {
+                    for (i = 0; i < data.Data.length; ++i) {
+                        item = data.Data[i];
+                        var active = "";
+                        if (item.IsActive) {
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","student")',LoadData)\" type='button' class='btn btn-success'> Active </button></td>";
+                        } else {
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","student")',LoadData)\" type='button' class='btn btn-danger'> NonActive </button></td>";
+                        }
+                        body.append("<tr>" +
+                            "<td><input name='cid' type='checkbox' value='" + item.ID +"'>" + (i + 1) + "</td>" +
+                            "<td>" + item.StudentId +"</td>" +
+                            "<td>" + item.FullName + "</td>" +
+                            "<td>" + new Date(item.DateBorn).toLocaleDateString() +"</td>" +
+                            "<td>" + item.Class + "</td>" +active +
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> Sửa </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' class='btn btn-danger'> Xóa </button>" +
+                            "</td > " +
+                            "</tr>"
+                        );
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    };
+
+    $(document).ready(function () {
+        LoadData();
+    });
+</script>

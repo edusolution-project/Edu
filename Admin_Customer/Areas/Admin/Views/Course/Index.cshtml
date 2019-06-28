@@ -1,0 +1,613 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <div class="row">
+            <div class="col-lg-6">
+                <h4 class="m-0 font-weight-bold text-primary">Quản lý Khóa học</h4>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-right">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCenter"> Thêm mới </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </th>
+                        <th>STT</th>
+                        <th>Mã khóa học</th>
+                        <th>Tên khóa học</th>
+                        <th>Tên giáo viên</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>1</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>2</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>3</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>4</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>5</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>6</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>7</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>8</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>9</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>10</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>11</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>12</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>13</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>14</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>15</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>16</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>17</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>18</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group">
+                                <input type="checkbox" aria-label="Checkbox">
+                            </div>
+                        </td>
+                        <td>19</td>
+                        <td>9999</td>
+                        <td>Tiếng anh</td>
+                        <td>Phạm Anh Tuấn</td>
+                        <td>1/1/2019</td>
+                        <td>31/1/2019</td>
+                        <td>hoạt động</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-info">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            <a href="#" class="btn btn-danger">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+<!-- Modal Create Form -->
+<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalCenterTitle">Tạo khóa học</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="staticText" class="col-form-label">Môn học:</label>
+                            <input type="text" class="form-control" id="inputText" placeholder="Môn học">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="staticText" class="col-form-label">Cấp độ:</label>
+                            <input type="text" class="form-control" id="inputText" placeholder="Cấp độ">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="staticText" class="col-form-label">Giáo trình:</label>
+                            <input type="text" class="form-control" id="inputText" placeholder="Giáo trình">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="staticText" class="col-form-label">Khóa học:</label>
+                            <input type="text" class="form-control" id="inputText" placeholder="Khóa học">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="staticText" class="col-form-label">Ngày bắt đầu:</label>
+                            <input type="date" class="form-control" id="inputText">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="staticText" class="col-form-label">Ngày kết thúc:</label>
+                            <input type="date" class="form-control" id="inputText">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="staticText" class="col-form-label">Giáo viên:</label>
+                            <select id="inputState" class="form-control">
+                                <option selected>Nguyễn văn A</option>
+                                <option>Nguyễn văn B</option>
+                                <option>Nguyễn văn C</option>
+                                <option>Nguyễn văn D</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="staticText" class="col-form-label">Trạng thái:</label>
+                            <select id="inputState" class="form-control">
+                                <option selected>Hoạt động</option>
+                                <option>Không hoạt động</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+</div>
