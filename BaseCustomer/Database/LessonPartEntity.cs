@@ -9,6 +9,8 @@ namespace BaseCustomerEntity.Database
 {
     public class LessonPartEntity : EntityBase
     {
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
         [JsonProperty("ParentID")]
         public string ParentID { get; set; } // chính là lessonID
         [JsonProperty("Title")]
@@ -35,7 +37,7 @@ namespace BaseCustomerEntity.Database
 
     public class LessonPartService : ServiceBase<LessonPartEntity>
     {
-        public LessonPartService(IConfiguration config) : base(config, "LessonParts")
+        public LessonPartService(IConfiguration config) : base(config)
         {
 
         }

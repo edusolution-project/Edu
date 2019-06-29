@@ -1,108 +1,294 @@
-﻿using BaseCustomerMVC.Globals;
+﻿using BaseCustomerEntity.Database;
+using BaseCustomerMVC.Globals;
+using BaseCustomerMVC.Models;
 using Core_v2.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
     [IndefindCtrlAttribulte("Quản lý khóa học", "CourseManagement", "admin")]
     public class CourseController : AdminController
     {
-        public CourseController()
+        private readonly CourseService _courseService;
+        private readonly SubjectService _subjectService;
+        private readonly GradeService _gradeService;
+        private readonly ClassService _service;
+        private readonly TeacherService _teacherService;
+        private readonly StudentService _studentService;
+        private readonly IHostingEnvironment _env;
+        public CourseController(ClassService service
+            , SubjectService subjectService
+            , GradeService gradeService
+            , CourseService courseService
+            , TeacherService teacherService
+            , StudentService studentService
+            , IHostingEnvironment evn)
         {
+            _service = service;
+            _courseService = courseService;
+            _gradeService = gradeService;
+            _subjectService = subjectService;
+            _teacherService = teacherService;
+            _studentService = studentService;
+            _env = evn;
+        }
+        public ActionResult Index(DefaultModel model)
+        {
+            ViewBag.Course = _courseService.GetAll()?.ToList();
+            ViewBag.Subject = _subjectService.GetAll()?.ToList();
+            ViewBag.Grade = _gradeService.GetAll()?.ToList();
+            ViewBag.Teacher = _teacherService.GetAll()?.ToList();
+            ViewBag.Model = model;
+            return View();
+        }
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetList(DefaultModel model)
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
+
+            if (!string.IsNullOrEmpty(model.SearchText))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
+            }
+            if (model.StartDate > DateTime.MinValue)
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Created >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
+            }
+            if (model.EndDate > DateTime.MinValue)
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Created <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
+            }
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            model.TotalRecord = data.Count();
+            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+                ? data.ToList()
+                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+            var respone = new Dictionary<string, object>
+            {
+                { "Data", DataResponse },
+                { "Model", model }
+            };
+            return new JsonResult(respone);
 
         }
 
-        // GET: Home
-        public ActionResult Index()
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetCourse(string GradeID,string SubjectID)
         {
-            return View();
+            var filter = new List<FilterDefinition<CourseEntity>>();
+
+            if (!string.IsNullOrEmpty(GradeID))
+            {
+                filter.Add(Builders<CourseEntity>.Filter.Where(o=>o.GradeID == GradeID));
+            }
+            if (!string.IsNullOrEmpty(SubjectID))
+            {
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+            }
+            var data = filter.Count > 0 ? _courseService.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _courseService.GetAll();
+
+            var DataResponse = data.ToList();
+            return new JsonResult(DataResponse);
+
+        }
+
+        [System.Obsolete]
+        [HttpPost]
+        public JsonResult GetDetails(string id)
+        {
+            var filter = Builders<ClassEntity>.Filter.Where(o => o.ID == id);
+            var data = _service.Collection.Find(filter);
+            var DataResponse = data == null || data.Count() <= 0 ? null : data.First();
+            var respone = new Dictionary<string, object>
+            {
+                { "Data", DataResponse }
+            };
+            return new JsonResult(respone);
+
         }
 
         [HttpPost]
-        public ActionResult Add(string SearchText)
+        [Obsolete]
+        public JsonResult Create(ClassEntity item)
         {
-            TempData["Error"] = RouteData.Values["Error"];
-            ViewBag.Model = SearchText;
-            return RedirectToAction("index");
+            if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
+            {
+                item.ID = null;
+                item.Created = DateTime.Now;
+                _service.CreateQuery().InsertOne(item);
+                Dictionary<string, object> response = new Dictionary<string, object>()
+                {
+                    {"Data",item },
+                    {"Error",null },
+                    {"Msg","Thêm thành công" }
+                };
+                return new JsonResult(response);
+            }
+            else
+            {
+                var oldData = _service.GetItemByID(item.ID);
+                if (oldData == null) return new JsonResult(null);
+                item.Updated = DateTime.Now;
+                _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+
+                Dictionary<string, object> response = new Dictionary<string, object>()
+                {
+                    {"Data",item },
+                    {"Error",null },
+                    {"Msg","Cập nhập thành công" }
+                };
+                return new JsonResult(response);
+            }
         }
 
-        // GET: Home/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: Home/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Home/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        [Obsolete]
+        public JsonResult Delete(DefaultModel model)
         {
-            try
+            if (model.ArrID.Length <= 0)
             {
-                // TODO: Add insert logic here
-
-                return RedirectToAction(nameof(Index));
+                return new JsonResult(null);
             }
-            catch
+            else
             {
-                return View();
+                if (model.ArrID.Contains(","))
+                {
+                    
+                    var delete = _service.Collection.DeleteMany(o => model.ArrID.Split(',').Contains(o.ID));
+                    return new JsonResult(delete);
+                }
+                else
+                {
+                    var delete = _service.Collection.DeleteMany(o => model.ArrID == o.ID);
+                    return new JsonResult(delete);
+                }
+
+
             }
         }
-
-        // GET: Home/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: Home/Edit/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        [Obsolete]
+        public JsonResult Publish(DefaultModel model)
         {
-            try
+            if (model.ArrID.Length <= 0)
             {
-                // TODO: Add update logic here
-
-                return RedirectToAction(nameof(Index));
+                return new JsonResult(null);
             }
-            catch
+            else
             {
-                return View();
+                if (model.ArrID.Contains(","))
+                {
+                    var filter = Builders<ClassEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == false);
+                    var update = Builders<ClassEntity>.Update.Set("IsActive", true);
+                    var publish = _service.Collection.UpdateMany(filter, update);
+                    return new JsonResult(publish);
+                }
+                else
+                {
+                    var filter = Builders<ClassEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == false);
+                    var update = Builders<ClassEntity>.Update.Set("IsActive", true);
+                    var publish = _service.Collection.UpdateMany(filter, update);
+                    return new JsonResult(publish);
+                }
+
+
             }
         }
-
-        // GET: Home/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Home/Delete/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        [Obsolete]
+        public JsonResult UnPublish(DefaultModel model)
         {
-            try
+            if (model.ArrID.Length <= 0)
             {
-                // TODO: Add delete logic here
-
-                return RedirectToAction(nameof(Index));
+                return new JsonResult(null);
             }
-            catch
+            else
             {
-                return View();
+                if (model.ArrID.Contains(","))
+                {
+                    var filter = Builders<ClassEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == true);
+                    var update = Builders<ClassEntity>.Update.Set("IsActive", false);
+                    var publish = _service.Collection.UpdateMany(filter, update);
+                    return new JsonResult(publish);
+                }
+                else
+                {
+                    var filter = Builders<ClassEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == true);
+                    var update = Builders<ClassEntity>.Update.Set("IsActive", false);
+                    var publish = _service.Collection.UpdateMany(filter, update);
+                    return new JsonResult(publish);
+                }
+
+
             }
         }
+        [HttpPost]
+        [Obsolete]
+        public async Task<JsonResult> Import(string ID)
+        {
+            var form = HttpContext.Request.Form;
+            if (string.IsNullOrEmpty(ID)) return new JsonResult("Fail");
+            var itemCourse = _service.GetItemByID(ID);
+            if(itemCourse == null) return new JsonResult("Fail");
+            if (itemCourse.Students == null) itemCourse.Students = new List<string>();
+            if (form == null) return new JsonResult(null);
+            if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
+            var file = form.Files[0];
+            var filePath = Path.Combine(_env.WebRootPath, itemCourse.ID +"_"+ file.FileName);
+            List<string> studentList = null;
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+                stream.Close();
+                try
+                {
+                    var readStream = new FileStream(filePath, FileMode.Open);
+                    using (ExcelPackage package = new ExcelPackage(readStream))
+                    {
+                        ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
+                        int totalRows = workSheet.Dimension.Rows;
+                        studentList = new List<string>();
+                        for (int i = 2; i <= totalRows; i++)
+                        {
+                            if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
+                            var StudentId = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                            studentList.Add(StudentId);
+                        }
+                        var listData = _studentService.Collection.Find(o => studentList.Contains(o.StudentId))?.ToList();
+                        if(listData != null)
+                        {
+                            var listID = listData.Select(o => o.ID);
+                            itemCourse.Students.AddRange(listID);
+                            itemCourse.Students = itemCourse.Students.Distinct().ToList();
+                            _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
+                        }
+                        
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new JsonResult(ex);
+                }
+            }
+            Dictionary<string, object> response = new Dictionary<string, object>()
+            {
+                {"Data",studentList}
+            };
+            return new JsonResult(response);
+        }
+
     }
 }

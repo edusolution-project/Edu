@@ -10,6 +10,8 @@ namespace BaseCustomerEntity.Database
 {
     public class SubjectEntity : EntityBase
     {
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
         [JsonProperty("Code")]
@@ -31,7 +33,7 @@ namespace BaseCustomerEntity.Database
     }
     public class SubjectService : ServiceBase<SubjectEntity>
     {
-        public SubjectService(IConfiguration config) : base(config, "Subjects")
+        public SubjectService(IConfiguration config) : base(config)
         {
         }
         public object GetItemByCode(string code)

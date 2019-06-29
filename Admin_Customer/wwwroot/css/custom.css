@@ -1,19 +1,93 @@
-body {
-    font-family: "Roboto", sans-serif;
-}
 .bg-login-image {
     background-image: url("/img/Luna-Blaise.jpg");
     background-position: center;
     background-size: cover;
 }
+
 #top-menu{
     border-bottom: 1px solid #e3e7ed;
 }
+
+#dataTable .btn{
+    margin: 0 5px;
+}
+
+#collapseOne .collapse-item:hover #icon-submenu,
+#accordionSidebar .nav-item .nav-link:hover #icon-submenu,
+.collapse .collapse-item:hover #icon-submenu {
+    display: block;
+}
+
+#icon-submenu {
+    display: none;
+    position: absolute;
+    right: 10px;
+}
+
+#accordionSidebar .nav-item .nav-link #icon-submenu .fas {
+    top: -24px;
+    position: relative;
+    right: 20px;
+}
+
+#icon-submenu .fas {
+    padding: 0 10px;
+    top: -18px;
+    position: relative;
+}
+
+#icon-submenu .fas:hover {
+    color: #1865f2;
+}
+
+#list-detail .sub-menu,
+#list-detail .sidebar,
+#list-detail .nav-item .nav-link {
+    width: 100% !important;
+}
+
+#menu-left {
+    border-right: 1px solid #ddd;
+    padding: 0;
+}
+
+#menu-left .breadcrumb-detail {
+    border-bottom: 1px solid #ddd;
+}
+
+.media .img-fluid {
+    max-height: 135px;
+}
+
+#lesson-detail {
+    background-color: #fff;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+}
+
+.header .breadcrumb{
+    background-color: transparent;
+}
+
+.nav-pills .nav-link.active {
+    color: #1865f2;
+    background-color: transparent;
+}
+
+.nav-pills .nav-link{
+    color: #444;
+}
+.lesson-tabs .fa {
+    border: 1px solid #444;
+    padding: 10px;
+    border-radius: 5px;
+}
+
 #accordionSidebar {
     box-shadow: 0px 10px 10px rgba(28, 39, 60, 0.03);
     -webkit-box-shadow: 0px 10px 10px rgba(28, 39, 60, 0.03);
     -moz-box-shadow: 0px 10px 10px rgba(28, 39, 60, 0.03);
 }
+
 #scores-popup .item {
     width: 100%;
     padding: 10px 0 0;
@@ -26,28 +100,32 @@ body {
     padding: 5px 0;
     text-transform: uppercase;
 }
-    .header-title{
- 	background: transparent;
-    }
-    .header-title .text-primary{
- 	color: #a90329 !important;
-    }
-    .user .btn-user {
- 	font-weight: bold;
-    }
+    
+.header-title .text-primary {
+    color: #4e73df !important;
+}
+
+.user .btn-user {
+    font-weight: bold;
+}
+
 #thao-luan .title{
  	display: inline-flex;
-    }
+}
+
 #thao-luan .date,
 #thao-luan .time{
     margin: 0px 3px;
 }
+
 #thao-luan .text{
     font-weight: bold;
 }
+
 #myTab .nav-item:first-child{
     margin-left: 30px;
 }
+
 #myTab .nav-item .active{
     color: #fff;
     border-color: #a90329;
@@ -56,12 +134,15 @@ body {
     background: -webkit-linear-gradient(top, #a90329 0%,#8f0222 44%,#6d0019 100%);
     background: linear-gradient(to bottom, #a90329 0%,#8f0222 44%,#6d0019 100%);
 }
+
 #myTab {
     border-bottom: 1px solid #6d0019 !important;
 }
+
 #myTab .nav-item > a{
 	color: #333;
 }
+
 #myTab .nav-item > a:hover{
 	color: #fff !important;
     border-color: #a90329;
@@ -117,4 +198,70 @@ video, audio {
 
 .navbar-light .navbar-nav .nav-link{
     padding: 15px 20px;
+}
+
+.btn-toggle.btn-lg.active {
+    transition: background-color 0.25s;
+}
+/* css btn toggle*/
+.btn-toggle.btn-lg {
+    margin: 0 5rem;
+    padding: 0;
+    position: relative;
+    border: none;
+    height: 2rem;
+    width: 6rem;
+    border-radius: 2.5rem;
+}
+
+.btn-toggle.active {
+    background-color: #29b5a8;
+}
+
+.btn-toggle.btn-lg.active:before {
+    opacity: 0.5;
+}
+
+.btn-toggle.btn-lg:before {
+    content: 'Off';
+    left: -5rem;
+}
+
+.btn-toggle.btn-lg.active:after {
+    opacity: 1;
+}
+
+.btn-toggle.btn-lg:after {
+    content: 'On';
+    right: -5rem;
+    opacity: 0.5;
+}
+
+.btn-toggle.btn-lg:before, .btn-toggle.btn-lg:after {
+    line-height: 2.5rem;
+    width: 6rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: absolute;
+    bottom: 0;
+    transition: opacity 0.5s;
+}
+
+.btn-toggle.btn-lg.active > .handle {
+    left: 4.2rem;
+    transition: left 0.5s;
+}
+
+.btn-toggle.btn-lg > .handle {
+    position: absolute;
+    top: 0.22rem;
+    left: 0.3125rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 1.875rem;
+    background: #fff;
+    transition: left 0.5s;
 }

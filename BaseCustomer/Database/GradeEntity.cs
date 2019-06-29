@@ -10,6 +10,8 @@ namespace BaseCustomerEntity.Database
 {
     public class GradeEntity : EntityBase
     {
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
         [JsonProperty("Code")]
@@ -26,14 +28,14 @@ namespace BaseCustomerEntity.Database
         public DateTime Updated { get; set; }
         [JsonProperty("IsAdmin")]
         public bool IsAdmin { get; set; }
-        [JsonProperty("NIsActiveame")]
+        [JsonProperty("IsActive")]
         public bool IsActive { get; set; }
         [JsonProperty("Order")]
         public int Order { get; set; }
     }
     public class GradeService : ServiceBase<GradeEntity>
     {
-        public GradeService(IConfiguration config) : base(config, "Grades")
+        public GradeService(IConfiguration config) : base(config)
         {
 
         }

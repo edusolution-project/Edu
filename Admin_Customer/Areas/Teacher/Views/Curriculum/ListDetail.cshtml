@@ -1,0 +1,81 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+
+<div id="list-detail">
+    <div class="card show">
+        <div class="card-header">
+            <h5 class="m-0 font-weight-bold text-primary">Chi tiết giáo trình</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="sub-menu">
+                    <ul class="navbar-nav sidebar accordion" id="accordionSidebar">
+                        <!-- Nav Item -->
+                        <li class="nav-item active">
+                            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                                <i class="fas fa-fw fa-cog"></i>
+                                <span>First Certificate in English (FCE)</span>
+                                <div id="icon-submenu">
+                                    <i class="fas fa-plus" data-toggle="tooltip" data-placement="top" title="thêm bài giảng"></i>
+                                    <i class="fas fa-edit" data-toggle="tooltip" data-placement="top" title="sửa bài giảng"></i>
+                                </div>
+                            </a>
+                            <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                                <div class="bg-white py-2 collapse-inner rounded">
+                                    <a class="collapse-item" href="@Url.Action("Lesson" , "Calendar")" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        <i class="far fa-address-book"></i> 
+                                        <span>First Certificate in English</span>
+                                        <div id="icon-submenu">
+                                            <i class="fas fa-plus" data-toggle="tooltip" data-placement="top" title="thêm bài giảng"></i>
+                                            <i class="fas fa-edit" data-toggle="tooltip" data-placement="top" title="sửa bài giảng"></i>
+                                            <i class="fas fa-trash" data-toggle="tooltip" data-placement="top" title="xóa bài giảng"></i>
+                                        </div>
+                                    </a>
+                                    <div id="collapseOne" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                                        <div class="bg-white py-2 collapse-inner rounded">
+                                            <a class="collapse-item" href="@Url.Action("Lesson" , "Calendar")">
+                                                <i class="fas fa-book-reader"></i> Lesson 1
+                                                <div id="icon-submenu">
+                                                    <i class="fas fa-edit" data-toggle="tooltip" data-placement="top" title="sửa bài giảng"></i>
+                                                    <i class="fas fa-trash" data-toggle="tooltip" data-placement="top" title="xóa bài giảng"></i>
+                                                </div>
+                                            </a>
+                                            <a class="collapse-item" href="@Url.Action("Lesson" , "Calendar")">
+                                                <i class="fas fa-book-reader"></i> Lesson 2
+                                                <div id="icon-submenu">
+                                                    <i class="fas fa-edit" data-toggle="tooltip" data-placement="top" title="sửa bài giảng"></i>
+                                                    <i class="fas fa-trash" data-toggle="tooltip" data-placement="top" title="xóa bài giảng"></i>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <a class="collapse-item" href="@Url.Action("Lesson" , "Calendar")"><i class="fas fa-book-reader"></i> <span>First Certificate in English</span> </a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- Nav Item -->
+                        <li class="nav-item active">
+                            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo2" aria-expanded="true" aria-controls="collapseTwo2">
+                                <i class="fas fa-fw fa-cog"></i>
+                                <span>First Certificate in English (FCE)</span>
+                            </a>
+                            <div id="collapseTwo2" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                                <div class="bg-white py-2 collapse-inner rounded">
+                                    <a class="collapse-item" href="#">Lesson 1</a>
+                                    <a class="collapse-item" href="#">Lesson 2</a>
+                                </div>
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer"></div>
+    </div>
+</div>

@@ -33,11 +33,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ModChapterService : ServiceBase<ModChapterEntity>
     {
-        public ModChapterService(IConfiguration config) : base(config, "ModChapters")
-        {
-
-        }
-        public ModChapterService(IConfiguration config, string tableName) : base(config, tableName)
+        public ModChapterService(IConfiguration config) : base(config, "ModChapters","VES")
         {
 
         }

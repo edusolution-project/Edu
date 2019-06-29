@@ -9,6 +9,8 @@ namespace BaseCustomerEntity.Database
 {
     public class ProgramEntity : EntityBase
     {
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
         [JsonProperty("Description")]
@@ -36,7 +38,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ProgramService : ServiceBase<ProgramEntity>
     {
-        public ProgramService(IConfiguration config) : base(config, "Programs")
+        public ProgramService(IConfiguration config) : base(config)
         {
 
         }

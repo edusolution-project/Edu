@@ -20,6 +20,7 @@ namespace BaseCustomerMVC.Controllers.Admin
     [IndefindCtrlAttribulte("Quản lý giáo viên", "TeacherManagement", "admin")]
     public class TeacherController : AdminController
     {
+        private readonly SubjectService _subjectService;
         private readonly TeacherService _service;
         private readonly RoleService _roleService;
         private readonly AccountService _accountService;
@@ -27,16 +28,19 @@ namespace BaseCustomerMVC.Controllers.Admin
         public TeacherController(TeacherService service
             , RoleService roleService
             , AccountService accountService
-            , IHostingEnvironment evn)
+            , IHostingEnvironment evn
+            , SubjectService subjectService)
         {
             _env = evn;
             _service = service;
             _roleService = roleService;
             _accountService = accountService;
+            _subjectService = subjectService;
         }
 
         public ActionResult Index(DefaultModel model)
         {
+            ViewBag.Subject = _subjectService.GetAll().ToList();
             ViewBag.Roles = _roleService.CreateQuery().Find(o=>o.Type == "teacher").SortBy(o=>o.Name).ToList();
             ViewBag.Model = model;
             return View();
@@ -111,10 +115,10 @@ namespace BaseCustomerMVC.Controllers.Admin
                         PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                         PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                         UserCreate = item.UserCreate,
-                        Type = "student",
+                        Type = "teacher",
                         UserID = item.ID,
                         UserName = item.Email.ToLower().Trim(),
-                        RoleID = _roleService.GetItemByCode("student").ID
+                        RoleID = _roleService.GetItemByCode("teacher").ID
                     };
                     _accountService.CreateQuery().InsertOne(account);
                     return new JsonResult(response);

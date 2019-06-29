@@ -8,6 +8,8 @@ namespace BaseCustomerEntity.Database
 {
     public class ChapterEntity : EntityBase
     {
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
         [JsonProperty("Code")]
@@ -33,7 +35,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ChapterService : ServiceBase<ChapterEntity>
     {
-        public ChapterService(IConfiguration config) : base(config, "Chapters")
+        public ChapterService(IConfiguration config) : base(config)
         {
 
         }

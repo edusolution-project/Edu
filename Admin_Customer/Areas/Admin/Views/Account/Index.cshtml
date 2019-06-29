@@ -18,9 +18,11 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="text-right">
-                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","account")','delete',LoadData);"> Xóa </button>
-                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> Thêm mới </button>
-                            <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "account")')"> Xuất danh sách </button>
+                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","account")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
+                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            @*<button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","account")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
+        <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+        <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "account")')"> <i class="fas fa-file-export"></i> </button>*@
                         </div>
                     </div>
                 </div>
@@ -164,9 +166,9 @@
 
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","account")',LoadData)\" type='button' class='btn btn-success'> Active </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","account")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","account")',LoadData)\" type='button' class='btn btn-danger'> NonActive </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","account")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"'/></div></td>"+
@@ -174,8 +176,8 @@
                             "<td>" + item.UserName +"</td>" +
                             "<td>" + item.Name + "</td>" +
                             "<td>" + item.RoleName +"</td>" +active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","account")','@Url.Action("create","account")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> Sửa </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","account")',LoadData); else return;\" type='button' class='btn btn-danger'> Xóa </button>" +
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","account")','@Url.Action("create","account")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","account")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                         );

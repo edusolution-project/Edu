@@ -8,6 +8,8 @@ namespace BaseCustomerEntity.Database
 {
     public class LessonEntity : EntityBase
     {
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
         [JsonProperty("CourseID")]
         public string CourseID { get; set; }
         [JsonProperty("ChapterID")]
@@ -40,9 +42,9 @@ namespace BaseCustomerEntity.Database
         public DateTime Updated { get; set; }
 
     }
-    public class LessonService : ServiceBase<ModLessonEntity>
+    public class LessonService : ServiceBase<LessonEntity>
     {
-        public LessonService(IConfiguration config) : base(config, "Lessons")
+        public LessonService(IConfiguration config) : base(config)
         {
 
         }

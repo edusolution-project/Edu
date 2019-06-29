@@ -17,10 +17,14 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="text-right">
-                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","student")','delete',LoadData);"> Xóa </button>
-                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> Thêm mới </button>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> Thêm nhanh từ file </button>
-                            <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "student")')"> Xuất danh sách </button>
+                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","student")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
+                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
+                            <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "student")')"> <i class="fas fa-file-export"></i> </button>
+                            @*<button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","student")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
+        <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
+        <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "student")')"> <i class="fas fa-file-export"></i> </button>*@
                         </div>
                     </div>
                 </div>
@@ -159,9 +163,9 @@
                         item = data.Data[i];
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","student")',LoadData)\" type='button' class='btn btn-success'> Active </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","student")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","student")',LoadData)\" type='button' class='btn btn-danger'> NonActive </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","student")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
                         body.append("<tr>" +
                             "<td><input name='cid' type='checkbox' value='" + item.ID +"'>" + (i + 1) + "</td>" +
@@ -169,8 +173,8 @@
                             "<td>" + item.FullName + "</td>" +
                             "<td>" + new Date(item.DateBorn).toLocaleDateString() +"</td>" +
                             "<td>" + item.Class + "</td>" +active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> Sửa </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' class='btn btn-danger'> Xóa </button>" +
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                         );

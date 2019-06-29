@@ -27,11 +27,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ModLessonExtendService : ServiceBase<ModLessonExtendEntity>
     {
-        public ModLessonExtendService(IConfiguration config) : base(config, "ModLessonExtends")
-        {
-
-        }
-        public ModLessonExtendService(IConfiguration config, string tableName) : base(config, tableName)
+        public ModLessonExtendService(IConfiguration config) : base(config, "ModLessonExtends", "VES")
         {
 
         }

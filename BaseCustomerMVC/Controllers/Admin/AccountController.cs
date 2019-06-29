@@ -121,6 +121,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 if (!ExistUserName(item.UserName))
                 {
+                    item.Type = _roleService.GetItemByID(item.RoleID).Type;
+                    item.CreateDate = DateTime.Now;
+                    item.UserCreate = User.Claims.GetClaimByType("UserID").Value;
                     _service.CreateQuery().InsertOne(item);
                     Dictionary<string, object> response = new Dictionary<string, object>()
                     {
@@ -145,7 +148,10 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 var oldData = _service.GetItemByID(item.ID);
                 if (oldData == null) return new JsonResult(null);
-
+                item.UserID = oldData.UserID;
+                item.UserCreate = User.Claims.GetClaimByType("UserID").Value;
+                item.Type = _roleService.GetItemByID(item.RoleID).Type;
+                
                 if (string.IsNullOrEmpty(item.PassWord) || Security.Encrypt(item.PassWord) == oldData.PassWord) item.PassWord = oldData.PassWord;
                 else item.PassWord = Security.Encrypt(item.PassWord);
                 if (string.IsNullOrEmpty(item.PassTemp) || Security.Encrypt(item.PassTemp) == oldData.PassTemp) item.PassTemp = oldData.PassTemp;

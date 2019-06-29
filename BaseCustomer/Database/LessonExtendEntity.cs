@@ -8,6 +8,8 @@ namespace BaseCustomerEntity.Database
 {
     public class LessonExtendEntity : EntityBase
     {
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
         [JsonProperty("LessonPartID")]
         public string LessonPartID { get; set; }
         [JsonProperty("NameOriginal")]
@@ -27,7 +29,7 @@ namespace BaseCustomerEntity.Database
     }
     public class LessonExtendService : ServiceBase<LessonExtendEntity>
     {
-        public LessonExtendService(IConfiguration config) : base(config, "LessonExtends")
+        public LessonExtendService(IConfiguration config) : base(config)
         {
 
         }

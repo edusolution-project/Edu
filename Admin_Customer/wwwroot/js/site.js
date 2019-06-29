@@ -128,6 +128,6 @@ function ExcuteOnlyItem(id, url, fn) {
     var data = new FormData();
     data.append("ArrID", id);
     Ajax(url, "POST", data, true).then(function () {
-        fn();
+        if(fn != void 0) fn();
     })
 }

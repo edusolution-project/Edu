@@ -1,577 +1,110 @@
-﻿
-@{
-    ViewData["Title"] = "Index";
+﻿@{
+    ViewData["Title"] = "Quản lý Khóa học";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var listCourse = ViewBag.Course as List<BaseCustomerEntity.Database.CourseEntity>;
+    var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
+    var listTeacher = ViewBag.Teacher as List<BaseCustomerEntity.Database.TeacherEntity>;
 }
 
-
-
-<!-- DataTales Example -->
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <div class="row">
-            <div class="col-lg-6">
-                <h4 class="m-0 font-weight-bold text-primary">Quản lý Khóa học</h4>
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
+    {
+        <input type="hidden" name="ArrID" value="" />
+        <!-- DataTales Example -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","Course")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
+                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            @*<button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "Course")')"> <i class="fas fa-file-export"></i> </button>*@
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-6">
-                <div class="text-right">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCenter"> Thêm mới </button>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="input-group">
+                                        <input type="checkbox" aria-label="Checkbox">
+                                    </div>
+                                </th>
+                                <th>STT</th>
+                                <th>Tên khóa học</th>
+                                <th>Tên giáo viên</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Ngày kết thúc</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </th>
-                        <th>STT</th>
-                        <th>Mã khóa học</th>
-                        <th>Tên khóa học</th>
-                        <th>Tên giáo viên</th>
-                        <th>Ngày bắt đầu</th>
-                        <th>Ngày kết thúc</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>1</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>2</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>3</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>4</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>5</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>6</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>7</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>8</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>9</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>10</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>11</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>12</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>13</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>14</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>15</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>16</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>17</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>18</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="input-group">
-                                <input type="checkbox" aria-label="Checkbox">
-                            </div>
-                        </td>
-                        <td>19</td>
-                        <td>9999</td>
-                        <td>Tiếng anh</td>
-                        <td>Phạm Anh Tuấn</td>
-                        <td>1/1/2019</td>
-                        <td>31/1/2019</td>
-                        <td>hoạt động</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-info">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                            </a>
-                            <a href="#" class="btn btn-danger">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+        <!-- /.container-fluid -->
+    }
 </div>
-<!-- /.container-fluid -->
 <!-- Modal Create Form -->
 <div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="ModalCenterTitle">Tạo khóa học</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form>
+        @using (Html.BeginForm("Create", "Course", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
+        {
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalCenterTitle">Tạo môn học</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label for="staticText" class="col-form-label">Tên khóa học:</label>
+                            <input type="text" class="form-control" name="Name" placeholder="Tên Khóa học">
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Môn học:</label>
-                            <input type="text" class="form-control" id="inputText" placeholder="Môn học">
+                            <select name="SubjectID" class="form-control" onchange="loadCourse()" required>
+                                @{
+                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                    {
+                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                    }
+
+                                }
+                            </select>
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Cấp độ:</label>
-                            <input type="text" class="form-control" id="inputText" placeholder="Cấp độ">
+                            <select name="GradeID" class="form-control" onchange="loadCourse()" required>
+                                @{
+                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                    {
+                                        <option value="@listGrade[i].ID">@listGrade[i].Name</option>
+                                    }
+
+                                }
+                            </select>
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Giáo trình:</label>
-                            <input type="text" class="form-control" id="inputText" placeholder="Giáo trình">
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label for="staticText" class="col-form-label">Khóa học:</label>
-                            <input type="text" class="form-control" id="inputText" placeholder="Khóa học">
+                            <select name="CourseID" class="form-control" onfocus="loadCourse()"></select>
                         </div>
                     </div>
                     <div class="row">
@@ -587,27 +120,147 @@
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Giáo viên:</label>
-                            <select id="inputState" class="form-control">
-                                <option selected>Nguyễn văn A</option>
-                                <option>Nguyễn văn B</option>
-                                <option>Nguyễn văn C</option>
-                                <option>Nguyễn văn D</option>
+                            <select name="TeacherID" class="form-control">
+                                @{
+                                    for (int i = 0; listTeacher != null && i < listTeacher.Count; i++)
+                                    {
+                                        <option value="@listTeacher[i].ID">@listTeacher[i].FullName (@listTeacher[i].Email)</option>
+                                    }
+
+                                }
                             </select>
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Trạng thái:</label>
-                            <select id="inputState" class="form-control">
-                                <option selected>Hoạt động</option>
-                                <option>Không hoạt động</option>
+                            <select name="IsActive" class="form-control">
+                                <option value="true" selected>Hoạt động</option>
+                                <option value="false">Không hoạt động</option>
                             </select>
                         </div>
                     </div>
-                </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "Course")','create',LoadData)">Lưu lại</button>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary">Lưu lại</button>
-            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal chose file -->
+<div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            @using (Html.BeginForm("Import", "course", FormMethod.Post, new { enctype = "multipart/form-data", name = "ImportForm" }))
+            {
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
+                            <div class="chose-file col-sm-9">
+                                <input type="file" name="file" class="form-control-file" id="FormControlFile">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="button-left">
+                        <button type="button" class="btn btn-secondary">Tải file mẫu</button>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
+                </div>
+            }
         </div>
     </div>
 </div>
+<script>
+
+    function loadCourse() {
+        var data = {
+            SubjectID: $("select[name='SubjectID']").val(),
+            GradeID:$("select[name='GradeID']").val()
+        }
+        console.log(data);
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetCourse", "Course")',
+            dataType: "json",
+            data: data,
+            success: function (res) {
+                if (res != null) {
+                    if (res.length > 0) {
+                        var course = $("select[name='CourseID']");
+                        course.html("");
+                        for (var i = 0; i < res.length; i++) {
+                            course.append("<option value='" + res[i].ID + "'>" + res[i].Name + "</option>");
+                        }
+                    }
+                }
+            },
+            error: function (err) {
+
+            }
+        })
+    }
+    function LoadData() {
+        var searchText = $("#searchText").val();
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetList", "Course")',
+            data: { SearchText: searchText },
+            dataType:"json",
+            success: function (data) {
+                var body = $('#dataTable tbody');
+                body.html("");
+                if (data.Data.length > 0)
+                {
+                    for (i = 0; i < data.Data.length; ++i) {
+                        item = data.Data[i];
+                        console.log(item);
+                        var active = "";
+                        if (item.IsActive) {
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                        } else {
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                        }
+                        body.append("<tr>" +
+                            "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"'/></div></td>"+
+                            "<td>" + (i + 1) + "</td>" +
+                            "<td>" + item.Name + "</td>" +
+                            "<td>" + new Date(item.Created).toLocaleDateString() +"</td>"+active +
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","Course")','@Url.Action("create","Course")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","Course")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "<button type=\"button\" onclick=\"ImportSV('" + item.ID + "','ImportForm')\" class=\"btn btn-primary\"  data-toggle=\"modal\" data-target=\".bd-modal-lg\"> Thêm sinh viên </button></td>" +
+                            "</tr>"
+                        );
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    };
+
+    $(document).ready(function () {
+        LoadData();
+    });
+
+    function ImportSV(id, formName) {
+        var form = document.querySelector('form[name="' + formName + '"]');
+        var input = form.querySelector('input[name="ID"]');
+        if (input == null) {
+            form.innerHTML += '<input type="hidden" name="ID" value="' + id + '" />';
+        } else {
+            input.value = id;
+        }
+    }
+</script>

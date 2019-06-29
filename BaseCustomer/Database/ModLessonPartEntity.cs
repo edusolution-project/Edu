@@ -35,11 +35,7 @@ namespace BaseCustomerEntity.Database
 
     public class ModLessonPartService : ServiceBase<ModLessonPartEntity>
     {
-        public ModLessonPartService(IConfiguration config) : base(config, "ModLessonParts")
-        {
-
-        }
-        public ModLessonPartService(IConfiguration config, string tableName) : base(config, tableName)
+        public ModLessonPartService(IConfiguration config) : base(config, "ModLessonParts", "VES")
         {
 
         }

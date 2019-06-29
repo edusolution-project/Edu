@@ -38,6 +38,8 @@ namespace BaseCustomerEntity.Globals
             services.AddTransient<LessonPartAnswerService>();
             services.AddTransient<LessonPartQuestionService>();
 
+            services.AddTransient<ClassService>();
+
             return services;
         }
     }

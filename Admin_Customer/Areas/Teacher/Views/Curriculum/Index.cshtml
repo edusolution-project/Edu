@@ -1,0 +1,238 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+
+<!-- Begin Page Content -->
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h4 class="m-0 font-weight-bold text-primary">Thông tin giáo trình</h4>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-right">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-plus"></i> </button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".modal-inport"> <i class="fas fa-upload"></i> </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="table-responsive">
+                    <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="input-group">
+                                        <input type="checkbox" aria-label="Checkbox">
+                                    </div>
+                                </th>
+                                <th>Tên giáo trình</th>
+                                <th>Tên môn học</th>
+                                <th>Cấp độ</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="input-group">
+                                        <input type="checkbox" aria-label="Checkbox">
+                                    </div>
+                                </td>
+                                <td><a href="@Url.Action("ListDetail" , "Curriculum")">First Certificate in English (FCE)</a></td>
+                                <td>Tiếng Anh</td>
+                                <td>B1</td>
+                                <td> Edit First Certificate in English</td>
+                                <td>Hoạt động</td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-info" data-toggle="modal" data-target=".edit-modal">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-edit"></i>
+                                        </span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <div class="card shadow clone mt-4">
+        <div class="card-header">
+            <h4 class="m-0 font-weight-bold text-primary">Kho giáo trình</h4>
+        </div>
+        <div class="card-body">
+            <div class="card-deck">
+                <div class="card">
+                    <img src="~/img/shopping.jpg" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Combo "Hack não 1500 từ tiếng Anh" + "Hack não IELTS" (Trọn bộ 3 cuốn)</h5>
+                        <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+                        <button type="button" class="btn btn-primary"><i class="fas fa-download"></i> Tải về</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="~/img/shopping.jpg" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Combo "Hack não 1500 từ tiếng Anh" + "Hack não IELTS" (Trọn bộ 3 cuốn)</h5>
+                        <p class="card-text">This card has supporting text below as a natural lead-in to additional content.</p>
+                        <button type="button" class="btn btn-primary"><i class="fas fa-download"></i> Tải về</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="~/img/shopping.jpg" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Combo "Hack não 1500 từ tiếng Anh" + "Hack não IELTS" (Trọn bộ 3 cuốn)</h5>
+                        <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
+                        <button type="button" class="btn btn-primary"><i class="fas fa-download"></i> Tải về</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- End of Main Content -->
+<!-- Add modal -->
+<div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Tạo giáo trình</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Tên giáo trình:</label>
+                        <input type="text" class="form-control" id="recipient-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="Server01" class="col-form-label">Môn học:</label>
+                        <input type="text" class="form-control is-valid" id="Server01" placeholder="Môn học" value="Tiếng anh">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-Select" class="col-form-label">Cấp độ:</label>
+                        <div class="autocomplete">
+                            <input id="level" type="text" class="form-control" name="level" placeholder="Cấp độ" value="Trình độ A1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Server02" class="col-form-label">Giáo Trình:</label>
+                        <input type="text" class="form-control" id="Server02" placeholder="Giáo trình">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Mô tả:</label>
+                        <textarea class="form-control" id="message-text"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-Select" class="col-form-label">Trạng thái:</label>
+                        <select class="custom-select" id="input-Select">
+                            <option value="1" selected>Hoạt động</option>
+                            <option value="2">Không hoạt dộng</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inport modal -->
+<div class="modal fade modal-inport" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Nhập dữ liệu từ file</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="p-3">
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
+                            <div class="chose-file col-sm-9">
+                                <input type="file" class="form-control-file" id="FormControlFile">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit modal -->
+
+<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Sửa thông tin</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="recipient-name" class="col-form-label">Tên giáo trình:</label>
+                        <input type="text" class="form-control" id="recipient-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="Server01" class="col-form-label">Môn học:</label>
+                        <input type="text" class="form-control is-valid" id="Server01" placeholder="Môn học" value="Tiếng anh">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-Select" class="col-form-label">Cấp độ:</label>
+                        <div class="autocomplete">
+                            <input id="level" type="text" class="form-control" name="level" placeholder="Cấp độ" value="Trình độ A1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Server02" class="col-form-label">Giáo Trình:</label>
+                        <input type="text" class="form-control" id="Server02" placeholder="Giáo trình">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Mô tả:</label>
+                        <textarea class="form-control" id="message-text"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-Select" class="col-form-label">Trạng thái:</label>
+                        <select class="custom-select" id="input-Select">
+                            <option value="1" selected>Hoạt động</option>
+                            <option value="2">Không hoạt dộng</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -9,6 +9,8 @@ namespace BaseCustomerEntity.Database
 {
     public class CourseEntity : EntityBase
     {
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
         [JsonProperty("Description")]
@@ -25,8 +27,8 @@ namespace BaseCustomerEntity.Database
         public string GradeID { get; set; }
         [JsonProperty("SubjectID")]
         public string SubjectID { get; set; }
-        [JsonProperty("ProgramID")]
-        public string ProgramID { get; set; }
+        [JsonProperty("TeacherID")]
+        public string TeacherID { get; set; }
         [JsonProperty("IsAdmin")]
         public bool IsAdmin { get; set; }
         [JsonProperty("IsActive")]
@@ -36,13 +38,9 @@ namespace BaseCustomerEntity.Database
     }
     public class CourseService : ServiceBase<CourseEntity>
     {
-        public CourseService(IConfiguration config) : base(config, "Courses")
+        public CourseService(IConfiguration config) : base(config)
         {
 
-        }
-        public object GetItemByCode(string code)
-        {
-            return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();
         }
     }
 }
