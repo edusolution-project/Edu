@@ -36,7 +36,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ModCourseService : ServiceBase<ModCourseEntity>
     {
-        public ModCourseService(IConfiguration config) : base(config, "ModCourses")
+        public ModCourseService(IConfiguration config) : base(config, "ModCourses", "VES")
         {
 
         }

@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,7 +41,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public ActionResult Index(DefaultModel model)
         {
-            ViewBag.Roles = _roleService.CreateQuery().Find(_=>true).SortBy(o => o.Name).ToList();
+            ViewBag.Roles = _roleService.CreateQuery().Find(_ => true).SortBy(o => o.Type).ToList();
             ViewBag.Model = model;
             return View();
         }
@@ -86,9 +87,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             return new JsonResult(respone);
 
         }
-        private string Name(string type,string id)
+        private string Name(string type, string id)
         {
-            if(type == "teacher")
+            if (type == "teacher")
             {
                 return _teacherService.GetItemByID(id).FullName;
             }
@@ -121,6 +122,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 if (!ExistUserName(item.UserName))
                 {
+                    var role = _roleService.GetItemByID(item.RoleID);
+                    item.Type = role.Type;
+                    item.PassWord = Security.Encrypt(item.PassWord);
                     _service.CreateQuery().InsertOne(item);
                     Dictionary<string, object> response = new Dictionary<string, object>()
                     {
@@ -175,18 +179,17 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 if (model.ArrID.Contains(","))
                 {
-                    var delete = _service.Collection.DeleteMany(o => model.ArrID.Split(',').Contains(o.ID));
+                    var delete = _service.Collection.DeleteMany(o => model.ArrID.Split(',').Contains(o.ID) && (o.UserName != User.Claims.GetClaimByType(ClaimTypes.Email).Value));
                     return new JsonResult(delete);
                 }
                 else
                 {
-                    var delete = _service.Collection.DeleteMany(o => model.ArrID == o.ID);
+                    var delete = _service.Collection.DeleteMany(o => model.ArrID == o.ID && (o.UserName != User.Claims.GetClaimByType(ClaimTypes.Email).Value));
                     return new JsonResult(delete);
                 }
-
-
             }
         }
+
         [HttpGet]
         [Obsolete]
         public async Task<IActionResult> Export(DefaultModel model)
@@ -207,7 +210,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             var filterData = filter.Count > 0 ? _service.Collection.Find(Builders<AccountEntity>.Filter.And(filter)) : _service.GetAll();
             var list = await filterData.ToListAsync();
-            var data = list.Select(o => new { o.UserName, o.Type, o.IsActive, _roleService.GetItemByID(o.RoleID).Name});
+            var data = list.Select(o => new { o.UserName, o.Type, o.IsActive, _roleService.GetItemByID(o.RoleID).Name });
             var stream = new MemoryStream();
 
             using (var package = new ExcelPackage(stream))

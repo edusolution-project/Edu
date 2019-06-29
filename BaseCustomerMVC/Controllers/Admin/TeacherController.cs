@@ -37,7 +37,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public ActionResult Index(DefaultModel model)
         {
-            ViewBag.Roles = _roleService.CreateQuery().Find(o=>o.Type == "teacher").SortBy(o=>o.Name).ToList();
+            ViewBag.Roles = _roleService.CreateQuery().Find(o => o.Type == "teacher").SortBy(o => o.Name).ToList();
             ViewBag.Model = model;
             return View();
         }
@@ -286,7 +286,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 package.Save();
             }
             stream.Position = 0;
-            string excelName = $"StudentList-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.xlsx";
+            string excelName = $"TeachertList-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.xlsx";
 
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);

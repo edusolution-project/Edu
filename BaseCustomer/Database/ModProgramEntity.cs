@@ -36,7 +36,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ModProgramService : ServiceBase<ModProgramEntity>
     {
-        public ModProgramService(IConfiguration config) : base(config, "ModPrograms")
+        public ModProgramService(IConfiguration config) : base(config, "ModPrograms", "VES")
         {
 
         }

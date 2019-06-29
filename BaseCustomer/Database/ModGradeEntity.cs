@@ -33,7 +33,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ModGradeService : ServiceBase<ModGradeEntity>
     {
-        public ModGradeService(IConfiguration config) : base(config, "ModGrades")
+        public ModGradeService(IConfiguration config) : base(config, "ModGrades", "VES")
         {
 
         }

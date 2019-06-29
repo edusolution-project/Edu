@@ -46,7 +46,7 @@ var Ajax = function (url, method, data, async) {
         request.send(data);
     });
 }
-function Submit(formName, url, actionName,fn) {
+function Submit(formName, url, actionName, fn) {
     var form = document.querySelector('form[name="' + formName + '"]');
     var _url = url == "" || url == void 0 || url == null ? form.action : url;
     var _method = form.method;
@@ -57,7 +57,7 @@ function Submit(formName, url, actionName,fn) {
             for (var i = 0; listCheckBox != null && listCheckBox.length > 0 && i < listCheckBox.length; i++) {
                 if (listCheckBox[i].checked) {
                     arr_input.value += arr_input.value == ""
-                        ? listCheckBox[i].value 
+                        ? listCheckBox[i].value
                         : "," + listCheckBox[i].value;
                 }
             }
@@ -66,12 +66,12 @@ function Submit(formName, url, actionName,fn) {
     var data = new FormData(form);
     Ajax(_url, _method, data, true)
         .then(function (res) {
-            if(fn != void 0) fn();
+            if (fn != void 0) fn();
         }).catch(function (res) {
             console.log(actionName, res);
         });
 }
-function Export(formName,url) {
+function Export(formName, url) {
     var form = document.querySelector('form[name="' + formName + '"]');
     var arr_input = form.querySelector('input[name="ArrID"]');
     var listCheckBox = form.querySelectorAll('input[name="cid"]');
@@ -103,6 +103,14 @@ function Add(_this) {
     if (inputID != null) {
         inputID.value = "0";
     }
+    var listinput = form.querySelectorAll('input');
+    for (var i = 0; i < listinput.length; i++) {
+        listinput[i].value = "";
+    }
+    var listselect = form.querySelectorAll('select');
+    for (var i = 0; i < listselect.length; i++) {
+        listselect[i].value = "";
+    }
 }
 function Edit(id, urlGetData, urlPostData, _this) {
     var modal = document.querySelector(_this.getAttribute("data-target"));
@@ -122,6 +130,10 @@ function Edit(id, urlGetData, urlPostData, _this) {
         for (var i = 0; i < listinput.length; i++) {
             listinput[i].value = item.Data[listinput[i].name];
         }
+        var listselect = form.querySelectorAll('select');
+        for (var i = 0; i < listselect.length; i++) {
+            listselect[i].value = item.Data[listselect[i].name];
+        }
     });
 }
 function ExcuteOnlyItem(id, url, fn) {
@@ -130,4 +142,16 @@ function ExcuteOnlyItem(id, url, fn) {
     Ajax(url, "POST", data, true).then(function () {
         fn();
     })
+}
+
+function toggleCheckbox(obj, wrappername) {
+    var wrapper = $("#" + wrappername);
+    var ischecked = $(obj).prop("checked");
+    $(wrapper).find("[name=cid]").prop("checked", ischecked);
+}
+
+function checkToggle(wrappername){
+    var wrapper = $("#" + wrappername);
+    $(wrapper).find('input[type=checkbox]:first')
+        .prop("checked", $(wrapper).find("[name=cid]:not(:checked)").length === 0);
 }

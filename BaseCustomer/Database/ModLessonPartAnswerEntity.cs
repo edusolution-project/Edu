@@ -28,7 +28,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ModLessonPartAnswerService : ServiceBase<ModLessonPartAnswerEntity>
     {
-        public ModLessonPartAnswerService(IConfiguration config) : base(config, "ModLessonPartAnswers")
+        public ModLessonPartAnswerService(IConfiguration config) : base(config, "ModLessonPartAnswers", "VES")
         {
 
         }

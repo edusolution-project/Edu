@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using BaseCustomerMVC.Globals;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Protocols;
+using System.Configuration;
 
 namespace Admin_Customer.Controllers
 {
@@ -21,10 +24,12 @@ namespace Admin_Customer.Controllers
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ILog _log;
+        private readonly IConfiguration _config;
+
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
             , TeacherService teacherService
             , StudentService studentService
-            , ILog log)
+            , ILog log, IConfiguration config)
         {
             _accountService = accountService;
             _roleService = roleService;
@@ -32,6 +37,7 @@ namespace Admin_Customer.Controllers
             _teacherService = teacherService;
             _studentService = studentService;
             _log = log;
+            _config = config;
         }
         public IActionResult Index()
         {
@@ -63,7 +69,7 @@ namespace Admin_Customer.Controllers
         {
             var superadminRole = new RoleEntity()
             {
-                Name = "Super Admin",
+                Name = _config.GetSection("Role:Admin:superadmin").Value,
                 Code = "superadmin",
                 Type = "admin",
                 CreateDate = DateTime.Now,
@@ -72,7 +78,7 @@ namespace Admin_Customer.Controllers
             };
             var adminRole = new RoleEntity()
             {
-                Name = "Admin",
+                Name = _config.GetSection("Role:Admin:admin").Value,
                 Code = "admin",
                 Type = "admin",
                 CreateDate = DateTime.Now,
@@ -81,7 +87,7 @@ namespace Admin_Customer.Controllers
             };
             var headteacherRole = new RoleEntity()
             {
-                Name = "Trưởng bộ môn",
+                Name = _config.GetSection("Role:Teacher:head-teacher").Value,
                 Code = "head-teacher",
                 Type = "teacher",
                 CreateDate = DateTime.Now,
@@ -90,7 +96,7 @@ namespace Admin_Customer.Controllers
             };
             var teacherrole = new RoleEntity()
             {
-                Name = "Giáo viên",
+                Name = _config.GetSection("Role:Teacher:teacher").Value,
                 Code = "teacher",
                 Type = "teacher",
                 CreateDate = DateTime.Now,
@@ -99,7 +105,7 @@ namespace Admin_Customer.Controllers
             };
             var studentRole = new RoleEntity()
             {
-                Name = "Student",
+                Name = _config.GetSection("Role:Student:student").Value,
                 Code = "student",
                 Type = "student",
                 CreateDate = DateTime.Now,
@@ -207,7 +213,8 @@ namespace Admin_Customer.Controllers
                                 CreateDate = DateTime.Now
                             };
                             _logService.CreateQuery().InsertOne(login);
-                            await HttpContext.SignInAsync(Cookies.DefaultLogin, claim,new AuthenticationProperties() {
+                            await HttpContext.SignInAsync(Cookies.DefaultLogin, claim, new AuthenticationProperties()
+                            {
                                 ExpiresUtc = !IsRemmember ? DateTime.Now : DateTime.Now.AddMinutes(Cookies.ExpiresLogin),
                                 AllowRefresh = true,
                                 RedirectUri = user.Type

@@ -33,7 +33,7 @@
                             <tr>
                                 <th>
                                     <div class="input-group">
-                                        <input type="checkbox" aria-label="Checkbox">
+                                        <input type="checkbox" aria-label="Checkbox" onclick="toggleCheckbox(this,'dataTable')">
                                     </div>
                                 </th>
                                 <th>STT</th>
@@ -103,39 +103,6 @@
     </div>
 </div>
 
-<!-- Modal chose file -->
-<div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            @using (Html.BeginForm("Import", "account", FormMethod.Post, new { enctype = "multipart/form-data", name = "ImportForm" }))
-            {
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <div class="row">
-                            <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
-                            <div class="chose-file col-sm-9">
-                                <input type="file" name="file" class="form-control-file" id="FormControlFile">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <div class="button-left">
-                        <button type="button" class="btn btn-secondary">Tải file mẫu</button>
-                    </div>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
-                </div>
-            }
-        </div>
-    </div>
-</div>
 <script>
     function LoadData() {
         var searchText = $("#searchText").val();
@@ -169,7 +136,7 @@
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","account")',LoadData)\" type='button' class='btn btn-danger'> NonActive </button></td>";
                         }
                         body.append("<tr>" +
-                            "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"'/></div></td>"+
+                            "<td><div class='input-group'><input name='cid' type='checkbox' onclick='checkToggle(\"dataTable\")'  value='" + item.ID +"'/></div></td>"+
                             "<td>" + (i + 1) + "</td>" +
                             "<td>" + item.UserName +"</td>" +
                             "<td>" + item.Name + "</td>" +
