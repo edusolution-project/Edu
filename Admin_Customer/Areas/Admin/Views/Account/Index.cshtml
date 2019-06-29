@@ -21,8 +21,8 @@
                             <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","account")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
                             <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
                             @*<button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","account")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
-        <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
-        <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "account")')"> <i class="fas fa-file-export"></i> </button>*@
+                                <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                                <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "account")')"> <i class="fas fa-file-export"></i> </button>*@
                         </div>
                     </div>
                 </div>
@@ -35,7 +35,7 @@
                             <tr>
                                 <th>
                                     <div class="input-group">
-                                        <input type="checkbox" aria-label="Checkbox">
+                                        <input type="checkbox" aria-label="Checkbox" onclick="toggleAll(this, 'dataTable')">
                                     </div>
                                 </th>
                                 <th>STT</th>
@@ -171,7 +171,7 @@
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","account")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
                         body.append("<tr>" +
-                            "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"'/></div></td>"+
+                            "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID + "' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td>" + (i + 1) + "</td>" +
                             "<td>" + item.UserName +"</td>" +
                             "<td>" + item.Name + "</td>" +

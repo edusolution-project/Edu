@@ -33,7 +33,7 @@
                         <thead>
                             <tr>
                                 <th>
-                                    <div class="input-group"><input type="checkbox" aria-label="Checkbox"></div>
+                                    <div class="input-group"><input type="checkbox" aria-label="Checkbox" onclick="toggleAll(this, 'dataTable')"></div>
                                 </th>
                                 <th>STT</th>
                                 <th>Mã môn</th>
@@ -66,7 +66,7 @@
                 <div class="modal-body">
                     <form>
                         <input type="hidden" name="Created" value="" />
-                        <input type="hidden" name="ID"/>
+                        <input type="hidden" name="ID" />
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <input type="text" class="form-control" name="Code" id="inputName" placeholder="mã môn">
@@ -119,7 +119,7 @@
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","subject")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
                         body.append("<tr>" +
-                            "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"'/></div></td>"+
+                            "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td>" + (i + 1) + "</td>" +
                             "<td>" + item.Code +"</td>" +
                             "<td>" + item.Name + "</td>" +
