@@ -2,8 +2,10 @@
 using BaseCustomerMVC.Globals;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Teacher
@@ -82,7 +84,29 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult Clone(string CourseID)
         {
+            //[JsonProperty("GradeID")]
+            //public string GradeID { get; set; }
+            //[JsonProperty("SubjectID")]
+            //public string SubjectID { get; set; }
+            //[JsonProperty("ProgramID")]
+            //public string ProgramID { get; set; }
 
+            var item = _modservice.GetItemByID(CourseID); //publisher
+            if(item != null)
+            {
+                var grade = _modgradeService.GetItemByID(item.GradeID);
+                var subject = _modsubjectService.GetItemByID(item.SubjectID);
+                var programe = _modprogramService.GetItemByID(item.ProgramID);
+                var chapter = _modchapterService.CreateQuery().Find(o => o.CourseID == CourseID).ToList();
+                var lesson = _modlessonService.CreateQuery().Find(o => o.CourseID == CourseID || chapter.Select(x=>x.ID).Contains(o.ChapterID)).ToList();
+                var lessonpart = _modlessonPartService.CreateQuery().Find(o => lesson.Select(x => x.ID).Contains(o.ParentID)).ToList();
+                var lessonQuestion = _modlessonPartQuestionService.CreateQuery().Find(o => lessonpart.Select(x => x.ID).Contains(o.ParentID)).ToList();
+                var lessonAnswer = _modlessonPartAnswerService.CreateQuery().Find(o => lessonpart.Select(x => x.ID).Contains(o.ParentID)).ToList();
+
+
+                
+
+            }
             return new JsonResult(null);
         }
     }
