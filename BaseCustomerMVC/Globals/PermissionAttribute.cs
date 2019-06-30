@@ -142,8 +142,8 @@ namespace BaseCustomerMVC.Globals
             }
             else
             {
-                Controller controller = (Controller)context.Controller;
-                int _number = CheckCtrlAndAct(controller, ctrlName, actName);
+                Controller ctrl = (Controller)context.Controller;
+                int _number = CheckCtrlAndAct(ctrl, ctrlName, actName);
                 if (_number > 0)
                 {
                     base.OnActionExecuting(context);
@@ -157,8 +157,9 @@ namespace BaseCustomerMVC.Globals
                     }
                     else
                     {
-                        context.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "home", action = "deny", Areas = _area }));
-                        return;
+                        var type = ctrl.User.Claims.GetClaimByType("Type").Value;
+                        //context.Result = new LocalRedirectResult("/" + type + "/home/deny");
+                        context.Result = new JsonResult("Accept deny");
                     }
                 }
             }
