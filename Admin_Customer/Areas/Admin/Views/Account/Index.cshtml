@@ -139,12 +139,12 @@
     </div>
 </div>
 <script>
-    function LoadData() {
-        var searchText = $("#searchText").val();
+    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
+       
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "account")',
-            data: { SearchText: searchText },
+            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
             dataType:"json",
             success: function (data) {
                 var body = $('#dataTable tbody');
@@ -152,7 +152,9 @@
                 if (data.Data.length > 0)
                 {
                     for (i = 0; i < data.Data.length; ++i) {
+                        
                         item = data.Data[i];
+                        if (item.RoleName == "Super Admin") continue;
                         //CreateDate: "0001-01-01T00:00:00"
                         //ID: "5d16336be0095e2b28b83600"
                         //IsActive: true
@@ -163,7 +165,7 @@
                         //UserCreate: null
                         //UserID: "0"
                         //UserName: "supperadmin@gmail.com"
-
+                        
                         var active = "";
                         if (item.IsActive) {
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","account")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
