@@ -1,19 +1,15 @@
 ﻿using BaseCustomerEntity.Database;
+using Core_v2.Repositories;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
     public class CourseViewModel:CourseEntity
     {
-
-        public CourseViewModel(CourseEntity item)
-        {
-            
-        }
-
         [JsonProperty("SubjectName")]
         public string SubjectName { get; set; }
         [JsonProperty("GradeName")]

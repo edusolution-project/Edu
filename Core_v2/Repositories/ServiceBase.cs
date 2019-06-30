@@ -1,4 +1,5 @@
-﻿using Core_v2.Interfaces;
+﻿using Core_v2.Globals;
+using Core_v2.Interfaces;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 
@@ -11,6 +12,7 @@ namespace Core_v2.Repositories
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
         private readonly IMongoCollection<T> _collection;
+        private readonly MappingEntity<T,T> _mapping;
         public ServiceBase(IConfiguration config, string tableName, string dbName = "")
         {
             _config = config;
@@ -21,6 +23,7 @@ namespace Core_v2.Repositories
             _client = new MongoClient(_config.GetConnectionString(_dbname));
             _database = _client.GetDatabase(_dbname);
             _collection = _database.GetCollection<T>(tableName);
+            _mapping = new MappingEntity<T,T>();
         }
         public ServiceBase(IConfiguration config, string dbName = "")
         {
@@ -32,6 +35,7 @@ namespace Core_v2.Repositories
             _client = new MongoClient(_config.GetConnectionString(_dbname));
             _database = _client.GetDatabase(_dbname);
             _collection = _database.GetCollection<T>(_tableName);
+            _mapping = new MappingEntity<T, T>();
         }
 
         public virtual IMongoCollection<T> Collection
@@ -53,5 +57,47 @@ namespace Core_v2.Repositories
         public IFindFluent<T, T> GetAll(){
             return _collection.Find(_ => true);
         } 
+
+        public T CreateOrUpdate(T item)
+        {
+            if(string.IsNullOrEmpty(item.ID) || item.ID == "0")
+            {
+                _collection.InsertOne(item);
+                return item;
+            }
+            else
+            {
+                var oldItem = _collection.Find(o => o.ID == item.ID).First();
+                if(oldItem != null)
+                {
+                    var newItem = _mapping.Auto(oldItem, item);
+                    _collection.ReplaceOne(o=>o.ID == newItem.ID,newItem);
+                    return newItem;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+        public DeleteResult Remove(string ID)
+        {
+            if (string.IsNullOrEmpty(ID) || ID == "0")
+            {
+                return null;
+            }
+            else
+            {
+                var oldItem = _collection.Find(o => o.ID == ID).First();
+                if (oldItem != null)
+                {
+                   return _collection.DeleteOne(o => o.ID == ID);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
     }
 }

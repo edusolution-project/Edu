@@ -97,12 +97,12 @@
     </div>
 </div>
 <script>
-    function LoadData() {
-        var searchText = $("#searchText").val();
+    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
+       
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "role")',
-            data: { SearchText: searchText },
+            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
             dataType:"json",
             success: function (data) {
                 var body = $('#dataTable tbody');
