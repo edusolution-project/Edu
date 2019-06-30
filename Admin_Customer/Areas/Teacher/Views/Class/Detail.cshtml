@@ -2,12 +2,13 @@
 @{
     ViewData["Title"] = "Detail";
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var curentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
 }
 
 
 <!-- Begin Page Content -->
 <div class="header-title mt-3 mb-3">
-    <h3 class="m-0 font-weight-bold text-primary">First Certificate in English 1</h3>
+    <h3 class="m-0 font-weight-bold text-primary">@curentClass.Name</h3>
 </div>
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -32,100 +33,18 @@
     <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
         <div class="card card-body mt-4 mb-4">
             <div class="table-responsive">
-                <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
+                <table id="scheduleTable" class="table table-bordered" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>
-                                <div class="input-group">
-                                    <input type="checkbox" aria-label="Checkbox">
-                                </div>
-                            </th>
+                            <th>STT</th>
                             <th>Tên bài học</th>
                             <th>Mô tả</th>
-                            <th>Thời gian bắt đầu</th>
-                            <th>thời gian kết thúc</th>
+                            <th>Ngày học</th>
                             <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="input-group">
-                                    <input type="checkbox" aria-label="Checkbox">
-                                </div>
-                            </td>
-                            <td><a href="@Url.Action("lesson" , "calendar")"> Bài giảng số 1 </a></td>
-                            <td>test</td>
-                            <td>07/06/2019</td>
-                            <td>31/06/2019</td>
-                            <td>Đóng</td>
-                            <td>
-                                <a href="#" class="btn btn-info">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-edit"></i>
-                                    </span>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="input-group">
-                                    <input type="checkbox" aria-label="Checkbox">
-                                </div>
-                            </td>
-                            <td><a href="@Url.Action("lesson" , "calendar")">Bài giảng số 2</a></td>
-                            <td>test</td>
-                            <td>07/06/2019</td>
-                            <td>07/06/2019</td>
-                            <td>Mở</td>
-                            <td>
-                                <a href="#" class="btn btn-info">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-edit"></i>
-                                    </span>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="input-group">
-                                    <input type="checkbox" aria-label="Checkbox">
-                                </div>
-                            </td>
-                            <td><a href="@Url.Action("lesson" , "calendar")">Bài giảng số 3</a></td>
-                            <td>test</td>
-                            <td>07/06/2019</td>
-                            <td>07/06/2019</td>
-                            <td>Mở</td>
-                            <td>
-                                <a href="#" class="btn btn-info">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-edit"></i>
-                                    </span>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="input-group">
-                                    <input type="checkbox" aria-label="Checkbox">
-                                </div>
-                            </td>
-                            <td><a href="@Url.Action("checkteacher" , "calendar")">Bài kiểm tra số 1</a></td>
-                            <td>test</td>
-                            <td>07/06/2019</td>
-                            <td>07/06/2019</td>
-                            <td>Mở</td>
-                            <td>
-                                <button type="button" class="btn btn-info">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-edit"></i>
-                                    </span>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -705,4 +624,79 @@
         </div>
     </div>
 </div>
-        <!-- End of Main Content -->
+<!-- End of Main Content -->
+
+<script>
+
+    var chapters = [];
+    var lessons = [];
+    var scheduleBody = $('#scheduleTable tbody');
+    var scheduleCounter = 0;
+
+    function LoadSchedule() {
+        chapters = [];
+        lessons = [];
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetClassSchedule", "Class")',
+            data: {ClassID: "@curentClass.ID"},
+            dataType:"json",
+            success: function (data) {
+                scheduleCounter = 1;
+                scheduleBody.html("");
+
+                chapters = data.Data.Chapters;
+                lessons = data.Data.Lessons;
+
+                renderChapter("0");
+
+                var rootChapters = chapters.filter(x => x.ParentID == "0");
+                console.log(rootChapters);
+
+                
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    };
+
+    function renderChapter(parentid) {  
+        
+        var subchapters = chapters.filter(x => x.ParentID == parentid);
+        var sublessons = lessons.filter(x => x.ChapterID == parentid);
+
+        console.log(parentid + " - " + subchapters.length);
+        if (subchapters.length > 0)
+            for (i = 0; i < subchapters.length; ++i) {
+                renderChapter(subchapters[i].ID);                
+            }        
+
+        if (sublessons.length > 0) {
+            for (j = 0; j < sublessons.length; ++j) {
+                var item = sublessons[j];
+                var active = "";
+                if (item.IsActive) {
+                    active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "LessonSchedule")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                } else {
+                    active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "LessonSchedule")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                }
+                    scheduleBody.append("<tr>" +
+                "<td>" + (scheduleCounter++) + "</td>" +
+                "<td><a href='@Url.Action("Detail", "Lesson")/" + item.ID + "'>" + item.Title + "</td>" +
+                "<td>---</td>" +
+                "<td>" + item.OpeningDate + "</td>" + active +
+                        "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","grade")','@Url.Action("create","grade")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                        "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","grade")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                "</td > " +
+                "</tr>"
+            );
+            }
+        }
+
+    }
+
+    $(document).ready(function () {
+        LoadSchedule();
+    });
+</script>

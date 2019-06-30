@@ -122,6 +122,10 @@ function Edit(id, urlGetData, urlPostData, _this) {
         for (var i = 0; i < listinput.length; i++) {
             listinput[i].value = item.Data[listinput[i].name];
         }
+        var listselect = form.querySelectorAll('select');
+        for (var i = 0; i < listselect.length; i++) {
+            listselect[i].value = item.Data[listselect[i].name];
+        }
     });
 }
 function ExcuteOnlyItem(id, url, fn) {

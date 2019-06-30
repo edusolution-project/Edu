@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Quản lý khóa học", "CourseManagement", "admin")]
+    [IndefindCtrlAttribulte("Quản lý khóa học", "ClassManagement", "admin")]
     public class CourseController : AdminController
     {
         private readonly CourseService _courseService;
@@ -89,7 +89,6 @@ namespace BaseCustomerMVC.Controllers.Admin
         public JsonResult GetCourse(string GradeID,string SubjectID)
         {
             var filter = new List<FilterDefinition<CourseEntity>>();
-
             if (!string.IsNullOrEmpty(GradeID))
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o=>o.GradeID == GradeID));
@@ -102,7 +101,6 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             var DataResponse = data.ToList();
             return new JsonResult(DataResponse);
-
         }
 
         [System.Obsolete]

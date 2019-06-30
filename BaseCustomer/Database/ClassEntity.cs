@@ -24,6 +24,12 @@ namespace BaseCustomerEntity.Database
         public List<string> Students { get; set; } = new List<string>();
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
+        [JsonProperty("OpeningDate")]
+        public DateTime OpeningDate { get; set; }
+
+        [JsonProperty("CloseDate")]
+        public DateTime CloseDate { get; set; }
+
         [JsonProperty("Updated")]
         public DateTime Updated { get; set; }
         public bool IsAdmin { get; set; }

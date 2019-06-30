@@ -6,11 +6,13 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
-    public class HomeController:TeacherController
+    [IndefindCtrlAttribulte("Trang chủ", "Home", "teacher")]
+    public class HomeController : TeacherController
     {
+        [Permission("teacher")]
         public IActionResult Index()
         {
             return View();
         }
-    }
+    }   
 }

@@ -37,7 +37,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var subject = _subjectService.GetAll().ToList();
             var grade = _service.GetAll().ToList();
 
-            ViewBag.Data = grade;
+            ViewBag.Grade = grade;
             ViewBag.Subject = subject;
 
             ViewBag.Model = model;
