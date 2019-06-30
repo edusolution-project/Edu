@@ -133,35 +133,35 @@ namespace BaseCustomerMVC.Globals
         
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-                string ctrlName = context.RouteData.Values["Controller"].ToString();
-                string actName = context.RouteData.Values["Action"].ToString();
-                string _area = context.RouteData.Values["Area"]?.ToString();
-                if (CheckCtrlAndAct(null, ctrlName, actName) > 0)
+            string ctrlName = context.RouteData.Values["Controller"].ToString();
+            string actName = context.RouteData.Values["Action"].ToString();
+            string _area = context.RouteData.Values["Area"]?.ToString();
+            if (CheckCtrlAndAct(null, ctrlName, actName) > 0)
+            {
+                base.OnActionExecuting(context);
+            }
+            else
+            {
+                Controller controller = (Controller)context.Controller;
+                int _number = CheckCtrlAndAct(controller, ctrlName, actName);
+                if (_number > 0)
                 {
                     base.OnActionExecuting(context);
                 }
                 else
                 {
-                    Controller controller = (Controller)context.Controller;
-                    int _number = CheckCtrlAndAct(controller, ctrlName, actName);
-                    if (_number > 0)
+                    if (_number == -1)
                     {
-                        base.OnActionExecuting(context);
+                        string _returnUrl = System.Net.WebUtility.UrlEncode(ctrlName + "/" + actName);
+                        context.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "home", action = "login", returnurl = _returnUrl }));
                     }
                     else
                     {
-                        if (_number == -1)
-                        {
-                            string _returnUrl = System.Net.WebUtility.UrlEncode(ctrlName + "/" + actName);
-                            context.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "home", action = "login", returnurl = _returnUrl }));
-                        }
-                        else
-                        {
-                            context.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "home", action = "error", Areas = _area }));
-                            return;
-                        }
+                        context.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "home", action = "deny", Areas = _area }));
+                        return;
                     }
                 }
+            }
         }
     }
 }
