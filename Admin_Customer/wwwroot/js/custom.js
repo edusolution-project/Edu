@@ -55,7 +55,7 @@ function setToggle(wrapperid) {
 
 /* check student */
 function goBack() {
-    document.location = '@Url.Action("StudentCalendar" , "MyCourse")';
+    document.location = 'MyCourse/StudentCalendar';
 }
 function start(obj) {
     $(obj).parent().removeClass("d-flex").hide();

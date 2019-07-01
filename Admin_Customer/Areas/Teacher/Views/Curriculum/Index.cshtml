@@ -8,38 +8,6 @@
     var listModSubject = ViewBag.ModSubject as List<BaseCustomerEntity.Database.ModSubjectEntity>;
 }
 
-<div class="search-filter">
-    <div class="form-row">
-        <div class="form-group row col-md-6">
-            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
-            <div class="col-sm-8">
-                <select id="SubjectID" class="form-control" onchange="LoadCourse()">
-                    @{
-                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                        {
-                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                        }
-
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="form-group row col-md-6">
-            <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
-            <div class="col-sm-8">
-                <select id="GradeID" class="form-control" onchange="LoadCourse()">
-                    @{
-                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                        {
-                            <option value="@listGrade[i].ID">@listGrade[i].Name</option>
-                        }
-
-                    }
-                </select>
-            </div>
-        </div>
-    </div>
-</div>
 <!-- Begin Page Content -->
 
 <div class="card shadow mb-4">
@@ -50,79 +18,110 @@
             </div>
             <div class="col-lg-6">
                 <div class="text-right">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-plus"></i> </button>
+                    <button type="button" class="btn btn-primary" data-placement="top" title="Tạo giáo trình" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-plus"></i> </button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="card-body">
-        <div class="row">
-            <div class="table-responsive">
-                <table id="tblCurriculum" class="table table-bordered" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>
-                                STT
-                            </th>
-                            <th>Tên giáo trình</th>
-                            <th>Tên môn học</th>
-                            <th>Cấp độ</th>
-                            <th>Mô tả</th>
-                            <th>Người tạo</th>
-                            <th>Ngày tạo</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+        <div class="search-filter">
+            <div class="form-row">
+                <div class="form-group row col-md-4">
+                    <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                    <div class="col-sm-8">
+                        <select id="SubjectID" class="form-control" onchange="LoadCourse()">
+                            @{
+                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                {
+                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row col-md-4 offset-md-4">
+                    <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+                    <div class="col-sm-8">
+                        <select id="GradeID" class="form-control" onchange="LoadCourse()">
+                            @{
+                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                {
+                                    <option value="@listGrade[i].ID">@listGrade[i].Name</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                </div>
             </div>
+        </div>
+        <div class="table-responsive">
+            <table id="tblCurriculum" class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>
+                            STT
+                        </th>
+                        <th>Tên giáo trình</th>
+                        <th>Tên môn học</th>
+                        <th>Cấp độ</th>
+                        <th>Mô tả</th>
+                        <th>Người tạo</th>
+                        <th>Ngày tạo</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 
 </div>
 
-<div class="search-filter">
-    <div class="form-row">
-        <div class="form-group row col-md-6">
-            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
-            <div class="col-sm-8">
-                <select id="ModSubjectID" class="form-control" onchange="LoadModCourse()">
-                    @{
-                        for (int i = 0; listModSubject != null && i < listModSubject.Count; i++)
-                        {
-                            <option value="@listModSubject[i].ID">@listModSubject[i].Name</option>
-                        }
 
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="form-group row col-md-6">
-            <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
-            <div class="col-sm-8">
-                <select id="ModGradeID" class="form-control" onchange="LoadModCourse()">
-                    @{
-                        for (int i = 0; listModGrade != null && i < listModGrade.Count; i++)
-                        {
-                            <option value="@listModGrade[i].ID">@listModGrade[i].Name</option>
-                        }
-
-                    }
-                </select>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="card shadow clone mt-4">
     <div class="card-header">
         <h4 class="m-0 font-weight-bold text-primary">Kho giáo trình</h4>
     </div>
     <div class="card-body">
-        <div class="card-deck" id="modCourseWrapper">
+        <div class="search-filter">
+            <div class="form-row">
+                <div class="form-group row col-md-4">
+                    <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                    <div class="col-sm-8">
+                        <select id="ModSubjectID" class="form-control" onchange="LoadModCourse()">
+                            @{
+                                for (int i = 0; listModSubject != null && i < listModSubject.Count; i++)
+                                {
+                                    <option value="@listModSubject[i].ID">@listModSubject[i].Name</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row col-md-4 offset-md-4">
+                    <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+                    <div class="col-sm-8">
+                        <select id="ModGradeID" class="form-control" onchange="LoadModCourse()">
+                            @{
+                                for (int i = 0; listModGrade != null && i < listModGrade.Count; i++)
+                                {
+                                    <option value="@listModGrade[i].ID">@listModGrade[i].Name</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="modCourseWrapper" class="card-deck">
             <div class="card">
-                <img src="~/img/shopping.jpg" class="card-img-top" alt="...">
+                <img src="~/img/english.jpg" class="card-img-top" alt="...">
                 <div class="card-body">
                     <h5 class="card-title">Combo "Hack não 1500 từ tiếng Anh" + "Hack não IELTS" (Trọn bộ 3 cuốn)</h5>
                     <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
@@ -299,12 +298,14 @@
                         item = data.Data[i];
                         var active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
 
-                        body.append("<div class='card' style='width:30%'>" +
-                            "<img src='~/img/shopping.jpg' class='card-img-top' alt='...'>" +
+                        body.append("<div class='item mb-4 col-md-4'>" +
+                            "<div class='card'>" +
+                            "<img src='../img/english.jpg' class='card-img-top' alt='...'>" +
                             "<div class='card-body'>" +
                                 "<h5 class=\"card-title\">" + item.Name + "</h5>" +
                                 "<p class=\"card-text\">" + item.Name + "</p>" +
                                 "<button type=\"button\" class=\"btn btn-primary\" onclick=\"Take('" + item.ID + "')\"><i class=\"fas fa-download\"></i>Tải về</button>" +
+                            "</div>" +
                             "</div>" +
                             "</div>"
                         );
