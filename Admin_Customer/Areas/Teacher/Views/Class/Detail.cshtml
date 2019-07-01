@@ -683,7 +683,7 @@
                 }
                     scheduleBody.append("<tr>" +
                 "<td>" + (scheduleCounter++) + "</td>" +
-                "<td><a href='@Url.Action("Detail", "Lesson")/" + item.ID + "'>" + item.Title + "</td>" +
+                "<td><a href='@Url.Action("Lesson", "Calendar")/" + item.ID + "'>" + item.Title + "</td>" +
                 "<td>---</td>" +
                 "<td>" + item.OpeningDate + "</td>" + active +
                         "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","grade")','@Url.Action("create","grade")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
