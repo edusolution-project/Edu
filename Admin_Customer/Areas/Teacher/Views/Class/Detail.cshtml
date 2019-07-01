@@ -674,7 +674,7 @@
                         if (item.ChapterID == null) {
                             scheduleBody.append("<tr>" +
                             "<td></td>" +
-                            "<td><a href='@Url.Action("Lesson", "Calendar")/" + item.ID + "'>" + item.Title + "</td>" +
+                            "<td><a href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
                             "<td>---</td>" +
                             "<td>" + item.StartDate + "</td>" +
                             "<td>" + item.EndDate + "</td>" + active +
@@ -689,7 +689,7 @@
                             console.log(item.ChapterID);
                             scheduleBody.find("tr[chapid=" + item.ChapterID + "]").after("<tr>" +
                             "<td></td>" +
-                            "<td><a href='@Url.Action("Lesson", "Calendar")/" + item.ID + "'>" + item.Title + "</td>" +
+                            "<td><a href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
                             "<td>---</td>" +
                             "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
                             "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" + active +
@@ -709,7 +709,7 @@
         });
     };
 
-  
+
     $(document).ready(function () {
         LoadSchedule();
     });

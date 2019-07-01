@@ -18,6 +18,10 @@
     display: block;
 }
 
+.sidebar-right{
+    border-left: 1px solid #ddd;
+}
+
 #icon-submenu {
     display: none;
     position: absolute;
@@ -177,12 +181,7 @@ video, audio {
     font-weight:bold;
 }
 
-#check .justify-content-center {
-    margin-top: 30px;
-}
-
 #check .btn-primary{
-    width: 30%;
     padding: 15px;
     border-color: #a90329;
     background: #a90329;
