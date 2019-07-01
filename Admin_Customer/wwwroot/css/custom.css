@@ -166,12 +166,21 @@ video, audio {
 }
 
 #check .float-right {
-    margin-top: -20px;
-    color: #fff;
+    position: absolute;
+    right: 20px;
+    top: 15px;
 }
-#check .justify-content-center{
-    margin-top: 30px; 
+
+#counter{
+    color: #ff0000;
+    font-size: 18px;
+    font-weight:bold;
 }
+
+#check .justify-content-center {
+    margin-top: 30px;
+}
+
 #check .btn-primary{
     width: 30%;
     padding: 15px;
@@ -203,6 +212,7 @@ video, audio {
 .btn-toggle.btn-lg.active {
     transition: background-color 0.25s;
 }
+
 /* css btn toggle*/
 .btn-toggle.btn-lg {
     margin: 0 5rem;
@@ -227,17 +237,7 @@ video, audio {
     left: -5rem;
 }
 
-.btn-toggle.btn-lg.active:after {
-    opacity: 1;
-}
-
-.btn-toggle.btn-lg:after {
-    content: 'On';
-    right: -5rem;
-    opacity: 0.5;
-}
-
-.btn-toggle.btn-lg:before, .btn-toggle.btn-lg:after {
+.btn-toggle.btn-lg:before{
     line-height: 2.5rem;
     width: 6rem;
     text-align: center;
