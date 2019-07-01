@@ -19,8 +19,6 @@ namespace BaseCustomerMVC.Models
             TeacherID = item.TeacherID;
             Students = item.Students;
             Created = item.Created;
-            OpeningDate = item.OpeningDate;
-            CloseDate = item.CloseDate;
             Updated = item.Updated;
             IsActive = item.IsActive;
             IsAdmin = item.IsAdmin;

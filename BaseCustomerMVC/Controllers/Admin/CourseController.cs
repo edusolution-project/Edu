@@ -77,7 +77,12 @@ namespace BaseCustomerMVC.Controllers.Admin
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
             var respone = new Dictionary<string, object>
             {
-                { "Data", DataResponse },
+                { "Data", DataResponse.Select(o=> new ClassViewModel(o){
+                        CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
+                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+                        SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
+                        TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
+                    }).ToList() },
                 { "Model", model }
             };
             return new JsonResult(respone);

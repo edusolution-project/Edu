@@ -12,7 +12,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 {
     public class ClassController : TeacherController
     {
-        private readonly GradeService _gradeservice;
+        private readonly GradeService _gradeService;
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _service;
@@ -23,7 +23,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public ClassController(GradeService gradeservice
            , SubjectService subjectService, TeacherService teacherService, ClassService service, CourseService courseService, ChapterService chapterService, LessonService lessonService)
         {
-            _gradeservice = gradeservice;
+            _gradeService = gradeservice;
             _subjectService = subjectService;
             _teacherService = teacherService;
             _courseService = courseService;
@@ -35,7 +35,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult Index(DefaultModel model)
         {
             var subject = _subjectService.GetAll().ToList();
-            var grade = _gradeservice.GetAll().ToList();
+            var grade = _gradeService.GetAll().ToList();
 
             ViewBag.Grade = grade;
             ViewBag.Subject = subject;
@@ -92,7 +92,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
                         CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
-                        GradeName = _gradeservice.GetItemByID(o.GradeID)?.Name,
+                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
                         SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
                         TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
                     })
