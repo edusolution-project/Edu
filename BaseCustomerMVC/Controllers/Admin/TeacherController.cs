@@ -259,7 +259,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             return new JsonResult(response);
         }
 
-
         [HttpGet]
         [Obsolete]
         public async Task<IActionResult> Export(DefaultModel model)
