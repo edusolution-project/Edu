@@ -1,5 +1,61 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿<!-- Sidebar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white mb-4" id="accordionSidebar">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-Content" aria-controls="navbar-Content" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbar-Content">
+            <ul class="navbar-nav mr-auto">
+                <!-- Nav Item -->
+                <li class="nav-item active">
+                    <a class="nav-link" href="@Url.Action("Index" , "Home")">
+                        <i class="fas fa-fw fa-home"></i>
+                    </a>
+                </li>
+
+                <!-- Nav Item -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index" , "MyCourse")">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Khóa học của tôi</span>
+                    </a>
+                </li>
+
+                <!-- Nav Item -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index" , "LessonToday")">
+                        <i class="fas fa-calendar"></i>
+                        <span>Bài học hôm nay</span>
+                    </a>
+                </li>
+
+                <!-- Nav Item -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index" , "Calendar")">
+                        <i class="fas fa-history"></i>
+                        <span>Lịch sử học tập</span>
+                    </a>
+                </li>
+
+                <!-- Nav Item -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index" , "News")">
+                        <i class="fas fa-comments"></i>
+                        <span>Thảo luận</span>
+                    </a>
+                </li>
+
+                <!-- Nav Item -->
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index" , "Statistic")">
+                        <i class="fas fa-fw fa-bell"></i>
+                        <span>Thông báo mới</span>
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- End of Sidebar -->
