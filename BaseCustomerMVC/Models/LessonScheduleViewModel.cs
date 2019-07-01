@@ -24,9 +24,9 @@ namespace BaseCustomerMVC.Models
             Order = item.Order;
         }
 
-        [JsonProperty("OpeningDate")]
-        public DateTime OpeningDate { get; set; }
-        [JsonProperty("CloseDate")]
-        public DateTime CloseDate { get; set; }
+        [JsonProperty("StartDate")]
+        public DateTime StartDate { get; set; }
+        [JsonProperty("EndDate")]
+        public DateTime EndDate { get; set; }
     }
 }

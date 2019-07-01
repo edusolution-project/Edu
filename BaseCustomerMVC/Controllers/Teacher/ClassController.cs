@@ -19,9 +19,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CourseService _courseService;
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
+        private readonly LessonScheduleService _lessonScheduleService;
 
         public ClassController(GradeService gradeservice
-           , SubjectService subjectService, TeacherService teacherService, ClassService service, CourseService courseService, ChapterService chapterService, LessonService lessonService)
+           , SubjectService subjectService, TeacherService teacherService, ClassService service,
+            CourseService courseService, ChapterService chapterService, LessonService lessonService, LessonScheduleService lessonScheduleService)
         {
             _gradeService = gradeservice;
             _subjectService = subjectService;
@@ -30,6 +32,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _service = service;
             _chapterService = chapterService;
             _lessonService = lessonService;
+            _lessonScheduleService = lessonScheduleService;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -85,8 +88,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
-
-
 
             var respone = new Dictionary<string, object>
             {
@@ -154,8 +155,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var classSchedule = new ClassScheduleViewModel(course)
             {
-                Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ToList(),
-                Lessons = _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ToList().Select(t => new LessonScheduleViewModel(t)).ToList()
+                Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
+                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID).FirstOrDefault()
+                           select new LessonScheduleViewModel(r)
+                           {
+                               StartDate = schedule.StartDate,
+                               EndDate = schedule.EndDate
+                           }).ToList()
             };
 
             var respone = new Dictionary<string, object>

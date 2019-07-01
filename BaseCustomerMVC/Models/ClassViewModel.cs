@@ -22,6 +22,8 @@ namespace BaseCustomerMVC.Models
             Updated = item.Updated;
             IsActive = item.IsActive;
             IsAdmin = item.IsAdmin;
+            StartDate = item.StartDate;
+            EndDate = item.EndDate;
             Order = item.Order;
         }
         [JsonProperty("CourseName")]

@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+Admin_Customer/Areas/Teacher/Views/Curriculum/Detail2.cshtml
+Admin_Customer/wwwroot/5d19ae10cacfb016d47f1b41_student.xlsx

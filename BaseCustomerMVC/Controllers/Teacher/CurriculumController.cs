@@ -98,6 +98,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
+        public IActionResult Detail(string ID)
+        {
+            if (string.IsNullOrEmpty("ID"))
+                return RedirectToAction("Index");
+            var data = _service.GetItemByID(ID);
+            if (data == null)
+                return RedirectToAction("Index");
+            ViewBag.Data = data;
+            ViewBag.Title = "Chi tiết giáo trình - " + data.Name;
+            return View();
+        }
+
+
         [Obsolete]
         [HttpPost]
         public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "")
@@ -306,6 +319,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             _lessonService.CreateQuery().InsertOne(item);
+
+
             var lessonpart = _modlessonPartService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
             if (lessonpart != null)
             {

@@ -9,15 +9,15 @@ namespace BaseCustomerEntity.Database
     public class LessonScheduleEntity : EntityBase
     {
         [JsonProperty("LessonID")]
-        public DateTime LessonID { get; set; }
-        [JsonProperty("OpeningDate")]
-        public DateTime OpeningDate { get; set; }
-        [JsonProperty("CloseDate")]
-        public DateTime CloseDate { get; set; }
+        public string LessonID { get; set; }
+        [JsonProperty("StartDate")]
+        public DateTime StartDate { get; set; }
+        [JsonProperty("EndDate")]
+        public DateTime EndDate { get; set; }
         [JsonProperty("ClassID")]
-        public DateTime ClassID { get; set; }
+        public string ClassID { get; set; }
     }
-    public class LessonScheduleService : ServiceBase<LessonEntity>
+    public class LessonScheduleService : ServiceBase<LessonScheduleEntity>
     {
         public LessonScheduleService(IConfiguration config) : base(config)
         {

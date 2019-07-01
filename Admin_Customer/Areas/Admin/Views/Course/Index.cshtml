@@ -6,12 +6,43 @@
     var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
     var listTeacher = ViewBag.Teacher as List<BaseCustomerEntity.Database.TeacherEntity>;
 }
+<div class="search-filter">
+    <div class="form-row">
+        <div class="form-group row col-md-6">
+            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+            <div class="col-sm-8">
+                <select id="SubjectID" class="form-control" onchange="LoadCourse()">
+                    @{
+                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                        {
+                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                        }
 
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row col-md-6">
+            <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+            <div class="col-sm-8">
+                <select id="GradeID" class="form-control" onchange="LoadCourse()">
+                    @{
+                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                        {
+                            <option value="@listGrade[i].ID">@listGrade[i].Name</option>
+                        }
+
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Begin Page Content -->
 <div class="container-fluid">
     @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
     {
-        <input type="hidden" name="ArrID" value=""/>
+        <input type="hidden" name="ArrID" value="" />
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -208,12 +239,16 @@
             }
         })
     }
-    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
-       
+    function LoadData() {
+        var searchText = $("#searchText").val();
+        var startDate = $("#startDate_sort").val();
+        var endDate = $("#endDate_sort").val();
+        var SubjectID = $("#SubjectID").val();
+        var GradeID = $("#GradeID").val();
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "Course")',
-            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
+            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, SubjectID: SubjectID, GradeID: GradeID},
             dataType:"json",
             success: function (data) {
                 var body = $('#dataTable tbody');
