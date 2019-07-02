@@ -9,6 +9,10 @@ namespace BaseCustomerMVC.Controllers.Student
 {
     public class CheckStudentController : StudentController
     {
+        public CheckStudentController()
+        {
+
+        }
         public IActionResult Index()
         {
             return View();
