@@ -29,5 +29,7 @@ namespace BaseCustomerMVC.Models
         public DateTime EndDate { get; set; }
 
         public string ArrID { get; set; }
+
+        public bool Status { get; set; }
     }
 }
