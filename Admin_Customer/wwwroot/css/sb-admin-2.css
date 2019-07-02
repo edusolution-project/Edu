@@ -7415,7 +7415,7 @@ a:focus {
       padding: .5rem 0;
       min-width: 10rem;
       font-size: 0.85rem;
-      margin: 0 0 1rem 0; }
+      margin: 0; }
       .sidebar .nav-item .collapse .collapse-inner .collapse-header,
       .sidebar .nav-item .collapsing .collapse-inner .collapse-header {
         margin: 0;
@@ -7505,12 +7505,12 @@ a:focus {
       transition: height 0.15s ease; }
     .sidebar .nav-item .collapse,
     .sidebar .nav-item .collapsing {
-      margin: 0 1rem; }
+      margin: 0 0 0 1.5rem; }
     .sidebar .nav-item .nav-link {
       display: block;
       width: 100%;
       text-align: left;
-      padding: 1rem;
+      padding: 0.3rem 1rem;
       width: 14rem; }
       .sidebar .nav-item .nav-link i {
         font-size: 0.85rem;

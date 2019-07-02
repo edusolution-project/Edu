@@ -1,10 +1,8 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseEntity;
 }
-
 
 <div id="list-detail">
     <div class="card show">
@@ -13,65 +11,10 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="sub-menu">
+                <div id="course-detail" style="width:100%;">
                     <ul class="navbar-nav sidebar accordion" id="accordionSidebar">
                         <!-- Nav Item -->
-                        <li class="nav-item active">
-                            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-                                <i class="fas fa-fw fa-cog"></i>
-                                <span>First Certificate in English (FCE)</span>
-                                <div id="icon-submenu">
-                                    <i class="fas fa-plus" data-toggle="tooltip" data-placement="top" title="thêm bài giảng"></i>
-                                    <i class="fas fa-edit" data-toggle="tooltip" data-placement="top" title="sửa bài giảng"></i>
-                                </div>
-                            </a>
-                            <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                                <div class="bg-white py-2 collapse-inner rounded">
-                                    <a class="collapse-item" href="@Url.Action("Lesson" , "Calendar")" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                        <i class="far fa-address-book"></i> 
-                                        <span>First Certificate in English</span>
-                                        <div id="icon-submenu">
-                                            <i class="fas fa-plus" data-toggle="tooltip" data-placement="top" title="thêm bài giảng"></i>
-                                            <i class="fas fa-edit" data-toggle="tooltip" data-placement="top" title="sửa bài giảng"></i>
-                                            <i class="fas fa-trash" data-toggle="tooltip" data-placement="top" title="xóa bài giảng"></i>
-                                        </div>
-                                    </a>
-                                    <div id="collapseOne" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                                        <div class="bg-white py-2 collapse-inner rounded">
-                                            <a class="collapse-item" href="@Url.Action("Lesson" , "Calendar")">
-                                                <i class="fas fa-book-reader"></i> Lesson 1
-                                                <div id="icon-submenu">
-                                                    <i class="fas fa-edit" data-toggle="tooltip" data-placement="top" title="sửa bài giảng"></i>
-                                                    <i class="fas fa-trash" data-toggle="tooltip" data-placement="top" title="xóa bài giảng"></i>
-                                                </div>
-                                            </a>
-                                            <a class="collapse-item" href="@Url.Action("Lesson" , "Calendar")">
-                                                <i class="fas fa-book-reader"></i> Lesson 2
-                                                <div id="icon-submenu">
-                                                    <i class="fas fa-edit" data-toggle="tooltip" data-placement="top" title="sửa bài giảng"></i>
-                                                    <i class="fas fa-trash" data-toggle="tooltip" data-placement="top" title="xóa bài giảng"></i>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <a class="collapse-item" href="@Url.Action("Lesson" , "Calendar")"><i class="fas fa-book-reader"></i> <span>First Certificate in English</span> </a>
-                                </div>
-                            </div>
-                        </li>
 
-                        <!-- Nav Item -->
-                        <li class="nav-item active">
-                            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo2" aria-expanded="true" aria-controls="collapseTwo2">
-                                <i class="fas fa-fw fa-cog"></i>
-                                <span>First Certificate in English (FCE)</span>
-                            </a>
-                            <div id="collapseTwo2" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                                <div class="bg-white py-2 collapse-inner rounded">
-                                    <a class="collapse-item" href="#">Lesson 1</a>
-                                    <a class="collapse-item" href="#">Lesson 2</a>
-                                </div>
-                            </div>
-                        </li>
 
                     </ul>
                 </div>
@@ -80,3 +23,90 @@
         <div class="card-footer"></div>
     </div>
 </div>
+
+<script>
+
+    var chapters = [];
+    var lessons = [];
+    var wrapper = $('#course-detail ul');
+
+    function LoadData() {
+        chapters = [];
+        lessons = [];
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetCourseDetail", "Curriculum")',
+            data: {ID: "@Data.ID"},
+            dataType:"json",
+            success: function (data) {
+                wrapper.html("");
+
+                chapters = data.Data.Chapters;
+                lessons = data.Data.Lessons;
+
+                if (chapters.length > 0) {
+                    for (i = 0; i < chapters.length; ++i) {
+                        var chapter = chapters[i];
+
+                        var navitem = $("<li>", { "class": "nav-item active" });
+                        var navlink = $("<a>", { "class": "nav-link", "href": "#", "data-toggle": "collapse", "data-target": "#chap_" + chapter.ID, "aria-expanded": "true", "aria-controls": "chap_" + chapter.ID });
+                        navlink.append($("<i>", { "class": "fas fa-fw fa-cog" }));
+                        navlink.append($("<span>", { "text": chapter.Name }));
+
+                        var submenu = $("<div>", { "id": "icon-submenu" });
+                        submenu.append($("<i>", { "class": "fas fa-plus", "data-toggle": "tooltip", "data-placement": "top", "title": "thêm bài giảng" }));
+                        submenu.append($("<i>", { "class": "fas fa-edit", "data-toggle": "tooltip", "data-placement": "top", "title": "sửa bài giảng" }));
+                        navlink.append(submenu);
+                        navitem.append(navlink);
+
+                        var chap_content = $("<div>", { "id": "chap_" + chapter.ID, "class": "collapse show", "aria-labelledby": "heading", "data-parent":"#accordionSidebar"})
+                        chap_content.append($("<div>", {"class":"bg-white py-2 collapse-inner rounded"}));
+
+                        navitem.append(chap_content);
+
+                        if (chapter.ParentID == "0") {
+                            wrapper.append(navitem);
+                        }
+                        else {
+                            console.log(chapter.ParentID);
+                            wrapper.find("#chap_" + chapter.ParentID + " .collapse-inner:first").append(navitem);
+                        }
+                    }
+                }
+
+                if (lessons.length > 0) {
+                    for (j = 0; j < lessons.length; j++) {
+                        var item = lessons[j];
+
+                        var lessonitem = $("<a>", {"class": "collapse-item", "href": "@Url.Action("Lesson", "Curriculum")/" + item.ID + "?CourseID=@Data.ID" });
+                        lessonitem.append("<i>", { "class": "fas fa-book-reader" })
+                        lessonitem.append(item.Title);
+
+                        var submenu = $("<div>", { "id": "icon-submenu" });
+                        submenu.append($("<i>", { "class": "fas fa-plus", "data-toggle": "tooltip", "data-placement": "top", "title": "thêm bài giảng" }));
+                        submenu.append($("<i>", { "class": "fas fa-edit", "data-toggle": "tooltip", "data-placement": "top", "title": "sửa bài giảng" }));
+                        lessonitem.append(submenu);
+
+
+                        if (item.ChapterID == null) {
+                            wrapper.append(lessonitem);
+                        }
+                        else
+                        {
+                            wrapper.find("#chap_" + item.ChapterID + " .collapse-inner:first").append(lessonitem);
+                        }
+                    }
+                }
+
+            },
+            error: function() {
+            }
+        });
+    };
+
+
+    $(document).ready(function () {
+        LoadData();
+    });
+</script>
