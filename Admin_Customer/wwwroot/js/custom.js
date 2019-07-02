@@ -1,43 +1,40 @@
-﻿/* -------------------------------------------------------------
-            bootstrapTabControl
-        ------------------------------------------------------------- */
-function bootstrapTabControl() {
-    var i, items = $('#pills-tab .nav-link'), pane = $('.tab-pane');
-    // next
-    $('.nexttab').on('click', function () {
-        for (i = 0; i < items.length; i++) {
-            if ($(items[i]).hasClass('active') == true) {
-                break;
-            }
-        }
-        if (i < items.length - 1) {
-            // for tab
-            $(items[i]).removeClass('active');
-            $(items[i + 1]).addClass('active');
-            // for pane
-            $(pane[i]).removeClass('show active');
-            $(pane[i + 1]).addClass('show active');
-        }
+﻿/* ----------  bootstrapTabControl  --------------- */
 
-    });
-    // Prev
-    $('.prevtab').on('click', function () {
-        for (i = 0; i < items.length; i++) {
-            if ($(items[i]).hasClass('active') == true) {
-                break;
-            }
+
+function tab_gonext() {
+    var i, items = $('#pills-tab .nav-item .nav-link'), pane = $('.tab-pane');
+    for (i = 0; i < items.length; i++) {
+        if ($(items[i]).hasClass('active') == true) {
+            break;
         }
-        if (i != 0) {
-            // for tab
-            $(items[i]).removeClass('active');
-            $(items[i - 1]).addClass('active');
-            // for pane
-            $(pane[i]).removeClass('show active');
-            $(pane[i - 1]).addClass('show active');
+    }
+    if (i < items.length - 1) {
+        // for tab
+        $(items[i]).removeClass('active');
+        $(items[i + 1]).addClass('active');
+        // for pane
+        $(pane[i]).removeClass('show active');
+        $(pane[i + 1]).addClass('show active');
+    }
+
+};
+
+function tab_goback() {
+    var i, items = $('#pills-tab .nav-item .nav-link'), pane = $('.tab-pane');
+    for (i = 0; i < items.length; i++) {
+        if ($(items[i]).hasClass('active') == true) {
+            break;
         }
-    });
-}
-bootstrapTabControl();
+    }
+    if (i != 0) {
+        // for tab
+        $(items[i]).removeClass('active');
+        $(items[i - 1]).addClass('active');
+        // for pane
+        $(pane[i]).removeClass('show active');
+        $(pane[i - 1]).addClass('show active');
+    }
+};
 
 
 

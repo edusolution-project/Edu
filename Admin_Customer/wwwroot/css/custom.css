@@ -7,9 +7,15 @@
 #top-menu{
     border-bottom: 1px solid #e3e7ed;
 }
-
-#dataTable .btn{
+#scheduleTable .btn,
+#dataTable .btn {
     margin: 0 5px;
+}
+
+.card-header .text-right {
+    position: absolute;
+    right: 15px;
+    top: 10px;
 }
 
 #collapseOne .collapse-item:hover #icon-submenu,
@@ -208,11 +214,12 @@ video, audio {
     padding: 15px 20px;
 }
 
+/* css btn toggle*/
+
 .btn-toggle.btn-lg.active {
-    transition: background-color 0.25s;
+    transition: background-color 0.5s;
 }
 
-/* css btn toggle*/
 .btn-toggle.btn-lg {
     margin: 0 5rem;
     padding: 0;
@@ -232,11 +239,6 @@ video, audio {
 }
 
 .btn-toggle.btn-lg:before {
-    content: 'Off';
-    left: -5rem;
-}
-
-.btn-toggle.btn-lg:before{
     line-height: 2.5rem;
     width: 6rem;
     text-align: center;
