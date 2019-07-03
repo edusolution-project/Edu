@@ -15,6 +15,7 @@ namespace Core_v2.Globals
 
         public T Auto(T oldItem,T newItem)
         {
+            if (oldItem == null) return newItem;
             Type myType = oldItem.GetType();
             IList<PropertyInfo> props = new List<PropertyInfo>(myType.GetProperties());
             var i = 0;
@@ -34,6 +35,7 @@ namespace Core_v2.Globals
         }
         public TN AutoOrtherType(T oldItem, TN newItem)
         {
+            if (oldItem == null) return newItem;
             Type myType = oldItem.GetType();
             IList<PropertyInfo> props = new List<PropertyInfo>(myType.GetProperties());
             var i = 0;

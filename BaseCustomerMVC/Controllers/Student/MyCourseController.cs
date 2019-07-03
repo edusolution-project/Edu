@@ -18,12 +18,16 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly TeacherService _teacherService;
         private readonly SubjectService _subjectService;
         private readonly GradeService _gradeService;
-
+        private readonly LessonService _lessonService;
+        private readonly LessonScheduleService _lessonScheduleService;
+        private readonly Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
         public MyCourseController(ClassService service
             , CourseService courseService
             , TeacherService teacherService
             , SubjectService subjectService
             , GradeService gradeService
+            , LessonService lessonService
+            , LessonScheduleService lessonScheduleService
             )
         {
             _service = service;
@@ -31,6 +35,9 @@ namespace BaseCustomerMVC.Controllers.Student
             _teacherService = teacherService;
             _subjectService = subjectService;
             _gradeService = gradeService;
+            _lessonService = lessonService;
+            _lessonScheduleService = lessonScheduleService;
+            _mapping = new Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel>();
         }
         [Obsolete]
         [HttpPost]
@@ -82,14 +89,31 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public JsonResult GetDetails(string CourseID)
         {
-            var filter = Builders<CourseEntity>.Filter.Where(o => o.ID == CourseID);
-            var data = _courseService.Collection.Find(filter);
-            var DataResponse = data == null || data.Count() <= 0 ? null : data.First();
-            var respone = new Dictionary<string, object>
+            try
             {
-                { "Data", DataResponse }
-            };
-            return new JsonResult(respone);
+                var filter = Builders<LessonEntity>.Filter.Where(o => o.CourseID == CourseID);
+                var data = _lessonService.Collection.Find(filter);
+                var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList();
+                var respone = new Dictionary<string, object>
+                {
+                    { "Data", DataResponse.Select(o=> _mapping.AutoOrtherType(o,new LessonScheduleViewModel(){
+                        IsActive = _lessonScheduleService.GetItemByID(o.ID).IsActive,
+                        StartDate = _lessonScheduleService.GetItemByID(o.ID).StartDate,
+                        EndDate = _lessonScheduleService.GetItemByID(o.ID).EndDate,
+                    }))
+                    }
+                };
+                return new JsonResult(respone);
+            }
+            catch (Exception ex)
+            {
+                var respone = new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error",ex }
+                };
+                return new JsonResult(respone);
+            }
 
         }
 
@@ -122,12 +146,20 @@ namespace BaseCustomerMVC.Controllers.Student
 
         }
 
-        public IActionResult Index()
+        public IActionResult Index(DefaultModel model)
         {
+            ViewBag.Model = model;
             return View();
         }
-        public IActionResult StudentCalendar()
+        public IActionResult StudentCalendar(DefaultModel model,string CourseID)
         {
+            if (string.IsNullOrEmpty(CourseID))
+            {
+                TempData["Error"] = "Bạn chưa chọn khóa học";
+                return RedirectToAction("Index");
+            }
+            ViewBag.CourseID = CourseID;
+            ViewBag.Model = model;
             return View();
         }
 
