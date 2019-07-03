@@ -20,7 +20,6 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly GradeService _gradeService;
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
-        private readonly Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
         public MyCourseController(ClassService service
             , CourseService courseService
             , TeacherService teacherService
@@ -37,11 +36,10 @@ namespace BaseCustomerMVC.Controllers.Student
             _gradeService = gradeService;
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
-            _mapping = new Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel>();
         }
         [Obsolete]
         [HttpPost]
-        public JsonResult GetList(DefaultModel model,string TeacherID)
+        public JsonResult GetList(DefaultModel model)
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
 
@@ -62,23 +60,26 @@ namespace BaseCustomerMVC.Controllers.Student
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+
+            var dataRes = DataResponse.Select(o => new MyClassViewModel()
+            {
+                ID = o.ID,
+                CourseID = o.CourseID,
+                TeacherID = o.TeacherID,
+                Status = o.IsActive,
+                EndDate = o.EndDate,
+                StartDate = o.StartDate,
+                Name = o.Name,
+                CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
+                StudentNumber = o.Students.Count,
+                SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
+                GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "" : _gradeService.GetItemByID(o.GradeID).Name,
+                TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" : _teacherService.GetItemByID(o.TeacherID).FullName,
+                IsActive = o.IsActive
+            })?.ToList();
             var respone = new Dictionary<string, object>
             {
-                { "Data", DataResponse.Select(o=> new MyClassViewModel(){
-                        ID = o.ID,
-                        CourseID = o.CourseID,
-                        TeacherID = o.TeacherID,
-                        Status = o.IsActive,
-                        EndDate = o.EndDate,
-                        StartDate = o.StartDate,
-                        Name = o.Name,
-                        CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" :  _courseService.GetItemByID(o.CourseID).Name,
-                        StudentNumber = o.Students.Count,
-                        SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "":_subjectService.GetItemByID(o.SubjectID).Name,
-                        GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "":_gradeService.GetItemByID(o.GradeID).Name,
-                        TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" :_teacherService.GetItemByID(o.TeacherID).FullName
-                    }) 
-                },
+                { "Data", dataRes },
                 { "Model", model }
             };
             return new JsonResult(respone);
@@ -94,14 +95,15 @@ namespace BaseCustomerMVC.Controllers.Student
                 var filter = Builders<LessonEntity>.Filter.Where(o => o.CourseID == CourseID);
                 var data = _lessonService.Collection.Find(filter);
                 var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList();
+                var dataRes = DataResponse.Select(o =>new LessonScheduleViewModel(o)
+                {
+                    IsActive = _lessonScheduleService.GetItemByID(o.ID) == null ? false : _lessonScheduleService.GetItemByID(o.ID).IsActive,
+                    StartDate = _lessonScheduleService.GetItemByID(o.ID) == null ? DateTime.MinValue : _lessonScheduleService.GetItemByID(o.ID).StartDate,
+                    EndDate = _lessonScheduleService.GetItemByID(o.ID) == null ? DateTime.MinValue : _lessonScheduleService.GetItemByID(o.ID).EndDate,
+                })?.ToList();
                 var respone = new Dictionary<string, object>
                 {
-                    { "Data", DataResponse.Select(o=> _mapping.AutoOrtherType(o,new LessonScheduleViewModel(){
-                        IsActive = _lessonScheduleService.GetItemByID(o.ID).IsActive,
-                        StartDate = _lessonScheduleService.GetItemByID(o.ID).StartDate,
-                        EndDate = _lessonScheduleService.GetItemByID(o.ID).EndDate,
-                    }))
-                    }
+                    { "Data", dataRes}
                 };
                 return new JsonResult(respone);
             }
@@ -151,15 +153,14 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Model = model;
             return View();
         }
-        [Route("[area]/[controller]/[action]/{CourseID}")]
-        public IActionResult StudentCalendar(DefaultModel model,string CourseID)
+        public IActionResult StudentCalendar(DefaultModel model,string id)
         {
-            if (string.IsNullOrEmpty(CourseID))
+            if (string.IsNullOrEmpty(id))
             {
                 TempData["Error"] = "Bạn chưa chọn khóa học";
                 return RedirectToAction("Index");
             }
-            ViewBag.CourseID = CourseID;
+            ViewBag.CourseID = id;
             ViewBag.Model = model;
             return View();
         }

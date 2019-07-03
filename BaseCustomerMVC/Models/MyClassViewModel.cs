@@ -11,7 +11,7 @@ namespace BaseCustomerMVC.Models
         public string ID { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
-        [JsonProperty("CourseID")]
+        [JsonProperty("SubjectName")]
         public string SubjectName { get; set; }
         [JsonProperty("CourseID")]
         public string CourseID { get; set; }
@@ -31,5 +31,7 @@ namespace BaseCustomerMVC.Models
         public bool Status { get; set; }
         [JsonProperty("StudentNumber")]
         public int StudentNumber { get; set; }
+        [JsonProperty("IsActive")]
+        public bool IsActive{ get; set; }
     }
 }

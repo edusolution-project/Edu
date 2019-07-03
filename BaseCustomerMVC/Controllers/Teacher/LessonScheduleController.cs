@@ -21,7 +21,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _service;
-        private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
         
 
         public LessonScheduleController(
@@ -42,7 +41,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _chapterService = chapterService;
             _lessonService = lessonService;
             _service = service;
-            _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
         }
 
         [Obsolete]
@@ -99,10 +97,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _service.CreateQuery().Find(o => o.LessonID == r.ID).FirstOrDefault()
-                           select _mapping.AutoOrtherType(r, new LessonScheduleViewModel() {
+                           select new LessonScheduleViewModel(r) {
                                StartDate = schedule.StartDate,
                                EndDate = schedule.EndDate
-                           })).ToList()
+                           })?.ToList()
             };
 
             var respone = new Dictionary<string, object>
