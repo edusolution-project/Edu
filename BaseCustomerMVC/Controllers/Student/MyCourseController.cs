@@ -151,6 +151,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Model = model;
             return View();
         }
+        [Route("[area]/[controller]/[action]/{CourseID}")]
         public IActionResult StudentCalendar(DefaultModel model,string CourseID)
         {
             if (string.IsNullOrEmpty(CourseID))
