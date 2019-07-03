@@ -11,6 +11,7 @@ namespace BaseCustomerMVC.Models
         public string ID { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
+        [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }
@@ -18,7 +19,6 @@ namespace BaseCustomerMVC.Models
         public List<ChapterViewModel> Chapters { get; set; } = new List<ChapterViewModel>() { };
         [JsonProperty("Lessons")]
         public List<LessonViewModel> Lessons { get; set; } = new List<LessonViewModel>() { };
-        [JsonProperty("StartDate")]
     }
     
 

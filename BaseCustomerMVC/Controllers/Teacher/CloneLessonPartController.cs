@@ -7,6 +7,7 @@ using System;
 using MongoDB.Driver;
 using System.Text;
 using System.Linq;
+using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -28,6 +29,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartService _service;
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
+        private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonpartMapping;
+        private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonpartQuestionMapping;
+        private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonpartAnswerMapping;
+
 
         public CloneLessonPartController(
             GradeService gradeservice,
@@ -40,7 +45,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonScheduleService lessonScheduleService,
             CloneLessonPartService service,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
-            CloneLessonPartQuestionService cloneLessonPartQuestionService
+            CloneLessonPartQuestionService cloneLessonPartQuestionService,
+            MappingEntity<LessonPartEntity, CloneLessonPartEntity> lessonpartMapping,
+            MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> lessonpartQuestionMapping,
+            MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> lessonpartAnswerMapping
             )
         {
             _gradeService = gradeservice;
@@ -54,6 +62,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
             _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
             _service = service;
+            _lessonpartMapping = lessonpartMapping;
+            _lessonpartQuestionMapping = lessonpartQuestionMapping;
+            _lessonpartAnswerMapping = lessonpartAnswerMapping;
         }
 
         [Obsolete]
@@ -65,18 +76,32 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (root != null)
             {
-                var listLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
-                if (listLessonPart != null && listLessonPart.Count <= 0)
+                var listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                if (listCloneLessonPart != null && listCloneLessonPart.Count > 0)
                 {
-                    var result = new List<LessonPartViewModel>();
-                    result.AddRange(listLessonPart.Select(o => new LessonPartViewModel(o)
+                    var result = new List<CloneLessonPartViewModel>();
+                    result.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
                     {
-                        Questions = _cloneLessonPartQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new QuestionViewModel(q)
+                        Questions = _cloneLessonPartQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new CloneQuestionViewModel(q)
                         {
                             Answers = _cloneLessonPartAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
                         }).ToList()
                     }));
-                };
+                }
+                else
+                {
+                    //Clone from lesson part
+                    var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                    if (listLessonPart != null && listLessonPart.Count > 0)
+                    {
+                        foreach (var lessonpart in listLessonPart)
+                            CloneLessonPart(_lessonpartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity()
+                            {
+                                OriginID = lessonpart.ID,
+                                ID = null
+                            }));
+                    }
+                }
             }
 
             var respone = new Dictionary<string, object>
@@ -84,6 +109,47 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 { "Data", data }
             };
             return new JsonResult(respone);
+        }
+
+        private void CloneLessonPart(CloneLessonPartEntity item)
+        {
+            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
+            _lessonPartService.Collection.InsertOne(item);
+            var list = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
+            if (list != null)
+            {
+                foreach (var question in list)
+                {
+                    CloneLessonQuestion(_lessonpartQuestionMapping.AutoOrtherType(question, new CloneLessonPartQuestionEntity()
+                    {
+                        OriginID = question.ID,
+                        ID = null
+                    }));
+                }
+            }
+        }
+
+        private void CloneLessonQuestion(CloneLessonPartQuestionEntity item)
+        {
+            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
+            _lessonPartQuestionService.Collection.InsertOne(item);
+            var list = _lessonPartAnswerService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
+            if (list != null)
+            {
+                foreach (var answer in list)
+                {
+                    CloneLessonAnswer(_lessonpartAnswerMapping.AutoOrtherType(answer, new CloneLessonPartAnswerEntity()
+                    {
+                        OriginID = answer.ID,
+                        ID = null
+                    }));
+                }
+            }
+        }
+
+        private void CloneLessonAnswer(CloneLessonPartAnswerEntity item)
+        {
+            _lessonPartAnswerService.Collection.InsertOne(item);
         }
     }
 }
