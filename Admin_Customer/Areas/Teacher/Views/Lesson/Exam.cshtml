@@ -1,11 +1,10 @@
-﻿
-
-@{
+﻿@{
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
 }
+
 <!-- Page Heading -->
 <div id="lessonContainer">
 </div>
@@ -13,11 +12,12 @@
 <input type="hidden" id="LessonID" value="" />
 <input type="hidden" id="ChapterID" value="" />
 <input type="hidden" id="CourseID" value="" />
+
 <script>
     $(document).ready(function () {
         load.lesson('');
     });
 </script>
 @section Script{
-    <script src="~/js/lesson.js"></script>
+    <script src="~/js/exam.js"></script>
 }

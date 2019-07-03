@@ -7507,11 +7507,12 @@ a:focus {
     .sidebar .nav-item .collapsing {
       margin: 0 0 0 1.5rem; }
     .sidebar .nav-item .nav-link {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 0.3rem 1rem;
-      width: 14rem; }
+        display: block;
+        width: 100%;
+        text-align: left;
+        /*padding: 0.3rem 1rem;*/
+        width: 14rem;
+    }
       .sidebar .nav-item .nav-link i {
         font-size: 0.85rem;
         margin-right: 0.25rem; }

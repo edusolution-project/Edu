@@ -51,5 +51,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Data = Data;
             return View();
         }
+
+        public IActionResult Exam()
+        {
+            return View();
+        }
+
     }
 }
