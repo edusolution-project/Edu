@@ -1,52 +1,166 @@
-﻿using BaseCustomerMVC.Globals;
+﻿using BaseCustomerEntity.Database;
+using BaseCustomerMVC.Globals;
 using BaseCustomerMVC.Models;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
     public class MyCourseController : StudentController
     {
-        public MyCourseController()
+        private readonly ClassService _service;
+        private readonly CourseService _courseService;
+        private readonly TeacherService _teacherService;
+        private readonly SubjectService _subjectService;
+        private readonly GradeService _gradeService;
+        private readonly LessonService _lessonService;
+        private readonly LessonScheduleService _lessonScheduleService;
+        private readonly Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
+        public MyCourseController(ClassService service
+            , CourseService courseService
+            , TeacherService teacherService
+            , SubjectService subjectService
+            , GradeService gradeService
+            , LessonService lessonService
+            , LessonScheduleService lessonScheduleService
+            )
         {
+            _service = service;
+            _courseService = courseService;
+            _teacherService = teacherService;
+            _subjectService = subjectService;
+            _gradeService = gradeService;
+            _lessonService = lessonService;
+            _lessonScheduleService = lessonScheduleService;
+            _mapping = new Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel>();
+        }
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetList(DefaultModel model,string TeacherID)
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
 
+            if (!string.IsNullOrEmpty(model.SearchText))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
+            }
+            if (model.StartDate > DateTime.MinValue)
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
+            }
+            if (model.EndDate > DateTime.MinValue)
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
+            }
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            model.TotalRecord = data.Count();
+            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+                ? data.ToList()
+                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+            var respone = new Dictionary<string, object>
+            {
+                { "Data", DataResponse.Select(o=> new MyClassViewModel(){
+                        ID = o.ID,
+                        CourseID = o.CourseID,
+                        TeacherID = o.TeacherID,
+                        Status = o.IsActive,
+                        EndDate = o.EndDate,
+                        StartDate = o.StartDate,
+                        Name = o.Name,
+                        CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" :  _courseService.GetItemByID(o.CourseID).Name,
+                        StudentNumber = o.Students.Count,
+                        SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "":_subjectService.GetItemByID(o.SubjectID).Name,
+                        GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "":_gradeService.GetItemByID(o.GradeID).Name,
+                        TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" :_teacherService.GetItemByID(o.TeacherID).FullName
+                    }) 
+                },
+                { "Model", model }
+            };
+            return new JsonResult(respone);
         }
 
-        //thông tin sắp xếp theo , mon => listCourse => listChapter/ listLesson
 
-            /// chia nhỏ api 
-            /// 1 => getlistCourse chỉ lấy danh sách giáo trình group theo môn và cấp độ
-            /// 2 => getlistLesson chỉ lấy danh sách bài giảng group theo giáo trình (save lại localstore nếu được)
-            /// 3 => getDetailsLesson => bài tập LessonViewModel + phục vụ cả làm bài tập chấm điểm.
-
-        /// <summary>
-        /// lấy danh sách bài giảng
-        /// </summary>
-        /// <returns></returns>
-        public Task<JsonResult> GetListCourse(DefaultModel model)
+        [System.Obsolete]
+        [HttpPost]
+        public JsonResult GetDetails(string CourseID)
         {
             try
             {
-                
-
-                return Task.FromResult(new JsonResult("ok"));
+                var filter = Builders<LessonEntity>.Filter.Where(o => o.CourseID == CourseID);
+                var data = _lessonService.Collection.Find(filter);
+                var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList();
+                var respone = new Dictionary<string, object>
+                {
+                    { "Data", DataResponse.Select(o=> _mapping.AutoOrtherType(o,new LessonScheduleViewModel(){
+                        IsActive = _lessonScheduleService.GetItemByID(o.ID).IsActive,
+                        StartDate = _lessonScheduleService.GetItemByID(o.ID).StartDate,
+                        EndDate = _lessonScheduleService.GetItemByID(o.ID).EndDate,
+                    }))
+                    }
+                };
+                return new JsonResult(respone);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return Task.FromResult(new JsonResult(ex));
+                var respone = new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error",ex }
+                };
+                return new JsonResult(respone);
             }
+
         }
 
-        public IActionResult Index()
+        [System.Obsolete]
+        [HttpPost]
+        public JsonResult GetLesson(string CourseID)
         {
+            var filter = Builders<CourseEntity>.Filter.Where(o => o.ID == CourseID);
+            var data = _courseService.Collection.Find(filter);
+            var DataResponse = data == null || data.Count() <= 0 ? null : data.First();
+            var respone = new Dictionary<string, object>
+            {
+                { "Data", DataResponse }
+            };
+            return new JsonResult(respone);
+
+        }
+        [System.Obsolete]
+        [HttpPost]
+        public JsonResult GetPart(string CourseID)
+        {
+            var filter = Builders<CourseEntity>.Filter.Where(o => o.ID == CourseID);
+            var data = _courseService.Collection.Find(filter);
+            var DataResponse = data == null || data.Count() <= 0 ? null : data.First();
+            var respone = new Dictionary<string, object>
+            {
+                { "Data", DataResponse }
+            };
+            return new JsonResult(respone);
+
+        }
+
+        public IActionResult Index(DefaultModel model)
+        {
+            ViewBag.Model = model;
             return View();
         }
-        public IActionResult StudentCalendar()
+        [Route("[area]/[controller]/[action]/{CourseID}")]
+        public IActionResult StudentCalendar(DefaultModel model,string CourseID)
         {
+            if (string.IsNullOrEmpty(CourseID))
+            {
+                TempData["Error"] = "Bạn chưa chọn khóa học";
+                return RedirectToAction("Index");
+            }
+            ViewBag.CourseID = CourseID;
+            ViewBag.Model = model;
             return View();
         }
 

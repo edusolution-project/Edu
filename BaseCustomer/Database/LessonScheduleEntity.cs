@@ -15,7 +15,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }
         [JsonProperty("IsActive")]
-        public DateTime IsActive { get; set; }
+        public bool IsActive { get; set; }
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
     }
