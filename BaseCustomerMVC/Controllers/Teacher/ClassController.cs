@@ -19,9 +19,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CourseService _courseService;
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
+        private readonly LessonScheduleService _lessonScheduleService;
 
         public ClassController(GradeService gradeservice
-           , SubjectService subjectService, TeacherService teacherService, ClassService service, CourseService courseService, ChapterService chapterService, LessonService lessonService)
+           , SubjectService subjectService, TeacherService teacherService, ClassService service,
+            CourseService courseService, ChapterService chapterService, LessonService lessonService, LessonScheduleService lessonScheduleService)
         {
             _gradeService = gradeservice;
             _subjectService = subjectService;
@@ -30,6 +32,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _service = service;
             _chapterService = chapterService;
             _lessonService = lessonService;
+            _lessonScheduleService = lessonScheduleService;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -86,8 +89,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ? data
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
 
-
-
             var respone = new Dictionary<string, object>
             {
                 { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
@@ -97,70 +98,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
                     })
                 },
-                { "Model", model }
-            };
-            return new JsonResult(respone);
-        }
-
-        [Obsolete]
-        [HttpPost]
-        public JsonResult GetClassSchedule(DefaultModel model, string ClassID = "", string UserID = "")
-        {
-            var filter = new List<FilterDefinition<ClassEntity>>();
-            TeacherEntity teacher = null;
-            if (string.IsNullOrEmpty("UserID"))
-                UserID = User.Claims.GetClaimByType("UserID").Value;
-            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
-            {
-                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
-                if (teacher == null)
-                {
-                    return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin giảng viên" }
-                    });
-                }
-            }
-            if (string.IsNullOrEmpty(ClassID))
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin lớp học" }
-                    });
-            }
-
-            var currentClass = _service.GetItemByID(ClassID);
-            if (currentClass == null)
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin lớp học" }
-                    });
-            }
-
-            var course = _courseService.GetItemByID(currentClass.CourseID);
-
-            if (course == null)
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin giáo trình" }
-                    });
-            }
-
-            var classSchedule = new ClassScheduleViewModel(course)
-            {
-                Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ToList(),
-                Lessons = _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ToList().Select(t => new LessonScheduleViewModel(t)).ToList()
-            };
-
-            var respone = new Dictionary<string, object>
-            {
-                { "Data", classSchedule },
                 { "Model", model }
             };
             return new JsonResult(respone);

@@ -46,6 +46,14 @@ namespace Core_v2.Repositories
             }
         }
 
+        public MappingEntity<T,T> Map
+        {
+            get
+            {
+                return _mapping;
+            }
+        }
+
         public virtual IMongoCollection<T> CreateQuery()
         {
             return _collection ?? _database.GetCollection<T>(_tableName);

@@ -98,6 +98,94 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
+        public IActionResult Detail(string ID)
+        {
+            if (string.IsNullOrEmpty("ID"))
+                return RedirectToAction("Index");
+            var data = _service.GetItemByID(ID);
+            if (data == null)
+                return RedirectToAction("Index");
+            ViewBag.Data = data;
+            ViewBag.Title = "Chi tiết giáo trình - " + data.Name;
+            return View();
+        }
+
+        public IActionResult Lesson(DefaultModel model, string CourseID)
+        {
+            if (CourseID == null)
+                return RedirectToAction("Index");
+            var currentCourse = _service.GetItemByID(CourseID);
+            if (currentCourse == null)
+                return RedirectToAction("Index");
+            var Data = _lessonService.GetItemByID(model.ID);
+            if (Data == null)
+                return RedirectToAction("Index");
+            ViewBag.Course = currentCourse;
+            ViewBag.Data = Data;
+            return View();
+        }
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetCourseDetail(DefaultModel model)
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
+
+            var course = _service.GetItemByID(model.ID);
+
+            if (course == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giáo trình" }
+                    });
+            }
+
+            var courseDetail = new Dictionary<string, object>
+            {
+                { "Chapters",_chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() } ,
+                { "Lessons", _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() }
+            };
+
+            var respone = new Dictionary<string, object>
+            {
+                { "Data", courseDetail },
+                { "Model", model }
+            };
+            return new JsonResult(respone);
+        }
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetListLessonPart(string LessonID)
+        {
+            var root = _lessonService.CreateQuery().Find(o => o.ID == LessonID).SingleOrDefault();
+            var data = new Dictionary<string, object> { };
+
+            if (root != null)
+            {
+                var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                if (listLessonPart != null && listLessonPart.Count <= 0)
+                {
+                    var result = new List<LessonPartViewModel>();
+                    result.AddRange(listLessonPart.Select(o => new LessonPartViewModel(o)
+                    {
+                        Questions = _lessonPartQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new QuestionViewModel(q)
+                        {
+                            Answers = _lessonPartAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
+                        }).ToList()
+                    }));
+                };
+            }
+
+            var respone = new Dictionary<string, object>
+            {
+                { "Data", data }
+            };
+            return new JsonResult(respone);
+        }
+
         [Obsolete]
         [HttpPost]
         public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "")
@@ -306,6 +394,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             _lessonService.CreateQuery().InsertOne(item);
+
+
             var lessonpart = _modlessonPartService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
             if (lessonpart != null)
             {

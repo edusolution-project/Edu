@@ -25,13 +25,20 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly ClassService _service;
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
+        private readonly LessonService _lessonService;
+        private readonly LessonScheduleService _lessonScheduleService;
         private readonly IHostingEnvironment _env;
+
+
+
         public CourseController(ClassService service
             , SubjectService subjectService
             , GradeService gradeService
             , CourseService courseService
             , TeacherService teacherService
             , StudentService studentService
+            , LessonService lessonService
+            , LessonScheduleService lessonScheduleService
             , IHostingEnvironment evn)
         {
             _service = service;
@@ -40,6 +47,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             _subjectService = subjectService;
             _teacherService = teacherService;
             _studentService = studentService;
+            _lessonService = lessonService;
+            _lessonScheduleService = lessonScheduleService;
             _env = evn;
         }
         public ActionResult Index(DefaultModel model)
@@ -54,7 +63,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetList(DefaultModel model)
+        public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "")
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
 
@@ -70,6 +79,14 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Created <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
+            if (!string.IsNullOrEmpty(SubjectID))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+            }
+            if (!string.IsNullOrEmpty(GradeID))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == GradeID));
+            }
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
@@ -80,8 +97,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 { "Data", DataResponse.Select(o=> new ClassViewModel(o){
                         CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
                         GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                        SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
-                        TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
+                        SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
+                        TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
                     }).ToList() },
                 { "Model", model }
             };
@@ -91,12 +108,12 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetCourse(string GradeID,string SubjectID)
+        public JsonResult GetCourse(string GradeID, string SubjectID)
         {
             var filter = new List<FilterDefinition<CourseEntity>>();
             if (!string.IsNullOrEmpty(GradeID))
             {
-                filter.Add(Builders<CourseEntity>.Filter.Where(o=>o.GradeID == GradeID));
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
             if (!string.IsNullOrEmpty(SubjectID))
             {
@@ -132,6 +149,24 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.ID = null;
                 item.Created = DateTime.Now;
                 _service.CreateQuery().InsertOne(item);
+
+                var schedules = new List<LessonScheduleEntity>();
+
+                    var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
+
+                if (lessons != null)
+                    foreach(LessonEntity lesson in lessons)
+                    {
+                        _lessonScheduleService.CreateQuery().InsertOne(new LessonScheduleEntity
+                        {
+                            ClassID = item.ID,
+                            LessonID = lesson.ID,
+                            StartDate = item.StartDate,
+                            EndDate = item.EndDate
+                        });
+                    }
+
+
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
                     {"Data",item },
@@ -167,9 +202,10 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             else
             {
+                //TODO: Clear chapter, Lesson & Lesson part on delete Course
                 if (model.ArrID.Contains(","))
                 {
-                    
+
                     var delete = _service.Collection.DeleteMany(o => model.ArrID.Split(',').Contains(o.ID));
                     return new JsonResult(delete);
                 }
@@ -245,12 +281,12 @@ namespace BaseCustomerMVC.Controllers.Admin
             var form = HttpContext.Request.Form;
             if (string.IsNullOrEmpty(ID)) return new JsonResult("Fail");
             var itemCourse = _service.GetItemByID(ID);
-            if(itemCourse == null) return new JsonResult("Fail");
+            if (itemCourse == null) return new JsonResult("Fail");
             if (itemCourse.Students == null) itemCourse.Students = new List<string>();
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
-            var filePath = Path.Combine(_env.WebRootPath, itemCourse.ID +"_"+ file.FileName);
+            var filePath = Path.Combine(_env.WebRootPath, itemCourse.ID + "_" + file.FileName);
             List<string> studentList = null;
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
@@ -271,14 +307,14 @@ namespace BaseCustomerMVC.Controllers.Admin
                             studentList.Add(StudentId);
                         }
                         var listData = _studentService.Collection.Find(o => studentList.Contains(o.StudentId))?.ToList();
-                        if(listData != null)
+                        if (listData != null)
                         {
                             var listID = listData.Select(o => o.ID);
                             itemCourse.Students.AddRange(listID);
                             itemCourse.Students = itemCourse.Students.Distinct().ToList();
                             _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
                         }
-                        
+
                     }
                 }
                 catch (Exception ex)
