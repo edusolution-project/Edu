@@ -7,6 +7,7 @@
 #top-menu{
     border-bottom: 1px solid #e3e7ed;
 }
+
 #scheduleTable .btn,
 #dataTable .btn {
     margin: 0 5px;
@@ -16,6 +17,14 @@
     position: absolute;
     right: 15px;
     top: 10px;
+    z-index: 9999;
+}
+
+.card-header .text-center {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 15px;
 }
 
 #collapseOne .collapse-item:hover #icon-submenu,
@@ -86,10 +95,13 @@
 .nav-pills .nav-link{
     color: #444;
 }
-.lesson-tabs .fa {
-    border: 1px solid #444;
-    padding: 10px;
+#pills-tab .far,
+#pills-tab .fab,
+#pills-tab .fas {
+    border: 1px solid #ddd;
+    padding: 8px;
     border-radius: 5px;
+    margin-right: 15px;
 }
 
 #accordionSidebar {
@@ -217,7 +229,7 @@ video, audio {
 /* css btn toggle*/
 
 .btn-toggle.btn-lg.active {
-    transition: background-color 0.5s;
+    transition: background-color 0.25s;
 }
 
 .btn-toggle.btn-lg {

@@ -63,8 +63,14 @@ var lessonService = {
         //header
         var lessonHeader = $("<div>", { "class": "card-header py-3" });
         lessonContent.append(lessonHeader);
+
+        //header
+        var ButtonStart = $("<div>", { "class": "d-flex justify-content-center pt-5 pb-5" });
+        var btnButton = $("<div>", { "class": "btn btn-primary", "onclick": "start(this)", "text": " Bắt đầu làm bài thi" });
+        lessonContent.append(ButtonStart);
+        ButtonStart.append(btnButton);
         //Body
-        var cardBody = $("<div>", { "class": "card-body" });
+        var cardBody = $("<div>", { "id": "check-student" , "class": "card-body d-none" });
         lessonContent.append(cardBody);
         //row
         var lessonRow = $("<div>", { "class": "row" });
@@ -104,12 +110,18 @@ var lessonService = {
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.id });
 
         var bodyright = $("<div>", { "class": "col-md-9" });
+        var BtnFinish = $("<div>", { "class": "d-flex justify-content-center" });
+        var Finish = $("<button>", { "class": "btn btn-primary", "onclick": "goBack()", "text": " Hoàn thành" });       
         var button = $("<div>", { "class": "text-right" });
         lessonHeader.append(button);
+        var counter = $("<div>", { "class": "text-center", "text": "Thời gian làm bài:" });
+        var counterdate = $("<span>", { "id": "counter", "text": " 20:00" });
+        counter.append(counterdate);
+        lessonHeader.append(counter);
         var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Quay lại", "onclick": "tab_goback()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
         var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Tiếp tục", "onclick": "tab_gonext()" });
-        var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
+        var iconnext = $("<i>", { "class": "fas fa-arrow-right" });       
         button.append(prevtab);
         prevtab.append(iconprev);
         button.append(nexttab);
@@ -120,6 +132,7 @@ var lessonService = {
 
         lessonRow.append(bodyright);
 
+
         // add lesson part
         var createLessonPart = $("<div>", { "class": "add-lesson-part" });
         var btn = $("<a>", { "class": "btn btn-sm btn-success", "text": "Thêm nội dung", "href": "javascript:void(0)", "onclick": "Create.lessonPart('" + data.id + "')" });
@@ -128,6 +141,9 @@ var lessonService = {
         var newLessonPart = $("<div>", { "class": "new-lesson-part", "id": data.id + new Date().getDate() });
 
         bodyright.append(lessonBody);
+
+        bodyright.append(BtnFinish);
+        BtnFinish.append(Finish);
 
         //lessonContainer.append(createLessonPart);
         //lessonContainer.append(newLessonPart);
@@ -699,7 +715,6 @@ var load = {
         //    if (xhr.readyState == 4 && xhr.status == 200) {
         var responseText = '{"code":200,"message":"Success","data":[{"questions":[],"parentID":"5cf7652f09b1b420e8fb68fb","title":"Test Dạng văn bản","timer":0,"description":"<p>Không phản ứng mức đề xuất nới trần số giờ làm thêm tối đa từ 300 giờ lên mức 400 giờ/năm nhưng Phó Trưởng ban Quan hệ lao động của Tổng liên đoàn đề xuất phải duy trì quy định về giới hạn số giờ làm thêm trong tháng. Theo ông Lê Đình Quảng, có thể nới hơn nữa giới hạn làm thêm tối đa 30 giờ/tháng nhưng không nên bỏ trần quy định này để tránh tình trạng sử dụng “vắt sức” người lao động để làm thêm giờ trong một khoảng thời gian dài liên tục.</p><p>Ông Quảng nhấn mạnh: “Quy định phải chống được sự lạm dụng chính sách làm thêm, để việc làm thêm đúng với bản chất là nhằm bù đắp sự thiếu hụt lao động đột xuất, nhằm tạo sự linh hoạt, tăng tính cạnh tranh của thị trường lao động Việt Nam so với các nước… chứ không phải ngày nào cũng tăng ca, tháng nào cũng làm thêm, doanh nghiệp lợi dụng việc tăng giờ làm thêm để trả lương thấp, buộc người lao động không có lựa chọn nào ngoài việc phải “tự nguyện” làm thêm giờ mới có thu nhập để đủ trang trải cuộc sống. Phải nói rõ nhà nước không khuyến khích việc làm thêm”.</p>","type":"TEXT","isExam":false,"point":0.0,"created":"2019-07-02T01:02:23.446Z","updated":"2019-07-02T02:18:14.186Z","order":0,"media":null,"id":"5d1aad1f8850bf445c825bcf"},{"questions":[],"parentID":"5cf7652f09b1b420e8fb68fb","title":"Test Video","timer":0,"description":null,"type":"VIDEO","isExam":false,"point":0.0,"created":"2019-07-02T01:02:42.078Z","updated":"2019-07-02T01:02:42.079Z","order":1,"media":{"name":"ui-id-1","originalName":"test.mp4","path":"/Files/VIDEO/20190702/760f209e-9d35-4e64-a318-0f07def10803_.mp4","extension":"video/mp4","created":"2019-07-02T01:02:42.079Z","size":4900365.0},"id":"5d1aad328850bf445c825bd0"},{"questions":[],"parentID":"5cf7652f09b1b420e8fb68fb","title":"test audio","timer":0,"description":null,"type":"AUDIO","isExam":false,"point":0.0,"created":"2019-07-02T02:20:20.516Z","updated":"2019-07-02T02:20:20.518Z","order":2,"media":{"name":"ui-id-1","originalName":"test.mp3","path":"/Files/AUDIO/20190702/ce921a63-0e44-4792-8c17-a6ccd0609083_.mp3","extension":"audio/mp3","created":"2019-07-02T02:20:20.518Z","size":2947074.0},"id":"5d1abf64859e6606b4f12a1f"},{"questions":[],"parentID":"5cf7652f09b1b420e8fb68fb","title":"tes img","timer":0,"description":null,"type":"IMG","isExam":false,"point":0.0,"created":"2019-07-02T02:20:47.466Z","updated":"2019-07-02T02:20:47.466Z","order":3,"media":{"name":"ui-id-2","originalName":"_102853861_kingscollege-geo.jpg","path":"/Files/IMG/20190702/d0a0836e-b2ac-4797-a4ad-71527664f87f_.jpg","extension":"image/jpeg","created":"2019-07-02T02:20:47.466Z","size":57957.0},"id":"5d1abf7f859e6606b4f12a20"},{"questions":[{"answers":[{"parentID":"5d1ac075859e6606b4f12a22","content":"A To make an appointment.","isCorrect":true,"createUser":null,"created":"2019-07-02T02:24:53.139Z","updated":"2019-07-02T02:24:53.139Z","media":null,"order":0,"id":"5d1ac075859e6606b4f12a23"},{"parentID":"5d1ac075859e6606b4f12a22","content":"B To rent a car.","isCorrect":false,"createUser":null,"created":"2019-07-02T02:24:53.148Z","updated":"2019-07-02T02:24:53.148Z","media":null,"order":1,"id":"5d1ac075859e6606b4f12a24"},{"parentID":"5d1ac075859e6606b4f12a22","content":"C To ask about a fee.","isCorrect":false,"createUser":null,"created":"2019-07-02T02:24:53.149Z","updated":"2019-07-02T02:24:53.149Z","media":null,"order":2,"id":"5d1ac075859e6606b4f12a25"},{"parentID":"5d1ac075859e6606b4f12a22","content":"D To apply for a position.","isCorrect":false,"createUser":null,"created":"2019-07-02T02:24:53.15Z","updated":"2019-07-02T02:24:53.15Z","media":null,"order":3,"id":"5d1ac075859e6606b4f12a26"}],"content":"Why is the woman calling?","createUser":null,"created":"2019-07-02T02:24:53.13Z","updated":"2019-07-02T02:24:53.13Z","point":1.0,"order":0,"description":null,"media":null,"parentID":"5d1ac075859e6606b4f12a21","id":"5d1ac075859e6606b4f12a22"}],"parentID":"5cf7652f09b1b420e8fb68fb","title":"Part 3 Questions 11-20","timer":0,"description":null,"type":"QUIZ1","isExam":false,"point":0.0,"created":"2019-07-02T02:24:53.128Z","updated":"2019-07-02T02:24:53.128Z","order":4,"media":null,"id":"5d1ac075859e6606b4f12a21"},{"questions":[{"answers":[{"parentID":"5d1ac382859e6606b4f12a38","content":"A","isCorrect":true,"createUser":null,"created":"2019-07-02T02:37:54.537Z","updated":"2019-07-02T02:38:32.45Z","media":null,"order":0,"id":"5d1ac35a859e6606b4f12a34"},{"parentID":"5d1ac382859e6606b4f12a38","content":"B","isCorrect":true,"createUser":null,"created":"2019-07-02T02:37:54.538Z","updated":"2019-07-02T02:38:32.451Z","media":null,"order":1,"id":"5d1ac35a859e6606b4f12a35"},{"parentID":"5d1ac382859e6606b4f12a38","content":"C","isCorrect":true,"createUser":null,"created":"2019-07-02T02:37:54.54Z","updated":"2019-07-02T02:38:32.452Z","media":null,"order":2,"id":"5d1ac35a859e6606b4f12a36"},{"parentID":"5d1ac382859e6606b4f12a38","content":"D","isCorrect":true,"createUser":null,"created":"2019-07-02T02:37:54.541Z","updated":"2019-07-02T02:38:32.453Z","media":null,"order":3,"id":"5d1ac35a859e6606b4f12a37"}],"content":"What event is being described?","createUser":null,"created":"2019-07-02T02:37:54.535Z","updated":"2019-07-02T02:38:32.449Z","point":0.0,"order":0,"description":null,"media":null,"parentID":"5d1ac12b859e6606b4f12a27","id":"5d1ac382859e6606b4f12a38"}],"parentID":"5cf7652f09b1b420e8fb68fb","title":"PART 4","timer":0,"description":null,"type":"QUIZ2","isExam":false,"point":0.0,"created":"2019-07-02T02:27:55.019Z","updated":"2019-07-02T02:38:32.448Z","order":5,"media":{"name":"ui-id-3","originalName":"the_best_court_in_the_world.jpg","path":"/Files/IMG/20190702/f5617d5d-33dc-4fb5-b2d1-3d7d466ee3f5_.jpg","extension":"image/jpeg","created":"0001-01-01T00:00:00Z","size":0.0},"id":"5d1ac12b859e6606b4f12a27"},{"questions":[{"answers":[{"parentID":"5d1ac23d859e6606b4f12a2e","content":"A","isCorrect":true,"createUser":null,"created":"2019-07-02T02:32:29.997Z","updated":"2019-07-02T02:34:05.583Z","media":null,"order":0,"id":"5d1ac23d859e6606b4f12a2f"},{"parentID":"5d1ac23d859e6606b4f12a2e","content":"B","isCorrect":true,"createUser":null,"created":"2019-07-02T02:33:53.253Z","updated":"2019-07-02T02:34:05.584Z","media":null,"order":1,"id":"5d1ac291859e6606b4f12a31"},{"parentID":"5d1ac23d859e6606b4f12a2e","content":"C","isCorrect":true,"createUser":null,"created":"2019-07-02T02:33:53.254Z","updated":"2019-07-02T02:34:05.585Z","media":null,"order":2,"id":"5d1ac291859e6606b4f12a32"}],"content":"Voyages Jules Verne arrange your travel insurance","createUser":null,"created":"2019-07-02T02:32:29.996Z","updated":"2019-07-02T02:34:05.582Z","point":1.0,"order":0,"description":null,"media":null,"parentID":"5d1ac23d859e6606b4f12a2d","id":"5d1ac23d859e6606b4f12a2e"}],"parentID":"5cf7652f09b1b420e8fb68fb","title":"Questions 31-34 refer to the following advertisement","timer":0,"description":null,"type":"QUIZ3","isExam":false,"point":0.0,"created":"2019-07-02T02:32:29.994Z","updated":"2019-07-02T02:34:05.466Z","order":6,"media":null,"id":"5d1ac23d859e6606b4f12a2d"},{"questions":[],"parentID":"5cf7652f09b1b420e8fb68fb","title":null,"timer":0,"description":"<p>12:00 noon-1:00 P.M., Salon A&nbsp;</p><p>Touring to promote his latest book, Outthinking Public Opinion , author Damian Schnauz makes a stop at the Uppsala International Book Fair to discuss his latest subject, take questions, and sign his books.</p><p>Introductory Course in Graphic Design 1:30-2:30 P.M., Visual Media Centre Professional digital designers Allen Doubek and Ivanette Lacasse will present useful techniques and provide attendees with hands-on practice opportunities.</p>","type":"ESSAY","isExam":false,"point":0.0,"created":"2019-07-02T02:33:23.305Z","updated":"2019-07-02T02:42:46.843Z","order":7,"media":null,"id":"5d1ac273859e6606b4f12a30"}]}';
         var data = JSON.parse(responseText);
-        console.log(data);
         if (data.code == 200) {
             render.lessonPart(data.data);
 

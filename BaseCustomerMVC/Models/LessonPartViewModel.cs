@@ -55,5 +55,8 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("Answers")]
         public List<LessonPartAnswerEntity> Answers { get; set; }
 
+        [JsonProperty("CloneAnswers")]
+        public List<CloneLessonPartAnswerEntity> CloneAnswers { get; set; }
+
     }
 }
