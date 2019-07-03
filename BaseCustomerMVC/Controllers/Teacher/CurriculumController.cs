@@ -148,12 +148,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 { "Lessons", _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() }
             };
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", courseDetail },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
         [Obsolete]
@@ -179,11 +179,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 };
             }
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", data }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
         [Obsolete]
@@ -209,7 +209,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ? data
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse.ToList().Select(o=> new CourseViewModel(o){
                         GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
@@ -218,7 +218,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }) },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
         [Obsolete]
@@ -244,12 +244,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ? data
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse.ToList() },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
         [HttpPost]

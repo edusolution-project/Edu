@@ -52,6 +52,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
+
+        [HttpPost]
+        public JsonResult GetDetailsLesson(string ID)
+        {
+            try
+            {
+                var lesson = _service.CreateQuery().Find(o => o.ID == ID).FirstOrDefault();
+
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", lesson }
+                };
+                return new JsonResult(response);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message }
+                });
+            }
+        }
+
         public IActionResult Exam()
         {
             return View();

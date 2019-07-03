@@ -43,12 +43,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ChapterService chapterService,
             LessonService lessonService,
             LessonScheduleService lessonScheduleService,
+            LessonPartService lessonPartService,
+            LessonPartQuestionService lessonPartQuestionService,
+            LessonPartAnswerService lessonPartAnswerService,
             CloneLessonPartService service,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
-            CloneLessonPartQuestionService cloneLessonPartQuestionService,
-            MappingEntity<LessonPartEntity, CloneLessonPartEntity> lessonpartMapping,
-            MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> lessonpartQuestionMapping,
-            MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> lessonpartAnswerMapping
+            CloneLessonPartQuestionService cloneLessonPartQuestionService
+
             )
         {
             _gradeService = gradeservice;
@@ -59,34 +60,41 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _chapterService = chapterService;
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
+            _lessonPartService = lessonPartService;
+            _lessonPartQuestionService = lessonPartQuestionService;
+            _lessonPartAnswerService = lessonPartAnswerService;
+
+            _service = service;
             _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
             _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
-            _service = service;
-            _lessonpartMapping = lessonpartMapping;
-            _lessonpartQuestionMapping = lessonpartQuestionMapping;
-            _lessonpartAnswerMapping = lessonpartAnswerMapping;
+
+            _lessonpartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
+            _lessonpartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
+            _lessonpartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
         }
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetListPart(string LessonID)
+        public JsonResult GetList(string LessonID, string ClassID)
         {
             var root = _lessonService.CreateQuery().Find(o => o.ID == LessonID).SingleOrDefault();
-            var data = new Dictionary<string, object> { };
+            var data = new List<CloneLessonPartViewModel>();
 
-            if (root != null)
+            var currentClass = _classService.CreateQuery().Find(o => o.ID == ClassID).SingleOrDefault();
+
+            if (root != null && currentClass != null)
             {
-                var listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                var listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.TeacherID == currentClass.TeacherID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
                 if (listCloneLessonPart != null && listCloneLessonPart.Count > 0)
                 {
-                    var result = new List<CloneLessonPartViewModel>();
-                    result.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
+                    data.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
                     {
                         Questions = _cloneLessonPartQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new CloneQuestionViewModel(q)
                         {
                             Answers = _cloneLessonPartAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
                         }).ToList()
                     }));
+                    
                 }
                 else
                 {
@@ -98,23 +106,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             CloneLessonPart(_lessonpartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity()
                             {
                                 OriginID = lessonpart.ID,
+                                TeacherID = currentClass.TeacherID,
                                 ID = null
                             }));
+                        listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.TeacherID == currentClass.TeacherID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+
+                        data.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
+                        {
+                            Questions = _cloneLessonPartQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new CloneQuestionViewModel(q)
+                            {
+                                Answers = _cloneLessonPartAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
+                            }).ToList()
+                        }));
                     }
                 }
             }
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", data }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
         private void CloneLessonPart(CloneLessonPartEntity item)
         {
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
-            _lessonPartService.Collection.InsertOne(item);
+            _service.Collection.InsertOne(item);
             var list = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
             if (list != null)
             {
@@ -132,7 +150,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private void CloneLessonQuestion(CloneLessonPartQuestionEntity item)
         {
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
-            _lessonPartQuestionService.Collection.InsertOne(item);
+            _cloneLessonPartQuestionService.Collection.InsertOne(item);
             var list = _lessonPartAnswerService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
             if (list != null)
             {
@@ -149,7 +167,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private void CloneLessonAnswer(CloneLessonPartAnswerEntity item)
         {
-            _lessonPartAnswerService.Collection.InsertOne(item);
+            _cloneLessonPartAnswerService.Collection.InsertOne(item);
         }
     }
 }

@@ -89,7 +89,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ? data
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
                         CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
@@ -100,7 +100,96 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
+        }
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetDetailsLesson(DefaultModel model, string SubjectID = "", string GradeID = "", string UserID = "")
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
+            TeacherEntity teacher = null;
+            if (string.IsNullOrEmpty("UserID"))
+                UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+            {
+                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+                if (teacher == null)
+                {
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giảng viên" }
+                    });
+                }
+            }
+            if (teacher != null)
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID));
+
+            if (!string.IsNullOrEmpty(model.SearchText))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
+            }
+            if (!string.IsNullOrEmpty(SubjectID))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+            }
+            if (!string.IsNullOrEmpty(GradeID))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == GradeID));
+            }
+
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            model.TotalRecord = data.Count();
+            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+                ? data
+                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
+                        CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
+                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+                        SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
+                        TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
+                    })
+                },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+
+        public JsonResult GetActiveList()
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
+            TeacherEntity teacher = null;
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+            {
+                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+                if (teacher == null)
+                {
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",UserID },
+                        {"Msg","Không có thông tin giảng viên" }
+                    });
+                }
+            }
+            if (teacher != null)
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID));
+
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            var DataResponse = data;
+            if (data != null)
+                DataResponse = data.Limit(3);
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", DataResponse.ToList() }
+            };
+            return new JsonResult(response);
         }
 
         public IActionResult Detail(DefaultModel model)

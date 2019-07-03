@@ -105,12 +105,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            })).ToList()
             };
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", classSchedule },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
     }
