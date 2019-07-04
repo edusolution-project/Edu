@@ -6,7 +6,7 @@ using System;
 
 namespace BaseCustomerEntity.Database
 {
-    public class ClassProgressEntity : EntityBase
+    public class StudentProgressEntity : EntityBase
     {
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
@@ -14,15 +14,14 @@ namespace BaseCustomerEntity.Database
         public int CompletedLessons { get; set; }
         [JsonProperty("TotalLessons")]
         public int TotalLessons { get; set; }
-        [JsonProperty("LastLesson")]
-        public string LastLessonID { get; set; }
-        [JsonProperty("LastDate")]
-        public DateTime LastDate { get; set; }
-
+        [JsonProperty("LastView")]
+        public DateTime LastView { get; set; }
+        [JsonProperty("StudentID")]
+        public int StudentID { get; set; }
     }
-    public class ClassProgressService : ServiceBase<ClassProgressEntity>
+    public class StudentProgressService : ServiceBase<StudentProgressEntity>
     {
-        public ClassProgressService(IConfiguration config) : base(config)
+        public StudentProgressService(IConfiguration config) : base(config)
         {
 
         }

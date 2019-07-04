@@ -53,7 +53,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
             TeacherEntity teacher = null;
-            if (string.IsNullOrEmpty("UserID"))
+            if (string.IsNullOrEmpty(UserID))
                 UserID = User.Claims.GetClaimByType("UserID").Value;
             if (!string.IsNullOrEmpty(UserID) && UserID != "0")
             {
@@ -178,7 +178,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             }
             if (teacher != null)
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID));
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID && o.EndDate < DateTime.Now));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             var DataResponse = data;
