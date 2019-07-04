@@ -3,12 +3,12 @@
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     var role = ViewBag.Roles as List<BaseCustomerEntity.Database.RoleEntity>
     ;
-    }
+}
 
-    <!-- Begin Page Content -->
-    <div class="container-fluid">
-        @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
-        {
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
+    {
         <input type="hidden" name="ArrID" value="" />
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
@@ -22,8 +22,8 @@
                             <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action(" Delete","account")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
                             <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
                             @*<button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action(" Delete","account")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
-                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
-                            <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action(" Export", "account" )')"> <i class="fas fa-file-export"></i> </button>*@
+                                <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                                <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action(" Export", "account" )')"> <i class="fas fa-file-export"></i> </button>*@
                         </div>
                     </div>
                 </div>
@@ -53,13 +53,13 @@
             </div>
         </div>
         <!-- /.container-fluid -->
-        }
-    </div>
-    <!-- Modal Create Form -->
-    <div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            @using (Html.BeginForm("Create", "account", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
-            {
+    }
+</div>
+<!-- Modal Create Form -->
+<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        @using (Html.BeginForm("Create", "account", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
+        {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="ModalCenterTitle">Tạo tài khoản</h5>
@@ -81,10 +81,10 @@
                             <div class="form-group col-md-6">
                                 <select name="RoleID" class="form-control">
                                     @{
-                                    for (int i = 0; role != null && i < role.Count; i++)
-                                    {
-                                    <option value="@role[i].ID">@role[i].Name</option>
-                                    }
+                                        for (int i = 0; role != null && i < role.Count; i++)
+                                        {
+                                            <option value="@role[i].ID">@role[i].Name</option>
+                                        }
                                     }
                                 </select>
                             </div>
@@ -102,16 +102,16 @@
                     <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action(" Create", "account" )','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
-            }
-        </div>
+        }
     </div>
+</div>
 
-    <!-- Modal chose file -->
-    <div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                @using (Html.BeginForm("Import", "account", FormMethod.Post, new { enctype = "multipart/form-data", name = "ImportForm" }))
-                {
+<!-- Modal chose file -->
+<div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            @using (Html.BeginForm("Import", "account", FormMethod.Post, new { enctype = "multipart/form-data", name = "ImportForm" }))
+            {
                 <div class="modal-header">
                     <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -135,11 +135,11 @@
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                     <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
                 </div>
-                }
-            </div>
+            }
         </div>
     </div>
-    <script>
+</div>
+<script>
     function LoadData() { var searchText = $("#searchText").val();
 
         $.ajax({
@@ -155,8 +155,9 @@
                     for (i = 0; i < data.Data.length; ++i) {
 
                         item = data.Data[i];
-                        if (item.RoleName == "Super Admin") continue;
+                        var isBlock = (item.RoleName == "Super Admin");
                         var active = "";
+
                         if (item.IsActive) {
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "account")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
@@ -169,7 +170,7 @@
                             "<td>" + item.Name + "</td>" +
                             "<td>" + item.RoleName +"</td>" +active +
                             "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "account")','@Url.Action("create", "account")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "account")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            (isBlock ?"": "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "account")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>") +
                             "</td > " +
                             "</tr>"
                         );
@@ -186,4 +187,4 @@
     $(document).ready(function () {
         LoadData();
     });
-    </script>
+</script>

@@ -14,20 +14,20 @@ var Ajax = function (url, method, data, async) {
             //4	DONE	The operation is complete.
 
             // Only run if the request is complete
-            if (request.readyState == 0) {
-                console.log('UNSENT	Client has been created.open() not called yet')
-            }
-            if (request.readyState == 1) {
-                console.log('OPENED	open() has been called')
-            }
-            if (request.readyState == 2) {
-                console.log('HEADERS_RECEIVED	send() has been called, and headers and status are available')
-            }
-            if (request.readyState == 3) {
-                console.log('LOADING	Downloading; responseText holds partial data')
-            }
+            //if (request.readyState == 0) {
+            //    console.log('UNSENT	Client has been created.open() not called yet')
+            //}
+            //if (request.readyState == 1) {
+            //    console.log('OPENED	open() has been called')
+            //}
+            //if (request.readyState == 2) {
+            //    console.log('HEADERS_RECEIVED	send() has been called, and headers and status are available')
+            //}
+            //if (request.readyState == 3) {
+            //    console.log('LOADING	Downloading; responseText holds partial data')
+            //}
             if (request.readyState == 4) {
-                console.log('DONE	The operation is complete')
+                console.log('DONE -	The operation is complete')
                 // Process the response
                 if (request.status >= 200 && request.status < 300) {
                     // If successful
