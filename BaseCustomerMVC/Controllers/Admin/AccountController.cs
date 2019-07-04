@@ -46,7 +46,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         }
 
         [Obsolete]
-        [HttpPost]
+        //[HttpPost]
         public JsonResult GetList(DefaultModel model)
         {
             var filter = new List<FilterDefinition<AccountEntity>>();
@@ -86,6 +86,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             return new JsonResult(response);
 
         }
+        
         private string Name(string type,string id)
         {
             if(type == "teacher")

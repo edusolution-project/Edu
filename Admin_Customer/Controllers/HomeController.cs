@@ -46,6 +46,87 @@ namespace Admin_Customer.Controllers
                 return RedirectToAction("Login");
             }
         }
+
+        public IActionResult Register()
+        {
+            HttpContext.Remove(Cookies.DefaultLogin);
+            return View();
+        }
+        [HttpPost]
+        public IActionResult Register(string UserName, string PassWord, string Type)
+        {
+            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
+            {
+                ViewBag.MessageError = "Không thể bỏ trống các trường bắt buộc";
+                return View();
+            }
+            else
+            {
+                string _sPass = Security.Encrypt(PassWord);
+                if (_accountService.IsAvailable(UserName))
+                {
+                    ViewBag.MessageError = "Tài khoản đã tồn tại";
+                    return View();
+                }
+                else
+                {
+                    var user = new AccountEntity()
+                    {
+                        PassWord = _sPass,
+                        UserName = UserName,
+                        Type = Type,
+                        IsActive = false,
+                        CreateDate = DateTime.Now,
+                        UserCreate = null,
+                    };
+
+
+                    switch (Type)
+                    {
+                        case "teacher":
+                            user.RoleID = _roleService.GetItemByCode("teacher").ID;
+                            break;
+                        default:
+                            user.RoleID = _roleService.GetItemByCode("student").ID;
+                            break;
+                    }
+                    _accountService.CreateQuery().InsertOne(user);
+                    switch (Type)
+                    {
+                        case "teacher":
+                            var teacher = new TeacherEntity()
+                            {
+                                FullName = user.UserName,
+                                Email = user.UserName,
+                                IsActive = false,
+                                CreateDate = DateTime.Now
+                            };
+                            _teacherService.CreateQuery().InsertOne(teacher);
+                            user.UserID = teacher.ID;
+                            //create teacher
+                            break;
+                        default:
+                            var student = new StudentEntity()
+                            {
+                                FullName = user.UserName,
+                                Email = user.UserName,
+                                IsActive = false,
+                                CreateDate = DateTime.Now
+                            };
+
+                            _studentService.CreateQuery().InsertOne(student);
+                            user.UserID = student.ID;
+                            //create student
+                            break;
+                    }
+                    var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
+                    _accountService.CreateQuery().ReplaceOne(filter, user);
+                    ViewBag.Data = user;
+                    return View();
+                }
+            }
+        }
+
         [Route("/login")]
         [System.Obsolete]
         public IActionResult Login()
@@ -207,7 +288,8 @@ namespace Admin_Customer.Controllers
                                 CreateDate = DateTime.Now
                             };
                             _logService.CreateQuery().InsertOne(login);
-                            await HttpContext.SignInAsync(Cookies.DefaultLogin, claim,new AuthenticationProperties() {
+                            await HttpContext.SignInAsync(Cookies.DefaultLogin, claim, new AuthenticationProperties()
+                            {
                                 ExpiresUtc = !IsRemmember ? DateTime.Now : DateTime.Now.AddMinutes(Cookies.ExpiresLogin),
                                 AllowRefresh = true,
                                 RedirectUri = user.Type
@@ -228,6 +310,8 @@ namespace Admin_Customer.Controllers
                 }
             }
         }
+
+
         [Route("/forgot-password")]
         public IActionResult ForgotPassword()
         {
