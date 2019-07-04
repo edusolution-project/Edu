@@ -20,10 +20,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
+        private readonly StudentService _studentService;
 
         public ClassController(GradeService gradeservice
            , SubjectService subjectService, TeacherService teacherService, ClassService service,
-            CourseService courseService, ChapterService chapterService, LessonService lessonService, LessonScheduleService lessonScheduleService)
+            CourseService courseService, ChapterService chapterService, LessonService lessonService, LessonScheduleService lessonScheduleService,
+            StudentService studentService)
         {
             _gradeService = gradeservice;
             _subjectService = subjectService;
@@ -33,6 +35,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _chapterService = chapterService;
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
+            _studentService = studentService;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -153,6 +156,43 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
                         TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
                     })
+                },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+        public JsonResult GetListMember(DefaultModel model)
+        {
+            if (string.IsNullOrEmpty(model.ID))
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không tìm thấy thông tin lớp" }
+                    });
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null)
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không tìm thấy thông tin lớp" }
+                    });
+            var teacher = _teacherService.GetItemByID(currentClass.TeacherID);
+
+            var filter = new List<FilterDefinition<StudentEntity>>();
+            filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.StudentId)));
+            var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
+            //model.TotalRecord = data.Count();
+            //var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+            //    ? data
+            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data",new Dictionary<string, object> {
+                        {"Teacher",teacher },
+                        {"Students",students }
+                    }
                 },
                 { "Model", model }
             };
