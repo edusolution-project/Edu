@@ -110,7 +110,7 @@ var lessonService = {
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.id });
 
         var bodyright = $("<div>", { "class": "col-md-9" });
-        var button = $("<div>", { "class": "text-right" });
+        var button = $("<div>", { "class": "float-right" });
         lessonHeader.append(button);
         var counter = $("<div>", { "class": "text-center", "text": "Thời gian làm bài:" });
         var counterdate = $("<span>", { "id": "counter", "text": " 20:00" });

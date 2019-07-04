@@ -7,11 +7,19 @@
     margin: 0 5px;
 }
 
-.card-header .text-right {
+.card-header .float-right {
     position: absolute;
     right: 15px;
-    top: 10px;
+    top: 0;
+}
+
+.lesson .float-right {
     z-index: 9999;
+    top: 10px;
+}
+
+#top-menu .dropdown-menu-right {
+    z-index: 99999;
 }
 
 .card-header .text-center {

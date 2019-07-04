@@ -104,7 +104,7 @@ var lessonService = {
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.id });
 
         var bodyright = $("<div>", { "class": "col-md-9" });
-        var button = $("<div>", { "class": "text-right" });
+        var button = $("<div>", { "class": "float-right" });
         lessonHeader.append(button);
         var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Quay lại", "onclick": "tab_goback()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });

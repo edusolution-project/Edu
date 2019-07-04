@@ -6,38 +6,7 @@
     var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
     var listTeacher = ViewBag.Teacher as List<BaseCustomerEntity.Database.TeacherEntity>;
 }
-<div class="search-filter">
-    <div class="form-row">
-        <div class="form-group row col-md-6">
-            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
-            <div class="col-sm-8">
-                <select id="SubjectID" class="form-control" onchange="LoadCourse()">
-                    @{
-                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                        {
-                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                        }
 
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="form-group row col-md-6">
-            <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
-            <div class="col-sm-8">
-                <select id="GradeID" class="form-control" onchange="LoadCourse()">
-                    @{
-                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                        {
-                            <option value="@listGrade[i].ID">@listGrade[i].Name</option>
-                        }
-
-                    }
-                </select>
-            </div>
-        </div>
-    </div>
-</div>
 <!-- Begin Page Content -->
 <div class="container-fluid">
     @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
@@ -51,7 +20,7 @@
                         <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
                     </div>
                     <div class="col-lg-6">
-                        <div class="text-right">
+                        <div class="float-right">
                             <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","Course")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
                             <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
                         </div>
@@ -60,6 +29,38 @@
             </div>
 
             <div class="card-body">
+                <div class="search-filter">
+                    <div class="form-row">
+                        <div class="form-group row col-md-3">
+                            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                            <div class="col-sm-8">
+                                <select id="SubjectID" class="form-control" onchange="LoadCourse()">
+                                    @{
+                                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                        {
+                                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                        }
+
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row col-md-3 offset-6">
+                            <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+                            <div class="col-sm-8">
+                                <select id="GradeID" class="form-control" onchange="LoadCourse()">
+                                    @{
+                                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                        {
+                                            <option value="@listGrade[i].ID">@listGrade[i].Name</option>
+                                        }
+
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
