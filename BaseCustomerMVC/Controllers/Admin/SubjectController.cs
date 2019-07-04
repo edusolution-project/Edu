@@ -90,6 +90,17 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
+                if(string.IsNullOrEmpty(item.Code))
+                {
+                     Dictionary<string, object> response = new Dictionary<string, object>()
+                    {
+                        {"Data",null },
+                        {"Error",item },
+                        {"Msg","Chưa nhập mã môn học" }
+                    };
+                    return new JsonResult(response);
+                }
+                
                 if (!Exist(item.Code))
                 {
                     item.ID = null;
@@ -111,7 +122,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {
                         {"Data",null },
                         {"Error",item },
-                        {"Msg","Trùng email hoặc mã sinh viên" }
+                        {"Msg","Mã môn học đã tồn tại" }
                     };
                     return new JsonResult(response);
                 }
@@ -159,6 +170,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 
             }
         }
+        
         [HttpGet]
         [Obsolete]
         public async Task<IActionResult> Export(DefaultModel model)
@@ -194,6 +206,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
+       
         [HttpPost]
         [Obsolete]
         public JsonResult Publish(DefaultModel model)
@@ -222,6 +235,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             }
         }
+        
         [HttpPost]
         [Obsolete]
         public JsonResult UnPublish(DefaultModel model)

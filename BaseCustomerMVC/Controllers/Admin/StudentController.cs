@@ -253,7 +253,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             };
             return new JsonResult(response);
         }
-
         
         [HttpGet]
         [Obsolete]

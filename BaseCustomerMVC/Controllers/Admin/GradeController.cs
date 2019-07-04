@@ -97,32 +97,32 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
-                if (!ExistEmail(item.Code))
-                {
-                    item.ID = null;
-                    item.IsActive = true;
-                    item.IsAdmin = false;
-                    item.Updated = DateTime.Now;
-                    item.Created = DateTime.Now;
-                    _service.CreateQuery().InsertOne(item);
-                    Dictionary<string, object> response = new Dictionary<string, object>()
+                //if (!ExistEmail(item.Code))
+                //{
+                item.ID = null;
+                item.IsActive = true;
+                item.IsAdmin = false;
+                item.Updated = DateTime.Now;
+                item.Created = DateTime.Now;
+                _service.CreateQuery().InsertOne(item);
+                Dictionary<string, object> response = new Dictionary<string, object>()
                     {
                         {"Data",item },
                         {"Error",null },
                         {"Msg","Thêm thành công" }
                     };
-                    return new JsonResult(response);
-                }
-                else
-                {
-                    Dictionary<string, object> response = new Dictionary<string, object>()
-                    {
-                        {"Data",null },
-                        {"Error",item },
-                        {"Msg","Trùng email hoặc mã sinh viên" }
-                    };
-                    return new JsonResult(response);
-                }
+                return new JsonResult(response);
+                //}
+                //else
+                //{
+                //    Dictionary<string, object> response = new Dictionary<string, object>()
+                //    {
+                //        {"Data",null },
+                //        {"Error",item },
+                //        {"Msg","Trùng email hoặc mã sinh viên" }
+                //    };
+                //    return new JsonResult(response);
+                //}
             }
             else
             {
@@ -160,11 +160,11 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
                 else
                 {
-                    var delete = _service.Collection.DeleteMany(o => model.ArrID==o.ID);
+                    var delete = _service.Collection.DeleteMany(o => model.ArrID == o.ID);
                     return new JsonResult(delete);
                 }
-                    
-                
+
+
             }
         }
         [HttpGet]
@@ -187,7 +187,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             var filterData = filter.Count > 0 ? _service.Collection.Find(Builders<GradeEntity>.Filter.And(filter)) : _service.GetAll();
             var list = await filterData.ToListAsync();
-            var data = list.Select(o => new { o.Name,o.Code,o.Created,o.IsActive });
+            var data = list.Select(o => new { o.Name, o.Code, o.Created, o.IsActive });
             var stream = new MemoryStream();
 
             using (var package = new ExcelPackage(stream))
@@ -215,8 +215,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (model.ArrID.Contains(","))
                 {
                     var filter = Builders<GradeEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == false);
-                    var update = Builders<GradeEntity>.Update.Set("IsActive",true);
-                    var publish = _service.Collection.UpdateMany(filter,update);
+                    var update = Builders<GradeEntity>.Update.Set("IsActive", true);
+                    var publish = _service.Collection.UpdateMany(filter, update);
                     return new JsonResult(publish);
                 }
                 else
@@ -263,7 +263,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private bool ExistEmail(string email)
         {
             var _currentData = _service.CreateQuery().Find(o => o.Code == email);
-            if(_currentData.Count() > 0)
+            if (_currentData.Count() > 0)
             {
                 return true;
             }
