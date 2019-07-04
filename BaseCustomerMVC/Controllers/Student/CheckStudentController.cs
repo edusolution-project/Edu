@@ -17,5 +17,10 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             return View();
         }
+
+        public IActionResult Exam()
+        {
+            return View();
+        }
     }
 }

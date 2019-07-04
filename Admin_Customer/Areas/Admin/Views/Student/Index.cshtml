@@ -16,11 +16,11 @@
                         <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
                     </div>
                     <div class="col-lg-6">
-                        <div class="text-right">
-                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","student")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
-                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
-                            <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "student")')"> <i class="fas fa-file-export"></i> </button>
+                        <div class="float-right">
+                            <button type="button" class="btn btn-primary" data-placement="top" title="Thêm học viên" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-primary" data-placement="top" title="Nhập file danh sách học viên" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
+                            <button type="button" class="btn btn-primary" data-placement="top" title="Xuất danh sách học viên" onclick="Export('FormControl','@Url.Action("Export", "student")')"> <i class="fas fa-file-export"></i> </button>
+                            <button type="button" class="btn btn-danger" data-placement="top" title="Xóa học viên" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","student")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
                         </div>
                     </div>
                 </div>
@@ -75,22 +75,22 @@
                             </div>
                         </div>
                         <div class="form-row">
-                            <div class="form-group col-md-12">
+                            <div class="form-group col-md-6">
                                 <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên">
                             </div>
-                        </div>
-                        <div class="form-row">
                             <div class="form-group col-md-6">
                                 <input type="email" class="form-control" name="Email" id="inputEmail" placeholder="Email">
-                            </div>
-                            <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="Phone" id="inputPhone" placeholder="Số điện thoại">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <input type="date" class="form-control" name="DateBorn" id="inputDate" placeholder="Ngày tháng năm sinh">
                             </div>
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control" name="Phone" id="inputPhone" placeholder="Số điện thoại">
+                            </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group row col-md-6">
                                 <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
                                 <div class="col-sm-8">

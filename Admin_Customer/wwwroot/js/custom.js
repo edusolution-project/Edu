@@ -52,7 +52,7 @@ function setToggle(wrapperid) {
 
 /* check student */
 function goBack() {
-    document.location = 'MyCourse/StudentCalendar';
+    document.location = 'LessonToday';
 }
 function start(obj) {
     $(obj).parent().removeClass("d-flex").hide();
@@ -85,3 +85,12 @@ function countdown() {
 function endtime() {
 
 }
+
+/* tooltip*/
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
+
+$(document).ready(function () {
+    $('.btn').tooltip();
+});

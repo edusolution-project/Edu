@@ -1,8 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Quản lý tài khoản";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    var role = ViewBag.Roles as List<BaseCustomerEntity.Database.RoleEntity>
-    ;
+    var role = ViewBag.Roles as List<BaseCustomerEntity.Database.RoleEntity>;
 }
 
 <!-- Begin Page Content -->
@@ -18,12 +17,12 @@
                         <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
                     </div>
                     <div class="col-lg-6">
-                        <div class="text-right">
-                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action(" Delete","account")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
-                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
-                            @*<button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action(" Delete","account")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
-                                <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
-                                <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action(" Export", "account" )')"> <i class="fas fa-file-export"></i> </button>*@
+                        <div class="float-right">
+                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-placement="top" title="Thêm tài khoản" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-danger" data-placement="top" title="Xóa tài khoản" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","account")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
+                            @*<button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","account")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
+        <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+        <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "account")')"> <i class="fas fa-file-export"></i> </button>*@
                         </div>
                     </div>
                 </div>
@@ -99,7 +98,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action(" Create", "account" )','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "account")','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
         }
@@ -140,28 +139,38 @@
     </div>
 </div>
 <script>
-    function LoadData() { var searchText = $("#searchText").val();
-
+    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
+       
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "account")',
-            data: {SearchText: searchText},
+            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
+            dataType:"json",
             success: function (data) {
-                console.log(data);
                 var body = $('#dataTable tbody');
                 body.html("");
                 if (data.Data.length > 0)
                 {
                     for (i = 0; i < data.Data.length; ++i) {
-
+                        
                         item = data.Data[i];
-                        var isBlock = (item.RoleName == "Super Admin");
+                        if (item.RoleName == "Super Admin") continue;
+                        //CreateDate: "0001-01-01T00:00:00"
+                        //ID: "5d16336be0095e2b28b83600"
+                        //IsActive: true
+                        //Name: "admin"
+                        //RoleID: "5d16336be0095e2b28b835fe"
+                        //RoleName: "Super Admin"
+                        //Type: "admin"
+                        //UserCreate: null
+                        //UserID: "0"
+                        //UserName: "supperadmin@gmail.com"
+                        
                         var active = "";
-
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "account")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","account")',LoadData)\" type='button' data-placement='top' title='Sửa' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "account")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","account")',LoadData)\" type='button' data-placement='top' title='Xóa' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID + "' onclick=\"setToggle('dataTable')\"/></div></td>"+
@@ -169,16 +178,15 @@
                             "<td>" + item.UserName +"</td>" +
                             "<td>" + item.Name + "</td>" +
                             "<td>" + item.RoleName +"</td>" +active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "account")','@Url.Action("create", "account")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            (isBlock ?"": "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "account")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>") +
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","account")','@Url.Action("create","account")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","account")',LoadData); else return;\" data-placement='top' title='Xóa' type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                         );
                     }
                 }
             },
-            error: function(err) {
-                console.log(err);
+            error: function() {
                 alert("Error");
             }
         });

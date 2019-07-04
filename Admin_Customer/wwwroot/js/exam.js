@@ -110,17 +110,15 @@ var lessonService = {
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.id });
 
         var bodyright = $("<div>", { "class": "col-md-9" });
-        var BtnFinish = $("<div>", { "class": "d-flex justify-content-center" });
-        var Finish = $("<button>", { "class": "btn btn-primary", "onclick": "goBack()", "text": " Hoàn thành" });       
-        var button = $("<div>", { "class": "text-right" });
+        var button = $("<div>", { "class": "float-right" });
         lessonHeader.append(button);
         var counter = $("<div>", { "class": "text-center", "text": "Thời gian làm bài:" });
         var counterdate = $("<span>", { "id": "counter", "text": " 20:00" });
         counter.append(counterdate);
         lessonHeader.append(counter);
-        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Quay lại", "onclick": "tab_goback()" });
+        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "data-toggle": "tooltip", "title": "Quay lại", "onclick": "tab_goback()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
-        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Tiếp tục", "onclick": "tab_gonext()" });
+        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "data-toggle": "tooltip", "title": "Tiếp tục", "onclick": "tab_gonext()" });
         var iconnext = $("<i>", { "class": "fas fa-arrow-right" });       
         button.append(prevtab);
         prevtab.append(iconprev);
@@ -142,8 +140,7 @@ var lessonService = {
 
         bodyright.append(lessonBody);
 
-        bodyright.append(BtnFinish);
-        BtnFinish.append(Finish);
+        
 
         //lessonContainer.append(createLessonPart);
         //lessonContainer.append(newLessonPart);
