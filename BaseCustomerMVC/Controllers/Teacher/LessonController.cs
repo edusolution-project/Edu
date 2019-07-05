@@ -49,7 +49,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return RedirectToAction("Index", "Class");
             ViewBag.Class = currentClass;
             ViewBag.Data = Data;
-            return View();
+            if (Data.TemplateType == LESSON_TEMPLATE.LECTURE)
+                return View();
+            else
+                return View("Exam");
         }
 
 
@@ -75,7 +78,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
         }
-
         public IActionResult Exam()
         {
             return View();

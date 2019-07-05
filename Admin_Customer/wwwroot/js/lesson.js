@@ -1,6 +1,5 @@
 ﻿var urlBase = "/teacher/";
 
-
 let myEditor;
 
 //lesson
@@ -81,11 +80,11 @@ var lessonService = {
         var title = $("<div>", { "class": "lesson-header-title", "text": data.Title });
         lessonHeader.append(title);
 
-        if (data.templateType == 2) {
+        if (data.TemplateType == 2) {
             if (data.Timer > 0) {
                 title.text(title.text() + " - thời gian: " + data.Timer + "p");
             }
-            else {
+            if (data.Point > 0) {
                 title.text(title.text() + " (" + data.Point + "đ)");
             }
         }
@@ -175,7 +174,7 @@ var lessonService = {
                 var data = JSON.parse(xhr.responseText);
                 if (data.code == 200) {
                     console.log(data.data);
-                    template.lesson(data.data.templateType, data.data);
+                    template.lesson(data.data.TemplateType, data.data);
                 }
             }
         }
@@ -431,8 +430,7 @@ var render = {
                 break;
         }
         if (tabContainer.find(".nav-item").length == 1) {
-            console.log(item);
-            //item.addClass("active");
+            item.addClass("active");
             tabsitem.addClass("show active");
         }
     },

@@ -4,20 +4,84 @@
     var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
 }
-
 <!-- Page Heading -->
+<span class="number" onclick="openNav()"><span class="completed" >25</span> / <span class="total">25</span></span>
 <div id="lessonContainer">
 </div>
 
-<input type="hidden" id="LessonID" value="" />
-<input type="hidden" id="ChapterID" value="" />
-<input type="hidden" id="CourseID" value="" />
-
+<input type="hidden" id="LessonID" value="@Data.ID" />
+<input type="hidden" id="ClassID" value="@Class.ID" />
 <script>
     $(document).ready(function () {
-        load.lesson('');
+        load.lesson($("#LessonID").val(), $("#ClassID").val());
     });
 </script>
 @section Script{
-    <script src="~/js/exam.js"></script>
+    <script src="~/js/teacher-exam.js"></script>
 }
+<script>
+    function openNav() {
+        $('#lessonContainer').addClass('col-md-10');
+        document.getElementById("myNav").style.display = "block";
+    }
+
+    function closeNav() {
+        $('#lessonContainer').removeClass('col-md-10');
+        document.getElementById("myNav").style.display = "none";
+    }
+
+</script>
+<div id="myNav" class="overlay">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <div class="overlay-content card-body">
+        <div class="input-group mb-3">
+            <div>
+                <button class="btn btn-outline-secondary active" type="button" name="">1</button>
+                <button class="btn btn-outline-secondary" type="button" name="">2</button>
+                <button class="btn btn-outline-secondary" type="button" name="">3</button>
+                <button class="btn btn-outline-secondary" type="button" name="">4</button>
+                <button class="btn btn-outline-secondary" type="button" name="">5</button>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <div>
+                <button class="btn btn-outline-secondary" type="button" name="">6</button>
+                <button class="btn btn-outline-secondary" type="button" name="">7</button>
+                <button class="btn btn-outline-secondary" type="button" name="">8</button>
+                <button class="btn btn-outline-secondary" type="button" name="">9</button>
+                <button class="btn btn-outline-secondary" type="button" name="">10</button>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <div>
+                <button class="btn btn-outline-secondary" type="button" name="">11</button>
+                <button class="btn btn-outline-secondary" type="button" name="">12</button>
+                <button class="btn btn-outline-secondary" type="button" name="">13</button>
+                <button class="btn btn-outline-secondary" type="button" name="">14</button>
+                <button class="btn btn-outline-secondary" type="button" name="">15</button>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <div>
+                <button class="btn btn-outline-secondary" type="button" name="">16</button>
+                <button class="btn btn-outline-secondary" type="button" name="">17</button>
+                <button class="btn btn-outline-secondary" type="button" name="">18</button>
+                <button class="btn btn-outline-secondary" type="button" name="">19</button>
+                <button class="btn btn-outline-secondary" type="button" name="">20</button>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <div>
+                <button class="btn btn-outline-secondary" type="button" name="">21</button>
+                <button class="btn btn-outline-secondary" type="button" name="">22</button>
+                <button class="btn btn-outline-secondary" type="button" name="">23</button>
+                <button class="btn btn-outline-secondary" type="button" name="">24</button>
+                <button class="btn btn-outline-secondary" type="button" name="">25</button>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center pt-5 pb-5">
+            <button class="btn btn-primary" onclick="goBack();"> Hoàn thành</button>
+        </div>
+    </div>
+</div>
