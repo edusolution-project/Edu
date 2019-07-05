@@ -20,10 +20,9 @@
                             <th>Giáo trình</th>
                             <th>Cấp độ</th>
                             <th>Giáo viên</th>
-                            <th>Học viên đăng ký</th>
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
-                            <th>Trạng thái</th>
+                            <!--<th>Trạng thái</th>-->
                         </tr>
                     </thead>
                     <tbody>
@@ -65,14 +64,14 @@
                             active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
                         body.append("<tr>" +
-                            "<td>" + item.Name + "</td>" +
+                            "<td><a href='@Url.Action("StudentCalendar", "MyCourse")/"+item.CourseID+"'>" + item.Name + "</a></td>" +
                             "<td>" + item.SubjectName + "</td>" +
-                            "<td><a href='@Url.Action("StudentCalendar", "MyCourse")/"+item.CourseID+"'>" + item.CourseName + "</a></td>" +
+                            "<td>" + item.CourseName + "</td>" +
                             "<td>" + item.GradeName + "</td>" +
                             "<td>" + item.TeacherName + "</td>" +
                             "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
                             "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" +
-                            active +
+                            //active +
                             "</tr>"
                         );
                     }

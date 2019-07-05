@@ -1,4 +1,8 @@
-#top-menu{
+.navbar-search .btn-primary {
+    padding: 0 15px;
+}
+
+#top-menu {
     border-bottom: 1px solid #e3e7ed;
 }
 
@@ -280,7 +284,6 @@ video, audio {
 .overlay {
     height: 100%;
     width: 20%;
-    display: none;
     position: fixed;
     z-index: 1;
     top: 0;
@@ -288,12 +291,14 @@ video, audio {
     background-color: rgba(0,0,0, 0.9);
 }
 
+.overlay .btn-outline-secondary {
+    margin: 0 0px 10px 8px;
+}
+
 .overlay-content {
     position: relative;
-    top: 25%;
+    top: 15%;
     width: 100%;
-    text-align: center;
-    margin-top: 30px;
 }
 
 .overlay a {
@@ -305,15 +310,16 @@ video, audio {
     transition: 0.3s;
 }
 
-    .overlay a:hover, .overlay a:focus {
-        color: #f1f1f1;
-    }
+.overlay a:hover, 
+.overlay a:focus {
+    color: #f1f1f1;
+}
 
 .overlay .closebtn {
     position: absolute;
-    top: 20px;
-    right: 45px;
-    font-size: 60px;
+    font-size: 45px;
+    left: 5px;
+    top: -20px;
 }
 
 @media screen and (max-height: 450px) {

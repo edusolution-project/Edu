@@ -5,9 +5,14 @@
 }
 
 <!-- Begin Page Content -->
-    <div class="card shadow mb-4">
+    <div class="lesson card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Part 1 Questions 1-7</h6>
+            <div class="float-right">
+                <!-- Tab carousel -->
+                <button type="button" class="prevtab btn btn-success" title="Quay lại" onclick="tab_goback()"> <i class="fas fa-arrow-left"></i> </button>
+                <button type="button" class="nexttab btn btn-success" title="Chuyển tiếp" onclick="tab_gonext()"> <i class="fas fa-arrow-right"></i> </button>
+            </div>
         </div>
         <div class="card-body">
             <div class="row">
@@ -42,11 +47,6 @@
                     </div>
                 </div>
                 <div class="col-md-9">
-                    <div class="text-right p-3">
-                        <!-- Tab carousel -->
-                        <button class="prevtab btn btn-success">Quay lại</button>
-                        <button class="nexttab btn btn-success">Chuyển tiếp</button>
-                    </div>
                     <div class="tab-content" id="pills-tabContent">
                         <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
                             <div class="card-body">
