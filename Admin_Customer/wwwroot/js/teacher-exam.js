@@ -1,6 +1,8 @@
 ﻿var urlBase = "/teacher/";
+var publisherPath = "http://publisher.edusolution.vn"
 
 let myEditor;
+let totalQuiz = 0;
 
 //lesson
 var urlLesson = {
@@ -448,6 +450,11 @@ var render = {
         }
     },
     questions: function (data, template) {
+        //add quiz indicator to question panel
+        $("#quizNavigator .quiz-wrapper").append($("<button>", { "class": "btn btn-outline-secondary rounded-quiz", "type": "button", "text": ++totalQuiz, "name": "quizNav" + data.ID }));
+        $(".quizNumber .total").text(totalQuiz);
+
+        //render question
         switch (template) {
             case "QUIZ2":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
@@ -603,7 +610,7 @@ var render = {
                 break;
             default:
                 answer.append($("<input>", { "type": "hidden" }));
-                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox", "onclick": "toggleCorrectAnswer(this)", "name": "rd_" + data.ParentID }));
+                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
                     answer.append($("<label>", { "class": "answer-text", "text": data.Content }));
                 render.mediaContent(data, answer);
@@ -651,9 +658,11 @@ var render = {
     mediaContent: function (data, wrapper, type = "") {
         if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
+            if (!data.Media.Path.startsWith("http"))
+                data.Media.Path = publisherPath + data.Media.Path;
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "src": data.Media.Path }));
+                    mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -667,7 +676,7 @@ var render = {
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "src": data.Media.Path }));
+                            mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
@@ -678,7 +687,6 @@ var render = {
             }
             wrapper.append(mediaHolder);
         }
-
     }
 };
 
@@ -756,6 +764,18 @@ var load = {
     }
 };
 
-function toggleCorrectAnswer(obj) {
-    $(obj).parent().parent().siblings(".quiz-extend").show();
+function answerQuestion(obj, quizid) {
+    $('.quiz-item#' + quizid + " .quiz-extend").show();
+    markQuestion(quizid);
+}
+
+function markQuestion(quizid) {
+    if ($("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "].completed").length === 1) {
+    } else {
+        $("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "]").addClass("completed");
+        var completed = parseInt($(".quizNumber .completed").text()) + 1;
+        $(".quizNumber .completed").text(completed);
+        if(completed == totalQuiz)
+            $(".quizNumber .completed").addClass("finish");
+    }
 }

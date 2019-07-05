@@ -269,7 +269,6 @@ var render = {
             var item = data[i];
             render.part(item);
         }
-
     },
     editPart: function (data) {
         var modalForm = window.modalForm;
@@ -382,6 +381,7 @@ var render = {
                 //Render Content
 
                 //Render Question
+                totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
                     render.questions(item, data.Type);
@@ -407,6 +407,7 @@ var render = {
                 });
                 container.append(tabsitem);
                 //Render Question
+                totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
                     render.questions(item, data.Type);
@@ -423,6 +424,7 @@ var render = {
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itembox.append(itemBody);
                 render.mediaContent(data, itemBody, "");
+                totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
                     render.questions(item, data.Type);
@@ -435,6 +437,7 @@ var render = {
         }
     },
     questions: function (data, template) {
+        //render question
         switch (template) {
             case "QUIZ2":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
@@ -636,6 +639,7 @@ var render = {
         }
     },
     mediaContent: function (data, wrapper, type = "") {
+
         if (data.media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
             switch (type) {

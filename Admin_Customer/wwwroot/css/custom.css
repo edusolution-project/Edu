@@ -1,4 +1,4 @@
-#top-menu{
+#top-menu {
     border-bottom: 1px solid #e3e7ed;
 }
 
@@ -35,7 +35,7 @@
     display: block;
 }
 
-.sidebar-right{
+.sidebar-right {
     border-left: 1px solid #ddd;
 }
 
@@ -57,9 +57,9 @@
     position: relative;
 }
 
-#icon-submenu .fas:hover {
-    color: #1865f2;
-}
+    #icon-submenu .fas:hover {
+        color: #1865f2;
+    }
 
 #list-detail .sub-menu,
 #list-detail .sidebar,
@@ -72,9 +72,9 @@
     padding: 0;
 }
 
-#menu-left .breadcrumb-detail {
-    border-bottom: 1px solid #ddd;
-}
+    #menu-left .breadcrumb-detail {
+        border-bottom: 1px solid #ddd;
+    }
 
 .media .img-fluid {
     max-height: 135px;
@@ -85,7 +85,7 @@
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
 }
 
-.header .breadcrumb{
+.header .breadcrumb {
     background-color: transparent;
 }
 
@@ -94,9 +94,10 @@
     background-color: transparent;
 }
 
-.nav-pills .nav-link{
+.nav-pills .nav-link {
     color: #444;
 }
+
 #pills-tab .far,
 #pills-tab .fab,
 #pills-tab .fas {
@@ -124,7 +125,7 @@
     padding: 5px 0;
     text-transform: uppercase;
 }
-    
+
 .header-title .text-primary {
     color: #4e73df !important;
 }
@@ -133,25 +134,25 @@
     font-weight: bold;
 }
 
-#thao-luan .title{
- 	display: inline-flex;
+#thao-luan .title {
+    display: inline-flex;
 }
 
 #thao-luan .date,
-#thao-luan .time{
+#thao-luan .time {
     margin: 0px 3px;
 }
 
-#thao-luan .text{
+#thao-luan .text {
     font-weight: bold;
 }
 
-#myTab .nav-item:first-child{
+#myTab .nav-item:first-child {
     margin-left: 30px;
 }
 
-#myTab .nav-item > a{
-	color: #333;
+#myTab .nav-item > a {
+    color: #333;
 }
 
 .media-holder {
@@ -173,13 +174,13 @@ video, audio {
     top: 15px;
 }
 
-#counter{
+#counter {
     color: #ff0000;
     font-size: 18px;
-    font-weight:bold;
+    font-weight: bold;
 }
 
-#check .btn-primary{
+#check .btn-primary {
     padding: 15px;
     border-color: #a90329;
     background: #a90329;
@@ -202,7 +203,7 @@ video, audio {
     border-color: #bee5eb;
 }
 
-.navbar-light .navbar-nav .nav-link{
+.navbar-light .navbar-nav .nav-link {
     padding: 15px 20px;
 }
 
@@ -261,21 +262,44 @@ video, audio {
 
 /*check number student*/
 
-.number {
-    color: #ff0000;
-    font-weight: bold;
-    position: absolute;
-    right: 10px;
-    background-color: #fff;
-    border: 2px solid #ff0000;
-    padding: 28px 15px;
-    border-radius: 50%;
-    background: rgb(238,238,238);
-    background: -moz-linear-gradient(top, rgb(238,238,238) 0%, rgb(204,204,204) 100%);
-    background: -webkit-linear-gradient(top, rgb(238,238,238) 0%,rgb(204,204,204) 100%);
-    background: linear-gradient(to bottom, rgb(238,238,238) 0%,rgb(204,204,204) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
+.rounded-quiz {
+    margin: 5px;
+    display: inline-block;
+    border-radius: 25px;
+    width: 30px;
+    line-height: 24px;
+    text-align: center;
+    padding: 2px 0 !important;
 }
+    .rounded-quiz.completed {
+        background-color: #666;
+        color: #36b9cc;
+    }
+
+    .number {
+        color: #999;
+        font-weight: bold;
+        position: absolute;
+        right: 10px;
+        background-color: #fff;
+        border: 2px solid #999;
+        padding: 18px 15px;
+        border-radius: 50%;
+        background: rgb(238,238,238);
+        background: -moz-linear-gradient(top, rgb(238,238,238) 0%, rgb(204,204,204) 100%);
+        background: -webkit-linear-gradient(top, rgb(238,238,238) 0%,rgb(204,204,204) 100%);
+        background: linear-gradient(to bottom, rgb(238,238,238) 0%,rgb(204,204,204) 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
+        cursor: pointer;
+    }
+
+    .number .completed {
+        color: #ff0000;
+    }
+
+    .number .finish {
+        color: #36b9cc;
+    }
 
 .overlay {
     height: 100%;
@@ -326,4 +350,8 @@ video, audio {
         top: 15px;
         right: 35px;
     }
+}
+
+.quiz-item .quiz-extend {
+    color: cornflowerblue;
 }
