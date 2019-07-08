@@ -2,28 +2,36 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
+    var _lessonID = ViewBag.LessonID as string;
+    var _classID = ViewBag.ClassID as string;
 }
 
 <!-- Begin Page Content -->
 <div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Part 1 Questions 1-7</h6>
+    <div class="row">
+        <div class="col-12">
+            <div class="breadcrumb-detail">
+                @*<div class="container">*@
+                    <ul class="breadcrumb m-0" id="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Student</a></li>
+                        <li class="breadcrumb-item"><a href="#">LessonToday</a></li>
+                        <li class="breadcrumb-item"><a href="#">LessonStudent</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Bài giảng số 1</li>
+                    </ul>
+                @*</div>*@
+            </div>
+        </div>
+    </div>
+    <div class="card-header">
+        <h6 class="m-0 font-weight-bold text-primary" id="title">Part 1 Questions 1-7</h6>
     </div>
     <div class="card-body">
         <div class="row">
             <div id="menu-left" class="col-md-3">
                 <div class="header">
-                    <div class="breadcrumb-detail">
-                        <ul class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#">Student</a></li>
-                            <li class="breadcrumb-item"><a href="#">LessonToday</a></li>
-                            <li class="breadcrumb-item"><a href="#">LessonStudent</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Bài giảng số 1</li>
-                        </ul>
-                    </div>
-
-                    <div class="lesson-tabs">
+                    <div class="lesson-tabs" id="lesson-tabs">
                         <ul class="nav flex-column nav-pills" id="pills-tab" role="tablist" aria-orientation="vertical">
                             <li class="nav-item">
                                 <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true"><i class="fa fa-edit"></i> <span class="ml-3">lesson part 1</span></a>
@@ -216,45 +224,32 @@
 @section Scripts{
     <script>
         function LoadData() {
-        var searchText = $("#searchText").val() == void 0? "" :$("#searchText").val();
-        var startDate = $("#startDate_sort").val()== void 0? "" :$("#startDate_sort").val();
-        var endDate = $("#endDate_sort").val()== void 0 ? "" :$("#endDate_sort").val();
-        var SubjectID = $("#SubjectID").val()== void 0 ? "" :$("#SubjectID").val();
-        var GradeID = $("#GradeID").val()== void 0? "" : $("#GradeID").val();
         $.ajax({
             type: "POST",
-            url: '@Url.Action("GetList", "MyCourse")',
-            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, SubjectID: SubjectID, GradeID: GradeID},
+            url: '@Url.Action("GetLesson", "MyCourse")',
+            data: {
+                ClassID: '@_classID',
+                LessonID:'@_lessonID'
+            },
             dataType:"json",
             success: function (data) {
-                var body = $('#dataTable tbody');
-                body.html("");
-                if (data.Data.length > 0)
+                var lessonTabs = $("#lesson-tabs");
+                var breadcrumb = $("#breadcrumb");
+                var content = $("#pills-tabContent");
+                var title = $("#title");
+                var item = data.Data;
+                if (item != void 0 && item != null)
                 {
-
-                    //ID ,CourseID ,TeacherID ,Status ,EndDate ,StartDate ,Name ,CourseName ,StudentNumber,SubjectName, TeacherName ,GradeName
-
-                    for (i = 0; i < data.Data.length; ++i) {
-                        item = data.Data[i];
-                        console.log(item);
-                        var active = "";
-                        if (item.IsActive) {
-                            active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
-                        } else {
-                            active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                    title.html(item.Title);
+                    var parts = data.Parts;
+                    if (parts != void 0 && parts != null) {
+                        for (var i = 0; parts != null && parts != [] && i < parts.lenght; i++) {
+                            var part = parts[i];
+                            var html = RenderPart(part);
+                            if (part.IsExam) {
+                                var questions = part.Questions;
+                            }
                         }
-                        body.append("<tr>" +
-                            "<td>" + item.Name + "</td>" +
-                            "<td>" + item.SubjectName + "</td>" +
-                            "<td><a href='"+'@Url.Action("GetPart", "MyCourse")'+"/"+item.CourseID+"/"+item.ID+"'>" + item.CourseName + "</a></td>" +
-                            "<td>" + item.GradeName + "</td>" +
-                            "<td>" + item.TeacherName + "</td>" +
-                            "<td>" + item.StudentNumber + "</td>" +
-                            "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
-                            "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" +
-                            active +
-                            "</tr>"
-                        );
                     }
                 }
             },

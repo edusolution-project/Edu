@@ -8,8 +8,8 @@ namespace BaseCustomerMVC.Models
 {
     public class LessonViewModel : EntityBase
     {
-        [JsonProperty("Name")]
-        public string Name { get; set; }
+        [JsonProperty("Title")]
+        public string Title { get; set; }
         [JsonProperty("IsActive")]
         public bool IsActive { get; set; }
         [JsonProperty("Order")]
