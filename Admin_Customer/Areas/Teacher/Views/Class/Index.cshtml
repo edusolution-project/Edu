@@ -35,6 +35,7 @@
                     <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
                     <div class="col-sm-8">
                         <select id="GradeID" class="form-control" onchange="LoadData()">
+                            <option value="" >-- Tất cả --</option>
                             @{
                                 for (int i = 0; listGrade != null && i < listGrade.Count; i++)
                                 {
@@ -114,11 +115,11 @@
     function LoadGrade() {
         var subject = $("#SubjectID").val();
         var grade = $("#GradeID").val();
-        $('#GradeID option[for!=' + subject + ']').hide();
-        $('#GradeID option[for=' + subject + ']').show();
-        if ($('#GradeID option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {
-           $('#GradeID').val($('#GradeID option[for=' + subject + ']:first').attr('value'));
-        }
+        $('#GradeID option:gt(0)[for!=' + subject + ']').hide();
+        $('#GradeID option:gt(0)[for=' + subject + ']').show();
+        //if ($('#GradeID option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {
+           $('#GradeID').val($('#GradeID option:visible:first').attr('value'));
+        //}
         LoadData();
     }
 

@@ -21,8 +21,8 @@
                     <div class="float-right">
                         <button type="button" class="btn btn-primary" onclick="Add(this)" data-placement='top' title='Thêm giáo viên' data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
-                        <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action(" Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>
-                        <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action(" Delete","teacher")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
+                        <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>
+                        <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","teacher")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
                         @*<button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action(" Delete","teacher")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
                         <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>

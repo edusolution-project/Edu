@@ -104,7 +104,7 @@ function Export(formName,url) {
         }
     }
     var _url = url + query;
-    window.open(_url, "_black");
+    window.open(_url, "_blank");
 }
 function Add(_this) {
     var modal = document.querySelector(_this.getAttribute("data-target"));
@@ -119,7 +119,7 @@ function Add(_this) {
     }
     var listselect = form.querySelectorAll('select');
     for (var i = 0; i < listselect.length; i++) {
-        listselect[i].value = "";
+        listselect[i].value = $(listselect[i]).find('option:first').attr("value");
     }
 }
 function Edit(id, urlGetData, urlPostData, _this) {
