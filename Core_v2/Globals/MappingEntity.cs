@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Core_v2.Globals
 {
-    public class MappingEntity<T,TN> where T:EntityBase where TN : EntityBase,new ()
+    public class MappingEntity<T, TN> where T : EntityBase where TN : EntityBase, new()
     {
         public MappingEntity()
         {
@@ -38,7 +38,7 @@ namespace Core_v2.Globals
             }
             return newItem;
         }
-        public T Auto(T oldItem,T newItem)
+        public T Auto(T oldItem, T newItem)
         {
             if (oldItem == null) return newItem;
             //lay typeOldItem
@@ -80,9 +80,19 @@ namespace Core_v2.Globals
                 if (newProps.Contains(item))
                 {
                     var value = item.GetValue(oldItem);
-                    if ((newItem[item.Name] == null || item.Name == "IsActive") && value != null)
+                    switch (item.PropertyType.Name)
                     {
-                        newItem[item.Name] = value;
+                        case "Boolean":
+                            if (!(bool)newItem[item.Name])
+                                newItem[item.Name] = value;
+                            break;
+                        case "DateTime":
+                            if ((DateTime)newItem[item.Name] < new DateTime(1900, 1, 1))
+                                newItem[item.Name] = value;
+                            break;
+                        default:
+                            newItem[item.Name] = value;
+                            break;
                     }
                 }
             }
@@ -98,11 +108,12 @@ namespace Core_v2.Globals
             Type newType = oldItem.GetType();
             IList<PropertyInfo> newProps = new List<PropertyInfo>(newType.GetProperties());
 
-            for(int i = 0; oldProps != null && i < oldProps.Count - 1; i++)
+            for (int i = 0; oldProps != null && i < oldProps.Count - 1; i++)
             {
                 var item = newProps[i];
                 if (item.Name == "ID" || item.Name == "id" || item.Name == "_id") continue;
-                if (newProps.Contains(item)) {
+                if (newProps.Contains(item))
+                {
                     var value = item.GetValue(oldItem);
                     if ((newItem[item.Name] == null || item.Name == "IsActive") && value != null)
                     {

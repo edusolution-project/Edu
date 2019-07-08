@@ -107,7 +107,18 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
-                if (!ExistEmail(item.Email) && !ExistTeacherId(item.TeacherId))
+                if (string.IsNullOrEmpty(item.Email))
+                {
+                    Dictionary<string, object> response = new Dictionary<string, object>()
+                    {
+                        {"Data",null },
+                        {"Error",item },
+                        {"Msg","Email không được để trống" }
+                    };
+                    return new JsonResult(response);
+                }
+                if (!ExistEmail(item.Email) //&& !ExistTeacherId(item.TeacherId)
+                        )
                 {
                     _service.CreateQuery().InsertOne(item);
                     Dictionary<string, object> response = new Dictionary<string, object>()
@@ -137,7 +148,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {
                         {"Data",null },
                         {"Error",item },
-                        {"Msg","Trùng email hoặc mã sinh viên" }
+                        {"Msg","Trùng email" }
                     };
                     return new JsonResult(response);
                 }
@@ -216,7 +227,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             string name = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
                             var item = new TeacherEntity
                             {
-                                TeacherId = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString(),
+                                //TeacherId = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString(),
 
                                 FullName = ho + " " + name,
                                 Subjects = new List<string>() { workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString() },
@@ -228,7 +239,9 @@ namespace BaseCustomerMVC.Controllers.Admin
                                 UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
                                 IsActive = true
                             };
-                            if (!ExistEmail(item.Email) && !ExistTeacherId(item.TeacherId))
+                            if (!ExistEmail(item.Email) 
+                                //&& !ExistTeacherId(item.TeacherId)
+                                )
                             {
                                 await _service.CreateQuery().InsertOneAsync(item);
                                 studentList.Add(item);
@@ -297,7 +310,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 package.Save();
             }
             stream.Position = 0;
-            string excelName = $"StudentList-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.xlsx";
+            string excelName = $"TeacherList-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.xlsx";
 
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
