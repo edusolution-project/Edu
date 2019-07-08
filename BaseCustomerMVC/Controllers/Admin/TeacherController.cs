@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -25,6 +26,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly RoleService _roleService;
         private readonly AccountService _accountService;
         private readonly IHostingEnvironment _env;
+        private readonly MappingEntity<TeacherEntity, TeacherViewModel> _mapping;
+
         public TeacherController(TeacherService service
             , RoleService roleService
             , AccountService accountService
@@ -36,12 +39,13 @@ namespace BaseCustomerMVC.Controllers.Admin
             _roleService = roleService;
             _accountService = accountService;
             _subjectService = subjectService;
+            _mapping = new MappingEntity<TeacherEntity, TeacherViewModel>();
         }
 
         public ActionResult Index(DefaultModel model)
         {
             ViewBag.Subject = _subjectService.GetAll().ToList();
-            ViewBag.Roles = _roleService.CreateQuery().Find(o=>o.Type == "teacher").SortBy(o=>o.Name).ToList();
+            ViewBag.Roles = _roleService.CreateQuery().Find(o => o.Type == "teacher").SortBy(o => o.Name).ToList();
             ViewBag.Model = model;
             return View();
         }
@@ -66,9 +70,13 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<TeacherEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();
-            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-                ? data.ToList()
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+            var teacher = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+                ? data
+                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+            var DataResponse = teacher.ToList().Select(t => _mapping.AutoOrtherType(t, new TeacherViewModel()
+            {
+                SubjectList = _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList()
+            })).ToList();
             var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse },
@@ -306,14 +314,14 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 if (model.ArrID.Contains(","))
                 {
-                    var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == false);
+                    var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive != true);
                     var update = Builders<TeacherEntity>.Update.Set("IsActive", true);
                     var publish = _service.Collection.UpdateMany(filter, update);
                     return new JsonResult(publish);
                 }
                 else
                 {
-                    var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == false);
+                    var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive != true);
                     var update = Builders<TeacherEntity>.Update.Set("IsActive", true);
                     var publish = _service.Collection.UpdateMany(filter, update);
                     return new JsonResult(publish);

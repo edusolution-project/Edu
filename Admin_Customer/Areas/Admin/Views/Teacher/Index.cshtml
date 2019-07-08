@@ -24,9 +24,9 @@
                             <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "teacher")')"> <i class="fas fa-file-export"></i> </button>
                             <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","teacher")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
                             @*<button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","teacher")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
-        <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
-        <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "teacher")')"> <i class="fas fa-file-export"></i> </button>*@
+                                <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
+                                <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "teacher")')"> <i class="fas fa-file-export"></i> </button>*@
                         </div>
                     </div>
                 </div>
@@ -74,7 +74,7 @@
 
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="TeacherId" id="inputName" placeholder="mã giáo viên">
+                                <input type="text" class="form-control" name="TeacherId" id="inputName" placeholder="Mã giáo viên" required>
                             </div>
                             <div class="form-group col-md-6">
                                 <select name="Subjects" class="form-control">
@@ -88,7 +88,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                             <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên">
+                            <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên">
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
@@ -99,18 +99,8 @@
                             </div>
                         </div>
                         <div class="form-row">
-                            @*<div class="form-group col-md-6">
-                                <select name="RoleID" class="form-control">
-                                   @{ 
-                                       for(int i = 0; role != null && i < role.Count; i++)
-                                       {
-                                           <option value="@role[i].ID">@role[i].Name</option>
-                                       }
-                                   }
-                                </select>
-                            </div>*@
                             <div class="form-group col-md-6">
-                                <input type="date" class="form-control" name="DateBorn" id="inputDate" placeholder="Ngày tháng năm sinh">
+                                <input type="text" class="form-control datepicker" name="DateBorn" id="inputDate" placeholder="Ngày tháng năm sinh">
                             </div>
                             <div class="form-group row col-md-6">
                                 <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
@@ -133,7 +123,8 @@
     </div>
 </div>
 
-<!-- Modal chose file -->
+
+<!-- Modal choose file -->
 <div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -167,8 +158,14 @@
     </div>
 </div>
 <script>
+
+    $('.datepicker').datepicker({
+        format: 'dd/mm/yy',
+        startDate: '0d'
+    }).val("");
+
     function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
-       
+
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "teacher")',
@@ -188,13 +185,21 @@
                         } else {
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","teacher")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
+                        var subject = "";
+                        if (item.SubjectList.length > 0) {
+                            for (j = 0; j < item.SubjectList.length; ++j) {
+                                subject += item.SubjectList[j].Name + "<br/>";
+                            }
+                        }
+                        var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.DateBorn));
+                        console.log(date);
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td>" + (i + 1) + "</td>" +
                             "<td>" + item.TeacherId +"</td>" +
                             "<td>" + item.FullName + "</td>" +
-                            "<td>" + new Date(item.DateBorn).toLocaleDateString() +"</td>" +
-                            "<td>" + item.Subjects + "</td>" +active +
+                            "<td>" + date + "</td>" +
+                            "<td>" + subject + "</td>" + active +
                             "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","teacher")','@Url.Action("create","teacher")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.TeacherId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","teacher")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +

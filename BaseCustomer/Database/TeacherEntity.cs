@@ -10,7 +10,7 @@ namespace BaseCustomerEntity.Database
     public class TeacherEntity : EntityBase
     {
         [JsonProperty("TeacherId")]
-        public string TeacherId { get; set; } // mã sinh viên
+        public string TeacherId { get; set; } // mã giáo viên
         [JsonProperty("Avatar")]
         public string Avatar { get; set; }
         [JsonProperty("FullName")]

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Core_v2.Globals
 {
-    public class MappingEntity<T,TN> where T:EntityBase where TN : EntityBase,new ()
+    public class MappingEntity<T, TN> where T : EntityBase where TN : EntityBase, new()
     {
         public MappingEntity()
         {
@@ -33,7 +33,7 @@ namespace Core_v2.Globals
 
             return newItem;
         }
-        public T Auto(T oldItem,T newItem)
+        public T Auto(T oldItem, T newItem)
         {
             if (oldItem == null) return newItem;
             Type myType = oldItem.GetType();
@@ -57,14 +57,16 @@ namespace Core_v2.Globals
         {
             if (oldItem == null) return newItem;
             Type myType = oldItem.GetType();
-            
+
             IList<PropertyInfo> props = new List<PropertyInfo>(myType.GetProperties());
             var i = 0;
             foreach (PropertyInfo prop in props)
             {
                 if (i >= props.Count - 1) break;
                 object propValue = prop.GetValue(oldItem);
-                if (propValue != null && newItem[prop.Name] == null)
+                if (propValue != null
+                    //&& newItem[prop.Name] == null
+                )
                 {
                     newItem[prop.Name] = propValue;
                 }
