@@ -2,13 +2,12 @@
 using BaseCustomerEntity.Database;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using Core_v2.Repositories;
 
 namespace BaseCustomerMVC.Models
 {
-    public class AnswerViewModel
+    public class AnswerViewModel:EntityBase
     {
-        [JsonProperty("ID")]
-        public string ID { get; set; }
         [JsonProperty("Content")]
         public string Content { get; set; }
         [JsonProperty("Media")]

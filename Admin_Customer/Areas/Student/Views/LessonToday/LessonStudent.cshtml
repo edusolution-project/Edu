@@ -2,206 +2,213 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
+    var _lessonID = ViewBag.LessonID as string;
+    var _classID = ViewBag.ClassID as string;
 }
 
 <!-- Begin Page Content -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Part 1 Questions 1-7</h6>
+<div class="card shadow mb-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="breadcrumb-detail">
+                @*<div class="container">*@
+                    <ul class="breadcrumb m-0" id="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Student</a></li>
+                        <li class="breadcrumb-item"><a href="#">LessonToday</a></li>
+                        <li class="breadcrumb-item"><a href="#">LessonStudent</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Bài giảng số 1</li>
+                    </ul>
+                @*</div>*@
+            </div>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div id="menu-left" class="col-md-3">
-                    <div class="header">
-                        <div class="breadcrumb-detail">
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                <li class="breadcrumb-item"><a href="#">Student</a></li>
-                                <li class="breadcrumb-item"><a href="#">LessonToday</a></li>
-                                <li class="breadcrumb-item"><a href="#">LessonStudent</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Bài giảng số 1</li>
-                            </ul>
-                        </div>
-
-                        <div class="lesson-tabs">
-                            <ul class="nav flex-column nav-pills" id="pills-tab" role="tablist" aria-orientation="vertical">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true"><i class="fa fa-edit"></i> <span class="ml-3">lesson part 1</span></a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="pills-video-tab" data-toggle="pill" href="#pills-video" role="tab" aria-controls="pills-video" aria-selected="false"><i class="fa fa-play-circle"></i> <span class="ml-3">lesson part 2</span></a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="pills-messages-tab" data-toggle="pill" href="#pills-messages" role="tab" aria-controls="pills-messages" aria-selected="false"><i class="fa fa-volume-up"></i> <span class="ml-3">lesson part 3</span></a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="pills-settings-tab" data-toggle="pill" href="#pills-settings" role="tab" aria-controls="pills-settings" aria-selected="false"><i class="fa fa-pencil-alt"></i> <span class="ml-3">lesson part 4</span></a>
-                                </li>
-                            </ul>
-                        </div>
+    </div>
+    <div class="card-header">
+        <h6 class="m-0 font-weight-bold text-primary" id="title">Part 1 Questions 1-7</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div id="menu-left" class="col-md-3">
+                <div class="header">
+                    <div class="lesson-tabs" id="lesson-tabs">
+                        <ul class="nav flex-column nav-pills" id="pills-tab" role="tablist" aria-orientation="vertical">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true"><i class="fa fa-edit"></i> <span class="ml-3">lesson part 1</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="pills-video-tab" data-toggle="pill" href="#pills-video" role="tab" aria-controls="pills-video" aria-selected="false"><i class="fa fa-play-circle"></i> <span class="ml-3">lesson part 2</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="pills-messages-tab" data-toggle="pill" href="#pills-messages" role="tab" aria-controls="pills-messages" aria-selected="false"><i class="fa fa-volume-up"></i> <span class="ml-3">lesson part 3</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="pills-settings-tab" data-toggle="pill" href="#pills-settings" role="tab" aria-controls="pills-settings" aria-selected="false"><i class="fa fa-pencil-alt"></i> <span class="ml-3">lesson part 4</span></a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-                <div class="col-md-9">
-                    <div class="text-right p-3">
-                        <!-- Tab carousel -->
-                        <button class="prevtab btn btn-success">Quay lại</button>
-                        <button class="nexttab btn btn-success">Chuyển tiếp</button>
+            </div>
+            <div class="col-md-9">
+                <div class="text-right p-3">
+                    <!-- Tab carousel -->
+                    <button class="prevtab btn btn-success">Quay lại</button>
+                    <button class="nexttab btn btn-success">Chuyển tiếp</button>
+                </div>
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                        <div class="card-body">
+                            <div class="part-box-header">
+                                <h4 class="title">Picture</h4>
+                            </div>
+                            <div class="media-wrapper">
+                                <div class="media-holder">
+                                    <img class="img-fluid" src="~/img/0001.jpg">
+                                </div>
+                                <div class="media-holder">
+                                    <img class="img-fluid" src="~/img/0002.jpg">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="tab-content" id="pills-tabContent">
-                        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-                            <div class="card-body">
+
+                    <div class="tab-pane fade" id="pills-video" role="tabpanel" aria-labelledby="pills-video-tab">
+                        <div class="card-body">
+                            <div class="part-box VIDEO">
                                 <div class="part-box-header">
-                                    <h4 class="title">Picture</h4>
+                                    <h4 class="title">Demo Video</h4>
                                 </div>
                                 <div class="media-wrapper">
-                                    <div class="media-holder">
-                                        <img class="img-fluid" src="~/img/0001.jpg">
-                                    </div>
-                                    <div class="media-holder">
-                                        <img class="img-fluid" src="~/img/0002.jpg">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="tab-pane fade" id="pills-video" role="tabpanel" aria-labelledby="pills-video-tab">
-                            <div class="card-body">
-                                <div class="part-box VIDEO">
-                                    <div class="part-box-header">
-                                        <h4 class="title">Demo Video</h4>
-                                    </div>
-                                    <div class="media-wrapper">
-                                        <div class="media-holder VIDEO">
-                                            <video controls="">
-                                                <source src="~/file/video/test.mp4" type="video/mp4">
-                                            </video>
-                                        </div>
+                                    <div class="media-holder VIDEO">
+                                        <video controls="">
+                                            <source src="~/file/video/test.mp4" type="video/mp4">
+                                        </video>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="tab-pane fade" id="pills-messages" role="tabpanel" aria-labelledby="pills-messages-tab">
-                            <div class="card-body">
-                                <div class="part-box AUDIO">
-                                    <div class="part-box-header">
-                                        <h4 class="title">Demo Audio</h4>
-                                    </div>
-                                    <div class="media-wrapper">
-                                        <div class="media-holder AUDIO">
-                                            <audio controls=""><source src="~/file/audio/test.mp3" type="audio/mp3">Your browser does not support the audio tag</audio>
-                                        </div>
+                    <div class="tab-pane fade" id="pills-messages" role="tabpanel" aria-labelledby="pills-messages-tab">
+                        <div class="card-body">
+                            <div class="part-box AUDIO">
+                                <div class="part-box-header">
+                                    <h4 class="title">Demo Audio</h4>
+                                </div>
+                                <div class="media-wrapper">
+                                    <div class="media-holder AUDIO">
+                                        <audio controls=""><source src="~/file/audio/test.mp3" type="audio/mp3">Your browser does not support the audio tag</audio>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-settings-tab">
-                            <div class="card-body">
-                                <div class="media">
-                                    <img src="~/img/1.png" class="align-self-center mr-3 img-fluid" alt="...">
-                                    <div class="media-body">
-                                        <h5 class="mt-0">1. Choose correct answers</h5>
-                                        <div class="content">
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">A.  has just opened and jobs are available </label>
-                                            </fieldset>
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">B.  is opening for longer and needs extra staff</label>
-                                            </fieldset>
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">C.  will open late because of job interviews </label>
-                                            </fieldset>
-                                        </div>
+                    <div class="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-settings-tab">
+                        <div class="card-body">
+                            <div class="media">
+                                <img src="~/img/1.png" class="align-self-center mr-3 img-fluid" alt="...">
+                                <div class="media-body">
+                                    <h5 class="mt-0">1. Choose correct answers</h5>
+                                    <div class="content">
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">A.  has just opened and jobs are available </label>
+                                        </fieldset>
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">B.  is opening for longer and needs extra staff</label>
+                                        </fieldset>
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">C.  will open late because of job interviews </label>
+                                        </fieldset>
                                     </div>
                                 </div>
-                                <hr />
-                                <div class="media">
-                                    <img src="~/img/2.png" class="align-self-center mr-3 img-fluid" alt="...">
-                                    <div class="media-body">
-                                        <h5 class="mt-0">2. Choose correct answers</h5>
-                                        <div class="content">
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">A.  has just opened and jobs are available </label>
-                                            </fieldset>
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">B.  is opening for longer and needs extra staff</label>
-                                            </fieldset>
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">C.  will open late because of job interviews </label>
-                                            </fieldset>
-                                        </div>
+                            </div>
+                            <hr />
+                            <div class="media">
+                                <img src="~/img/2.png" class="align-self-center mr-3 img-fluid" alt="...">
+                                <div class="media-body">
+                                    <h5 class="mt-0">2. Choose correct answers</h5>
+                                    <div class="content">
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">A.  has just opened and jobs are available </label>
+                                        </fieldset>
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">B.  is opening for longer and needs extra staff</label>
+                                        </fieldset>
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">C.  will open late because of job interviews </label>
+                                        </fieldset>
                                     </div>
                                 </div>
-                                <hr />
-                                <div class="media">
-                                    <img src="~/img/3.png" class="align-self-center mr-3 img-fluid" alt="...">
-                                    <div class="media-body">
-                                        <h5 class="mt-0">3. Choose correct answers</h5>
-                                        <div class="content">
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">A.  has just opened and jobs are available </label>
-                                            </fieldset>
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">B.  is opening for longer and needs extra staff</label>
-                                            </fieldset>
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">C.  will open late because of job interviews </label>
-                                            </fieldset>
-                                        </div>
+                            </div>
+                            <hr />
+                            <div class="media">
+                                <img src="~/img/3.png" class="align-self-center mr-3 img-fluid" alt="...">
+                                <div class="media-body">
+                                    <h5 class="mt-0">3. Choose correct answers</h5>
+                                    <div class="content">
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">A.  has just opened and jobs are available </label>
+                                        </fieldset>
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">B.  is opening for longer and needs extra staff</label>
+                                        </fieldset>
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">C.  will open late because of job interviews </label>
+                                        </fieldset>
                                     </div>
                                 </div>
+                            </div>
 
-                                <hr />
-                                <div class="media">
-                                    <img src="~/img/4.png" class="align-self-center mr-3 img-fluid" alt="...">
-                                    <div class="media-body">
-                                        <h5 class="mt-0">4. Choose correct answers</h5>
-                                        <div class="content">
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">A.  has just opened and jobs are available </label>
-                                            </fieldset>
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">B.  is opening for longer and needs extra staff</label>
-                                            </fieldset>
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">C.  will open late because of job interviews </label>
-                                            </fieldset>
-                                        </div>
+                            <hr />
+                            <div class="media">
+                                <img src="~/img/4.png" class="align-self-center mr-3 img-fluid" alt="...">
+                                <div class="media-body">
+                                    <h5 class="mt-0">4. Choose correct answers</h5>
+                                    <div class="content">
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">A.  has just opened and jobs are available </label>
+                                        </fieldset>
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">B.  is opening for longer and needs extra staff</label>
+                                        </fieldset>
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">C.  will open late because of job interviews </label>
+                                        </fieldset>
                                     </div>
                                 </div>
+                            </div>
 
-                                <hr />
-                                <div class="media">
-                                    <img src="~/img/5.png" class="align-self-center mr-3 img-fluid" alt="...">
-                                    <div class="media-body">
-                                        <h5 class="mt-0">5. Choose correct answers</h5>
-                                        <div class="content">
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">A.  has just opened and jobs are available </label>
-                                            </fieldset>
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">B.  is opening for longer and needs extra staff</label>
-                                            </fieldset>
-                                            <fieldset class="answer-item">
-                                                <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                                <label class="answer-text">C.  will open late because of job interviews </label>
-                                            </fieldset>
-                                        </div>
+                            <hr />
+                            <div class="media">
+                                <img src="~/img/5.png" class="align-self-center mr-3 img-fluid" alt="...">
+                                <div class="media-body">
+                                    <h5 class="mt-0">5. Choose correct answers</h5>
+                                    <div class="content">
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">A.  has just opened and jobs are available </label>
+                                        </fieldset>
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">B.  is opening for longer and needs extra staff</label>
+                                        </fieldset>
+                                        <fieldset class="answer-item">
+                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                                            <label class="answer-text">C.  will open late because of job interviews </label>
+                                        </fieldset>
                                     </div>
                                 </div>
                             </div>
@@ -211,5 +218,47 @@
             </div>
         </div>
     </div>
+</div>
 <!-- End of Main Content -->
 
+@section Scripts{
+    <script>
+        function LoadData() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetLesson", "MyCourse")',
+            data: {
+                ClassID: '@_classID',
+                LessonID:'@_lessonID'
+            },
+            dataType:"json",
+            success: function (data) {
+                var lessonTabs = $("#lesson-tabs");
+                var breadcrumb = $("#breadcrumb");
+                var content = $("#pills-tabContent");
+                var title = $("#title");
+                var item = data.Data;
+                if (item != void 0 && item != null)
+                {
+                    title.html(item.Title);
+                    var parts = data.Parts;
+                    if (parts != void 0 && parts != null) {
+                        for (var i = 0; parts != null && parts != [] && i < parts.lenght; i++) {
+                            var part = parts[i];
+                            var html = RenderPart(part);
+                            if (part.IsExam) {
+                                var questions = part.Questions;
+                            }
+                        }
+                    }
+                }
+            },
+            error: function (err) {
+                console.log(err.responseText)
+            }
+        });
+    };
+
+    LoadData();
+
+    </script>}

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Core_v2.Globals
 {
-    public class MappingEntity<T, TN> where T : EntityBase where TN : EntityBase, new()
+    public class MappingEntity<T,TN> where T:EntityBase where TN : EntityBase,new ()
     {
         public MappingEntity()
         {
@@ -15,86 +15,101 @@ namespace Core_v2.Globals
         public T AutoWithoutID(T oldItem, T newItem)
         {
             if (oldItem == null) return newItem;
-            Type myType = oldItem.GetType();
-            IList<PropertyInfo> props = new List<PropertyInfo>(myType.GetProperties());
-            var i = 0;
-            foreach (PropertyInfo prop in props)
-            {
-                if (i >= props.Count - 1) break;
-                if (prop.Name == "ID" || prop.Name == "_id") continue;
-                object propValue = prop.GetValue(oldItem);
-                if (propValue != null && newItem[prop.Name] == null)
-                {
-                    newItem[prop.Name] = propValue;
-                }
-                i++;
-                // Do something with propValue
-            }
+            //lay typeOldItem
+            Type oldType = oldItem.GetType();
+            IList<PropertyInfo> oldProps = new List<PropertyInfo>(oldType.GetProperties());
+            //lay typenewItem
+            Type newType = oldItem.GetType();
+            IList<PropertyInfo> newProps = new List<PropertyInfo>(newType.GetProperties());
 
+            for (int i = 0; oldProps != null && i < oldProps.Count - 1; i++)
+            {
+                var item = newProps[i];
+                if (item.Name == "ID" || item.Name == "id" || item.Name == "_id") continue;
+                if (newProps.Contains(item))
+                {
+                    var value = item.GetValue(oldItem);
+                    var type = item.GetType();
+                    if ((newItem[item.Name] == null) && value != null)
+                    {
+                        newItem[item.Name] = value;
+                    }
+                }
+            }
             return newItem;
         }
-        public T Auto(T oldItem, T newItem)
+        public T Auto(T oldItem,T newItem)
         {
             if (oldItem == null) return newItem;
-            Type myType = oldItem.GetType();
-            IList<PropertyInfo> props = new List<PropertyInfo>(myType.GetProperties());
-            var i = 0;
-            foreach (PropertyInfo prop in props)
-            {
-                if (i >= props.Count - 1) break;
-                object propValue = prop.GetValue(oldItem);
-                if (propValue != null && newItem[prop.Name] == null)
-                {
-                    newItem[prop.Name] = propValue;
-                }
-                i++;
-                // Do something with propValue
-            }
+            //lay typeOldItem
+            Type oldType = oldItem.GetType();
+            IList<PropertyInfo> oldProps = new List<PropertyInfo>(oldType.GetProperties());
+            //lay typenewItem
+            Type newType = oldItem.GetType();
+            IList<PropertyInfo> newProps = new List<PropertyInfo>(newType.GetProperties());
 
+            for (int i = 0; oldProps != null && i < oldProps.Count - 1; i++)
+            {
+                var item = newProps[i];
+                var type = item.GetType();
+                if (newProps.Contains(item))
+                {
+                    var value = item.GetValue(oldItem);
+                    if ((newItem[item.Name] == null || item.Name == "IsActive") && value != null)
+                    {
+                        newItem[item.Name] = value;
+                    }
+                }
+            }
             return newItem;
         }
         public TN AutoOrtherType(T oldItem, TN newItem)
         {
             if (oldItem == null) return newItem;
-            Type myType = oldItem.GetType();
+            //lay typeOldItem
+            Type oldType = oldItem.GetType();
+            IList<PropertyInfo> oldProps = new List<PropertyInfo>(oldType.GetProperties());
+            //lay typenewItem
+            Type newType = oldItem.GetType();
+            IList<PropertyInfo> newProps = new List<PropertyInfo>(newType.GetProperties());
 
-            IList<PropertyInfo> props = new List<PropertyInfo>(myType.GetProperties());
-            var i = 0;
-            foreach (PropertyInfo prop in props)
+            for (int i = 0; oldProps != null && i < oldProps.Count - 1; i++)
             {
-                if (i >= props.Count - 1) break;
-                object propValue = prop.GetValue(oldItem);
-                if (propValue != null
-                    //&& newItem[prop.Name] == null
-                )
+                var item = newProps[i];
+                var type = item.GetType();
+                if (newProps.Contains(item))
                 {
-                    newItem[prop.Name] = propValue;
+                    var value = item.GetValue(oldItem);
+                    if ((newItem[item.Name] == null || item.Name == "IsActive") && value != null)
+                    {
+                        newItem[item.Name] = value;
+                    }
                 }
-                i++;
-                // Do something with propValue
             }
-
             return newItem;
         }
         public TN AutoOrtherTypeWithoutID(T oldItem, TN newItem)
         {
             if (oldItem == null) return newItem;
-            Type myType = oldItem.GetType();
-            IList<PropertyInfo> props = new List<PropertyInfo>(myType.GetProperties());
-            var i = 0;
-            foreach (PropertyInfo prop in props)
-            {
-                if (i >= props.Count - 1) break;
-                if (prop.Name == "ID" || prop.Name == "_id") continue;
-                object propValue = prop.GetValue(oldItem);
-                if (propValue != null && newItem[prop.Name] == null)
-                {
-                    newItem[prop.Name] = propValue;
-                }
-                i++;
-                // Do something with propValue
-            }
+            //lay typeOldItem
+            Type oldType = oldItem.GetType();
+            IList<PropertyInfo> oldProps = new List<PropertyInfo>(oldType.GetProperties());
+            //lay typenewItem
+            Type newType = oldItem.GetType();
+            IList<PropertyInfo> newProps = new List<PropertyInfo>(newType.GetProperties());
 
+            for(int i = 0; oldProps != null && i < oldProps.Count - 1; i++)
+            {
+                var item = newProps[i];
+                if (item.Name == "ID" || item.Name == "id" || item.Name == "_id") continue;
+                if (newProps.Contains(item)) {
+                    var value = item.GetValue(oldItem);
+                    if ((newItem[item.Name] == null || item.Name == "IsActive") && value != null)
+                    {
+                        newItem[item.Name] = value;
+                    }
+                }
+            }
             return newItem;
         }
     }
