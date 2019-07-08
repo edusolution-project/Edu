@@ -20,12 +20,14 @@ namespace Core_v2.Repositories
             {
                 Type myType = GetType();
                 PropertyInfo myPropInfo = myType.GetProperty(propertyName);
+                if (myPropInfo == null) return null;
                 return myPropInfo.GetValue(this, null);
             }
             set
             {
                 Type myType = GetType();
                 PropertyInfo myPropInfo = myType.GetProperty(propertyName);
+                if (myPropInfo == null) return;
                 myPropInfo.SetValue(this, value, null);
 
             }
