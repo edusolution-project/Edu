@@ -492,58 +492,58 @@
     </div>
 <!-- End of Main Content -->
 
-    @section Scripts{ 
-        <script>
-        function LoadData() {
-        var searchText = $("#searchText").val();
-        var startDate = $("#startDate_sort").val();
-        var endDate = $("#endDate_sort").val();
-        var SubjectID = $("#SubjectID").val();
-        var GradeID = $("#GradeID").val();
-        $.ajax({
-            type: "POST",
-            url: '@Url.Action("GetDetails", "MyCourse")',
-            data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, SubjectID: SubjectID, GradeID: GradeID, CourseID : '@_courseID',ClassID:'@_classID' },
-            dataType: "json",
-            async: false,
-            success: function (data) {
-                var body = $('#dataTable > tbody');
-                body.html("");
-                if (data.Data != null)
-                {
-                    //ID ,Name ,Status ,EndDate ,StartDate
-                    debugger;
-                    for (i = 0; i < data.Data.length; ++i) {
-                        item = data.Data[i];
-                        var active = "";
-                        var title = "";
-                        var url = "@Url.Action("LessonStudent","LessonToday")" + "/" + item.ID+"/"+'@_classID'
-                        if (item.IsActive) {
-                            title = "<td><a href='"+url+"' title=" + item.Title + ">" + item.Title + "</a></td>";
-                            active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
-                        } else {
-                            active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
-                            title = "<td><a href=\"javascript:alert('Bài học chưa được mở')\" title=" + item.Title + ">" + item.Title + "</a></td>";
-                        }
-                        debugger;
-                        body.append("<tr>" + title +
-                            "<td><a href='"+url+"' title=" + item.Title + ">" + item.Title + "</a></td>" +
-                            "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
-                            "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" +
-                            active +
-                            "</tr>");
+@section Scripts{ 
+    <script>
+    function LoadData() {
+    var searchText = $("#searchText").val();
+    var startDate = $("#startDate_sort").val();
+    var endDate = $("#endDate_sort").val();
+    var SubjectID = $("#SubjectID").val();
+    var GradeID = $("#GradeID").val();
+    $.ajax({
+        type: "POST",
+        url: '@Url.Action("GetDetails", "MyCourse")',
+        data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, SubjectID: SubjectID, GradeID: GradeID, CourseID : '@_courseID',ClassID:'@_classID' },
+        dataType: "json",
+        async: false,
+        success: function (data) {
+            var body = $('#dataTable > tbody');
+            body.html("");
+            if (data.Data != null)
+            {
+                //ID ,Name ,Status ,EndDate ,StartDate
+                debugger;
+                for (i = 0; i < data.Data.length; ++i) {
+                    item = data.Data[i];
+                    var active = "";
+                    var title = "";
+                    var url = "@Url.Action("LessonStudent","LessonToday")" + "/" + item.ID+"/"+'@_classID'
+                    if (item.IsActive) {
+                        title = "<td><a href='"+url+"' title=" + item.Title + ">" + item.Title + "</a></td>";
+                        active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                    } else {
+                        active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                        title = "<td><a href=\"javascript:alert('Bài học chưa được mở')\" title=" + item.Title + ">" + item.Title + "</a></td>";
                     }
+                    debugger;
+                    body.append("<tr>" + title +
+                        "<td><a href='"+url+"' title=" + item.Title + ">" + item.Title + "</a></td>" +
+                        "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
+                        "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" +
+                        active +
+                        "</tr>");
                 }
-            },
-            error: function() {
-                alert("Error");
             }
-        });
-    };
-
-    $(document).ready(function () {
-        LoadData();
+        },
+        error: function() {
+            alert("Error");
+        }
     });
+};
 
-        </script>
-    }
+$(document).ready(function () {
+    LoadData();
+});
+
+    </script>
+}
