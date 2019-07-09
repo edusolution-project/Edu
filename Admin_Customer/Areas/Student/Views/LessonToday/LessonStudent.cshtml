@@ -245,9 +245,16 @@
                     if (parts != void 0 && parts != null) {
                         for (var i = 0; parts != null && parts != [] && i < parts.lenght; i++) {
                             var part = parts[i];
+                            console.log(part);
                             var html = RenderPart(part);
                             if (part.IsExam) {
                                 var questions = part.Questions;
+                                for (var x = 0; questions != null && x < questions.lenght; x++) {
+                                    var question = questions[x];
+                                    console.log(question);
+                                    RenderQuestion(question);
+                                    var answer = question.Answers || question.CloneAnswers;
+                                }
                             }
                         }
                     }
