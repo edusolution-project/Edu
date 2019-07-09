@@ -223,7 +223,11 @@
 
 @section Scripts{
     <script>
-        function LoadData() {
+    // thieeu cai dem => roi submit
+    var urlStart = '@Url.Action("Create","Example")';
+    var urlChose = '@Url.Action("CreateDetails","Example")';
+    var urlComplete = '@Url.Action("CompleteExam","Example")';
+    function LoadData() {
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetLesson", "MyCourse")',
@@ -233,21 +237,141 @@
             },
             dataType:"json",
             success: function (data) {
-                var lessonTabs = $("#lesson-tabs");
+                var lessonTabs = $("#lesson-tabs > #pills-tab");
+                lessonTabs.html("");
                 var breadcrumb = $("#breadcrumb");
                 var content = $("#pills-tabContent");
+                content.html("");
                 var title = $("#title");
                 var item = data.Data;
+                console.log(item);
                 if (item != void 0 && item != null)
                 {
+                   
                     title.html(item.Title);
-                    var parts = data.Parts;
+
+                    var parts = item.Parts;
                     if (parts != void 0 && parts != null) {
-                        for (var i = 0; parts != null && parts != [] && i < parts.lenght; i++) {
+                        for (var i = 0; parts != null && i < parts.length; i++) {
                             var part = parts[i];
-                            var html = RenderPart(part);
-                            if (part.IsExam) {
+                            if (part.Title == null) continue;
+                            var tabs = '<li class="nav-item">' +
+                                '<a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#' + part.ID + '" role="tab" aria-controls="' + part.ID + '" aria-selected="true"><i class="fa fa-edit"></i> <span class="ml-3">' + part.Title + '</span></a>' +
+                            '</li>';
+                            lessonTabs.append(tabs)
+                            //`Qz1:trắc nghiệm thường`
+                            //`Qz2:điền từ`
+                            //`Qz3:kéo thả`
+                            //`Qz4:tự luận. (ESSAY)`
+                            //var html = RenderPart(part);
+                            if (part.Type == "QUIZ1") {
                                 var questions = part.Questions;
+                                for (var x = 0; x < questions.length; x++) {
+                                    var question = questions[x];
+                                    var answers = question.CloneAnswers;
+                                    for (var y = 0; y < answers.length; y++) {
+                                        var answer = answers[y];
+                                    }
+                                }
+                            }
+                            if (part.Type == "QUIZ2") {
+                                var questions = part.Questions;
+                                for (var x = 0; x < questions.length; x++) {
+                                    var question = questions[x];
+                                    var answers = question.CloneAnswers;
+                                    for (var y = 0; y < answers.length; y++) {
+                                        var answer = answers[y];
+                                    }
+                                }
+                            }
+                            if (part.Type == "QUIZ3") {
+                                var questions = part.Questions;
+                                for (var x = 0; x < questions.length; x++) {
+                                    var question = questions[x];
+                                    var answers = question.CloneAnswers;
+                                    for (var y = 0; y < answers.length; y++) {
+                                        var answer = answers[y];
+                                    }
+                                }
+                            }
+                            if (part.Type == "ESSAY") { // tu luan
+                                var questions = part.Questions;
+                                for (var x = 0; x < questions.length; x++) {
+                                    var question = questions[x];
+                                    var answers = question.CloneAnswers;
+                                    for (var y = 0; y < answers.length; y++) {
+                                        var answer = answers[y];
+                                    }
+                                }
+                            }
+                            if (part.Type == "IMG") {
+                                var html = '<div class="tab-pane fade" id="' + part.ID + '" role="tabpanel" aria-labelledby="' + part.ID + '">' +
+                                    '<div class="card-body">'+
+                                    '<div class="part-box-header">' +
+                                    '<h4 class="title">' + part.Title + '</h4>' +
+                                        '</div>'+
+                                        '<div class="media-wrapper">'+
+                                            '<div class="media-holder">'+
+                                                '<img class="img-fluid" src="~'+part.Media.Path+'">'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                    '</div>';
+                                content.append(html);
+                            }
+                            if (part.Type == "VIDEO") {
+
+                                var html =  '<div class="tab-pane fade" id="' + part.ID + '" role="tabpanel" aria-labelledby="' + part.ID + '">' +
+                                    '<div class="card-body">'+
+                                        '<div class="part-box VIDEO">'+
+                                            '<div class="part-box-header">'+
+                                                '<h4 class="title">' + part.Title + '</h4>' +
+                                            '</div>'+
+                                            '<div class="media-wrapper">'+
+                                                '<div class="media-holder VIDEO">'+
+                                                    '<video controls="">'+
+                                                        '<source src="~'+part.Media.Path+'" type="video/mp4">'+
+                                                    '</video>'+
+                                                '</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                    '</div>';
+                                content.append(html);
+                            }
+                            if (part.Type == "AUDIO") {
+                                var html = '<div class="tab-pane fade" id="' + part.ID + '" role="tabpanel" aria-labelledby="' + part.ID + '">' +
+                                    '<div class="card-body">'+
+                                        '<div class="part-box AUDIO">'+
+                                            '<div class="part-box-header">'+
+                                                '<h4 class="title">' + part.Title + '</h4>' +
+                                            '</div>'+
+                                            '<div class="media-wrapper">'+
+                                                '<div class="media-holder AUDIO">'+
+                                                    '<audio controls=""><source src="~'+part.Media.Path+'" type="audio/mp3">Your browser does not support the audio tag</audio>'+
+                                                '</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                    '</div>';
+                                content.append(html);
+                            }
+                            if (part.Type == "TEXT") {
+                                    var html = '<div class="tab-pane fade active show" id="' + part.ID + '" role="tabpanel" aria-labelledby="' + part.ID + '">' +
+                                    '<div class="card-body">'+
+                                        '<div class="part-box">'+
+                                            '<div class="part-box-header">'+
+                                                '<h4 class="title">' + part.Title + '</h4>' +
+                                            '</div>'+
+                                        '<div class="media-wrapper">' +part.Description+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                    '</div>';
+                                content.append(html);
+                            }
+                            if (part.Type == "VOCAB") {
+
                             }
                         }
                     }

@@ -11,6 +11,14 @@ namespace BaseCustomerEntity.Database
 {
     public class ExamEntity : EntityBase
     {
+        [JsonProperty("Timer")]
+        public int Timer { get; set; }
+        [JsonProperty("ClassID")]
+        public string ClassID { get; set; }
+        [JsonProperty("TeacherID")]
+        public string TeacherID { get; set; }
+        [JsonProperty("LessonID")]
+        public string LessonID { get; set; }
         [JsonProperty("LessonScheduleID")]
         public string LessonScheduleID { get; set; }
         [JsonProperty("StudentID")]
@@ -44,7 +52,7 @@ namespace BaseCustomerEntity.Database
         {
             var item = GetItemByID(ID);
             if (item == null) return false;
-            return (DateTime.Now - item.CurrentDoTime).TotalSeconds <= 0;
+            return (DateTime.Now - item.CurrentDoTime.AddMinutes(item.Timer)).TotalSeconds <= 0;
         }
         
     }

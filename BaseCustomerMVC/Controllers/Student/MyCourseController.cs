@@ -130,9 +130,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     { "Data", DataResponse.Select(
                         o=> _mapping.AutoOrtherType(o,new LessonScheduleViewModel(){
-                                //IsActive = _lessonScheduleService.GetItemByID(ClassID).IsActive,
-                                //StartDate = _lessonScheduleService.GetItemByID(ClassID).StartDate,
-                                //EndDate = _lessonScheduleService.GetItemByID(ClassID).EndDate,
+                                IsActive = _lessonScheduleService.GetItemByID(ClassID).IsActive,
+                                StartDate = _lessonScheduleService.GetItemByID(ClassID).StartDate,
+                                EndDate = _lessonScheduleService.GetItemByID(ClassID).EndDate,
                             })
                         )
                     }
@@ -165,13 +165,13 @@ namespace BaseCustomerMVC.Controllers.Student
             var listPart = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID);
            // var listPartOriginal = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID);
             if (listPart == null) return null;
-
+            var listData = listPart.ToList();
             MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
             MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
             MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
             var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
             {
-                Parts = listPart.ToList().Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
                 {
                     Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID)?.ToList()
                         .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()

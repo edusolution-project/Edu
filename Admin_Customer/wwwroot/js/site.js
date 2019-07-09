@@ -175,3 +175,63 @@ function hideModal() {
     $('.modal-backdrop').hide();
     $('body').removeClass("modal-open");
 }
+//var urlStart = '@Url.Action("Create","Example")';
+function StartDoExam(url, Timer, TeacherID, ClassID, LessonID, LessonScheduleID, StudentID) {
+    var dataform = new FormData();
+        dataform.append("Timer", Timer);
+        dataform.append("TeacherID", TeacherID);
+        dataform.append("ClassID", ClassID);
+        dataform.append("LessonID", LessonID);
+        dataform.append("LessonScheduleID", LessonScheduleID);
+    dataform.append("StudentID", StudentID);
+    Ajax(url, "POST", dataform, false)
+        .then(function (res) {
+            console.log(res);
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
+
+}
+//var urlComplete = '@Url.Action("CompleteExam","Example")';
+function CompelteExample(url,ExamID,StudentID) {
+    var dataform = new FormData();
+        dataform.append("ExamID", ExamID);
+        dataform.append("StudentID", StudentID);
+    Ajax(url, "POST", dataform, false)
+        .then(function (res) {
+            console.log(res);
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
+}
+//var urlChose = '@Url.Action("CreateDetails","Example")';
+function ChosenAnswer(url,ID, ExamID, QuestionID, AnswerID, StudentID,AnswerValue) {
+    var dataform = new FormData();
+        dataform.append("ExamID", ExamID);
+        dataform.append("ID", ID);
+        dataform.append("AnswerID", AnswerID);
+        dataform.append("QuestionID", QuestionID);
+        dataform.append("StudentID", StudentID);
+        dataform.append("AnswerValue", AnswerValue);
+    Ajax(url, "POST", dataform, false)
+        .then(function (res) {
+            console.log(res);
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
+}
+function OverTime(ExamID, StudentID) {
+    var dataform = new FormData();
+    dataform.append("ExamID", ExamID);
+    dataform.append("StudentID", StudentID);
+    Ajax(url, "POST", dataform, false)
+        .then(function (res) {
+            console.log(res);
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
+}
