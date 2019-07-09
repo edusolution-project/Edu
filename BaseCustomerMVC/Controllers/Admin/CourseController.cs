@@ -54,6 +54,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _classProgressService = classProgressService;
             _env = evn;
         }
+
         public ActionResult Index(DefaultModel model)
         {
             ViewBag.Course = _courseService.GetAll()?.ToList();
@@ -299,8 +300,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
-            var filePath = Path.Combine(_env.WebRootPath, itemCourse.ID + "_" + file.FileName);
-            List<string> studentList = null;
+            var filePath = Path.Combine(_env.WebRootPath, itemCourse.ID + "_" + file.FileName + DateTime.Now.ToString("ddMMyyyyhhmmss"));
+            List<StudentEntity> studentList = null;
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
@@ -312,22 +313,22 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {
                         ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
                         int totalRows = workSheet.Dimension.Rows;
-                        studentList = new List<string>();
-                        for (int i = 2; i <= totalRows; i++)
+                        studentList = new List<StudentEntity>();
+                        for (int i = 1; i <= totalRows; i++)
                         {
                             if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                            var StudentId = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
-                            studentList.Add(StudentId);
+                            var studentEmail = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
+                            var student = _studentService.CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
+                            if (student != null)
+                                studentList.Add(student);
                         }
-                        var listData = _studentService.Collection.Find(o => studentList.Contains(o.StudentId))?.ToList();
-                        if (listData != null)
-                        {
-                            var listID = listData.Select(o => o.ID);
-                            itemCourse.Students.AddRange(listID);
-                            itemCourse.Students = itemCourse.Students.Distinct().ToList();
-                            _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
-                        }
+
+                        var listID = studentList.Select(o => o.ID);
+                        itemCourse.Students.AddRange(listID);
+                        itemCourse.Students = itemCourse.Students.Distinct().ToList();
+                        _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
                     }
+                    System.IO.File.Delete(filePath);
                 }
                 catch (Exception ex)
                 {

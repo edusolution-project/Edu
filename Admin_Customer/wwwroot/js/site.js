@@ -46,25 +46,24 @@ var Ajax = function (url, method, data, async) {
         request.send(data);
     });
 }
-function Submit(formName, url, actionName,fn) {
+function Submit(formName, url, actionName, fn) {
     var form = document.querySelector('form[name="' + formName + '"]');
     var _url = url == "" || url == void 0 || url == null ? form.action : url;
     var _method = form.method;
     var requires = $(form).find(':required');
-    
+
     var err = false;
 
-    requires.each(function(){
-        if($(this).val() == "")
-        {
+    requires.each(function () {
+        if ($(this).val() == "" || $(this).val() == null) {
             alert("Vui lòng nhập đủ thông tin");
             $(this).focus();
             err = true;
         }
     });
 
-    if(err) return false;
-       
+    if (err) return false;
+
     if (actionName.toLowerCase() == "delete" || actionName.toLowerCase() == "publish" || actionName.toLowerCase == "unpublish") {
         var arr_input = form.querySelector('input[name="ArrID"]');
         var listCheckBox = form.querySelectorAll('input[name="cid"]');
@@ -72,21 +71,23 @@ function Submit(formName, url, actionName,fn) {
             for (var i = 0; listCheckBox != null && listCheckBox.length > 0 && i < listCheckBox.length; i++) {
                 if (listCheckBox[i].checked) {
                     arr_input.value += arr_input.value == ""
-                        ? listCheckBox[i].value 
+                        ? listCheckBox[i].value
                         : "," + listCheckBox[i].value;
                 }
             }
         }
     }
+    $(form).find("input:disabled").removeAttr("disabled");
+
     var data = new FormData(form);
     Ajax(_url, _method, data, true)
         .then(function (res) {
-            if(fn != void 0) fn();
+            if (fn != void 0) fn();
         }).catch(function (res) {
             console.log(actionName, res);
         });
 }
-function Export(formName,url) {
+function Export(formName, url) {
     var form = document.querySelector('form[name="' + formName + '"]');
     var arr_input = form.querySelector('input[name="ArrID"]');
     var listCheckBox = form.querySelectorAll('input[name="cid"]');
@@ -126,6 +127,7 @@ function Add(_this) {
     for (var i = 0; i < listselect.length; i++) {
         listselect[i].value = $(listselect[i]).find('option:first').attr("value");
     }
+    $(form).find("input:disabled").removeAttr("disabled");
 }
 function Edit(id, urlGetData, urlPostData, _this) {
     var modal = document.querySelector(_this.getAttribute("data-target"));
@@ -138,6 +140,7 @@ function Edit(id, urlGetData, urlPostData, _this) {
     else {
         inputID.value = id;
     }
+    $(form).find("input[locked]").attr("disabled", "disabled");
     var data = new FormData(form);
     Ajax(urlGetData, "POST", data, true).then(function (res) {
         var item = JSON.parse(res);
@@ -145,10 +148,9 @@ function Edit(id, urlGetData, urlPostData, _this) {
         var listinput = $(form).find('input');
         for (var i = 0; i < listinput.length; i++) {
             listinput[i].value = item.Data[listinput[i].name];
-            if($(listinput[i]).hasClass("hiddenDate"))
-            {
+            if ($(listinput[i]).hasClass("hiddenDate")) {
                 var fieldId = $(listinput[i]).attr("id");
-                
+
                 $(listinput[i]).prev().removeClass("hasDatepicker").val($.datepicker.formatDate('dd/mm/yy', new Date(item.Data[listinput[i].name]))).datepicker({
                     dateFormat: 'dd/mm/yy',
                     altField: '#' + fieldId,
@@ -166,7 +168,7 @@ function ExcuteOnlyItem(id, url, fn) {
     var data = new FormData();
     data.append("ArrID", id);
     Ajax(url, "POST", data, true).then(function () {
-        if(fn != void 0) fn();
+        if (fn != void 0) fn();
     })
 }
 

@@ -93,7 +93,7 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <input type="email" class="form-control" name="Email" id="inputEmail" placeholder="Email" disabled>
+                                <input type="email" class="form-control" name="Email" id="inputEmail" placeholder="Email" disabled locked>
                             </div>
                             <div class="form-group col-md-6">
                                 <input type="text" class="form-control" name="Phone" id="inputPhone" placeholder="Số điện thoại">
@@ -149,7 +149,7 @@
                 </div>
                 <div class="modal-footer">
                     <div class="button-left">
-                        <button type="button" class="btn btn-secondary">Tải file mẫu</button>
+                        <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')">Tải file mẫu</button>
                     </div>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                     <button type="button" class="btn btn-primary" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
