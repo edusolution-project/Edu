@@ -21,6 +21,12 @@ namespace BaseCustomerEntity.Database
         public string AnswerID { get; set; }
         [JsonProperty("RealAnswerID")]
         public string RealAnswerID { get; set; }
+        [JsonProperty("QuestionValue")]
+        public string QuestionValue { get; set; }
+        [JsonProperty("AnswerValue")]
+        public string AnswerValue { get; set; }
+        [JsonProperty("RealAnswerValue")]
+        public string RealAnswerValue { get; set; }
         [JsonProperty("Point")]
         public double Point { get; set; }
         [JsonProperty("Created")]
