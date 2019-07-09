@@ -21,8 +21,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _service;
-        private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
-        
+        private readonly Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
 
         public LessonScheduleController(
             // GradeService gradeservice
@@ -42,7 +41,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _chapterService = chapterService;
             _lessonService = lessonService;
             _service = service;
-            _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
+            _mapping = new Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel>();
         }
 
         [Obsolete]
@@ -98,20 +97,80 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _service.CreateQuery().Find(o => o.LessonID == r.ID).FirstOrDefault()
-                           select _mapping.AutoOrtherType(r, new LessonScheduleViewModel() {
+                           let schedule = _service.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
+                           select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()
+                           {
+                               ScheduleID = schedule.ID,
                                StartDate = schedule.StartDate,
-                               EndDate = schedule.EndDate
+                               EndDate = schedule.EndDate,
+                               IsActive = schedule.IsActive
                            })).ToList()
             };
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", classSchedule },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
+        [HttpPost]
+        [Obsolete]
+        public JsonResult Publish(DefaultModel model)
+        {
+
+            if (model.ArrID.Length <= 0)
+            {
+                return new JsonResult(null);
+            }
+            else
+            {
+                if (model.ArrID.Contains(","))
+                {
+                    var filter = Builders<LessonScheduleEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive != true);
+                    var update = Builders<LessonScheduleEntity>.Update.SetOnInsert("IsActive", true);
+                    var publish = _service.Collection.UpdateMany(filter, update, new UpdateOptions() { IsUpsert = true });
+                    return new JsonResult(publish);
+                }
+                else
+                {
+                    var filter = Builders<LessonScheduleEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive != true);
+                    var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", true);
+                    var publish = _service.Collection.UpdateMany(filter, update, new UpdateOptions() { IsUpsert = true });
+                    return new JsonResult(publish);
+                }
+
+            }
+        }
+
+        [HttpPost]
+        [Obsolete]
+        public JsonResult UnPublish(DefaultModel model)
+        {
+            if (model.ArrID.Length <= 0)
+            {
+                return new JsonResult(null);
+            }
+            else
+            {
+                if (model.ArrID.Contains(","))
+                {
+                    var filter = Builders<LessonScheduleEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == true);
+                    var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", false);
+                    var publish = _service.Collection.UpdateMany(filter, update);
+                    return new JsonResult(publish);
+                }
+                else
+                {
+                    var filter = Builders<LessonScheduleEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == true);
+                    var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", false);
+                    var publish = _service.Collection.UpdateMany(filter, update);
+                    return new JsonResult(publish);
+                }
+
+
+            }
+        }
     }
 }

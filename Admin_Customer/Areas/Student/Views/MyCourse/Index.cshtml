@@ -34,13 +34,13 @@
     </div>
 <!-- End of Main Content -->
 
-    <script>
+    @section Scripts{ <script>
         function LoadData() {
-        var searchText = $("#searchText").val();
-        var startDate = $("#startDate_sort").val();
-        var endDate = $("#endDate_sort").val();
-        var SubjectID = $("#SubjectID").val();
-        var GradeID = $("#GradeID").val();
+        var searchText = $("#searchText").val() == void 0? "" :$("#searchText").val();
+        var startDate = $("#startDate_sort").val()== void 0? "" :$("#startDate_sort").val();
+        var endDate = $("#endDate_sort").val()== void 0 ? "" :$("#endDate_sort").val();
+        var SubjectID = $("#SubjectID").val()== void 0 ? "" :$("#SubjectID").val();
+        var GradeID = $("#GradeID").val()== void 0? "" : $("#GradeID").val();
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "MyCourse")',
@@ -66,9 +66,14 @@
                         body.append("<tr>" +
                             "<td><a href='@Url.Action("StudentCalendar", "MyCourse")/"+item.CourseID+"'>" + item.Name + "</a></td>" +
                             "<td>" + item.SubjectName + "</td>" +
+<<<<<<< HEAD
                             "<td>" + item.CourseName + "</td>" +
+=======
+                            "<td><a href='"+'@Url.Action("Calendar", "MyCourse")'+"/"+item.CourseID+"/"+item.ID+"'>" + item.CourseName + "</a></td>" +
+>>>>>>> origin/Longht_2019_07_08_Update_Student_and_fix_error_null
                             "<td>" + item.GradeName + "</td>" +
                             "<td>" + item.TeacherName + "</td>" +
+                            "<td>" + item.StudentNumber + "</td>" +
                             "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
                             "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" +
                             //active +
@@ -77,14 +82,12 @@
                     }
                 }
             },
-            error: function() {
-                alert("Error");
+            error: function (err) {
+                console.log(err.responseText)
             }
         });
     };
 
-    $(document).ready(function () {
-        LoadData();
-    });
+    LoadData();
 
-</script>
+</script>}

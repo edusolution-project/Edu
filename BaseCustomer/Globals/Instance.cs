@@ -14,7 +14,7 @@ namespace BaseCustomerEntity.Globals
             services.AddTransient<PermissionService>();
             services.AddTransient<RoleService>();
             services.AddTransient<StudentService>();
-            services.AddTransient<TeacherService>();
+            services.AddTransient<TeacherService>();            
             services.AddTransient<AccountLogService>();
             services.AddTransient<ModProgramService>();
             services.AddTransient<ModCourseService>();
@@ -39,7 +39,12 @@ namespace BaseCustomerEntity.Globals
             services.AddTransient<LessonPartQuestionService>();
             services.AddTransient<LessonScheduleService>();
 
+            services.AddTransient<CloneLessonPartService>();
+            services.AddTransient<CloneLessonPartAnswerService>();
+            services.AddTransient<CloneLessonPartQuestionService>();
+
             services.AddTransient<ClassService>();
+            services.AddTransient<ClassProgressService>();
 
             return services;
         }

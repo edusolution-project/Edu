@@ -36,8 +36,6 @@ function tab_goback() {
     }
 };
 
-
-
 /* check all input */
 function toggleAll(obj, wrapperid) {
     var wrapper = $('#' + wrapperid);
@@ -61,7 +59,7 @@ function start(obj) {
 }
 function countdown() {
     clearTimeout(r);
-    var time = $("#counter").text().trim();
+    var time = $(".time-counter").text().trim();
     var minutes = parseInt(time.split(":")[0]);
     var second = parseInt(time.split(":")[1]);
     if (second > 0) {
@@ -77,19 +75,16 @@ function countdown() {
             return;
         }
     }
-    $("#counter").text((minutes < 10 ? ("0" + minutes) : minutes) + ":" + (second < 10 ? ("0" + second) : second));
+    $(".time-counter").text((minutes < 10 ? ("0" + minutes) : minutes) + ":" + (second < 10 ? ("0" + second) : second));
     var r = setTimeout(function () {
         countdown();
     }, 1000);
 }
 function endtime() {
-
+    alert("Thời gian làm bài đã kết thúc! Cảm ơn bạn");
 }
 
 /* tooltip*/
-$(document).ready(function(){
-    $('[data-toggle="tooltip"]').tooltip();
-});
 
 $(document).ready(function () {
     $('.btn').tooltip();

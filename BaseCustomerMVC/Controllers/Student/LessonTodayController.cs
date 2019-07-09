@@ -1,5 +1,6 @@
 ﻿using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Globals;
+using BaseCustomerMVC.Models;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -25,9 +26,17 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-
-        public IActionResult LessonStudent()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="id">LessonID</param>
+        /// <param name="ClassID">ClassID</param>
+        /// <returns></returns>
+        public IActionResult LessonStudent(DefaultModel model,string id,string ClassID)
         {
+            ViewBag.LessonID = id;
+            ViewBag.ClassID = ClassID;
             return View();
         }
     }

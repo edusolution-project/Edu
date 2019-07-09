@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BaseCustomerEntity.Database
 {
-    public class AccountEntity: EntityBase
+    public class AccountEntity : EntityBase
     {
         [JsonProperty("UserID")]
         public string UserID { get; set; }
@@ -35,10 +35,16 @@ namespace BaseCustomerEntity.Database
         {
 
         }
-        public AccountEntity GetAccount(string type,string userName,string passWord)
+        public AccountEntity GetAccount(string type, string userName, string passWord)
         {
             var pass = passWord;
             return Collection.Find(o => o.Type == type && o.UserName == userName && (o.PassWord == pass || o.PassTemp == pass))?.SingleOrDefault();
+        }
+
+        [Obsolete]
+        public bool IsAvailable(string userName)
+        {
+            return Collection.Count(o => o.UserName == userName) > 0;
         }
     }
 }

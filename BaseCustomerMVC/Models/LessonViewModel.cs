@@ -2,15 +2,14 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System;
+using Core_v2.Repositories;
 
 namespace BaseCustomerMVC.Models
 {
-    public class LessonViewModel
+    public class LessonViewModel : EntityBase
     {
-        [JsonProperty("ID")]
-        public string ID { get; set; }
-        [JsonProperty("Name")]
-        public string Name { get; set; }
+        [JsonProperty("Title")]
+        public string Title { get; set; }
         [JsonProperty("IsActive")]
         public bool IsActive { get; set; }
         [JsonProperty("Order")]

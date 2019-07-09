@@ -2,27 +2,18 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System;
+using Core_v2.Repositories;
 
 namespace BaseCustomerMVC.Models
 {
-    public class PartViewModel
+    public class PartViewModel:CloneLessonPartEntity
     {
-        [JsonProperty("ID")]
-        public string ID { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
         [JsonProperty("IsActive")]
         public bool IsActive { get; set; }
-        [JsonProperty("Order")]
-        public int Order { get; set; }
-        [JsonProperty("Media")]
-        public Media Media { get; set; }
         [JsonProperty("TemplateType")]
         public int TemplateType { get; set; }
-        [JsonProperty("Point")]
-        public int Point { get; set; }
-        [JsonProperty("Timer")]
-        public int Timer { get; set; }
         [JsonProperty("CreateUser")]
         public string CreateUser { get; set; }
         [JsonProperty("Questions")]

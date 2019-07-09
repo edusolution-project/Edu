@@ -1,17 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿using Core_v2.Repositories;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
-    public class MyClassViewModel
+    public class MyClassViewModel:EntityBase
     {
-        [JsonProperty("ID")]
-        public string ID { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
-        [JsonProperty("CourseID")]
+        [JsonProperty("SubjectName")]
         public string SubjectName { get; set; }
         [JsonProperty("CourseID")]
         public string CourseID { get; set; }
@@ -27,8 +26,8 @@ namespace BaseCustomerMVC.Models
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }
-        [JsonProperty("Status")]
-        public bool Status { get; set; }
+        [JsonProperty("IsActive")]
+        public bool IsActive { get; set; }
         [JsonProperty("StudentNumber")]
         public int StudentNumber { get; set; }
     }

@@ -27,6 +27,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly StudentService _studentService;
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
+        private readonly ClassProgressService _classProgressService;
         private readonly IHostingEnvironment _env;
 
 
@@ -39,6 +40,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             , StudentService studentService
             , LessonService lessonService
             , LessonScheduleService lessonScheduleService
+            , ClassProgressService classProgressService
             , IHostingEnvironment evn)
         {
             _service = service;
@@ -49,6 +51,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _studentService = studentService;
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
+            _classProgressService = classProgressService;
             _env = evn;
         }
         public ActionResult Index(DefaultModel model)
@@ -92,7 +95,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse.Select(o=> new ClassViewModel(o){
                         CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
@@ -102,7 +105,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     }).ToList() },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
 
         }
 
@@ -132,11 +135,11 @@ namespace BaseCustomerMVC.Controllers.Admin
             var filter = Builders<ClassEntity>.Filter.Where(o => o.ID == id);
             var data = _service.Collection.Find(filter);
             var DataResponse = data == null || data.Count() <= 0 ? null : data.First();
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
 
         }
 
@@ -150,12 +153,14 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.Created = DateTime.Now;
                 _service.CreateQuery().InsertOne(item);
 
+
+                //Create Class => Create Lesson Schedule & Class Progress
+                var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
+
+                //Create Lesson Schedule
                 var schedules = new List<LessonScheduleEntity>();
-
-                    var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
-
                 if (lessons != null)
-                    foreach(LessonEntity lesson in lessons)
+                    foreach (LessonEntity lesson in lessons)
                     {
                         _lessonScheduleService.CreateQuery().InsertOne(new LessonScheduleEntity
                         {
@@ -165,7 +170,15 @@ namespace BaseCustomerMVC.Controllers.Admin
                             EndDate = item.EndDate
                         });
                     }
-
+                //Create Class Progress
+                var classProgress = new ClassProgressEntity()
+                {
+                    ClassID = item.ID,
+                    TotalLessons = lessons.Count,
+                    CompletedLessons = 0,
+                    LastDate = DateTime.Now
+                };
+                _classProgressService.CreateQuery().InsertOne(classProgress);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {

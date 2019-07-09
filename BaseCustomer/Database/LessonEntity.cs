@@ -42,6 +42,12 @@ namespace BaseCustomerEntity.Database
         public DateTime Updated { get; set; }
 
     }
+
+    public class LESSON_TEMPLATE
+    {
+        public const int LECTURE = 1, EXAM = 2;
+    }
+
     public class LessonService : ServiceBase<LessonEntity>
     {
         public LessonService(IConfiguration config) : base(config)

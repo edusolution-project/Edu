@@ -19,7 +19,6 @@ namespace BaseCustomerMVC.Models
         public List<ChapterViewModel> Chapters { get; set; } = new List<ChapterViewModel>() { };
         [JsonProperty("Lessons")]
         public List<LessonViewModel> Lessons { get; set; } = new List<LessonViewModel>() { };
-        
     }
     
 

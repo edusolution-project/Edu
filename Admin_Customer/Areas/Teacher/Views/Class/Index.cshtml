@@ -20,7 +20,7 @@
                 <div class="form-group row col-md-4">
                     <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
                     <div class="col-sm-8">
-                        <select id="SubjectID" class="form-control">
+                        <select id="SubjectID" class="form-control" onchange="LoadData()">
                             @{
                                 for (int i = 0; listSubject != null && i < listSubject.Count; i++)
                                 {
@@ -34,7 +34,7 @@
                 <div class="form-group row col-md-4 offset-4">
                     <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
                     <div class="col-sm-8">
-                        <select id="GradeID" class="form-control">
+                        <select id="GradeID" class="form-control" onchange="LoadData()">
                             @{
                                 for (int i = 0; listGrade != null && i < listGrade.Count; i++)
                                 {
@@ -89,7 +89,7 @@
                 {
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
-                        var active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                        var active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' disabled> <div class='handle'></div> </button></td>";
 
                         body.append("<tr>" +
                             "<td>" + (i + 1) + "</td>" +

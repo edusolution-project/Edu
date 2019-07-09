@@ -60,12 +60,12 @@ namespace BaseCustomerMVC.Controllers.Admin
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
 
         }
     }
