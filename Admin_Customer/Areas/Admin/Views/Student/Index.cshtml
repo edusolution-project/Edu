@@ -37,6 +37,7 @@
                                 <th>STT</th>
                                 <th>Mã học viên</th>
                                 <th>Họ tên</th>
+                                <th>Email</th>
                                 <th>Ngày sinh</th>
                                 <th>Lớp</th>
                                 <th>Trạng thái</th>
@@ -79,12 +80,13 @@
                                 <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên">
                             </div>
                             <div class="form-group col-md-6">
-                                <input type="email" class="form-control" name="Email" id="inputEmail" placeholder="Email">
+                                <input type="email" class="form-control" name="Email" id="inputEmail" placeholder="Email" disabled>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <input type="date" class="form-control" name="DateBorn" id="inputDate" placeholder="Ngày tháng năm sinh">
+                                <input type="text" class="form-control datepicker" placeholder="Ngày sinh">
+                                <input type="hidden" name="DateBorn" class="hiddenDate" id="DateBorn" value="">
                             </div>
                             <div class="form-group col-md-6">
                                 <input type="text" class="form-control" name="Phone" id="inputPhone" placeholder="Số điện thoại">
@@ -146,6 +148,15 @@
     </div>
 </div>
 <script>
+    $('.datepicker').each(function () {
+        var fieldID = $(this).next().attr("id");
+        $(this).datepicker({
+            dateFormat: 'dd/mm/yy',
+            altField: '#' + fieldID,
+            altFormat: 'mm/dd/yy'
+        }).val("");
+    })
+
     function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
         $.ajax({
             type: "POST",
@@ -165,12 +176,14 @@
                         } else {
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","student")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
+                         var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.DateBorn));
+
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td>" + (i + 1) + "</td>" +
                             "<td>" + item.StudentId +"</td>" +
                             "<td>" + item.FullName + "</td>" +
-                            "<td>" + new Date(item.DateBorn).toLocaleDateString() +"</td>" +
+                            "<td>" + date +"</td>" +
                             "<td>" + item.Class + "</td>" +active +
                             "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +

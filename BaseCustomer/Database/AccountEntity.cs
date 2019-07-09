@@ -16,6 +16,8 @@ namespace BaseCustomerEntity.Database
         public string Type { get; set; } // admin/student/teacher
         [JsonProperty("UserName")]
         public string UserName { get; set; }
+        [JsonProperty("Name")]
+        public string Name { get; set; }
         [JsonProperty("PassWord")]
         public string PassWord { get; set; }
         [JsonProperty("PassTemp")]

@@ -146,11 +146,13 @@
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Ngày bắt đầu:</label>
-                            <input type="date" name="StartDate" class="form-control" id="inputText">
+                            <input type="text" class="form-control datepicker" placeholder="Ngày sinh">
+                            <input type="hidden" name="StartDate" class="hiddenDate" id="StartDate" value="">
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Ngày kết thúc:</label>
-                            <input type="date" name="EndDate" class="form-control" id="inputText">
+                            <input type="text" class="form-control datepicker" placeholder="Ngày sinh">
+                            <input type="hidden" name="EndDate" class="hiddenDate" id="EndDate" value="">
                         </div>
                     </div>
                     <div class="row">
@@ -218,6 +220,14 @@
     </div>
 </div>
 <script>
+    $('.datepicker').each(function () {
+        var fieldID = $(this).next().attr("id");
+        $(this).datepicker({
+            dateFormat: 'dd/mm/yy',
+            altField: '#' + fieldID,
+            altFormat: 'mm/dd/yy'
+        }).val("");
+    })
 
     function loadCourse() {
          var course = $("select[name='CourseID']");
@@ -234,7 +244,6 @@
             success: function (res) {
                 if (res != null) {
                     if (res.length > 0) {
-
                         for (var i = 0; i < res.length; i++) {
                             course.append("<option value='" + res[i].ID + "'>" + res[i].Name + "</option>");
                         }
@@ -271,13 +280,17 @@
                         } else {
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
+
+                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
+                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
+
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td>" + (i + 1) + "</td>" +
                             "<td>" + item.Name + "</td>" +
                             "<td>" + item.TeacherName + "</td>" +
-                            "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
-                            "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" +
+                            "<td>" + startdate + "</td>" +
+                            "<td>" + enddate + "</td>" +
                             active +
                             "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "Course")','@Url.Action("create", "Course")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "Course")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
@@ -297,8 +310,7 @@
         LoadData();
     });
 
-
-     function LoadGrade() {
+    function LoadGrade() {
         var subject = $("#SubjectID").val();
         var grade = $("#GradeID").val();
         $('#GradeID option:gt(0)[for!=' + subject + ']').hide();

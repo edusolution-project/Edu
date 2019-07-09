@@ -75,7 +75,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
             var DataResponse = teacher.ToList().Select(t => _mapping.AutoOrtherType(t, new TeacherViewModel()
             {
-                SubjectList = _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList()
+                SubjectList = t.Subjects == null ? null : _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList()
             })).ToList();
             var response = new Dictionary<string, object>
             {

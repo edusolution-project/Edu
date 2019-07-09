@@ -457,6 +457,7 @@ var render = {
         //render question
         switch (template) {
             case "QUIZ2":
+                alert(1);
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });

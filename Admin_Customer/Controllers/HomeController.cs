@@ -53,7 +53,7 @@ namespace Admin_Customer.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Register(string UserName, string PassWord, string Type)
+        public IActionResult Register(string UserName, string Name, string PassWord, string Type)
         {
             if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
             {
@@ -74,6 +74,7 @@ namespace Admin_Customer.Controllers
                     {
                         PassWord = _sPass,
                         UserName = UserName,
+                        Name = Name,
                         Type = Type,
                         IsActive = false,
                         CreateDate = DateTime.Now,
@@ -96,7 +97,7 @@ namespace Admin_Customer.Controllers
                         case "teacher":
                             var teacher = new TeacherEntity()
                             {
-                                FullName = user.UserName,
+                                FullName = user.Name,
                                 Email = user.UserName,
                                 IsActive = false,
                                 CreateDate = DateTime.Now
@@ -108,7 +109,7 @@ namespace Admin_Customer.Controllers
                         default:
                             var student = new StudentEntity()
                             {
-                                FullName = user.UserName,
+                                FullName = user.Name,
                                 Email = user.UserName,
                                 IsActive = false,
                                 CreateDate = DateTime.Now

@@ -404,7 +404,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             _lessonService.CreateQuery().InsertOne(item);
 
-
             var lessonpart = _modlessonPartService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
             if (lessonpart != null)
             {

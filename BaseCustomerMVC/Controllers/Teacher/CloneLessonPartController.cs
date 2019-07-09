@@ -94,7 +94,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             Answers = _cloneLessonPartAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
                         }).ToList()
                     }));
-                    
+
                 }
                 else
                 {
@@ -103,12 +103,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (listLessonPart != null && listLessonPart.Count > 0)
                     {
                         foreach (var lessonpart in listLessonPart)
-                            CloneLessonPart(_lessonpartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity()
-                            {
-                                OriginID = lessonpart.ID,
-                                TeacherID = currentClass.TeacherID,
-                                ID = null
-                            }));
+                        {
+                            var clonepart = _lessonpartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity());
+                            clonepart.ID = null;
+                            clonepart.OriginID = lessonpart.ID;
+                            clonepart.TeacherID = currentClass.TeacherID;
+                            CloneLessonPart(clonepart);
+                        }
+
                         listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.TeacherID == currentClass.TeacherID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
 
                         data.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
@@ -138,11 +140,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 foreach (var question in list)
                 {
-                    CloneLessonQuestion(_lessonpartQuestionMapping.AutoOrtherType(question, new CloneLessonPartQuestionEntity()
-                    {
-                        OriginID = question.ID,
-                        ID = null
-                    }));
+                    var cloneQuestion = _lessonpartQuestionMapping.AutoOrtherType(question, new CloneLessonPartQuestionEntity());
+                    cloneQuestion.OriginID = question.ID;
+                    cloneQuestion.ParentID = item.ID;
+                    cloneQuestion.ID = null;
+                    CloneLessonQuestion(cloneQuestion);
                 }
             }
         }
@@ -156,11 +158,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 foreach (var answer in list)
                 {
-                    CloneLessonAnswer(_lessonpartAnswerMapping.AutoOrtherType(answer, new CloneLessonPartAnswerEntity()
-                    {
-                        OriginID = answer.ID,
-                        ID = null
-                    }));
+                    var cloneAnswer = _lessonpartAnswerMapping.AutoOrtherType(answer, new CloneLessonPartAnswerEntity());
+                    cloneAnswer.OriginID = answer.ID;
+                    cloneAnswer.ParentID = item.ID;
+                    cloneAnswer.ID = null;
+                    CloneLessonAnswer(cloneAnswer);
                 }
             }
         }
