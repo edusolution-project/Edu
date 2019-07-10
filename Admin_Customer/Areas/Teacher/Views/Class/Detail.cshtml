@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Detail";
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var curentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
@@ -463,7 +462,7 @@
                                     <input type="checkbox" aria-label="Checkbox">
                                 </div>
                             </td>
-                            <td><a href="@Url.Action("Exam" , "Lesson")">Bài kiểm tra số 1</a></td>
+                            <td><a href="@Url.Action(" Exam" , "Lesson" )">Bài kiểm tra số 1</a></td>
                             <td>test</td>
                             <td>07/06/2019</td>
                             <td>31/06/2019</td>
@@ -476,7 +475,7 @@
                                     <input type="checkbox" aria-label="Checkbox">
                                 </div>
                             </td>
-                            <td><a href="@Url.Action("Exam" , "Lesson")">Bài kiểm tra số 2</a></td>
+                            <td><a href="@Url.Action(" Exam" , "Lesson" )">Bài kiểm tra số 2</a></td>
                             <td>test</td>
                             <td>07/06/2019</td>
                             <td>07/06/2019</td>
@@ -638,12 +637,39 @@
                 if (chapters.length > 0) {
                     for (i = 0; i < chapters.length; ++i) {
                         var chapter = chapters[i];
-                        scheduleBody.append("<tr chapid='" + chapter.ID + "'>" +
-                            "<td colspan='6'><b>" + chapter.Name + "</b></td>" +
-                            "</tr>"
-                        );
+                        var parent = scheduleBody;
+
+                        var chapLV = 0;
+                        if (chapter.ParentID == null) {
+                            chapter.ParentID = "0";
+                        }
+
+                        if (chapter.ParentID != "0")
+                        {
+                            parent = scheduleBody.find("tr[chapid=" + chapter.ParentID +"]");
+                        }
+
+                        var chapContent = $("<tr>", {"chapid":chapter.ID, "pid": chapter.ParentID, "clv": chapLV});
+                        chapContent.append("<td colspan='6'><b>" + chapter.Name + "</b>");
+
+                        if (chapter.ParentID === "0") {
+                            scheduleBody.append(chapContent);
+                        }
+                        else
+                        {
+                            var siblings = parent.find("tr[pid=" + chapter.ParentID + "]");
+
+                            if (siblings.length > 0) {
+                                $(siblings).last().after(chapContent);
+                            }
+                            else
+                            {
+                                parent.after(chapContent);
+                            }
+                        }
                     }
                 }
+
 
                 if (lessons.length > 0) {
                     for (j = lessons.length-1; j >= 0; j--) {
@@ -663,8 +689,8 @@
                             "<td>---</td>" +
                             "<td>" + item.StartDate + "</td>" +
                             "<td>" + item.EndDate + "</td>" + active +
-                                    "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","grade")','@Url.Action("create","grade")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                                    "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","grade")',LoadData); else return;\" data-placement='top' title='Xóa' type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                                    "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "grade")','@Url.Action("create", "grade")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                                    "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "grade")',LoadData); else return;\" data-placement='top' title='Xóa' type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                             );
@@ -678,8 +704,8 @@
                             "<td>---</td>" +
                             "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
                             "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" + active +
-                                    "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","grade")','@Url.Action("create","grade")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +
-                                    "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","grade")',LoadData); else return;\" type='button' class='btn btn-danger' data-placement='top' title='Xóa'> <i class='fas fa-trash'></i> </button>" +
+                                    "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "grade")','@Url.Action("create", "grade")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +
+                                    "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "grade")',LoadData); else return;\" type='button' class='btn btn-danger' data-placement='top' title='Xóa'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                             );
@@ -694,8 +720,13 @@
         });
     };
 
+    function LoadMembers() {
+
+    }
+
 
     $(document).ready(function () {
         LoadSchedule();
+        LoadMembers();
     });
 </script>

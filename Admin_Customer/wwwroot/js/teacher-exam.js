@@ -457,6 +457,7 @@ var render = {
         //render question
         switch (template) {
             case "QUIZ2":
+                alert(1);
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -662,11 +663,8 @@ var render = {
                 data.Media.Path = publisherPath + data.Media.Path;
             switch (type) {
                 case "IMG":
-<<<<<<< HEAD:Admin_Customer/wwwroot/js/exam.js
                     mediaHolder.append($("<img>", { "class": "img-fluid" , "src": data.media.path }));
-=======
                     mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
->>>>>>> origin/Longht_2019_07_08_Update_Student_and_fix_error_null:Admin_Customer/wwwroot/js/teacher-exam.js
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -678,7 +676,6 @@ var render = {
                     mediaHolder.append($("<embed>", { "src": data.Media.Path, "width": "100%", "height": "800px" }));
                     break;
                 default:
-<<<<<<< HEAD:Admin_Customer/wwwroot/js/exam.js
                     if (data.media.extension != null)
                         if (data.media.extension.indexOf("image") >= 0)
                             mediaHolder.append($("<img>", { "class": "img-fluid", "src": data.media.path }));
@@ -686,7 +683,6 @@ var render = {
                             mediaHolder.append("<video controls><source src='" + data.media.path + "' type='" + data.media.extension + "' />Your browser does not support the video tag</video>");
                         else if (data.media.extension.indexOf("audio") >= 0)
                             mediaHolder.append("<audio controls><source src='" + data.media.path + "' type='" + data.media.extension + "' />Your browser does not support the audio tag</audio>");
-=======
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
                             mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
@@ -694,7 +690,6 @@ var render = {
                             mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
                             mediaHolder.append("<audio controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
->>>>>>> origin/Longht_2019_07_08_Update_Student_and_fix_error_null:Admin_Customer/wwwroot/js/teacher-exam.js
                         else
                             mediaHolder.append($("<embed>", { "src": data.Answers.path }));
                     break;
@@ -724,7 +719,6 @@ var load = {
     },
     listPart: function (lessonID, classID) {
 
-<<<<<<< HEAD:Admin_Customer/wwwroot/js/exam.js
         var xhr = new XMLHttpRequest();
         //var url = urlBase;
         //xhr.open('GET', url + urlLessonPart.List + "?LessonID=" + lessonID + "&UserID=" + userID + "&ClientID=" + clientID);
@@ -739,7 +733,7 @@ var load = {
         }
         //    }
         //}
-=======
+
         var url = urlBase + "CloneLessonPart/";
         $.ajax({
             type: "POST",
@@ -750,7 +744,6 @@ var load = {
                 render.lessonPart(data.Data);
             }
         });
->>>>>>> origin/Longht_2019_07_08_Update_Student_and_fix_error_null:Admin_Customer/wwwroot/js/teacher-exam.js
     },
     listExtends: function (partID) {
         var xhr = new XMLHttpRequest();

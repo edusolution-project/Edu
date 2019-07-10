@@ -17,15 +17,16 @@
     </div>
     <div class="card-body">
         <div class="row">
-            <div id="menu-left" class="col-md-4">
+            <div class="col-lg-12">
+                <div class="breadcrumb-detail">
+                    <ul class="breadcrumb bg-white">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Detail","Curriculum")/@Course.ID">@Course.Name</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@Data.Title</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="menu-left" class="col-md-3">
                 <div class="header">
-                    <div class="breadcrumb-detail">
-                        <ul class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="@Url.Action("Detail","Curriculum")/@Course.ID">@Course.Name</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">@Data.Title</li>
-                        </ul>
-                    </div>
-
                     <div class="lesson-tabs">
                         <ul class="nav flex-column nav-pills" id="pills-tab" role="tablist" aria-orientation="vertical">
                             <li class="nav-item">
@@ -44,36 +45,32 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-9">
                 <div class="tab-content" id="pills-tabContent">
                     <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-                        <div class="card-body">
-                            <div class="part-box-header">
-                                <h4 class="title">Picture</h4>
+                        <div class="part-box-header">
+                            <h4 class="title">Picture</h4>
+                        </div>
+                        <div class="media-wrapper">
+                            <div class="media-holder">
+                                <img class="img-fluid" src="~/img/0001.jpg">
                             </div>
-                            <div class="media-wrapper">
-                                <div class="media-holder">
-                                    <img class="img-fluid" src="~/img/0001.jpg">
-                                </div>
-                                <div class="media-holder">
-                                    <img class="img-fluid" src="~/img/0002.jpg">
-                                </div>
+                            <div class="media-holder">
+                                <img class="img-fluid" src="~/img/0002.jpg">
                             </div>
                         </div>
                     </div>
 
                     <div class="tab-pane fade" id="pills-video" role="tabpanel" aria-labelledby="pills-video-tab">
-                        <div class="card-body">
-                            <div class="part-box VIDEO">
-                                <div class="part-box-header">
-                                    <h4 class="title">Demo Video</h4>
-                                </div>
-                                <div class="media-wrapper">
-                                    <div class="media-holder VIDEO">
-                                        <video controls="">
-                                            <source src="~/file/video/test.mp4" type="video/mp4">
-                                        </video>
-                                    </div>
+                        <div class="part-box VIDEO">
+                            <div class="part-box-header">
+                                <h4 class="title">Demo Video</h4>
+                            </div>
+                            <div class="media-wrapper">
+                                <div class="media-holder VIDEO">
+                                    <video controls="">
+                                        <source src="~/file/video/test.mp4" type="video/mp4">
+                                    </video>
                                 </div>
                             </div>
                         </div>
@@ -95,111 +92,127 @@
                     </div>
 
                     <div class="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-settings-tab">
-                        <div class="card-body">
-                            <div class="media">
-                                <img src="~/img/1.png" class="align-self-center mr-3 img-fluid" alt="...">
-                                <div class="media-body">
-                                    <h5 class="mt-0">1. Choose correct answers</h5>
-                                    <div class="content">
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">A.  has just opened and jobs are available </label>
-                                        </fieldset>
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">B.  is opening for longer and needs extra staff</label>
-                                        </fieldset>
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">C.  will open late because of job interviews </label>
-                                        </fieldset>
-                                    </div>
+                        <div class="media">
+                            <img src="~/img/1.png" class="align-self-center mr-3 img-fluid" alt="...">
+                            <div class="media-body">
+                                <h5 class="mt-0">1. Choose correct answers</h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        A.  has just opened and jobs are available
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
+                                    <label class="form-check-label" for="exampleRadios2">
+                                        B.  is opening for longer and needs extra staff
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3">
+                                    <label class="form-check-label" for="exampleRadios3">
+                                        C.  will open late because of job interviews
+                                    </label>
                                 </div>
                             </div>
-                            <hr />
-                            <div class="media">
-                                <img src="~/img/2.png" class="align-self-center mr-3 img-fluid" alt="...">
-                                <div class="media-body">
-                                    <h5 class="mt-0">2. Choose correct answers</h5>
-                                    <div class="content">
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">A.  has just opened and jobs are available </label>
-                                        </fieldset>
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">B.  is opening for longer and needs extra staff</label>
-                                        </fieldset>
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">C.  will open late because of job interviews </label>
-                                        </fieldset>
-                                    </div>
+                        </div>
+                        <hr />
+                        <div class="media">
+                            <img src="~/img/2.png" class="align-self-center mr-3 img-fluid" alt="...">
+                            <div class="media-body">
+                                <h5 class="mt-0">2. Choose correct answers</h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        A.  has just opened and jobs are available
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
+                                    <label class="form-check-label" for="exampleRadios2">
+                                        B.  is opening for longer and needs extra staff
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3">
+                                    <label class="form-check-label" for="exampleRadios3">
+                                        C.  will open late because of job interviews
+                                    </label>
                                 </div>
                             </div>
-                            <hr />
-                            <div class="media">
-                                <img src="~/img/3.png" class="align-self-center mr-3 img-fluid" alt="...">
-                                <div class="media-body">
-                                    <h5 class="mt-0">3. Choose correct answers</h5>
-                                    <div class="content">
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">A.  has just opened and jobs are available </label>
-                                        </fieldset>
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">B.  is opening for longer and needs extra staff</label>
-                                        </fieldset>
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">C.  will open late because of job interviews </label>
-                                        </fieldset>
-                                    </div>
+                        </div>
+                        <hr />
+                        <div class="media">
+                            <img src="~/img/3.png" class="align-self-center mr-3 img-fluid" alt="...">
+                            <div class="media-body">
+                                <h5 class="mt-0">3. Choose correct answers</h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        A.  has just opened and jobs are available
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
+                                    <label class="form-check-label" for="exampleRadios2">
+                                        B.  is opening for longer and needs extra staff
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3">
+                                    <label class="form-check-label" for="exampleRadios3">
+                                        C.  will open late because of job interviews
+                                    </label>
                                 </div>
                             </div>
-
-                            <hr />
-                            <div class="media">
-                                <img src="~/img/4.png" class="align-self-center mr-3 img-fluid" alt="...">
-                                <div class="media-body">
-                                    <h5 class="mt-0">4. Choose correct answers</h5>
-                                    <div class="content">
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">A.  has just opened and jobs are available </label>
-                                        </fieldset>
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">B.  is opening for longer and needs extra staff</label>
-                                        </fieldset>
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">C.  will open late because of job interviews </label>
-                                        </fieldset>
-                                    </div>
+                        </div>
+                        <hr />
+                        <div class="media">
+                            <img src="~/img/4.png" class="align-self-center mr-3 img-fluid" alt="...">
+                            <div class="media-body">
+                                <h5 class="mt-0">4. Choose correct answers</h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        A.  has just opened and jobs are available
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
+                                    <label class="form-check-label" for="exampleRadios2">
+                                        B.  is opening for longer and needs extra staff
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3">
+                                    <label class="form-check-label" for="exampleRadios3">
+                                        C.  will open late because of job interviews
+                                    </label>
                                 </div>
                             </div>
-
-                            <hr />
-                            <div class="media">
-                                <img src="~/img/5.png" class="align-self-center mr-3 img-fluid" alt="...">
-                                <div class="media-body">
-                                    <h5 class="mt-0">5. Choose correct answers</h5>
-                                    <div class="content">
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">A.  has just opened and jobs are available </label>
-                                        </fieldset>
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">B.  is opening for longer and needs extra staff</label>
-                                        </fieldset>
-                                        <fieldset class="answer-item">
-                                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
-                                            <label class="answer-text">C.  will open late because of job interviews </label>
-                                        </fieldset>
-                                    </div>
+                        </div>
+                        <hr />
+                        <div class="media">
+                            <img src="~/img/5.png" class="align-self-center mr-3 img-fluid" alt="...">
+                            <div class="media-body">
+                                <h5 class="mt-0">5. Choose correct answers</h5>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        A.  has just opened and jobs are available
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
+                                    <label class="form-check-label" for="exampleRadios2">
+                                        B.  is opening for longer and needs extra staff
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3">
+                                    <label class="form-check-label" for="exampleRadios3">
+                                        C.  will open late because of job interviews
+                                    </label>
                                 </div>
                             </div>
                         </div>

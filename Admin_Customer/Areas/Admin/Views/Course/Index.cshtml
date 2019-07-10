@@ -1,10 +1,14 @@
 ﻿@{
     ViewData["Title"] = "Quản lý Khóa học";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    var listCourse = ViewBag.Course as List<BaseCustomerEntity.Database.CourseEntity>;
-    var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
-    var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
-    var listTeacher = ViewBag.Teacher as List<BaseCustomerEntity.Database.TeacherEntity>;
+    var listCourse = ViewBag.Course as List<BaseCustomerEntity.Database.CourseEntity>
+    ;
+    var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>
+        ;
+    var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>
+        ;
+    var listTeacher = ViewBag.Teacher as List<BaseCustomerEntity.Database.TeacherEntity>
+        ;
 }
 
 <!-- Begin Page Content -->
@@ -34,7 +38,7 @@
                         <div class="form-group row col-md-3">
                             <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
                             <div class="col-sm-8">
-                                <select id="SubjectID" class="form-control" onchange="LoadCourse()">
+                                <select id="SubjectID" class="form-control" onchange="LoadGrade()">
                                     @{
                                         for (int i = 0; listSubject != null && i < listSubject.Count; i++)
                                         {
@@ -48,11 +52,12 @@
                         <div class="form-group row col-md-3 offset-6">
                             <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
                             <div class="col-sm-8">
-                                <select id="GradeID" class="form-control" onchange="LoadCourse()">
+                                <select id="GradeID" class="form-control" onchange="LoadData()">
+                                    <option value="">-- Tất cả --</option>
                                     @{
                                         for (int i = 0; listGrade != null && i < listGrade.Count; i++)
                                         {
-                                            <option value="@listGrade[i].ID">@listGrade[i].Name</option>
+                                            <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
                                         }
 
                                     }
@@ -107,7 +112,7 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Môn học:</label>
-                            <select name="SubjectID" class="form-control" onchange="loadCourse()" required>
+                            <select name="SubjectID" class="form-control" onchange="LoadGradeInput(this)" required>
                                 @{
                                     for (int i = 0; listSubject != null && i < listSubject.Count; i++)
                                     {
@@ -123,7 +128,7 @@
                                 @{
                                     for (int i = 0; listGrade != null && i < listGrade.Count; i++)
                                     {
-                                        <option value="@listGrade[i].ID">@listGrade[i].Name</option>
+                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
                                     }
 
                                 }
@@ -135,11 +140,13 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Ngày bắt đầu:</label>
-                            <input type="date" name="StartDate" class="form-control" id="inputText">
+                            <input type="text" class="form-control datepicker" placeholder="Ngày sinh">
+                            <input type="hidden" name="StartDate" class="hiddenDate" id="StartDate" value="">
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Ngày kết thúc:</label>
-                            <input type="date" name="EndDate" class="form-control" id="inputText">
+                            <input type="text" class="form-control datepicker" placeholder="Ngày sinh">
+                            <input type="hidden" name="EndDate" class="hiddenDate" id="EndDate" value="">
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Giáo viên:</label>
@@ -165,7 +172,7 @@
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "Course")','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action(" Create", "Course" )','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
         }
@@ -206,8 +213,18 @@
     </div>
 </div>
 <script>
+    $('.datepicker').each(function () {
+        var fieldID = $(this).next().attr("id");
+        $(this).datepicker({
+            dateFormat: 'dd/mm/yy',
+            altField: '#' + fieldID,
+            altFormat: 'mm/dd/yy'
+        }).val("");
+    })
 
     function loadCourse() {
+         var course = $("select[name='CourseID']");
+        $(course).empty();
         var data = {
             SubjectID: $("select[name='SubjectID']").val(),
             GradeID:$("select[name='GradeID']").val()
@@ -220,8 +237,6 @@
             success: function (res) {
                 if (res != null) {
                     if (res.length > 0) {
-                        var course = $("select[name='CourseID']");
-                        course.html("");
                         for (var i = 0; i < res.length; i++) {
                             course.append("<option value='" + res[i].ID + "'>" + res[i].Name + "</option>");
                         }
@@ -254,21 +269,31 @@
                         console.log(item);
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
+
+                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
+                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
+
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td>" + (i + 1) + "</td>" +
                             "<td>" + item.Name + "</td>" +
                             "<td>" + item.TeacherName + "</td>" +
-                            "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
-                            "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" +
+                            "<td>" + startdate + "</td>" +
+                            "<td>" + enddate + "</td>" +
                             active +
+<<<<<<< HEAD
                             "<td><button type='button' class='btn btn-primary' data-placement='top' title='sửa' data-toggle='modal' data-target='#ModalCenter' onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","Course")','@Url.Action("create","Course")',this)\"> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","Course")',LoadData); else return;\" type='button' data-placement='top' title='xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "<button type=\"button\" class=\"btn btn-primary\" data-placement='top' title='nhập file' onclick=\"ImportSV('" + item.ID + "','ImportForm')\" data-toggle=\"modal\" data-target=\".bd-modal-lg\"> <i class=\"fas fa-plus\"></i> </button>" +
+=======
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "Course")','@Url.Action("create", "Course")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "Course")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "<button type=\"button\" class=\"btn btn-primary\" onclick=\"ImportSV('" + item.ID + "','ImportForm')\" data-toggle=\"modal\" data-target=\".bd-modal-lg\"> <i class=\"fas fa-plus\"></i> </button>" +
+>>>>>>> origin/VietPhung_20190709
                             "</tr>"
                         );
                     }
@@ -283,6 +308,27 @@
     $(document).ready(function () {
         LoadData();
     });
+
+    function LoadGrade() {
+        var subject = $("#SubjectID").val();
+        var grade = $("#GradeID").val();
+        $('#GradeID option:gt(0)[for!=' + subject + ']').hide();
+        $('#GradeID option:gt(0)[for=' + subject + ']').show();
+        //if ($('#GradeID option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {
+           $('#GradeID').val($('#GradeID option:visible:first').attr('value'));
+        //}
+        LoadData();
+    }
+
+     function LoadGradeInput(obj) {
+        var subject = $(obj).val();
+        var grade = $(obj).parent().parent().find("[name=GradeID]");
+        $(grade).find('option[for!=' + subject + ']').hide();
+        $(grade).find('option[for=' + subject + ']').show(0);
+        $(grade).val($(grade).find('option[for=' + subject + ']:first').attr('value'));
+
+        loadCourse();
+    }
 
     function ImportSV(id, formName) {
         var form = document.querySelector('form[name="' + formName + '"]');

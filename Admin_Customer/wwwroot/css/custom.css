@@ -282,6 +282,30 @@ video, audio {
     color: #36b9cc;
 }
 
+.rounded-quiz.completed {
+    background-color: #666;
+    color: #36b9cc;
+}
+
+.number {
+    color: #999;
+    font-weight: bold;
+    position: absolute;
+    right: 10px;
+    background-color: #fff;
+    border: 2px solid #999;
+    width: 66px;
+    text-align: center;
+    padding: 19px 0;
+    border-radius: 50%;
+    background: rgb(238,238,238);
+    background: -moz-linear-gradient(top, rgb(238,238,238) 0%, rgb(204,204,204) 100%);
+    background: -webkit-linear-gradient(top, rgb(238,238,238) 0%,rgb(204,204,204) 100%);
+    background: linear-gradient(to bottom, rgb(238,238,238) 0%,rgb(204,204,204) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
+    cursor: pointer;
+}
+
 .number {
     color: #999;
     font-weight: bold;
@@ -363,7 +387,7 @@ video, audio {
 .quiz-item .quiz-extend {
     color: cornflowerblue;
 }
-
+/* sesson */
 .quiz-item {
     display: block;
     width: 100%;

@@ -40,9 +40,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Index(DefaultModel model)
         {
-            var subject = _subjectService.GetAll().ToList();
-            var grade = _gradeService.GetAll().ToList();
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
+            var subject = new List<SubjectEntity>();
+            var grade = new List<GradeEntity>();
+
+            if (teacher != null && teacher.Subjects != null)
+            {
+                subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+            }
             ViewBag.Grade = grade;
             ViewBag.Subject = subject;
 

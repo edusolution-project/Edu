@@ -50,6 +50,21 @@ function Submit(formName, url, actionName,fn) {
     var form = document.querySelector('form[name="' + formName + '"]');
     var _url = url == "" || url == void 0 || url == null ? form.action : url;
     var _method = form.method;
+    var requires = $(form).find(':required');
+    
+    var err = false;
+
+    requires.each(function(){
+        if($(this).val() == "")
+        {
+            alert("Vui lòng nhập đủ thông tin");
+            $(this).focus();
+            err = true;
+        }
+    });
+
+    if(err) return false;
+       
     if (actionName.toLowerCase() == "delete" || actionName.toLowerCase() == "publish" || actionName.toLowerCase == "unpublish") {
         var arr_input = form.querySelector('input[name="ArrID"]');
         var listCheckBox = form.querySelectorAll('input[name="cid"]');
@@ -94,7 +109,7 @@ function Export(formName,url) {
         }
     }
     var _url = url + query;
-    window.open(_url, "_black");
+    window.open(_url, "_blank");
 }
 function Add(_this) {
     var modal = document.querySelector(_this.getAttribute("data-target"));
@@ -102,6 +117,14 @@ function Add(_this) {
     var inputID = form.querySelector('input[name="ID"]');
     if (inputID != null) {
         inputID.value = "0";
+    }
+    var listinput = form.querySelectorAll('input');
+    for (var i = 0; i < listinput.length; i++) {
+        listinput[i].value = "";
+    }
+    var listselect = form.querySelectorAll('select');
+    for (var i = 0; i < listselect.length; i++) {
+        listselect[i].value = $(listselect[i]).find('option:first').attr("value");
     }
 }
 function Edit(id, urlGetData, urlPostData, _this) {
@@ -118,9 +141,20 @@ function Edit(id, urlGetData, urlPostData, _this) {
     var data = new FormData(form);
     Ajax(urlGetData, "POST", data, true).then(function (res) {
         var item = JSON.parse(res);
-        var listinput = form.querySelectorAll('input');
+        console.log(item);
+        var listinput = $(form).find('input');
         for (var i = 0; i < listinput.length; i++) {
             listinput[i].value = item.Data[listinput[i].name];
+            if($(listinput[i]).hasClass("hiddenDate"))
+            {
+                var fieldId = $(listinput[i]).attr("id");
+                
+                $(listinput[i]).prev().removeClass("hasDatepicker").val($.datepicker.formatDate('dd/mm/yy', new Date(item.Data[listinput[i].name]))).datepicker({
+                    dateFormat: 'dd/mm/yy',
+                    altField: '#' + fieldId,
+                    altFormat: 'mm/dd/yy'
+                });
+            }
         }
         var listselect = form.querySelectorAll('select');
         for (var i = 0; i < listselect.length; i++) {
@@ -134,4 +168,10 @@ function ExcuteOnlyItem(id, url, fn) {
     Ajax(url, "POST", data, true).then(function () {
         if(fn != void 0) fn();
     })
+}
+
+function hideModal() {
+    $('.modal').hide();
+    $('.modal-backdrop').hide();
+    $('body').removeClass("modal-open");
 }

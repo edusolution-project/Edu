@@ -327,7 +327,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                             itemCourse.Students = itemCourse.Students.Distinct().ToList();
                             _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
                         }
-
                     }
                 }
                 catch (Exception ex)

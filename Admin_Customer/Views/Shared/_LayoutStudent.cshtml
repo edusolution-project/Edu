@@ -24,16 +24,16 @@
 
             <!-- Main Content -->
             <div id="content">
-                @Html.Partial("_topmenu")
+                @await Html.PartialAsync("_topmenu")
 
-                @Html.Partial("_sideBarStudent")
+                @await Html.PartialAsync("_sideBarStudent")
 
                 <div class="container">
                     @RenderBody()
                 </div>
 
                 <!-- Footer -->
-                @Html.Partial("_Footer")
+                @await Html.PartialAsync("_Footer")
                 <!-- End of Footer -->
 
             </div>
@@ -47,7 +47,7 @@
         </a>
     </div>
     <!-- Logout Modal-->
-    @Html.Partial("_modalLogout")
+    @await Html.PartialAsync("_modalLogout")
 
     @RenderSection("Script", false)
     @RenderSection("Scripts", false)

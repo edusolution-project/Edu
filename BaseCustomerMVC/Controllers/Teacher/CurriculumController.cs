@@ -83,8 +83,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Index(DefaultModel model)
         {
-            var subject = _subjectService.GetAll().ToList();
-            var grade = _gradeService.GetAll().ToList();
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+
+            var subject = new List<SubjectEntity>();
+            var grade = new List<GradeEntity>();
+
+            if (teacher != null && teacher.Subjects != null)
+            {
+                subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+            }
 
             var modsubject = _modsubjectService.GetAll().ToList();
             var modgrade = _modgradeService.GetAll().ToList();
@@ -223,19 +232,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetModList(DefaultModel model, string ModSubjectID = "", string ModGradeID = "")
+        public JsonResult GetModList(DefaultModel model, string SubjectID = "", string GradeID = "")
         {
             var filter = new List<FilterDefinition<ModCourseEntity>>();
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
 
-            if (!string.IsNullOrEmpty(ModSubjectID))
+            if (!string.IsNullOrEmpty(SubjectID))
             {
-                filter.Add(Builders<ModCourseEntity>.Filter.Where(o => o.SubjectID == ModSubjectID));
+                filter.Add(Builders<ModCourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
-            if (!string.IsNullOrEmpty(ModGradeID))
+            if (!string.IsNullOrEmpty(GradeID))
             {
-                filter.Add(Builders<ModCourseEntity>.Filter.Where(o => o.GradeID == ModGradeID));
+                filter.Add(Builders<ModCourseEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
 
             var data = filter.Count > 0 ? _modservice.Collection.Find(Builders<ModCourseEntity>.Filter.And(filter)) : _modservice.GetAll();
@@ -394,7 +403,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             _lessonService.CreateQuery().InsertOne(item);
-
 
             var lessonpart = _modlessonPartService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
             if (lessonpart != null)
