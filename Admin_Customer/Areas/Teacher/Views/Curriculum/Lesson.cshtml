@@ -11,8 +11,8 @@
     <div class="lesson card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">@Data.Title</h6>
         <div class="float-right">
-            <button class="prevtab btn btn-success" title="Quay lại"> <i class="fas fa-arrow-left"></i> </button>
-            <button class="nexttab btn btn-success" title="Chuyển tiếp"> <i class="fas fa-arrow-right"></i> </button>
+            <button class="prevtab btn btn-success" title="Quay lại" onclick="tab_goback()"> <i class="fas fa-arrow-left"></i> </button>
+            <button class="nexttab btn btn-success" title="Chuyển tiếp" onclick="tab_gonext()"> <i class="fas fa-arrow-right"></i> </button>
         </div>
     </div>
     <div class="card-body">
@@ -40,6 +40,9 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" id="pills-settings-tab" data-toggle="pill" href="#pills-settings" role="tab" aria-controls="pills-settings" aria-selected="false"><i class="fa fa-pencil-alt"></i> <span class="ml-3">lesson part 4</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="pills-scroll-tab" data-toggle="pill" href="#pills-scroll" role="tab" aria-controls="pills-scroll" aria-selected="false"><i class="fa fa-pencil-alt"></i> <span class="ml-3">lesson part 5</span></a>
                             </li>
                         </ul>
                     </div>
@@ -217,8 +220,168 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="tab-pane fade" id="pills-scroll" role="tabpanel" aria-labelledby="pills-scroll-tab">
+                        <div class="quiz-item">
+                            <div class="quiz-pane">
+                                <div class="pane-item">
+                                    <div class="quiz-text"> 1. These are cheaper if you buy several of them.</div>
+                                </div>
+                            </div>
+                            <div class="answer-pane">
+                                <div class="pane-item placeholder">Thả câu trả lời tại đây</div>
+                            </div>
+                        </div>
+                        <div class="quiz-item">
+                            <div class="quiz-pane">
+                                <div class="pane-item">
+                                    <div class="quiz-text">2. You can’t get many different meals here</div>
+                                </div>
+                            </div>
+                            <div class="answer-pane">
+                                <div class="pane-item placeholder">Thả câu trả lời tại đây</div>
+                            </div>
+                        </div>
+                        <div class="quiz-item">
+                            <div class="quiz-pane">
+                                <div class="pane-item">
+                                    <div class="quiz-text">3. Put this in a cold place.</div>
+                                </div>
+                            </div>
+                            <div class="answer-pane">
+                                <div class="pane-item placeholder">Thả câu trả lời tại đây</div>
+                            </div>
+                        </div>
+                        <div class="quiz-item">
+                            <div class="quiz-pane">
+                                <div class="pane-item">
+                                    <div class="quiz-text">4. You are too late to get seat for this show.</div>
+                                </div>
+                            </div>
+                            <div class="answer-pane">
+                                <div class="pane-item placeholder">Thả câu trả lời tại đây</div>
+                            </div>
+                        </div>
+                        <div class="quiz-item">
+                            <div class="quiz-pane">
+                                <div class="pane-item">
+                                    <div class="quiz-text">5. This place is not open all night.</div>
+                                </div>
+                            </div>
+                            <div class="answer-pane">
+                                <div class="pane-item placeholder">Thả câu trả lời tại đây</div>
+                            </div>
+                        </div>
+                        <div class="answer-wrapper no-child">
+                            <div class="item">
+                                <fieldset class="answer-item">
+                                    <div class="media-holder ">
+                                        <img class="img-fluid" src="~/img/1-1.png">
+                                    </div>
+                                </fieldset>
+                                <fieldset class="answer-item">
+                                    <div class="media-holder ">
+                                        <img class="img-fluid" src="~/img/2-2.png">
+                                    </div>
+                                </fieldset>
+                                <fieldset class="answer-item">
+                                    <div class="media-holder ">
+                                        <img class="img-fluid" src="~/img/3-3.png">
+                                    </div>
+                                </fieldset>
+                                <fieldset class="answer-item">
+                                    <div class="media-holder ">
+                                        <img class="img-fluid" src="~/img/4-4.png">
+                                    </div>
+                                </fieldset>
+                                <fieldset class="answer-item">
+                                    <div class="media-holder ">
+                                        <img class="img-fluid" src="~/img/5-5.png">
+                                    </div>
+                                </fieldset>
+                                <fieldset class="answer-item">
+                                    <div class="media-holder ">
+                                        <img class="img-fluid" src="~/img/6-6.png">
+                                    </div>
+                                </fieldset>
+                                <fieldset class="answer-item">
+                                    <div class="media-holder ">
+                                        <img class="img-fluid" src="~/img/7-7.png">
+                                    </div>
+                                </fieldset>
+                                <fieldset class="answer-item">
+                                    <div class="media-holder ">
+                                        <img class="img-fluid" src="~/img/8-8.png">
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+@section Scripts{
+    <script type="text/javascript">
+
+        $('.answer-item').draggable({
+                cursor: "move",
+                helper: 'clone',
+                revert: "true",
+                scroll: true,
+                start: function (event, ui) {
+                    ui.helper.data('parent', $(this).parent());
+                },
+                stop: function (event, ui) {
+                    //var prevParent = ui.helper.data('parent');
+                    //$(prevParent).find(".placeholder").show();
+                }
+            });
+
+        $(".answer-wrapper.no-child").droppable({
+                        tolerance: "intersect",
+                        accept: ".answer-item",
+                        activeClass: "hasAnswer",
+                        hoverClass: "answerHover",
+                        drop: function (event, ui) {
+                            var prevHolder = ui.helper.data('parent');
+                            $(prevHolder).find(".placeholder").show();
+                            $(this).append($(ui.draggable));
+                        }
+        });
+
+        $(".answer-pane").droppable({
+                        tolerance: "intersect",
+                        accept: ".answer-item",
+                        activeClass: "hasAnswer",
+                        hoverClass: "answerHover",
+                        drop: function (event, ui) {
+                            var prevHolder = ui.helper.data('parent');
+                            $(prevHolder).find(".placeholder").show();
+                            $(this).append($(ui.draggable));
+                        }
+        });
+
+        $(".answer-pane").droppable({
+                        tolerance: "intersect",
+                        accept: ".answer-item",
+                        activeClass: "hasAnswer",
+                        hoverClass: "answerHover",
+                        drop: function (event, ui) {
+                            $(this).find(".placeholder").hide();
+                            var prevHolder = ui.helper.data('parent');
+
+                            if ($(this).find(".answer-item").length > 0) {//remove all answer to box
+                                //$(container).siblings(".answer-wrapper").append($(this).find(".answer-item"));
+                                $(prevHolder).append($(this).find(".answer-item"));
+                            }
+                            else {
+                                $(prevHolder).find(".placeholder").show();
+                            };
+                            $(this).append($(ui.draggable));
+                        }
+        });
+
+    </script>
+}

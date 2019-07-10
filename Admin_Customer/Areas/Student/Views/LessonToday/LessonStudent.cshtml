@@ -371,19 +371,19 @@
 
     //LoadData();
 
-       $('.answer-item').draggable({
-                    cursor: "move",
-                    helper: 'clone',
-                    revert: "true",
-                    scroll: true,
-                    start: function (event, ui) {
-                        ui.helper.data('parent', $(this).parent());
-                    },
-                    stop: function (event, ui) {
-                        //var prevParent = ui.helper.data('parent');
-                        //$(prevParent).find(".placeholder").show();
-                    }
-                });
+    $('.answer-item').draggable({
+                cursor: "move",
+                helper: 'clone',
+                revert: "true",
+                scroll: true,
+                start: function (event, ui) {
+                    ui.helper.data('parent', $(this).parent());
+                },
+                stop: function (event, ui) {
+                    //var prevParent = ui.helper.data('parent');
+                    //$(prevParent).find(".placeholder").show();
+                }
+            });
 
     $(".answer-wrapper.no-child").droppable({
                     tolerance: "intersect",

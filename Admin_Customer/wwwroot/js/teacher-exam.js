@@ -457,7 +457,6 @@ var render = {
         //render question
         switch (template) {
             case "QUIZ2":
-                alert(1);
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -663,7 +662,7 @@ var render = {
                 data.Media.Path = publisherPath + data.Media.Path;
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "class": "img-fluid" , "src": data.media.path }));
+                    mediaHolder.append($("<img>", { "class": "img-fluid" , "src": data.Media.path }));
                     mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
                     break;
                 case "VIDEO":
@@ -676,13 +675,13 @@ var render = {
                     mediaHolder.append($("<embed>", { "src": data.Media.Path, "width": "100%", "height": "800px" }));
                     break;
                 default:
-                    if (data.media.extension != null)
-                        if (data.media.extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "class": "img-fluid", "src": data.media.path }));
-                        else if (data.media.extension.indexOf("video") >= 0)
-                            mediaHolder.append("<video controls><source src='" + data.media.path + "' type='" + data.media.extension + "' />Your browser does not support the video tag</video>");
-                        else if (data.media.extension.indexOf("audio") >= 0)
-                            mediaHolder.append("<audio controls><source src='" + data.media.path + "' type='" + data.media.extension + "' />Your browser does not support the audio tag</audio>");
+                    if (data.Media.Extension != null)
+                        if (data.Media.Extension.indexOf("image") >= 0)
+                            mediaHolder.append($("<img>", { "class": "img-fluid", "src": data.Media.path }));
+                        else if (data.Media.Extension.indexOf("video") >= 0)
+                            mediaHolder.append("<video controls><source src='" + data.Media.path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                        else if (data.Media.Extension.indexOf("audio") >= 0)
+                            mediaHolder.append("<audio controls><source src='" + data.Media.path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
                             mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));

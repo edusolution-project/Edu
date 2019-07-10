@@ -1,4 +1,9 @@
-
+.bg-password-image {
+    background-image: url('/img/logo.jpg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
 .navbar-search .btn-primary {
     padding: 0 15px;
 }
@@ -15,16 +20,18 @@
 .card-header .float-right {
     position: absolute;
     right: 15px;
-    top: 0;
+    top: 0px;
 }
 
 .lesson .float-right {
-    z-index: 9999;
     top: 10px;
 }
 
-#top-menu .dropdown-menu-right {
-    z-index: 99999;
+.bg-gradient-primary .nav-item:active,
+.bg-gradient-primary .nav-item:focus,
+.bg-gradient-primary .nav-item:hover {
+    background-color: #224abe;
+    font-weight: bold;
 }
 
 .card-header .text-center {
@@ -313,7 +320,6 @@ video, audio {
     right: 10px;
     background-color: #fff;
     border: 2px solid #999;
-    padding: 18px 15px;
     border-radius: 50%;
     background: rgb(238,238,238);
     background: -moz-linear-gradient(top, rgb(238,238,238) 0%, rgb(204,204,204) 100%);

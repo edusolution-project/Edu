@@ -5,9 +5,9 @@
 
 <!-- Begin Page Content -->
 <div class="container-fluid">
-    @using (Html.BeginForm(FormMethod.Post,new { name="FormControl"}))
+    @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
     {
-        <input type="hidden" name="ArrID" value=""/>
+        <input type="hidden" name="ArrID" value="" />
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -80,7 +80,7 @@
                                 <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên">
                             </div>
                             <div class="form-group col-md-6">
-                                <input type="email" class="form-control" name="Email" id="inputEmail" placeholder="Email" disabled>
+                                <input type="email" class="form-control" name="Email" id="inputEmail" placeholder="Email" disabled locked required>
                             </div>
                         </div>
                         <div class="form-row">
@@ -107,7 +107,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "student")','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary" onclick="Submit('AddForm','@Url.Action("Create", "student")','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
         }
@@ -118,7 +118,7 @@
 <div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            @using (Html.BeginForm("Import", "student", FormMethod.Post,new { enctype = "multipart/form-data",name="ImportForm" }))
+            @using (Html.BeginForm("Import", "student", FormMethod.Post, new { enctype = "multipart/form-data", name = "ImportForm" }))
             {
                 <div class="modal-header">
                     <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
@@ -138,7 +138,7 @@
                 </div>
                 <div class="modal-footer">
                     <div class="button-left">
-                        <button type="button" class="btn btn-secondary">Tải file mẫu</button>
+                        <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action("Export", "student")')">Tải file mẫu</button>
                     </div>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                     <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
@@ -164,6 +164,7 @@
             data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
             dataType:"json",
             success: function (data) {
+                hideModal();
                 var body = $('#dataTable tbody');
                 body.html("");
                 if (data.Data.length > 0)
@@ -176,17 +177,18 @@
                         } else {
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","student")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
-                         var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.DateBorn));
+                        var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.DateBorn));
 
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td>" + (i + 1) + "</td>" +
                             "<td>" + item.StudentId +"</td>" +
                             "<td>" + item.FullName + "</td>" +
+                            "<td>" + item.Email + "</td>" +
                             "<td>" + date +"</td>" +
                             "<td>" + item.Class + "</td>" +active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                         );

@@ -78,6 +78,7 @@
                                 <th>STT</th>
                                 <th>Tên khóa học</th>
                                 <th>Tên giáo viên</th>
+                                <th>Số HV</th>
                                 <th>Ngày bắt đầu</th>
                                 <th>Ngày kết thúc</th>
                                 <th>Trạng thái</th>
@@ -108,7 +109,7 @@
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Tên khóa học:</label>
-                            <input type="text" class="form-control" name="Name" placeholder="Tên Khóa học">
+                            <input type="text" class="form-control" name="Name" placeholder="Tên khóa học" required>
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Môn học:</label>
@@ -136,16 +137,16 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Giáo trình:</label>
-                            <select name="CourseID" class="form-control" onfocus="loadCourse()"></select>
+                            <select name="CourseID" class="form-control" onfocus="loadCourse()" required></select>
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Ngày bắt đầu:</label>
-                            <input type="text" class="form-control datepicker" placeholder="Ngày sinh">
+                            <input type="text" class="form-control datepicker" placeholder="Ngày bắt đầu">
                             <input type="hidden" name="StartDate" class="hiddenDate" id="StartDate" value="">
                         </div>
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Ngày kết thúc:</label>
-                            <input type="text" class="form-control datepicker" placeholder="Ngày sinh">
+                            <input type="text" class="form-control datepicker" placeholder="Ngày kết thúc">
                             <input type="hidden" name="EndDate" class="hiddenDate" id="EndDate" value="">
                         </div>
                         <div class="form-group col-md-6">
@@ -172,7 +173,7 @@
                     </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action(" Create", "Course" )','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary" onclick="Submit('AddForm','@Url.Action("Create", "Course" )','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
         }
@@ -260,6 +261,7 @@
             data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, SubjectID: SubjectID, GradeID: GradeID},
             dataType:"json",
             success: function (data) {
+                hideModal();
                 var body = $('#dataTable tbody');
                 body.html("");
                 if (data.Data.length > 0)
@@ -282,18 +284,13 @@
                             "<td>" + (i + 1) + "</td>" +
                             "<td>" + item.Name + "</td>" +
                             "<td>" + item.TeacherName + "</td>" +
+                            "<td>" + item.Students.length + "</td>" +
                             "<td>" + startdate + "</td>" +
                             "<td>" + enddate + "</td>" +
                             active +
-<<<<<<< HEAD
-                            "<td><button type='button' class='btn btn-primary' data-placement='top' title='sửa' data-toggle='modal' data-target='#ModalCenter' onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","Course")','@Url.Action("create","Course")',this)\"> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","Course")',LoadData); else return;\" type='button' data-placement='top' title='xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
-                            "<button type=\"button\" class=\"btn btn-primary\" data-placement='top' title='nhập file' onclick=\"ImportSV('" + item.ID + "','ImportForm')\" data-toggle=\"modal\" data-target=\".bd-modal-lg\"> <i class=\"fas fa-plus\"></i> </button>" +
-=======
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "Course")','@Url.Action("create", "Course")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "Course")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
-                            "<button type=\"button\" class=\"btn btn-primary\" onclick=\"ImportSV('" + item.ID + "','ImportForm')\" data-toggle=\"modal\" data-target=\".bd-modal-lg\"> <i class=\"fas fa-plus\"></i> </button>" +
->>>>>>> origin/VietPhung_20190709
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "Course")','@Url.Action("create", "Course")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "Course")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "<button type=\"button\" class=\"btn btn-primary\" onclick=\"ImportSV('" + item.ID + "','ImportForm')\" data-toggle=\"modal\" data-placement=\"top\" title=\"Nhập file dữ liệu\" data-target=\".bd-modal-lg\"> <i class=\"fas fa-upload\"></i> </button>" +
                             "</tr>"
                         );
                     }
@@ -320,7 +317,7 @@
         LoadData();
     }
 
-     function LoadGradeInput(obj) {
+    function LoadGradeInput(obj) {
         var subject = $(obj).val();
         var grade = $(obj).parent().parent().find("[name=GradeID]");
         $(grade).find('option[for!=' + subject + ']').hide();

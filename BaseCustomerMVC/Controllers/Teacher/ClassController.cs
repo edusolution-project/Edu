@@ -7,6 +7,11 @@ using System;
 using MongoDB.Driver;
 using System.Text;
 using System.Linq;
+using Core_v2.Globals;
+using System.Threading.Tasks;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
+using OfficeOpenXml;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -21,11 +26,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
+        private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _mapping;
+        private readonly IHostingEnvironment _env;
+
 
         public ClassController(GradeService gradeservice
            , SubjectService subjectService, TeacherService teacherService, ClassService service,
             CourseService courseService, ChapterService chapterService, LessonService lessonService, LessonScheduleService lessonScheduleService,
-            StudentService studentService)
+            StudentService studentService, IHostingEnvironment evn)
         {
             _gradeService = gradeservice;
             _subjectService = subjectService;
@@ -36,6 +44,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
+            _mapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
+            _env = evn;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -188,25 +198,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var teacher = _teacherService.GetItemByID(currentClass.TeacherID);
 
             var filter = new List<FilterDefinition<StudentEntity>>();
-            filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.StudentId)));
+            filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
             var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
-            //model.TotalRecord = data.Count();
-            //var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-            //    ? data
-            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+            var studentsView = students.ToList().Select(t => _mapping.AutoOrtherType(t, new ClassMemberViewModel()
+            {
+                ClassName = currentClass.Name,
+                ClassStatus = "Đang học",
+                LastJoinDate = DateTime.Now
+            })).ToList();
 
             var response = new Dictionary<string, object>
             {
                 { "Data",new Dictionary<string, object> {
                         {"Teacher",teacher },
-                        {"Students",students }
+                        {"Students",studentsView }
                     }
                 },
                 { "Model", model }
             };
             return new JsonResult(response);
         }
-
 
         public JsonResult GetActiveList()
         {
@@ -226,7 +237,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             }
             if (teacher != null)
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID && o.EndDate < DateTime.Now));
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID && o.EndDate >= DateTime.Now));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             var DataResponse = data;
@@ -248,6 +259,60 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return RedirectToAction("Index");
             ViewBag.Class = currentClass;
             return View();
+        }
+
+        [HttpPost]
+        [Obsolete]
+        public async Task<JsonResult> ImportStudent(string ID)
+        {
+            var form = HttpContext.Request.Form;
+            if (string.IsNullOrEmpty(ID)) return new JsonResult("Fail");
+            var itemCourse = _service.GetItemByID(ID);
+            if (itemCourse == null) return new JsonResult("Fail");
+            if (itemCourse.Students == null) itemCourse.Students = new List<string>();
+            if (form == null) return new JsonResult(null);
+            if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
+            var file = form.Files[0];
+            var filePath = Path.Combine(_env.WebRootPath, itemCourse.ID + "_" + file.FileName + DateTime.Now.ToString("ddMMyyyyhhmmss"));
+            List<StudentEntity> studentList = null;
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+                stream.Close();
+                try
+                {
+                    var readStream = new FileStream(filePath, FileMode.Open);
+                    using (ExcelPackage package = new ExcelPackage(readStream))
+                    {
+                        ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
+                        int totalRows = workSheet.Dimension.Rows;
+                        studentList = new List<StudentEntity>();
+                        for (int i = 1; i <= totalRows; i++)
+                        {
+                            if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
+                            var studentEmail = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
+                            var student = _studentService.CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
+                            if (student != null)
+                                studentList.Add(student);
+                        }
+
+                        var listID = studentList.Select(o => o.ID);
+                        itemCourse.Students.AddRange(listID);
+                        itemCourse.Students = itemCourse.Students.Distinct().ToList();
+                        _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
+                    }
+                    System.IO.File.Delete(filePath);
+                }
+                catch (Exception ex)
+                {
+                    return new JsonResult(ex);
+                }
+            }
+            Dictionary<string, object> response = new Dictionary<string, object>()
+            {
+                {"Data",studentList}
+            };
+            return new JsonResult(response);
         }
     }
 }

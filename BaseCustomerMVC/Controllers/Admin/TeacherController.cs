@@ -139,7 +139,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         UserName = item.Email.ToLower().Trim(),
                         RoleID = _roleService.GetItemByCode("teacher").ID
                     };
-                    _accountService.CreateQuery().InsertOne(account);
+                    _accountService.CreateOrUpdate(account);
                     return new JsonResult(response);
                 }
                 else
@@ -157,7 +157,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 var oldData = _service.GetItemByID(item.ID);
                 if (oldData == null) return new JsonResult(null);
-                _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                _service.CreateOrUpdate(item);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -227,19 +227,17 @@ namespace BaseCustomerMVC.Controllers.Admin
                             //string name = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
                             string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
                             string name = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
-                            string subjectname = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString().Trim();
+                            string subjectname = workSheet.Cells[i, 8].Value == null ? "" : workSheet.Cells[i, 8].Value.ToString().Trim();
                             var subject = _subjectService.CreateQuery().Find(t => t.Name == subjectname).SingleOrDefault();
                             var item = new TeacherEntity
                             {
-                                //TeacherId = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString(),
-
                                 FullName = name,
                                 TeacherId = code,
                                 Subjects = subject != null ? new List<string> { subject.ID } : null,
-                                DateBorn = workSheet.Cells[i, 4].Value == null ? DateTime.MinValue : (DateTime)workSheet.Cells[i, 4].Value,
+                                DateBorn = workSheet.Cells[i, 4].Value == null ? DateTime.MinValue : (DateTime.Parse(workSheet.Cells[i, 4].Value.ToString())),
                                 Email = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
-                                Phone = workSheet.Cells[i, 7].Value == null ? "" : workSheet.Cells[i, 7].Value.ToString(),
-                                Address = workSheet.Cells[i, 8].Value == null ? "" : workSheet.Cells[i, 8].Value.ToString(),
+                                Phone = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString(),
+                                Address = workSheet.Cells[i, 7].Value == null ? "" : workSheet.Cells[i, 7].Value.ToString(),
                                 CreateDate = DateTime.Now,
                                 UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
                                 IsActive = true
@@ -268,8 +266,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                                 Error.Add(item);
                             }
                         }
-
                     }
+                    System.IO.File.Delete(filePath);
                 }
                 catch (Exception ex)
                 {
@@ -310,14 +308,26 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 SubjectList = _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList()
             })).ToList();
-            var index = 1;
-            var dataResponse = dataview.Select(o => new { STT = index++, Ma_GV = o.TeacherId, Ho_ten = o.FullName, Ngay_sinh = o.DateBorn.ToLocalTime(), o.Email, Mon_hoc = o.SubjectList.Select(t => t.Name), Trang_thai = o.IsActive ? "Hoạt động" : "Đang khóa" });
+            var index = 0;
+            var dataResponse = dataview.Select(o => new
+            {
+                STT = index++,
+                Ma_GV = o.TeacherId,
+                Ho_ten = o.FullName,
+                Ngay_sinh = o.DateBorn.ToLocalTime().ToString("MM/dd/yyyy"),
+                o.Email,
+                Dien_thoai = o.Phone,
+                Dia_chi = o.Address,
+                Chuyen_mon = o.SubjectList.Select(t => t.Name),
+                Trang_thai = o.IsActive ? "Hoạt động" : "Đang khóa"
+            });
 
 
             using (var package = new ExcelPackage(stream))
             {
                 var workSheet = package.Workbook.Worksheets.Add("DS_Giaovien");
                 workSheet.Cells.LoadFromCollection(dataResponse, true);
+                workSheet.Column(3).Style.Numberformat.Format = "MM/dd/yyyy";
                 package.Save();
             }
             stream.Position = 0;
