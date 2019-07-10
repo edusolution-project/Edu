@@ -235,3 +235,9 @@ function OverTime(ExamID, StudentID) {
             console.log(err);
         })
 }
+function LocalStore(ExamID, value) {
+    localStorage.setItem(ExamID, value);
+}
+function LoadLocalStore(ExamID) {
+    return localStorage.getItem(ExamID);
+}

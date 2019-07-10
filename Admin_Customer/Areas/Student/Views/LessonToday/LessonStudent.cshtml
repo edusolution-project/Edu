@@ -255,24 +255,33 @@
                         for (var i = 0; parts != null && i < parts.length; i++) {
                             var part = parts[i];
                             if (part.Title == null) continue;
-                            var tabs = '<li class="nav-item">' +
-                                '<a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#' + part.ID + '" role="tab" aria-controls="' + part.ID + '" aria-selected="true"><i class="fa fa-edit"></i> <span class="ml-3">' + part.Title + '</span></a>' +
-                            '</li>';
+                            var tabs = '<li class="nav-item"><a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#' + part.ID + '" role="tab" aria-controls="' + part.ID + '" aria-selected="true"><i class="fa fa-edit"></i> <span class="ml-3">' + part.Title + '</span></a></li>';
                             lessonTabs.append(tabs)
                             //`Qz1:trắc nghiệm thường`
                             //`Qz2:điền từ`
                             //`Qz3:kéo thả`
                             //`Qz4:tự luận. (ESSAY)`
                             //var html = RenderPart(part);
+
+                            var html = '<div class="tab-pane fade" id="' + part.ID + '" role="tabpanel" aria-labelledby="' + part.ID + '"><div class="card-body"><div class="part-box-header"><h4 class="title">' + part.Title + '</h4></div>{{content}}</div></div>';
+
                             if (part.Type == "QUIZ1") {
                                 var questions = part.Questions;
                                 for (var x = 0; x < questions.length; x++) {
                                     var question = questions[x];
+                                    var _html = '<div class="quiz-wrapper"><div class="quiz-item" id="' + question.ID + '"><div class="quiz-box-header"><h4 class="title">' + question.Content + ' (' + question.Point + 'đ)</h4></div><div class="answer-wrapper">{{content_answer}}</div></div></div>';
                                     var answers = question.CloneAnswers;
+                                    var _answer = "";
                                     for (var y = 0; y < answers.length; y++) {
                                         var answer = answers[y];
+                                        var onclick = "ChosenAnswer(" + urlChose + ",'" + document.getElementById("ExamID").value + "', '" + questions.ID + "', '" + answer.ID + "','" + answer.Content + "')";
+                                        var __html = '<fieldset class="answer-item"><input type="radio" class="input-checkbox answer-checkbox" onclick="' + onclick + '"><label class="answer-text"' + answer.Content + '</label></fieldset>';
+                                        answer += __html;
                                     }
+                                    _questionhtml += _html.replace("{{content_answer}}", _answer);
                                 }
+                                html = html.replace("{{content}}", _html);
+                                content.append(html);
                             }
                             if (part.Type == "QUIZ2") {
                                 var questions = part.Questions;
@@ -305,69 +314,25 @@
                                 }
                             }
                             if (part.Type == "IMG") {
-                                var html = '<div class="tab-pane fade" id="' + part.ID + '" role="tabpanel" aria-labelledby="' + part.ID + '">' +
-                                    '<div class="card-body">'+
-                                    '<div class="part-box-header">' +
-                                    '<h4 class="title">' + part.Title + '</h4>' +
-                                        '</div>'+
-                                        '<div class="media-wrapper">'+
-                                            '<div class="media-holder">'+
-                                                '<img class="img-fluid" src="~'+part.Media.Path+'">'+
-                                            '</div>'+
-                                        '</div>'+
-                                    '</div>'+
-                                    '</div>';
+                                
+                                var _html =   '<div class="media-wrapper">'+'<div class="media-holder">'+'<img class="img-fluid" src="~'+part.Media.Path+'">'+'</div>'+'</div>';
+                                html = html.replace("{{content}}", _html);
                                 content.append(html);
                             }
                             if (part.Type == "VIDEO") {
 
-                                var html =  '<div class="tab-pane fade" id="' + part.ID + '" role="tabpanel" aria-labelledby="' + part.ID + '">' +
-                                    '<div class="card-body">'+
-                                        '<div class="part-box VIDEO">'+
-                                            '<div class="part-box-header">'+
-                                                '<h4 class="title">' + part.Title + '</h4>' +
-                                            '</div>'+
-                                            '<div class="media-wrapper">'+
-                                                '<div class="media-holder VIDEO">'+
-                                                    '<video controls="">'+
-                                                        '<source src="~'+part.Media.Path+'" type="video/mp4">'+
-                                                    '</video>'+
-                                                '</div>'+
-                                            '</div>'+
-                                        '</div>'+
-                                    '</div>'+
-                                    '</div>';
+                                var _html = '<div class="media-wrapper">' + '<div class="media-holder VIDEO">' + '<video controls="">' + '<source src="~' + part.Media.Path + '" type="video/mp4">' + '</video>' + '</div>' + '</div>';
+                                html = html.replace("{{content}}", _html);
                                 content.append(html);
                             }
                             if (part.Type == "AUDIO") {
-                                var html = '<div class="tab-pane fade" id="' + part.ID + '" role="tabpanel" aria-labelledby="' + part.ID + '">' +
-                                    '<div class="card-body">'+
-                                        '<div class="part-box AUDIO">'+
-                                            '<div class="part-box-header">'+
-                                                '<h4 class="title">' + part.Title + '</h4>' +
-                                            '</div>'+
-                                            '<div class="media-wrapper">'+
-                                                '<div class="media-holder AUDIO">'+
-                                                    '<audio controls=""><source src="~'+part.Media.Path+'" type="audio/mp3">Your browser does not support the audio tag</audio>'+
-                                                '</div>'+
-                                            '</div>'+
-                                        '</div>'+
-                                    '</div>'+
-                                    '</div>';
+                                var _html = '<div class="media-wrapper">' + '<div class="media-holder AUDIO">' + '<audio controls=""><source src="~' + part.Media.Path + '" type="audio/mp3">Your browser does not support the audio tag</audio>' + '</div>' + '</div>';
+                                html = html.replace("{{content}}", _html);
                                 content.append(html);
                             }
                             if (part.Type == "TEXT") {
-                                    var html = '<div class="tab-pane fade active show" id="' + part.ID + '" role="tabpanel" aria-labelledby="' + part.ID + '">' +
-                                    '<div class="card-body">'+
-                                        '<div class="part-box">'+
-                                            '<div class="part-box-header">'+
-                                                '<h4 class="title">' + part.Title + '</h4>' +
-                                            '</div>'+
-                                        '<div class="media-wrapper">' +part.Description+
-                                            '</div>'+
-                                        '</div>'+
-                                    '</div>'+
-                                    '</div>';
+                                var _html ='<div class="media-wrapper">' +part.Description+'</div>';
+                                html = html.replace("{{content}}", _html);
                                 content.append(html);
                             }
                             if (part.Type == "VOCAB") {
