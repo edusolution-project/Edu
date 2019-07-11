@@ -143,8 +143,22 @@ namespace BaseCustomerMVC.Controllers.Student
         [Obsolete]
         public JsonResult Create(ExamEntity item)
         {
+            var userid = User.Claims.GetClaimByType("UserID").Value;
             if(string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
+                var _lesson = _lessonService.GetItemByID(item.LessonID);
+                var _class = _classService.GetItemByID(item.ClassID);
+                var _schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID).SingleOrDefault();
+                item.Timer = _lesson.Timer;
+                item.Point = 0;
+                item.LessonScheduleID = _schedule.ID;
+                item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
+                && o.StudentID == userid
+                && o.Status == true
+                && o.TeacherID == _class.TeacherID
+                && o.LessonScheduleID == _schedule.ID).Count();
+                item.StudentID = userid;
+                item.TeacherID = _class.TeacherID;
                 item.ID = null;
                 item.Created = DateTime.Now;
                 item.CurrentDoTime = DateTime.Now;
@@ -154,20 +168,40 @@ namespace BaseCustomerMVC.Controllers.Student
             else
             {
                 item.Updated = DateTime.Now;
-                item.Status = true;
             }
             _service.CreateOrUpdate(item);
             return new JsonResult(item);
+        }
+        [HttpPost]
+        public JsonResult GetCurrentExam(string ClassID,string LessonID)
+        {
+            var userID = User.Claims.GetClaimByType("UserID").Value;
+            var x = _service.CreateQuery().Find(o => o.ClassID == ClassID && o.LessonID == LessonID && o.Status == false && o.StudentID == userID).SingleOrDefault();
+            return new JsonResult(x);
         }
         [HttpPost]
         public JsonResult CreateDetails(ExamDetailEntity item)
         {
             if (_service.IsOverTime(item.ExamID))
             {
-                if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
+                if (string.IsNullOrEmpty(item.ID) || item.ID == "0" || item.ID == "null")
                 {
-                    item.ID = null;
-                    item.Created = DateTime.Now;
+                    var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();
+                    var oldItem = _examDetailService.CreateQuery().Find(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).SingleOrDefault();
+                    if (oldItem == null)
+                    {
+                        item.Created = DateTime.Now;
+                        var xitem = map.AutoWithoutID(item, new ExamDetailEntity() { });
+                        _examDetailService.CreateOrUpdate(xitem);
+                        return new JsonResult(xitem);
+                    }
+                    else
+                    {
+                        
+                        var xitem = map.Auto(oldItem, item);
+                        _examDetailService.CreateOrUpdate(xitem);
+                        return new JsonResult(xitem);
+                    }
                 }
                 else
                 {

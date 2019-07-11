@@ -130,9 +130,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     { "Data", DataResponse.Select(
                         o=> _mapping.AutoOrtherType(o,new LessonScheduleViewModel(){
-                                IsActive = _lessonScheduleService.GetItemByID(ClassID).IsActive,
-                                StartDate = _lessonScheduleService.GetItemByID(ClassID).StartDate,
-                                EndDate = _lessonScheduleService.GetItemByID(ClassID).EndDate,
+                                IsActive = _lessonScheduleService.GetItemByID(ClassID) == null ? false: _lessonScheduleService.GetItemByID(ClassID).IsActive,
+                                StartDate = _lessonScheduleService.GetItemByID(ClassID) == null ?DateTime.MinValue :  _lessonScheduleService.GetItemByID(ClassID).StartDate,
+                                EndDate = _lessonScheduleService.GetItemByID(ClassID) == null ? DateTime.MinValue : _lessonScheduleService.GetItemByID(ClassID).EndDate,
                             })
                         )
                     }

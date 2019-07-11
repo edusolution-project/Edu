@@ -1,7 +1,53 @@
-﻿var urlBase = "/teacher/";
+﻿var urlBase = "/student/";
+var publisherPath = "http://publisher.edusolution.vn"
 
 let myEditor;
+let totalQuiz = 0;
+var Ajax = function (url, method, data, async) {
+    var request = new XMLHttpRequest();
+    // Return it as a Promise
+    return new Promise(function (resolve, reject) {
+        // Setup our listener to process compeleted requests
+        request.onreadystatechange = function () {
+            //0	UNSENT	Client has been created.open() not called yet.
+            //1	OPENED	open() has been called.
+            //2	HEADERS_RECEIVED	send() has been called, and headers and status are available.
+            //3	LOADING	Downloading; responseText holds partial data.
+            //4	DONE	The operation is complete.
 
+            // Only run if the request is complete
+            //if (request.readyState == 0) {
+            //    console.log('UNSENT	Client has been created.open() not called yet')
+            //}
+            //if (request.readyState == 1) {
+            //    console.log('OPENED	open() has been called')
+            //}
+            //if (request.readyState == 2) {
+            //    console.log('HEADERS_RECEIVED	send() has been called, and headers and status are available')
+            //}
+            //if (request.readyState == 3) {
+            //    console.log('LOADING	Downloading; responseText holds partial data')
+            //}
+            if (request.readyState == 4) {
+                console.log('DONE -	The operation is complete')
+                // Process the response
+                if (request.status >= 200 && request.status < 300) {
+                    // If successful
+                    resolve(request.response);
+                } else {
+                    // If failed
+                    reject({
+                        status: request.status,
+                        statusText: request.statusText
+                    });
+                }
+            }
+        };
+        request.open(method || 'GET', url, async || true);
+        // Send the request
+        request.send(data);
+    });
+}
 //lesson
 var urlLesson = {
     "List": "GetListLesson",
@@ -64,8 +110,14 @@ var lessonService = {
         //header
         var lessonHeader = $("<div>", { "class": "card-header py-3" });
         lessonContent.append(lessonHeader);
+
+        //header
+        var ButtonStart = $("<div>", { "class": "d-flex justify-content-center pt-5 pb-5" });
+        var btnButton = $("<div>", { "class": "btn btn-primary", "onclick": "BeginExam(this,'" + data.ID + "','" + C_classID+"')", "text": " Bắt đầu làm bài thi" });
+        lessonContent.append(ButtonStart);
+        ButtonStart.append(btnButton);
         //Body
-        var cardBody = $("<div>", { "class": "card-body" });
+        var cardBody = $("<div>", { "id": "check-student", "class": "card-body d-none" });
         lessonContent.append(cardBody);
         //row
         var lessonRow = $("<div>", { "class": "row" });
@@ -83,6 +135,11 @@ var lessonService = {
         if (data.TemplateType == 2) {
             if (data.Timer > 0) {
                 title.text(title.text() + " - thời gian: " + data.Timer + "p");
+
+                var counter = $("<div>", { "class": "text-center", "text": "Thời gian làm bài " });
+                var counterdate = $("<span>", { "id": "counter", "class": "time-counter", "text": (data.Timer < 10 ? ("0" + data.Timer) : data.Timer) + ":00" });
+                counter.append(counterdate);
+                lessonHeader.append(counter);
             }
             if (data.Point > 0) {
                 title.text(title.text() + " (" + data.Point + "đ)");
@@ -92,10 +149,7 @@ var lessonService = {
         var edit = $("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "lessonService.renderEdit('" + data.ID + "')" });
         var close = $("<a>", { "class": "btn btn-sm btn-close", "text": "X", "onclick": "render.resetLesson()" });
         var remove = $("<a>", { "class": "btn btn-sm btn-remove", "text": "Xóa", "onclick": "lessonService.remove('" + data.ID + "')" });
-        //lessonHeader.append(sort);
-        //lessonHeader.append(edit);
-        //lessonHeader.append(close);
-        //lessonHeader.append(remove); //removeLesson
+        
 
 
         lessonRow.append(tabsleft);
@@ -107,9 +161,10 @@ var lessonService = {
         var bodyright = $("<div>", { "class": "col-md-9" });
         var button = $("<div>", { "class": "float-right" });
         lessonHeader.append(button);
-        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Quay lại", "onclick": "tab_goback()" });
+
+        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "data-toggle": "tooltip", "title": "Quay lại", "onclick": "tab_goback()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
-        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Tiếp tục", "onclick": "tab_gonext()" });
+        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "data-toggle": "tooltip", "title": "Tiếp tục", "onclick": "tab_gonext()" });
         var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
         button.append(prevtab);
         prevtab.append(iconprev);
@@ -120,6 +175,7 @@ var lessonService = {
         lessonBody.append(tabscontent);
 
         lessonRow.append(bodyright);
+
 
         // add lesson part
         var createLessonPart = $("<div>", { "class": "add-lesson-part" });
@@ -137,158 +193,26 @@ var lessonService = {
         //var lessonContainerBackground = $("<div>", { "class": "lesson-container-bg" });
         //containerLesson.append(lessonContainerBackground);
         containerLesson.append(lessonBox);
-    },
-    renderSort: function () {
-        $(".lesson-body").toggleClass("sorting");
-        $(".lesson-body .part-box").toggleClass("compactView");
-        if ($(".lesson-body").hasClass("sorting")) {
-            $(".lesson-header .btn-sort").text("Bỏ sắp xếp");
-            $(".lesson-body").sortable({
-                revert: "invalid",
-                update: function (event, ui) {
-                    var id = $(ui.item).attr("id");
-                    var ar = $(this).parent().find(".part-box");
-                    var index = $(ar).index(ui.item);
-                    lessonPartService.changePos(id, index);
-                }
-            });
-            $(".lesson-body").sortable("enable");
-            $(".part-box").disableSelection();
-        }
-        else {
-            $(".lesson-header .btn-sort").text("Sắp xếp");
-            $(".lesson-body").sortable("disable");
-        }
-    },
-    renderEdit: function (id) {
-        var modalForm = $(window.modalForm);
-        showModal();
-        modalTitle.html("Chọn Template");
-        modalForm.html(template.Type('lesson'));
-        var xhr = new XMLHttpRequest();
-        var url = urlBase;
-        xhr.open('GET', url + urlLesson.Details + "?ID=" + id + "&UserID=" + userID + "&ClientID=" + clientID);
-        xhr.send({});
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                var data = JSON.parse(xhr.responseText);
-                if (data.code == 200) {
-                    console.log(data.data);
-                    template.lesson(data.data.TemplateType, data.data);
-                }
-            }
-        }
-    },
-    remove: function (id) {
-        var ChapterID = $("#ChapterID").val();
-        var CourseID = $("#CourseID").val();
-        var check = confirm("bạn muốn xóa nội dung này ?");
-        if (check) {
-            var xhr = new XMLHttpRequest();
-            var url = urlBase;
-            xhr.open('POST', url + urlLesson.Remove + "?ID=" + id + "&UserID=" + userID + "&ClientID=" + clientID);
-            xhr.send({});
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    var data = JSON.parse(xhr.responseText);
-                    if (data.code == 200) {
-                        if (ChapterID != "" && ChapterID != "0")
-                            document.location = urlChapter.Location + ChapterID;
-                        else
-                            if (CourseID != "" && CourseID != "0")
-                                document.location = urlCourse.Location + ChapterID;
-                            else
-                                document.location = urlCourse.HomeLocation;
-                    }
-                }
-            }
-        }
-    },
-    changePos: function (id, pos) {
-        var url = urlBase;
-        $.ajax({
-            type: "POST",
-            url: url + urlLesson.ChangePos,
-            data: {
-                "ID": id,
-                "UserID": userID,
-                "ClientID": clientID,
-                "pos": pos
-            },
-            success: function (data) {
-                console.log(data.message);
-                //document.location = document.location;
-            },
-            error: function (data) {
-                console.log(data);
-            }
-        });
-    },
-    changeParent: function (id, chapterid, courseid) {
-        var url = urlBase;
-        $.ajax({
-            type: "POST",
-            url: url + urlLesson.ChangeParent,
-            data: {
-                "ID": id,
-                "UserID": userID,
-                "ClientID": clientID,
-                "ChapterID": chapterid,
-                "CourseID": courseid
-            },
-            success: function (data) {
-                console.log(data.message);
-                //document.location = document.location;
-            },
-            error: function (data) {
-                console.log(data);
-            }
-        });
-    },
-    create: function () {
-        var modalForm = $(window.modalForm);
-        showModal();
-        modalTitle.html("Chọn Template");
-        modalForm.html(template.Type('lesson'));
     }
-
 }
 
 var render = {
     resetLesson: function () {
         $(containerLesson).html("");
     },
-    sortLesson: function () {
-
-    },
     lesson: function (data) {
         lessonService.renderData(data);
     },
-    lessonPart: function (data,lsid,clid) {
+    lessonPart: function (data,lsid,clsid) {
         for (var i = 0; data != null && i < data.length; i++) {
-            var item = data[i];
-            render.part(item,lsid,clid);
+            var lessonpart = data[i];
+            if (lessonpart.Title == null) continue;
+            render.part(lessonpart,lsid,clsid);
         }
-    },
-    editPart: function (data) {
-        var modalForm = window.modalForm;
-        modalTitle.html("Cập nhật nội dung");
-        $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
-        $(modalForm).append($("<input>", { "type": "hidden", "name": "ID", "value": data.ID }));
-        $(modalForm).append($("<input>", { "type": "hidden", "name": "Type", "value": data.Type }));
-
-        $('#action').val(urlLessonPart.CreateOrUpdate);
-
-
-
-        $(modalForm).append($("<div>", { "class": "lesson_parts" }));
-        $(modalForm).append($("<div>", { "class": "question_template hide" }));
-        $(modalForm).append($("<div>", { "class": "answer_template hide" }));
-        template.lessonPart(data.Type, data);
 
     },
     part: function (data) {
-        console.log(data);
+        
         var time = "", point = "";
 
         if (data.Timer > 0) {
@@ -304,8 +228,8 @@ var render = {
 
         //tabs         
         var lessonitem = $("<li>", { "class": "nav-item" });
-        var item = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
-        lessonitem.append(item);
+        var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
+        lessonitem.append(itemtitle);
         tabContainer.append(lessonitem);
 
         // tabs content
@@ -321,18 +245,14 @@ var render = {
         if (data.Title != null) {
             boxHeader.append($("<h4>", { "class": "title", "text": data.Title + time + point }));
         }
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Thu gọn", "onclick": "toggleCompact(this)" }));
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "Create.removePart('" + data.ID + "')" }));
         itembox.append(boxHeader);
-        console.log(data.Questions)
         switch (data.Type) {
             case "TEXT":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
                 }
-                item.prepend($("<i>", { "class": "far fa-file-word" }));
+                itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
@@ -341,7 +261,7 @@ var render = {
                 render.mediaContent(data, itemBody, "IMG");
                 if (data.Description != null)
                     wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                item.prepend($("<i>", { "class": "fas fa-file-image" }));
+                itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
@@ -350,7 +270,7 @@ var render = {
                 render.mediaContent(data, itemBody, "AUDIO");
                 if (data.Description != null)
                     wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                item.prepend($("<i>", { "class": "fas fa-music" }));
+                itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
@@ -359,7 +279,7 @@ var render = {
                 render.mediaContent(data, itemBody, "VIDEO");
                 if (data.Description != null)
                     wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                item.prepend($("<i>", { "class": "far fa-play-circle" }));
+                itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
@@ -368,29 +288,28 @@ var render = {
                 render.mediaContent(data, itemBody, "DOC");
                 if (data.Description != null)
                     wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                item.prepend($("<i>", { "class": "fas fa-file-word" }));
+                itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
             case "QUIZ1":
             case "QUIZ2":
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
-                item.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
                 render.mediaContent(data, itemBody, "");
                 container.append(tabsitem);
                 //Render Content
 
                 //Render Question
-                totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    render.questions(item, data.Type);
+                    var quizitem = data.Questions[i];
+                    render.questions(quizitem, data.Type);
                 }
                 break;
             case "QUIZ3":
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
-                item.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
                 render.mediaContent(data, itemBody, "");
                 var answers_box = $("<div>", { "class": "answer-wrapper no-child" });
@@ -408,10 +327,9 @@ var render = {
                 });
                 container.append(tabsitem);
                 //Render Question
-                totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    render.questions(item, data.Type);
+                    var quizitem = data.Questions[i];
+                    render.questions(quizitem, data.Type);
                 }
                 break;
             case "ESSAY":
@@ -419,29 +337,33 @@ var render = {
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
                 }
-                item.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itembox.append(itemBody);
                 render.mediaContent(data, itemBody, "");
-                
-                totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    render.questions(item, data.Type);
+                    var quizitem = data.Questions[i];
+                    render.questions(quizitem, data.Type);
                 }
                 break;
         }
+
         if (tabContainer.find(".nav-item").length == 1) {
-            item.addClass("active");
+            itemtitle.addClass("active");
             tabsitem.addClass("show active");
         }
     },
     questions: function (data, template) {
+        //add quiz indicator to question panel
+        $("#quizNavigator .quiz-wrapper").append($("<button>", { "class": "btn btn-outline-secondary rounded-quiz", "type": "button", "text": ++totalQuiz, "name": "quizNav" + data.ID }));
+        $(".quizNumber .total").text(totalQuiz);
+
         //render question
         switch (template) {
             case "QUIZ2":
+                alert(1);
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -456,17 +378,16 @@ var render = {
                 quizitem.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description });
+                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
                     quizitem.append(extend);
                 }
 
                 for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
-                    var item = data.CloneAnswers[i];
-                    render.answers(item, template,data.ID);
+                    var answer = data.CloneAnswers[i];
+                    render.answers(answer, template);
                 }
                 break;
             case "QUIZ3":
-                console.log(data.CloneAnswers);
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -477,12 +398,12 @@ var render = {
                 quizitem.append(answer_part);
 
                 var pane_item = $("<div>", { "class": "pane-item" });
-                if (data.media == null) {
+                if (data.Media == null) {
                     pane_item.append($("<div>", { "class": "quiz-text", "text": data.Content }));
                 } else {
                     render.mediaContent(data, pane_item);
                 }
-               
+
                 quiz_part.append(pane_item);
                 container.append(quizitem);
 
@@ -507,8 +428,8 @@ var render = {
                 });
 
                 for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
-                    var item = data.CloneAnswers[i];
-                    render.answers(item, template, data.ID);
+                    var answer = data.CloneAnswers[i];
+                    render.answers(answer, template);
                 }
                 break;
             default:
@@ -534,22 +455,21 @@ var render = {
                 itembox.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description });
+                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
                     itembox.append(extend);
                 }
 
                 container.append(itembox);
-                console.log(data.CloneAnswers);
+
                 //Render Answer
                 for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
-                    var item = data.CloneAnswers[i];
-                    render.answers(item, template, data.ID);
+                    var answer = data.CloneAnswers[i];
+                    render.answers(answer, template);
                 }
                 break;
         }
     },
-    answers: function (data, template, id) {
-        console.log(data);
+    answers: function (data, template) {
         var container = $("#" + data.ParentID + " .answer-wrapper");
         var answer = $("<fieldset>", { "class": "answer-item" });
         switch (template) {
@@ -573,7 +493,7 @@ var render = {
                 if (data.Content != null)
                     answer.append($("<input>", { "type": "hidden", "value": data.Content }));
 
-                if (data.media != null) {
+                if (data.Media != null) {
                     render.mediaContent(data, answer);
                 }
                 else
@@ -597,7 +517,7 @@ var render = {
                 break;
             default:
                 answer.append($("<input>", { "type": "hidden" }));
-                answer.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "onclick": "toggleCorrectAnswer(this)" }));
+                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox", "onclick": "answerQuestion(this,'" + data.ParentID + "','" + data.ID + "','" + data.Content + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
                     answer.append($("<label>", { "class": "answer-text", "text": data.Content }));
                 render.mediaContent(data, answer);
@@ -643,12 +563,13 @@ var render = {
         }
     },
     mediaContent: function (data, wrapper, type = "") {
-        
-        if (data.media != null) {
+        if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
+            if (!data.Media.Path.startsWith("http"))
+                data.Media.Path = publisherPath + data.Media.Path;
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "src": data.Media.Path }));
+                    mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -662,38 +583,33 @@ var render = {
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "src": data.Media.Path }));
+                            mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
                             mediaHolder.append("<audio controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else
-                            mediaHolder.append($("<embed>", { "src": data.Media.Path }));
+                            mediaHolder.append($("<embed>", { "src": data.Answers.path }));
                     break;
             }
             wrapper.append(mediaHolder);
         }
-
     }
 };
 
 var load = {
-    lesson: function (id, classid) {
-        if (id != $("#LessonID").val())
-            document.location = urlLesson.Location + id;
-        else {
-            var url = urlBase + "Lesson/";
-            $.ajax({
-                type: "POST",
-                url: url + urlLesson.Details,
-                data: { ID: id },
-                dataType: "json",
-                success: function (data) {
-                    render.lesson(data.Data);
-                    load.listPart(data.Data.ID, classid);
-                }
-            });
-        }
+    lesson: function (id, classid, url) {
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: { LessonID: id, ClassID: classid},
+            dataType: "json",
+            success: function (data) {
+                render.lesson(data.Data);
+                render.lessonPart(data.Data.Parts, data.Data.ID, classid)
+            }
+        });
     },
     listPart: function (lessonID, classID) {
 
@@ -750,3 +666,68 @@ var load = {
         file.click();
     }
 };
+function answerQuestion(obj, quizid, answerID, answerValue) {
+    var dataform = new FormData();
+    dataform.append("ID", obj.parentElement.parentElement.parentElement.getAttribute("data-id"));
+        dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
+        dataform.append("AnswerID", answerID);
+        dataform.append("QuestionID", quizid);
+        dataform.append("AnswerValue", answerValue);
+        Ajax(urlChose, "POST", dataform, false)
+            .then(function (res) {
+                if (res != "Accept Deny") {
+                    var data = JSON.parse(res);
+                    console.log(data)
+                    obj.parentElement.parentElement.parentElement.setAttribute("data-id", data.ID);
+                }
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
+    $('.quiz-item#' + quizid + " .quiz-extend").show();
+    markQuestion(quizid);
+}
+
+function markQuestion(quizid) {
+    if ($("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "].completed").length === 1) {
+    } else {
+        $("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "]").addClass("completed");
+        var completed = parseInt($(".quizNumber .completed").text()) + 1;
+        $(".quizNumber .completed").text(completed);
+        if(completed == totalQuiz)
+            $(".quizNumber .completed").addClass("finish");
+    }
+}
+function BeginExam(_this, LessonID, ClassID) {
+    var dataform = new FormData();
+        dataform.append("ClassID", ClassID);
+        dataform.append("LessonID", LessonID);
+        Ajax(urlStart, "POST", dataform, false)
+            .then(function (res) {
+                var data = JSON.parse(res);
+                document.querySelector("input[name='ExamID']").value = data.ID;
+                start(_this);
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
+}
+function GetCurrentExam() {
+    var dataform = new FormData();
+    dataform.append("ClassID", ClassID);
+    dataform.append("LessonID", LessonID);
+    Ajax(urlCurrentExam, "POST", dataform, false)
+    .then(function (res) {
+        if (res == null) return;
+        var data = JSON.parse(res);
+        document.querySelector("input[name='ExamID']").value = data.ID;
+        
+        start();
+    })
+    .catch(function (err) {
+        console.log(err);
+    })
+}
+function LoadCurrentExam(ID) {
+    //localstorge
+}

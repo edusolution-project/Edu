@@ -52,7 +52,7 @@ namespace BaseCustomerEntity.Database
         {
             var item = GetItemByID(ID);
             if (item == null) return false;
-            return (DateTime.Now - item.CurrentDoTime.AddMinutes(item.Timer)).TotalSeconds <= 0;
+            return (item.CurrentDoTime.AddMinutes(item.Timer) - DateTime.Now).TotalSeconds <= 0;
         }
         
     }
