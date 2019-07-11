@@ -46,6 +46,8 @@ namespace BaseCustomerEntity.Globals
             services.AddTransient<ClassService>();
             services.AddTransient<ClassProgressService>();
 
+            services.AddTransient<ExamService>();
+            services.AddTransient<ExamDetailService>();
             return services;
         }
     }

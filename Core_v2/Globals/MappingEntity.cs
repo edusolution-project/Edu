@@ -80,19 +80,23 @@ namespace Core_v2.Globals
                 if (newProps.Contains(item))
                 {
                     var value = item.GetValue(oldItem);
-                    switch (item.PropertyType.Name)
+                    if(newItem[item.Name] == null) newItem[item.Name] = value;
+                    else
                     {
-                        case "Boolean":
-                            if (!(bool)newItem[item.Name])
+                        switch (item.PropertyType.Name)
+                        {
+                            case "Boolean":
+                                if (!(bool) newItem[item.Name])
+                                    newItem[item.Name] = value;
+                                break;
+                            case "DateTime":
+                                if ((DateTime)newItem[item.Name] < new DateTime(1900, 1, 1))
+                                    newItem[item.Name] = value;
+                                break;
+                            default:
                                 newItem[item.Name] = value;
-                            break;
-                        case "DateTime":
-                            if ((DateTime)newItem[item.Name] < new DateTime(1900, 1, 1))
-                                newItem[item.Name] = value;
-                            break;
-                        default:
-                            newItem[item.Name] = value;
-                            break;
+                                break;
+                        }
                     }
                 }
             }

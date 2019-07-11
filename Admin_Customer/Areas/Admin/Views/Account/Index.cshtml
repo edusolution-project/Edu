@@ -73,6 +73,9 @@
                                 <input type="email" class="form-control" name="UserName" placeholder="Tên đăng nhập (Email)" autocomplete="off" required>
                             </div>
                             <div class="form-group col-md-6">
+                                <input type="text" class="form-control" name="Name" placeholder="Họ và tên" autocomplete="off" required>
+                            </div>
+                            <div class="form-group col-md-6">
                                 <input type="password" class="form-control" name="PassWord" placeholder="Mật khẩu" autocomplete="off" required>
                             </div>
                         </div>
@@ -82,8 +85,11 @@
                                     @{
                                         for (int i = 0; role != null && i < role.Count; i++)
                                         {
-                                            <option value="@role[i].ID">@role[i].Name</option>
-                                        }
+                                            if (role[i].Name != "Super Admin")
+                                            {
+                                                <option value="@role[i].ID">@role[i].Name</option>
+                                            }
+                                        }   
                                     }
                                 </select>
                             </div>
@@ -175,6 +181,7 @@
                             "</tr>"
                         );
                     }
+                    $('.btn').tooltip();
                 }
             },
             error: function() {

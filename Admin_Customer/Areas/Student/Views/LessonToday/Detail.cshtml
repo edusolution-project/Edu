@@ -1,0 +1,22 @@
+﻿
+
+@{
+    ViewData["Title"] = ViewBag.Title;
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
+    var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+}
+<!-- Page Heading -->
+<div id="lessonContainer">
+</div>
+
+<input type="hidden" id="LessonID" value="@Data.ID" />
+<input type="hidden" id="ClassID" value="@Class.ID" />
+<script>
+    $(document).ready(function () {
+        load.lesson($("#LessonID").val(), $("#ClassID").val());
+    });
+</script>
+@section Script{
+    <script src="~/js/lesson.js"></script>
+}

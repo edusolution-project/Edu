@@ -181,7 +181,7 @@ namespace Admin_Customer.Controllers
             };
             var studentRole = new RoleEntity()
             {
-                Name = "Student",
+                Name = "Học viên",
                 Code = "student",
                 Type = "student",
                 CreateDate = DateTime.Now,

@@ -150,7 +150,6 @@ function Edit(id, urlGetData, urlPostData, _this) {
             listinput[i].value = item.Data[listinput[i].name];
             if ($(listinput[i]).hasClass("hiddenDate")) {
                 var fieldId = $(listinput[i]).attr("id");
-
                 $(listinput[i]).prev().removeClass("hasDatepicker").val($.datepicker.formatDate('dd/mm/yy', new Date(item.Data[listinput[i].name]))).datepicker({
                     changeMonth: true,
                     changeYear: true,
@@ -173,7 +172,6 @@ function ExcuteOnlyItem(id, url, fn) {
         if (fn != void 0) fn();
     })
 }
-
 function hideModal() {
     $('.modal').hide();
     $('.modal-backdrop').hide();

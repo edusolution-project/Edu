@@ -1,14 +1,14 @@
 ﻿@{
-    ViewData["Title"] = "Detail";
+
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var curentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    ViewData["Title"] = curentClass.Name;
 }
 
 
 <!-- Begin Page Content -->
 <div class="card-header mb-3">
     <h3 class="m-0 font-weight-bold text-primary">@curentClass.Name</h3>
-
 
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         <li class="nav-item">
@@ -36,7 +36,6 @@
                     <table id="scheduleTable" class="table table-bordered" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>STT</th>
                                 <th>Tên bài học</th>
                                 <th>Mô tả</th>
                                 <th>Ngày bắt đầu</th>
@@ -82,11 +81,11 @@
                             <table id="membersTable" class="table table-bordered" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>
+                                        <th>STT</th>
                                         <th>Họ và tên</th>
                                         <th>Email</th>
                                         <th>Điện thoại</th>
                                         <th>Lớp</th>
-                                        <th>Tuổi</th>
                                         <th>Ngày tháng năm sinh</th>
                                         <th>Tình trạng khóa học</th>
                                         <th>Ngày học gần nhất</th>
@@ -113,16 +112,6 @@
                         <br>
                         <p>Hi teacher, what's is the main content of next lesson?</p>
                     </div>
-                    <div class="item">
-                        <div class="title"><span class="text">Colleen Hurst, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <br>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <br>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
                 </div>
             </div>
             <div class="card shadow mb-4">
@@ -131,50 +120,6 @@
                     <hr class="line mb-0">
                 </div>
                 <div class="card-body">
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Charde Marshall, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <p>Hi teacher, what's is the main content of next lesson?</p>
-                    </div>
                     <div class="item">
                         <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
                         <p>Hi teacher, what's is the main content of next lesson?</p>
@@ -378,29 +323,29 @@
             <div class="modal-content">
                 @using (Html.BeginForm("ImportStudent", "Class", FormMethod.Post, new { enctype = "multipart/form-data", name = "ImportForm" }))
                 {
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <div class="row">
-                            <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
-                            <div class="chose-file col-sm-9">
-                                <input type="file" name="file" class="form-control-file" id="FormControlFile">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="row">
+                                <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
+                                <div class="chose-file col-sm-9">
+                                    <input type="file" name="file" class="form-control-file" id="FormControlFile">
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <div class="button-left">
-                        <button type="button" class="btn btn-secondary">Tải file mẫu</button>
+                    <div class="modal-footer">
+                        <div class="button-left">
+                            <button type="button" class="btn btn-secondary">Tải file mẫu</button>
+                        </div>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadMembers)">Lưu lại</button>
                     </div>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadMembers)">Lưu lại</button>
-                </div>
                 }
             </div>
         </div>
@@ -483,7 +428,6 @@
 
                         if (item.ChapterID == null) {
                             scheduleBody.append("<tr lid=\"" + item.ID + "\">" +
-                            "<td></td>" +
                             "<td><a href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
                             "<td>---</td>" +
                             "<td dvalue=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
@@ -495,7 +439,6 @@
                         else
                         {
                             scheduleBody.find("tr[chapid=" + item.ChapterID + "]").after("<tr lid=\"" + item.ID + "\">" +
-                            "<td></td>" +
                             "<td><a href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
                             "<td>---</td>" +
                             "<td dvalue=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
@@ -542,11 +485,11 @@
                         var lastdate = $.datepicker.formatDate('dd/mm/yy', new Date(student.LastJoinDate));
 
                         membersBody.append("<tr>" +
+                                "<td>" + (j + 1) + "</td>" +
                                 "<td>" + student.FullName + "</td>" +
                                 "<td>" + student.Email + "</td>" +
                                 "<td>" + (student.Phone == null ?"" : student.Phone)  + "</td>" +
-                                "<td>" + (student.StudentId == null ?"" : student.StudentId)  + "</td>" +
-                                "<td>" + (student.StudentId == null ?"" : student.StudentId)  + "</td>" +
+                                "<td>" + (student.Class == null ?"" : student.Class[0])  + "</td>" +
                                 "<td>" + date + "</td>" +
                                 "<td>" +
                                     "<div class=\"progress\">" +

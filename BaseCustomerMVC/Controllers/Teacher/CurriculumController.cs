@@ -84,7 +84,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult Index(DefaultModel model)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            var teacher = User.IsInRole("teacher") ? _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault() : new TeacherEntity();
 
             var subject = new List<SubjectEntity>();
             var grade = new List<GradeEntity>();

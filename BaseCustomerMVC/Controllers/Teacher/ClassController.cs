@@ -30,7 +30,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly IHostingEnvironment _env;
 
-
         public ClassController(GradeService gradeservice
            , SubjectService subjectService, TeacherService teacherService, ClassService service,
             CourseService courseService, ChapterService chapterService, LessonService lessonService, LessonScheduleService lessonScheduleService,
@@ -53,7 +52,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult Index(DefaultModel model)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            var teacher = User.IsInRole("teacher") ? _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault() : new TeacherEntity();
 
             var subject = new List<SubjectEntity>();
             var grade = new List<GradeEntity>();

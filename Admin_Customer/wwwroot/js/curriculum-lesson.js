@@ -477,7 +477,7 @@ var render = {
                 quizitem.append(answer_part);
 
                 var pane_item = $("<div>", { "class": "pane-item" });
-                if (data.media == null) {
+                if (data.Media == null) {
                     pane_item.append($("<div>", { "class": "quiz-text", "text": data.Content }));
                 } else {
                     render.mediaContent(data, pane_item);
@@ -572,7 +572,7 @@ var render = {
                 if (data.Content != null)
                     answer.append($("<input>", { "type": "hidden", "value": data.Content }));
 
-                if (data.media != null) {
+                if (data.Media != null) {
                     render.mediaContent(data, answer);
                 }
                 else
@@ -643,7 +643,7 @@ var render = {
     },
     mediaContent: function (data, wrapper, type = "") {
 
-        if (data.media != null) {
+        if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
             if (!data.Media.Path.startsWith("http"))
                 data.Media.Path = publisherPath + data.Media.Path;

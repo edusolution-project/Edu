@@ -212,7 +212,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                                 //Address = workSheet.Cells[i, 9].Value == null ? "" : workSheet.Cells[i, 9].Value.ToString(),
                                 CreateDate = DateTime.Now,
                                 UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
-                                IsActive = true
+                                IsActive = workSheet.Cells[i, 7].Value.ToString() == "Hoạt động"
                             };
                             if (!ExistEmail(item.Email))
                             {
@@ -299,6 +299,42 @@ namespace BaseCustomerMVC.Controllers.Admin
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
+
+        [HttpGet]
+        [Obsolete]
+        public async Task<IActionResult> ExportTemplate(DefaultModel model)
+        {
+
+            var list = new List<StudentEntity>() { new StudentEntity() {
+                ID = "undefined"
+                } };
+            var data = list.Select(o => new
+            {
+                STT = 1,
+                Ma_HV = "HV01",
+                Ho_ten = "Nguyễn Văn A",
+                Ngay_sinh = "01/30/1999",
+                Email = "email@gmail.com",
+                Lop = "8A1",
+                Trang_thai = "Hoạt động"
+            });
+            var stream = new MemoryStream();
+
+            using (var package = new ExcelPackage(stream))
+            {
+                var workSheet = package.Workbook.Worksheets.Add("DS_HV");
+                workSheet.Cells.LoadFromCollection(data, true);
+                package.Save();
+            }
+            stream.Position = 0;
+            string excelName = $"StudentTemplate.xlsx";
+
+            //return File(stream, "application/octet-stream", excelName);  
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
+        }
+
+
+
         [HttpPost]
         [Obsolete]
         public JsonResult Publish(DefaultModel model)
