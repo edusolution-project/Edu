@@ -536,9 +536,9 @@
         var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(enddateHolder.attr('dvalue')));
 
         startdateHolder.find('span').hide();
-        startdateHolder.append($("<input>", {"type":"text", "class":"date-input"})).append($("<input>", {"type":"hidden", "id" : id + "_startdate", "value":startdateHolder.attr('dvalue')}));
+        startdateHolder.append($("<input>", {"type":"text", "class":"date-input form-control"})).append($("<input>", {"type":"hidden", "id" : id + "_startdate", "value":startdateHolder.attr('dvalue')}));
         enddateHolder.find('span').hide();
-        enddateHolder.append($("<input>", {"type":"text", "class":"date-input"}))
+        enddateHolder.append($("<input>", {"type":"text", "class":"date-input form-control"}))
             .append($("<input>", {"type":"hidden", "id":id + "_enddate", "value": enddateHolder.attr('dvalue')}));
 
 
