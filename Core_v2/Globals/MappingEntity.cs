@@ -82,7 +82,7 @@ namespace Core_v2.Globals
                 if (newProps.Contains(item))
                 {
                     var value = item.GetValue(oldItem);
-                    if(newItem[item.Name] == null) newItem[item.Name] = value;
+                    if(newItem[item.Name] == null) newItem[item.Name] = value;//repush here
                     else
                     {
                         switch (item.PropertyType.Name)
