@@ -6,6 +6,8 @@ using System.Text;
 
 namespace Core_v2.Globals
 {
+
+    //20190711
     public class MappingEntity<T, TN> where T : EntityBase where TN : EntityBase, new()
     {
         public MappingEntity()
