@@ -3,6 +3,7 @@ using BaseCustomerMVC.Globals;
 using BaseCustomerMVC.Models;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -43,6 +44,29 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.LessonID = id;
             ViewBag.ClassID = ClassID;
             return View();
+        }
+
+        [HttpPost]
+        public JsonResult GetDetailsLesson(string ID)
+        {
+            try
+            {
+                var lesson = _lessonService.CreateQuery().Find(o => o.ID == ID).FirstOrDefault();
+
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", lesson }
+                };
+                return new JsonResult(response);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message }
+                });
+            }
         }
 
         public IActionResult Detail(DefaultModel model, string ClassID)

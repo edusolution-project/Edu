@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = ViewBag.Title;
-    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
 }
@@ -18,7 +18,7 @@
     });
 </script>
 @section Script{
-<script src="~/js/teacher-exam.js"></script>
+<script src="~/js/student-exam.js"></script>
 }
 <script>
     function openNav() {

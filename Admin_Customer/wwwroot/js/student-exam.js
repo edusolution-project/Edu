@@ -1,4 +1,4 @@
-﻿var urlBase = "/teacher/";
+﻿var urlBase = "/student/";
 var publisherPath = "http://publisher.edusolution.vn"
 
 let myEditor;
@@ -695,7 +695,7 @@ var load = {
         if (id != $("#LessonID").val())
             document.location = urlLesson.Location + id;
         else {
-            var url = urlBase + "Lesson/";
+            var url = urlBase + "LessonToday/";
             $.ajax({
                 type: "POST",
                 url: url + urlLesson.Details,
