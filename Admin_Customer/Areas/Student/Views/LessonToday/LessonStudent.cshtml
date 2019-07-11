@@ -11,7 +11,7 @@
 </div>
 <script>
     $(document).ready(function () {
-        load.lesson('');
+        load.lesson($("#LessonID").val(), $("#CourseID").val());
     });
 </script>
 
@@ -382,64 +382,5 @@
     };
 
     //LoadData();
-
-    $('.answer-item').draggable({
-                cursor: "move",
-                helper: 'clone',
-                revert: "true",
-                scroll: true,
-                start: function (event, ui) {
-                    ui.helper.data('parent', $(this).parent());
-                },
-                stop: function (event, ui) {
-                    //var prevParent = ui.helper.data('parent');
-                    //$(prevParent).find(".placeholder").show();
-                }
-            });
-
-    $(".answer-wrapper.no-child").droppable({
-                    tolerance: "intersect",
-                    accept: ".answer-item",
-                    activeClass: "hasAnswer",
-                    hoverClass: "answerHover",
-                    drop: function (event, ui) {
-                        var prevHolder = ui.helper.data('parent');
-                        $(prevHolder).find(".placeholder").show();
-                        $(this).append($(ui.draggable));
-                    }
-    });
-
-    $(".answer-pane").droppable({
-                    tolerance: "intersect",
-                    accept: ".answer-item",
-                    activeClass: "hasAnswer",
-                    hoverClass: "answerHover",
-                    drop: function (event, ui) {
-                        var prevHolder = ui.helper.data('parent');
-                        $(prevHolder).find(".placeholder").show();
-                        $(this).append($(ui.draggable));
-                    }
-    });
-
-    $(".answer-pane").droppable({
-                    tolerance: "intersect",
-                    accept: ".answer-item",
-                    activeClass: "hasAnswer",
-                    hoverClass: "answerHover",
-                    drop: function (event, ui) {
-                        $(this).find(".placeholder").hide();
-                        var prevHolder = ui.helper.data('parent');
-
-                        if ($(this).find(".answer-item").length > 0) {//remove all answer to box
-                            //$(container).siblings(".answer-wrapper").append($(this).find(".answer-item"));
-                            $(prevHolder).append($(this).find(".answer-item"));
-                        }
-                        else {
-                            $(prevHolder).find(".placeholder").show();
-                        };
-                        $(this).append($(ui.draggable));
-                    }
-    });
-
 
     </script>}
