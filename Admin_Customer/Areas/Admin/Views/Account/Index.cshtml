@@ -159,9 +159,9 @@
 
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","account")',LoadData)\" type='button' data-placement='top' title='Sửa' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'" + (isAdmin ? "disabled":"") + " > <div class='handle'></div> </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","account")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'" + (isAdmin ? "disabled":"") + " > <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","account")',LoadData)\" type='button' data-placement='top' title='Xóa' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","account")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID + "' onclick=\"setToggle('dataTable')\"/></div></td>"+

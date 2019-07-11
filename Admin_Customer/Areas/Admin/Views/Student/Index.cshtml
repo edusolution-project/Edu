@@ -189,8 +189,8 @@
                             "<td>" + item.Email + "</td>" +
                             "<td>" + date + "</td>" +
                             "<td>" + item.Class + "</td>" +active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                         );
