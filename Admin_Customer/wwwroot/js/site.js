@@ -152,6 +152,8 @@ function Edit(id, urlGetData, urlPostData, _this) {
                 var fieldId = $(listinput[i]).attr("id");
 
                 $(listinput[i]).prev().removeClass("hasDatepicker").val($.datepicker.formatDate('dd/mm/yy', new Date(item.Data[listinput[i].name]))).datepicker({
+                    changeMonth: true,
+                    changeYear: true,
                     dateFormat: 'dd/mm/yy',
                     altField: '#' + fieldId,
                     altFormat: 'mm/dd/yy'

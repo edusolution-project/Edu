@@ -151,6 +151,8 @@
     $('.datepicker').each(function () {
         var fieldID = $(this).next().attr("id");
         $(this).datepicker({
+            changeMonth: true,
+            changeYear: true,
             dateFormat: 'dd/mm/yy',
             altField: '#' + fieldID,
             altFormat: 'mm/dd/yy'
@@ -185,7 +187,7 @@
                             "<td>" + item.StudentId +"</td>" +
                             "<td>" + item.FullName + "</td>" +
                             "<td>" + item.Email + "</td>" +
-                            "<td>" + date +"</td>" +
+                            "<td>" + date + "</td>" +
                             "<td>" + item.Class + "</td>" +active +
                             "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +

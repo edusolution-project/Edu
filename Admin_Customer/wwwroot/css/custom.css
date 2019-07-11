@@ -292,7 +292,7 @@ video, audio {
 .number {
     color: #999;
     font-weight: bold;
-    position: absolute;
+    position: fixed;
     right: 10px;
     background-color: #fff;
     border: 2px solid #999;
@@ -317,6 +317,7 @@ video, audio {
 }
 
 .overlay {
+    display: none;
     height: 100%;
     width: 20%;
     position: fixed;
@@ -373,21 +374,31 @@ video, audio {
     color: cornflowerblue;
 }
 /* sesson */
+
 .quiz-item {
     display: block;
     width: 100%;
-    padding: 10px 0 10px;
+    padding-bottom: 20px;
     border-bottom: solid 1px #ccc;
 }
 
-.quiz-pane {
+.quiz-box-header{
+    padding: 20px 0;
+}
+
+.part-box-header .title{
+    line-height: inherit;
+    text-align: justify;
+}
+
+.QUIZ3 .quiz-pane {
     width: 48%;
     margin-right: 2%;
     display: inline-block;
     vertical-align: top;
 }
 
-.pane-item {
+.QUIZ3 .pane-item {
     display: block;
     margin: 7px;
     border: dotted 1px #ccc;
@@ -396,15 +407,15 @@ video, audio {
     background: #ddd;
 }
 
-.answer-pane {
+.QUIZ3 .answer-pane {
     width: 48%;
     display: inline-block;
     border: dotted 1px #ccc;
     text-align: center;
 }
 
-.answer-wrapper .answer-box,
-.answer-wrapper .answer-item {
+.QUIZ3 .answer-wrapper .answer-box,
+.QUIZ3 .answer-wrapper .answer-item {
     display: inline-block;
     width: 48%;
     text-align: left;

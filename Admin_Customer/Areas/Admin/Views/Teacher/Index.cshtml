@@ -163,6 +163,8 @@
     $('.datepicker').each(function () {
         var fieldID = $(this).next().attr("id");
         $(this).datepicker({
+            changeMonth: true,
+            changeYear: true,
             dateFormat: 'dd/mm/yy',
             altField: '#' + fieldID,
             altFormat: 'mm/dd/yy'
