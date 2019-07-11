@@ -2,7 +2,6 @@
 var publisherPath = "http://publisher.edusolution.vn"
 
 let myEditor;
-let totalQuiz = 0;
 
 //lesson
 var urlLesson = {
@@ -66,14 +65,8 @@ var lessonService = {
         //header
         var lessonHeader = $("<div>", { "class": "card-header py-3" });
         lessonContent.append(lessonHeader);
-
-        //header
-        var ButtonStart = $("<div>", { "class": "d-flex justify-content-center pt-5 pb-5" });
-        var btnButton = $("<div>", { "class": "btn btn-primary", "onclick": "start(this)", "text": " Bắt đầu làm bài thi" });
-        lessonContent.append(ButtonStart);
-        ButtonStart.append(btnButton);
         //Body
-        var cardBody = $("<div>", { "id": "check-student", "class": "card-body d-none" });
+        var cardBody = $("<div>", { "class": "card-body" });
         lessonContent.append(cardBody);
         //row
         var lessonRow = $("<div>", { "class": "row" });
@@ -91,11 +84,6 @@ var lessonService = {
         if (data.TemplateType == 2) {
             if (data.Timer > 0) {
                 title.text(title.text() + " - thời gian: " + data.Timer + "p");
-
-                var counter = $("<div>", { "class": "text-center", "text": "Thời gian làm bài " });
-                var counterdate = $("<span>", { "id": "counter", "class": "time-counter", "text": (data.Timer < 10 ? ("0" + data.Timer) : data.Timer) + ":00" });
-                counter.append(counterdate);
-                lessonHeader.append(counter);
             }
             if (data.Point > 0) {
                 title.text(title.text() + " (" + data.Point + "đ)");
@@ -103,12 +91,14 @@ var lessonService = {
         }
         var sort = $("<a>", { "class": "btn btn-sm btn-sort", "text": "Sắp xếp", "onclick": "lessonService.renderSort()" });
         var edit = $("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "lessonService.renderEdit('" + data.ID + "')" });
+        var create = $("<a>", { "class": "btn btn-sm btn-add", "text": "Thêm nội dung", "onclick": "Create.lessonPart('" + data.ID + "')" });
         var close = $("<a>", { "class": "btn btn-sm btn-close", "text": "X", "onclick": "render.resetLesson()" });
         var remove = $("<a>", { "class": "btn btn-sm btn-remove", "text": "Xóa", "onclick": "lessonService.remove('" + data.ID + "')" });
-        //lessonHeader.append(sort);
-        //lessonHeader.append(edit);
+        lessonHeader.append(sort);
+        lessonHeader.append(edit);
+        lessonHeader.append(create);
         //lessonHeader.append(close);
-        //lessonHeader.append(remove); //removeLesson
+        lessonHeader.append(remove); //removeLesson
 
 
         lessonRow.append(tabsleft);
@@ -120,10 +110,9 @@ var lessonService = {
         var bodyright = $("<div>", { "class": "col-md-9" });
         var button = $("<div>", { "class": "float-right" });
         lessonHeader.append(button);
-
-        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "data-toggle": "tooltip", "title": "Quay lại", "onclick": "tab_goback()" });
+        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Quay lại", "onclick": "tab_goback()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
-        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "data-toggle": "tooltip", "title": "Tiếp tục", "onclick": "tab_gonext()" });
+        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Tiếp tục", "onclick": "tab_gonext()" });
         var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
         button.append(prevtab);
         prevtab.append(iconprev);
@@ -134,7 +123,6 @@ var lessonService = {
         lessonBody.append(tabscontent);
 
         lessonRow.append(bodyright);
-
 
         // add lesson part
         var createLessonPart = $("<div>", { "class": "add-lesson-part" });
@@ -154,11 +142,10 @@ var lessonService = {
         containerLesson.append(lessonBox);
     },
     renderSort: function () {
-        $(".lesson-body").toggleClass("sorting");
-        $(".lesson-body .part-box").toggleClass("compactView");
-        if ($(".lesson-body").hasClass("sorting")) {
-            $(".lesson-header .btn-sort").text("Bỏ sắp xếp");
-            $(".lesson-body").sortable({
+        $("#pills-tab").toggleClass("sorting");
+        if ($("#pills-tab").hasClass("sorting")) {
+            $(".card-header .btn-sort").text("Bỏ sắp xếp");
+            $("#pills-tab").sortable({
                 revert: "invalid",
                 update: function (event, ui) {
                     var id = $(ui.item).attr("id");
@@ -167,12 +154,12 @@ var lessonService = {
                     lessonPartService.changePos(id, index);
                 }
             });
-            $(".lesson-body").sortable("enable");
+            $("#pills-tab").sortable("enable");
             $(".part-box").disableSelection();
         }
         else {
-            $(".lesson-header .btn-sort").text("Sắp xếp");
-            $(".lesson-body").sortable("disable");
+            $(".card-header .btn-sort").text("Sắp xếp");
+            $("#pills-tab").sortable("disable");
         }
     },
     renderEdit: function (id) {
@@ -281,10 +268,9 @@ var render = {
     },
     lessonPart: function (data) {
         for (var i = 0; data != null && i < data.length; i++) {
-            var lessonpart = data[i];
-            render.part(lessonpart);
+            var item = data[i];
+            render.part(item);
         }
-
     },
     editPart: function (data) {
         var modalForm = window.modalForm;
@@ -304,6 +290,7 @@ var render = {
 
     },
     part: function (data) {
+        console.log(data);
         var time = "", point = "";
 
         if (data.Timer > 0) {
@@ -337,8 +324,8 @@ var render = {
             boxHeader.append($("<h4>", { "class": "title", "text": data.Title + time + point }));
         }
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Thu gọn", "onclick": "toggleCompact(this)" }));
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "Create.removePart('" + data.ID + "')" }));
+        boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
+        boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "Create.removePart('" + data.ID + "')" }));
         itembox.append(boxHeader);
         switch (data.Type) {
             case "TEXT":
@@ -396,9 +383,10 @@ var render = {
                 //Render Content
 
                 //Render Question
+                totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var quizitem = data.Questions[i];
-                    render.questions(quizitem, data.Type);
+                    var item = data.Questions[i];
+                    render.questions(item, data.Type);
                 }
                 break;
             case "QUIZ3":
@@ -421,9 +409,10 @@ var render = {
                 });
                 container.append(tabsitem);
                 //Render Question
+                totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var quizitem = data.Questions[i];
-                    render.questions(quizitem, data.Type);
+                    var item = data.Questions[i];
+                    render.questions(item, data.Type);
                 }
                 break;
             case "ESSAY":
@@ -437,9 +426,10 @@ var render = {
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itembox.append(itemBody);
                 render.mediaContent(data, itemBody, "");
+                totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var quizitem = data.Questions[i];
-                    render.questions(quizitem, data.Type);
+                    var item = data.Questions[i];
+                    render.questions(item, data.Type);
                 }
                 break;
         }
@@ -450,10 +440,6 @@ var render = {
         }
     },
     questions: function (data, template) {
-        //add quiz indicator to question panel
-        $("#quizNavigator .quiz-wrapper").append($("<button>", { "class": "btn btn-outline-secondary rounded-quiz", "type": "button", "text": ++totalQuiz, "name": "quizNav" + data.ID }));
-        $(".quizNumber .total").text(totalQuiz);
-
         //render question
         switch (template) {
             case "QUIZ2":
@@ -471,13 +457,13 @@ var render = {
                 quizitem.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
+                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description });
                     quizitem.append(extend);
                 }
 
                 for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                    var answer = data.Answers[i];
-                    render.answers(answer, template);
+                    var item = data.Answers[i];
+                    render.answers(item, template);
                 }
                 break;
             case "QUIZ3":
@@ -491,7 +477,7 @@ var render = {
                 quizitem.append(answer_part);
 
                 var pane_item = $("<div>", { "class": "pane-item" });
-                if (data.Media == null) {
+                if (data.media == null) {
                     pane_item.append($("<div>", { "class": "quiz-text", "text": data.Content }));
                 } else {
                     render.mediaContent(data, pane_item);
@@ -521,8 +507,8 @@ var render = {
                 });
 
                 for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                    var answer = data.Answers[i];
-                    render.answers(answer, template);
+                    var item = data.Answers[i];
+                    render.answers(item, template);
                 }
                 break;
             default:
@@ -548,7 +534,7 @@ var render = {
                 itembox.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
+                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description });
                     itembox.append(extend);
                 }
 
@@ -556,8 +542,8 @@ var render = {
 
                 //Render Answer
                 for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                    var answer = data.Answers[i];
-                    render.answers(answer, template);
+                    var item = data.Answers[i];
+                    render.answers(item, template);
                 }
                 break;
         }
@@ -586,7 +572,7 @@ var render = {
                 if (data.Content != null)
                     answer.append($("<input>", { "type": "hidden", "value": data.Content }));
 
-                if (data.Media != null) {
+                if (data.media != null) {
                     render.mediaContent(data, answer);
                 }
                 else
@@ -656,13 +642,14 @@ var render = {
         }
     },
     mediaContent: function (data, wrapper, type = "") {
-        if (data.Media != null) {
+
+        if (data.media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
             if (!data.Media.Path.startsWith("http"))
                 data.Media.Path = publisherPath + data.Media.Path;
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
+                    mediaHolder.append($("<img>", { "src": data.Media.Path }));
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -676,17 +663,18 @@ var render = {
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
+                            mediaHolder.append($("<img>", { "src": data.Media.Path }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
                             mediaHolder.append("<audio controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else
-                            mediaHolder.append($("<embed>", { "src": data.Answers.path }));
+                            mediaHolder.append($("<embed>", { "src": data.Media.Path }));
                     break;
             }
             wrapper.append(mediaHolder);
         }
+
     }
 };
 
@@ -710,10 +698,10 @@ var load = {
     },
     listPart: function (lessonID, classID) {
 
-        var url = urlBase + "CloneLessonPart/";
+        var url = urlBase + "Curriculum/";
         $.ajax({
             type: "POST",
-            url: url + "GetList",
+            url: url + "GetListLessonPart",
             data: { LessonID: lessonID, ClassID: classID },
             dataType: "json",
             success: function (data) {
@@ -764,6 +752,26 @@ var load = {
     }
 };
 
+var edit = {
+    lessonPart: function (partId) {
+        var modalForm = window.modalForm;
+        showModal();
+        $(modalForm).empty();
+        var xhr = new XMLHttpRequest();
+        var url = urlBase;
+        xhr.open('GET', url + urlLessonPart.Details + "?ID=" + partId + "&UserID=" + userID + "&ClientID=" + clientID);
+        xhr.send({});
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                var data = JSON.parse(xhr.responseText);
+                if (data.code === 200) {
+                    render.editPart(data.data);
+                }
+            }
+        }
+    }
+}
+
 function answerQuestion(obj, quizid) {
     $('.quiz-item#' + quizid + " .quiz-extend").show();
     markQuestion(quizid);
@@ -775,7 +783,23 @@ function markQuestion(quizid) {
         $("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "]").addClass("completed");
         var completed = parseInt($(".quizNumber .completed").text()) + 1;
         $(".quizNumber .completed").text(completed);
-        if(completed == totalQuiz)
+        if (completed == totalQuiz)
             $(".quizNumber .completed").addClass("finish");
     }
 }
+
+function toggleCompact(obj) {
+        var parent = $(obj).parent().parent();
+        $(parent).toggleClass("compactView");
+        if ($(parent).hasClass("compactView"))
+            $(obj).text("Mở rộng");
+        else
+            $(obj).text("Thu gọn");
+    }
+
+var showModal = function () {
+    modal.modal('show');
+};
+var hideModal = function () {
+    modal.modal('hide');
+};

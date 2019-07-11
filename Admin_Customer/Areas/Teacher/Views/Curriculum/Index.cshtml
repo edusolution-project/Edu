@@ -71,6 +71,7 @@
                         <th>Người tạo</th>
                         <th>Ngày tạo</th>
                         <th>Trạng thái</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -266,6 +267,7 @@
                             "<td>" + item.Description + "</td>" +
                             "<td>" + item.TeacherName + "</td>" +
                             "<td>" + new Date(item.Created).toLocaleDateString() + "</td>" + active +
+                            "<td><button type=\"button\" class=\"btn btn-primary\" onclick=\"\" data-placement=\"top\" title=\"Nhân bản\"> <i class=\"fas fa-plus\"></i> </button></td>" +
                             "</tr>"
                         );
                     }

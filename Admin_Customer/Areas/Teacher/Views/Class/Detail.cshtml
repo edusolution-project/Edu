@@ -93,23 +93,7 @@
                                         <th>Trạng thái</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Phạm Anh Tuấn</td>
-                                        <td>test@gmail.com</td>
-                                        <td>1234567890</td>
-                                        <td>HV001</td>
-                                        <td>61</td>
-                                        <td>2011/04/25</td>
-                                        <td>
-                                            <div class="progress">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                        </td>
-                                        <td>07/06/2019</td>
-                                        <td>Đang học</td>
-                                    </tr>
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -394,36 +378,35 @@
             <div class="modal-content">
                 @using (Html.BeginForm("ImportStudent", "Class", FormMethod.Post, new { enctype = "multipart/form-data", name = "ImportForm" }))
                 {
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <div class="row">
-                                <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
-                                <div class="chose-file col-sm-9">
-                                    <input type="file" name="file" class="form-control-file" id="FormControlFile">
-                                </div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
+                            <div class="chose-file col-sm-9">
+                                <input type="file" name="file" class="form-control-file" id="FormControlFile">
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <div class="button-left">
-                            <button type="button" class="btn btn-secondary">Tải file mẫu</button>
-                        </div>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadMembers)">Lưu lại</button>
+                </div>
+                <div class="modal-footer">
+                    <div class="button-left">
+                        <button type="button" class="btn btn-secondary">Tải file mẫu</button>
                     </div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadMembers)">Lưu lại</button>
+                </div>
                 }
             </div>
         </div>
     </div>
-
-
-    <script>
+</div>
+<script>
 
     var chapters = [];
     var lessons = [];
@@ -431,6 +414,7 @@
     var membersBody = $('#membersTable tbody');
     var scheduleCounter = 0;
     var memberCounter = 0;
+
     function LoadSchedule() {
         chapters = [];
         lessons = [];
@@ -486,7 +470,6 @@
 
                 if (lessons.length > 0) {
                     for (j = lessons.length-1; j >= 0; j--) {
-
                         var item = lessons[j];
                         var active = "";
                         if (item.IsActive) {
@@ -495,27 +478,29 @@
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',LoadSchedule)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
 
+                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
+                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
+
                         if (item.ChapterID == null) {
-                            scheduleBody.append("<tr>" +
+                            scheduleBody.append("<tr lid=\"" + item.ID + "\">" +
                             "<td></td>" +
                             "<td><a href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
                             "<td>---</td>" +
-                            "<td>" + item.StartDate + "</td>" +
-                            "<td>" + item.EndDate + "</td>" + active +
-                                    "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "grade")','@Url.Action("create", "grade")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "</td > " +
+                            "<td dvalue=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
+                            "<td dvalue=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" + active +
+                            "<td><button onclick=\"EditSchedule('" + item.ID + "')\" type='button' class='btn btn-primary action edit' data-toggle='tooltip' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +"</td > " +
                             "</tr>"
                             );
                         }
                         else
                         {
-                            scheduleBody.find("tr[chapid=" + item.ChapterID + "]").after("<tr>" +
+                            scheduleBody.find("tr[chapid=" + item.ChapterID + "]").after("<tr lid=\"" + item.ID + "\">" +
                             "<td></td>" +
                             "<td><a href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
                             "<td>---</td>" +
-                            "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
-                            "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" + active +
-                                    "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "grade")','@Url.Action("create", "grade")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +
+                            "<td dvalue=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
+                            "<td dvalue=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" + active +
+                            "<td><button onclick=\"EditSchedule('" + item.ID + "')\" type='button' class='btn btn-primary action edit' data-toggle='tooltip' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +
                             "</td > " +
                             "</tr>"
                             );
@@ -596,5 +581,70 @@
         LoadMembers();
     });
 
+    function EditSchedule(id) {
 
-    </script>
+        var wrapper = $("[lid=" + id + "]");
+
+        var startdateHolder = wrapper.find('.startdate');
+        var enddateHolder = wrapper.find('.enddate');
+
+
+        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(startdateHolder.attr('dvalue')));
+        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(enddateHolder.attr('dvalue')));
+
+        startdateHolder.find('span').hide();
+        startdateHolder.append($("<input>", {"type":"text", "class":"date-input"})).append($("<input>", {"type":"hidden", "id" : id + "_startdate", "value":startdateHolder.attr('dvalue')}));
+        enddateHolder.find('span').hide();
+        enddateHolder.append($("<input>", {"type":"text", "class":"date-input"}))
+            .append($("<input>", {"type":"hidden", "id":id + "_enddate", "value": enddateHolder.attr('dvalue')}));
+
+
+
+        wrapper.find(".edit").after("<button onclick=\"CancelEditSchedule('" + id + "')\" type='button' class='btn btn-primary action undo' data-toggle='tooltip' data-placement='top' title='Hủy'> <i class='fas fa-undo'></i> </button>")
+            .after("<button onclick=\"SaveSchedule('" + id + "')\" type='button' class='btn btn-primary action save' data-toggle='tooltip' data-placement='top' title='Lưu'> <i class='fas fa-save'></i> </button>")
+        wrapper.find(".edit").hide()
+
+        $(startdateHolder).find(".date-input").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'dd/mm/yy',
+                altField: '#' + id + "_startdate",
+                altFormat: 'mm/dd/yy'
+        }).val(startdate);
+
+        $(enddateHolder).find(".date-input").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'dd/mm/yy',
+                altField: '#' + id + "_enddate",
+                altFormat: 'mm/dd/yy'
+        }).val(enddate);
+
+    }
+
+    function CancelEditSchedule(id) {
+        var wrapper = $("[lid=" + id + "]");
+        var startdateHolder = wrapper.find('.startdate');
+        var enddateHolder = wrapper.find('.enddate');
+        startdateHolder.find(':visible').remove();
+        enddateHolder.find(':visible').remove();
+        startdateHolder.find(':not(:visible)').show();
+        enddateHolder.find(':not(:visible)').show();
+        wrapper.find('.action:visible').remove();
+        wrapper.find('.action:not(:visible)').show();
+    }
+
+    function SaveSchedule(id) {
+        var wrapper = $("[lid=" + id + "]");
+        var startdate = wrapper.find($('#' + id + "_startdate")).val();
+        var enddate = wrapper.find($('#' + id + "_enddate")).val();
+        //Send request here
+        wrapper.find(".startdate").attr("dvalue", startdate);
+        wrapper.find(".startdate span").text($.datepicker.formatDate('dd/mm/yy', new Date(startdate)));
+        wrapper.find(".enddate").attr("dvalue", enddate);
+        wrapper.find(".enddate span").text($.datepicker.formatDate('dd/mm/yy', new Date(enddate)));
+        CancelEditSchedule(id);
+    }
+
+</script>
+

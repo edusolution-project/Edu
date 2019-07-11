@@ -27,6 +27,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
         private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _mapping;
+        private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly IHostingEnvironment _env;
 
 
@@ -45,6 +46,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
             _mapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
+            _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
             _env = evn;
         }
 
@@ -237,7 +239,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             }
             if (teacher != null)
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID && o.EndDate >= DateTime.Now));
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID && o.EndDate > DateTime.Now.Date));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             var DataResponse = data;
@@ -246,7 +248,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var response = new Dictionary<string, object>
             {
-                { "Data", DataResponse.ToList() }
+                { "Data", DataResponse.ToList().Select(t=> _activeMapping.AutoOrtherType(t, new ClassActiveViewModel(){
+                    Progress = (int)((DateTime.Now - t.StartDate).TotalDays  * 100 / (t.EndDate - t.StartDate).TotalDays)
+                    })) }
             };
             return new JsonResult(response);
         }

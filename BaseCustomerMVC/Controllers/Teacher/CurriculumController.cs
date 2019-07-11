@@ -175,7 +175,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (root != null)
             {
                 var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
-                if (listLessonPart != null && listLessonPart.Count <= 0)
+                if (listLessonPart != null && listLessonPart.Count > 0)
                 {
                     var result = new List<LessonPartViewModel>();
                     result.AddRange(listLessonPart.Select(o => new LessonPartViewModel(o)
@@ -185,14 +185,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             Answers = _lessonPartAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
                         }).ToList()
                     }));
+                    data = new Dictionary<string, object>
+                    {
+                        { "Data", result }
+                    };
                 };
             }
 
-            var response = new Dictionary<string, object>
-            {
-                { "Data", data }
-            };
-            return new JsonResult(response);
+            return new JsonResult(data);
         }
 
         [Obsolete]
