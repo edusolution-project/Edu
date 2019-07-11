@@ -7,12 +7,24 @@
     var _classID = ViewBag.ClassID as string;
 }
 
-<!-- Begin Page Content -->
+<div id="lessonContainer">
+</div>
+<script>
+    $(document).ready(function () {
+        load.lesson('');
+    });
+</script>
+
+@section Script{
+    <script src="~/js/student-exam.js"></script>
+}
+
+
+<!--
     <div class="lesson card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Part 1 Questions 1-7</h6>
             <div class="float-right">
-                <!-- Tab carousel -->
                 <button type="button" class="prevtab btn btn-success" title="Quay lại" onclick="tab_goback()"> <i class="fas fa-arrow-left"></i> </button>
                 <button type="button" class="nexttab btn btn-success" title="Chuyển tiếp" onclick="tab_gonext()"> <i class="fas fa-arrow-right"></i> </button>
             </div>
@@ -329,7 +341,7 @@
             </div>
         </div>
     </div>
-<!-- End of Main Content -->
+-->
 
 @section Scripts{
     <script>

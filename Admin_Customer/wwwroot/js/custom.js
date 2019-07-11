@@ -85,7 +85,6 @@ function endtime() {
 }
 
 /* tooltip*/
-
 $(document).ready(function () {
     $('.btn').tooltip();
 });
