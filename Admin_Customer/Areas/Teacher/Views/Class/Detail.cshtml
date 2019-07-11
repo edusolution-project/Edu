@@ -552,7 +552,7 @@
                 changeYear: true,
                 dateFormat: 'dd/mm/yy',
                 altField: '#' + id + "_startdate",
-                altFormat: 'mm/dd/yy'
+                altFormat: 'yy-mm-dd'
         }).val(startdate);
 
         $(enddateHolder).find(".date-input").datepicker({
@@ -560,7 +560,7 @@
                 changeYear: true,
                 dateFormat: 'dd/mm/yy',
                 altField: '#' + id + "_enddate",
-                altFormat: 'mm/dd/yy'
+                altFormat: 'yy-mm-dd'
         }).val(enddate);
 
     }

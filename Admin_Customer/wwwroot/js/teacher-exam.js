@@ -508,7 +508,8 @@ var render = {
                     drop: function (event, ui) {
                         $(this).find(".placeholder").hide();
                         var prevHolder = ui.helper.data('parent');
-
+                        var quizId = $(this).parent().attr('id');
+                        answerQuestion($(this), quizId);
                         if ($(this).find(".answer-item").length > 0) {//remove all answer to box
                             //$(container).siblings(".answer-wrapper").append($(this).find(".answer-item"));
                             $(prevHolder).append($(this).find(".answer-item"));
@@ -569,7 +570,7 @@ var render = {
             case "QUIZ2":
 
                 if ($(container).find(".answer-item").length == 0) {
-                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text form-control", "placeholder": data.Content }));
+                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text form-control", "placeholder": data.Content,  "onchange": "answerQuestion(this,'" + data.ParentID + "')" }));
                     container.append(answer);
                 }
                 else {

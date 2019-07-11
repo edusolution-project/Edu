@@ -155,7 +155,7 @@ function Edit(id, urlGetData, urlPostData, _this) {
                     changeYear: true,
                     dateFormat: 'dd/mm/yy',
                     altField: '#' + fieldId,
-                    altFormat: 'mm/dd/yy'
+                    altFormat: 'yy-mm-dd'
                 });
             }
         }
