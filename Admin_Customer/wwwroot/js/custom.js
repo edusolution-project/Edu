@@ -85,9 +85,6 @@ function endtime() {
 }
 
 /* tooltip*/
-$(document).ready(function(){
-    $('[data-toggle="tooltip"]').tooltip();
-});
 
 $(document).ready(function () {
     $('.btn').tooltip();

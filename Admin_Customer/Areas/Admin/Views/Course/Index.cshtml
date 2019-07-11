@@ -25,8 +25,8 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="float-right">
-                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action(" Delete","Course")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
-                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-primary" data-placement="top" title="Thêm khóa học" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-danger" data-placement="top" title="Xóa tất cả" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","Course")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
                         </div>
                     </div>
                 </div>
@@ -100,19 +100,17 @@
         {
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="ModalCenterTitle">Tạo môn học</h5>
+                    <h5 class="modal-title" id="ModalCenterTitle">Tạo Khóa học</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="form-group col-md-12">
+                        <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Tên khóa học:</label>
                             <input type="text" class="form-control" name="Name" placeholder="Tên khóa học" required>
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Môn học:</label>
                             <select name="SubjectID" class="form-control" onchange="LoadGradeInput(this)" required>
@@ -137,14 +135,10 @@
                                 }
                             </select>
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Giáo trình:</label>
                             <select name="CourseID" class="form-control" onfocus="loadCourse()" required></select>
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Ngày bắt đầu:</label>
                             <input type="text" class="form-control datepicker" placeholder="Ngày bắt đầu">
@@ -155,8 +149,6 @@
                             <input type="text" class="form-control datepicker" placeholder="Ngày kết thúc">
                             <input type="hidden" name="EndDate" class="hiddenDate" id="EndDate" value="">
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Giáo viên:</label>
                             <select name="TeacherID" class="form-control">
@@ -169,6 +161,7 @@
                                 }
                             </select>
                         </div>
+
                         <div class="form-group col-md-6">
                             <label for="staticText" class="col-form-label">Trạng thái:</label>
                             <select name="IsActive" class="form-control">
@@ -176,8 +169,8 @@
                                 <option value="false">Không hoạt động</option>
                             </select>
                         </div>
+                        </div>
                     </div>
-                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                     <button type="button" class="btn btn-primary" onclick="Submit('AddForm','@Url.Action("Create", "Course" )','create',LoadData)">Lưu lại</button>
@@ -297,9 +290,9 @@
                             "<td>" + startdate + "</td>" +
                             "<td>" + enddate + "</td>" +
                             active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "Course")','@Url.Action("create", "Course")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "Course")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
-                            "<button type=\"button\" class=\"btn btn-primary\" onclick=\"ImportSV('" + item.ID + "','ImportForm')\" data-toggle=\"modal\" data-target=\".bd-modal-lg\"> <i class=\"fas fa-plus\"></i> </button>" +
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "Course")','@Url.Action("create", "Course")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "Course")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "<button type=\"button\" class=\"btn btn-primary\" onclick=\"ImportSV('" + item.ID + "','ImportForm')\" data-toggle=\"modal\" data-placement=\"top\" title=\"Nhập file dữ liệu\" data-target=\".bd-modal-lg\"> <i class=\"fas fa-upload\"></i> </button>" +
                             "</tr>"
                         );
                     }

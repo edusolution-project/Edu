@@ -13,8 +13,9 @@
     <link href="~/css/custom.css" rel="stylesheet">
     <link href="~/css/jquery-ui.min.css" rel="stylesheet" />
     <script type="text/javascript" src="~/vendor/jquery/jquery.min.js"></script>
-    <script src="~/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="~/js/site.js"></script>
+    <script type="text/javascript" src="~/js/custom.js"></script>
 </head>
 <body>
     <!-- Page Wrapper -->
@@ -44,17 +45,19 @@
         <a class="scroll-to-top rounded" href="#page-top">
             <i class="fas fa-angle-up"></i>
         </a>
+    </div>
+    <!-- Logout Modal-->
+    @await Html.PartialAsync("_modalLogout")
 
-        <!-- Logout Modal-->
-        @await Html.PartialAsync("_modalLogout")
-
-        <!-- Bootstrap core JavaScript-->
-        <script type="text/javascript" src="~/js/popper.min.js"></script>
-        <script type="text/javascript" src="~/vendor/bootstrap/js/bootstrap.js"></script>
-        <script type="text/javascript" src="~/js/custom.js"></script>
-        <!-- Core plugin JavaScript-->
-        <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
-        <!-- Custom scripts for all pages-->
-        <script type="text/javascript" src="~/js/sb-admin-2.min.js"></script>
+    <!-- Bootstrap core JavaScript-->
+    @*<script type="text/javascript" src="~/js/moment.min.js"></script>*@
+    <script type="text/javascript" src="~/js/popper.min.js"></script>
+    <script type="text/javascript" src="~/vendor/bootstrap/js/bootstrap.js"></script>
+    <!-- Core plugin JavaScript-->
+    @*<script type="text/javascript" src="~/js/plugins/bootstrap-datetimepicker.min.js"></script>
+    <script type="text/javascript" src="~/js/plugins/bootstrap-selectpicker.js"></script>*@
+    <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script type="text/javascript" src="~/js/sb-admin-2.min.js"></script>
 </body>
 </html>
