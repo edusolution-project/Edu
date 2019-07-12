@@ -21,8 +21,10 @@ namespace BaseCustomerMVC.Controllers.Student
         {
 
         }
-        public IActionResult Index()
+        public IActionResult Index(DefaultModel model, string id, string ClassID)
         {
+            ViewBag.LessonID = id;
+            ViewBag.ClassID = ClassID;
             return View();
         }
 

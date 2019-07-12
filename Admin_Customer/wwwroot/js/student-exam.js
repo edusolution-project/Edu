@@ -48,46 +48,6 @@ var Ajax = function (url, method, data, async) {
         request.send(data);
     });
 }
-//lesson
-var urlLesson = {
-    "List": "GetListLesson",
-    "Details": "GetDetailsLesson",
-    "CreateOrUpdate": "CreateOrUpdateLesson",
-    "Remove": "RemoveLesson",
-    "Location": "/ModLessons/Detail/",
-    "ChangeParent": "ChangeLessonParent",
-    "ChangePos": "ChangeLessonPosition"
-};
-
-//lessonpart
-var urlLessonPart = {
-    "List": "GetListLessonPart",
-    "Details": "GetDetailsLessonPart",
-    "CreateOrUpdate": "CreateOrUpdateLessonPart",
-    "Remove": "RemoveLessonPart",
-    "ChangePos": "ChangeLessonPartPosition"
-};
-
-//lessonAnswer
-var urlLessonAnswer = {
-    "List": "GetListAnswer",
-    "Details": "GetDetailsAnswer",
-    "CreateOrUpdate": "CreateOrUpdateLessonAnswer",
-    "Remove": "RemoveLessonAnswer"
-};
-
-//Media
-var urlMedia = {
-    "List": "GetListLessonExtends",
-    "Details": "GetDetailsLessonExtends",
-    "Update": "UpdateLessonExtends"
-}
-
-var urlCourse = {
-    "Location": "/ModCourses/Detail/",
-    "HomeLocation": "/ModCourses/Index"
-}
-
 var urlChapter = {
     "Location": "/ModChapters/Detail/"
 }
@@ -377,10 +337,10 @@ var render = {
 
                 quizitem.append(answer_wrapper);
 
-                if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
-                    quizitem.append(extend);
-                }
+                //if (data.Description !== "") {
+                //    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
+                //    quizitem.append(extend);
+                //}
 
                 for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
                     var answer = data.CloneAnswers[i];
@@ -454,10 +414,10 @@ var render = {
 
                 itembox.append(answer_wrapper);
 
-                if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
-                    itembox.append(extend);
-                }
+                //if (data.Description !== "") {
+                //    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
+                //    itembox.append(extend);
+                //}
 
                 container.append(itembox);
 
@@ -476,7 +436,7 @@ var render = {
             case "QUIZ2":
 
                 if ($(container).find(".answer-item").length == 0) {
-                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text", "placeholder": data.Content }));
+                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text", "placeholder": data.Content, "onfocusout": "answerQuestion(this,'" + data.ParentID + "','" + data.ID + "','this.value')" }));
                     container.append(answer);
                 }
                 else {
@@ -508,8 +468,16 @@ var render = {
                         ui.helper.data('parent', $(this).parent());
                     },
                     stop: function (event, ui) {
+                        var parent = this.parentElement.parentElement;
+
+                        if (parent != null && this.parentElement.classList != "answer-wrapper no-child ui-droppable") {
+                            
+                        } else {
+
+                        }
                         //var prevParent = ui.helper.data('parent');
                         //$(prevParent).find(".placeholder").show();
+                        SetCurrentExam()
                     }
                 });
 
@@ -599,15 +567,37 @@ var render = {
 
 var load = {
     lesson: function (id, classid, url) {
-
+        var checkSupport = false;
+        if (typeof (Storage) !== "undefined") {
+            // Code for localStorage/sessionStorage.
+            checkSupport = true;
+        } else {
+            // Sorry! No Web Storage support..
+            checkSupport = false;
+        }
         $.ajax({
             type: "POST",
             url: url,
             data: { LessonID: id, ClassID: classid},
             dataType: "json",
             success: function (data) {
-                render.lesson(data.Data);
-                render.lessonPart(data.Data.Parts, data.Data.ID, classid)
+                if (data.Exam != null && data.Exam != void 0) {
+                    document.querySelector("input[name='ExamID']").value = data.Exam.ID;
+                    if (checkSupport) {
+                        LoadCurrentExam();
+                        $("#counter").html(data.Exam.Timer);
+                    } else {
+                        render.lesson(data.Data);
+                        render.lessonPart(data.Data.Parts, data.Data.ID, classid);
+                        start();
+                        $("#counter").html(data.Exam.Timer);
+                    }
+                    
+                    countdown();
+                } else {
+                    render.lesson(data.Data);
+                    render.lessonPart(data.Data.Parts, data.Data.ID, classid)
+                }
             }
         });
     },
@@ -667,6 +657,8 @@ var load = {
     }
 };
 function answerQuestion(obj, quizid, answerID, answerValue) {
+    //$('.quiz-item#' + quizid + " .quiz-extend").show();
+    markQuestion(quizid);
     var dataform = new FormData();
     dataform.append("ID", obj.parentElement.parentElement.parentElement.getAttribute("data-id"));
         dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
@@ -677,15 +669,14 @@ function answerQuestion(obj, quizid, answerID, answerValue) {
             .then(function (res) {
                 if (res != "Accept Deny") {
                     var data = JSON.parse(res);
-                    console.log(data)
                     obj.parentElement.parentElement.parentElement.setAttribute("data-id", data.ID);
+                    SetCurrentExam()
                 }
         })
         .catch(function (err) {
             console.log(err);
         })
-    $('.quiz-item#' + quizid + " .quiz-extend").show();
-    markQuestion(quizid);
+    
 }
 
 function markQuestion(quizid) {
@@ -707,16 +698,17 @@ function BeginExam(_this, LessonID, ClassID) {
                 var data = JSON.parse(res);
                 document.querySelector("input[name='ExamID']").value = data.ID;
                 start(_this);
-        })
-        .catch(function (err) {
-            console.log(err);
-        })
+                SetCurrentExam();
+            })
+            .catch(function (err) {
+                console.log(err);
+            })
 }
 function GetCurrentExam() {
     var dataform = new FormData();
     dataform.append("ClassID", ClassID);
     dataform.append("LessonID", LessonID);
-    Ajax(urlCurrentExam, "POST", dataform, false)
+    return Ajax(urlCurrentExam, "POST", dataform, true)
     .then(function (res) {
         if (res == null) return;
         var data = JSON.parse(res);
@@ -728,6 +720,14 @@ function GetCurrentExam() {
         console.log(err);
     })
 }
-function LoadCurrentExam(ID) {
+//exampleid
+function LoadCurrentExam() {
     //localstorge
+    var html = localStorage.getItem($("input[name='ExamID']").val());
+    $("#lessonContainer").html(html);
+
+}
+function SetCurrentExam() {
+    var html = $("#lessonContainer").html();
+    localStorage.setItem($("input[name='ExamID']").val(), html);
 }

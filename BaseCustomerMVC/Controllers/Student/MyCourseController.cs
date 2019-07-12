@@ -27,6 +27,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
         private readonly Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
         private readonly Core_v2.Globals.MappingEntity<ClassEntity, MyClassViewModel> _mappingList;
+        private readonly ExamService _examService;
+        private readonly ExamDetailService _examDetailService;
         public MyCourseController(ClassService service
             , CourseService courseService
             , TeacherService teacherService
@@ -38,8 +40,12 @@ namespace BaseCustomerMVC.Controllers.Student
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
             , LessonPartService lessonPartService
+            , ExamService examService
+            , ExamDetailService examDetailService
             )
         {
+            _examService = examService;
+            _examDetailService = examDetailService;
             _service = service;
             _courseService = courseService;
             _teacherService = teacherService;
@@ -155,11 +161,11 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public JsonResult GetLesson(string LessonID,string ClassID)
         {
-            //var userId = User.Claims.GetClaimByType("UserID").Value;
-            //if (string.IsNullOrEmpty(userId))
-            //{
-            //    return null;
-            //}
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return null;
+            }
             var lesson = _lessonService.GetItemByID(LessonID);
             if (lesson == null) return null;
             var listPart = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID);
@@ -169,24 +175,57 @@ namespace BaseCustomerMVC.Controllers.Student
             MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
             MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
             MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
-            var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
+            var exam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassID == ClassID && o.StudentID == userId && o.Status == false).FirstOrDefault();
+            if (exam == null || _examService.IsOverTime(exam.ID))
             {
-                Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
                 {
-                    Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID)?.ToList()
-                        .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
-                        {
-                            CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
-                        }))?.ToList()
-                })).ToList()
-            });
+                    Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                    {
+                        Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID)?.ToList()
+                            .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                            {
+                                CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
+                            }))?.ToList()
+                    })).ToList()
+                });
 
-            var respone = new Dictionary<string, object>
+                var respone = new Dictionary<string, object>
+                {
+                    { "Data", dataResponse }
+                };
+                return new JsonResult(respone);
+            }
+            else
             {
-                { "Data", dataResponse }
-            };
-            return new JsonResult(respone);
-
+                var listED = _examDetailService.CreateQuery().Find(o => o.ExamID == exam.ID).ToList();
+                // so sanh va dua ra dap an cua sinh vien
+                var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
+                {
+                    Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                    {
+                        Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID)?.ToList()
+                            .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                            {
+                                CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
+                            }))?.ToList()
+                    })).ToList()
+                });
+                var timere = exam.CurrentDoTime.AddMinutes(exam.Timer) - DateTime.UtcNow;
+                var respone = new Dictionary<string, object>
+                {
+                    {
+                        "Data", dataResponse
+                    },
+                    {
+                         "Exam", exam
+                    },
+                    {
+                        "Timer", timere.Minutes < 10 ? "0"+  timere.Minutes+":"+timere.Seconds: timere.Minutes+":"+timere.Seconds
+                    }
+                };
+                return new JsonResult(respone);
+            }
         }
 
         public IActionResult Index(DefaultModel model)
