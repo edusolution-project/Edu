@@ -3,14 +3,46 @@
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
-    var Course = ViewBag.Course as BaseCustomerEntity.Database.CourseEntity;
+    //var Course = ViewBag.Course as BaseCustomerEntity.Database.CourseEntity;
 }
 
 <div id="lessonContainer">
 </div>
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
+    <input type="hidden" id="action" value="" />
+    <div class="modal-dialog lesson-modal" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="#" id="modal-body" name="modalForm" enctype="multipart/form-data">
+                    <ul class="template_type">
+                        <li class="template_type_item">
+                            <span>Nội dung bài giảng</span>
+                            <img src="" alt="">
+                        </li>
+                        <li class="lesson-part__type__item">
+                            <span>Nội dung bài tập</span>
+                            <i class="fa fa-check-square-o"></i>
 
+                        </li>
+                    </ul>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
 <input type="hidden" id="LessonID" value="@Data.ID" />
-<input type="hidden" id="CourseID" value="@Course.ID" />
+<input type="hidden" id="ChapterID" value="@Data.ChapterID" />
+<input type="hidden" id="CourseID" value="@Data.CourseID" />
 <script>
     $(document).ready(function () {
         load.lesson($("#LessonID").val(), $("#CourseID").val());
