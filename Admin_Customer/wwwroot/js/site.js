@@ -144,7 +144,6 @@ function Edit(id, urlGetData, urlPostData, _this) {
     var data = new FormData(form);
     Ajax(urlGetData, "POST", data, true).then(function (res) {
         var item = JSON.parse(res);
-        console.log(item);
         var listinput = $(form).find('input');
         for (var i = 0; i < listinput.length; i++) {
             listinput[i].value = item.Data[listinput[i].name];
