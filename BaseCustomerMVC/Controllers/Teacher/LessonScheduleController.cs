@@ -172,5 +172,29 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             }
         }
+
+        [HttpPost]
+        [Obsolete]
+        public JsonResult UpdateSchedule(LessonScheduleEntity entity)
+        {
+            if (entity == null || string.IsNullOrEmpty(entity.ID))
+            {
+                return new JsonResult(null);
+            }
+            else
+            {
+                var oldItem = _service.GetItemByID(entity.ID);
+                if (oldItem == null)
+                    return new JsonResult(null);
+
+                oldItem.StartDate = entity.StartDate;
+                oldItem.EndDate = entity.EndDate;
+
+                _service.CreateQuery().ReplaceOne(o => o.ID == oldItem.ID, oldItem);
+                return new JsonResult(oldItem);
+            }
+        }
+
+
     }
 }

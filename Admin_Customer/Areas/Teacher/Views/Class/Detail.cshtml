@@ -418,9 +418,9 @@
                         var item = lessons[j];
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("unpublish", "LessonSchedule")',LoadSchedule)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("unpublish", "LessonSchedule")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',LoadSchedule)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
 
                         var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
@@ -565,6 +565,15 @@
 
     }
 
+    function ToggleStatus(obj) {
+        var action = $(obj).attr("onclick");
+        if(action.indexOf("UnPublish") > 0)
+             $(obj).attr("onclick", action.replace("UnPublish","Publish"));
+        else
+             $(obj).attr("onclick", action.replace("Publish","UnPublish"));
+        $(obj).toggleClass("btn-success").toggleClass("btn-danger");
+    }
+
     function CancelEditSchedule(id) {
         var wrapper = $("[lid=" + id + "]");
         var startdateHolder = wrapper.find('.startdate');
@@ -588,6 +597,5 @@
         wrapper.find(".enddate span").text($.datepicker.formatDate('dd/mm/yy', new Date(enddate)));
         CancelEditSchedule(id);
     }
-
 </script>
 

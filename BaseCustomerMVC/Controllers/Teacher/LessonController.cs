@@ -78,11 +78,65 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
         }
-        
+
+
+        [HttpPost]
+        public JsonResult CreateOrUpdateLesson(LessonEntity item)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var data = _service.CreateQuery().Find(o => o.ID == item.ID).SingleOrDefault();
+                if (data == null)
+                {
+                    item.Created = DateTime.Now;
+                    item.CreateUser = UserID;
+                    item.IsAdmin = true;
+                    item.IsActive = false;
+                    item.IsParentCourse = item.ChapterID.Equals("0");
+                    item.Updated = DateTime.Now;
+                    item.Order = 0;
+                    var maxItem = new LessonEntity();
+                    if (item.IsParentCourse)
+                        maxItem = _service.CreateQuery().Find(o => o.CourseID == item.CourseID && o.IsParentCourse).SortByDescending(o => o.Order).FirstOrDefault();
+                    else
+                        maxItem = _service.CreateQuery().Find(o => o.ChapterID == item.ChapterID).SortByDescending(o => o.Order).FirstOrDefault();
+                    if (maxItem != null)
+                    {
+                        item.Order = maxItem.Order + 1;
+                    }
+                    _service.CreateQuery().InsertOne(item);
+                }
+                else
+                {
+                    item.Updated = DateTime.Now;
+                    item.Order = data.Order;
+                    _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                }
+
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", item },
+                    {"Error",null }
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error",ex.Message }
+                });
+            }
+
+        }
+
         public IActionResult Exam()
         {
             return View();
         }
+
+
 
     }
 }
