@@ -1,8 +1,8 @@
+.bg-login-image,
 .bg-password-image {
     background-image: url('/img/logo.jpg');
     background-repeat: no-repeat;
     background-position: center;
-    background-size: cover;
 }
 .navbar-search .btn-primary {
     padding: 0 15px;
@@ -69,9 +69,9 @@
     position: relative;
 }
 
-    #icon-submenu .fas:hover {
-        color: #1865f2;
-    }
+#icon-submenu .fas:hover {
+    color: #1865f2;
+}
 
 #list-detail .sub-menu,
 #list-detail .sidebar,
@@ -84,21 +84,9 @@
     padding: 0;
 }
 
-    #menu-left .breadcrumb-detail {
-        border-bottom: 1px solid #ddd;
-    }
-
-.media .img-fluid {
-    max-height: 135px;
-}
-
 #lesson-detail {
     background-color: #fff;
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
-}
-
-.header .breadcrumb {
-    background-color: transparent;
 }
 
 .nav-pills .nav-link.active {
@@ -143,19 +131,6 @@
 }
 
 .user .btn-user {
-    font-weight: bold;
-}
-
-#thao-luan .title {
-    display: inline-flex;
-}
-
-#thao-luan .date,
-#thao-luan .time {
-    margin: 0px 3px;
-}
-
-#thao-luan .text {
     font-weight: bold;
 }
 
@@ -219,8 +194,22 @@ video, audio {
     padding: 15px 20px;
 }
 
-/* css btn toggle*/
+.bg-news .media .img-fluid {
+    max-width: 250px;
+}
 
+.bg-news .media-body {
+    text-align: justify;
+}
+
+.bg-news-right{
+    border-left: 1px solid #ddd;
+}
+
+.bg-news-right .media .img-fluid {
+    max-width: 50px;
+}
+/* css btn toggle*/
 .btn-toggle.btn-lg.active {
     transition: background-color 0.5s;
 }

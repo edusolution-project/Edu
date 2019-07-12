@@ -94,11 +94,11 @@ var lessonService = {
         var create = $("<a>", { "class": "btn btn-sm btn-add", "text": "Thêm nội dung", "onclick": "Create.lessonPart('" + data.ID + "')" });
         var close = $("<a>", { "class": "btn btn-sm btn-close", "text": "X", "onclick": "render.resetLesson()" });
         var remove = $("<a>", { "class": "btn btn-sm btn-remove", "text": "Xóa", "onclick": "lessonService.remove('" + data.ID + "')" });
-        lessonHeader.append(sort);
-        lessonHeader.append(edit);
-        lessonHeader.append(create);
+        //lessonHeader.append(sort);
+        //lessonHeader.append(edit);
+        //lessonHeader.append(create);
         //lessonHeader.append(close);
-        lessonHeader.append(remove); //removeLesson
+        //lessonHeader.append(remove); //removeLesson
 
 
         lessonRow.append(tabsleft);
@@ -321,11 +321,11 @@ var render = {
 
         var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {
-            boxHeader.append($("<h4>", { "class": "title", "text": data.Title + time + point }));
+            boxHeader.append($("<h5>", { "class": "title", "text": data.Title + time + point }));
         }
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Thu gọn", "onclick": "toggleCompact(this)" }));
-        boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
-        boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "Create.removePart('" + data.ID + "')" }));
+        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
+        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "Create.removePart('" + data.ID + "')" }));
         itembox.append(boxHeader);
         switch (data.Type) {
             case "TEXT":
@@ -522,9 +522,9 @@ var render = {
                 var itembox = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
-                    boxHeader.append($("<h4>", { "class": "title", "text": data.Content + point }));
+                    boxHeader.append($("<h5>", { "class": "title", "text": data.Content + point }));
                 else
-                    boxHeader.append($("<h4>", { "class": "title", "text": point }));
+                    boxHeader.append($("<h5>", { "class": "title", "text": point }));
 
                 render.mediaContent(data, boxHeader);
 
@@ -649,7 +649,8 @@ var render = {
                 data.Media.Path = publisherPath + data.Media.Path;
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "src": data.Media.Path }));
+                    mediaHolder.append($("<img>", { "class": "img-fluid lazy" , "src": data.Media.Path }));
+
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -663,7 +664,7 @@ var render = {
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "src": data.Media.Path }));
+                            mediaHolder.append($("<img>", { "class": "img-fluid lazy" , "src": data.Media.Path }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
