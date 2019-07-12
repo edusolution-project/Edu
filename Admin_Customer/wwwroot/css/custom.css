@@ -377,7 +377,7 @@ video, audio {
 .quiz-item {
     display: block;
     width: 100%;
-    padding-bottom: 20px;
+    padding: 20px 0;
     border-bottom: solid 1px #ccc;
 }
 
@@ -404,6 +404,30 @@ video, audio {
     border-radius: 5px;
     padding: 10px;
     background: #ddd;
+}
+
+.QUIZ3 .ui-draggable-handle {
+    margin: 7px;
+    border: dotted 1px #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    color: #fff;
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.QUIZ3 .no-child .ui-draggable-handle {
+    color: #333;
+    margin: 7px;
+    padding: 5px;
+    background-color: #ddd;
+    border-color: #ddd;
+    border: dotted 1px #ccc;
+    border-radius: 5px;
+}
+.QUIZ3 .answer-text {
+    margin: 0;
+    padding: 5px;
 }
 
 .QUIZ3 .answer-pane {
