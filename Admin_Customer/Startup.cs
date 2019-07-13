@@ -43,6 +43,7 @@ namespace Admin_Customer
             services.AddLogs();
             services.AddTransient<IndefindCtrlService>();
             services.AddServiceBase();
+            services.AddScoped<FileProcess>();
             //services.AddMvc(options=> {
             //    options.Filters.Add<PermissionAttribute>();
             //}).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);

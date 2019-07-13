@@ -1,5 +1,4 @@
 ﻿var urlBase = "/student/";
-var publisherPath = "http://publisher.edusolution.vn"
 
 let myEditor;
 let totalQuiz = 0;
@@ -659,8 +658,7 @@ var render = {
     mediaContent: function (data, wrapper, type = "") {
         if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
-            if (!data.Media.Path.startsWith("http"))
-                data.Media.Path = publisherPath + data.Media.Path;
+           
             switch (type) {
                 case "IMG":
                     mediaHolder.append($("<img>", { "class": "img-fluid lazy" , "src": data.Media.Path }));
