@@ -87,14 +87,10 @@
 
 
                         if (item.ChapterID == null) {
-                            
                             wrapper.append(lessonitem);
                         }
                         else
                         {
-                            console.log(item);
-                            console.log("#chap_" + item.ChapterID);
-                           
                             wrapper.find("#chap_" + item.ChapterID + " .collapse-inner:first").append(lessonitem);
                         }
                     }
