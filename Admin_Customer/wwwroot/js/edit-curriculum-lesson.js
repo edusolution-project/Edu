@@ -1009,14 +1009,14 @@ var template = {
         answer_template_holder.empty();
 
         contentholder.append($("<label>", { "class": "title", "text": "Tiêu đề" }));
-        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text", "placeholder": "Nhập tiêu đề" }));
+        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Nhập tiêu đề" }));
         if (data != null && data.title != null)
             contentholder.find("[name=Title]").val(data.Title);
         console.log(type);
         switch (type) {
             case "TEXT"://Text
                 contentholder.append($("<label>", { "class": "title", "text": "Nhập nội dung văn bản" }));
-                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text", "placeholder": "Nội dung văn bản" }));
+                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung văn bản" }));
                 if (data != null && data.Description != null)
                     contentholder.find("[name=Description]").val(data.Description);
 
@@ -1059,18 +1059,18 @@ var template = {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "onclick": "questionService.remove(this)", "tabindex": -1 }));
-                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text", "placeholder": "Nội dung câu hỏi" }));
+                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Nội dung câu hỏi" }));
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(questionTemplate.find(".media_holder"), "Questions.");
                 questionTemplate.append($("<div>", { "class": "media_preview" }));
                 questionTemplate.append($("<label>", { "class": "input_label", "text": "Điểm" }));
-                questionTemplate.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point", "placeholder": "Điểm", "value": "1" }));
+                questionTemplate.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Điểm", "value": "1" }));
                 questionTemplate.append($("<label>", { "class": "part_label", "text": "Đáp án (click chọn nếu là đáp án đúng)" }));
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
-                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer", "value": "+", "onclick": "addNewAnswer(this)" }));
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer form-control", "value": "+", "onclick": "addNewAnswer(this)" }));
                 questionTemplate.append(answer_wrapper);
-                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description", "placeholder": "Giải thích đáp án" }));
+                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Giải thích đáp án" }));
                 question_template_holder.append(questionTemplate);
 
                 var answerTemplate = $("<fieldset>", { "class": "answer-box" });
@@ -1079,7 +1079,7 @@ var template = {
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect" }));
                 answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "onclick": "toggleCorrectAnswer(this)" }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text", "placeholder": "Đáp án" }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Đáp án" }));
                 answerTemplate.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
@@ -1328,7 +1328,7 @@ var addNewQuestion = function (data = null) {
         if (data.Description != null)
             $(clone).find("[name='Questions.Description']").val(data.Description);
         if (data.Media != null) {
-            render.MediaAdd(clone.find(".media_holder"), "Questions.", "", Mata.media);
+            render.MediaAdd(clone.find(".media_holder"), "Questions.", "", Data.media);
             render.mediaContent(data, clone.find(".media_preview:first"), "");
         }
     }
