@@ -33,12 +33,14 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly StudentService _studentService;
         private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _studentMapping;
+        private readonly ChapterService _chapterService;
         public MyCourseController(ClassService service
             , CourseService courseService
             , TeacherService teacherService
             , SubjectService subjectService
             , GradeService gradeService
             , LessonService lessonService
+            , ChapterService chapterService
             , LessonPartQuestionService lessonPartQuestionService
             , LessonPartAnswerService lessonPartAnswerService
             , LessonScheduleService lessonScheduleService
@@ -51,6 +53,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , StudentService studentService
             )
         {
+            _chapterService = chapterService;
             _studentService = studentService;
             _examService = examService;
             _examDetailService = examDetailService;
@@ -312,8 +315,6 @@ namespace BaseCustomerMVC.Controllers.Student
                     };
                     return new JsonResult(respone);
                 }
-                
-                
             }
         }
         [Obsolete]
@@ -364,6 +365,63 @@ namespace BaseCustomerMVC.Controllers.Student
             };
             return new JsonResult(response);
         }
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetSchedules(DefaultModel model)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            if (string.IsNullOrEmpty(model.ID))
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null || currentClass.Students.IndexOf(UserID) < 0)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var course = _courseService.GetItemByID(currentClass.CourseID);
+
+            if (course == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giáo trình" }
+                    });
+            }
+
+            var classSchedule = new ClassScheduleViewModel(course)
+            {
+                Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
+                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
+                           select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               StartDate = schedule.StartDate,
+                               EndDate = schedule.EndDate,
+                               IsActive = schedule.IsActive
+                           })).ToList()
+            };
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", classSchedule },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
         public IActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;
@@ -381,6 +439,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Model = model;
             return View();
         }
+
         public IActionResult Detail(DefaultModel model,string id)
         {
             if (model == null) return null;
