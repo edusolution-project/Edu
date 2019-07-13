@@ -8,6 +8,8 @@ namespace BaseCustomerMVC.Models
 {
     public class LessonPartViewModel : LessonPartEntity
     {
+        public LessonPartViewModel()
+        { }
 
         public LessonPartViewModel(LessonPartEntity o)
         {
@@ -25,8 +27,29 @@ namespace BaseCustomerMVC.Models
             this.Media = o.Media;
             this.Questions = new List<QuestionViewModel>();
         }
+        
         [JsonProperty("Questions")]
         public List<QuestionViewModel> Questions { get; set; }
+
+        public LessonPartEntity ToEntity()
+        {
+            return new LessonPartEntity
+            {
+                OriginID = this.OriginID,
+                Created = this.Created,
+                Description = this.Description,
+                ID = this.ID,
+                IsExam = this.IsExam,
+                Order = this.Order,
+                ParentID = this.ParentID,
+                Point = this.Point,
+                Timer = this.Timer,
+                Title = this.Title,
+                Type = this.Type,
+                Updated = this.Updated,
+                Media = this.Media
+            };
+        }
 
     }
 
@@ -57,6 +80,24 @@ namespace BaseCustomerMVC.Models
 
         [JsonProperty("CloneAnswers")]
         public List<CloneLessonPartAnswerEntity> CloneAnswers { get; set; }
+
+        public LessonPartQuestionEntity ToEntity()
+        {
+            return new LessonPartQuestionEntity
+            {
+                Created = this.Created,
+                Description = this.Description,
+                ID = this.ID,
+                Updated = this.Updated,
+                Content = this.Content,
+                CreateUser = this.CreateUser,
+                ParentID = this.ParentID,
+                Order = this.Order,
+                Point = this.Point,
+                Media = this.Media,
+                OriginID = this.OriginID
+            };
+        }
 
     }
 }

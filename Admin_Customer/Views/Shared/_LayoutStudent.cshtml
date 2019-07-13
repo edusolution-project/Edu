@@ -13,6 +13,14 @@
     <link href="~/css/custom.css" rel="stylesheet">
     <script type="text/javascript" src="~/vendor/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="~/js/custom.js"></script>
+    <script type="text/javascript" src="~/js/plugins/jquery.lazy.min.js"></script>
+    <script type="text/javascript" src="~/js/plugins/jquery.lazy.plugins.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('.lazy').Lazy();
+        });
+    </script>
 </head>
 <body>
     <!-- Page Wrapper -->
@@ -23,16 +31,16 @@
 
             <!-- Main Content -->
             <div id="content">
-                @Html.Partial("_topmenu")
+                @await Html.PartialAsync("_topmenu")
 
-                @Html.Partial("_sideBarStudent")
+                @await Html.PartialAsync("_sideBarStudent")
 
                 <div class="container">
                     @RenderBody()
                 </div>
 
                 <!-- Footer -->
-                @Html.Partial("_Footer")
+                @await Html.PartialAsync("_Footer")
                 <!-- End of Footer -->
 
             </div>
@@ -46,7 +54,7 @@
         </a>
     </div>
     <!-- Logout Modal-->
-    @Html.Partial("_modalLogout")
+    @await Html.PartialAsync("_modalLogout")
 
     @RenderSection("Script", false)
     @RenderSection("Scripts", false)
@@ -54,7 +62,6 @@
     <script type="text/javascript" src="~/js/popper.min.js"></script>
     <script type="text/javascript" src="~/vendor/bootstrap/js/bootstrap.js"></script>
     <!-- Core plugin JavaScript-->
-    <script type="text/javascript" src="~/js/custom.js"></script>
     <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
     <!-- Custom scripts for all pages-->
     <script type="text/javascript" src="~/js/sb-admin-2.min.js"></script>

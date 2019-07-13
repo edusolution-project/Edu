@@ -1,3 +1,13 @@
+.bg-password-image {
+    background-image: url('/img/logo.jpg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.navbar-search .btn-primary {
+    padding: 0 15px;
+}
+
 #top-menu {
     border-bottom: 1px solid #e3e7ed;
 }
@@ -10,16 +20,18 @@
 .card-header .float-right {
     position: absolute;
     right: 15px;
-    top: 0;
+    top: 0px;
 }
 
 .lesson .float-right {
-    z-index: 9999;
     top: 10px;
 }
 
-#top-menu .dropdown-menu-right {
-    z-index: 99999;
+.bg-gradient-primary .nav-item:active,
+.bg-gradient-primary .nav-item:focus,
+.bg-gradient-primary .nav-item:hover {
+    background-color: #224abe;
+    font-weight: bold;
 }
 
 .card-header .text-center {
@@ -272,15 +284,15 @@ video, audio {
     padding: 2px 0 !important;
 }
 
-    .rounded-quiz.completed {
-        background-color: #666;
-        color: #36b9cc;
-    }
+.rounded-quiz.completed {
+    background-color: #666;
+    color: #36b9cc;
+}
 
 .number {
     color: #999;
     font-weight: bold;
-    position: absolute;
+    position: fixed;
     right: 10px;
     background-color: #fff;
     border: 2px solid #999;
@@ -296,18 +308,18 @@ video, audio {
     cursor: pointer;
 }
 
-    .number .completed {
-        color: #ff0000;
-    }
+.number .completed {
+    color: #ff0000;
+}
 
-    .number .finish {
-        color: #36b9cc;
-    }
+.number .finish {
+    color: #36b9cc;
+}
 
 .overlay {
+    display: none;
     height: 100%;
     width: 20%;
-    display: none;
     position: fixed;
     z-index: 1;
     top: 0;
@@ -315,12 +327,14 @@ video, audio {
     background-color: rgba(0,0,0, 0.9);
 }
 
+.overlay .btn-outline-secondary {
+    margin: 0 0px 10px 8px;
+}
+
 .overlay-content {
     position: relative;
-    top: 25%;
+    top: 15%;
     width: 100%;
-    text-align: center;
-    margin-top: 30px;
 }
 
 .overlay a {
@@ -332,15 +346,16 @@ video, audio {
     transition: 0.3s;
 }
 
-    .overlay a:hover, .overlay a:focus {
-        color: #f1f1f1;
-    }
+.overlay a:hover, 
+.overlay a:focus {
+    color: #f1f1f1;
+}
 
 .overlay .closebtn {
     position: absolute;
-    top: 20px;
-    right: 45px;
-    font-size: 60px;
+    font-size: 45px;
+    left: 5px;
+    top: -20px;
 }
 
 @media screen and (max-height: 450px) {
@@ -357,4 +372,77 @@ video, audio {
 
 .quiz-item .quiz-extend {
     color: cornflowerblue;
+}
+/* sesson */
+.quiz-item {
+    display: block;
+    width: 100%;
+    padding: 20px 0;
+    border-bottom: solid 1px #ccc;
+}
+
+.quiz-box-header{
+    padding: 20px 0;
+}
+
+.part-box-header .title{
+    line-height: inherit;
+    text-align: justify;
+}
+
+.QUIZ3 .quiz-pane {
+    width: 48%;
+    margin-right: 2%;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.QUIZ3 .pane-item {
+    display: block;
+    margin: 7px;
+    border: dotted 1px #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    background: #ddd;
+}
+
+.QUIZ3 .ui-draggable-handle {
+    margin: 7px;
+    border: dotted 1px #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    color: #fff;
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.QUIZ3 .no-child .ui-draggable-handle {
+    color: #333;
+    margin: 7px;
+    padding: 5px;
+    background-color: #ddd;
+    border-color: #ddd;
+    border: dotted 1px #ccc;
+    border-radius: 5px;
+}
+.QUIZ3 .answer-text {
+    margin: 0;
+    padding: 5px;
+}
+
+.QUIZ3 .answer-pane {
+    width: 48%;
+    display: inline-block;
+    border: dotted 1px #ccc;
+    text-align: center;
+}
+
+.QUIZ3 .answer-wrapper .answer-box,
+.QUIZ3 .answer-wrapper .answer-item {
+    display: inline-block;
+    width: 48%;
+    text-align: left;
+    vertical-align: top;
+    position: relative;
+    margin: 3% 0.5%;
 }

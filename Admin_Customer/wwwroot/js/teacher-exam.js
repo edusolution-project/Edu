@@ -1,5 +1,4 @@
 ﻿var urlBase = "/teacher/";
-var publisherPath = "http://publisher.edusolution.vn"
 
 let myEditor;
 let totalQuiz = 0;
@@ -328,13 +327,13 @@ var render = {
         var itembody = $("<div>", { "class": "card-body" });
         tabsitem.append(itembody);
 
-        var itembox = $("<div>", { "class": "part-box" + data.Type, "id": data.ID });
+        var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         itembody.append(itembox);
 
 
         var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {
-            boxHeader.append($("<h4>", { "class": "title", "text": data.Title + time + point }));
+            boxHeader.append($("<h5>", { "class": "title font-weight-bold", "text": data.Title + time + point }));
         }
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Thu gọn", "onclick": "toggleCompact(this)" }));
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
@@ -457,7 +456,6 @@ var render = {
         //render question
         switch (template) {
             case "QUIZ2":
-                alert(1);
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -509,7 +507,8 @@ var render = {
                     drop: function (event, ui) {
                         $(this).find(".placeholder").hide();
                         var prevHolder = ui.helper.data('parent');
-
+                        var quizId = $(this).parent().attr('id');
+                        answerQuestion($(this), quizId);
                         if ($(this).find(".answer-item").length > 0) {//remove all answer to box
                             //$(container).siblings(".answer-wrapper").append($(this).find(".answer-item"));
                             $(prevHolder).append($(this).find(".answer-item"));
@@ -537,9 +536,9 @@ var render = {
                 var itembox = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
-                    boxHeader.append($("<h4>", { "class": "title", "text": data.Content + point }));
+                    boxHeader.append($("<h5>", { "class": "title", "text": data.Content + point }));
                 else
-                    boxHeader.append($("<h4>", { "class": "title", "text": point }));
+                    boxHeader.append($("<h5>", { "class": "title", "text": point }));
 
                 render.mediaContent(data, boxHeader);
 
@@ -570,7 +569,7 @@ var render = {
             case "QUIZ2":
 
                 if ($(container).find(".answer-item").length == 0) {
-                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text", "placeholder": data.Content }));
+                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text form-control", "placeholder": data.Content,  "onchange": "answerQuestion(this,'" + data.ParentID + "')" }));
                     container.append(answer);
                 }
                 else {
@@ -659,11 +658,9 @@ var render = {
     mediaContent: function (data, wrapper, type = "") {
         if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
-            if (!data.Media.Path.startsWith("http"))
-                data.Media.Path = publisherPath + data.Media.Path;
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
+                    mediaHolder.append($("<img>", { "class": "img-fluid lazy" , "src": data.Media.Path }));
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -677,13 +674,13 @@ var render = {
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
+                            mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid lazy" }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
                             mediaHolder.append("<audio controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else
-                            mediaHolder.append($("<embed>", { "src": data.Answers.path }));
+                            mediaHolder.append($("<embed>", { "src": data.Media.Path }));
                     break;
             }
             wrapper.append(mediaHolder);
@@ -710,7 +707,6 @@ var load = {
         }
     },
     listPart: function (lessonID, classID) {
-
         var url = urlBase + "CloneLessonPart/";
         $.ajax({
             type: "POST",
@@ -776,7 +772,7 @@ function markQuestion(quizid) {
         $("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "]").addClass("completed");
         var completed = parseInt($(".quizNumber .completed").text()) + 1;
         $(".quizNumber .completed").text(completed);
-        if(completed == totalQuiz)
+        if (completed == totalQuiz)
             $(".quizNumber .completed").addClass("finish");
     }
 }
