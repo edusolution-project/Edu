@@ -164,11 +164,11 @@ namespace BaseCustomerMVC.Controllers.Admin
                 else
                 {
                     _accountService.Collection.DeleteMany(o => model.ArrID == o.UserID);
-                    var delete = _service.Collection.DeleteMany(o => model.ArrID==o.ID);
+                    var delete = _service.Collection.DeleteMany(o => model.ArrID == o.ID);
                     return new JsonResult(delete);
                 }
-                    
-                
+
+
             }
         }
 
@@ -196,26 +196,25 @@ namespace BaseCustomerMVC.Controllers.Admin
                         int totalRows = workSheet.Dimension.Rows;
                         studentList = new List<StudentEntity>();
                         Error = new List<StudentEntity>();
-                        for (int i = 2; i <= totalRows; i++)
+                        for (int i = 1; i <= totalRows; i++)
                         {
                             if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                            string ho = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
-                            string name = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
+                            string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                            string name = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
                             var item = new StudentEntity
                             {
-                                StudentId = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString(),
-
-                                FullName = ho + " " + name,
-                                Class = new List<string>() { workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString() },
-                                DateBorn = workSheet.Cells[i, 6].Value == null ? DateTime.MinValue : (DateTime)workSheet.Cells[i, 6].Value,
-                                Email = workSheet.Cells[i, 7].Value == null ? "" : workSheet.Cells[i, 7].Value.ToString(),
-                                Phone = workSheet.Cells[i, 8].Value == null ? "" : workSheet.Cells[i, 8].Value.ToString(),
-                                Address = workSheet.Cells[i, 9].Value == null ? "" : workSheet.Cells[i, 9].Value.ToString(),
+                                StudentId = code,
+                                FullName = name,
+                                DateBorn = workSheet.Cells[i, 4].Value == null ? DateTime.MinValue : (DateTime.Parse(workSheet.Cells[i, 4].Value.ToString())),
+                                Email = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
+                                Class = new List<string>() { workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString() },
+                                //Phone = workSheet.Cells[i, 8].Value == null ? "" : workSheet.Cells[i, 8].Value.ToString(),
+                                //Address = workSheet.Cells[i, 9].Value == null ? "" : workSheet.Cells[i, 9].Value.ToString(),
                                 CreateDate = DateTime.Now,
                                 UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
-                                IsActive = true
+                                IsActive = workSheet.Cells[i, 7].Value.ToString() == "Hoạt động"
                             };
-                            if (!ExistEmail(item.Email) && !ExistStudentId(item.StudentId))
+                            if (!ExistEmail(item.Email))
                             {
                                 await _service.CreateQuery().InsertOneAsync(item);
                                 studentList.Add(item);
@@ -240,6 +239,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         }
 
                     }
+                    System.IO.File.Delete(filePath);
                 }
                 catch (Exception ex)
                 {
@@ -253,7 +253,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             };
             return new JsonResult(response);
         }
-        
+
         [HttpGet]
         [Obsolete]
         public async Task<IActionResult> Export(DefaultModel model)
@@ -274,12 +274,22 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             var filterData = filter.Count > 0 ? _service.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _service.GetAll();
             var list = await filterData.ToListAsync();
-            var data = list.Select(o => new { o.StudentId,o.FullName,o.DateBorn,o.Email,o.Class,o.IsActive });
+            var index = 1;
+            var data = list.Select(o => new
+            {
+                STT = index++,
+                Ma_HV = o.StudentId,
+                Ho_ten = o.FullName,
+                Ngay_sinh = o.DateBorn.ToLocalTime().ToString("MM/dd/yyyy"),
+                Email = o.Email,
+                Lop = o.Class,
+                Trang_thai = o.IsActive ? "Hoạt động" : "Đang khóa"
+            });
             var stream = new MemoryStream();
 
             using (var package = new ExcelPackage(stream))
             {
-                var workSheet = package.Workbook.Worksheets.Add("Sheet1");
+                var workSheet = package.Workbook.Worksheets.Add("DS_HV");
                 workSheet.Cells.LoadFromCollection(data, true);
                 package.Save();
             }
@@ -289,6 +299,42 @@ namespace BaseCustomerMVC.Controllers.Admin
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
+
+        [HttpGet]
+        [Obsolete]
+        public async Task<IActionResult> ExportTemplate(DefaultModel model)
+        {
+
+            var list = new List<StudentEntity>() { new StudentEntity() {
+                ID = "undefined"
+                } };
+            var data = list.Select(o => new
+            {
+                STT = 1,
+                Ma_HV = "HV01",
+                Ho_ten = "Nguyễn Văn A",
+                Ngay_sinh = "01/30/1999",
+                Email = "email@gmail.com",
+                Lop = "8A1",
+                Trang_thai = "Hoạt động"
+            });
+            var stream = new MemoryStream();
+
+            using (var package = new ExcelPackage(stream))
+            {
+                var workSheet = package.Workbook.Worksheets.Add("DS_HV");
+                workSheet.Cells.LoadFromCollection(data, true);
+                package.Save();
+            }
+            stream.Position = 0;
+            string excelName = $"StudentTemplate.xlsx";
+
+            //return File(stream, "application/octet-stream", excelName);  
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
+        }
+
+
+
         [HttpPost]
         [Obsolete]
         public JsonResult Publish(DefaultModel model)
@@ -302,8 +348,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (model.ArrID.Contains(","))
                 {
                     var filter = Builders<StudentEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == false);
-                    var update = Builders<StudentEntity>.Update.Set("IsActive",true);
-                    var publish = _service.Collection.UpdateMany(filter,update);
+                    var update = Builders<StudentEntity>.Update.Set("IsActive", true);
+                    var publish = _service.Collection.UpdateMany(filter, update);
                     return new JsonResult(publish);
                 }
                 else
@@ -350,7 +396,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private bool ExistEmail(string email)
         {
             var _currentData = _service.CreateQuery().Find(o => o.Email == email);
-            if(_currentData.Count() > 0)
+            if (_currentData.Count() > 0)
             {
                 return true;
             }

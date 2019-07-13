@@ -40,7 +40,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public ActionResult Index(DefaultModel model)
         {
-            ViewBag.Roles = _roleService.CreateQuery().Find(_=>true).SortBy(o => o.Name).ToList();
+            ViewBag.Roles = _roleService.CreateQuery().Find(_ => true).SortBy(o => o.Name).ToList();
             ViewBag.Model = model;
             return View();
         }
@@ -86,10 +86,10 @@ namespace BaseCustomerMVC.Controllers.Admin
             return new JsonResult(response);
 
         }
-        
-        private string Name(string type,string id)
+
+        private string Name(string type, string id)
         {
-            if(type == "teacher")
+            if (type == "teacher")
             {
                 return _teacherService.GetItemByID(id).FullName;
             }
@@ -125,7 +125,34 @@ namespace BaseCustomerMVC.Controllers.Admin
                     item.Type = _roleService.GetItemByID(item.RoleID).Type;
                     item.CreateDate = DateTime.Now;
                     item.UserCreate = User.Claims.GetClaimByType("UserID").Value;
+
+                    switch (item.Type)
+                    {
+                        case "teacher":
+                            var teacher = new TeacherEntity()
+                            {
+                                Email = item.UserName,
+                                FullName = item.Name,
+                                CreateDate = DateTime.Now,
+                                UserCreate = User.Identity.Name
+                            };
+                            _teacherService.CreateQuery().InsertOne(teacher);
+                            item.UserID = teacher.ID;
+                            break;
+                        case "student":
+                            var student = new StudentEntity()
+                            {
+                                Email = item.UserName,
+                                FullName = item.Name,
+                                CreateDate = DateTime.Now,
+                                UserCreate = User.Identity.Name
+                            };
+                            _studentService.CreateQuery().InsertOne(student);
+                            item.UserID = student.ID;
+                            break;
+                    }
                     _service.CreateQuery().InsertOne(item);
+
                     Dictionary<string, object> response = new Dictionary<string, object>()
                     {
                         {"Data",item },
@@ -152,7 +179,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.UserID = oldData.UserID;
                 item.UserCreate = User.Claims.GetClaimByType("UserID").Value;
                 item.Type = _roleService.GetItemByID(item.RoleID).Type;
-                
+
                 if (string.IsNullOrEmpty(item.PassWord) || Security.Encrypt(item.PassWord) == oldData.PassWord) item.PassWord = oldData.PassWord;
                 else item.PassWord = Security.Encrypt(item.PassWord);
                 if (string.IsNullOrEmpty(item.PassTemp) || Security.Encrypt(item.PassTemp) == oldData.PassTemp) item.PassTemp = oldData.PassTemp;
@@ -214,7 +241,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             var filterData = filter.Count > 0 ? _service.Collection.Find(Builders<AccountEntity>.Filter.And(filter)) : _service.GetAll();
             var list = await filterData.ToListAsync();
-            var data = list.Select(o => new { o.UserName, o.Type, o.IsActive, _roleService.GetItemByID(o.RoleID).Name});
+            var data = list.Select(o => new { o.UserName, o.Type, o.IsActive, _roleService.GetItemByID(o.RoleID).Name });
             var stream = new MemoryStream();
 
             using (var package = new ExcelPackage(stream))

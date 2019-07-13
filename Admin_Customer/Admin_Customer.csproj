@@ -8,37 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Areas\Admin\Data\**" />
-    <Compile Remove="Areas\Admin\Models\**" />
-    <Compile Remove="Areas\Student\Data\**" />
-    <Compile Remove="Areas\Student\Models\**" />
-    <Compile Remove="Areas\Teacher\Controllers\**" />
-    <Compile Remove="Areas\Teacher\Data\**" />
-    <Compile Remove="Areas\Teacher\Models\**" />
-    <Content Remove="Areas\Admin\Data\**" />
-    <Content Remove="Areas\Admin\Models\**" />
-    <Content Remove="Areas\Student\Data\**" />
-    <Content Remove="Areas\Student\Models\**" />
-    <Content Remove="Areas\Teacher\Controllers\**" />
-    <Content Remove="Areas\Teacher\Data\**" />
-    <Content Remove="Areas\Teacher\Models\**" />
-    <EmbeddedResource Remove="Areas\Admin\Data\**" />
-    <EmbeddedResource Remove="Areas\Admin\Models\**" />
-    <EmbeddedResource Remove="Areas\Student\Data\**" />
-    <EmbeddedResource Remove="Areas\Student\Models\**" />
-    <EmbeddedResource Remove="Areas\Teacher\Controllers\**" />
-    <EmbeddedResource Remove="Areas\Teacher\Data\**" />
-    <EmbeddedResource Remove="Areas\Teacher\Models\**" />
-    <None Remove="Areas\Admin\Data\**" />
-    <None Remove="Areas\Admin\Models\**" />
-    <None Remove="Areas\Student\Data\**" />
-    <None Remove="Areas\Student\Models\**" />
-    <None Remove="Areas\Teacher\Controllers\**" />
-    <None Remove="Areas\Teacher\Data\**" />
-    <None Remove="Areas\Teacher\Models\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Remove="compilerconfig.json" />
   </ItemGroup>
 
@@ -47,7 +16,41 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Areas\Admin\Views\Account\Index.cshtml" />
+    <None Include="Areas\Admin\Views\Course\Index.cshtml" />
+    <None Include="Areas\Admin\Views\Grade\Index.cshtml" />
+    <None Include="Areas\Admin\Views\Home\Index.cshtml" />
+    <None Include="Areas\Admin\Views\Role\Index.cshtml" />
     <None Include="Areas\Admin\Views\Statistic\Index.cshtml" />
+    <None Include="Areas\Admin\Views\Student\Index.cshtml" />
+    <None Include="Areas\Admin\Views\Subject\Index.cshtml" />
+    <None Include="Areas\Admin\Views\Teacher\Index.cshtml" />
+    <None Include="Areas\Student\Views\CheckStudent\Exam.cshtml" />
+    <None Include="Areas\Student\Views\CheckStudent\Index.cshtml" />
+    <None Include="Areas\Student\Views\Home\Index.cshtml" />
+    <None Include="Areas\Student\Views\LessonToday\Detail.cshtml" />
+    <None Include="Areas\Student\Views\LessonToday\Exam.cshtml" />
+    <None Include="Areas\Student\Views\LessonToday\Index.cshtml" />
+    <None Include="Areas\Student\Views\LessonToday\LessonStudent.cshtml" />
+    <None Include="Areas\Student\Views\MyCourse\Calendar.cshtml" />
+    <None Include="Areas\Student\Views\MyCourse\Detail.cshtml" />
+    <None Include="Areas\Student\Views\MyCourse\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Calendar\CheckList.cshtml" />
+    <None Include="Areas\Teacher\Views\Calendar\CheckTeacher.cshtml" />
+    <None Include="Areas\Teacher\Views\Calendar\CheckTeacherStudent.cshtml" />
+    <None Include="Areas\Teacher\Views\Calendar\Detail.cshtml" />
+    <None Include="Areas\Teacher\Views\Calendar\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Calendar\Lesson.cshtml" />
+    <None Include="Areas\Teacher\Views\Class\Detail.cshtml" />
+    <None Include="Areas\Teacher\Views\Class\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Curriculum\Detail.cshtml" />
+    <None Include="Areas\Teacher\Views\Curriculum\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Curriculum\Lesson.cshtml" />
+    <None Include="Areas\Teacher\Views\Discussion\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Home\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Lesson\Detail.cshtml" />
+    <None Include="Areas\Teacher\Views\Lesson\Exam.cshtml" />
+    <None Include="Areas\Teacher\Views\News\Index.cshtml" />
     <None Include="compilerconfig.json" />
     <None Include="wwwroot\scss\navs\_global.scss" />
     <None Include="wwwroot\scss\navs\_sidebar.scss" />
@@ -1774,11 +1777,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BaseCustomerMVC\BaseCustomerMVC.csproj" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Folder Include="Areas\Admin\Views\Course\" />
   </ItemGroup>
 
 </Project>

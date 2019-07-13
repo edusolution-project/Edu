@@ -148,7 +148,7 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var _lesson = _lessonService.GetItemByID(item.LessonID);
                 var _class = _classService.GetItemByID(item.ClassID);
-                var _schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID).SingleOrDefault();
+                var _schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID).FirstOrDefault();
                 item.Timer = _lesson.Timer;
                 item.Point = 0;
                 item.LessonScheduleID = _schedule.ID;
@@ -176,18 +176,18 @@ namespace BaseCustomerMVC.Controllers.Student
         public JsonResult GetCurrentExam(string ClassID,string LessonID)
         {
             var userID = User.Claims.GetClaimByType("UserID").Value;
-            var x = _service.CreateQuery().Find(o => o.ClassID == ClassID && o.LessonID == LessonID && o.Status == false && o.StudentID == userID).SingleOrDefault();
+            var x = _service.CreateQuery().Find(o => o.ClassID == ClassID && o.LessonID == LessonID && o.Status == false && o.StudentID == userID).FirstOrDefault();
             return new JsonResult(x);
         }
         [HttpPost]
         public JsonResult CreateDetails(ExamDetailEntity item)
         {
-            if (_service.IsOverTime(item.ExamID))
+            if (!_service.IsOverTime(item.ExamID))
             {
                 if (string.IsNullOrEmpty(item.ID) || item.ID == "0" || item.ID == "null")
                 {
                     var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();
-                    var oldItem = _examDetailService.CreateQuery().Find(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).SingleOrDefault();
+                    var oldItem = _examDetailService.CreateQuery().Find(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).FirstOrDefault();
                     if (oldItem == null)
                     {
                         item.Created = DateTime.Now;

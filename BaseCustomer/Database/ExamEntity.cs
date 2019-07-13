@@ -53,12 +53,12 @@ namespace BaseCustomerEntity.Database
         {
             var item = GetItemByID(ID);
             if (item == null) return false;
-
-            if((item.CurrentDoTime.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds <= 0)
+            double count = (item.CurrentDoTime.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
+            if (count <= 0)
             {
                 UpdateStatus(item);
             }
-            return (item.CurrentDoTime.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds <= 0;
+            return count <= 0;
         }
         public Task UpdateStatus(ExamEntity exam)
         {
