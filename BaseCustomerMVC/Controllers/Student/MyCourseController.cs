@@ -77,10 +77,10 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 return null;
             }
-            //else
-            //{
-            //    filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
-            //}
+            else
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
+            }
             if (!string.IsNullOrEmpty(model.SearchText))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
@@ -327,6 +327,18 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.CourseID = id;
             ViewBag.ClassID = ClassID;
             ViewBag.Model = model;
+            return View();
+        }
+        public IActionResult Detail(DefaultModel model,string id)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(id);
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            if (currentClass.Students.IndexOf(userId) < 0)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
             return View();
         }
     }

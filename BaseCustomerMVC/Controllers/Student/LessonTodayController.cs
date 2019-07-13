@@ -42,7 +42,7 @@ namespace BaseCustomerMVC.Controllers.Student
             //student id
             var userid = User.Claims.GetClaimByType("UserID").Value;
             // lấy class theo student id
-            var data = _classService.Collection.Find(o => o.IsActive == true).ToList();
+            var data = _classService.Collection.Find(o => o.IsActive == true && o.Students.Contains(userid)).ToList();
 
             if(data != null && data.Count > 0)
             {
