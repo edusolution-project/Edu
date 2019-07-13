@@ -31,6 +31,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ExamDetailService _examDetailService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
+        private readonly StudentService _studentService;
+        private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _studentMapping;
         public MyCourseController(ClassService service
             , CourseService courseService
             , TeacherService teacherService
@@ -46,8 +48,10 @@ namespace BaseCustomerMVC.Controllers.Student
             , LessonPartService lessonPartService
             , ExamService examService
             , ExamDetailService examDetailService
+            , StudentService studentService
             )
         {
+            _studentService = studentService;
             _examService = examService;
             _examDetailService = examDetailService;
             _service = service;
@@ -65,6 +69,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _mappingList = new Core_v2.Globals.MappingEntity<ClassEntity, MyClassViewModel>();
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
+            _studentMapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
         }
 
         [Obsolete]
@@ -311,7 +316,54 @@ namespace BaseCustomerMVC.Controllers.Student
                 
             }
         }
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetMembers(DefaultModel model)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
 
+            if (string.IsNullOrEmpty(model.ID))
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null || currentClass.Students.IndexOf(UserID) < 0)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var teacher = _teacherService.GetItemByID(currentClass.TeacherID);
+
+            var filter = new List<FilterDefinition<StudentEntity>>();
+            filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
+            var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
+            var studentsView = students.ToList().Select(t => _studentMapping.AutoOrtherType(t, new ClassMemberViewModel()
+            {
+                ClassName = currentClass.Name,
+                ClassStatus = "Đang học",
+                LastJoinDate = DateTime.Now
+            })).ToList();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data",new Dictionary<string, object> {
+                        {"Teacher",teacher },
+                        {"Students",studentsView }
+                    }
+                },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
         public IActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;

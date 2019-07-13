@@ -257,8 +257,8 @@
                 }
 
             },
-            error: function() {
-                alert("Error");
+            error: function (res) {
+                console.log(res.responseText);
             }
         });
     }
@@ -304,8 +304,8 @@
                     }
                 }
             },
-            error: function() {
-                alert("Error");
+            error: function (res) {
+                console.log(res.responseText);
             }
         });
     }
