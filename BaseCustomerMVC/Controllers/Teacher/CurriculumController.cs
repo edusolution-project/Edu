@@ -425,6 +425,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Updated = DateTime.Now,
                         Created = DateTime.Now
                     };
+                    if (_item.Media != null && _item.Media.Path != null)
+                        if (!_item.Media.Path.StartsWith("http://"))
+                            _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
                     CloneLessonPart(_item);
                 }
             }
@@ -453,6 +456,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Updated = DateTime.Now,
                         Created = DateTime.Now
                     };
+                    //change Media path
+                    if (_item.Media != null && _item.Media.Path != null)
+                        if (!_item.Media.Path.StartsWith("http://"))
+                            _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
                     CloneLessonQuestion(_item);
                 }
             }
@@ -480,6 +487,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Updated = DateTime.Now,
                         Created = DateTime.Now
                     };
+                    if (_item.Media != null && _item.Media.Path != null)
+                        if (!_item.Media.Path.StartsWith("http://"))
+                            _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
                     CloneLessonAnswer(_item);
                 }
             }
@@ -487,6 +497,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private void CloneLessonAnswer(LessonPartAnswerEntity item)
         {
+
             _lessonPartAnswerService.Collection.InsertOne(item);
         }
     }

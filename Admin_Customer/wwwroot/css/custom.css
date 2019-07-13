@@ -435,3 +435,129 @@ video, audio {
     position: relative;
     margin: 3% 0.5%;
 }
+/* custom sesson */
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .quiz-remove {
+    right: 10px;
+    padding: 3px 7px 1px 8px;
+    border-radius: 40px;
+    line-height: 20px;
+}
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .quiz-remove,
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-remove {
+    border: solid 1px #ccc;
+    cursor: pointer;
+    color: #ccc;
+}
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .fieldset_title,
+.lesson-modal .lesson_parts .part_content .fieldQuestion .quiz-remove,
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-remove {
+    font-weight: bold;
+    position: absolute;
+    top: -15px;
+    background: #fff;
+    padding: 5px;
+}
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-wrapper .answer-box .answer-text,
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-wrapper .answer-item .answer-text {
+    font-size: inherit;
+    color: inherit;
+    display: inline-block;
+    width: calc(100% - 30px);
+    margin-bottom: 0;
+}
+
+.lesson-modal .lesson_parts .input-text {
+    padding: 1px 3px;
+    display: block;
+    width: 100%;
+    margin-bottom: 7px;
+}
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .quiz-remove:hover,
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-remove:hover {
+    color: #333;
+    border: solid 1px #333;
+}
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-remove {
+    right: -10px;
+    line-height: 11px;
+    top: -8px;
+    border-radius: 10px;
+    padding: 4px 4px 1px 4px;
+}
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .fieldset_title,
+.lesson-modal .lesson_parts .part_content .fieldQuestion .quiz-remove,
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-remove {
+    font-weight: bold;
+    position: absolute;
+    top: -15px;
+    background: #fff;
+    padding: 5px;
+}
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-wrapper .btnAddAnswer {
+    vertical-align: top;
+    margin-top: 0;
+}
+
+.lesson-modal .btn:hover {
+    background-color: #f44336 !important;
+    color: #fff !important;
+}
+
+.lesson-modal .btn-primary.btnAddFile {
+    margin: 10px 0;
+}
+
+.lesson-modal .btn-danger {
+    position: relative;
+    left: 10px;
+}
+
+.hide {
+    display: none;
+}
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-wrapper .answer-box .answer-checkbox,
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-wrapper .answer-item .answer-checkbox {
+    display: inline-block;
+    margin-right: 5px;
+    width: 25px;
+    vertical-align: baseline;
+}
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-wrapper .answer-box,
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-wrapper .answer-item {
+    display: inline-block;
+    margin: 0 10px 10px 0;
+    width: 23%;
+    min-width: 175px;
+    font-size: 15px;
+    color: #999;
+    text-align: left;
+    vertical-align: top;
+    position: relative;
+}
+
+.lesson-modal .lesson_parts .input-text.part_point {
+    display: inline-block;
+    max-width: 50px;
+}
+
+.lesson-modal .lesson_parts .input-text {
+    padding: 1px 3px;
+    display: block;
+    width: 100%;
+    margin-bottom: 7px;
+}
+
+.text-right .btn-edit {
+    position: relative;
+    right: 5px;
+}
