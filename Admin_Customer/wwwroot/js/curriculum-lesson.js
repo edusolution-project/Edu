@@ -224,16 +224,25 @@ var lessonService = {
                 title.append(titlePoint);
             }
         }
-        var sort = $("<a>", { "class": "btn btn-sm btn-sort", "text": "Sắp xếp", "onclick": "lessonService.renderSort()" });
-        var edit = $("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "lessonService.renderEdit('" + data.ID + "')" });
-        var create = $("<a>", { "class": "btn btn-sm btn-add", "text": "Thêm nội dung", "onclick": "Create.lessonPart('" + data.ID + "')" });
-        var close = $("<a>", { "class": "btn btn-sm btn-close", "text": "X", "onclick": "render.resetLesson()" });
-        var remove = $("<a>", { "class": "btn btn-sm btn-remove", "text": "Xóa", "onclick": "lessonService.remove('" + data.ID + "')" });
+        var sort    = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sắp xếp", "onclick": "lessonService.renderSort()" });
+        var edit    = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Sửa", "onclick": "lessonService.renderEdit('" + data.ID + "')" });
+        var create  = $("<button>", { "class": "btn btn-primary btn-add", "title": "Thêm nội dung", "onclick": "Create.lessonPart('" + data.ID + "')" });
+        var close   = $("<button>", { "class": "btn btn-primary btn-close", "text": "X", "onclick": "render.resetLesson()" });
+        var remove  = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Xóa", "onclick": "lessonService.remove('" + data.ID + "')" });
+
+        var iconSort = $("<i>", { "class": "fas fa-sort" });
+        var iconEdit = $("<i>", { "class": "fas fa-edit" });
+        var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
+        var iconTrash = $("<i>", { "class": "fas fa-trash" });
         lessonHeader.append(sort);
+        sort.append(iconSort);
         lessonHeader.append(edit);
+        edit.append(iconEdit);
         lessonHeader.append(create);
+        create.append(iconCreate);
         //lessonHeader.append(close);
         lessonHeader.append(remove); //removeLesson
+        remove.append(iconTrash);
 
 
         lessonRow.append(tabsleft);
@@ -538,12 +547,16 @@ var render = {
 
         var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {
-            boxHeader.append($("<h4>", { "class": "title", "text": data.Title + time + point }));
+            boxHeader.append($("<h5>", { "class": "title", "text": data.Title + time + point }));
         }
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Thu gọn", "onclick": "toggleCompact(this)" }));
-        boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "lessonPartService.edit('" + data.ID + "')" }))
-        boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "lessonPartService.remove('" + data.ID + "')" }));
+        var boxButton = $("<div>", { "class": "text-right" });
+        boxButton.append($("<button>", { "class": "btn btn-primary btn-sm btn-edit", "text": "Sửa", "onclick": "lessonPartService.edit('" + data.ID + "')" }))
+        boxButton.append($("<button>", { "class": "btn btn-danger btn-sm btn-close", "text": "Xóa", "onclick": "lessonPartService.remove('" + data.ID + "')" }));
+
         itembox.append(boxHeader);
+        boxHeader.append(boxButton);
+
         switch (data.Type) {
             case "TEXT":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
@@ -845,8 +858,8 @@ var render = {
                 wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide" }));
                 break;
         }
-        wrapper.append($("<input>", { "type": "button", "class": "btn btnAddFile", "onclick": "chooseFile(this)", "value": "Chọn file", "tabindex": -1 }));
-        wrapper.append($("<input>", { "type": "button", "class": "btn btnResetFile hide", "onclick": "resetMedia(this)", "value": "x", "tabindex": -1 }));
+        wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddFile", "onclick": "chooseFile(this)", "value": "Chọn file", "tabindex": -1 }));
+        wrapper.append($("<input>", { "type": "button", "class": "btn btn-danger btnResetFile hide", "onclick": "resetMedia(this)", "value": "x", "tabindex": -1 }));
         if (data != null) {
             if (data.Name != null) $(wrapper).find("[name='" + prefix + "Media.Name']").val(data.Name);
             if (data.OriginalName != null) {
@@ -1139,15 +1152,15 @@ var template = {
         var answer_template_holder = $('.answer_template');
         answer_template_holder.empty();
 
-        contentholder.append($("<label>", { "class": "title", "text": "Tiêu đề" }));
-        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text", "placeholder": "Nhập tiêu đề" }));
+        contentholder.append($("<label>", { "class": "title", "text": "Tiêu đề:" }));
+        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Nhập tiêu đề" }));
         if (data != null && data.Title != null)
             contentholder.find("[name=Title]").val(data.Title);
 
         switch (type) {
             case "TEXT"://Text
                 contentholder.append($("<label>", { "class": "title", "text": "Nhập nội dung văn bản" }));
-                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text", "placeholder": "Nội dung văn bản" }));
+                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung văn bản" }));
                 if (data != null && data.Description != null)
                     contentholder.find("[name=Description]").val(data.Description);
 
@@ -1190,12 +1203,12 @@ var template = {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "onclick": "questionService.remove(this)", "tabindex": -1 }));
-                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text", "placeholder": "Nội dung câu hỏi" }));
+                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Nội dung câu hỏi" }));
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(questionTemplate.find(".media_holder"), "Questions.");
                 questionTemplate.append($("<div>", { "class": "media_preview" }));
                 questionTemplate.append($("<label>", { "class": "input_label", "text": "Điểm" }));
-                questionTemplate.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point", "placeholder": "Điểm", "value": "1" }));
+                questionTemplate.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Điểm", "value": "1" }));
                 questionTemplate.append($("<label>", { "class": "part_label", "text": "Đáp án (click chọn nếu là đáp án đúng)" }));
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
@@ -1210,13 +1223,13 @@ var template = {
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect" }));
                 answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "onclick": "toggleCorrectAnswer(this)" }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text", "placeholder": "Đáp án" }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Đáp án" }));
                 answerTemplate.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
                 answer_template_holder.append(answerTemplate);
 
-                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media nếu cần" }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media" }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
@@ -1261,8 +1274,7 @@ var template = {
                 answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text", "placeholder": "Đáp án" }));
                 answer_template_holder.append(answerTemplate);
 
-
-                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media nếu cần" }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media" }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
@@ -1287,16 +1299,16 @@ var template = {
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "onclick": "questionService.remove(this)", "tabindex": -1 }));
 
                 var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text", "placeholder": "Nội dung câu hỏi", "tabindex": 0 }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Nội dung câu hỏi", "tabindex": 0 }));
                 quizWrapper.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(quizWrapper.find(".media_holder"), "Questions.");
                 quizWrapper.append($("<div>", { "class": "media_preview" }));
                 quizWrapper.append($("<label>", { "class": "input_label", "text": "Điểm" }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point", "placeholder": "Điểm", "value": "1", "tabindex": 0 }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Điểm", "value": "1", "tabindex": 0 }));
                 questionTemplate.append(quizWrapper);
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
-                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer", "value": "Thêm câu trả lời", "onclick": "addNewAnswer(this)", "tabindex": -1 }));
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer", "value": "Thêm câu trả lời", "onclick": "addNewAnswer(this)", "tabindex": -1 }));
                 questionTemplate.append(answer_wrapper);
                 question_template_holder.append(questionTemplate);
 
@@ -1306,13 +1318,13 @@ var template = {
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect", "value": true }));
                 answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "onclick": "toggleCorrectAnswer(this)", "checked": "checked", "tabindex": 0 }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text", "placeholder": "Đáp án (click chọn nếu là đáp án đúng)", "tabindex": 0 }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Đáp án (click chọn nếu là đáp án đúng)", "tabindex": 0 }));
                 answerTemplate.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
                 answer_template_holder.append(answerTemplate);
 
-                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media nếu cần", "tabindex": -1 }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media", "tabindex": -1 }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
@@ -1331,7 +1343,7 @@ var template = {
                 break;
             case "ESSAY"://Tự luận
                 contentholder.append($("<label>", { "class": "title", "text": "Nhập nội dung văn bản" }));
-                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text", "placeholder": "Nội dung văn bản" }));
+                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung văn bản" }));
                 if (data != null && data.description != null)
                     contentholder.find("[name=Description]").val(data.description);
 
@@ -1350,15 +1362,15 @@ var template = {
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
 
                 var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text", "placeholder": "Nội dung câu hỏi", "tabindex": 0 }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Nội dung câu hỏi", "tabindex": 0 }));
                 quizWrapper.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(quizWrapper.find(".media_holder"), "Questions.");
                 quizWrapper.append($("<div>", { "class": "media_preview" }));
                 quizWrapper.append($("<label>", { "class": "input_label", "text": "Điểm" }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point", "placeholder": "Điểm", "value": "1", "tabindex": 0 }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Điểm", "value": "1", "tabindex": 0 }));
                 questionTemplate.append(quizWrapper);
 
-                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media nếu cần", "tabindex": -1 }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media", "tabindex": -1 }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
