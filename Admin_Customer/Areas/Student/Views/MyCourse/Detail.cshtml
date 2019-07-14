@@ -236,7 +236,7 @@
 
                         if (item.ChapterID == null) {
                             scheduleBody.append("<tr lid=\"" + item.ID + "\">" +
-                            "<td><a href='@Url.Action("Detail", "LessonToday")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
+                            "<td><a href='@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
                             "<td>---</td>" +
                             "<td dvalue=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
                             "<td dvalue=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" + active +
@@ -246,7 +246,7 @@
                         else
                         {
                             scheduleBody.find("tr[chapid=" + item.ChapterID + "]").after("<tr lid=\"" + item.ID + "\">" +
-                            "<td><a href=" + (item.IsActive ? "'@Url.Action("Detail", "LessonToday")/" + item.ID + "?ClassID=@curentClass.ID'":"'javascript:LockNotify()'")   + ">" + item.Title + "</td>" +
+                            "<td><a href=" + (item.IsActive ? "'@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "?ClassID=@curentClass.ID'":"'javascript:LockNotify()'")   + ">" + item.Title + "</td>" +
                             "<td>---</td>" +
                             "<td dvalue=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
                             "<td dvalue=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" + active +

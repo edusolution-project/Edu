@@ -39,9 +39,9 @@ namespace BaseCustomerMVC.Controllers.Student
         /// <param name="id">LessonID</param>
         /// <param name="ClassID">ClassID</param>
         /// <returns></returns>
-        public IActionResult LessonStudent(DefaultModel model, string id, string ClassID)
+        public IActionResult LessonStudent(DefaultModel model, string ClassID)
         {
-            ViewBag.LessonID = id;
+            ViewBag.LessonID = model.ID;
             ViewBag.ClassID = ClassID;
             return View();
         }
