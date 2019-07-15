@@ -436,7 +436,7 @@ var render = {
             case "QUIZ2":
 
                 if ($(container).find(".answer-item").length == 0) {
-                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text", "placeholder": data.Content, "onfocusout": "answerQuestion(this,'" + data.ParentID + "','" + data.ID + "','this.value')" }));
+                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text", "placeholder": data.Content, "onfocusout": "answerQuestion(this,'" + data.ParentID + "','" + data.ID + "',$(this).val())" }));
                     container.append(answer);
                 }
                 else {
@@ -446,8 +446,9 @@ var render = {
                 break;
             case "QUIZ3":
                 var placeholder = $("#" + data.ParentID).find(".answer-pane");
+                $(placeholder).attr("data-id", data.ParentID)
                 $(placeholder).removeClass("no-child");
-                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
+                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây"}));
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
 
                 if (data.Content != null)
@@ -466,17 +467,17 @@ var render = {
                     scroll: true,
                     start: function (event, ui) {
                         ui.helper.data('parent', $(this).parent());
+                        if (this.parentElement.classList.value == "answer-pane ui-droppable") {
+                            var x = this.parentElement.parentElement.id;
+                            answerQuestion(this, x, data.ID, "");
+                        }
+                        SetCurrentExam()
                     },
                     stop: function (event, ui) {
-                        var parent = this.parentElement.parentElement;
-
-                        if (parent != null && this.parentElement.classList != "answer-wrapper no-child ui-droppable") {
-                            
-                        } else {
-
-                        }
-                        //var prevParent = ui.helper.data('parent');
-                        //$(prevParent).find(".placeholder").show();
+                        if (this.parentElement.classList.value == "answer-pane ui-droppable") {
+                            var x = this.parentElement.parentElement.id;
+                            answerQuestion(this, x, data.ID, $(this).find(".media-holder > img").attr("src"));
+                        } 
                         SetCurrentExam()
                     }
                 });
@@ -657,6 +658,7 @@ var load = {
     }
 };
 function answerQuestion(obj, quizid, answerID, answerValue) {
+    console.log(obj, quizid, answerID, answerValue);
     //$('.quiz-item#' + quizid + " .quiz-extend").show();
     markQuestion(quizid);
     var dataform = new FormData();

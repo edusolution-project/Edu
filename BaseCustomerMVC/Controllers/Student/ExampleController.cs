@@ -231,30 +231,24 @@ namespace BaseCustomerMVC.Controllers.Student
             example.Status = true;
             double point = 0;
             var userID = User.Claims.GetClaimByType("UserID").Value;
-            if (userID == StudentID && _service.IsOverTime(ExamID))
-            {
-                var listDetails = _examDetailService.Collection.Find(o => o.ExamID == example.ID).ToList();
-                for(int i = 0; listDetails != null&& i < listDetails.Count; i++)
-                {
-                    var examDetail = listDetails[i];
-                    if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
-                    var answer = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID && o.TeacherID == example.TeacherID)?.First();
-                    examDetail.RealAnswerID = answer == null ? "0" : answer.ID;
-                    if (answer != null)
-                    {
-                        if (examDetail.AnswerID == examDetail.RealAnswerID)
-                        {
-                            point += _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID).Point;
-                            examDetail.Point = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID).Point;
-                        }
-                    }
-                    _examDetailService.CreateOrUpdate(examDetail);
-                }
-            }
-            else
-            {
-                return new JsonResult("Accept deny");
-            }
+            //phair kiem tra lai
+            //var listDetails = _examDetailService.Collection.Find(o => o.ExamID == example.ID).ToList();
+            //for(int i = 0; listDetails != null&& i < listDetails.Count; i++)
+            //{
+            //    var examDetail = listDetails[i];
+            //    if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
+            //    var answer = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID && o.TeacherID == example.TeacherID)?.First();
+            //    examDetail.RealAnswerID = answer == null ? "0" : answer.ID;
+            //    if (answer != null)
+            //    {
+            //        if (examDetail.AnswerID == examDetail.RealAnswerID)
+            //        {
+            //            point += _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID).Point;
+            //            examDetail.Point = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID).Point;
+            //        }
+            //    }
+            //    _examDetailService.CreateOrUpdate(examDetail);
+            //}
             example.Point = point;
             _service.CreateOrUpdate(example);
             return new JsonResult(example);
