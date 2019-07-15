@@ -733,3 +733,23 @@ function SetCurrentExam() {
     var html = $("#lessonContainer").html();
     localStorage.setItem($("input[name='ExamID']").val(), html);
 }
+//hoàn thành
+function ExamComplete(url) {
+    if (confirm("Có phải bạn muốn nộp bài")) {
+        var exam = document.querySelector("input[name='ExamID']");
+        var dataform = new FormData();
+        dataform.append("ExamID", exam.value);
+        return Ajax(url, "POST", dataform, true)
+            .then(function (res) {
+                if (res == null) return;
+                var data = JSON.parse(res);
+                console.log(data);
+
+            })
+            .catch(function (err) {
+                console.log(err);
+            })
+    } else {
+        //
+    }
+}
