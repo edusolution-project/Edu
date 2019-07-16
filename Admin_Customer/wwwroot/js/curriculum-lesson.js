@@ -92,7 +92,7 @@ var submitForm = function (event) {
         }
         $('.btnSaveForm').show();
     }
-};
+}
 
 var Create = {
     removeLesson: function (id) {

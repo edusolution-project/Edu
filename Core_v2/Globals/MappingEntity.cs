@@ -6,8 +6,6 @@ using System.Text;
 
 namespace Core_v2.Globals
 {
-
-    //20190711
     public class MappingEntity<T, TN> where T : EntityBase where TN : EntityBase, new()
     {
         public MappingEntity()
@@ -82,7 +80,7 @@ namespace Core_v2.Globals
                 if (newProps.Contains(item))
                 {
                     var value = item.GetValue(oldItem);
-                    if(newItem[item.Name] == null) newItem[item.Name] = value;//repush here
+                    if(newItem[item.Name] == null) newItem[item.Name] = value;
                     else
                     {
                         switch (item.PropertyType.Name)
@@ -92,7 +90,7 @@ namespace Core_v2.Globals
                                     newItem[item.Name] = value;
                                 break;
                             case "DateTime":
-                                if ((DateTime)newItem[item.Name] < new DateTime(1900, 1, 1))
+                                if ((DateTime) newItem[item.Name] <= DateTime.MinValue)
                                     newItem[item.Name] = value;
                                 break;
                             default:

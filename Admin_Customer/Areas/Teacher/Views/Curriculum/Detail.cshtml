@@ -2,12 +2,32 @@
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseEntity;
+    var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>
+    ;
+    var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>
+        ;
+    var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.ChapterEntity>
+        ;
+    var user = ViewBag.User as string;
 }
 
 <div id="list-detail">
     <div class="card show">
         <div class="card-header">
             <h5 class="m-0 font-weight-bold text-primary">@Data.Name</h5>
+            <input type="hidden" id="CourseID" value="@Data.ID" />
+
+            <button onclick="EditCourse()" type="button" data-placement="top" title="Sửa" class="btn btn-primary" data-toggle="modal" data-target="#courseModal" data-original-title="Sửa">
+                <i class="fas fa-edit"></i>
+            </button>
+
+            <button onclick="AddChapter('0'); return false;" type="button" data-placement="top" title="Thêm chương mục" class="btn btn-primary" data-toggle="modal" data-target="#chapterModal" data-original-title="Thêm chương mục">
+                <i class="fas fa-plus-square"></i>
+            </button>
+
+            <button onclick="DeleteCourse('@Data.ID')" type="button" data-placement="top" title="Xóa" class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+            </button>
         </div>
         <div class="card-body">
             <div class="row">
@@ -19,6 +39,144 @@
             </div>
         </div>
         <div class="card-footer"></div>
+    </div>
+</div>
+
+<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Sửa thông tin</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="@Url.Action(" CreateOrUpdate","Curriculum")" name="courseForm" enctype="multipart/form-data" method="post">
+                    <input type="hidden" name="ID" />
+                    <input type="hidden" name="CreateUser" value="@user" />
+                    <input type="hidden" name="IsActive" value="false" />
+                    <div class="form-group">
+                        <label class="col-form-label">Tên giáo trình:</label>
+                        <input type="text" class="form-control" name="Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Môn học:</label>
+                        <select name="SubjectID" class="form-control" onchange="ChangeGrade(this)">
+                            @{
+                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                {
+                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Cấp độ:</label>
+                        <select Name="GradeID" class="form-control">
+                            @{
+                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                {
+                                    <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Mô tả:</label>
+                        <textarea class="form-control" name="Description"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="return Submit('courseForm', '@Url.Action(" CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="chapterModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="@Url.Action(" CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
+                    <input type="hidden" name="ID" />
+                    <input type="hidden" name="CourseID" value="@Data.ID" />
+                    <div class="form-group">
+                        <label class="col-form-label">Tên chương mục:</label>
+                        <input type="text" class="form-control" name="Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Chương mục cấp trên:</label>
+                        <select name="ParentID" class="form-control">
+                            <option value="0">------</option>
+                            @{
+                                for (int i = 0; listChapter != null && i < listChapter.Count; i++)
+                                {
+                                    <option value="@listChapter[i].ID">@listChapter[i].Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action(" CreateOrUpdateChapter","Curriculum")','update' , ReloadCourse)">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="@Url.Action(" CreateOrUpdate","Lesson")" name="lessonForm" enctype="multipart/form-data" method="post">
+                    <input type="hidden" name="ID" />
+                    <input type="hidden" name="CourseID" value="@Data.ID" />
+                    <input type="hidden" name="ChapterID" value="" />
+                    <div class="form-group">
+                        <label class="col-form-label">Kiểu bài:</label>
+                        <select name="TemplateType" class="form-control" onchange="SelectTemplate()">
+                            <option value="1">Bài giảng</option>
+                            <option value="2">Bài tập</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Tên bài:</label>
+                        <input type="text" class="form-control" name="Title" required>
+                    </div>
+                    <div class="form-group" style="width: 45%; display:inline-block; margin-right: 5%;" for="examOnly">
+                        <label class="col-form-label">Điểm:</label>
+                        <input type="text" class="form-control" name="Point">
+                    </div>
+                    <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
+                        <label class="col-form-label">Thời gian (phút):</label>
+                        <input type="text" class="form-control" name="Timer">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@Url.Action("CreateOrUpdate","Lesson")','update' , ReloadCourse)">Lưu</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -38,6 +196,7 @@
             data: {ID: "@Data.ID"},
             dataType:"json",
             success: function (data) {
+                hideModal();
                 wrapper.html("");
 
                 chapters = data.Data.Chapters;
@@ -45,16 +204,19 @@
 
                 if (chapters.length > 0) {
                     for (i = 0; i < chapters.length; ++i) {
+
                         var chapter = chapters[i];
 
                         var navitem = $("<li>", { "class": "nav-item active" });
                         var navlink = $("<a>", { "class": "nav-link", "href": "#", "data-toggle": "collapse", "data-target": "#chap_" + chapter.ID, "aria-expanded": "true", "aria-controls": "chap_" + chapter.ID });
                         navlink.append($("<i>", { "class": "fas fa-fw fa-cog" }));
-                        navlink.append($("<span>", { "text": chapter.Name }));
+                        navlink.append($("<span>", {"class":"Name", "text": chapter.Name }));
 
                         var submenu = $("<div>", { "id": "icon-submenu" });
-                        submenu.append($("<i>", { "class": "fas fa-plus", "data-toggle": "tooltip", "data-placement": "top", "title": "thêm bài giảng" }));
-                        submenu.append($("<i>", { "class": "fas fa-edit", "data-toggle": "tooltip", "data-placement": "top", "title": "sửa bài giảng" }));
+                        submenu.append($("<i>", { "class": "fas fa-plus-square", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương mục", "onclick": "AddChapter('" + chapter.ID + "'); return false;" }));
+                        submenu.append($("<i>", { "class": "fas fa-plus-circle", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài", "onclick" : "AddLesson('" + chapter.ID + "');" }));
+                        submenu.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Sửa", "pid": chapter.ParentID, "onclick" : "EditChapter(this, '" + chapter.ID + "'); return false;" }));
+                        submenu.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
                         navlink.append(submenu);
                         navitem.append(navlink);
 
@@ -63,7 +225,7 @@
 
                         navitem.append(chap_content);
 
-                        if (chapter.ParentID == "0") {
+                        if (chapter.ParentID == "0" || chapter.ParentID == null) {
                             wrapper.append(navitem);
                         }
                         else {
@@ -78,11 +240,11 @@
 
                         var lessonitem = $("<a>", {"class": "collapse-item", "href": "@Url.Action("Lesson", "Curriculum")/" + item.ID + "?CourseID=@Data.ID" });
                         lessonitem.append("<i>", { "class": "fas fa-book-reader" })
-                        lessonitem.append(item.Title);
+                        lessonitem.append($("<span>", {"class":"Title", "text": item.Title }));
 
-                        var submenu = $("<div>", { "id": "icon-submenu" });
-                        submenu.append($("<i>", { "class": "fas fa-plus", "data-toggle": "tooltip", "data-placement": "top", "title": "thêm bài giảng" }));
-                        submenu.append($("<i>", { "class": "fas fa-edit", "data-toggle": "tooltip", "data-placement": "top", "title": "sửa bài giảng" }));
+                        var submenu = $("<div>", { "id": "icon-submenu", "style": "right: 35px" });
+                        submenu.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Sửa", "onclick" : "return EditLesson(this,'" + item.ID + "'); return false;", "cid": item.ChapterID, "type": item.TemplateType, "point": item.Point, "timer": item.Timer }));
+                        submenu.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
                         lessonitem.append(submenu);
 
 
@@ -95,15 +257,174 @@
                         }
                     }
                 }
-
+                $('i').tooltip();
             },
             error: function() {
             }
         });
     };
 
+    function ChangeGrade(obj, wrapper) {
+        var subject = $(obj).val();
+        var grade = $(wrapper).val();
+        $(wrapper).find('option[for!=' + subject + ']').hide();
+        $(wrapper).find('option[for=' + subject + ']').show();
+        if ($(wrapper).find('option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {
+           $(wrapper).val($(wrapper).find('option[for=' + subject + ']:first').attr('value'));
+        }
+    }
+
+    function EditCourse() {
+        var modal = $("#courseModal");
+        var modalTitle = modal.find("#modalTitle");
+        var ID = '@Data.ID';
+        modalTitle.text("Cập nhật nội dung");
+        var name = '@Data.Name';
+        modal.find("[name=Name]").val(name);
+        var subject = '@Data.SubjectID'
+        var grade = '@Data.GradeID'
+        var sbj = modal.find("[name=SubjectID]");
+        var grd = modal.find("[name=GradeID]");
+        sbj.val(subject);
+        ChangeGrade(sbj,grd);
+        $(grd).val(grade);
+        var description = '@Data.Description';
+        modal.find("[name=Description]").val(description);
+        modal.find("[name=ID]").val(ID);
+    }
+
+    function ReloadCourse()
+    {
+        document.location = document.location;
+    }
+
+    function DeleteCourse(ID)
+    {
+        if(confirm('Chắc chắn xóa?'))
+        {
+            ExcuteOnlyItem(ID, '@Url.Action("Remove", "Curriculum")', function(){
+                 document.location = '@Url.Action("Index", "Curriculum")';
+            });
+        }
+    }
+
+    function EditChapter(obj, ID) {
+        var modal = $("#chapterModal");
+        var modalTitle = modal.find("#modalTitle");
+        modalTitle.text("Cập nhật chương mục");
+        var name = $(obj).parent().siblings(".Name").text().trim();
+        var parent = $(obj).attr("pid");
+        modal.find("[name=Name]").val(name);
+        modal.find("[name=ParentID]").val(parent);
+        modal.find("[name=ID]").val(ID);
+    }
+
+    function AddChapter(parentchap) {
+        var modal = $("#chapterModal");
+        var modalTitle = modal.find("#modalTitle");
+        modalTitle.text("Tạo chương mục");
+        modal.find("[name=Name]").val("");
+        modal.find("[name=ID]").val("");
+        modal.find("[name=ParentID]").val(parentchap);
+    }
+
+    function DeleteChapter(ID)
+    {
+        if(confirm('Chắc chắn xóa?'))
+        {
+            ExcuteOnlyItem(ID, '@Url.Action("RemoveChapter", "Curriculum")', LoadData);
+        }
+    }
+
+    function AddLesson(ID)
+    {
+        var modal = $("#lessonModal");
+        var modalTitle = modal.find("#modalTitle");
+        modalTitle.text("Thêm bài");
+
+        modal.find("[name=Title]").val("");
+        modal.find("[name=ChapterID]").val(ID);
+        modal.find("[name=ID]").val("");
+        modal.find("[name=Point]").val("0");
+        modal.find("[name=Timer]").val("0");
+        SelectTemplate("1");
+        return false;
+    }
+
+
+    function EditLesson(obj, ID)
+    {
+        var modal = $("#lessonModal");
+        var modalTitle = modal.find("#modalTitle");
+        modalTitle.text("Cập nhật nội dung bài");
+        var title = $(obj).parent().siblings(".Title").text().trim();
+        var chapter = $(obj).attr("cid");
+        var type = $(obj).attr("type");
+        var point = $(obj).attr("point");
+        var timer = $(obj).attr("timer");
+
+        modal.find("[name=Title]").val(title);
+        modal.find("[name=ChapterID]").val(chapter);
+        modal.find("[name=ID]").val(ID);
+        modal.find("[name=Point]").val(point);
+        modal.find("[name=Timer]").val(timer);
+        
+        SelectTemplate(type);
+        return false;
+    }
+
+    function DeleteLesson(ID)
+    {
+        if(confirm('Chắc chắn xóa?'))
+        {
+            ExcuteOnlyItem(ID, '@Url.Action("Remove", "Lesson")', LoadData);
+        }
+        return false;
+    }
+
+    function SelectTemplate(type)
+    {
+        var modal = $("#lessonModal");
+        if(type != null && type != "")
+            modal.find("[name=TemplateType]").val(type);
+        var template = modal.find("[name=TemplateType]").val();
+        switch(template)
+        {
+            case "1": //bài giảng
+                modal.find("[for=examOnly]").hide();
+                modal.find("[for=examOnly] input").prop("required", false);
+                break;
+            default:
+                modal.find("[for=examOnly]").show();
+                modal.find("[for=examOnly] input").prop("required", true);
+                break;
+        }
+    }
+
 
     $(document).ready(function () {
         LoadData();
     });
 </script>
+
+
+<style>
+    #accordionSidebar .nav-item .nav-link #icon-submenu .fas {
+        top: 0;
+    }
+
+    .collapse-item {
+        position: relative;
+    }
+
+    #icon-submenu {
+        top: 12px;
+        right: 20px;
+    }
+
+        #icon-submenu .fas {
+            padding: 0 0 0 15px;
+            top: -3px;
+            position: relative;
+        }
+</style>

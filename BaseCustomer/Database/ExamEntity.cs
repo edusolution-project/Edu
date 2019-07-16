@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -52,9 +53,19 @@ namespace BaseCustomerEntity.Database
         {
             var item = GetItemByID(ID);
             if (item == null) return false;
-            if (item.Status) return false;
-            if (item.Timer == 0) return true;
-            return (item.CurrentDoTime.AddMinutes(item.Timer)-DateTime.Now).TotalSeconds <= 0;
+            double count = (item.CurrentDoTime.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
+            if (count <= 0)
+            {
+                UpdateStatus(item);
+            }
+            return count <= 0;
+        }
+        public Task UpdateStatus(ExamEntity exam)
+        {
+            exam.Status = true;
+            exam.Updated = DateTime.Now;
+            CreateOrUpdate(exam);
+            return Task.CompletedTask;
         }
         
     }

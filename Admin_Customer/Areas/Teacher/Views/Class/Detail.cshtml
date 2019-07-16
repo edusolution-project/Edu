@@ -565,15 +565,6 @@
 
     }
 
-    function ToggleStatus(obj) {
-        var action = $(obj).attr("onclick");
-        if(action.indexOf("UnPublish") > 0)
-             $(obj).attr("onclick", action.replace("UnPublish","Publish"));
-        else
-             $(obj).attr("onclick", action.replace("Publish","UnPublish"));
-        $(obj).toggleClass("btn-success").toggleClass("btn-danger");
-    }
-
     function CancelEditSchedule(id) {
         var wrapper = $("[lid=" + id + "]");
         var startdateHolder = wrapper.find('.startdate');
