@@ -1,5 +1,4 @@
 ﻿var urlBase = "/student/";
-var publisherPath = "http://publisher.edusolution.vn"
 
 let myEditor;
 let totalQuiz = 0;
@@ -323,7 +322,6 @@ var render = {
         //render question
         switch (template) {
             case "QUIZ2":
-                alert(1);
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
