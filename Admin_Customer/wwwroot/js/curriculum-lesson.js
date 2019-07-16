@@ -287,7 +287,7 @@ var lessonService = {
     renderSort: function () {
         $("#pills-tab").toggleClass("sorting");
         if ($("#pills-tab").hasClass("sorting")) {
-            $(".card-header .btn-sort").text("Bỏ sắp xếp");
+            $(".card-header .btn-sort").addClass("btn-warning");
             $("#pills-tab").sortable({
                 revert: "invalid",
                 update: function (event, ui) {
@@ -301,7 +301,7 @@ var lessonService = {
             $("#pills-tab").disableSelection();
         }
         else {
-            $(".card-header .btn-sort").text("Sắp xếp");
+            $(".card-header .btn-sort").removeClass("btn-warning");
             $("#pills-tab").sortable("disable");
         }
     },

@@ -196,7 +196,7 @@ var render = {
         var itembody = $("<div>", { "class": "card-body" });
         tabsitem.append(itembody);
 
-        var itembox = $("<div>", { "class": "part-box" + data.Type, "id": data.ID });
+        var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         itembody.append(itembox);
 
 
@@ -584,12 +584,12 @@ var load = {
                     document.querySelector("input[name='ExamID']").value = data.Exam.ID;
                     if (checkSupport) {
                         LoadCurrentExam();
-                        $("#counter").html(data.Exam.Timer);
+                        $("#counter").html(data.Timer);
                     } else {
                         render.lesson(data.Data);
                         render.lessonPart(data.Data.Parts, data.Data.ID, classid);
                         start();
-                        $("#counter").html(data.Exam.Timer);
+                        $("#counter").html(data.Timer);
                     }
                     
                     countdown();
@@ -742,7 +742,14 @@ function ExamComplete(url) {
                 if (res == null) return;
                 var data = JSON.parse(res);
                 console.log(data);
-
+                $(".lesson-container").empty(); 
+                $("#quizNavigator").addClass('d-none');
+                $("#finish").addClass('d-none');
+                $('#lessonContainer').removeClass('col-md-10');
+                $(".lesson-container").append('<div class="card show mb-4"></div>');
+                $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Bạn đã hoàn thành bài thi</h3></div>');
+                $(".card").append('<div class="content card-body d-flex justify-content-center"></div>');
+                $(".content").append('<a href="#" onclick="goBack()"> Quay về trang bài học </a>');
             })
             .catch(function (err) {
                 console.log(err);

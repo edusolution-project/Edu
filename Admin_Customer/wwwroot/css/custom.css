@@ -80,6 +80,11 @@
     width: 100% !important;
 }
 
+    #list-detail .nav-item .nav-link:hover {
+        background: #eaecf4;
+        border-radius: 5px;
+    }
+
 #menu-left {
     border-right: 1px solid #ddd;
     padding: 0;
@@ -222,7 +227,6 @@ video, audio {
 }
 
 .btn-toggle.btn-lg {
-    margin: 0 5rem;
     padding: 0;
     position: relative;
     border: none;

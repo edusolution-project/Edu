@@ -6,7 +6,7 @@
     var _lessonID = ViewBag.LessonID as string;
     var _classID = ViewBag.ClassID as string;
 }
-<span class="number quizNumber" onclick="openNav()"><span class="completed">0</span> / <span class="total">0</span></span>
+    <span class="number quizNumber" onclick="openNav()"><span class="completed">0</span> / <span class="total">0</span></span>
 <!-- Begin Page Content -->
 <div id="lessonContainer">
 </div>
@@ -42,9 +42,9 @@
 
     </script>
     @*//CompleteExam(string ExamID)
-        Url.Action("CompleteExam","Example") 
+        Url.Action("CompleteExam","Example")
         param1 ExamID = <input type="hidden" name="ExamID" id="ExamID" value="" />
-        *@
+    *@
     <div id="quizNavigator" class="overlay">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <div class="overlay-content card-body">

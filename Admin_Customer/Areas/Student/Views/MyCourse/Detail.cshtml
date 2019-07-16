@@ -236,7 +236,7 @@
                         var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
 
                         var rowData = "<tr lid=\"" + item.ID + "\">" +
-                            "<td><a href='@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
+                            "<td><a href='@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "/@curentClass.ID'>" + item.Title + "</td>" +
                             "<td>---</td>" +
                             "<td value=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
                             "<td value=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" +

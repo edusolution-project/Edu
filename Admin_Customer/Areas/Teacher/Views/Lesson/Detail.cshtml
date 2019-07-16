@@ -6,6 +6,10 @@
     var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
 }
+
+<div class="breadcumb" style="padding: 0 0 15px; font-weight:bold;">
+    <a href="@Url.Action("Detail","Class")/@Class.ID">@Class.Name</a>
+</div>
 <!-- Page Heading -->
 <div id="lessonContainer">
 </div>
