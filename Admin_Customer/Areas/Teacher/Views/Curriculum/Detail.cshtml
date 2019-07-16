@@ -52,7 +52,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="@Url.Action(" CreateOrUpdate","Curriculum")" name="courseForm" enctype="multipart/form-data" method="post">
+                <form action="@Url.Action("CreateOrUpdate","Curriculum")" name="courseForm" enctype="multipart/form-data" method="post">
                     <input type="hidden" name="ID" />
                     <input type="hidden" name="CreateUser" value="@user" />
                     <input type="hidden" name="IsActive" value="false" />
@@ -92,7 +92,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('courseForm', '@Url.Action(" CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
+                <button type="button" class="btn btn-primary" onclick="return Submit('courseForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
             </div>
         </div>
     </div>
@@ -108,7 +108,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="@Url.Action(" CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
+                <form action="@Url.Action("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
                     <input type="hidden" name="ID" />
                     <input type="hidden" name="CourseID" value="@Data.ID" />
                     <div class="form-group">
@@ -131,7 +131,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action(" CreateOrUpdateChapter","Curriculum")','update' , ReloadCourse)">Lưu</button>
+                <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("CreateOrUpdateChapter","Curriculum")','update' , ReloadCourse)">Lưu</button>
             </div>
         </div>
     </div>
@@ -147,7 +147,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="@Url.Action(" CreateOrUpdate","Lesson")" name="lessonForm" enctype="multipart/form-data" method="post">
+                <form action="@Url.Action("CreateOrUpdate","Lesson")" name="lessonForm" enctype="multipart/form-data" method="post">
                     <input type="hidden" name="ID" />
                     <input type="hidden" name="CourseID" value="@Data.ID" />
                     <input type="hidden" name="ChapterID" value="" />
