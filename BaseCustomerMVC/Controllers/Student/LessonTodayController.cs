@@ -2,10 +2,12 @@
 using BaseCustomerMVC.Globals;
 using BaseCustomerMVC.Models;
 using Core_v2.Interfaces;
+using Core_v2.Globals;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Student
@@ -13,16 +15,18 @@ namespace BaseCustomerMVC.Controllers.Student
     public class LessonTodayController : StudentController
     {
         // bài học hôm nay.
-
+        private readonly LessonScheduleService _lessonScheduleService;
         private readonly ClassService _classService;
         private readonly LessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
         public LessonTodayController(
+            LessonScheduleService lessonScheduleService,
             ClassService classService,
             LessonService lessonService,
             LessonPartService lessonPartService
             )
         {
+            _lessonScheduleService = lessonScheduleService;
             _classService = classService;
             _lessonService = lessonService;
             _lessonPartService = lessonPartService;
@@ -30,6 +34,46 @@ namespace BaseCustomerMVC.Controllers.Student
         public IActionResult Index()
         {
             return View();
+        }
+
+
+        public JsonResult GetList(DefaultModel model)
+        {
+            //student id
+            var userid = User.Claims.GetClaimByType("UserID").Value;
+            // lấy class theo student id
+            var data = _classService.Collection.Find(o => o.IsActive == true && o.Students.Contains(userid)).ToList();
+
+            if(data != null && data.Count > 0)
+            {
+                var mapping = new MappingEntity<ClassEntity, LessonTodayViewModel>();
+                var map2 = new MappingEntity<LessonEntity, LessonScheduleTodayViewModel>() { };
+                //id class
+                var listID = data.Select(o => o.ID).ToList();
+                // lịch học hôm nay
+                var schedule = _lessonScheduleService.Collection.Find(o => listID.Contains(o.ClassID)).ToList();
+                // có list lessonid
+                var listIDSchedule = schedule.Select(x => x.LessonID).ToList();
+
+                var resData = data.Select(o => mapping.AutoOrtherType(o, new LessonTodayViewModel()
+                {
+                    Lessons = schedule != null ? _lessonService.Collection.Find(y => listIDSchedule.Contains(y.ID)).ToList()
+                        .Select(y => map2.AutoOrtherType(y, new LessonScheduleTodayViewModel() {
+                            ClassID = schedule.SingleOrDefault(x => x.LessonID == y.ID)?.ID
+                        })).ToList() : null
+                })) ;
+
+                var response = new Dictionary<string, object>()
+                    {
+                        {"Data", resData }
+                    };
+                return new JsonResult(response);
+            }
+            var response2 = new Dictionary<string, object>()
+            {
+                {"Data", data }
+            };
+            return new JsonResult(response2);
         }
 
         /// <summary>

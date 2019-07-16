@@ -7,6 +7,7 @@ using System;
 using MongoDB.Driver;
 using System.Text;
 using System.Linq;
+using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -23,6 +24,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonPartQuestionService _lessonPartQuestionService;
         private readonly LessonExtendService _lessonExtendService;
         private readonly TeacherService _teacherService;
+        private readonly ClassService _classService;
 
 
         private readonly ModCourseService _modservice;
@@ -36,6 +38,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ModLessonPartQuestionService _modlessonPartQuestionService;
         private readonly ModLessonExtendService _modlessonExtendService;
 
+        private readonly MappingEntity<CourseEntity, CourseViewModel> _courseViewMapping;
+
         public CurriculumController(CourseService service,
                  ProgramService programService,
                  SubjectService subjectService,
@@ -47,7 +51,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  LessonPartQuestionService lessonPartQuestionService,
                  LessonExtendService lessonExtendService,
                  TeacherService teacherService,
-                 ModCourseService modservice
+                 ModCourseService modservice,
+                 ClassService classService
+
                 , ModProgramService modprogramService
                 , ModSubjectService modsubjectService
                 , ModChapterService modchapterService
@@ -70,6 +76,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonExtendService = lessonExtendService;
             _teacherService = teacherService;
             _modservice = modservice;
+            _classService = classService;
             _modprogramService = modprogramService;
             _modsubjectService = modsubjectService;
             _modchapterService = modchapterService;
@@ -79,6 +86,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _modlessonPartAnswerService = modlessonPartAnswerService;
             _modlessonPartQuestionService = modlessonPartQuestionService;
             _modlessonExtendService = modlessonExtendService;
+
+            _courseViewMapping = new MappingEntity<CourseEntity, CourseViewModel>();
         }
 
         public IActionResult Index(DefaultModel model)
@@ -102,6 +111,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Subject = subject;
             ViewBag.ModGrade = modgrade;
             ViewBag.ModSubject = modsubject;
+            ViewBag.User = UserID;
 
             ViewBag.Model = model;
             return View();
@@ -114,8 +124,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var data = _service.GetItemByID(ID);
             if (data == null)
                 return RedirectToAction("Index");
+
             ViewBag.Data = data;
             ViewBag.Title = "Chi tiết giáo trình - " + data.Name;
+            var subject = new List<SubjectEntity>();
+            var grade = new List<GradeEntity>();
+
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = User.IsInRole("teacher") ? _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault() : new TeacherEntity();
+
+
+            if (teacher != null && teacher.Subjects != null)
+            {
+                subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+            }
+
+            var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
+
+            ViewBag.Chapter = chapters;
+            ViewBag.Grade = grade;
+            ViewBag.Subject = subject;
+            ViewBag.User = UserID;
+
+
             return View();
         }
 
@@ -133,6 +165,368 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Data = Data;
             return View();
         }
+
+
+
+        #region Course
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "")
+        {
+            var filter = new List<FilterDefinition<CourseEntity>>();
+
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            if (!string.IsNullOrEmpty(SubjectID))
+            {
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+            }
+            if (!string.IsNullOrEmpty(GradeID))
+            {
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
+            }
+
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
+            model.TotalRecord = data.Count();
+            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+                ? data
+                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", DataResponse.ToList().Select(o =>
+
+                    _courseViewMapping.AutoOrtherType(o, new CourseViewModel(){
+                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+                        SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
+                        TeacherName = _teacherService.GetItemByID(o.CreateUser)?.FullName
+                    })).ToList()
+                },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetModList(DefaultModel model, string SubjectID = "", string GradeID = "")
+        {
+            var filter = new List<FilterDefinition<ModCourseEntity>>();
+
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            if (!string.IsNullOrEmpty(SubjectID))
+            {
+                filter.Add(Builders<ModCourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+            }
+            if (!string.IsNullOrEmpty(GradeID))
+            {
+                filter.Add(Builders<ModCourseEntity>.Filter.Where(o => o.GradeID == GradeID));
+            }
+
+            var data = filter.Count > 0 ? _modservice.Collection.Find(Builders<ModCourseEntity>.Filter.And(filter)) : _modservice.GetAll();
+            model.TotalRecord = data.Count();
+            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+                ? data
+                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", DataResponse.ToList() },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+        [HttpPost]
+        public JsonResult CreateOrUpdate(CourseEntity item)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var data = _service.CreateQuery().Find(o => o.ID == item.ID).SingleOrDefault();
+                if (data == null)
+                {
+                    item.Created = DateTime.Now;
+                    item.CreateUser = UserID;
+                    item.IsAdmin = true;
+                    item.IsActive = false;
+                    item.Updated = DateTime.Now;
+                    _service.CreateQuery().InsertOne(item);
+                }
+                else
+                {
+                    item.Updated = DateTime.Now;
+                    item.Order = data.Order;
+                    item.Created = data.Created;
+                    item.CreateUser = data.CreateUser;
+                    _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                }
+
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", item },
+                    {"Error",null }
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error",ex.Message }
+                });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Remove(DefaultModel model)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                if (model.ArrID == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", "Nothing to remove" },
+                                {"Error", null }
+                            });
+                }
+                var ID = model.ArrID;
+                var course = _service.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (course == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", "Already removed" },
+                                {"Error", null }
+                            });
+                }
+                if (course.CreateUser != UserID)
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", "Permisson Error" }
+                            });
+                var learningClass = _classService.CreateQuery().CountDocuments(o => o.CourseID == course.ID);
+                if (learningClass > 0)
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", "Course in use" }
+                            });
+
+                _chapterService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
+
+
+                var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).ToList();
+                if (lessons != null)
+                {
+                    foreach (var lesson in lessons)
+                    {
+                        var parts = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).ToList();
+                        foreach (var part in parts)
+                        {
+                            var quizs = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == part.ID).ToList();
+                            foreach (var quiz in quizs)
+                            {
+                                _lessonPartAnswerService.CreateQuery().DeleteMany(o => o.ParentID == quiz.ID);
+                            }
+                            _lessonPartQuestionService.CreateQuery().DeleteMany(o => o.ParentID == lesson.ID);
+                        }
+                        _lessonPartQuestionService.CreateQuery().DeleteMany(o => o.ParentID == lesson.ID);
+                    }
+                    _lessonService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
+                }
+
+                _service.Remove(ID);
+                return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", "Remove OK" },
+                                {"Error", null }
+                            });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message}
+                });
+            }
+        }
+
+        [HttpPost]
+        [Obsolete]
+        public JsonResult Publish(DefaultModel model)
+        {
+
+            if (model.ArrID.Length <= 0)
+            {
+                return new JsonResult(null);
+            }
+            else
+            {
+                if (model.ArrID.Contains(","))
+                {
+                    var filter = Builders<CourseEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive != true);
+                    var update = Builders<CourseEntity>.Update.SetOnInsert("IsActive", true);
+                    var publish = _service.Collection.UpdateMany(filter, update, new UpdateOptions() { IsUpsert = true });
+                    return new JsonResult(publish);
+                }
+                else
+                {
+                    var filter = Builders<CourseEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive != true);
+                    var update = Builders<CourseEntity>.Update.Set("IsActive", true);
+                    var publish = _service.Collection.UpdateMany(filter, update, new UpdateOptions() { IsUpsert = true });
+                    return new JsonResult(publish);
+                }
+
+            }
+        }
+
+        [HttpPost]
+        [Obsolete]
+        public JsonResult UnPublish(DefaultModel model)
+        {
+            if (model.ArrID.Length <= 0)
+            {
+                return new JsonResult(null);
+            }
+            else
+            {
+                if (model.ArrID.Contains(","))
+                {
+                    var filter = Builders<CourseEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == true);
+                    var update = Builders<CourseEntity>.Update.Set("IsActive", false);
+                    var publish = _service.Collection.UpdateMany(filter, update);
+                    return new JsonResult(publish);
+                }
+                else
+                {
+                    var filter = Builders<CourseEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == true);
+                    var update = Builders<CourseEntity>.Update.Set("IsActive", false);
+                    var publish = _service.Collection.UpdateMany(filter, update);
+                    return new JsonResult(publish);
+                }
+
+
+            }
+        }
+
+        #endregion Course
+
+        #region Chapter
+        [HttpPost]
+        public JsonResult CreateOrUpdateChapter(ChapterEntity item)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+                if (item.CourseID == null || _service.GetItemByID(item.CourseID) == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        {"Error", "No Course Found" }
+                    });
+                }
+
+                var data = _chapterService.CreateQuery().Find(o => o.ID == item.ID).SingleOrDefault();
+                if (data == null)
+                {
+                    item.Created = DateTime.Now;
+                    item.CreateUser = UserID;
+                    item.IsAdmin = true;
+                    item.IsActive = false;
+                    item.Updated = DateTime.Now;
+                    var max = _chapterService.CreateQuery()
+                             .CountDocuments(o => o.ParentID == item.ParentID);
+                    item.Order = (int)max;
+
+                    _chapterService.CreateQuery().InsertOne(item);
+                }
+                else
+                {
+                    item.Updated = DateTime.Now;
+                    item.Order = data.Order;
+                    item.Created = data.Created;
+                    item.CreateUser = data.CreateUser;
+                    _chapterService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                }
+
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", item },
+                    { "Error", null }
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error",ex.Message }
+                });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult RemoveChapter(DefaultModel model)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var ID = model.ArrID;
+                var chapter = _chapterService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (chapter == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", "Already removed" },
+                                {"Error", null }
+                            });
+                }
+                if (chapter.CreateUser != UserID)
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", "Permisson Error" }
+                            });
+
+                RemoveChapter(chapter.ID);
+
+                return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", "Remove OK" },
+                                {"Error", null }
+                            });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message}
+                });
+            }
+        }
+
+        private void RemoveChapter(string chapid)
+        {
+            _lessonService.CreateQuery().DeleteMany(o => o.ChapterID == chapid);
+            var subchapters = _chapterService.CreateQuery().Find(o => o.ParentID == chapid).ToList();
+            if (subchapters != null && subchapters.Count > 0)
+                foreach (var chapter in subchapters)
+                    RemoveChapter(chapter.ID);
+            _chapterService.Remove(chapid);
+        }
+
+        #endregion Chapter
+
 
         [Obsolete]
         [HttpPost]
@@ -195,71 +589,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(data);
         }
 
-        [Obsolete]
-        [HttpPost]
-        public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "")
-        {
-            var filter = new List<FilterDefinition<CourseEntity>>();
 
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
 
-            if (!string.IsNullOrEmpty(SubjectID))
-            {
-                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            }
-            if (!string.IsNullOrEmpty(GradeID))
-            {
-                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
-            }
-
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
-            model.TotalRecord = data.Count();
-            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-                ? data
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
-
-            var response = new Dictionary<string, object>
-            {
-                { "Data", DataResponse.ToList().Select(o=> new CourseViewModel(o){
-                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                        SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
-                        TeacherName = _teacherService.GetItemByID(o.CreateUser)?.FullName
-                    }) },
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
-
-        [Obsolete]
-        [HttpPost]
-        public JsonResult GetModList(DefaultModel model, string SubjectID = "", string GradeID = "")
-        {
-            var filter = new List<FilterDefinition<ModCourseEntity>>();
-
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-
-            if (!string.IsNullOrEmpty(SubjectID))
-            {
-                filter.Add(Builders<ModCourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            }
-            if (!string.IsNullOrEmpty(GradeID))
-            {
-                filter.Add(Builders<ModCourseEntity>.Filter.Where(o => o.GradeID == GradeID));
-            }
-
-            var data = filter.Count > 0 ? _modservice.Collection.Find(Builders<ModCourseEntity>.Filter.And(filter)) : _modservice.GetAll();
-            model.TotalRecord = data.Count();
-            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-                ? data
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
-
-            var response = new Dictionary<string, object>
-            {
-                { "Data", DataResponse.ToList() },
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
 
         [HttpPost]
         public JsonResult Clone(string CourseID, string GradeID, string SubjectID)

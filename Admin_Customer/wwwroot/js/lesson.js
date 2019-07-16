@@ -264,10 +264,10 @@ var render = {
     lesson: function (data) {
         lessonService.renderData(data);
     },
-    lessonPart: function (data) {
+    lessonPart: function (data,lsid,clid) {
         for (var i = 0; data != null && i < data.length; i++) {
             var item = data[i];
-            render.part(item);
+            render.part(item,lsid,clid);
         }
     },
     editPart: function (data) {
@@ -325,6 +325,7 @@ var render = {
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "Create.removePart('" + data.ID + "')" }));
         itembox.append(boxHeader);
+        console.log(data.Questions)
         switch (data.Type) {
             case "TEXT":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
@@ -424,6 +425,7 @@ var render = {
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itembox.append(itemBody);
                 render.mediaContent(data, itemBody, "");
+                
                 totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
@@ -458,12 +460,13 @@ var render = {
                     quizitem.append(extend);
                 }
 
-                for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                    var item = data.Answers[i];
-                    render.answers(item, template);
+                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                    var item = data.CloneAnswers[i];
+                    render.answers(item, template,data.ID);
                 }
                 break;
             case "QUIZ3":
+                console.log(data.CloneAnswers);
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -479,7 +482,7 @@ var render = {
                 } else {
                     render.mediaContent(data, pane_item);
                 }
-
+               
                 quiz_part.append(pane_item);
                 container.append(quizitem);
 
@@ -503,9 +506,9 @@ var render = {
                     }
                 });
 
-                for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                    var item = data.Answers[i];
-                    render.answers(item, template);
+                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                    var item = data.CloneAnswers[i];
+                    render.answers(item, template, data.ID);
                 }
                 break;
             default:
@@ -536,16 +539,17 @@ var render = {
                 }
 
                 container.append(itembox);
-
+                console.log(data.CloneAnswers);
                 //Render Answer
-                for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                    var item = data.Answers[i];
-                    render.answers(item, template);
+                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                    var item = data.CloneAnswers[i];
+                    render.answers(item, template, data.ID);
                 }
                 break;
         }
     },
-    answers: function (data, template) {
+    answers: function (data, template, id) {
+        console.log(data);
         var container = $("#" + data.ParentID + " .answer-wrapper");
         var answer = $("<fieldset>", { "class": "answer-item" });
         switch (template) {
@@ -639,7 +643,7 @@ var render = {
         }
     },
     mediaContent: function (data, wrapper, type = "") {
-
+        
         if (data.media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
             switch (type) {

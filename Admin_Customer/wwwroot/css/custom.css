@@ -4,6 +4,7 @@
     background-repeat: no-repeat;
     background-position: center;
 }
+
 .navbar-search .btn-primary {
     padding: 0 15px;
 }
@@ -69,9 +70,9 @@
     position: relative;
 }
 
-#icon-submenu .fas:hover {
-    color: #1865f2;
-}
+    #icon-submenu .fas:hover {
+        color: #1865f2;
+    }
 
 #list-detail .sub-menu,
 #list-detail .sidebar,
@@ -103,6 +104,11 @@
     color: #444;
     margin-right: 10px;
 }
+
+    .nav-pills .nav-link:hover {
+        background-color: #d8dbe0;
+        border-color: #d8dbe0;
+    }
 
 #pills-tab .far,
 #pills-tab .fab,
@@ -208,13 +214,13 @@ video, audio {
     text-align: justify;
 }
 
-.bg-news-right{
+.bg-news-right {
     border-left: 1px solid #ddd;
 }
 
-.bg-news-right .media .img-fluid {
-    max-width: 50px;
-}
+    .bg-news-right .media .img-fluid {
+        max-width: 50px;
+    }
 /* css btn toggle*/
 .btn-toggle.btn-lg.active {
     transition: background-color 0.5s;
@@ -279,10 +285,10 @@ video, audio {
     padding: 2px 0 !important;
 }
 
-.rounded-quiz.completed {
-    background-color: #666;
-    color: #36b9cc;
-}
+    .rounded-quiz.completed {
+        background-color: #666;
+        color: #36b9cc;
+    }
 
 .number {
     color: #999;
@@ -303,13 +309,13 @@ video, audio {
     cursor: pointer;
 }
 
-.number .completed {
-    color: #ff0000;
-}
+    .number .completed {
+        color: #ff0000;
+    }
 
-.number .finish {
-    color: #36b9cc;
-}
+    .number .finish {
+        color: #36b9cc;
+    }
 
 .overlay {
     display: none;
@@ -322,9 +328,9 @@ video, audio {
     background-color: rgba(0,0,0, 0.9);
 }
 
-.overlay .btn-outline-secondary {
-    margin: 0 0px 10px 8px;
-}
+    .overlay .btn-outline-secondary {
+        margin: 0 0px 10px 8px;
+    }
 
 .overlay-content {
     position: relative;
@@ -341,10 +347,10 @@ video, audio {
     transition: 0.3s;
 }
 
-.overlay a:hover, 
-.overlay a:focus {
-    color: #f1f1f1;
-}
+    .overlay a:hover,
+    .overlay a:focus {
+        color: #f1f1f1;
+    }
 
 .overlay .closebtn {
     position: absolute;
@@ -376,11 +382,11 @@ video, audio {
     border-bottom: solid 1px #ccc;
 }
 
-.quiz-box-header{
+.quiz-box-header {
     padding: 20px 0;
 }
 
-.part-box-header .title{
+.part-box-header .title {
     line-height: inherit;
     text-align: justify;
 }
@@ -420,6 +426,7 @@ video, audio {
     border: dotted 1px #ccc;
     border-radius: 5px;
 }
+
 .QUIZ3 .answer-text {
     margin: 0;
     padding: 5px;

@@ -76,7 +76,6 @@ var submitForm = function (event) {
                 switch ($("#action").val()) {
                     case "Lesson/" + urlLesson.CreateOrUpdate:
                         //render.lesson(data.data);
-
                         //document.location = urlLesson.Location + data.Data.ID;
                         document.location = document.location;
                         break;
@@ -93,7 +92,7 @@ var submitForm = function (event) {
         }
         $('.btnSaveForm').show();
     }
-};
+}
 
 var Create = {
     removeLesson: function (id) {

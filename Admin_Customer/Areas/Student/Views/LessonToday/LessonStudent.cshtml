@@ -2,31 +2,60 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
-     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
+    var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
     var _lessonID = ViewBag.LessonID as string;
     var _classID = ViewBag.ClassID as string;
 }
-
+<span id="finish" class="number quizNumber d-none" onclick="openNav()"><span class="completed">0</span> / <span class="total">0</span></span>
 <!-- Begin Page Content -->
 <div id="lessonContainer">
 </div>
 <!-- End of Main Content -->
-<input type="hidden" name="CExamID" value="" />
+<input type="hidden" name="ExamID" id="ExamID" value="" />
 @section Scripts{
     <script>
     // thieeu cai dem => roi submit
-        var C_classID = '@_classID';
-        var C_lessonID = '@_lessonID';
-        var urlStart = '@Url.Action("Create","Example")';
-        var urlChose = '@Url.Action("CreateDetails","Example")';
-        var urlComplete = '@Url.Action("CompleteExam","Example")';
-        var urlCurrent = '@Url.Action("GetCurrent", "Example")';
-        var urlLoadLesson = '@Url.Action("GetLesson", "MyCourse")';
+    var urlStart = '@Url.Action("Create","Example")';
+    var urlChose = '@Url.Action("CreateDetails","Example")';
+    var urlComplete = '@Url.Action("CompleteExam","Example")';
+    var urlCurrentExam = '@Url.Action("GetCurrentExam","Example")';
+    var C_lessonID = '@_lessonID';
+    var C_classID = '@_classID';
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            load.lesson('@_lessonID','@_classID','@Url.Action("GetLesson", "MyCourse")');
+        });
     </script>
     <script src="~/js/student-exam.js"></script>
     <script>
-        $(document).ready(function () {
-            load.lesson(C_lessonID, C_classID);
-        });
+        function openNav() {
+            $('#lessonContainer').addClass('col-md-10');
+            $("#quizNavigator").show();
+        }
+
+        function closeNav() {
+            $('#lessonContainer').removeClass('col-md-10');
+            $("#quizNavigator").hide();
+        }
+
     </script>
+    @*//CompleteExam(string ExamID)
+        Url.Action("CompleteExam","Example") 
+        param1 ExamID = <input type="hidden" name="ExamID" id="ExamID" value="" />
+        *@
+    <div id="quizNavigator" class="overlay">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="overlay-content card-body">
+            <div class="input-group mb-3 quiz-wrapper">
+
+            </div>
+
+            <div class="d-flex justify-content-center pt-5 pb-5">
+                <button class="btn btn-primary btn-finish" onclick="ExamComplete('@Url.Action("CompleteExam","Example")')"> Hoàn thành</button>
+            </div>
+        </div>
+    </div>
+
 }

@@ -183,18 +183,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        public JsonResult Remove(string ID)
+        [HttpPost]
+        public JsonResult Remove(DefaultModel model, string ID)
         {
             try
             {
-                var lesson = _lessonService.CreateQuery().Find(o => o.ID == ID);//TODO: check permission
+                if (!String.IsNullOrEmpty(model.ArrID))
+                    ID = model.ArrID;
+                var lesson = _lessonService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();//TODO: check permission
                 if (lesson != null)
                 {
                     var lessonparts = _lessonPartService.CreateQuery().Find(o => o.ParentID == ID).ToList();
-                    for (int i = 0; lessonparts != null && i < lessonparts.Count; i++)
-                        RemoveLessonPart(lessonparts[i].ID);
+                    if (lessonparts != null && lessonparts.Count > 0)
+                        for (int i = 0; lessonparts != null && i < lessonparts.Count; i++)
+                            RemoveLessonPart(lessonparts[i].ID);
 
-                    ChangeLessonPosition(lesson.Single(), int.MaxValue);//chuyển lesson xuống cuối của đối tượng chứa
+                    ChangeLessonPosition(lesson, int.MaxValue);//chuyển lesson xuống cuối của đối tượng chứa
                     _lessonService.Remove(ID);
                     return new JsonResult(new Dictionary<string, object>
                             {

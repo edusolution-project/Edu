@@ -1,48 +1,53 @@
 ﻿var urlBase = "/student/";
+var publisherPath = "http://publisher.edusolution.vn"
 
 let myEditor;
 let totalQuiz = 0;
+var Ajax = function (url, method, data, async) {
+    var request = new XMLHttpRequest();
+    // Return it as a Promise
+    return new Promise(function (resolve, reject) {
+        // Setup our listener to process compeleted requests
+        request.onreadystatechange = function () {
+            //0	UNSENT	Client has been created.open() not called yet.
+            //1	OPENED	open() has been called.
+            //2	HEADERS_RECEIVED	send() has been called, and headers and status are available.
+            //3	LOADING	Downloading; responseText holds partial data.
+            //4	DONE	The operation is complete.
 
-//lesson
-var urlLesson = {
-    "List": "GetListLesson",
-    "Details": "GetDetailsLesson",
-    "CreateOrUpdate": "CreateOrUpdateLesson",
-    "Remove": "RemoveLesson",
-    "Location": "/ModLessons/Detail/",
-    "ChangeParent": "ChangeLessonParent",
-    "ChangePos": "ChangeLessonPosition"
-};
-
-//lessonpart
-var urlLessonPart = {
-    "List": "GetListLessonPart",
-    "Details": "GetDetailsLessonPart",
-    "CreateOrUpdate": "CreateOrUpdateLessonPart",
-    "Remove": "RemoveLessonPart",
-    "ChangePos": "ChangeLessonPartPosition"
-};
-
-//lessonAnswer
-var urlLessonAnswer = {
-    "List": "GetListAnswer",
-    "Details": "GetDetailsAnswer",
-    "CreateOrUpdate": "CreateOrUpdateLessonAnswer",
-    "Remove": "RemoveLessonAnswer"
-};
-
-//Media
-var urlMedia = {
-    "List": "GetListLessonExtends",
-    "Details": "GetDetailsLessonExtends",
-    "Update": "UpdateLessonExtends"
+            // Only run if the request is complete
+            //if (request.readyState == 0) {
+            //    console.log('UNSENT	Client has been created.open() not called yet')
+            //}
+            //if (request.readyState == 1) {
+            //    console.log('OPENED	open() has been called')
+            //}
+            //if (request.readyState == 2) {
+            //    console.log('HEADERS_RECEIVED	send() has been called, and headers and status are available')
+            //}
+            //if (request.readyState == 3) {
+            //    console.log('LOADING	Downloading; responseText holds partial data')
+            //}
+            if (request.readyState == 4) {
+                console.log('DONE -	The operation is complete')
+                // Process the response
+                if (request.status >= 200 && request.status < 300) {
+                    // If successful
+                    resolve(request.response);
+                } else {
+                    // If failed
+                    reject({
+                        status: request.status,
+                        statusText: request.statusText
+                    });
+                }
+            }
+        };
+        request.open(method || 'GET', url, async || true);
+        // Send the request
+        request.send(data);
+    });
 }
-
-var urlCourse = {
-    "Location": "/ModCourses/Detail/",
-    "HomeLocation": "/ModCourses/Index"
-}
-
 var urlChapter = {
     "Location": "/ModChapters/Detail/"
 }
@@ -68,7 +73,7 @@ var lessonService = {
 
         //header
         var ButtonStart = $("<div>", { "class": "d-flex justify-content-center pt-5 pb-5" });
-        var btnButton = $("<div>", { "class": "btn btn-primary", "onclick": "start(this)", "text": " Bắt đầu làm bài thi" });
+        var btnButton = $("<div>", { "class": "btn btn-primary", "onclick": "BeginExam(this,'" + data.ID + "','" + C_classID+"')", "text": " Bắt đầu làm bài thi" });
         lessonContent.append(ButtonStart);
         ButtonStart.append(btnButton);
         //Body
@@ -104,10 +109,7 @@ var lessonService = {
         var edit = $("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "lessonService.renderEdit('" + data.ID + "')" });
         var close = $("<a>", { "class": "btn btn-sm btn-close", "text": "X", "onclick": "render.resetLesson()" });
         var remove = $("<a>", { "class": "btn btn-sm btn-remove", "text": "Xóa", "onclick": "lessonService.remove('" + data.ID + "')" });
-        //lessonHeader.append(sort);
-        //lessonHeader.append(edit);
-        //lessonHeader.append(close);
-        //lessonHeader.append(remove); //removeLesson
+        
 
 
         lessonRow.append(tabsleft);
@@ -151,158 +153,26 @@ var lessonService = {
         //var lessonContainerBackground = $("<div>", { "class": "lesson-container-bg" });
         //containerLesson.append(lessonContainerBackground);
         containerLesson.append(lessonBox);
-    },
-    renderSort: function () {
-        $(".lesson-body").toggleClass("sorting");
-        $(".lesson-body .part-box").toggleClass("compactView");
-        if ($(".lesson-body").hasClass("sorting")) {
-            $(".lesson-header .btn-sort").text("Bỏ sắp xếp");
-            $(".lesson-body").sortable({
-                revert: "invalid",
-                update: function (event, ui) {
-                    var id = $(ui.item).attr("id");
-                    var ar = $(this).parent().find(".part-box");
-                    var index = $(ar).index(ui.item);
-                    lessonPartService.changePos(id, index);
-                }
-            });
-            $(".lesson-body").sortable("enable");
-            $(".part-box").disableSelection();
-        }
-        else {
-            $(".lesson-header .btn-sort").text("Sắp xếp");
-            $(".lesson-body").sortable("disable");
-        }
-    },
-    renderEdit: function (id) {
-        var modalForm = $(window.modalForm);
-        showModal();
-        modalTitle.html("Chọn Template");
-        modalForm.html(template.Type('lesson'));
-        var xhr = new XMLHttpRequest();
-        var url = urlBase;
-        xhr.open('GET', url + urlLesson.Details + "?ID=" + id + "&UserID=" + userID + "&ClientID=" + clientID);
-        xhr.send({});
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                var data = JSON.parse(xhr.responseText);
-                if (data.code == 200) {
-                    console.log(data.data);
-                    template.lesson(data.data.TemplateType, data.data);
-                }
-            }
-        }
-    },
-    remove: function (id) {
-        var ChapterID = $("#ChapterID").val();
-        var CourseID = $("#CourseID").val();
-        var check = confirm("bạn muốn xóa nội dung này ?");
-        if (check) {
-            var xhr = new XMLHttpRequest();
-            var url = urlBase;
-            xhr.open('POST', url + urlLesson.Remove + "?ID=" + id + "&UserID=" + userID + "&ClientID=" + clientID);
-            xhr.send({});
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    var data = JSON.parse(xhr.responseText);
-                    if (data.code == 200) {
-                        if (ChapterID != "" && ChapterID != "0")
-                            document.location = urlChapter.Location + ChapterID;
-                        else
-                            if (CourseID != "" && CourseID != "0")
-                                document.location = urlCourse.Location + ChapterID;
-                            else
-                                document.location = urlCourse.HomeLocation;
-                    }
-                }
-            }
-        }
-    },
-    changePos: function (id, pos) {
-        var url = urlBase;
-        $.ajax({
-            type: "POST",
-            url: url + urlLesson.ChangePos,
-            data: {
-                "ID": id,
-                "UserID": userID,
-                "ClientID": clientID,
-                "pos": pos
-            },
-            success: function (data) {
-                console.log(data.message);
-                //document.location = document.location;
-            },
-            error: function (data) {
-                console.log(data);
-            }
-        });
-    },
-    changeParent: function (id, chapterid, courseid) {
-        var url = urlBase;
-        $.ajax({
-            type: "POST",
-            url: url + urlLesson.ChangeParent,
-            data: {
-                "ID": id,
-                "UserID": userID,
-                "ClientID": clientID,
-                "ChapterID": chapterid,
-                "CourseID": courseid
-            },
-            success: function (data) {
-                console.log(data.message);
-                //document.location = document.location;
-            },
-            error: function (data) {
-                console.log(data);
-            }
-        });
-    },
-    create: function () {
-        var modalForm = $(window.modalForm);
-        showModal();
-        modalTitle.html("Chọn Template");
-        modalForm.html(template.Type('lesson'));
     }
-
 }
 
 var render = {
     resetLesson: function () {
         $(containerLesson).html("");
     },
-    sortLesson: function () {
-
-    },
     lesson: function (data) {
         lessonService.renderData(data);
     },
-    lessonPart: function (data) {
+    lessonPart: function (data,lsid,clsid) {
         for (var i = 0; data != null && i < data.length; i++) {
             var lessonpart = data[i];
-            render.part(lessonpart);
+            if (lessonpart.Title == null) continue;
+            render.part(lessonpart,lsid,clsid);
         }
 
     },
-    editPart: function (data) {
-        var modalForm = window.modalForm;
-        modalTitle.html("Cập nhật nội dung");
-        $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
-        $(modalForm).append($("<input>", { "type": "hidden", "name": "ID", "value": data.ID }));
-        $(modalForm).append($("<input>", { "type": "hidden", "name": "Type", "value": data.Type }));
-
-        $('#action').val(urlLessonPart.CreateOrUpdate);
-
-
-
-        $(modalForm).append($("<div>", { "class": "lesson_parts" }));
-        $(modalForm).append($("<div>", { "class": "question_template hide" }));
-        $(modalForm).append($("<div>", { "class": "answer_template hide" }));
-        template.lessonPart(data.Type, data);
-
-    },
     part: function (data) {
+        
         var time = "", point = "";
 
         if (data.Timer > 0) {
@@ -333,11 +203,8 @@ var render = {
 
         var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {
-            boxHeader.append($("<h5>", { "class": "title font-weight-bold", "text": data.Title + time + point }));
+            boxHeader.append($("<h4>", { "class": "title", "text": data.Title + time + point }));
         }
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Thu gọn", "onclick": "toggleCompact(this)" }));
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "Create.removePart('" + data.ID + "')" }));
         itembox.append(boxHeader);
         switch (data.Type) {
             case "TEXT":
@@ -456,6 +323,7 @@ var render = {
         //render question
         switch (template) {
             case "QUIZ2":
+                //alert(1);
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -469,13 +337,13 @@ var render = {
 
                 quizitem.append(answer_wrapper);
 
-                if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
-                    quizitem.append(extend);
-                }
+                //if (data.Description !== "") {
+                //    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
+                //    quizitem.append(extend);
+                //}
 
-                for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                    var answer = data.Answers[i];
+                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                    var answer = data.CloneAnswers[i];
                     render.answers(answer, template);
                 }
                 break;
@@ -507,8 +375,7 @@ var render = {
                     drop: function (event, ui) {
                         $(this).find(".placeholder").hide();
                         var prevHolder = ui.helper.data('parent');
-                        var quizId = $(this).parent().attr('id');
-                        answerQuestion($(this), quizId);
+
                         if ($(this).find(".answer-item").length > 0) {//remove all answer to box
                             //$(container).siblings(".answer-wrapper").append($(this).find(".answer-item"));
                             $(prevHolder).append($(this).find(".answer-item"));
@@ -520,8 +387,8 @@ var render = {
                     }
                 });
 
-                for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                    var answer = data.Answers[i];
+                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                    var answer = data.CloneAnswers[i];
                     render.answers(answer, template);
                 }
                 break;
@@ -536,9 +403,9 @@ var render = {
                 var itembox = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
-                    boxHeader.append($("<h5>", { "class": "title", "text": data.Content + point }));
+                    boxHeader.append($("<h4>", { "class": "title", "text": data.Content + point }));
                 else
-                    boxHeader.append($("<h5>", { "class": "title", "text": point }));
+                    boxHeader.append($("<h4>", { "class": "title", "text": point }));
 
                 render.mediaContent(data, boxHeader);
 
@@ -547,16 +414,16 @@ var render = {
 
                 itembox.append(answer_wrapper);
 
-                if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
-                    itembox.append(extend);
-                }
+                //if (data.Description !== "") {
+                //    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description, "style": "display:none" });
+                //    itembox.append(extend);
+                //}
 
                 container.append(itembox);
 
                 //Render Answer
-                for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                    var answer = data.Answers[i];
+                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                    var answer = data.CloneAnswers[i];
                     render.answers(answer, template);
                 }
                 break;
@@ -569,7 +436,7 @@ var render = {
             case "QUIZ2":
 
                 if ($(container).find(".answer-item").length == 0) {
-                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text form-control", "placeholder": data.Content,  "onchange": "answerQuestion(this,'" + data.ParentID + "')" }));
+                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text form-control", "placeholder": data.Content, "onfocusout": "answerQuestion(this,'" + data.ParentID + "','" + data.ID + "',$(this).val())" }));
                     container.append(answer);
                 }
                 else {
@@ -579,8 +446,9 @@ var render = {
                 break;
             case "QUIZ3":
                 var placeholder = $("#" + data.ParentID).find(".answer-pane");
+                $(placeholder).attr("data-id", data.ParentID)
                 $(placeholder).removeClass("no-child");
-                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
+                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây"}));
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
 
                 if (data.Content != null)
@@ -599,10 +467,18 @@ var render = {
                     scroll: true,
                     start: function (event, ui) {
                         ui.helper.data('parent', $(this).parent());
+                        if (this.parentElement.classList.value == "answer-pane ui-droppable") {
+                            var x = this.parentElement.parentElement.id;
+                            answerQuestion(this, x, data.ID, "");
+                        }
+                        SetCurrentExam()
                     },
                     stop: function (event, ui) {
-                        //var prevParent = ui.helper.data('parent');
-                        //$(prevParent).find(".placeholder").show();
+                        if (this.parentElement.classList.value == "answer-pane ui-droppable") {
+                            var x = this.parentElement.parentElement.id;
+                            answerQuestion(this, x, data.ID, $(this).find(".media-holder > img").attr("src"));
+                        } 
+                        SetCurrentExam()
                     }
                 });
 
@@ -610,7 +486,7 @@ var render = {
                 break;
             default:
                 answer.append($("<input>", { "type": "hidden" }));
-                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
+                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox", "onclick": "answerQuestion(this,'" + data.ParentID + "','" + data.ID + "','" + data.Content + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
                     answer.append($("<label>", { "class": "answer-text", "text": data.Content }));
                 render.mediaContent(data, answer);
@@ -642,8 +518,8 @@ var render = {
                 wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide" }));
                 break;
         }
-        wrapper.append($("<input>", { "type": "button", "class": "btn btn-default btnAddFile", "onclick": "chooseFile(this)", "value": "Chọn file", "tabindex": -1 }));
-        wrapper.append($("<input>", { "type": "button", "class": "btn btn-default btnResetFile hide", "onclick": "resetMedia(this)", "value": "x", "tabindex": -1 }));
+        wrapper.append($("<input>", { "type": "button", "class": "btn btnAddFile", "onclick": "chooseFile(this)", "value": "Chọn file", "tabindex": -1 }));
+        wrapper.append($("<input>", { "type": "button", "class": "btn btnResetFile hide", "onclick": "resetMedia(this)", "value": "x", "tabindex": -1 }));
         if (data != null) {
             if (data.name != null) $(wrapper).find("[name='" + prefix + "Media.Name']").val(data.name);
             if (data.originalName != null) {
@@ -658,10 +534,11 @@ var render = {
     mediaContent: function (data, wrapper, type = "") {
         if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
-           
+            if (!data.Media.Path.startsWith("http"))
+                data.Media.Path = publisherPath + data.Media.Path;
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "class": "img-fluid lazy" , "src": data.Media.Path }));
+                    mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -675,13 +552,13 @@ var render = {
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid lazy" }));
+                            mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
                             mediaHolder.append("<audio controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else
-                            mediaHolder.append($("<embed>", { "src": data.Media.Path }));
+                            mediaHolder.append($("<embed>", { "src": data.Answers.path }));
                     break;
             }
             wrapper.append(mediaHolder);
@@ -690,24 +567,43 @@ var render = {
 };
 
 var load = {
-    lesson: function (id, classid) {
-        if (id != $("#LessonID").val())
-            document.location = urlLesson.Location + id;
-        else {
-            var url = urlBase + "LessonToday/";
-            $.ajax({
-                type: "POST",
-                url: url + urlLesson.Details,
-                data: { ID: id },
-                dataType: "json",
-                success: function (data) {
-                    render.lesson(data.Data);
-                    load.listPart(data.Data.ID, classid);
-                }
-            });
+    lesson: function (id, classid, url) {
+        var checkSupport = false;
+        if (typeof (Storage) !== "undefined") {
+            // Code for localStorage/sessionStorage.
+            checkSupport = true;
+        } else {
+            // Sorry! No Web Storage support..
+            checkSupport = false;
         }
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: { LessonID: id, ClassID: classid},
+            dataType: "json",
+            success: function (data) {
+                if (data.Exam != null && data.Exam != void 0) {
+                    document.querySelector("input[name='ExamID']").value = data.Exam.ID;
+                    if (checkSupport) {
+                        LoadCurrentExam();
+                        $("#counter").html(data.Exam.Timer);
+                    } else {
+                        render.lesson(data.Data);
+                        render.lessonPart(data.Data.Parts, data.Data.ID, classid);
+                        start();
+                        $("#counter").html(data.Exam.Timer);
+                    }
+                    
+                    countdown();
+                } else {
+                    render.lesson(data.Data);
+                    render.lessonPart(data.Data.Parts, data.Data.ID, classid)
+                }
+            }
+        });
     },
     listPart: function (lessonID, classID) {
+
         var url = urlBase + "CloneLessonPart/";
         $.ajax({
             type: "POST",
@@ -761,10 +657,28 @@ var load = {
         file.click();
     }
 };
-
-function answerQuestion(obj, quizid) {
-    $('.quiz-item#' + quizid + " .quiz-extend").show();
+function answerQuestion(obj, quizid, answerID, answerValue) {
+    console.log(obj, quizid, answerID, answerValue);
+    //$('.quiz-item#' + quizid + " .quiz-extend").show();
     markQuestion(quizid);
+    var dataform = new FormData();
+    dataform.append("ID", obj.parentElement.parentElement.parentElement.getAttribute("data-id"));
+        dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
+        dataform.append("AnswerID", answerID);
+        dataform.append("QuestionID", quizid);
+        dataform.append("AnswerValue", answerValue);
+        Ajax(urlChose, "POST", dataform, false)
+            .then(function (res) {
+                if (res != "Accept Deny") {
+                    var data = JSON.parse(res);
+                    obj.parentElement.parentElement.parentElement.setAttribute("data-id", data.ID);
+                    SetCurrentExam()
+                }
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
+    
 }
 
 function markQuestion(quizid) {
@@ -773,7 +687,76 @@ function markQuestion(quizid) {
         $("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "]").addClass("completed");
         var completed = parseInt($(".quizNumber .completed").text()) + 1;
         $(".quizNumber .completed").text(completed);
-        if (completed == totalQuiz)
+        if(completed == totalQuiz)
             $(".quizNumber .completed").addClass("finish");
+    }
+}
+function BeginExam(_this, LessonID, ClassID) {
+    var dataform = new FormData();
+        dataform.append("ClassID", ClassID);
+        dataform.append("LessonID", LessonID);
+        Ajax(urlStart, "POST", dataform, false)
+            .then(function (res) {
+                var data = JSON.parse(res);
+                document.querySelector("input[name='ExamID']").value = data.ID;
+                start(_this);
+                SetCurrentExam();
+            })
+            .catch(function (err) {
+                console.log(err);
+            })
+}
+function GetCurrentExam() {
+    var dataform = new FormData();
+    dataform.append("ClassID", ClassID);
+    dataform.append("LessonID", LessonID);
+    return Ajax(urlCurrentExam, "POST", dataform, true)
+    .then(function (res) {
+        if (res == null) return;
+        var data = JSON.parse(res);
+        document.querySelector("input[name='ExamID']").value = data.ID;
+        
+        start();
+    })
+    .catch(function (err) {
+        console.log(err);
+    })
+}
+//exampleid
+function LoadCurrentExam() {
+    //localstorge
+    var html = localStorage.getItem($("input[name='ExamID']").val());
+    $("#lessonContainer").html(html);
+
+}
+function SetCurrentExam() {
+    var html = $("#lessonContainer").html();
+    localStorage.setItem($("input[name='ExamID']").val(), html);
+}
+//hoàn thành
+function ExamComplete(url) {
+    if (confirm("Có phải bạn muốn nộp bài")) {
+        var exam = document.querySelector("input[name='ExamID']");
+        var dataform = new FormData();
+        dataform.append("ExamID", exam.value);
+        return Ajax(url, "POST", dataform, true)
+            .then(function (res) {
+                if (res == null) return;
+                var data = JSON.parse(res);
+                console.log(data);
+                $(".lesson-container").empty(); 
+                $("#quizNavigator").addClass('d-none');
+                $("#finish").addClass('d-none');
+                $('#lessonContainer').removeClass('col-md-10');
+                $(".lesson-container").append('<div class="card show mb-4"></div>');
+                $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Bạn đã hoàn thành bài thi</h3></div>');
+                $(".card").append('<div class="content card-body d-flex justify-content-center"></div>');
+                $(".content").append('<a href="#" onclick="goBack()"> Quay về trang bài học </a>');
+            })
+            .catch(function (err) {
+                console.log(err);
+            })
+    } else {
+        //
     }
 }

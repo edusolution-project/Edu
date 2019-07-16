@@ -155,7 +155,7 @@
                                                 <input type="checkbox" aria-label="Checkbox">
                                             </div>
                                         </td>
-                                        <td><a href="@Url.Action(" Exam" , "Lesson" )">Bài kiểm tra số 1</a></td>
+                                        <td><a href="@Url.Action("Exam" , "Lesson" )">Bài kiểm tra số 1</a></td>
                                         <td>test</td>
                                         <td>07/06/2019</td>
                                         <td>31/06/2019</td>
@@ -175,7 +175,7 @@
                                                 <input type="checkbox" aria-label="Checkbox">
                                             </div>
                                         </td>
-                                        <td><a href="@Url.Action(" Exam" , "Lesson" )">Bài kiểm tra số 2</a></td>
+                                        <td><a href="@Url.Action("Exam" , "Lesson" )">Bài kiểm tra số 2</a></td>
                                         <td>test</td>
                                         <td>07/06/2019</td>
                                         <td>07/06/2019</td>
@@ -563,15 +563,6 @@
                 altFormat: 'yy-mm-dd'
         }).val(enddate);
 
-    }
-
-    function ToggleStatus(obj) {
-        var action = $(obj).attr("onclick");
-        if(action.indexOf("UnPublish") > 0)
-             $(obj).attr("onclick", action.replace("UnPublish","Publish"));
-        else
-             $(obj).attr("onclick", action.replace("Publish","UnPublish"));
-        $(obj).toggleClass("btn-success").toggleClass("btn-danger");
     }
 
     function CancelEditSchedule(id) {

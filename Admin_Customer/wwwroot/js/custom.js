@@ -50,11 +50,12 @@ function setToggle(wrapperid) {
 
 /* check student */
 function goBack() {
-    document.location = 'LessonToday';
+    document.location = '/student/MyCourse';
 }
 function start(obj) {
     $(obj).parent().removeClass("d-flex").hide();
     $("#check-student").removeClass("d-none");
+    $("#finish").removeClass("d-none");
     countdown();
 }
 function countdown() {
@@ -81,7 +82,8 @@ function countdown() {
     }, 1000);
 }
 function endtime() {
-    alert("Thời gian làm bài đã kết thúc! Cảm ơn bạn");
+    //document.location = 'LessonToday';
+    //alert("Thời gian làm bài đã kết thúc! Cảm ơn bạn");
 }
 
 /* tooltip*/
