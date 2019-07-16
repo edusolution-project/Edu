@@ -82,7 +82,7 @@ function Submit(formName, url, actionName, fn) {
     var data = new FormData(form);
     Ajax(_url, _method, data, true)
         .then(function (res) {
-            if (fn() != void 0) fn(res);
+            if (fn != void 0) fn();
         }).catch(function (res) {
             console.log(actionName, res);
         });
