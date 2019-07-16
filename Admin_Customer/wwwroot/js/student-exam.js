@@ -744,7 +744,14 @@ function ExamComplete(url) {
                 if (res == null) return;
                 var data = JSON.parse(res);
                 console.log(data);
-
+                $(".lesson-container").empty(); 
+                $("#quizNavigator").addClass('d-none');
+                $("#finish").addClass('d-none');
+                $('#lessonContainer').removeClass('col-md-10');
+                $(".lesson-container").append('<div class="card show mb-4"></div>');
+                $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Bạn đã hoàn thành bài thi</h3></div>');
+                $(".card").append('<div class="content card-body d-flex justify-content-center"></div>');
+                $(".content").append('<a href="#" onclick="goBack()"> Quay về trang bài học </a>');
             })
             .catch(function (err) {
                 console.log(err);

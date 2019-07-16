@@ -6,7 +6,7 @@
     var _lessonID = ViewBag.LessonID as string;
     var _classID = ViewBag.ClassID as string;
 }
-<span class="number quizNumber" onclick="openNav()"><span class="completed">0</span> / <span class="total">0</span></span>
+<span id="finish" class="number quizNumber d-none" onclick="openNav()"><span class="completed">0</span> / <span class="total">0</span></span>
 <!-- Begin Page Content -->
 <div id="lessonContainer">
 </div>
@@ -53,7 +53,7 @@
             </div>
 
             <div class="d-flex justify-content-center pt-5 pb-5">
-                <button class="btn btn-primary" onclick="ExamComplete('@Url.Action("CompleteExam","Example")')"> Hoàn thành</button>
+                <button class="btn btn-primary btn-finish" onclick="ExamComplete('@Url.Action("CompleteExam","Example")')"> Hoàn thành</button>
             </div>
         </div>
     </div>
