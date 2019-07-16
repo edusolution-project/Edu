@@ -94,8 +94,14 @@
     background-color: transparent;
 }
 
+.nav-pills .nav-link:hover {
+    background-color: #d8dbe0;
+    border-color: #d8dbe0;
+}
+
 .nav-pills .nav-link {
     color: #444;
+    margin-right: 10px;
 }
 
 #pills-tab .far,
