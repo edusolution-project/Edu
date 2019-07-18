@@ -532,8 +532,6 @@ var render = {
     mediaContent: function (data, wrapper, type = "") {
         if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
-            if (!data.Media.Path.startsWith("http"))
-                data.Media.Path = publisherPath + data.Media.Path;
             switch (type) {
                 case "IMG":
                     mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
@@ -588,6 +586,7 @@ var load = {
                     } else {
                         render.lesson(data.Data);
                         render.lessonPart(data.Data.Parts, data.Data.ID, classid);
+                        console.log("render Part");
                         start();
                         $("#counter").html(data.Timer);
                     }
@@ -689,6 +688,7 @@ function markQuestion(quizid) {
             $(".quizNumber .completed").addClass("finish");
     }
 }
+
 function BeginExam(_this, LessonID, ClassID) {
     var dataform = new FormData();
         dataform.append("ClassID", ClassID);
@@ -704,6 +704,7 @@ function BeginExam(_this, LessonID, ClassID) {
                 console.log(err);
             })
 }
+
 function GetCurrentExam() {
     var dataform = new FormData();
     dataform.append("ClassID", ClassID);
@@ -727,6 +728,7 @@ function LoadCurrentExam() {
     $("#lessonContainer").html(html);
 
 }
+
 function SetCurrentExam() {
     var html = $("#lessonContainer").html();
     localStorage.setItem($("input[name='ExamID']").val(), html);

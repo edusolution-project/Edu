@@ -714,6 +714,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private void CloneLesson(LessonEntity item)
         {
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
+            if (item.Media != null && item.Media.Path != null)
+                if (!item.Media.Path.StartsWith("http://"))
+                    item.Media.Path = "http://publisher.edusolution.vn" + item.Media.Path;
+
             _lessonService.CreateQuery().InsertOne(item);
 
             var lessonpart = _modlessonPartService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
@@ -809,7 +813,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private void CloneLessonAnswer(LessonPartAnswerEntity item)
         {
-
             _lessonPartAnswerService.Collection.InsertOne(item);
         }
     }
