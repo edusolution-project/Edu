@@ -156,6 +156,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                 IsActive = _lessonScheduleService.GetItemByID(ClassID) == null ? false: _lessonScheduleService.GetItemByID(ClassID).IsActive,
                                 StartDate = _lessonScheduleService.GetItemByID(ClassID) == null ?DateTime.MinValue :  _lessonScheduleService.GetItemByID(ClassID).StartDate,
                                 EndDate = _lessonScheduleService.GetItemByID(ClassID) == null ? DateTime.MinValue : _lessonScheduleService.GetItemByID(ClassID).EndDate,
+                                IsView = _learningHistoryService.CreateQuery().Count(x=>x.StudentID == userId && x.LessonID == o.ID && x.ClassID == ClassID) > 0
                             })
                         )
                     }
@@ -424,7 +425,8 @@ namespace BaseCustomerMVC.Controllers.Student
                                ScheduleID = schedule.ID,
                                StartDate = schedule.StartDate,
                                EndDate = schedule.EndDate,
-                               IsActive = schedule.IsActive
+                               IsActive = schedule.IsActive,
+                               IsView = _learningHistoryService.CreateQuery().Count(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassID == model.ID) > 0
                            })).ToList()
             };
 
