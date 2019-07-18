@@ -1,5 +1,5 @@
 ﻿var urlBase = "/student/";
-
+var publisherPath = "http://publisher.edusolution.vn";
 let myEditor;
 let totalQuiz = 0;
 var Ajax = function (url, method, data, async) {

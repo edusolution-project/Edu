@@ -34,6 +34,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly StudentService _studentService;
         private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _studentMapping;
         private readonly ChapterService _chapterService;
+        private readonly LearningHistoryService _learningHistoryService;
         public MyCourseController(ClassService service
             , CourseService courseService
             , TeacherService teacherService
@@ -51,8 +52,10 @@ namespace BaseCustomerMVC.Controllers.Student
             , ExamService examService
             , ExamDetailService examDetailService
             , StudentService studentService
+            ,LearningHistoryService learningHistoryService
             )
         {
+            _learningHistoryService = learningHistoryService;
             _chapterService = chapterService;
             _studentService = studentService;
             _examService = examService;
@@ -107,8 +110,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
 
-            var std = DataResponse.Select(o => _mappingList.AutoOrtherType(o, new MyClassViewModel()
-            {
+            var std = DataResponse.Select(o => _mappingList.AutoOrtherType(o,new MyClassViewModel() {
                 CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
                 StudentNumber = o.Students.Count,
                 SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
@@ -127,7 +129,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         [System.Obsolete]
         [HttpPost]
-        public JsonResult GetDetails(string CourseID, string ClassID)
+        public JsonResult GetDetails(string CourseID,string ClassID)
         {
             try
             {
@@ -174,7 +176,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         [System.Obsolete]
         [HttpPost]
-        public JsonResult GetLesson(string LessonID, string ClassID)
+        public JsonResult GetLesson(string LessonID,string ClassID)
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
@@ -185,12 +187,22 @@ namespace BaseCustomerMVC.Controllers.Student
             if (lesson == null) return null;
             var listPart = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).ToList();
 
+
+            _learningHistoryService.CreateHist(new LearningHistoryEntity()
+            {
+                ClassID =ClassID,
+                LessonID = LessonID,
+                Time = DateTime.Now,
+                StudentID = User.Claims.GetClaimByType("UserID").Value
+            });
+
+
             // var listPartOriginal = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID);
             bool IsNull = false;
             if (listPart == null || listPart.Count <= 0)
             {
                 var listparts = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).ToList();
-                if (listparts != null)
+                if(listparts != null)
                 {
                     var mapp = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
                     listPart = listparts.Select(o => mapp.AutoOrtherType(o, new CloneLessonPartEntity() { })).ToList();
@@ -218,7 +230,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         })).ToList()
                     });
 
-                    var respone = new Dictionary<string, object> { { "Data", dataResponse } };
+                    var respone = new Dictionary<string, object>{{ "Data", dataResponse }};
                     return new JsonResult(respone);
                 }
                 else
@@ -234,8 +246,7 @@ namespace BaseCustomerMVC.Controllers.Student
                             Questions = _lessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
                                 .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
                                 {
-                                    CloneAnswers = _lessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList().Select(y => mapAnswer.AutoOrtherType(y, new CloneLessonPartAnswerEntity()
-                                    {
+                                    CloneAnswers = _lessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList().Select(y => mapAnswer.AutoOrtherType(y, new CloneLessonPartAnswerEntity() {
                                         IsCorrect = false
                                     })).ToList()
                                 }))?.ToList()
@@ -408,7 +419,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
-                           where schedule != null && schedule.IsActive
                            select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
                                ScheduleID = schedule.ID,
@@ -425,14 +435,14 @@ namespace BaseCustomerMVC.Controllers.Student
             };
             return new JsonResult(response);
         }
-
+        
         public IActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;
             return View();
         }
-
-        public IActionResult Calendar(DefaultModel model, string id, string ClassID)
+        
+        public IActionResult Calendar(DefaultModel model, string id,string ClassID)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -445,7 +455,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public IActionResult Detail(DefaultModel model, string id)
+        public IActionResult Detail(DefaultModel model,string id)
         {
             if (model == null) return null;
             var currentClass = _service.GetItemByID(id);
