@@ -148,15 +148,32 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var _lesson = _lessonService.GetItemByID(item.LessonID);
                 var _class = _classService.GetItemByID(item.ClassID);
-                var _schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID).FirstOrDefault();
+                if(_class == null)
+                {
+                    return new JsonResult("No Class for Student");
+                }
+                var _currentSchedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID);
+                var _schedule = _currentSchedule != null && _currentSchedule.Count() > 0 ? _currentSchedule.FirstOrDefault() : null;
+                if(_schedule != null)
+                {
+                    item.LessonScheduleID = _schedule.ID;
+                    item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
+                    && o.StudentID == userid
+                    && o.Status == true
+                    && o.TeacherID == _class.TeacherID
+                    && o.LessonScheduleID == _schedule.ID).Count();
+                }
+                else
+                {
+                   item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
+                   && o.StudentID == userid
+                   && o.Status == true
+                   && o.TeacherID == _class.TeacherID).Count();
+                }
                 item.Timer = _lesson.Timer;
                 item.Point = 0;
-                item.LessonScheduleID = _schedule.ID;
-                item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
-                && o.StudentID == userid
-                && o.Status == true
-                && o.TeacherID == _class.TeacherID
-                && o.LessonScheduleID == _schedule.ID).Count();
+               
+                
                 item.StudentID = userid;
                 item.TeacherID = _class.TeacherID;
                 item.ID = null;

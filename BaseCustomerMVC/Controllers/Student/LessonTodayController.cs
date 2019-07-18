@@ -59,7 +59,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     Lessons = schedule != null ? _lessonService.Collection.Find(y => listIDSchedule.Contains(y.ID)).ToList()
                         .Select(y => map2.AutoOrtherType(y, new LessonScheduleTodayViewModel() {
-                            ClassID = schedule.SingleOrDefault(x => x.LessonID == y.ID)?.ID
+                            ClassID = schedule.SingleOrDefault(x => x.LessonID == y.ID)?.ClassID
                         })).ToList() : null
                 })) ;
 
