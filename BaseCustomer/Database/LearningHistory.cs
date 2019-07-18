@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -17,8 +18,8 @@ namespace BaseCustomerEntity.Database
         public string StudentID { get; set; }
         [JsonProperty("LessonPartID")]
         public string LessonPartID { get; set; } //CloneLessonPartID 
-        [JsonProperty("Questions")]
-        public int Questions { get; set; } //Questions 
+        [JsonProperty("QuestionID")]
+        public string QuestionID { get; set; } //Questions 
         [JsonProperty("State")]
         public int State { get; set; } //State 
         [JsonProperty("Time")]
@@ -30,6 +31,31 @@ namespace BaseCustomerEntity.Database
         public LearningHistoryService(IConfiguration config) : base(config)
         {
 
+        }
+        public Task CreateHist(LearningHistoryEntity item)
+        {
+            var oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
+                && o.LessonID == item.LessonID
+                && o.ClassID == item.ClassID
+                && o.LessonPartID == item.LessonPartID
+                && o.QuestionID == item.QuestionID).ToList();
+            if (string.IsNullOrEmpty(item.LessonPartID) && string.IsNullOrEmpty(item.QuestionID))
+            {
+                oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
+                && o.LessonID == item.LessonID
+                && o.ClassID == item.ClassID).ToList();
+            }
+            item.Time = DateTime.Now;
+            if (oldItem == null)
+            {
+                item.State = 0;
+            }
+            else
+            {
+                item.State = oldItem.Count;
+            }
+            CreateOrUpdate(item);
+            return Task.CompletedTask;
         }
     }
 }

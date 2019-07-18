@@ -41,7 +41,8 @@ namespace BaseCustomerMVC.Controllers.Student
             var oldItem = _service.CreateQuery().Find(o => o.StudentID == userID 
             && o.LessonID == item.LessonID 
             && o.ClassID == item.ClassID
-            && o.LessonPartID == item.LessonPartID).ToList();
+            && o.LessonPartID == item.LessonPartID
+            && o.QuestionID == item.QuestionID).ToList();
             if(oldItem!= null)
             {
                 item.Time = DateTime.Now;

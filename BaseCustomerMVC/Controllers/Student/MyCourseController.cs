@@ -34,6 +34,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly StudentService _studentService;
         private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _studentMapping;
         private readonly ChapterService _chapterService;
+        private readonly LearningHistoryService _learningHistoryService;
         public MyCourseController(ClassService service
             , CourseService courseService
             , TeacherService teacherService
@@ -51,8 +52,10 @@ namespace BaseCustomerMVC.Controllers.Student
             , ExamService examService
             , ExamDetailService examDetailService
             , StudentService studentService
+            ,LearningHistoryService learningHistoryService
             )
         {
+            _learningHistoryService = learningHistoryService;
             _chapterService = chapterService;
             _studentService = studentService;
             _examService = examService;
@@ -183,7 +186,17 @@ namespace BaseCustomerMVC.Controllers.Student
             var lesson = _lessonService.GetItemByID(LessonID);
             if (lesson == null) return null;
             var listPart = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).ToList();
-            
+
+
+            _learningHistoryService.CreateHist(new LearningHistoryEntity()
+            {
+                ClassID =ClassID,
+                LessonID = LessonID,
+                Time = DateTime.Now,
+                StudentID = User.Claims.GetClaimByType("UserID").Value
+            });
+
+
             // var listPartOriginal = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID);
             bool IsNull = false;
             if (listPart == null || listPart.Count <= 0)

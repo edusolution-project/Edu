@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
@@ -26,6 +27,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
+        private readonly LearningHistoryService _learningHistoryService;
 
         public ExampleController(ExamService service,
             ExamDetailService examDetailService
@@ -37,8 +39,10 @@ namespace BaseCustomerMVC.Controllers.Student
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
             , TeacherService teacherService
+            , LearningHistoryService learningHistoryService
             )
         {
+            _learningHistoryService = learningHistoryService;
             _service = service;
             _classService = classService;
             _lessonService = lessonService;
@@ -201,6 +205,16 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             if (!_service.IsOverTime(item.ExamID))
             {
+                var exam = _service.GetItemByID(item.ExamID);
+                _learningHistoryService.CreateHist(new LearningHistoryEntity()
+                {
+                    ClassID = exam.ClassID,
+                    LessonID = exam.LessonID,
+                    LessonPartID = item.LessonPartID,
+                    QuestionID = item.QuestionID,
+                    Time = DateTime.Now,
+                    StudentID = User.Claims.GetClaimByType("UserID").Value
+                });
                 if (string.IsNullOrEmpty(item.ID) || item.ID == "0" || item.ID == "null")
                 {
                     var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();
