@@ -1,7 +1,7 @@
 ﻿var urlBase = "/student/";
 var publisherPath = "http://publisher.edusolution.vn";
-let myEditor;
-let totalQuiz = 0;
+var myEditor;
+var totalQuiz = 0;
 var Ajax = function (url, method, data, async) {
     var request = new XMLHttpRequest();
     // Return it as a Promise
@@ -534,27 +534,27 @@ var render = {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
+                    mediaHolder.append($("<img>", { "src": publisherPath + data.Media.Path, "class": "img-fluid" }));
                     break;
                 case "VIDEO":
-                    mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                    mediaHolder.append("<video controls><source src='" + publisherPath + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                     break;
                 case "AUDIO":
-                    mediaHolder.append("<audio controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                    mediaHolder.append("<audio controls><source src='" + publisherPath +  + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                     break;
                 case "DOC":
-                    mediaHolder.append($("<embed>", { "src": data.Media.Path, "width": "100%", "height": "800px" }));
+                    mediaHolder.append($("<embed>", { "src": publisherPath +  data.Media.Path, "width": "100%", "height": "800px" }));
                     break;
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
+                            mediaHolder.append($("<img>", { "src": publisherPath + data.Media.Path, "class": "img-fluid" }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
-                            mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                            mediaHolder.append("<video controls><source src='"+publisherPath + + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
-                            mediaHolder.append("<audio controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                            mediaHolder.append("<audio controls><source src='" + publisherPath + + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else
-                            mediaHolder.append($("<embed>", { "src": data.Answers.path }));
+                            mediaHolder.append($("<embed>", { "src": +publisherPath + data.Answers.path }));
                     break;
             }
             wrapper.append(mediaHolder);
@@ -655,8 +655,16 @@ var load = {
     }
 };
 function answerQuestion(obj, quizid, answerID, answerValue) {
-    console.log(obj, quizid, answerID, answerValue);
+    //console.log(obj, quizid, answerID, answerValue);
     //$('.quiz-item#' + quizid + " .quiz-extend").show();
+    if (obj.type != void 0) {
+        if (obj.type == "checkbox" || obj.type == "radio") {
+            $(obj).attr("checked", "");
+        }
+        if (obj.type == "text") {
+            obj.value = answerValue;
+        }
+    }
     markQuestion(quizid);
     var dataform = new FormData();
     dataform.append("ID", obj.parentElement.parentElement.parentElement.getAttribute("data-id"));
@@ -725,12 +733,21 @@ function GetCurrentExam() {
 function LoadCurrentExam() {
     //localstorge
     var html = localStorage.getItem($("input[name='ExamID']").val());
+    var html2 = localStorage.getItem($("input[name='ExamID']").val() + "_Quiz");
+    var html3 = localStorage.getItem($("input[name='ExamID']").val() + "_QuizNav");
     $("#lessonContainer").html(html);
+    $("#quiz-number_123").html(html2);
+    $("#quizNavigator").html(html3);
+    
 
 }
 
 function SetCurrentExam() {
     var html = $("#lessonContainer").html();
+    var html2 = $("#quiz-number_123").html();
+    var html3 = $("#quizNavigator").html();
+    localStorage.setItem($("input[name='ExamID']").val() + "_QuizNav", html3);
+    localStorage.setItem($("input[name='ExamID']").val() + "_Quiz", html2);
     localStorage.setItem($("input[name='ExamID']").val(), html);
 }
 //hoàn thành
