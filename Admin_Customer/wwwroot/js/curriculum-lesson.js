@@ -251,7 +251,7 @@ var lessonService = {
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.ID });
 
         var bodyright = $("<div>", { "class": "col-md-9" });
-        var button = $("<div>", { "class": "float-right" });
+        var button = $("<div>", { "class": "text-right" });
         lessonHeader.append(button);
         var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Quay lại", "onclick": "tab_goback()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
@@ -549,7 +549,7 @@ var render = {
             boxHeader.append($("<h5>", { "class": "title", "text": data.Title + time + point }));
         }
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Thu gọn", "onclick": "toggleCompact(this)" }));
-        var boxButton = $("<div>", { "class": "text-right" });
+        var boxButton = $("<div>", { "class": "float-right" });
         boxButton.append($("<button>", { "class": "btn btn-primary btn-sm btn-edit", "text": "Sửa", "onclick": "lessonPartService.edit('" + data.ID + "')" }))
         boxButton.append($("<button>", { "class": "btn btn-danger btn-sm btn-close", "text": "Xóa", "onclick": "lessonPartService.remove('" + data.ID + "')" }));
 
@@ -779,7 +779,7 @@ var render = {
     },
     answers: function (data, template) {
         var container = $("#" + data.ParentID + " .answer-wrapper");
-        var answer = $("<fieldset>", { "class": "answer-item" });
+        var answer = $("<fieldset>", { "class": "answer-item form-check" });
         switch (template) {
             case "QUIZ2":
 
@@ -825,9 +825,9 @@ var render = {
                 break;
             default:
                 answer.append($("<input>", { "type": "hidden" }));
-                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
+                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
-                    answer.append($("<label>", { "class": "answer-text", "text": data.Content }));
+                    answer.append($("<label>", { "class": "answer-text form-check-label", "text": data.Content }));
                 render.mediaContent(data, answer);
                 container.append(answer);
                 break;

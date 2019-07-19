@@ -11,36 +11,44 @@
     var user = ViewBag.User as string;
 }
 
-<div id="list-detail">
-    <div class="card show">
-        <div class="card-header">
-            <h5 class="m-0 font-weight-bold text-primary">@Data.Name</h5>
-            <input type="hidden" id="CourseID" value="@Data.ID" />
+    <div class="container">
+        <div id="list-detail">
+            <div class="card show">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h5 class="m-0 font-weight-bold text-primary">@Data.Name</h5>
+                        </div>
+                        <div class="text-right col-lg-6">
+                            <input type="hidden" id="CourseID" value="@Data.ID" />
 
-            <button onclick="EditCourse()" type="button" data-placement="top" title="Sửa" class="btn btn-primary" data-toggle="modal" data-target="#courseModal" data-original-title="Sửa">
-                <i class="fas fa-edit"></i>
-            </button>
+                            <button onclick="EditCourse()" type="button" data-placement="top" title="Sửa" class="btn btn-primary" data-toggle="modal" data-target="#courseModal" data-original-title="Sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
 
-            <button onclick="AddChapter('0'); return false;" type="button" data-placement="top" title="Thêm chương mục" class="btn btn-primary" data-toggle="modal" data-target="#chapterModal" data-original-title="Thêm chương mục">
-                <i class="fas fa-plus-square"></i>
-            </button>
+                            <button onclick="AddChapter('0'); return false;" type="button" data-placement="top" title="Thêm chương mục" class="btn btn-primary" data-toggle="modal" data-target="#chapterModal" data-original-title="Thêm chương mục">
+                                <i class="fas fa-plus-square"></i>
+                            </button>
 
-            <button onclick="DeleteCourse('@Data.ID')" type="button" data-placement="top" title="Xóa" class="btn btn-danger">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div id="course-detail" style="width:100%;">
-                    <ul class="navbar-nav sidebar accordion" id="accordionSidebar">
-                        <!-- Nav Item -->
-                    </ul>
+                            <button onclick="DeleteCourse('@Data.ID')" type="button" data-placement="top" title="Xóa" class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div id="course-detail" style="width:100%;">
+                            <ul class="navbar-nav sidebar accordion" id="accordionSidebar">
+                                <!-- Nav Item -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer"></div>
             </div>
         </div>
-        <div class="card-footer"></div>
     </div>
-</div>
 
 <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
     <div class="modal-dialog modal-lg">
