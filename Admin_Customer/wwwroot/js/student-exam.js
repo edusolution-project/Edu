@@ -1,5 +1,4 @@
 ﻿var urlBase = "/student/";
-var publisherPath = "http://publisher.edusolution.vn";
 var myEditor;
 var totalQuiz = 0;
 var Ajax = function (url, method, data, async) {
@@ -534,27 +533,27 @@ var render = {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "src": publisherPath + data.Media.Path, "class": "img-fluid" }));
+                    mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
                     break;
                 case "VIDEO":
-                    mediaHolder.append("<video controls><source src='" + publisherPath + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                    mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                     break;
                 case "AUDIO":
-                    mediaHolder.append("<audio controls><source src='" + publisherPath +  + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                    mediaHolder.append("<audio controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                     break;
                 case "DOC":
-                    mediaHolder.append($("<embed>", { "src": publisherPath +  data.Media.Path, "width": "100%", "height": "800px" }));
+                    mediaHolder.append($("<embed>", { "src": data.Media.Path, "width": "100%", "height": "800px" }));
                     break;
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "src": publisherPath + data.Media.Path, "class": "img-fluid" }));
+                            mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
-                            mediaHolder.append("<video controls><source src='"+publisherPath + + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                            mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
-                            mediaHolder.append("<audio controls><source src='" + publisherPath + + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                            mediaHolder.append("<audio controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else
-                            mediaHolder.append($("<embed>", { "src": +publisherPath + data.Answers.path }));
+                            mediaHolder.append($("<embed>", { "src": + data.Answers.path }));
                     break;
             }
             wrapper.append(mediaHolder);

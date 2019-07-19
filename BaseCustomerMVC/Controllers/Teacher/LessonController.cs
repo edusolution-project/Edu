@@ -95,6 +95,52 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        [HttpPost]
+        public JsonResult Join(string ID, string JoinLesson)
+        {
+            try
+            {
+                var rootItem = _lessonService.GetItemByID(ID);
+                var joinItem = _lessonService.GetItemByID(JoinLesson);
+                if (rootItem == null || joinItem == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        { "Error", "Dữ liệu không đúng" }
+                    });
+                }
+                var currentIndex = _lessonPartService.CreateQuery().CountDocuments(o => o.ParentID == rootItem.ID);
+                var joinParts = _lessonPartService.CreateQuery().Find(o => o.ParentID == joinItem.ID).SortBy(o => o.Order).ToList();
+
+                if (joinParts != null && joinParts.Count > 0)
+                {
+                    foreach (var part in joinParts)
+                    {
+                        part.ParentID = rootItem.ID;
+                        part.Order = (int)currentIndex++;
+                        _lessonPartService.CreateQuery().ReplaceOne(o => o.ID == part.ID, part);
+                    }
+                }
+
+                ChangeLessonPosition(joinItem, int.MaxValue);//chuyển lesson xuống cuối của đối tượng chứa
+                _lessonService.Remove(joinItem.ID);
+
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", joinItem },
+                        { "Error", null }
+                    });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    { "Error", ex.Message }
+                });
+            }
+        }
 
         [HttpPost]
         public JsonResult CreateOrUpdate(LessonEntity item)
@@ -190,7 +236,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 if (!String.IsNullOrEmpty(model.ArrID))
                     ID = model.ArrID;
-                var lesson = _lessonService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();//TODO: check permission
+                var lesson = _lessonService.GetItemByID(ID);//TODO: check permission
                 if (lesson != null)
                 {
                     var lessonparts = _lessonPartService.CreateQuery().Find(o => o.ParentID == ID).ToList();

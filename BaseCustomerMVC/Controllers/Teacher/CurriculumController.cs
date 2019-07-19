@@ -26,7 +26,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
 
-
         private readonly ModCourseService _modservice;
         private readonly ModProgramService _modprogramService;
         private readonly ModSubjectService _modsubjectService;

@@ -1,7 +1,7 @@
 ﻿var urlBase = "/teacher/";
 
-let myEditor;
-let totalQuiz = 0;
+var myEditor;
+var totalQuiz = 0;
 
 //lesson
 var urlLesson = {
