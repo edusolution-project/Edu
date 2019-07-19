@@ -19,7 +19,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("TemplateType")]
         public int TemplateType { get; set; }
         [JsonProperty("Point")]
-        public int Point { get; set; }
+        public double Point { get; set; }
         [JsonProperty("Timer")]
         public int Timer { get; set; }
         [JsonProperty("CreateUser")]
@@ -40,7 +40,10 @@ namespace BaseCustomerEntity.Database
         public DateTime Created { get; set; }
         [JsonProperty("Updated")]
         public DateTime Updated { get; set; }
-
+        [JsonProperty("Limit")] // gioi han so luot lam bai
+        public int Limit { get; set; }
+        [JsonProperty("Multiple")] // hệ số 
+        public int Multiple { get; set; }
     }
 
     public class LESSON_TEMPLATE

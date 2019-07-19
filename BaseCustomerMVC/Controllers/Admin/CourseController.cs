@@ -196,6 +196,39 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.Updated = DateTime.Now;
                 _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
 
+                if (item.CourseID != oldData.CourseID)
+                {
+                    //remove old schedule & progress
+
+                    _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == item.ID);
+                    _classProgressService.CreateQuery().DeleteMany(o => o.ClassID == item.ID);
+
+                    var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
+
+                    //Create Lesson Schedule
+                    var schedules = new List<LessonScheduleEntity>();
+                    if (lessons != null)
+                        foreach (LessonEntity lesson in lessons)
+                        {
+                            _lessonScheduleService.CreateQuery().InsertOne(new LessonScheduleEntity
+                            {
+                                ClassID = item.ID,
+                                LessonID = lesson.ID,
+                                StartDate = item.StartDate,
+                                EndDate = item.EndDate
+                            });
+                        }
+                    //Create Class Progress
+                    var classProgress = new ClassProgressEntity()
+                    {
+                        ClassID = item.ID,
+                        TotalLessons = lessons.Count,
+                        CompletedLessons = 0,
+                        LastDate = DateTime.Now
+                    };
+                    _classProgressService.CreateQuery().InsertOne(classProgress);
+                }
+
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
                     {"Data",item },

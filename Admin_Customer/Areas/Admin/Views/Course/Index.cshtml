@@ -315,7 +315,7 @@
                             "<td>" + enddate + "</td>" +
                             active +
                             "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "Course")','@Url.Action("create", "Course")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "Course")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa lớp " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "Course")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "<button type=\"button\" class=\"btn btn-primary\" onclick=\"ImportSV('" + item.ID + "','ImportForm')\" data-toggle=\"modal\" data-placement=\"top\" title=\"Nhập file dữ liệu\" data-target=\".bd-modal-lg\"> <i class=\"fas fa-upload\"></i> </button>" +
                             "</tr>"
                         );

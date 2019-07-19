@@ -3,7 +3,13 @@
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
+    var Course = ViewBag.Course as BaseCustomerEntity.Database.CourseEntity;
 }
+
+
+<div class="breadcumb" style="padding: 0 0 15px; font-weight:bold;">
+    <a href="@Url.Action("Detail","Curriculum")/@Course.ID">@Course.Name</a> / @Data.Title
+</div>
 
 <div id="lessonContainer">
 </div>

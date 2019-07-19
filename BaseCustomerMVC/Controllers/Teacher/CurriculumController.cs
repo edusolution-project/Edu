@@ -186,6 +186,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
+            filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();
@@ -589,18 +590,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(data);
         }
 
-
-
-
         [HttpPost]
         public JsonResult Clone(string CourseID, string GradeID, string SubjectID)
         {
-            //[JsonProperty("GradeID")]
-            //public string GradeID { get; set; }
-            //[JsonProperty("SubjectID")]
-            //public string SubjectID { get; set; }
-            //[JsonProperty("ProgramID")]
-            //public string ProgramID { get; set; }
+
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             var item = _modservice.GetItemByID(CourseID); //publisher
             if (item != null)
@@ -613,7 +606,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     var chapter_root = _modchapterService.CreateQuery().Find(o => o.CourseID == CourseID && o.ParentID == "0").ToList();
                     var lesson = _modlessonService.CreateQuery().Find(o => o.CourseID == CourseID).ToList();
-
 
                     var clone_course = new CourseEntity()
                     {
@@ -657,7 +649,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var clone_lesson = lesson.Select(o => new LessonEntity()
                     {
                         Media = o.Media,
-                        ChapterID = _chapterService.Collection.Find(x => x.OriginID == o.ChapterID).First() != null ? _chapterService.Collection.Find(x => x.OriginID == o.ChapterID).First().ID : "0",
+                        ChapterID = _chapterService.Collection.Find(x => x.OriginID == o.ChapterID && x.CourseID == clone_course.ID).First() != null ? _chapterService.Collection.Find(x => x.OriginID == o.ChapterID && x.CourseID == clone_course.ID).First().ID : "0",
                         CreateUser = _userCreate,
                         Code = o.Code,
                         OriginID = o.ID,
@@ -683,16 +675,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     }
                 }
-
-                //var subject_clone = new SubjectEntity()
-                //{
-                //    Name = subject.Name,
-                //    Code = subject.Code,
-                //    OriginID = subject.ID,
-                //    ParentID = subject.ParentID
-                //};
-
-
             }
             return new JsonResult("OK");
         }
@@ -711,7 +693,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Name = o.Name,
                     Code = o.Code,
                     CourseID = item.CourseID,
-                    //ParentID = o.ParentID,//ParentID cũ
                     ParentID = item.ID,//Edit by VietPhung 20190701
                     ParentType = o.ParentType,
                     CreateUser = _userCreate,
@@ -733,6 +714,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private void CloneLesson(LessonEntity item)
         {
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
+            if (item.Media != null && item.Media.Path != null)
+                if (!item.Media.Path.StartsWith("http://"))
+                    item.Media.Path = "http://publisher.edusolution.vn" + item.Media.Path;
+
             _lessonService.CreateQuery().InsertOne(item);
 
             var lessonpart = _modlessonPartService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
@@ -828,7 +813,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private void CloneLessonAnswer(LessonPartAnswerEntity item)
         {
-
             _lessonPartAnswerService.Collection.InsertOne(item);
         }
     }

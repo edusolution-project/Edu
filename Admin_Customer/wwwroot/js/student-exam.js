@@ -1,5 +1,4 @@
 ﻿var urlBase = "/student/";
-var publisherPath = "http://publisher.edusolution.vn"
 
 let myEditor;
 let totalQuiz = 0;
@@ -323,7 +322,6 @@ var render = {
         //render question
         switch (template) {
             case "QUIZ2":
-                //alert(1);
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -436,7 +434,7 @@ var render = {
             case "QUIZ2":
 
                 if ($(container).find(".answer-item").length == 0) {
-                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text form-control", "placeholder": data.Content, "onfocusout": "answerQuestion(this,'" + data.ParentID + "','" + data.ID + "',$(this).val())" }));
+                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text", "placeholder": data.Content, "onfocusout": "answerQuestion(this,'" + data.ParentID + "','" + data.ID + "',$(this).val())" }));
                     container.append(answer);
                 }
                 else {
@@ -534,8 +532,6 @@ var render = {
     mediaContent: function (data, wrapper, type = "") {
         if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
-            if (!data.Media.Path.startsWith("http"))
-                data.Media.Path = publisherPath + data.Media.Path;
             switch (type) {
                 case "IMG":
                     mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
@@ -586,12 +582,13 @@ var load = {
                     document.querySelector("input[name='ExamID']").value = data.Exam.ID;
                     if (checkSupport) {
                         LoadCurrentExam();
-                        $("#counter").html(data.Exam.Timer);
+                        $("#counter").html(data.Timer);
                     } else {
                         render.lesson(data.Data);
                         render.lessonPart(data.Data.Parts, data.Data.ID, classid);
+                        console.log("render Part");
                         start();
-                        $("#counter").html(data.Exam.Timer);
+                        $("#counter").html(data.Timer);
                     }
                     
                     countdown();
@@ -691,6 +688,7 @@ function markQuestion(quizid) {
             $(".quizNumber .completed").addClass("finish");
     }
 }
+
 function BeginExam(_this, LessonID, ClassID) {
     var dataform = new FormData();
         dataform.append("ClassID", ClassID);
@@ -706,6 +704,7 @@ function BeginExam(_this, LessonID, ClassID) {
                 console.log(err);
             })
 }
+
 function GetCurrentExam() {
     var dataform = new FormData();
     dataform.append("ClassID", ClassID);
@@ -729,6 +728,7 @@ function LoadCurrentExam() {
     $("#lessonContainer").html(html);
 
 }
+
 function SetCurrentExam() {
     var html = $("#lessonContainer").html();
     localStorage.setItem($("input[name='ExamID']").val(), html);

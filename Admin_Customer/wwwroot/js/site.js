@@ -27,7 +27,7 @@ var Ajax = function (url, method, data, async) {
             //    console.log('LOADING	Downloading; responseText holds partial data')
             //}
             if (request.readyState == 4) {
-                console.log('DONE -	The operation is complete')
+                //console.log('DONE -	The operation is complete')
                 // Process the response
                 if (request.status >= 200 && request.status < 300) {
                     // If successful
@@ -167,8 +167,9 @@ function Edit(id, urlGetData, urlPostData, _this) {
 function ExcuteOnlyItem(id, url, fn) {
     var data = new FormData();
     data.append("ArrID", id);
-    Ajax(url, "POST", data, true).then(function () {
-        if (fn != void 0) fn();
+    Ajax(url, "POST", data, true).then(function (res) {
+        if (fn != void 0) fn(res);
+        console.log(res)
     })
 }
 function hideModal() {

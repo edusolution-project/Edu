@@ -34,8 +34,9 @@
                                 <tr>
                                     <th>Tên bài học</th>
                                     <th>Mô tả</th>
-                                    <th>Thời gian bắt đầu</th>
-                                    <th>thời gian kết thúc</th>
+                                    <th>Ngày bắt đầu</th>
+                                    <th>Ngày kết thúc</th>
+                                    <th>Ngày học gần nhất</th>
                                     <th>Trạng thái</th>
                                 </tr>
                             </thead>
@@ -234,24 +235,20 @@
                         var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
                         var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
 
-                        if (item.ChapterID == null) {
-                            scheduleBody.append("<tr lid=\"" + item.ID + "\">" +
-                            "<td><a href='@Url.Action("Detail", "LessonToday")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
+                        var rowData = "<tr lid=\"" + item.ID + "\">" +
+                            "<td><a href='@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "/@curentClass.ID'>" + item.Title + "</td>" +
                             "<td>---</td>" +
                             "<td value=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
-                            "<td value=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" + active +
-                            "</tr>"
-                            );
+                            "<td value=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" +
+                            "<td value=\"---\" class='lastjoin'><span>---</span></td>" + active +
+                            "</tr>";
+
+                        if (item.ChapterID == null) {
+                            scheduleBody.append(rowData);
                         }
                         else
                         {
-                            scheduleBody.find("tr[chapid=" + item.ChapterID + "]").after("<tr lid=\"" + item.ID + "\">" +
-                            "<td><a href=" + (item.IsActive ? "'@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "/@curentClass.ID'":"'javascript:LockNotify()'")   + ">" + item.Title + "</td>" +
-                            "<td>---</td>" +
-                            "<td value=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
-                            "<td value=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" + active +
-                            "</tr>"
-                            );
+                            scheduleBody.find("tr[chapid=" + item.ChapterID + "]").after(rowData);
                         }
                     }
                 }
