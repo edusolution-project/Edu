@@ -241,7 +241,7 @@
                             isView = "";
                         }
                         var rowData = "<tr lid=\"" + item.ID + "\">" +
-                            "<td class=" + isView + "><a href='@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "/@curentClass.ID'>" + item.Title + "</td>" +
+                            "<td class=" + isView + "><a href='" + (item.IsActive ? ("@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "/@curentClass.ID") : "javascript:LockNotify()") + "'>" + item.Title + "</td>" +
                             "<td>---</td>" +
                             "<td value=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
                             "<td value=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" +

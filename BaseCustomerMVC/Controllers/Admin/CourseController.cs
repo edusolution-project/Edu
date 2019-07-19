@@ -123,6 +123,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
+            filter.Add(Builders<CourseEntity>.Filter.Where(o => o.IsActive == true));
             var data = filter.Count > 0 ? _courseService.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _courseService.GetAll();
 
             var DataResponse = data.ToList();

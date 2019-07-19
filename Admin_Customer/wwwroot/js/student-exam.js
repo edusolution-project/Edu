@@ -27,7 +27,7 @@ var Ajax = function (url, method, data, async) {
             //    console.log('LOADING	Downloading; responseText holds partial data')
             //}
             if (request.readyState == 4) {
-                console.log('DONE -	The operation is complete')
+                //console.log('DONE -	The operation is complete')
                 // Process the response
                 if (request.status >= 200 && request.status < 300) {
                     // If successful
