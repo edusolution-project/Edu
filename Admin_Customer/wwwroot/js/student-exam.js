@@ -67,8 +67,12 @@ var lessonService = {
         var lessonContent = $("<div>", { "class": "card shadow mb-4" });
         lessonContainer.append(lessonContent);
         //header
-        var lessonHeader = $("<div>", { "class": "card-header py-3" });
+        var lessonHeader = $("<div>", { "class": "card-header" });
         lessonContent.append(lessonHeader);
+
+        //header row
+        var HeaderRow = $("<div>", { "class": "row" });
+        lessonHeader.append(HeaderRow);
 
         //header
         var ButtonStart = $("<div>", { "class": "d-flex justify-content-center pt-5 pb-5" });
@@ -88,17 +92,17 @@ var lessonService = {
         var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
 
 
-        var title = $("<div>", { "class": "lesson-header-title", "text": data.Title });
-        lessonHeader.append(title);
+        var title = $("<div>", { "class": "lesson-header-title col-lg-4", "text": data.Title });
+        HeaderRow.append(title);
 
         if (data.TemplateType == 2) {
             if (data.Timer > 0) {
                 title.text(title.text() + " - thời gian: " + data.Timer + "p");
 
-                var counter = $("<div>", { "class": "text-center", "text": "Thời gian làm bài " });
+                var counter = $("<div>", { "class": "text-center col-lg-4", "text": "Thời gian làm bài " });
                 var counterdate = $("<span>", { "id": "counter", "class": "time-counter", "text": (data.Timer < 10 ? ("0" + data.Timer) : data.Timer) + ":00" });
                 counter.append(counterdate);
-                lessonHeader.append(counter);
+                HeaderRow.append(counter);
             }
             if (data.Point > 0) {
                 title.text(title.text() + " (" + data.Point + "đ)");
@@ -118,8 +122,8 @@ var lessonService = {
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.ID });
 
         var bodyright = $("<div>", { "class": "col-md-9" });
-        var button = $("<div>", { "class": "float-right" });
-        lessonHeader.append(button);
+        var button = $("<div>", { "class": "text-right col-lg-4" });
+        HeaderRow.append(button);
 
         var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "data-toggle": "tooltip", "title": "Quay lại", "onclick": "tab_goback()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
@@ -199,12 +203,15 @@ var render = {
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         itembody.append(itembox);
 
+        //item row
+        var ItemRow = $("<div>", { "class": "row"});
+        itembox.append(ItemRow);
 
         var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {
-            boxHeader.append($("<h4>", { "class": "title", "text": data.Title + time + point }));
+            boxHeader.append($("<h5>", { "class": "title", "text": data.Title + time + point }));
         }
-        itembox.append(boxHeader);
+        ItemRow.append(boxHeader);
         switch (data.Type) {
             case "TEXT":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
@@ -269,10 +276,10 @@ var render = {
             case "QUIZ3":
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                itembox.append(itemBody);
+                ItemRow.append(itemBody);
                 render.mediaContent(data, itemBody, "");
                 var answers_box = $("<div>", { "class": "answer-wrapper no-child" });
-                itembox.append(answers_box);
+                ItemRow.append(answers_box);
                 $(answers_box).droppable({
                     tolerance: "intersect",
                     accept: ".answer-item",
@@ -297,7 +304,7 @@ var render = {
                     itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
                 }
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                itembox.append(itemBody);
+                ItemRow.append(itemBody);
                 container.append(tabsitem);
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itembox.append(itemBody);
@@ -401,9 +408,9 @@ var render = {
                 var itembox = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
-                    boxHeader.append($("<h4>", { "class": "title", "text": data.Content + point }));
+                    boxHeader.append($("<h5>", { "class": "title", "text": data.Content + point }));
                 else
-                    boxHeader.append($("<h4>", { "class": "title", "text": point }));
+                    boxHeader.append($("<h5>", { "class": "title", "text": point }));
 
                 render.mediaContent(data, boxHeader);
 

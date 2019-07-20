@@ -569,7 +569,7 @@ var render = {
     },
     answers: function (data, template) {
         var container = $("#" + data.ParentID + " .answer-wrapper");
-        var answer = $("<fieldset>", { "class": "answer-item form-check" });
+        var answer = $("<fieldset>", { "class": "answer-item" });
         switch (template) {
             case "QUIZ2":
 
@@ -613,11 +613,13 @@ var render = {
 
                 container.append(answer);
                 break;
-            default:
-                answer.append($("<input>", { "type": "hidden" }));
-                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
+            default: 
+                var form = $("<div>", { "class": "form-check" });
+                answer.append(form);
+                form.append($("<input>", { "type": "hidden" }));
+                form.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
-                    answer.append($("<label>", { "class": "answer-text form-check-label", "text": data.Content}));
+                    form.append($("<label>", { "class": "answer-text form-check-label", "text": data.Content}));
                 render.mediaContent(data, answer);
                 container.append(answer);
                 break;

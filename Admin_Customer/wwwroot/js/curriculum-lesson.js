@@ -193,8 +193,12 @@ var lessonService = {
         var lessonContent = $("<div>", { "class": "card shadow mb-4" });
         lessonContainer.append(lessonContent);
         //header
-        var lessonHeader = $("<div>", { "class": "card-header py-3" });
+        var lessonHeader = $("<div>", { "class": "card-header" });
         lessonContent.append(lessonHeader);
+
+        //header row
+        var headerRow = $("<div>", { "class": "row" });
+        lessonHeader.append(headerRow);
         //Body
         var cardBody = $("<div>", { "class": "card-body" });
         lessonContent.append(cardBody);
@@ -207,11 +211,11 @@ var lessonService = {
         var lessontabs = $("<div>", { "class": "lesson-tabs" });
         var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
 
-        var title = $("<div>", { "class": "lesson-header-title" });
+        var title = $("<div>", { "class": "lesson-header-title col-lg-6" });
         var titleText = $("<span>", { "class": "title-text", "text": data.Title })
         title.append(titleText);
 
-        lessonHeader.append(title);
+        headerRow.append(title);
 
         if (data.TemplateType == 2) {
             if (data.Timer > 0) {
@@ -223,6 +227,7 @@ var lessonService = {
                 title.append(titlePoint);
             }
         }
+        var lessonButton = $("<div>", { "class": "lesson-button" });
         var sort    = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sắp xếp", "onclick": "lessonService.renderSort()" });
         var edit    = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Sửa", "onclick": "lessonService.renderEdit('" + data.ID + "')" });
         var create  = $("<button>", { "class": "btn btn-primary btn-add", "title": "Thêm nội dung", "onclick": "Create.lessonPart('" + data.ID + "')" });
@@ -233,14 +238,18 @@ var lessonService = {
         var iconEdit = $("<i>", { "class": "fas fa-edit" });
         var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
         var iconTrash = $("<i>", { "class": "fas fa-trash" });
-        lessonHeader.append(sort);
+
+        title.append(lessonButton);
+        lessonButton.append(iconSort);
+
+        lessonButton.append(sort);
         sort.append(iconSort);
-        lessonHeader.append(edit);
+        lessonButton.append(edit);
         edit.append(iconEdit);
-        lessonHeader.append(create);
+        lessonButton.append(create);
         create.append(iconCreate);
         //lessonHeader.append(close);
-        lessonHeader.append(remove); //removeLesson
+        lessonButton.append(remove); //removeLesson
         remove.append(iconTrash);
 
 
@@ -251,8 +260,8 @@ var lessonService = {
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.ID });
 
         var bodyright = $("<div>", { "class": "col-md-9" });
-        var button = $("<div>", { "class": "text-right" });
-        lessonHeader.append(button);
+        var button = $("<div>", { "class": "text-right col-lg-6" });
+        headerRow.append(button);
         var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Quay lại", "onclick": "tab_goback()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
         var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Tiếp tục", "onclick": "tab_gonext()" });

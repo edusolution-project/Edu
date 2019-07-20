@@ -8,7 +8,7 @@
 
 <!-- Begin Page Content -->
     <div class="container">
-        <div class="card show mb-4">
+        <div class="card shadow mb-4">
             <div class="card-header">
                 <h3 class="m-0 font-weight-bold text-primary">@curentClass.Name</h3>
             </div>
@@ -72,11 +72,17 @@
                             <!-- DataTales Example -->
                             <div class="tab-student card">
                                 <div class="card-header">
-                                    <h5 class="m-0 font-weight-bold text-primary">Danh sách sinh viên</h5>
-                                    <div class="float-right">
-                                        <button type="button" class="btn btn-primary" style="position: relative; top: 10px;" onclick="ImportSV('@curentClass.ID','ImportForm')" data-toggle="modal" data-target=".bd-modal-lg">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <h5 class="m-0 font-weight-bold text-primary">Danh sách sinh viên</h5>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="text-right">
+                                                <button type="button" class="btn btn-primary" onclick="ImportSV('@curentClass.ID','ImportForm')" data-toggle="modal" data-target=".bd-modal-lg">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="card-body">
