@@ -63,12 +63,16 @@ var lessonService = {
         var lessonContent = $("<div>", { "class": "card shadow mb-4" });
         lessonContainer.append(lessonContent);
         //header
-        var lessonHeader = $("<div>", { "class": "card-header py-3" });
+        var lessonHeader = $("<div>", { "class": "card-header" });
         lessonContent.append(lessonHeader);
+
+        //row
+        var row = $("<div>", { "class": "row" });
+        lessonHeader.append(row);
 
         //header
         var ButtonStart = $("<div>", { "class": "d-flex justify-content-center pt-5 pb-5" });
-        var btnButton = $("<div>", { "class": "btn btn-primary", "onclick": "start(this)", "text": " Bắt đầu làm bài thi" });
+        var btnButton = $("<div>", { "class": "btn btn-primary btn-lesson", "onclick": "start(this)", "text": " Bắt đầu bài học" });
         lessonContent.append(ButtonStart);
         ButtonStart.append(btnButton);
         //Body
@@ -79,22 +83,22 @@ var lessonService = {
         cardBody.append(lessonRow);
 
 
-        var tabsleft = $("<div>", { "id": "menu-left", "class": "col-md-3" });
+        var tabsleft = $("<div>", { "id": "menu-left", "class": "col-md-2" });
         var lessontabs = $("<div>", { "class": "lesson-tabs" });
         var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
 
 
-        var title = $("<div>", { "class": "lesson-header-title", "text": data.Title });
-        lessonHeader.append(title);
+        var title = $("<div>", { "class": "lesson-header-title col-lg-4", "text": data.Title });
+        row.append(title);
 
         if (data.TemplateType == 2) {
             if (data.Timer > 0) {
                 title.text(title.text() + " - thời gian: " + data.Timer + "p");
 
-                var counter = $("<div>", { "class": "text-center", "text": "Thời gian làm bài " });
+                var counter = $("<div>", { "class": "text-center col-lg-4", "text": "Thời gian làm bài " });
                 var counterdate = $("<span>", { "id": "counter", "class": "time-counter", "text": (data.Timer < 10 ? ("0" + data.Timer) : data.Timer) + ":00" });
                 counter.append(counterdate);
-                lessonHeader.append(counter);
+                row.append(counter);
             }
             if (data.Point > 0) {
                 title.text(title.text() + " (" + data.Point + "đ)");
@@ -116,9 +120,9 @@ var lessonService = {
 
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.ID });
 
-        var bodyright = $("<div>", { "class": "col-md-9" });
-        var button = $("<div>", { "class": "float-right" });
-        lessonHeader.append(button);
+        var bodyright = $("<div>", { "class": "col-md-10" });
+        var button = $("<div>", { "class": "text-right col-lg-4" });
+        row.append(button);
 
         var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "data-toggle": "tooltip", "title": "Quay lại", "onclick": "tab_goback()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
@@ -324,12 +328,12 @@ var render = {
 
         // tabs content
         var tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane fade", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
-        var itembody = $("<div>", { "class": "card-body" });
-        tabsitem.append(itembody);
+        //var itembody = $("<div>", { "class": "card-body" });
+        //tabsitem.append(itembody);
 
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
-        itembody.append(itembox);
-
+        var itemrow = $("<div>", { "class": "row"});
+        tabsitem.append(itembox);
 
         var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {
@@ -339,6 +343,7 @@ var render = {
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "Create.removePart('" + data.ID + "')" }));
         itembox.append(boxHeader);
+        itembox.append(itemrow);
         switch (data.Type) {
             case "TEXT":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
@@ -401,12 +406,12 @@ var render = {
                 }
                 break;
             case "QUIZ3":
-                var itemBody = $("<div>", { "class": "quiz-wrapper" });
+                var itemBody = $("<div>", { "class": "quiz-wrapper col-lg-9" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                itembox.append(itemBody);
+                itemrow.append(itemBody);
                 render.mediaContent(data, itemBody, "");
-                var answers_box = $("<div>", { "class": "answer-wrapper no-child" });
-                itembox.append(answers_box);
+                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-lg-3" });
+                itemrow.append(answers_box);
                 $(answers_box).droppable({
                     tolerance: "intersect",
                     accept: ".answer-item",
@@ -484,8 +489,8 @@ var render = {
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
 
-                var quiz_part = $("<div>", { "class": "quiz-pane" });
-                var answer_part = $("<div>", { "class": "answer-pane no-child" });
+                var quiz_part = $("<div>", { "class": "col-lg-8 quiz-pane" });
+                var answer_part = $("<div>", { "class": "col-lg-4 answer-pane no-child" });
                 quizitem.append(quiz_part);
                 quizitem.append(answer_part);
 
@@ -564,7 +569,7 @@ var render = {
     },
     answers: function (data, template) {
         var container = $("#" + data.ParentID + " .answer-wrapper");
-        var answer = $("<fieldset>", { "class": "answer-item" });
+        var answer = $("<fieldset>", { "class": "answer-item form-check" });
         switch (template) {
             case "QUIZ2":
 
@@ -610,9 +615,9 @@ var render = {
                 break;
             default:
                 answer.append($("<input>", { "type": "hidden" }));
-                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
+                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
-                    answer.append($("<label>", { "class": "answer-text", "text": data.Content }));
+                    answer.append($("<label>", { "class": "answer-text form-check-label", "text": data.Content}));
                 render.mediaContent(data, answer);
                 container.append(answer);
                 break;

@@ -6,41 +6,42 @@
     ViewData["Title"] = Data.Title;
 }
 
+<div class="container">
+    <div class="breadcumb" style="padding: 0 0 15px; font-weight:bold;">
+        <a href="@Url.Action("Detail","Curriculum")/@Course.ID">@Course.Name</a> / @Data.Title
+    </div>
 
-<div class="breadcumb" style="padding: 0 0 15px; font-weight:bold;">
-    <a href="@Url.Action("Detail","Curriculum")/@Course.ID">@Course.Name</a> / @Data.Title
-</div>
+    <div id="lessonContainer">
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
+        <input type="hidden" id="action" value="" />
+        <div class="modal-dialog modal-xl lesson-modal" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="#" id="modal-body" name="modalForm" enctype="multipart/form-data">
+                        <ul class="template_type">
+                            <li class="template_type_item">
+                                <span>Nội dung bài giảng</span>
+                                <img src="" alt="">
+                            </li>
+                            <li class="lesson-part__type__item">
+                                <span>Nội dung bài tập</span>
+                                <i class="fa fa-check-square-o"></i>
 
-<div id="lessonContainer">
-</div>
-<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
-    <input type="hidden" id="action" value="" />
-    <div class="modal-dialog modal-xl lesson-modal" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Modal title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="#" id="modal-body" name="modalForm" enctype="multipart/form-data">
-                    <ul class="template_type">
-                        <li class="template_type_item">
-                            <span>Nội dung bài giảng</span>
-                            <img src="" alt="">
-                        </li>
-                        <li class="lesson-part__type__item">
-                            <span>Nội dung bài tập</span>
-                            <i class="fa fa-check-square-o"></i>
-
-                        </li>
-                    </ul>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Lưu</button>
+                            </li>
+                        </ul>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Lưu</button>
+                </div>
             </div>
         </div>
     </div>

@@ -10,185 +10,184 @@
 }
 
 <!-- Begin Page Content -->
-
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <div class="row">
-            <div class="col-lg-6">
-                <h4 class="m-0 font-weight-bold text-primary">Thông tin giáo trình</h4>
+    <div class="container">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h4 class="m-0 font-weight-bold text-primary">Thông tin giáo trình</h4>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="float-right">
+                            <button type="button" onclick="addCourse()" class="btn btn-primary" data-placement="top" title="Tạo giáo trình" data-toggle="modal" data-target="#courseModal"> <i class="fas fa-plus"></i> </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-6">
-                <div class="float-right">
-                    <button type="button" onclick="addCourse()" class="btn btn-primary" data-placement="top" title="Tạo giáo trình" data-toggle="modal" data-target="#courseModal"> <i class="fas fa-plus"></i> </button>
+
+            <div class="card-body">
+                <div class="search-filter">
+                    <div class="form-row">
+                        <div class="form-group row col-md-4">
+                            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                            <div class="col-sm-8">
+                                <select id="SubjectID" class="form-control" onchange="LoadGrade(this)">
+                                    @{
+                                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                        {
+                                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                        }
+
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row col-md-4 offset-md-4">
+                            <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+                            <div class="col-sm-8">
+                                <select id="GradeID" class="form-control" onchange="LoadCourse()">
+                                    @{
+                                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                        {
+                                            <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
+                                        }
+
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="tblCurriculum" class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên giáo trình</th>
+                                <th>Tên môn học</th>
+                                <th>Cấp độ</th>
+                                <th>Mô tả</th>
+                                <th>Người tạo</th>
+                                <th>Ngày tạo</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card shadow clone mt-4">
+            <div class="card-header">
+                <h4 class="m-0 font-weight-bold text-primary">Kho giáo trình</h4>
+            </div>
+            <div class="card-body">
+                <div class="search-filter">
+                    <div class="form-row">
+                        <div class="form-group row col-md-4">
+                            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                            <div class="col-sm-8">
+                                <select id="ModSubjectID" class="form-control" onchange="LoadModGrade(this)">
+                                    @{
+                                        for (int i = 0; listModSubject != null && i < listModSubject.Count; i++)
+                                        {
+                                            <option value="@listModSubject[i].ID">@listModSubject[i].Name</option>
+                                        }
+
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row col-md-4 offset-md-4">
+                            <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+                            <div class="col-sm-8">
+                                <select id="ModGradeID" class="form-control" onchange="LoadModCourse()">
+                                    @{
+                                        for (int i = 0; listModGrade != null && i < listModGrade.Count; i++)
+                                        {
+                                            <option value="@listModGrade[i].ID" for="@listModGrade[i].SubjectID">@listModGrade[i].Name</option>
+                                        }
+
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="modCourseWrapper" class="card-deck">
+                    <div class="card">
+                        <img src="~/img/english.jpg" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title">Combo "Hack não 1500 từ tiếng Anh" + "Hack não IELTS" (Trọn bộ 3 cuốn)</h5>
+                            <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+                            <button type="button" class="btn btn-primary"><i class="fas fa-download"></i> Tải về</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
+        <!-- End of Main Content -->
 
-    <div class="card-body">
-        <div class="search-filter">
-            <div class="form-row">
-                <div class="form-group row col-md-4">
-                    <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
-                    <div class="col-sm-8">
-                        <select id="SubjectID" class="form-control" onchange="LoadGrade(this)">
-                            @{
-                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                {
-                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                }
-
-                            }
-                        </select>
+        <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Sửa thông tin</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                </div>
-                <div class="form-group row col-md-4 offset-md-4">
-                    <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
-                    <div class="col-sm-8">
-                        <select id="GradeID" class="form-control" onchange="LoadCourse()">
-                            @{
-                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                {
-                                    <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                }
+                    <div class="modal-body">
+                        <form action="@Url.Action("CreateOrUpdate","Curriculum")" id="modal-body" name="modalForm" enctype="multipart/form-data" method="post">
+                            <input type="hidden" name="ID" />
+                            <input type="hidden" name="CreateUser" value="@user" />
+                            <input type="hidden" name="IsActive" value="false" />
+                            <div class="form-group">
+                                <label class="col-form-label">Tên giáo trình:</label>
+                                <input type="text" class="form-control" name="Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-form-label">Môn học:</label>
+                                <select name="SubjectID" class="form-control" onchange="ChangeGrade(this)">
+                                    @{
+                                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                        {
+                                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                        }
 
-                            }
-                        </select>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-form-label">Cấp độ:</label>
+                                <select Name="GradeID" class="form-control">
+                                    @{
+                                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                        {
+                                            <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
+                                        }
+
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="message-text" class="col-form-label">Mô tả:</label>
+                                <textarea class="form-control" name="Description"></textarea>
+                            </div>
+                        </form>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="table-responsive">
-            <table id="tblCurriculum" class="table table-bordered" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Tên giáo trình</th>
-                        <th>Tên môn học</th>
-                        <th>Cấp độ</th>
-                        <th>Mô tả</th>
-                        <th>Người tạo</th>
-                        <th>Ngày tạo</th>
-                        <th>Trạng thái</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-
-
-
-<div class="card shadow clone mt-4">
-    <div class="card-header">
-        <h4 class="m-0 font-weight-bold text-primary">Kho giáo trình</h4>
-    </div>
-    <div class="card-body">
-        <div class="search-filter">
-            <div class="form-row">
-                <div class="form-group row col-md-4">
-                    <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
-                    <div class="col-sm-8">
-                        <select id="ModSubjectID" class="form-control" onchange="LoadModGrade(this)">
-                            @{
-                                for (int i = 0; listModSubject != null && i < listModSubject.Count; i++)
-                                {
-                                    <option value="@listModSubject[i].ID">@listModSubject[i].Name</option>
-                                }
-
-                            }
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group row col-md-4 offset-md-4">
-                    <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
-                    <div class="col-sm-8">
-                        <select id="ModGradeID" class="form-control" onchange="LoadModCourse()">
-                            @{
-                                for (int i = 0; listModGrade != null && i < listModGrade.Count; i++)
-                                {
-                                    <option value="@listModGrade[i].ID" for="@listModGrade[i].SubjectID">@listModGrade[i].Name</option>
-                                }
-
-                            }
-                        </select>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary" onclick="return Submit('modalForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="modCourseWrapper" class="card-deck">
-            <div class="card">
-                <img src="~/img/english.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Combo "Hack não 1500 từ tiếng Anh" + "Hack não IELTS" (Trọn bộ 3 cuốn)</h5>
-                    <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-                    <button type="button" class="btn btn-primary"><i class="fas fa-download"></i> Tải về</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- End of Main Content -->
-
-<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Sửa thông tin</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="@Url.Action("CreateOrUpdate","Curriculum")" id="modal-body" name="modalForm" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="ID" />
-                    <input type="hidden" name="CreateUser" value="@user" />
-                    <input type="hidden" name="IsActive" value="false" />
-                    <div class="form-group">
-                        <label class="col-form-label">Tên giáo trình:</label>
-                        <input type="text" class="form-control" name="Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Môn học:</label>
-                        <select name="SubjectID" class="form-control" onchange="ChangeGrade(this)">
-                            @{
-                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                {
-                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                }
-
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Cấp độ:</label>
-                        <select Name="GradeID" class="form-control">
-                            @{
-                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                {
-                                    <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                }
-
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="message-text" class="col-form-label">Mô tả:</label>
-                        <textarea class="form-control" name="Description"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('modalForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 <script>
@@ -233,7 +232,7 @@
                             "<td>" + item.TeacherName + "</td>" +
                             "<td>" + created + "</td>" + active +
                             "<td><button type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#courseModal\"  onclick=\"EditCourse(this,'" + item.ID + "')\" data-placement=\"top\" title=\"Sửa\"> <i class=\"fas fa-edit\"></i> </button>" +
-                            "<button type=\"button\" class=\"btn btn-danger\" onclick=\"if(confirm('Chắc chắn xóa?')){ ExcuteOnlyItem('" + item.ID + "', '@Url.Action("Remove","Curriculum")', ReloadCourse)}\" data-placement=\"top\" title=\"Xóa\"> <i class=\"fas fa-trash\"></i> </button></td>" +
+                            "<button type=\"button\" class=\"btn btn-remove btn-danger\" onclick=\"if(confirm('Chắc chắn xóa?')){ ExcuteOnlyItem('" + item.ID + "', '@Url.Action("Remove","Curriculum")', ReloadCourse)}\" data-placement=\"top\" title=\"Xóa\"> <i class=\"fas fa-trash\"></i> </button></td>" +
                             "</tr>"
                         );
                     }
@@ -318,7 +317,7 @@
         $(wrapper).find('option[for!=' + subject + ']').hide();
         $(wrapper).find('option[for=' + subject + ']').show();
         if ($(wrapper).find('option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {
-           $(wrapper).val($(wrapper).find('option[for=' + subject + ']:first').attr('value'));
+            $(wrapper).val($(wrapper).find('option[for=' + subject + ']:first').attr('value'));
         }
     }
 
@@ -395,5 +394,6 @@
 
     var hideModal = function () {
         modal.modal('hide');
-    };
+        };
+
 </script>

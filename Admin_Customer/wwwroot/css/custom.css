@@ -8,6 +8,18 @@
 .navbar-search .btn-primary {
     padding: 0 15px;
 }
+#tblCurriculum .btn-remove,
+#tblCurriculum .btn-primary {
+    margin: 0 5px;
+    font-size: 0.8rem;
+    padding: 6px 10px;
+}
+
+#list-detail .text-right .btn-primary,
+#list-detail .text-right .btn-danger {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+}
 
 #top-menu {
     border-bottom: 1px solid #e3e7ed;
@@ -18,28 +30,11 @@
     margin: 0 5px;
 }
 
-.card-header .float-right {
-    position: absolute;
-    right: 15px;
-    top: 0px;
-}
-
-.lesson .float-right {
-    top: 10px;
-}
-
 .bg-gradient-primary .nav-item:active,
 .bg-gradient-primary .nav-item:focus,
 .bg-gradient-primary .nav-item:hover {
     background-color: #224abe;
     font-weight: bold;
-}
-
-.card-header .text-center {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 15px;
 }
 
 #collapseOne .collapse-item:hover #icon-submenu,
@@ -70,9 +65,9 @@
     position: relative;
 }
 
-    #icon-submenu .fas:hover {
-        color: #1865f2;
-    }
+#icon-submenu .fas:hover {
+    color: #1865f2;
+}
 
 #list-detail .sub-menu,
 #list-detail .sidebar,
@@ -80,14 +75,13 @@
     width: 100% !important;
 }
 
-    #list-detail .nav-item .nav-link:hover {
-        background: #eaecf4;
-        border-radius: 5px;
-    }
+#menu-left{
+    border-right: 1px solid #ccc;
+}
 
-#menu-left {
-    border-right: 1px solid #ddd;
-    padding: 0;
+#list-detail .nav-item .nav-link:hover {
+    background: #eaecf4;
+    border-radius: 5px;
 }
 
 #lesson-detail {
@@ -95,9 +89,29 @@
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
 }
 
+.lesson-box .text-right{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.lesson .btn-sort,
+.lesson .btn-edit,
+.lesson .btn-add,
+.lesson .btn-remove {
+    margin: 5px;
+    font-size: 0.8rem;
+    padding: 6px 10px;
+}
+
 .nav-pills .nav-link.active {
     color: #1865f2;
     background-color: transparent;
+}
+
+.nav-pills .nav-link:hover {
+    background-color: #d8dbe0;
+    border-color: #d8dbe0;
 }
 
 .nav-pills .nav-link {
@@ -157,7 +171,6 @@
 .media-holder {
     max-width: 100%;
     min-width: 50%;
-    margin: 3px 0;
 }
 
 video, audio {
@@ -230,8 +243,8 @@ video, audio {
     padding: 0;
     position: relative;
     border: none;
-    height: 2rem;
-    width: 6rem;
+    height: 1.7rem;
+    width: 4rem;
     border-radius: 2.5rem;
 }
 
@@ -245,7 +258,7 @@ video, audio {
 
 .btn-toggle.btn-lg:before {
     line-height: 2.5rem;
-    width: 6rem;
+    width: 4rem;
     text-align: center;
     font-weight: 600;
     font-size: 1rem;
@@ -257,16 +270,16 @@ video, audio {
 }
 
 .btn-toggle.btn-lg.active > .handle {
-    left: 4.2rem;
+    left: 2.5rem;
     transition: left 0.5s;
 }
 
 .btn-toggle.btn-lg > .handle {
     position: absolute;
-    top: 0.22rem;
-    left: 0.3125rem;
-    width: 1.5rem;
-    height: 1.5rem;
+    top: 0.16rem;
+    left: 0.3rem;
+    width: 1.35rem;
+    height: 1.35rem;
     border-radius: 1.875rem;
     background: #fff;
     transition: left 0.5s;
@@ -284,10 +297,10 @@ video, audio {
     padding: 2px 0 !important;
 }
 
-    .rounded-quiz.completed {
-        background-color: #666;
-        color: #36b9cc;
-    }
+.rounded-quiz.completed {
+    background-color: #666;
+    color: #36b9cc;
+}
 
 .number {
     color: #999;
@@ -300,6 +313,7 @@ video, audio {
     text-align: center;
     padding: 19px 0;
     border-radius: 50%;
+    z-index: 99;
     background: rgb(238,238,238);
     background: -moz-linear-gradient(top, rgb(238,238,238) 0%, rgb(204,204,204) 100%);
     background: -webkit-linear-gradient(top, rgb(238,238,238) 0%,rgb(204,204,204) 100%);
@@ -377,48 +391,52 @@ video, audio {
 .quiz-item {
     display: block;
     width: 100%;
-    padding: 20px 0;
+    padding: 15px 0;
     border-bottom: solid 1px #ccc;
 }
 
-.quiz-box-header {
+#scheduleTable.table th,
+#scheduleTable.table td {
+    vertical-align: initial;
+    text-align: center;
+}
+/*.QUIZ1 .quiz-box-header {
     padding: 20px 0;
 }
-
+*/
 .part-box-header .title {
     line-height: inherit;
     text-align: justify;
+    color: #333;
 }
 
 .QUIZ3 .quiz-pane {
-    width: 48%;
-    margin-right: 2%;
     display: inline-block;
-    vertical-align: top;
 }
 
 .QUIZ3 .pane-item {
     display: block;
-    margin: 7px;
-    border: dotted 1px #ccc;
+    margin: 10px 0;
     border-radius: 5px;
     padding: 10px;
     background: #ddd;
 }
 
 .QUIZ3 .ui-draggable-handle {
-    margin: 7px;
-    border: dotted 1px #ccc;
+    margin: 5px 0;
     border-radius: 5px;
-    padding: 5px;
+    padding: 2px;
     color: #fff;
     background-color: #4e73df;
     border-color: #4e73df;
 }
 
+.QUIZ3 .ui-draggable-handle .img-fluid {
+    width: 100%;
+}
+
 .QUIZ3 .no-child .ui-draggable-handle {
     color: #333;
-    margin: 7px;
     padding: 5px;
     background-color: #ddd;
     border-color: #ddd;
@@ -432,27 +450,33 @@ video, audio {
 }
 
 .QUIZ3 .answer-pane {
-    width: 48%;
     display: inline-block;
-    border: dotted 1px #ccc;
+    border: 1px dashed #ccc;
     text-align: center;
 }
 
 .QUIZ3 .answer-wrapper .answer-box,
 .QUIZ3 .answer-wrapper .answer-item {
     display: inline-block;
-    width: 48%;
-    text-align: left;
     vertical-align: top;
-    position: relative;
-    margin: 3% 0.5%;
+    width: 100%;
 }
+
+.QUIZ3 .answer-wrapper .answer-item .img-fluid {
+    width: 100%;
+}
+
+.QUIZ3 .answer-wrapper {
+    overflow: scroll;
+    max-height: 500px;
+}
+
+.QUIZ3 .pane-item .quiz-text {
+    color: #333;
+    font-weight: bold;
+}
+
 /* custom sesson */
-
-.lesson-box .btn-primary {
-    margin-right: 10px;
-}
-
 .lesson-modal .lesson_parts .part_content .fieldQuestion .quiz-remove {
     right: 10px;
     padding: 3px 7px 1px 8px;
