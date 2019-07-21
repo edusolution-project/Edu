@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
@@ -26,6 +27,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
+        private readonly LearningHistoryService _learningHistoryService;
 
         public ExampleController(ExamService service,
             ExamDetailService examDetailService
@@ -37,8 +39,10 @@ namespace BaseCustomerMVC.Controllers.Student
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
             , TeacherService teacherService
+            , LearningHistoryService learningHistoryService
             )
         {
+            _learningHistoryService = learningHistoryService;
             _service = service;
             _classService = classService;
             _lessonService = lessonService;
@@ -148,15 +152,32 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var _lesson = _lessonService.GetItemByID(item.LessonID);
                 var _class = _classService.GetItemByID(item.ClassID);
-                var _schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID).FirstOrDefault();
+                if(_class == null)
+                {
+                    return new JsonResult("No Class for Student");
+                }
+                var _currentSchedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID);
+                var _schedule = _currentSchedule != null && _currentSchedule.Count() > 0 ? _currentSchedule.FirstOrDefault() : null;
+                if(_schedule != null)
+                {
+                    item.LessonScheduleID = _schedule.ID;
+                    item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
+                    && o.StudentID == userid
+                    && o.Status == true
+                    && o.TeacherID == _class.TeacherID
+                    && o.LessonScheduleID == _schedule.ID).Count();
+                }
+                else
+                {
+                   item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
+                   && o.StudentID == userid
+                   && o.Status == true
+                   && o.TeacherID == _class.TeacherID).Count();
+                }
                 item.Timer = _lesson.Timer;
                 item.Point = 0;
-                item.LessonScheduleID = _schedule.ID;
-                item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
-                && o.StudentID == userid
-                && o.Status == true
-                && o.TeacherID == _class.TeacherID
-                && o.LessonScheduleID == _schedule.ID).Count();
+               
+                
                 item.StudentID = userid;
                 item.TeacherID = _class.TeacherID;
                 item.ID = null;
@@ -184,6 +205,16 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             if (!_service.IsOverTime(item.ExamID))
             {
+                var exam = _service.GetItemByID(item.ExamID);
+                _learningHistoryService.CreateHist(new LearningHistoryEntity()
+                {
+                    ClassID = exam.ClassID,
+                    LessonID = exam.LessonID,
+                    LessonPartID = item.LessonPartID,
+                    QuestionID = item.QuestionID,
+                    Time = DateTime.Now,
+                    StudentID = User.Claims.GetClaimByType("UserID").Value
+                });
                 if (string.IsNullOrEmpty(item.ID) || item.ID == "0" || item.ID == "null")
                 {
                     var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();

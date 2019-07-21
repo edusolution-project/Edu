@@ -15,5 +15,7 @@ namespace BaseCustomerMVC.Models
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }
+        [JsonProperty("IsView")]
+        public bool IsView { get; set; }
     }
 }

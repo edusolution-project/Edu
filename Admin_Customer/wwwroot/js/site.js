@@ -82,7 +82,7 @@ function Submit(formName, url, actionName, fn) {
     var data = new FormData(form);
     Ajax(_url, _method, data, true)
         .then(function (res) {
-            if (fn != void 0) fn();
+            if (fn != void 0) fn(res);
         }).catch(function (res) {
             console.log(actionName, res);
         });
@@ -181,21 +181,21 @@ function hideModal() {
 
 function ToggleStatus(obj) {
     var action = $(obj).attr("onclick");
-    if(action.indexOf("UnPublish") > 0)
-            $(obj).attr("onclick", action.replace("UnPublish","Publish"));
+    if (action.indexOf("UnPublish") > 0)
+        $(obj).attr("onclick", action.replace("UnPublish", "Publish"));
     else
-            $(obj).attr("onclick", action.replace("Publish","UnPublish"));
+        $(obj).attr("onclick", action.replace("Publish", "UnPublish"));
     $(obj).toggleClass("btn-success").toggleClass("btn-danger");
 }
 
 //var urlStart = '@Url.Action("Create","Example")';
 function StartDoExam(url, Timer, TeacherID, ClassID, LessonID, LessonScheduleID, StudentID) {
     var dataform = new FormData();
-        dataform.append("Timer", Timer);
-        dataform.append("TeacherID", TeacherID);
-        dataform.append("ClassID", ClassID);
-        dataform.append("LessonID", LessonID);
-        dataform.append("LessonScheduleID", LessonScheduleID);
+    dataform.append("Timer", Timer);
+    dataform.append("TeacherID", TeacherID);
+    dataform.append("ClassID", ClassID);
+    dataform.append("LessonID", LessonID);
+    dataform.append("LessonScheduleID", LessonScheduleID);
     dataform.append("StudentID", StudentID);
     Ajax(url, "POST", dataform, false)
         .then(function (res) {
@@ -207,10 +207,10 @@ function StartDoExam(url, Timer, TeacherID, ClassID, LessonID, LessonScheduleID,
 
 }
 //var urlComplete = '@Url.Action("CompleteExam","Example")';
-function CompelteExample(url,ExamID,StudentID) {
+function CompelteExample(url, ExamID, StudentID) {
     var dataform = new FormData();
-        dataform.append("ExamID", ExamID);
-        dataform.append("StudentID", StudentID);
+    dataform.append("ExamID", ExamID);
+    dataform.append("StudentID", StudentID);
     Ajax(url, "POST", dataform, false)
         .then(function (res) {
             console.log(res);
@@ -220,14 +220,14 @@ function CompelteExample(url,ExamID,StudentID) {
         })
 }
 //var urlChose = '@Url.Action("CreateDetails","Example")';
-function ChosenAnswer(url,ID, ExamID, QuestionID, AnswerID, StudentID,AnswerValue) {
+function ChosenAnswer(url, ID, ExamID, QuestionID, AnswerID, StudentID, AnswerValue) {
     var dataform = new FormData();
-        dataform.append("ExamID", ExamID);
-        dataform.append("ID", ID);
-        dataform.append("AnswerID", AnswerID);
-        dataform.append("QuestionID", QuestionID);
-        dataform.append("StudentID", StudentID);
-        dataform.append("AnswerValue", AnswerValue);
+    dataform.append("ExamID", ExamID);
+    dataform.append("ID", ID);
+    dataform.append("AnswerID", AnswerID);
+    dataform.append("QuestionID", QuestionID);
+    dataform.append("StudentID", StudentID);
+    dataform.append("AnswerValue", AnswerValue);
     Ajax(url, "POST", dataform, false)
         .then(function (res) {
             console.log(res);

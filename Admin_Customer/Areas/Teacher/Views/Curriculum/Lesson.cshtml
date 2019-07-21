@@ -1,9 +1,9 @@
 ﻿
 @{
-    ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
     var Course = ViewBag.Course as BaseCustomerEntity.Database.CourseEntity;
+    ViewData["Title"] = Data.Title;
 }
 
 <div class="container">

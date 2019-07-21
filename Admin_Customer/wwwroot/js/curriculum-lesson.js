@@ -1,6 +1,6 @@
 ﻿var urlBase = "/teacher/";
 
-let myEditor;
+var myEditor;
 
 //lesson
 var urlLesson = {
