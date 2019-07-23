@@ -8,10 +8,9 @@
 .navbar-search .btn-primary {
     padding: 0 15px;
 }
-
 #tblCurriculum .btn-remove,
 #tblCurriculum .btn-primary {
-    margin: 0 5px;
+    margin: 0.5rem;
     font-size: 0.8rem;
     padding: 6px 10px;
 }
@@ -26,9 +25,12 @@
     border-bottom: 1px solid #e3e7ed;
 }
 
-#scheduleTable .btn,
-#dataTable .btn {
-    margin: 0 5px;
+#scheduleTable .btn-primary,
+#scheduleTable .btn-danger,
+#dataTable .btn-primary,
+#dataTable .btn-danger {
+    font-size: 0.8rem;
+    margin: auto 0.2rem;
 }
 
 .bg-gradient-primary .nav-item:active,
@@ -66,9 +68,9 @@
     position: relative;
 }
 
-    #icon-submenu .fas:hover {
-        color: #1865f2;
-    }
+#icon-submenu .fas:hover {
+    color: #1865f2;
+}
 
 #list-detail .sub-menu,
 #list-detail .sidebar,
@@ -76,7 +78,7 @@
     width: 100% !important;
 }
 
-#menu-left {
+#menu-left{
     border-right: 1px solid #ccc;
 }
 
@@ -88,12 +90,6 @@
 #lesson-detail {
     background-color: #fff;
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
-}
-
-.lesson-box .text-right {
-    position: absolute;
-    top: 10px;
-    right: 10px;
 }
 
 .lesson .btn-sort,
@@ -115,15 +111,10 @@
     border-color: #d8dbe0;
 }
 
-.nav-pills .nav-link {
-    color: #444;
-    margin-right: 10px;
+.nav-pills .nav-link:hover {
+    background-color: #d8dbe0;
+    border-color: #d8dbe0;
 }
-
-    .nav-pills .nav-link:hover {
-        background-color: #d8dbe0;
-        border-color: #d8dbe0;
-    }
 
 #pills-tab .far,
 #pills-tab .fab,
@@ -298,10 +289,10 @@ video, audio {
     padding: 2px 0 !important;
 }
 
-    .rounded-quiz.completed {
-        background-color: #666;
-        color: #36b9cc;
-    }
+.rounded-quiz.completed {
+    background-color: #666;
+    color: #36b9cc;
+}
 
 .number {
     color: #999;
@@ -398,13 +389,9 @@ video, audio {
 
 #scheduleTable.table th,
 #scheduleTable.table td {
-    vertical-align: middle;
-    text-align: left;
+    vertical-align: initial;
 }
-/*.QUIZ1 .quiz-box-header {
-    padding: 20px 0;
-}
-*/
+
 .part-box-header .title {
     line-height: inherit;
     text-align: justify;
@@ -432,9 +419,9 @@ video, audio {
     border-color: #4e73df;
 }
 
-    .QUIZ3 .ui-draggable-handle .img-fluid {
-        width: 100%;
-    }
+.QUIZ3 .ui-draggable-handle .img-fluid {
+    width: 100%;
+}
 
 .QUIZ3 .no-child .ui-draggable-handle {
     color: #333;
@@ -454,6 +441,7 @@ video, audio {
     display: inline-block;
     border: 1px dashed #ccc;
     text-align: center;
+    top: -12px;
 }
 
 .QUIZ3 .answer-wrapper .answer-box,
@@ -463,13 +451,13 @@ video, audio {
     width: 100%;
 }
 
-    .QUIZ3 .answer-wrapper .answer-item .img-fluid {
-        width: 100%;
-    }
+.QUIZ3 .answer-wrapper .answer-item .img-fluid {
+    width: 100%;
+}
 
 .QUIZ3 .answer-wrapper {
     overflow: scroll;
-    max-height: 500px;
+    max-height: 555px;
 }
 
 .QUIZ3 .pane-item .quiz-text {

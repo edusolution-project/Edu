@@ -125,7 +125,7 @@ var Create = {
         $(modalForm).empty();
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": lessonID }));
         $('#action').val("LessonPart/" + urlLessonPart.CreateOrUpdate);
-        var selectTemplate = $("<select>", { "class": "templatetype", "onchange": "chooseTemplate()", "name": "Type" });
+        var selectTemplate = $("<select>", { "class": "templatetype form-control", "onchange": "chooseTemplate()", "name": "Type" });
         $(modalForm).append(selectTemplate);
         $(selectTemplate).append("<option value='0'>--- Chọn kiểu nội dung ---</option>")
             .append("<option value='TEXT'>Nội dung văn bản</option>")
