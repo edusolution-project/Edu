@@ -21,7 +21,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _service;
-        private readonly Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
+        private readonly ExamService _examService;
+        private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
 
         public LessonScheduleController(
             // GradeService gradeservice
@@ -31,7 +32,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CourseService courseService,
             ChapterService chapterService,
             LessonService lessonService,
-            LessonScheduleService service)
+            LessonScheduleService service,
+            ExamService examService)
         {
             //_gradeService = gradeservice;
             //_subjectService = subjectService;
@@ -41,7 +43,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _chapterService = chapterService;
             _lessonService = lessonService;
             _service = service;
-            _mapping = new Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel>();
+            _examService = examService;
+            _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
         }
 
         [Obsolete]
@@ -115,6 +118,78 @@ namespace BaseCustomerMVC.Controllers.Teacher
             };
             return new JsonResult(response);
         }
+
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetExamList(DefaultModel model, string ClassID = "")
+        {
+            TeacherEntity teacher = null;
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+            {
+                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+                if (teacher == null)
+                {
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giảng viên" }
+                    });
+                }
+            }
+            if (string.IsNullOrEmpty(ClassID))
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var currentClass = _classService.GetItemByID(ClassID);
+            if (currentClass == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var course = _courseService.GetItemByID(currentClass.CourseID);
+
+            if (course == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giáo trình" }
+                    });
+            }
+
+            var examlist = new ClassScheduleViewModel(course)
+            {
+                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.TemplateType == LESSON_TEMPLATE.EXAM).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                           let schedule = _service.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
+                           where schedule != null
+                           select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               StartDate = schedule.StartDate,
+                               EndDate = schedule.EndDate,
+                               StudentJoins = _examService.CreateQuery().Count(o => o.LessonScheduleID == schedule.ID)
+                           })).ToList()
+            };
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", examlist },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
 
         [HttpPost]
         [Obsolete]

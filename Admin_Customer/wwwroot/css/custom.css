@@ -8,6 +8,7 @@
 .navbar-search .btn-primary {
     padding: 0 15px;
 }
+
 #tblCurriculum .btn-remove,
 #tblCurriculum .btn-primary {
     margin: 0 5px;
@@ -65,9 +66,9 @@
     position: relative;
 }
 
-#icon-submenu .fas:hover {
-    color: #1865f2;
-}
+    #icon-submenu .fas:hover {
+        color: #1865f2;
+    }
 
 #list-detail .sub-menu,
 #list-detail .sidebar,
@@ -75,7 +76,7 @@
     width: 100% !important;
 }
 
-#menu-left{
+#menu-left {
     border-right: 1px solid #ccc;
 }
 
@@ -89,7 +90,7 @@
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
 }
 
-.lesson-box .text-right{
+.lesson-box .text-right {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -297,10 +298,10 @@ video, audio {
     padding: 2px 0 !important;
 }
 
-.rounded-quiz.completed {
-    background-color: #666;
-    color: #36b9cc;
-}
+    .rounded-quiz.completed {
+        background-color: #666;
+        color: #36b9cc;
+    }
 
 .number {
     color: #999;
@@ -397,8 +398,8 @@ video, audio {
 
 #scheduleTable.table th,
 #scheduleTable.table td {
-    vertical-align: initial;
-    text-align: center;
+    vertical-align: middle;
+    text-align: left;
 }
 /*.QUIZ1 .quiz-box-header {
     padding: 20px 0;
@@ -431,9 +432,9 @@ video, audio {
     border-color: #4e73df;
 }
 
-.QUIZ3 .ui-draggable-handle .img-fluid {
-    width: 100%;
-}
+    .QUIZ3 .ui-draggable-handle .img-fluid {
+        width: 100%;
+    }
 
 .QUIZ3 .no-child .ui-draggable-handle {
     color: #333;
@@ -462,9 +463,9 @@ video, audio {
     width: 100%;
 }
 
-.QUIZ3 .answer-wrapper .answer-item .img-fluid {
-    width: 100%;
-}
+    .QUIZ3 .answer-wrapper .answer-item .img-fluid {
+        width: 100%;
+    }
 
 .QUIZ3 .answer-wrapper {
     overflow: scroll;

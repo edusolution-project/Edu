@@ -17,5 +17,8 @@ namespace BaseCustomerMVC.Models
         public DateTime EndDate { get; set; }
         [JsonProperty("IsView")]
         public bool IsView { get; set; }
+        [JsonProperty("StudentJoins")]
+        public long StudentJoins { get; set; }
+
     }
 }
