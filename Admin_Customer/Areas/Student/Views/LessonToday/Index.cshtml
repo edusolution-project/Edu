@@ -3,63 +3,63 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
 }
-
-<!-- Begin Page Content -->
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Thông tin bài học hôm nay</h6>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="table-responsive">
-                <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
-                    <tbody>
-                        <tr><td colspan="2">Preliminary English</td></tr>
-                        <tr>
-                            <td>*</td>
-                            <td><a href="@Url.Action("index" , "CheckStudent")">Bài kiểm tra số 1</a></td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 1 Questions 1-7</a></td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 2 Questions 8-13</a></td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 3 Questions 14-19</a></td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 4 Questions 20-25</a></td>
-                        </tr>
-                        <tr><td colspan="2">Preliminary English 2</td></tr>
-                        <tr>
-                            <td>1</td>
-                            <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 1 Questions 1-7</a></td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 2 Questions 8-13</a></td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 3 Questions 14-19</a></td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 4 Questions 20-25</a></td>
-                        </tr>
-                    </tbody>
-                </table>
+    <div class="container">
+        <!-- Begin Page Content -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Thông tin bài học hôm nay</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="table-responsive">
+                        <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
+                            <tbody>
+                                <tr><td colspan="2">Preliminary English</td></tr>
+                                <tr>
+                                    <td>*</td>
+                                    <td><a href="@Url.Action("index" , "CheckStudent")">Bài kiểm tra số 1</a></td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 1 Questions 1-7</a></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 2 Questions 8-13</a></td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 3 Questions 14-19</a></td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 4 Questions 20-25</a></td>
+                                </tr>
+                                <tr><td colspan="2">Preliminary English 2</td></tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 1 Questions 1-7</a></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 2 Questions 8-13</a></td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 3 Questions 14-19</a></td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 4 Questions 20-25</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
+        <!-- End of Main Content -->
     </div>
-</div>
-<!-- End of Main Content -->
-
 @section Scripts{
     <script>
         function LoadData() {

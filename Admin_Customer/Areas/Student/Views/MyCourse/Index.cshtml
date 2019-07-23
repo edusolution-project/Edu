@@ -5,34 +5,34 @@
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
      ViewData["Title"] = "Khóa học của tôi - Danh sách khóa học";
 }
-
-<!-- Begin Page Content -->
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Danh sách khóa học</h6>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Tên khóa học</th>
-                        <th>Môn học</th>
-                        <th>Giáo trình</th>
-                        <th>Cấp độ</th>
-                        <th>Giáo viên</th>
-                        <th>Ngày bắt đầu</th>
-                        <th>Ngày kết thúc</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+    <div class="container">
+        <!-- Begin Page Content -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Danh sách khóa học</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên khóa học</th>
+                                <th>Môn học</th>
+                                <th>Giáo trình</th>
+                                <th>Cấp độ</th>
+                                <th>Giáo viên</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Ngày kết thúc</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+        <!-- End of Main Content -->
     </div>
-</div>
-<!-- End of Main Content -->
-
 @section Scripts{
     <script>
         function LoadData() {

@@ -760,9 +760,9 @@ var render = {
                 var itembox = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
-                    boxHeader.append($("<h4>", { "class": "title", "text": data.Content + point }));
+                    boxHeader.append($("<h5>", { "class": "title", "text": data.Content + point }));
                 else
-                    boxHeader.append($("<h4>", { "class": "title", "text": point }));
+                    boxHeader.append($("<h5>", { "class": "title", "text": point }));
 
                 render.mediaContent(data, boxHeader);
 
@@ -834,9 +834,9 @@ var render = {
                 break;
             default:
                 answer.append($("<input>", { "type": "hidden" }));
-                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
+                answer.append($("<input>", { "type": "radio", "id": data.ParentID , "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
-                    answer.append($("<label>", { "class": "answer-text form-check-label", "text": data.Content }));
+                    answer.append($("<label>", { "class": "answer-text form-check-label", "for": data.ParentID , "text": data.Content }));
                 render.mediaContent(data, answer);
                 container.append(answer);
                 break;

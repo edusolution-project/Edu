@@ -86,7 +86,7 @@ var lessonService = {
         cardBody.append(lessonRow);
 
 
-        var tabsleft = $("<div>", { "id": "menu-left", "class": "col-md-3" });
+        var tabsleft = $("<div>", { "id": "menu-left", "class": "col-md-2" });
         var lessontabs = $("<div>", { "class": "lesson-tabs" });
         var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
 
@@ -120,7 +120,7 @@ var lessonService = {
 
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.ID });
 
-        var bodyright = $("<div>", { "class": "col-md-9" });
+        var bodyright = $("<div>", { "class": "col-md-10" });
         var button = $("<div>", { "class": "text-right col-lg-4" });
         HeaderRow.append(button);
 
@@ -196,21 +196,21 @@ var render = {
 
         // tabs content
         var tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane fade", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
-        var itembody = $("<div>", { "class": "card-body" });
-        tabsitem.append(itembody);
+        //var itembody = $("<div>", { "class": "card-body" });
+        //tabsitem.append(itembody);
 
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
-        itembody.append(itembox);
+        tabsitem.append(itembox);
 
         //item row
         var ItemRow = $("<div>", { "class": "row"});
-        itembox.append(ItemRow);
-
+        
         var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {
             boxHeader.append($("<h5>", { "class": "title", "text": data.Title + time + point }));
         }
-        ItemRow.append(boxHeader);
+        itembox.append(boxHeader);
+        itembox.append(ItemRow);
         switch (data.Type) {
             case "TEXT":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
@@ -273,11 +273,11 @@ var render = {
                 }
                 break;
             case "QUIZ3":
-                var itemBody = $("<div>", { "class": "quiz-wrapper" });
+                var itemBody = $("<div>", { "class": "quiz-wrapper col-lg-9" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 ItemRow.append(itemBody);
                 render.mediaContent(data, itemBody, "");
-                var answers_box = $("<div>", { "class": "answer-wrapper no-child" });
+                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-lg-3" });
                 ItemRow.append(answers_box);
                 $(answers_box).droppable({
                     tolerance: "intersect",
@@ -359,10 +359,10 @@ var render = {
             case "QUIZ3":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
-                var quizitem = $("<div>", { "class": "quiz-item row", "id": data.ID });
+                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
 
-                var quiz_part = $("<div>", { "class": "quiz-pane col-6" });
-                var answer_part = $("<div>", { "class": "answer-pane no-child col-6" });
+                var quiz_part = $("<div>", { "class": "quiz-pane col-8" });
+                var answer_part = $("<div>", { "class": "answer-pane no-child col-4" });
                 quizitem.append(quiz_part);
                 quizitem.append(answer_part);
 
@@ -484,10 +484,12 @@ var render = {
                     container.append(answer);
                 break;
             default:
-                answer.append($("<input>", { "type": "hidden" }));
-                answer.append($("<input>", { "type": "radio", "class": "input-checkbox answer-checkbox", "onclick": "answerQuestion(this,'" + data.ParentID + "','" + data.ID + "','" + data.Content + "')", "name": "rd_" + data.ParentID }));
+                var form = $("<div>", { "class": "form-check" });
+                answer.append(form);
+                form.append($("<input>", { "type": "hidden" }));
+                form.append($("<input>", { "id": data.ID, "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
-                    answer.append($("<label>", { "class": "answer-text", "text": data.Content }));
+                    form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "text": data.Content }));
                 render.mediaContent(data, answer);
                 container.append(answer);
                 break;
@@ -535,7 +537,7 @@ var render = {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid" }));
+                    mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid lazy" }));
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -549,7 +551,7 @@ var render = {
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "src": data.Media.Path , "class": "img-fluid" }));
+                            mediaHolder.append($("<img>", { "src": data.Media.Path , "class": "img-fluid lazy" }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
