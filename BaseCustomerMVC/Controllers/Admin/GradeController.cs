@@ -88,7 +88,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                 { "Data", DataResponse }
             };
             return new JsonResult(response);
-
         }
 
         [HttpPost]

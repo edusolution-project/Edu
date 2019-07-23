@@ -130,7 +130,7 @@ namespace BaseCustomerMVC.Globals
                 }
             }
         }
-        
+
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             string ctrlName = context.RouteData.Values["Controller"].ToString();
@@ -159,7 +159,8 @@ namespace BaseCustomerMVC.Globals
                     {
                         var type = ctrl.User.Claims.GetClaimByType("Type").Value;
                         //context.Result = new LocalRedirectResult("/" + type + "/home/deny");
-                        context.Result = new JsonResult("Accept deny");
+                        context.Result = new JsonResult("Access deny");
+                        //new RedirectToRouteResult(new RouteValueDictionary(new { controller = "home", action = "login" }));
                     }
                 }
             }
