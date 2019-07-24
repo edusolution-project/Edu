@@ -406,11 +406,11 @@ var render = {
                 }
                 break;
             case "QUIZ3":
-                var itemBody = $("<div>", { "class": "quiz-wrapper col-lg-9" });
+                var itemBody = $("<div>", { "class": "quiz-wrapper col-lg-8" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itemrow.append(itemBody);
                 render.mediaContent(data, itemBody, "");
-                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-lg-3" });
+                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-lg-4" });
                 itemrow.append(answers_box);
                 $(answers_box).droppable({
                     tolerance: "intersect",
@@ -489,8 +489,8 @@ var render = {
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
 
-                var quiz_part = $("<div>", { "class": "col-lg-8 quiz-pane" });
-                var answer_part = $("<div>", { "class": "col-lg-4 answer-pane no-child" });
+                var quiz_part = $("<div>", { "class": "col-lg-6 quiz-pane" });
+                var answer_part = $("<div>", { "class": "col-lg-6 answer-pane no-child" });
                 quizitem.append(quiz_part);
                 quizitem.append(answer_part);
 
@@ -664,7 +664,7 @@ var render = {
     },
     mediaContent: function (data, wrapper, type = "") {
         if (data.Media != null) {
-            var mediaHolder = $("<div>", { "class": "media-holder " + type });
+            var mediaHolder = $("<div>", { "class": "ml-3 media-holder " + type });
             switch (type) {
                 case "IMG":
                     mediaHolder.append($("<img>", { "class": "img-fluid lazy" , "src": data.Media.Path }));

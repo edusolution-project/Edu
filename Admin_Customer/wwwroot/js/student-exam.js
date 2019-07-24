@@ -203,14 +203,14 @@ var render = {
         tabsitem.append(itembox);
 
         //item row
-        var ItemRow = $("<div>", { "class": "row"});
+        //var ItemRow = $("<div>", { "class": "row"});
         
         var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {
             boxHeader.append($("<h5>", { "class": "title", "text": data.Title + time + point }));
         }
         itembox.append(boxHeader);
-        itembox.append(ItemRow);
+        //itembox.append(ItemRow);
         switch (data.Type) {
             case "TEXT":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
@@ -534,7 +534,7 @@ var render = {
     },
     mediaContent: function (data, wrapper, type = "") {
         if (data.Media != null) {
-            var mediaHolder = $("<div>", { "class": "media-holder " + type });
+            var mediaHolder = $("<div>", { "class": "ml-3 media-holder " + type });
             switch (type) {
                 case "IMG":
                     mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid lazy" }));
