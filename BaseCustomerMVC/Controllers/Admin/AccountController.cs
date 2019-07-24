@@ -40,7 +40,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public ActionResult Index(DefaultModel model)
         {
-            ViewBag.Roles = _roleService.CreateQuery().Find(_ => true).SortBy(o => o.Name).ToList();
+            ViewBag.Role = _roleService.CreateQuery().Find(o => o.Code == "admin").SingleOrDefault();
             ViewBag.Model = model;
             return View();
         }
@@ -50,6 +50,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         public JsonResult GetList(DefaultModel model)
         {
             var filter = new List<FilterDefinition<AccountEntity>>();
+            var roleList = new List<string> { "admin", "superadmin" };
 
             if (!string.IsNullOrEmpty(model.SearchText))
             {
@@ -63,17 +64,22 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 filter.Add(Builders<AccountEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
+
+
+            filter.Add(Builders<AccountEntity>.Filter.Where(o => o.Type == "admin"));
+
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<AccountEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+            var roles = _roleService.CreateQuery().Find(o => roleList.Contains(o.Code)).ToList();
             var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse.Select(o=> new AccountViewModel(){
                     ID = o.ID,
                     UserName = o.UserName,
-                    RoleName = _roleService.GetItemByID(o.RoleID).Name ,
+                    RoleName = roles.SingleOrDefault(t=>t.ID== o.RoleID)?.Name ,
                     RoleID = o.RoleID,
                     Type = o.Type,
                     Name = Name(o.Type,o.UserID),
@@ -221,6 +227,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             }
         }
+
         [HttpGet]
         [Obsolete]
         public async Task<IActionResult> Export(DefaultModel model)

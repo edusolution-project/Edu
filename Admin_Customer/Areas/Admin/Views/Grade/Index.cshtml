@@ -33,15 +33,15 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>
+                                <th class='text-center'>
                                     <div class="input-group"><input type="checkbox" aria-label="Checkbox"></div>
                                 </th>
-                                <th>STT</th>
+                                <th class='text-center'>STT</th>
                                 @*<th>Mã</th>*@
-                                <th>Tên</th>
-                                <th>Ngày tạo</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
+                                <th class='text-center'>Tên</th>
+                                <th class='text-center'>Ngày tạo</th>
+                                <th class='text-center'>Trạng thái</th>
+                                <th class='text-center'>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -91,10 +91,10 @@
                                 </div>
                             </div>
                             <div class="form-group row col-md-6">
-                                <label for="staticText" class="col-sm-4 col-form-label">Root:</label>
+                                <label for="staticText" class="col-sm-4 col-form-label">Cấp độ gốc:</label>
                                 <div class="col-sm-8">
                                     <select id="input-option" name="ParentID" class="form-control">
-                                        <option value="0" selected>---- Is Root ----</option>
+                                        <option value="0" selected> ---- </option>
                                         @{
                                             for (int i = 0; listData != null && i < listData.Count; i++)
                                             {
@@ -147,17 +147,19 @@
                         console.log(item);
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","grade")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","grade")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","grade")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","grade")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
+
+                        var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.Created));
                         body.append("<tr>" +
-                            "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
-                            "<td>" + (i + 1) + "</td>" +
+                            "<td class='text-center'><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
+                            "<td class='text-center'>" + (i + 1) + "</td>" +
                             //"<td>" + item.Code +"</td>" +
                             "<td>" + item.Name + "</td>" +
-                            "<td>" + new Date(item.Created).toLocaleDateString() +"</td>"+active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","grade")','@Url.Action("create","grade")',this)\" type='button' data-placement='top' title='Sửa' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<td class='text-center'>" + date +"</td>"+active +
+                            "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","grade")','@Url.Action("create","grade")',this)\" type='button' data-placement='top' title='Sửa' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","grade")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"

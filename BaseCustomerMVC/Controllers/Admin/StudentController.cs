@@ -38,6 +38,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         public ActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;
+            ViewBag.Role = _roleService.CreateQuery().Find(o => o.Code == "student").SingleOrDefault();
             return View();
         }
 
@@ -347,9 +348,15 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 if (model.ArrID.Contains(","))
                 {
+                    var idArr = model.ArrID.Split(',');
                     var filter = Builders<StudentEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == false);
                     var update = Builders<StudentEntity>.Update.Set("IsActive", true);
                     var publish = _service.Collection.UpdateMany(filter, update);
+
+                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => idArr.Contains(o.UserID) && o.Type == "student" && o.IsActive != true);
+                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", true);
+                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
+
                     return new JsonResult(publish);
                 }
                 else
@@ -357,12 +364,19 @@ namespace BaseCustomerMVC.Controllers.Admin
                     var filter = Builders<StudentEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == false);
                     var update = Builders<StudentEntity>.Update.Set("IsActive", true);
                     var publish = _service.Collection.UpdateMany(filter, update);
+
+                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => model.ArrID == o.UserID && o.Type == "student" && o.IsActive != true);
+                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", true);
+                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
+
                     return new JsonResult(publish);
                 }
 
 
             }
         }
+
+
         [HttpPost]
         [Obsolete]
         public JsonResult UnPublish(DefaultModel model)
@@ -375,9 +389,15 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 if (model.ArrID.Contains(","))
                 {
+                    var idArr = model.ArrID.Split(',');
                     var filter = Builders<StudentEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == true);
                     var update = Builders<StudentEntity>.Update.Set("IsActive", false);
                     var publish = _service.Collection.UpdateMany(filter, update);
+
+                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => idArr.Contains(o.UserID) && o.Type == "student" && o.IsActive == true);
+                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", false);
+                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
+
                     return new JsonResult(publish);
                 }
                 else
@@ -385,6 +405,11 @@ namespace BaseCustomerMVC.Controllers.Admin
                     var filter = Builders<StudentEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == true);
                     var update = Builders<StudentEntity>.Update.Set("IsActive", false);
                     var publish = _service.Collection.UpdateMany(filter, update);
+
+                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => model.ArrID == o.UserID && o.Type == "student" && o.IsActive == true);
+                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", false);
+                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
+
                     return new JsonResult(publish);
                 }
 
