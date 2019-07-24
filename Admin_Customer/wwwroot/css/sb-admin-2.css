@@ -7031,13 +7031,17 @@ a:focus {
   outline: none; }
 
 #wrapper {
-  display: flex; }
-  #wrapper #content-wrapper {
+  display: flex; 
+}
+
+#wrapper #content-wrapper {
     background-color: #f8f9fc;
     width: 100%;
-    overflow-x: hidden; }
-    #wrapper #content-wrapper #content {
-      flex: 1 0 auto; }
+}
+
+#wrapper #content-wrapper #content {
+    flex: 1 0 auto; 
+}
 
 .container,
 .container-fluid {
