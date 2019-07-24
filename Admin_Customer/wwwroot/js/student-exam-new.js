@@ -7,6 +7,31 @@ var writeLog = function (name, msg) {
 }
 
 var ExamStudent = (function () {
+    function countdown() {
+        clearTimeout(r);
+        var time = $(".time-counter").text().trim();
+        var minutes = parseInt(time.split(":")[0]);
+        var second = parseInt(time.split(":")[1]);
+        if (second > 0) {
+            second--;
+        }
+        else {
+            if (minutes > 0) {
+                minutes--;
+                second = 59;
+            }
+            else {
+                ExamComplete();
+                return;
+            }
+        }
+        var text = (minutes < 10 ? ("0" + minutes) : minutes) + ":" + (second < 10 ? ("0" + second) : second);
+        $(".time-counter").text(text);
+        localStorage.setItem("Timer", text);
+        var r = setTimeout(function () {
+            countdown();
+        }, 1000);
+    }
     var config = {
         id: "exam-student",
         url: {
@@ -89,17 +114,22 @@ var ExamStudent = (function () {
             var formData = new FormData();
             formData.append("LessonID", config.lesson_id);
             formData.append("ClassID", config.class_id);
-            Ajax(config.url.load, formData).then(function (res) {
-                if (res != "Accept Deny") {
+            Ajax(config.url.load, formData, "POST", true).then(function (res) {
+                if (res != "Accept Deny" && res != "null" && res != null && res.message != "res is not defined" && res != void 0) {
                     var resData = JSON.parse(res);
                     renderLesson(resData);
                     setCurrentData(resData);
                     renderBoDem();
+                    startDragDrop();
+                    $("#counter").html(resData.Timer);
                 }
             });
         } else {
             renderLesson(data);
             renderBoDem();
+            startDragDrop();
+            $("#counter").html(localStorage.getItem("Timer"));
+            countdown();
         }
     }
     var setCurrentData = function (data) {
@@ -107,6 +137,16 @@ var ExamStudent = (function () {
         localStorage.setItem(config.lesson_id + "_" + config.class_id, enData);
     }
     var currentData = function () {
+        var dataform = new FormData();
+        dataform.append("ClassID", config.class_id);
+        dataform.append("LessonID", config.lesson_id);
+        Ajax(config.url.current, dataform, "POST", true).then(function (res) {
+            if (res == null || res == "null") { localStorage.clear(); return null; }
+            else {
+                var data = JSON.parse(res);
+                document.querySelector("input[name='ExamID']").value = data.ID;
+            }
+        });
         var data = localStorage.getItem(config.lesson_id + "_" + config.class_id);
         var enData = b64DecodeUnicode(data)
         if (enData == null || enData == {} || enData == "" || enData == "{}" || enData == void 0) {
@@ -133,22 +173,23 @@ var ExamStudent = (function () {
         else {
             // bài thi
             writeLog("bài tập", data);
+            var counter = data.Data.Timer >= 10 ? data.Data.Timer + ":00" : "0" + data.Data.Timer + ":00";
+            if (localStorage.getItem("Timer") == null) localStorage.setItem("Timer", counter);
             container.innerHTML = '<div class="" id="lessonContainer"></div>';
             var lessonContainer = container.querySelector("#lessonContainer");
-            lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-4">' + data.Data.Title + '</div><div class="text-center col-lg-4">Thời gian làm bài <span id="counter" class="time-counter"></span></div>' + tab + '</div><div id="body-exam" class="card-body"></div></div></div></div></div>';
+            lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-4">' + data.Data.Title + '</div><div class="text-center col-lg-4">Thời gian làm bài <span id="counter" class="time-counter">' + counter+'</span></div>' + tab + '</div><div id="body-exam" class="card-body"></div></div></div></div></div>';
             var bodyExam = lessonContainer.querySelector("#body-exam");
             var content = checkExam()
                 ? renderContent(data.Data)
                 : '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài thi</div></div>';
             bodyExam.innerHTML = '<div class="row">' + content + '</div>';
             if (checkExam) {
-                document.querySelector("input[name='ExamID']").value = localStorage.getItem("CurrentExam") == null ? "" : localStorage.getItem("CurrentExam");
+                document.querySelector("input[name='ExamID']").value = localStorage.getItem("CurrentExam");
             }
         }
     }
     var checkExam = function () {
-        return true;
-        //return localStorage.getItem("CurrentExam") != null && localStorage.getItem("CurrentExam") != void 0 && localStorage.getItem("CurrentExam") != "";
+        return localStorage.getItem("CurrentExam") != null && localStorage.getItem("CurrentExam") != void 0 && localStorage.getItem("CurrentExam") != "" && localStorage.getItem("CurrentExam") != typeof(void 0);
     }
     var rednerLessonPart = function (data, index) {
         writeLog("rednerLessonPart", data);
@@ -238,7 +279,7 @@ var ExamStudent = (function () {
                 var answer = item.CloneAnswers[x];
                 html += '<fieldset class="answer-item" id="' + answer.ID + '">';
                 html += '<div class="form-check">';
-                html += '<input type="radio" data-type="QUIZ1" class="input-checkbox answer-checkbox form-check-input" onclick="AnswerQuestion(this)" name="rd_' + item.ID + '">';
+                html += '<input type="radio" data-type="QUIZ1" value="' + answer.Content+'" class="input-checkbox answer-checkbox form-check-input" onclick="AnswerQuestion(this)" name="rd_' + item.ID + '">';
                 html += '<label class="answer-text form-check-label" for="' + answer.ID + '">' + answer.Content + '</label>';
                 html += '</div>';
                 html += renderMedia(answer.Media);
@@ -258,13 +299,13 @@ var ExamStudent = (function () {
             html += '<div class="quiz-item" id="' + item.ID + '">';
             html += '<div class="quiz-box-header"><h5 class="title"> - ' + itemContent + ' (' + item.Point + 'đ)</h5>' + renderMedia(item.Media) + '</div>';
             html += '<div class="answer-wrapper">';
-            html += '<fieldset class="answer-item">';
+            html += '<fieldset class="answer-item" id="quiz2-'+item.ID+'">';
             var content = "";
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
                 content += content == "" ? answer.Content : " | " + answer.Content;
             }
-            html += '<input data-type="QUIZ2" type="text" class="input-text answer-text" placeholder="' + content + '" onfocusout="AnswerQuestion(this)">';
+            html += '<input id="inputQZ2-' + item.ID +'" data-type="QUIZ2" type="text" class="input-text answer-text" placeholder="' + content + '" onfocusout="AnswerQuestion(this)">';
             html += '</fieldset>';
             html += '</div></div>';
         }
@@ -302,9 +343,9 @@ var ExamStudent = (function () {
     var renderESSAY = function (data) {
         var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
         html += '<div class="quiz-wrapper">';
-        html += '<div class="quiz-item" id="quiz' + data.ID + '"></div>';
+        html += '<div class="quiz-item" id="' + data.ID + '"></div>';
         html += '<div class="answer-wrapper">';
-        html += '<div class="answer-content"><textarea data-type="ESSAY" class="form-control" row="3" placeholder="Câu trả lời tự luận" onfocusout="AnswerQuestion(this)"></textarea></div>';
+        html += '<div class="answer-content"><textarea data-type="ESSAY" id="essay-' + data.ID +'" class="form-control" row="3" placeholder="Câu trả lời tự luận" onfocusout="AnswerQuestion(this)"></textarea></div>';
         html += '</div>';
         html += '</div>';
         return html;
@@ -345,9 +386,9 @@ var ExamStudent = (function () {
     }
     var beginExam = function (_this) {
         var dataform = new FormData();
-        dataform.append("LessonID", config.lesson_id);
-        dataform.append("ClassID", config.class_id);
-        Ajax(config.url.start, "POST", dataform, false)
+            dataform.append("LessonID", config.lesson_id);
+            dataform.append("ClassID", config.class_id);
+        Ajax(config.url.start, dataform, "POST", false)
             .then(function (res) {
                 if (res != "Accept Deny") {
                     notification("success", "Bắt đầu làm bài", 3000);
@@ -356,6 +397,7 @@ var ExamStudent = (function () {
                     // chưa viết hàm khác kịp (chỉ load những phần chưa load);
                     localStorage.setItem("CurrentExam", data.ID);
                     getCurrentData();
+                    countdown();
 
                 } else {
                     notification("error", res, 3000);
@@ -408,6 +450,8 @@ var ExamStudent = (function () {
                             statusText: request.statusText
                         });
                     }
+                } else {
+                    return null;
                 }
             };
             request.open(method || 'POST', url, async || true);
@@ -415,41 +459,110 @@ var ExamStudent = (function () {
             request.send(data);
         });
     }
-    var AnswerQuestion = function (_this) {
-        console.log(_this);
-        if (quizid == void 0 || quizid == null || quizid == "") return;
-        if (obj.type != void 0) {
-            if (obj.type == "checkbox" || obj.type == "radio") {
-                $(obj).attr("checked", "");
-            }
-            if (obj.type == "text") {
-                obj.value = answerValue;
-            }
+    var AnswerQuestion = function (_this, _quizid, _answerID, _answerValue) {
+        var type = _this.dataset.type;
+        if (type == null || type == void 0 || type == "") {
+            type = _this.querySelector("fieldset").dataset.type;
         }
-        markQuestion(quizid, answerID);
+        var quizID = "";
+        var answerValue = "";
+        var anwswerID = "";
+        switch (type) {
+            case "QUIZ1":
+                quizID = _this.name.replace("rd_", "");
+                answerValue = _this.value;
+                anwswerID = _this.parentElement.parentElement.id;
+                break;
+            case "QUIZ2":
+                quizID = _this.parentElement.id.replace("quiz2-","");
+                answerValue = _this.value;
+                anwswerID = _this.parentElement.id;
+                break;
+            case "QUIZ3":
+                quizID = _this.dataset.id == void 0 ? _quizid : _this.dataset.id;
+                var item = _this.querySelector('fieldset');
+                var label = item.querySelector('label');
+                if (label == null) {
+                    label = item.querySelector("[src]").src;
+                }
+                else {
+                    label = item.querySelector('label').innerHTML;
+                }
+                answerValue = _this.dataset.id == void 0 ? "" : label;
+                anwswerID = item.id;
+                break;
+            case "ESSAY":
+                quizID = _this.id.replace("essay-", "");
+                answerValue = _this.value;
+                anwswerID = _this.id;
+                break;
+            default:
+                quizID = _quizid;
+                answerValue = _answerID;
+                anwswerID = _answerValue;
+                break;
+        }
         var dataform = new FormData();
-            dataform.append("ID", obj.parentElement.parentElement.parentElement.getAttribute("data-id"));
             dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
-            dataform.append("AnswerID", answerID);
-            dataform.append("QuestionID", quizid);
-        dataform.append("AnswerValue", answerValue);
-        Ajax(config.url.chosen, "POST", dataform, false).then(function (res) {
-            if (res != "Accept Deny") {
-                var data = JSON.parse(res);
-                obj.parentElement.parentElement.parentElement.setAttribute("data-id", data.ID);
-                SetCurrentExam()
-            }
+            dataform.append("AnswerID", anwswerID);
+            dataform.append("QuestionID", quizID);
+            dataform.append("AnswerValue", answerValue);
+        Ajax(config.url.chosen, dataform, "POST", false).then(function (res) {
         })
         .catch(function (err) {
-            console.log(err);
-        })
+            notification("error", err, 3000);
+        });
+        if (answerValue == "") {
+            delAnswerForStudent(quizID);
+        } else {
+            saveAnswerForStudent(quizID, anwswerID, answerValue, type);
+        }
     }
     var ExamComplete = function () {
-
+        if (confirm("Có phải bạn muốn nộp bài")) {
+            var exam = document.querySelector("input[name='ExamID']");
+            var dataform = new FormData();
+            dataform.append("ExamID", exam.value);
+            Ajax(config.url.end, dataform, "POST", true)
+                .then(function (res) {
+                    notification("success", "Nộp bài thành công", 3000);
+                    $(".lesson-container").empty();
+                    $("#quizNavigator").addClass('d-none');
+                    $("#finish").addClass('d-none');
+                    $('#lessonContainer').removeClass('col-md-10');
+                    $(".lesson-container").append('<div class="card show mb-4"></div>');
+                    $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Bạn đã hoàn thành bài thi</h3></div>');
+                    $(".card").append('<div class="content card-body d-flex justify-content-center"></div>');
+                    $(".content").append('<a href="#" onclick="goBack()"> Quay về trang bài học </a>');
+                    localStorage.clear();
+            })
+            .catch(function (err) {
+                console.log(err);
+            });
+           
+        }
+        
+    }
+    var delAnswerForStudent = function (quizID) {
+        localStorage.removeItem(config.lesson_id + config.class_id + quizID);
+        renderBoDem();
+        document.getElementById("")
+        startDragDrop();
+        var xxx = document.getElementById("quizNav" + quizID);
+        if (xxx != null) {
+            xxx.classList.remove("completed");
+        } 
     }
     var saveAnswerForStudent = function (quizID, answerID, answerValue, type) {
+        if (quizID == void 0) return;
         var value = quizID + "~~" + answerID + "~~" + answerValue + "~~" + type;
         localStorage.setItem(config.lesson_id + config.class_id + quizID, value);
+        renderBoDem();
+        startDragDrop();
+        var xxx = document.getElementById("quizNav" + quizID);
+        if (xxx != null) {
+            xxx.classList.add("completed");
+        } 
     }
     var rendAgain = function (value) {
         var arr = value.split('~~');
@@ -463,8 +576,9 @@ var ExamStudent = (function () {
                 answer.querySelector("input[type='radio']").setAttribute("checked", "");
                 break;
             case "QUIZ2":
-                var quiz = document.getElementById(quizID);
-                quiz.querySelector('input[type="text"]').value = answerValue;
+                var quiz = document.getElementById("inputQZ2-" + quizID);
+                quiz.setAttribute("value", answerValue);
+                console.log(quiz);
                 break;
             case "QUIZ3":
                 var quiz = document.getElementById(quizID);
@@ -475,16 +589,69 @@ var ExamStudent = (function () {
                 content.innerHTML = abc;
                 break;
             case "ESSAY":
-                var quiz = document.getElementById(quizID);
-                quiz.querySelector('textarea').value = answerValue;
+                var quiz = document.getElementById("essay-" + quizID);
+                console.log(quiz);
+                quiz.innerHTML = answerValue;
                 break;
             default: return;
         }
+    }
+    var startDragDrop = function () {
+        $(".answer-item").draggable({
+            cursor: "move",
+            helper: 'clone',
+            revert: "true",
+            scroll: true,
+            start: function (event, ui) {
+
+            },
+            stop: function (event, ui) {
+
+            }
+        });
+        $('.answer-pane.ui-droppable').droppable({
+            tolerance: "intersect",
+            accept: ".answer-item",
+            activeClass: "hasAnswer",
+            hoverClass: "answerHover",
+            drop: function (event, ui) {
+                var item = $(ui.draggable);
+                var anserID = item.attr("id");
+                var questionID = $(this).attr("data-id");
+                if (questionID == void 0) return;
+                var answerValue = item.find(".media-holder  > img").attr("src");
+                var prevHolder = $(ui.helper).parent();
+                prevHolder.remove($(ui.helper));
+                //$(prevHolder).find(".placeholder").show();
+                $(this).html("");
+                $(this).append(item);
+                item.data("parent", questionID);
+                AnswerQuestion(this, questionID, anserID, answerValue);
+            }
+        });
+        $(".answer-wrapper.no-child").droppable({
+            tolerance: "intersect",
+            accept: ".answer-item",
+            activeClass: "hasAnswer",
+            hoverClass: "answerHover",
+            drop: function (event, ui) {
+                debugger;
+                var prevHolder = $(ui.helper).parent();
+                var quiz = prevHolder.data("id");
+                if (quiz == void 0 || quiz == null || quiz == "") return;
+                prevHolder.remove($(ui.helper));
+                prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
+                //$(prevHolder).find(".placeholder").show();
+                $(this).append($(ui.draggable));
+                AnswerQuestion(this, quiz, typeof (void 0), "");
+            }
+        });
     }
     var renderBoDem = function () {
         var listQuiz = document.querySelectorAll(".quiz-item");
         var count = 0;
         var answerList = '';
+        writeLog("renderBoDem", listQuiz);
         for (var i = 0; listQuiz != null && i < listQuiz.length; i++) {
             var item = listQuiz[i];
             var answer = localStorage.getItem(config.lesson_id + config.class_id + item.id);
@@ -494,19 +661,38 @@ var ExamStudent = (function () {
                 compeleted = "completed";
                 rendAgain(answer);
             }
-            answerList += '<button class="btn btn-outline-secondary rounded-quiz ' + compeleted + '" type="button" name="quizNav' + item.id + '">' + (i + 1) + '</button>';
+            answerList += '<button class="btn btn-outline-secondary rounded-quiz ' + compeleted + '" type="button" id="quizNav' + item.id + '" name="quizNav' + item.id + '">' + (i + 1) + '</button>';
         }
-        document.body.innerHTML += '<span id="quiz-number_123" style="top:30%" class="number quizNumber" onclick="openNav()"><span class="completed">' + count + '</span> / <span class="total">' + listQuiz.length + '</span></span>';
+        var quiz_number_123 = document.getElementById("quiz-number_123");
+        if (quiz_number_123 != null) {
+            quiz_number_123.querySelector(".completed").innerHTML = count;
+            quiz_number_123.querySelector(".total").innerHTML = listQuiz.length;
+        } else {
+            document.body.innerHTML += '<span id="quiz-number_123" style="top:30%" class="number quizNumber" onclick="openNav()"><span class="completed">' + count + '</span> / <span class="total">' + listQuiz.length + '</span></span>';
+        }
         var html = '<div id="quizNavigator" class="overlay">';
         html += '<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>';
         html += '<div class="overlay-content card-body">';
         html += '<div class="input-group mb-3 quiz-wrapper">';
         html += answerList;
-        if (listQuiz != null && count >= listQuiz.length) html += '<div class="d-flex justify-content-center pt-5 pb-5"><button class="btn btn-primary" onclick="ExamComplete()" data-original-title="" title=""> Hoàn thành</button></div>';
+        html += '<div style="display:none" id="btn-completed" class="d-flex justify-content-center pt-5 pb-5"><button class="btn btn-primary" onclick="ExamComplete()" data-original-title="" title=""> Hoàn thành</button></div>';
         html += '</div>'
         html += '</div>';
         html += '</div>';
-        document.body.innerHTML += html;
+        var quizNavigator = document.getElementById("quizNavigator");
+        if (quizNavigator != null) {
+            if (listQuiz != null && count >= listQuiz.length) {
+                console.log(count, listQuiz.length);
+                var btn = document.getElementById("btn-completed");
+                if (btn != null) btn.style.display = "block";
+            } else {
+                var btn = document.getElementById("btn-completed");
+                if (btn != null) btn.style.display = "none!important";
+            }
+        } else {
+            document.body.innerHTML += html;
+        }
+        startDragDrop();
     }
     window.ExamStudent = {} || ExamStudent;
     ExamStudent.onReady = onReady;
