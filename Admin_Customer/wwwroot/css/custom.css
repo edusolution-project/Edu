@@ -450,6 +450,7 @@ video, audio {
     overflow-y: scroll;
     max-height: 500px;
     text-align: center;
+    margin-top: 20px;
 }
 
 .QUIZ3 .pane-item .quiz-text {

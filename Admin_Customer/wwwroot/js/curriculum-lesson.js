@@ -627,11 +627,12 @@ var render = {
                 }
                 break;
             case "QUIZ3":
-                var itemBody = $("<div>", { "class": "quiz-wrapper col-lg-8" });
+                var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                render.mediaContent(data, ItemRow, "");
                 ItemRow.append(itemBody);
-                render.mediaContent(data, itemBody, "");
-                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-lg-4" });
+                ItemRow.find(".media-holder").addClass("col-12");
+                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-4" });
                 ItemRow.append(answers_box);
                 $(answers_box).droppable({
                     tolerance: "intersect",
@@ -885,10 +886,10 @@ var render = {
     mediaContent: function (data, wrapper, type = "") {
 
         if (data.Media != null) {
-            var mediaHolder = $("<div>", { "class": "ml-3 media-holder " + type });
+            var mediaHolder = $("<div>", { "class": "media-holder " + type });
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", {"class":"img-fluid lazy" , "src": data.Media.Path }));
+                    mediaHolder.append($("<img>", {"class":"ml-3 img-fluid lazy" , "src": data.Media.Path }));
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -902,7 +903,7 @@ var render = {
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "class": "img-fluid lazy" , "src": data.Media.Path }));
+                            mediaHolder.append($("<img>", { "class": "ml-3 img-fluid lazy" , "src": data.Media.Path }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
