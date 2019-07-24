@@ -45,7 +45,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         public ActionResult Index(DefaultModel model)
         {
             ViewBag.Subject = _subjectService.GetAll().ToList();
-            ViewBag.Roles = _roleService.CreateQuery().Find(o => o.Type == "teacher").SortBy(o => o.Name).ToList();
+            var roleList = new List<string> { "teacher", "head-teacher" };
+            ViewBag.Roles = _roleService.CreateQuery().Find(o => roleList.Contains(o.Code)).ToList();
             ViewBag.Model = model;
             return View();
         }
@@ -70,13 +71,24 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<TeacherEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();
-            var teacher = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+            var teachers = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
-            var DataResponse = teacher.ToList().Select(t => _mapping.AutoOrtherType(t, new TeacherViewModel()
-            {
-                SubjectList = t.Subjects == null ? null : _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList()
-            })).ToList();
+
+            var roleList = new List<string> { "teacher", "head-teacher" };
+            var roles = _roleService.CreateQuery().Find(o => roleList.Contains(o.Code)).ToList();
+
+            var DataResponse =
+
+                from t in teachers.ToList()
+                let role = roles.Find(r => r.ID == _accountService.CreateQuery().Find(o => o.UserID == t.ID && o.Type == "teacher").SingleOrDefault()?.RoleID)
+                select _mapping.AutoOrtherType(t, new TeacherViewModel()
+                {
+                    SubjectList = t.Subjects == null ? null : _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList(),
+                    RoleID = role?.ID,
+                    RoleName = role?.Name
+                });
+
             var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse },
@@ -91,11 +103,26 @@ namespace BaseCustomerMVC.Controllers.Admin
         public JsonResult GetDetails(string id)
         {
             var filter = Builders<TeacherEntity>.Filter.Where(o => o.ID == id);
-            var data = _service.Collection.Find(filter);
-            var DataResponse = data == null || data.Count() <= 0 ? null : data.First();
+            var data = _service.Collection.Find(filter).SingleOrDefault();
+
+            var roleList = new List<string> { "teacher", "head-teacher" };
+            var roles = _roleService.CreateQuery().Find(o => roleList.Contains(o.Code)).ToList();
+            TeacherViewModel teacher = null;
+
+            if (data != null)
+            {
+                var role = roles.Find(r => r.ID == _accountService.CreateQuery().Find(o => o.UserID == data.ID && o.Type == "teacher").SingleOrDefault()?.RoleID);
+                teacher = _mapping.AutoOrtherType(data, new TeacherViewModel()
+                {
+                    SubjectList = data.Subjects == null ? null : _subjectService.CreateQuery().Find(o => data.Subjects.Contains(o.ID)).ToList(),
+                    RoleID = role?.ID,
+                    RoleName = role?.Name
+                });
+            }
+
             var response = new Dictionary<string, object>
             {
-                { "Data", DataResponse }
+                { "Data", teacher }
             };
             return new JsonResult(response);
 
@@ -103,7 +130,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Create(TeacherEntity item)
+        public JsonResult Create(TeacherEntity item, string RoleID)
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
@@ -137,7 +164,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         Type = "teacher",
                         UserID = item.ID,
                         UserName = item.Email.ToLower().Trim(),
-                        RoleID = _roleService.GetItemByCode("teacher").ID
+                        RoleID = RoleID
                     };
                     _accountService.CreateOrUpdate(account);
                     return new JsonResult(response);
@@ -158,6 +185,12 @@ namespace BaseCustomerMVC.Controllers.Admin
                 var oldData = _service.GetItemByID(item.ID);
                 if (oldData == null) return new JsonResult(null);
                 _service.CreateOrUpdate(item);
+
+                var oldAccount = _accountService.CreateQuery().Find(t => t.UserID == item.ID && t.Type == "teacher").SingleOrDefault();
+                if (oldAccount == null) return new JsonResult(null);
+                oldAccount.RoleID = RoleID;
+                oldAccount.IsActive = item.IsActive;
+                _accountService.CreateOrUpdate(oldAccount);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -348,9 +381,15 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 if (model.ArrID.Contains(","))
                 {
+                    var idArr = model.ArrID.Split(',');
                     var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive != true);
                     var update = Builders<TeacherEntity>.Update.Set("IsActive", true);
                     var publish = _service.Collection.UpdateMany(filter, update);
+
+                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => idArr.Contains(o.UserID) && o.Type == "teacher" && o.IsActive != true);
+                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", true);
+                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
+
                     return new JsonResult(publish);
                 }
                 else
@@ -358,12 +397,16 @@ namespace BaseCustomerMVC.Controllers.Admin
                     var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive != true);
                     var update = Builders<TeacherEntity>.Update.Set("IsActive", true);
                     var publish = _service.Collection.UpdateMany(filter, update);
+
+                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => model.ArrID == o.UserID && o.Type == "teacher" && o.IsActive != true);
+                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", true);
+                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
+
                     return new JsonResult(publish);
                 }
-
-
             }
         }
+
         [HttpPost]
         [Obsolete]
         public JsonResult UnPublish(DefaultModel model)
@@ -376,9 +419,16 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 if (model.ArrID.Contains(","))
                 {
-                    var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == true);
+                    var idArr = model.ArrID.Split(',');
+                    var filter = Builders<TeacherEntity>.Filter.Where(o => idArr.Contains(o.ID) && o.IsActive == true);
                     var update = Builders<TeacherEntity>.Update.Set("IsActive", false);
                     var publish = _service.Collection.UpdateMany(filter, update);
+
+                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => idArr.Contains(o.UserID) && o.Type == "teacher" && o.IsActive == true);
+                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", false);
+                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
+
+
                     return new JsonResult(publish);
                 }
                 else
@@ -386,6 +436,11 @@ namespace BaseCustomerMVC.Controllers.Admin
                     var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == true);
                     var update = Builders<TeacherEntity>.Update.Set("IsActive", false);
                     var publish = _service.Collection.UpdateMany(filter, update);
+
+                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => model.ArrID == o.UserID && o.Type == "teacher" && o.IsActive == true);
+                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", false);
+                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
+
                     return new JsonResult(publish);
                 }
 

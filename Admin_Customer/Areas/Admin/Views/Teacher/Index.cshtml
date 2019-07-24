@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Quản lý giáo viên";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    var role = ViewBag.Roles as List<BaseCustomerEntity.Database.RoleEntity>;
+    var roles = ViewBag.Roles as List<BaseCustomerEntity.Database.RoleEntity>;
     var subject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
 }
 
@@ -40,14 +40,14 @@
                                 <th>
                                     <div class="input-group"><input type="checkbox" aria-label="Checkbox" onclick="toggleAll(this, 'dataTable')"></div>
                                 </th>
-                                <th>STT</th>
-                                <th>Mã GV</th>
-                                <th>Email</th>
-                                <th>Họ tên</th>
-                                <th>Ngày sinh</th>
-                                <th>Chuyên môn</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
+                                <th class='text-center'>STT</th>
+                                <th class='text-center'>Email</th>
+                                <th class='text-center'>Họ tên</th>
+                                <th class='text-center'>Ngày sinh</th>
+                                <th class='text-center'>Loại</th>
+                                <th class='text-center'>Chuyên môn</th>
+                                <th class='text-center'>Trạng thái</th>
+                                <th class='text-center'>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -75,7 +75,7 @@
                     <form>
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="TeacherId" id="inputName" placeholder="Mã giáo viên" required>
+                                <input type="text" class="form-control" name="TeacherId" id="inputName" placeholder="Mã giáo viên">
                             </div>
                             <div class="form-group col-md-6">
                                 <select name="Subjects" class="form-control">
@@ -110,6 +110,21 @@
                                     <select id="input-option" name="IsActive" class="form-control">
                                         <option value="true" selected>Hoạt động</option>
                                         <option value="false">Không hoạt động</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group row col-md-6">
+                                <label for="staticText" class="col-sm-4 col-form-label">Loại:</label>
+                                <div class="col-sm-8">
+                                    <select name="RoleID" class="form-control" required>
+                                        @{
+                                            for (int i = 0; roles != null && i < roles.Count; i++)
+                                            {
+                                                <option value="@roles[i].ID">@roles[i].Name</option>
+                                            }
+                                        }
                                     </select>
                                 </div>
                             </div>
@@ -185,12 +200,11 @@
                 {
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
-                        console.log(item);
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "teacher")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "teacher")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "teacher")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "teacher")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
                         var subject = "";
                         if (item.SubjectList != null && item.SubjectList.length > 0) {
@@ -202,19 +216,20 @@
 
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
-                            "<td>" + (i + 1) + "</td>" +
-                            "<td>" + ((item.TeacherId == null) ? "" : item.TeacherId) + "</td>" +
+                            "<td class='text-center'>" + (i + 1) + "</td>" +
+                            //"<td>" + ((item.TeacherId == null) ? "" : item.TeacherId) + "</td>" +
                             "<td>" + item.Email + "</td>" +
                             "<td>" + item.FullName + "</td>" +
-                            "<td>" + date + "</td>" +
-                            "<td>" + subject + "</td>" + active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "teacher")','@Url.Action("create", "teacher")',this)\" type='button' data-placement='top' title='Sửa' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<td class='text-center'>" + date + "</td>" +
+                            "<td class='text-center'>" + item.RoleName + "</td>" +
+                            "<td class='text-center'>" + subject + "</td>" + active +
+                            "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "teacher")','@Url.Action("create", "teacher")',this)\" type='button' data-placement='top' title='Sửa' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.TeacherId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "teacher")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                         );
                     }
-                    $('.btn').tooltip();
+                    $('.btn:has(i)').tooltip();
                 }
             },
             error: function() {
