@@ -11,44 +11,44 @@
     var user = ViewBag.User as string;
 }
 
-    <div class="container">
-        <div id="list-detail">
-            <div class="card show">
-                <div class="card-header">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <h5 class="m-0 font-weight-bold text-primary">@Data.Name</h5>
-                        </div>
-                        <div class="text-right col-lg-6">
-                            <input type="hidden" id="CourseID" value="@Data.ID" />
+<div class="container">
+    <div id="list-detail">
+        <div class="card show">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h5 class="m-0 font-weight-bold text-primary">@Data.Name</h5>
+                    </div>
+                    <div class="text-right col-lg-6">
+                        <input type="hidden" id="CourseID" value="@Data.ID" />
 
-                            <button onclick="EditCourse()" type="button" data-placement="top" title="Sửa" class="btn btn-primary" data-toggle="modal" data-target="#courseModal" data-original-title="Sửa">
-                                <i class="fas fa-edit"></i>
-                            </button>
+                        <button onclick="EditCourse()" type="button" data-placement="top" title="Sửa" class="btn btn-primary" data-toggle="modal" data-target="#courseModal" data-original-title="Sửa">
+                            <i class="fas fa-edit"></i>
+                        </button>
 
-                            <button onclick="AddChapter('0'); return false;" type="button" data-placement="top" title="Thêm chương mục" class="btn btn-primary" data-toggle="modal" data-target="#chapterModal" data-original-title="Thêm chương mục">
-                                <i class="fas fa-plus-square"></i>
-                            </button>
+                        <button onclick="AddChapter('0'); return false;" type="button" data-placement="top" title="Thêm chương mục" class="btn btn-primary" data-toggle="modal" data-target="#chapterModal" data-original-title="Thêm chương mục">
+                            <i class="fas fa-plus-square"></i>
+                        </button>
 
-                            <button onclick="DeleteCourse('@Data.ID')" type="button" data-placement="top" title="Xóa" class="btn btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
+                        <button onclick="DeleteCourse('@Data.ID')" type="button" data-placement="top" title="Xóa" class="btn btn-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div id="course-detail" style="width:100%;">
-                            <ul class="navbar-nav sidebar accordion" id="accordionSidebar">
-                                <!-- Nav Item -->
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer"></div>
             </div>
+            <div class="card-body">
+                <div class="row">
+                    <div id="course-detail" style="width:100%;">
+                        <ul class="navbar-nav sidebar accordion" id="accordionSidebar">
+                            <!-- Nav Item -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer"></div>
         </div>
     </div>
+</div>
 
 <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
     <div class="modal-dialog modal-lg">
@@ -170,13 +170,28 @@
                         <label class="col-form-label">Tên bài:</label>
                         <input type="text" class="form-control" name="Title" required>
                     </div>
-                    <div class="form-group" style="width: 45%; display:inline-block; margin-right: 5%;" for="examOnly">
-                        <label class="col-form-label">Điểm:</label>
-                        <input type="text" class="form-control" name="Point">
+                    <div class="form-group" style="width: 45%;  display:inline-block; margin-right: 5%;" for="examOnly">
+                        <label class="col-form-label">Thời gian (phút):</label>
+                        <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required>
                     </div>
                     <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
-                        <label class="col-form-label">Thời gian (phút):</label>
-                        <input type="text" class="form-control" name="Timer">
+                        <label class="col-form-label">Số lượt làm bài:</label>
+                        <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required>
+                    </div>
+                    <div class="form-group" style="width: 45%; display:inline-block; margin-right: 5%;" for="examOnly">
+                        <label class="col-form-label">Điểm:</label>
+                        <input type="text" class="form-control" name="Point" placeholder="0" required>
+                    </div>
+                    <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
+                        <label class="col-form-label">Hệ số:</label>
+                        <input type="text" class="form-control" name="Multiple" placeholder="> 0" required>
+                    </div>
+                    <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
+                        <label class="col-form-label">Kiểu bài kiểm tra:</label>
+                        <select name="Etype" class="form-control">
+                            <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PARTIAL">Thành phần</option>
+                            <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">Cuối kì</option>
+                        </select>
                     </div>
                 </form>
             </div>
@@ -281,7 +296,14 @@
                         lessonitem.append($("<span>", {"class":"Title", "text": item.Title }));
 
                         var submenu = $("<div>", { "id": "icon-submenu", "style": "right: 35px" });
-                        submenu.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Sửa", "onclick" : "return EditLesson(this,'" + item.ID + "'); return false;", "cid": item.ChapterID, "type": item.TemplateType, "point": item.Point, "timer": item.Timer }));
+                        submenu.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Sửa", "onclick" : "return EditLesson(this,'" + item.ID + "'); return false;",
+                            "cid": item.ChapterID, 
+                            "type": item.TemplateType, 
+                            "point": item.Point, 
+                            "timer": item.Timer,
+                            "etype": item.Etype,
+                            "mul": item.Multiple,
+                            "limit": item.Limit}));
                         submenu.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
                         submenu.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép nội dung", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
 
@@ -408,12 +430,18 @@
         var type = $(obj).attr("type");
         var point = $(obj).attr("point");
         var timer = $(obj).attr("timer");
+        var limit = $(obj).attr("limit");
+        var multiple = $(obj).attr("mul");
+        var etype = $(obj).attr("etype");
 
         modal.find("[name=Title]").val(title);
         modal.find("[name=ChapterID]").val(chapter);
         modal.find("[name=ID]").val(ID);
         modal.find("[name=Point]").val(point);
         modal.find("[name=Timer]").val(timer);
+        modal.find("[name=Limit]").val(limit);
+        modal.find("[name=Multiple]").val(multiple);
+        modal.find("[name=Etype]").val(etype);
 
         SelectTemplate(type);
         return false;
