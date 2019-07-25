@@ -1,6 +1,5 @@
 ﻿/* ----------  bootstrapTabControl  --------------- */
 
-
 function tab_gonext() {
     var i, items = $('#pills-tab .nav-item .nav-link'), pane = $('.tab-pane');
     for (i = 0; i < items.length; i++) {
@@ -89,8 +88,28 @@ function endtime() {
     //alert("Thời gian làm bài đã kết thúc! Cảm ơn bạn");
 }
 
-/* tooltip*/
+/* tooltip */
 $(document).ready(function () {
     $('.btn').tooltip();
     $('.lazy').Lazy();
+});
+
+/* Search */
+
+$(document).ready(function () {
+
+    $("#Search-form").on("keyup", function () {
+        var value = $(this).val().toLowerCase();
+        $(".card.shadow *").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    });
+
+    $("#searchText").on("keyup", function () {
+        var value = $(this).val().toLowerCase();
+        $(".card.shadow *").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    });
+
 });

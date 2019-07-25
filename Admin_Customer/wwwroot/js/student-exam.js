@@ -535,7 +535,7 @@ var render = {
     },
     mediaContent: function (data, wrapper, type = "") {
         if (data.Media != null) {
-            var mediaHolder = $("<div>", { "class": "ml-3 media-holder " + type });
+            var mediaHolder = $("<div>", { "class": "media-holder " + type });
             switch (type) {
                 case "IMG":
                     mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid lazy" }));
