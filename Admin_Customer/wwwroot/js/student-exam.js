@@ -307,6 +307,7 @@ var render = {
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
                 }
+                itemBody.append($("<textarea>", { "class": "content-answer","onfocusout":"alert(this.value)"}))
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 ItemRow.append(itemBody);
                 container.append(tabsitem);

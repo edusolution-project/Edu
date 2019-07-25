@@ -35,7 +35,7 @@
         <div class="card-body">
             <div class="search-filter">
                 <div class="form-row">
-                    <div class="form-group row col-md-3">
+                    <div class="form-group row col-md-4">
                         <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
                         <div class="col-sm-8">
                             <select id="SubjectID" class="form-control" onchange="LoadGrade()">
@@ -49,7 +49,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group row col-md-3 offset-6">
+                    <div class="form-group row col-md-4 offset-1">
                         <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
                         <div class="col-sm-8">
                             <select id="GradeID" class="form-control" onchange="LoadData()">
@@ -75,14 +75,14 @@
                                     <input type="checkbox" aria-label="Checkbox" onclick="toggleAll(this, 'dataTable')" />
                                 </div>
                             </th>
-                            <th>STT</th>
-                            <th>Tên khóa học</th>
-                            <th>Tên giáo viên</th>
-                            <th>Số HV</th>
-                            <th>Ngày bắt đầu</th>
-                            <th>Ngày kết thúc</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <th class='text-center'>STT</th>
+                            <th class='text-center'>Tên khóa học</th>
+                            <th class='text-center'>Tên giáo viên</th>
+                            <th class='text-center'>Số HV</th>
+                            <th class='text-center'>Ngày bắt đầu</th>
+                            <th class='text-center'>Ngày kết thúc</th>
+                            <th class='text-center'>Trạng thái</th>
+                            <th class='text-center'>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -297,9 +297,9 @@
                         console.log(item);
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
 
                         var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
@@ -307,14 +307,14 @@
 
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
-                            "<td>" + (i + 1) + "</td>" +
+                            "<td class='text-center'>" + (i + 1) + "</td>" +
                             "<td>" + item.Name + "</td>" +
                             "<td>" + item.TeacherName + "</td>" +
-                            "<td>" + item.Students.length + "</td>" +
-                            "<td>" + startdate + "</td>" +
-                            "<td>" + enddate + "</td>" +
+                            "<td class='text-center'>" + item.Students.length + "</td>" +
+                            "<td class='text-center'>" + startdate + "</td>" +
+                            "<td class='text-center'>" + enddate + "</td>" +
                             active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "Course")','@Url.Action("create", "Course")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "Course")','@Url.Action("create", "Course")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa lớp " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "Course")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "<button type=\"button\" class=\"btn btn-primary\" onclick=\"ImportSV('" + item.ID + "','ImportForm')\" data-toggle=\"modal\" data-placement=\"top\" title=\"Nhập danh sách học viên\" data-target=\".bd-modal-lg\"> <i class=\"fas fa-upload\"></i> </button>" +
                             "</tr>"

@@ -90,18 +90,18 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
-                if(string.IsNullOrEmpty(item.Code))
-                {
-                     Dictionary<string, object> response = new Dictionary<string, object>()
-                    {
-                        {"Data",null },
-                        {"Error",item },
-                        {"Msg","Chưa nhập mã môn học" }
-                    };
-                    return new JsonResult(response);
-                }
+                //if(string.IsNullOrEmpty(item.Code))
+                //{
+                //     Dictionary<string, object> response = new Dictionary<string, object>()
+                //    {
+                //        {"Data",null },
+                //        {"Error",item },
+                //        {"Msg","Chưa nhập mã môn học" }
+                //    };
+                //    return new JsonResult(response);
+                //}
                 
-                if (!Exist(item.Code))
+                if (!Exist(item.Name))
                 {
                     item.ID = null;
                     item.IsAdmin = false;
@@ -121,8 +121,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                     Dictionary<string, object> response = new Dictionary<string, object>()
                     {
                         {"Data",null },
-                        {"Error",item },
-                        {"Msg","Mã môn học đã tồn tại" }
+                        {"Error", "Môn học đã tồn tại" },
+                        {"Msg","" }
                     };
                     return new JsonResult(response);
                 }
@@ -266,9 +266,9 @@ namespace BaseCustomerMVC.Controllers.Admin
         }
 
         [Obsolete]
-        private bool Exist(string code)
+        private bool Exist(string name)
         {
-            var _currentData = _service.CreateQuery().Find(o => o.Code == code);
+            var _currentData = _service.CreateQuery().Find(o => o.Name == name);
             if(_currentData.Count() > 0)
             {
                 return true;

@@ -9,7 +9,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
     [IndefindCtrlAttribulte("Trang chủ", "Home", "teacher")]
     public class HomeController : TeacherController
     {
-        [Permission("teacher")]
         public IActionResult Index()
         {
             return View();

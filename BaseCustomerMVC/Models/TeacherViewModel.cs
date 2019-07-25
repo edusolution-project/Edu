@@ -7,7 +7,12 @@ namespace BaseCustomerMVC.Models
 {
     public class TeacherViewModel : TeacherEntity
     {
-         [JsonProperty("SubjectList")]
+        [JsonProperty("SubjectList")]
         public List<SubjectEntity> SubjectList { get; set; }
+        [JsonProperty("RoleID")]
+        public string RoleID { get; set; }
+        [JsonProperty("RoleName")]
+        public string RoleName { get; set; }
+
     }
 }

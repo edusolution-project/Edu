@@ -70,33 +70,41 @@
                         </div>
 
                         <!-- DataTales Example -->
-                        <div class="tab-student card">
-                            <div class="card-header">
-                                <h5 class="m-0 font-weight-bold text-primary">Danh sách sinh viên</h5>
-                                <div class="float-right">
-                                    <button type="button" class="btn btn-primary" style="position: relative; top: 10px;" onclick="ImportSV('@curentClass.ID','ImportForm')" data-toggle="modal" data-target="#importModal">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
+                        <div class="tab-student">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <h5 class="m-0 font-weight-bold text-primary">Danh sách sinh viên</h5>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="text-right">
+                                                <button type="button" class="btn btn-primary" onclick="ImportSV('@curentClass.ID','ImportForm')" data-toggle="modal" data-target="#importModal">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table id="membersTable" class="table table-bordered" width="100%" cellspacing="0">
-                                        <thead>
-                                            <tr>
-                                                <th>STT</th>
-                                                <th>Họ và tên</th>
-                                                <th>Email</th>
-                                                <th>Điện thoại</th>
-                                                <th>Lớp</th>
-                                                <th>Ngày tháng năm sinh</th>
-                                                <th>Tình trạng khóa học</th>
-                                                <th>Ngày học gần nhất</th>
-                                                <th>Trạng thái</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="membersTable" class="table table-bordered" width="100%" cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <th>STT</th>
+                                                    <th>Họ và tên</th>
+                                                    <th>Email</th>
+                                                    <th>Điện thoại</th>
+                                                    <th>Lớp</th>
+                                                    <th>Ngày tháng năm sinh</th>
+                                                    <th>Tình trạng khóa học</th>
+                                                    <th>Ngày học gần nhất</th>
+                                                    <th>Trạng thái</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>

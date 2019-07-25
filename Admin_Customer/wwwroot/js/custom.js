@@ -77,7 +77,9 @@ function countdown() {
             return;
         }
     }
-    $(".time-counter").text((minutes < 10 ? ("0" + minutes) : minutes) + ":" + (second < 10 ? ("0" + second) : second));
+    var text = (minutes < 10 ? ("0" + minutes) : minutes) + ":" + (second < 10 ? ("0" + second) : second);
+    $(".time-counter").text(text);
+    localStorage.setItem("Timer", text);
     var r = setTimeout(function () {
         countdown();
     }, 1000);
@@ -90,4 +92,5 @@ function endtime() {
 /* tooltip*/
 $(document).ready(function () {
     $('.btn').tooltip();
+    $('.lazy').Lazy();
 });

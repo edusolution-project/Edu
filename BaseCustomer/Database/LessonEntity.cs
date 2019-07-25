@@ -43,12 +43,20 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Limit")] // gioi han so luot lam bai
         public int Limit { get; set; }
         [JsonProperty("Multiple")] // hệ số 
-        public int Multiple { get; set; }
+        public double Multiple { get; set; }
+
+        [JsonProperty("Etype")] // kiểu bài thi (thành phần / cuối kì) 
+        public int Etype { get; set; }
     }
 
     public class LESSON_TEMPLATE
     {
         public const int LECTURE = 1, EXAM = 2;
+    }
+
+    public class LESSON_ETYPE
+    {
+        public const int PARTIAL = 1, END = 2;
     }
 
     public class LessonService : ServiceBase<LessonEntity>
