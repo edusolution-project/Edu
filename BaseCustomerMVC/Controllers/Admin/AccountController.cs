@@ -65,7 +65,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                 filter.Add(Builders<AccountEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
 
-
             filter.Add(Builders<AccountEntity>.Filter.Where(o => o.Type == "admin"));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<AccountEntity>.Filter.And(filter)) : _service.GetAll();
@@ -128,7 +127,15 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 if (!ExistUserName(item.UserName))
                 {
-                    item.Type = _roleService.GetItemByID(item.RoleID).Type;
+                    var role = new RoleEntity();
+                    if (string.IsNullOrEmpty(item.RoleID))
+                    {
+                        role = _roleService.CreateQuery().Find(o => o.Code == "admin").First();
+                        item.RoleID = role.ID;
+                    }
+                    else
+                        role = _roleService.GetItemByID(item.RoleID);
+                    item.Type = role.Type;
                     item.CreateDate = DateTime.Now;
                     item.UserCreate = User.Claims.GetClaimByType("UserID").Value;
 
@@ -173,7 +180,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {
                         {"Data",null },
                         {"Error",item },
-                        {"Msg","Trùng email hoặc mã sinh viên" }
+                        {"Msg","Trùng tên đăng nhập" }
                     };
                     return new JsonResult(response);
                 }
@@ -263,6 +270,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
+
         [HttpPost]
         [Obsolete]
         public JsonResult Publish(DefaultModel model)
@@ -291,6 +299,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             }
         }
+
         [HttpPost]
         [Obsolete]
         public JsonResult UnPublish(DefaultModel model)
@@ -318,6 +327,31 @@ namespace BaseCustomerMVC.Controllers.Admin
 
 
             }
+        }
+
+        [HttpPost]
+        [Obsolete]
+        public JsonResult ChangePass(string AccountID, string Pass)
+        {
+            var account = _service.GetItemByID(AccountID);
+            if (account == null)
+            {
+                return new JsonResult(new Dictionary<string, object>()
+                {
+                    {"Error", "Account not found"}
+                });
+            }
+            if (string.IsNullOrEmpty(Pass))
+                return new JsonResult(new Dictionary<string, object>()
+                {
+                    {"Error", "Password blank"}
+                });
+            account.PassWord = Security.Encrypt(Pass);
+            _service.CreateQuery().ReplaceOne(t => t.ID == AccountID, account);
+            return new JsonResult(new Dictionary<string, object>()
+                {
+                    {"Data", "Password updated"}
+                });
         }
 
         [Obsolete]

@@ -81,12 +81,16 @@ namespace BaseCustomerMVC.Controllers.Admin
             var DataResponse =
 
                 from t in teachers.ToList()
-                let role = roles.Find(r => r.ID == _accountService.CreateQuery().Find(o => o.UserID == t.ID && o.Type == "teacher").SingleOrDefault()?.RoleID)
+                let account = _accountService.CreateQuery().Find(o => o.UserID == t.ID && o.Type == "teacher").FirstOrDefault()
+                where account != null
+                let role = roles.Find(r => r.ID == account.RoleID)
+                where role != null
                 select _mapping.AutoOrtherType(t, new TeacherViewModel()
                 {
                     SubjectList = t.Subjects == null ? null : _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList(),
-                    RoleID = role?.ID,
-                    RoleName = role?.Name
+                    RoleID = role.ID,
+                    RoleName = role.Name,
+                    AccountID = account.ID
                 });
 
             var response = new Dictionary<string, object>
@@ -103,7 +107,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         public JsonResult GetDetails(string id)
         {
             var filter = Builders<TeacherEntity>.Filter.Where(o => o.ID == id);
-            var data = _service.Collection.Find(filter).SingleOrDefault();
+            var data = _service.Collection.Find(filter).First();
 
             var roleList = new List<string> { "teacher", "head-teacher" };
             var roles = _roleService.CreateQuery().Find(o => roleList.Contains(o.Code)).ToList();
@@ -111,12 +115,14 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             if (data != null)
             {
-                var role = roles.Find(r => r.ID == _accountService.CreateQuery().Find(o => o.UserID == data.ID && o.Type == "teacher").SingleOrDefault()?.RoleID);
+                var account = _accountService.CreateQuery().Find(o => o.UserID == data.ID && o.Type == "teacher").First();
+                var role = roles.Find(r => r.ID == account.RoleID);
                 teacher = _mapping.AutoOrtherType(data, new TeacherViewModel()
                 {
                     SubjectList = data.Subjects == null ? null : _subjectService.CreateQuery().Find(o => data.Subjects.Contains(o.ID)).ToList(),
                     RoleID = role?.ID,
-                    RoleName = role?.Name
+                    RoleName = role?.Name,
+                    AccountID = account?.ID
                 });
             }
 

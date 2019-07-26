@@ -46,22 +46,20 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetList(DefaultModel model)
+        public JsonResult GetList(DefaultModel model, string SubjectID = "")
         {
             var filter = new List<FilterDefinition<GradeEntity>>();
 
             if (!string.IsNullOrEmpty(model.SearchText))
             {
-                filter.Add(Builders<GradeEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower()) || o.Code.ToLower().Contains(model.SearchText.ToLower())));
+                filter.Add(Builders<GradeEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
             }
-            if (model.StartDate > DateTime.MinValue)
+
+            if (!string.IsNullOrEmpty(SubjectID))
             {
-                filter.Add(Builders<GradeEntity>.Filter.Where(o => o.Created >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
+                filter.Add(Builders<GradeEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
-            if (model.EndDate > DateTime.MinValue)
-            {
-                filter.Add(Builders<GradeEntity>.Filter.Where(o => o.Created <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
-            }
+
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<GradeEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize

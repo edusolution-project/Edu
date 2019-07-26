@@ -37,6 +37,8 @@ namespace BaseCustomerEntity.Database
         {
 
         }
+
+
         public AccountEntity GetAccount(string type, string userName, string passWord)
         {
             var pass = passWord;

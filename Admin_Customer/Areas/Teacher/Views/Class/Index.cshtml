@@ -7,70 +7,70 @@
 
 
 <!-- Begin Page Content -->
-    <div class="container">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Các lớp đã được phân công</h6>
-            </div>
-            <div class="card-body">
-                <div class="search-filter">
-                    <div class="form-row">
-                        <div class="form-group row col-md-4">
-                            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
-                            <div class="col-sm-8">
-                                <select id="SubjectID" class="form-control" onchange="LoadGrade()">
-                                    @{
-                                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                        {
-                                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                        }
-
+<div class="container">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Các lớp đã được phân công</h6>
+        </div>
+        <div class="card-body">
+            <div class="search-filter">
+                <div class="form-row">
+                    <div class="form-group row col-md-4">
+                        <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                        <div class="col-sm-8">
+                            <select id="SubjectID" class="form-control" onchange="LoadGrade()">
+                                @{
+                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                    {
+                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
                                     }
-                                </select>
-                            </div>
+
+                                }
+                            </select>
                         </div>
-                        <div class="form-group row col-md-4 offset-4">
-                            <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
-                            <div class="col-sm-8">
-                                <select id="GradeID" class="form-control" onchange="LoadData()">
-                                    <option value="">-- Tất cả --</option>
-                                    @{
-                                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                        {
-                                            <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                        }
-
+                    </div>
+                    <div class="form-group row col-md-4 offset-4">
+                        <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+                        <div class="col-sm-8">
+                            <select id="GradeID" class="form-control" onchange="LoadData()">
+                                <option value="">-- Tất cả --</option>
+                                @{
+                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                    {
+                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
                                     }
-                                </select>
-                            </div>
+
+                                }
+                            </select>
                         </div>
                     </div>
                 </div>
-                <div class="table-responsive">
-                    <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
-                        <thead>
-                            <tr class="text-center">
-                                <th>STT</th>
-                                <th>Tên lớp</th>
-                                <th>Môn học</th>
-                                <th>Cấp độ</th>
-                                <th>Giáo viên</th>
-                                <th>Học viên đăng ký</th>
-                                <th>Ngày bắt đầu</th>
-                                <th>Ngày kết thúc</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr class="text-center">
+                            <th>STT</th>
+                            <th>Tên lớp</th>
+                            <th>Môn học</th>
+                            <th>Cấp độ</th>
+                            <th>Giáo viên</th>
+                            <th>Học viên đăng ký</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Ngày kết thúc</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
-        <!-- End of Main Content -->
+</div>
+<!-- End of Main Content -->
 
 
-        <script>
+<script>
 
     function LoadData() {
         var searchText = $("#searchText").val();
@@ -127,4 +127,4 @@
     $(document).ready(function () {
         LoadGrade();
     });
-        </script>
+</script>

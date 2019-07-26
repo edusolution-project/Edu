@@ -31,7 +31,6 @@ namespace BaseCustomerEntity.Database
         public bool IsActive { get; set; }
         [JsonProperty("Order")]
         public int Order { get; set; }
-
         [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]

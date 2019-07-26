@@ -73,15 +73,15 @@
                                 <input type="text" class="form-control" name="StudentId" id="inputName" placeholder="mã học viên">
                             </div>
                             <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="Class" id="inputText" placeholder="Lớp">
+                                <input type="text" class="form-control" name="Class" placeholder="Lớp">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên" required>
+                                <input type="text" class="form-control" name="FullName" placeholder="Họ và tên" required>
                             </div>
                             <div class="form-group col-md-6">
-                                <input type="email" class="form-control" name="Email" id="inputEmail" placeholder="Email" disabled locked required>
+                                <input type="email" class="form-control" name="Email" placeholder="Email" disabled locked required>
                             </div>
                         </div>
                         <div class="form-row">
@@ -108,7 +108,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="Submit('AddForm','@Url.Action("Create", "student")','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "student")','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
         }
@@ -142,12 +142,43 @@
                         <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action("ExportTemplate", "student")')">Tải file mẫu</button>
                     </div>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary btn-submit" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
                 </div>
             }
         </div>
     </div>
 </div>
+
+
+<!-- Modal change pass -->
+<div class="modal fade bd-modal-lg" id="passModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            @using (Html.BeginForm("ChangePass", "Account", FormMethod.Post, new { enctype = "multipart/form-data", name = "PassForm" }))
+            {
+                <div class="modal-header">
+                    <h5 class="modal-title">Nhập mật khẩu mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AccountID" />
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <input type="password" class="form-control" name="Pass" placeholder="Mật khẩu mới">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action("ChangePass", "Account")','changepass',checkPassUpdate)">Lưu lại</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
 <script>
     $('.datepicker').each(function () {
         var fieldID = $(this).next().attr("id");
@@ -191,6 +222,7 @@
                             "<td class='text-center'>" + date + "</td>" +
                             "<td class='text-center'>" + (item.Class == null?"":item.Class) + "</td>" +active +
                             "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"ChangePass('" + item.AccountID + "')\")\" type='button' data-placement='top' title='Đổi mật khẩu' class='btn btn-primary' data-toggle='modal' data-target='#passModal'> <i class='fas fa-key'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
@@ -208,4 +240,23 @@
     $(document).ready(function () {
         LoadData();
     });
+
+    
+    function ChangePass(accountid) {
+        $('form[name=PassForm] [name=AccountID]').val(accountid);
+    }
+
+    function checkPassUpdate(response) {
+        var result = JSON.parse(response);
+        if(result.Error != null)
+            alert(result.Error)
+        else
+            hideModal();
+    }
+
+    $('form').submit(function (e) {
+        e.preventDefault;
+        $(this).find(".btn-submit").focus().click();
+        return false;
+    })
 </script>

@@ -39,8 +39,7 @@
                                     </div>
                                 </th>
                                 <th class='text-center'>STT</th>
-                                <th class='text-center'>Tên đăng nhập</th>
-                                <th class='text-center'>Họ tên</th>
+                                <th class='text-center'>Tên đăng nhập / Email</th>
                                 <th class='text-center'>Loại</th>
                                 <th class='text-center'>Trạng thái</th>
                                 <th class='text-center'>Thao tác</th>
@@ -73,9 +72,6 @@
                                 <input type="email" class="form-control" name="UserName" placeholder="Tên đăng nhập (Email)" autocomplete="off" required>
                             </div>
                             <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="Name" placeholder="Họ và tên" autocomplete="off" required>
-                            </div>
-                            <div class="form-group col-md-6">
                                 <input type="password" class="form-control" name="PassWord" placeholder="Mật khẩu" autocomplete="off" required>
                             </div>
                         </div>
@@ -92,10 +88,38 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "account")','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary btn-submit" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "account")','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
         }
+    </div>
+</div>
+
+<!-- Modal change pass -->
+<div class="modal fade bd-modal-lg" id="passModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form name="PassForm" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nhập mật khẩu mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AccountID" />
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <input type="password" class="form-control" name="Pass" placeholder="Mật khẩu mới">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action("ChangePass", "Account")','changepass',checkPassUpdate)">Lưu lại</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 <script>
@@ -127,10 +151,12 @@
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID + "' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td class='text-center'>" + (i + 1) + "</td>" +
                             "<td>" + item.UserName +"</td>" +
-                            "<td>" + item.Name + "</td>" +
                             "<td class='text-center'>" + item.RoleName +"</td>" +active +
-                            (isAdmin ? "<td></td>" : ("<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","account")','@Url.Action("create","account")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' role='tooltip' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<td class='text-center'>" +
+                            (isAdmin ? "" : (
+                            @*"<button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","account")','@Url.Action("create","account")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' role='tooltip' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +*@
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","account")',LoadData); else return;\" data-placement='top' title='Xóa' role='tooltip' type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>")) +
+                            "<button onclick=\"ChangePass('" + item.ID + "')\")\" type='button' data-placement='top' title='Đổi mật khẩu' class='btn btn-primary' data-toggle='modal' data-target='#passModal'> <i class='fas fa-key'></i> </button>" +
                             "</td > " +
                             "</tr>"
                         );
@@ -147,4 +173,23 @@
     $(document).ready(function () {
         LoadData();
     });
+
+
+    function ChangePass(accountid) {
+        $('form[name=PassForm] [name=AccountID]').val(accountid);
+    }
+
+    function checkPassUpdate(response) {
+        var result = JSON.parse(response);
+        if(result.Error != null)
+            alert(result.Error)
+        else
+            hideModal();
+    }
+
+    $('form').submit(function (e) {
+        e.preventDefault;
+        $(this).find(".btn-submit").focus().click();
+        return false;
+    })
 </script>

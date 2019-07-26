@@ -19,14 +19,10 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="float-right">
-                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-placement="top" title="Thêm giáo viên" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-placement="top" title="Nhập file dữ liệu" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
+                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-placement="top" title="Thêm giáo viên" data-toggle="modal" data-target="#editModal"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-placement="top" title="Nhập file dữ liệu" data-target="#importModal"> <i class="fas fa-upload"></i> </button>
                             <button type="button" class="btn btn-primary" data-placement="top" title="Xuất file dữ liệu" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>
                             <button type="button" class="btn btn-danger" data-placement="top" title="Xóa" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","teacher")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
-                            @*<button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","teacher")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
-                                <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
-                                <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>*@
                         </div>
                     </div>
                 </div>
@@ -60,7 +56,7 @@
 </div>
 
 <!-- Modal Create Form -->
-<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         @using (Html.BeginForm("Create", "teacher", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
         {
@@ -88,8 +84,10 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên">
+                            </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
@@ -133,7 +131,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="Submit('AddForm','@Url.Action("Create", "teacher" )','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "teacher" )','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
         }
@@ -141,7 +139,7 @@
 </div>
 
 <!-- Modal choose file -->
-<div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+<div class="modal fade bd-modal-lg" id="importModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             @using (Html.BeginForm("Import", "teacher", FormMethod.Post, new { enctype = "multipart/form-data", name = "ImportForm" }))
@@ -157,7 +155,7 @@
                         <div class="row">
                             <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
                             <div class="chose-file col-sm-9">
-                                <input type="file" name="file" class="form-control-file" id="FormControlFile">
+                                <input type="file" name="file" class="form-control-file" >
                             </div>
                         </div>
                     </div>
@@ -167,7 +165,37 @@
                         <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')">Tải file mẫu</button>
                     </div>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal change pass -->
+<div class="modal fade bd-modal-lg" id="passModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            @using (Html.BeginForm("ChangePass", "Account", FormMethod.Post, new { enctype = "multipart/form-data", name = "PassForm" }))
+            {
+                <div class="modal-header">
+                    <h5 class="modal-title">Nhập mật khẩu mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AccountID" />
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <input type="password" class="form-control" name="Pass" placeholder="Mật khẩu mới">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action("ChangePass", "Account")','changepass',checkPassUpdate)">Lưu lại</button>
                 </div>
             }
         </div>
@@ -223,7 +251,8 @@
                             "<td class='text-center'>" + date + "</td>" +
                             "<td class='text-center'>" + item.RoleName + "</td>" +
                             "<td class='text-center'>" + subject + "</td>" + active +
-                            "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "teacher")','@Url.Action("create", "teacher")',this)\" type='button' data-placement='top' title='Sửa' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails", "teacher")','@Url.Action("create", "teacher")',this)\" type='button' data-placement='top' title='Sửa' class='btn btn-primary' data-toggle='modal' data-target='#editModal'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"ChangePass('" + item.AccountID + "')\")\" type='button' data-placement='top' title='Đổi mật khẩu' class='btn btn-primary' data-toggle='modal' data-target='#passModal'> <i class='fas fa-key'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.TeacherId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete", "teacher")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
@@ -238,7 +267,25 @@
         });
     };
 
+    function ChangePass(accountid) {
+        $('form[name=PassForm] [name=AccountID]').val(accountid);
+    }
+
+    function checkPassUpdate(response) {
+        var result = JSON.parse(response);
+        if(result.Error != null)
+            alert(result.Error)
+        else
+            hideModal();
+    }
+
     $(document).ready(function () {
         LoadData();
     });
+
+    $('form').submit(function (e) {
+        e.preventDefault;
+        $(this).find(".btn-submit").focus().click();
+        return false;
+    })
 </script>

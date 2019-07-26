@@ -29,6 +29,24 @@
             </div>
 
             <div class="card-body">
+                <div class="search-filter">
+                    <div class="form-row">
+                        <div class="form-group row col-md-4">
+                            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                            <div class="col-sm-8">
+                                <select id="SubjectID" class="form-control" onchange="LoadData()">
+                                    @{
+                                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                        {
+                                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                        }
+
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
@@ -70,8 +88,8 @@
                         <input type="hidden" name="ID" />
                         <div class="form-row">
                             @*<div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="Code" id="inputName" placeholder="mã cấp độ">
-                            </div>*@
+                                    <input type="text" class="form-control" name="Code" id="inputName" placeholder="mã cấp độ">
+                                </div>*@
                             <div class="form-group col-md-6">
                                 <input type="text" class="form-control" name="Name" id="inputText" placeholder="Tên cấp độ">
                             </div>
@@ -120,21 +138,23 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "grade")','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary btn-submit" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "grade")','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
         }
     </div>
 </div>
 <script>
-    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
+    function LoadData() {
+        var searchText = $("#searchText").val();
+        var SubjectID = $("#SubjectID").val();
+
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "grade")',
             data: {
                 SearchText: searchText,
-                StartDate: startDate,
-                EndDate: endDate
+                SubjectID: SubjectID
             },
             dataType:"json",
             success: function (data) {
@@ -158,7 +178,7 @@
                             "<td class='text-center'>" + (i + 1) + "</td>" +
                             //"<td>" + item.Code +"</td>" +
                             "<td>" + item.Name + "</td>" +
-                            "<td class='text-center'>" + date +"</td>"+active +
+                            "<td class='text-center'>" + date +"</td>" + active +
                             "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","grade")','@Url.Action("create","grade")',this)\" type='button' data-placement='top' title='Sửa' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","grade")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
@@ -177,4 +197,10 @@
     $(document).ready(function () {
         LoadData();
     });
+
+    $('form').submit(function (e) {
+        e.preventDefault;
+        $(this).find(".btn-submit").focus().click();
+        return false;
+    })
 </script>

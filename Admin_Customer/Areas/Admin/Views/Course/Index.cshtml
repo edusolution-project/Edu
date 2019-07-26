@@ -173,7 +173,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="Submit('AddForm','@Url.Action("Create", "Course" )','create',LoadData)">Lưu lại</button>
+                <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "Course" )','create',LoadData)">Lưu lại</button>
             </div>
         </div>
         }
@@ -364,4 +364,10 @@
             input.value = id;
         }
     }
+
+    $('form').submit(function (e) {
+        e.preventDefault;
+        $(this).find(".btn-submit").focus().click();
+        return false;
+    })
 </script>

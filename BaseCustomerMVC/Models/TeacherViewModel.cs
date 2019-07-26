@@ -13,6 +13,9 @@ namespace BaseCustomerMVC.Models
         public string RoleID { get; set; }
         [JsonProperty("RoleName")]
         public string RoleName { get; set; }
+        [JsonProperty("AccountID")]
+        public string AccountID {get;set;}
+
 
     }
 }

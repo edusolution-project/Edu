@@ -23,6 +23,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly RoleService _roleService;
         private readonly AccountService _accountService;
         private readonly IHostingEnvironment _env;
+        private readonly MappingEntity<StudentEntity, StudentViewModel> _mapping;
         public StudentController(StudentService service
             , RoleService roleService
             , AccountService accountService
@@ -32,6 +33,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _service = service;
             _roleService = roleService;
             _accountService = accountService;
+            _mapping = new MappingEntity<StudentEntity, StudentViewModel>();
         }
         // GET: Home
 
@@ -65,9 +67,17 @@ namespace BaseCustomerMVC.Controllers.Admin
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+
+            var students = from r in DataResponse
+                           let account = _accountService.CreateQuery().Find(o => o.UserID == r.ID && o.Type == "student").First()
+                           select _mapping.AutoOrtherType(r, new StudentViewModel()
+                           {
+                               AccountID = account.ID
+                           });
+
             var response = new Dictionary<string, object>
             {
-                { "Data", DataResponse },
+                { "Data", students },
                 { "Model", model }
             };
             return new JsonResult(response);
@@ -80,13 +90,17 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             var filter = Builders<StudentEntity>.Filter.Where(o => o.ID == id);
             var data = _service.Collection.Find(filter);
-            var DataResponse = data == null || data.Count() <= 0 ? null : data.First();
+            var student = data == null || data.Count() <= 0 ? null : data.First();
+            var account = _accountService.CreateQuery().Find(o => o.UserID == student.ID && o.Type == "student").First();
             var response = new Dictionary<string, object>
             {
-                { "Data", DataResponse }
+                { "Data", _mapping.AutoOrtherType(student, new StudentViewModel()
+                    {
+                    AccountID = account.ID
+                    })
+                }
             };
             return new JsonResult(response);
-
         }
 
         [HttpPost]
@@ -375,7 +389,6 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             }
         }
-
 
         [HttpPost]
         [Obsolete]

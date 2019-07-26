@@ -90,7 +90,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="Submit('AddForm','@Url.Action("Create", "subject")','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "subject")','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
         }
@@ -98,7 +98,7 @@
 </div>
 <script>
     function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
-
+        hideModal();
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "subject")',
@@ -127,7 +127,7 @@
                             "<td class='text-center'>" + item.Name + "</td>" +
                             "<td class='text-center'>" + date +"</td>"+active +
                             "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","subject")','@Url.Action("create","subject")',this)\" type='button' class='btn btn-primary' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","subject")',LoadData); else return;\" type='button' data-toggle='tooltip' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa môn học " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","subject")',LoadData); else return;\" type='button' data-toggle='tooltip' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                         );
@@ -144,4 +144,12 @@
     $(document).ready(function () {
         LoadData();
     });
+
+    $('form').submit(function (e) {
+        e.preventDefault;
+        $(this).find(".btn-submit").focus().click();
+        return false;
+    })
+
+
 </script>
