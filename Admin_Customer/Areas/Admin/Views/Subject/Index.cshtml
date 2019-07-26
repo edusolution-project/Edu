@@ -69,16 +69,15 @@
                         <input type="hidden" name="ID" />
                         <div class="form-row">
                             @*<div class="form-group col-md-6">
-                                    <input type="text" class="form-control" name="Code" id="inputName" placeholder="Mã môn học">
-                                </div>*@
+                <input type="text" class="form-control" name="Code" id="inputName" placeholder="Mã môn học">
+            </div>*@
                             <div class="form-group col-md-6">
+                                <label for="staticText" class="col-form-label">Tên môn học:</label>
                                 <input type="text" class="form-control" name="Name" id="inputText" placeholder="Tên môn học" required>
                             </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group row col-md-6">
-                                <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
-                                <div class="col-sm-8">
+                            <div class="form-group col-md-6">
+                                <label for="staticText" class="col-form-label">Trạng thái:</label>
+                                <div class="select">
                                     <select id="input-option" name="IsActive" class="form-control">
                                         <option value="true" selected>Hoạt động</option>
                                         <option value="false">Không hoạt động</option>
@@ -86,62 +85,73 @@
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="Submit('AddForm','@Url.Action("Create", "subject")','create',LoadData)">Lưu lại</button>
-                </div>
-            </div>
-        }
-    </div>
-</div>
-<script>
-    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
-
-        $.ajax({
-            type: "POST",
-            url: '@Url.Action("GetList", "subject")',
-            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
-            dataType:"json",
-            success: function (data) {
-                var body = $('#dataTable tbody');
-                body.html("");
-                if (data.Data.length > 0)
-                {
-                    for (i = 0; i < data.Data.length; ++i) {
-                        item = data.Data[i];
-                        console.log(item);
-                        var active = "";
-                        if (item.IsActive) {
-                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","subject")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' title='Sửa' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
-                        } else {
-                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","subject")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' title='Xóa' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
-                        }
-
-                        var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.Created));
-                        body.append("<tr>" +
-                            "<td class='text-center'><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
-                            "<td class='text-center'>" + (i + 1) + "</td>" +
-                            //"<td>" + item.Code +"</td>" +
-                            "<td class='text-center'>" + item.Name + "</td>" +
-                            "<td class='text-center'>" + date +"</td>"+active +
-                            "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","subject")','@Url.Action("create","subject")',this)\" type='button' class='btn btn-primary' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","subject")',LoadData); else return;\" type='button' data-toggle='tooltip' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
-                            "</td > " +
-                            "</tr>"
-                        );
-                    }
-                    $('.btn').tooltip();
+                        @*<div class="form-row">
+                                    <div class="form-group row col-md-6">
+                                        <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
+                                        <div class="col-sm-8">
+                                            <select id="input-option" name="IsActive" class="form-control">
+                                                <option value="true" selected>Hoạt động</option>
+                                                <option value="false">Không hoạt động</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div*@
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                            <button type="button" class="btn btn-primary" onclick="Submit('AddForm','@Url.Action("Create", "subject")','create',LoadData)">Lưu lại</button>
+                        </div>
+                    </div>
                 }
-            },
-            error: function() {
-                alert("Error");
-            }
-        });
-    };
+            </div>
+        </div>
+        <script>
+            function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
 
-    $(document).ready(function () {
-        LoadData();
-    });
-</script>
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetList", "subject")',
+                    data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
+                    dataType:"json",
+                    success: function (data) {
+                        var body = $('#dataTable tbody');
+                        body.html("");
+                        if (data.Data.length > 0)
+                        {
+                            for (i = 0; i < data.Data.length; ++i) {
+                                item = data.Data[i];
+                                console.log(item);
+                                var active = "";
+                                if (item.IsActive) {
+                                    active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","subject")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' title='Sửa' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                                } else {
+                                    active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","subject")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' title='Xóa' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                                }
+
+                                var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.Created));
+                                body.append("<tr>" +
+                                    "<td class='text-center'><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
+                                    "<td class='text-center'>" + (i + 1) + "</td>" +
+                                    //"<td>" + item.Code +"</td>" +
+                                    "<td class='text-center'>" + item.Name + "</td>" +
+                                    "<td class='text-center'>" + date +"</td>"+active +
+                                    "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","subject")','@Url.Action("create","subject")',this)\" type='button' class='btn btn-primary' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                                    "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","subject")',LoadData); else return;\" type='button' data-toggle='tooltip' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                                    "</td > " +
+                                    "</tr>"
+                                );
+                            }
+                            $('.btn').tooltip();
+                        }
+                    },
+                    error: function() {
+                        alert("Error");
+                    }
+                });
+            };
+
+            $(document).ready(function () {
+                LoadData();
+            });
+        </script>

@@ -188,26 +188,21 @@ video, audio {
     background: linear-gradient(to bottom, #a90329 0%,#8f0222 44%,#6d0019 100%);
 }
 
-#ModalCenter .modal-body .btn-group{
-    display: block;
-}
-
-#ModalCenter .modal-body .btn-group .dropdown-menu.show {
+#ModalCenter .modal-body .dropdown-menu.show {
     width: 100%;
 }
 
-#ModalCenter .modal-body .btn-group .dropdown-toggle {
+#ModalCenter .modal-body .dropdown-toggle {
     width: 100%;
+    border: 1px solid #d1d3e2;
+    border-radius: 0;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
 }
 
-#ModalCenter .modal-body .btn-group .text {
-    float: left;
-}
-
-#ModalCenter .modal-body .dropdown-toggle::after {
-    position: relative;
-    float: right;
-    top: 10px;
+#ModalCenter .modal-body .dropdown-menu > li {
+    padding: 10px 15px;
+    border-bottom: 1px solid #d1d3e2;
 }
 
 #dataTable .input-group input {
@@ -459,7 +454,7 @@ video, audio {
 }
 
 .QUIZ3 .ui-draggable-handle .img-fluid {
-    width: 100%;
+    width: 75%;
 }
 
 .QUIZ3 .no-child .ui-draggable-handle {
@@ -467,8 +462,7 @@ video, audio {
     padding: 3px;
     background-color: #ddd;
     border-color: #ddd;
-    border-radius: 5px;
-    max-width: 75%;
+    border-radius: 3px;
 }
 
 .QUIZ3 .answer-text {
@@ -477,10 +471,10 @@ video, audio {
 }
 
 .QUIZ3 .answer-wrapper.no-child {
-    overflow-y: scroll;
-    max-height: 500px;
+    overflow-y: auto;
     text-align: center;
     margin-top: 20px;
+    max-height: 500px;
 }
 
 .QUIZ3 .pane-item .quiz-text {
@@ -653,3 +647,5 @@ video, audio {
 #body-exam .justify-content-center {
     margin: auto;
 }
+
+/* css input dropdown */

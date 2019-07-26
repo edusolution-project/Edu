@@ -113,30 +113,38 @@
                     </div>
                     <div class="form-group col-md-6">
                         <label for="staticText" class="col-form-label">Môn học:</label>
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-display="static" aria-haspopup="true" aria-expanded="false" name="SubjectID" onchange="LoadGradeInput(this)">
-                                <span class="text">Chọn môn học giảng dạy</span>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
-                                @{
-                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                    {
-                                        <a class="dropdown-item"><input class="checkbox" type="checkbox" value="@listSubject[i].ID"><span class="lbl"> @listSubject[i].Name </span></a>
+                        <div class="input-group">
+                            <div class="input-group-btn">
+                                <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                    Chọn <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    @{
+                                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                        {
+                                            <li>
+                                                <a>
+                                                    <input type="checkbox" value="@listSubject[i].ID"><span class="lbl"> @listSubject[i].Name </span>
+                                                </a>
+                                            </li>
+                                        }
                                     }
-                                }
+                                </ul>
                             </div>
+                            <input id="input-form" type="text" class="form-control" >
                         </div>
 
-                        @*
-                        <select name="SubjectID" class="form-control" onchange="LoadGradeInput(this)" required>
-                            @{
-                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                {
-                                    <option value="@listSubject[i].ID"> @listSubject[i].Name</option>
-                                }
 
-                            }
-                        </select>*@
+                        
+                        @*<select id="example-getting-started" name="SubjectID" class="form-control" onchange="LoadGradeInput(this)" required>
+            @{
+                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                {
+                    <option value="@listSubject[i].ID"> @listSubject[i].Name</option>
+                }
+
+            }
+        </select>*@
                     </div>
                     <div class="form-group col-md-6">
                         <label for="staticText" class="col-form-label">Cấp độ:</label>
@@ -144,7 +152,7 @@
                             @{
                                     for (int i = 0; listGrade != null && i < listGrade.Count; i++)
                                     {
-                                <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
+                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
                                     }
 
                             }
