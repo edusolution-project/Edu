@@ -188,6 +188,28 @@ video, audio {
     background: linear-gradient(to bottom, #a90329 0%,#8f0222 44%,#6d0019 100%);
 }
 
+#ModalCenter .modal-body .btn-group{
+    display: block;
+}
+
+#ModalCenter .modal-body .btn-group .dropdown-menu.show {
+    width: 100%;
+}
+
+#ModalCenter .modal-body .btn-group .dropdown-toggle {
+    width: 100%;
+}
+
+#ModalCenter .modal-body .btn-group .text {
+    float: left;
+}
+
+#ModalCenter .modal-body .dropdown-toggle::after {
+    position: relative;
+    float: right;
+    top: 10px;
+}
+
 #dataTable .input-group input {
     width: 18px;
     height: 18px;
@@ -278,16 +300,17 @@ video, audio {
     margin: 5px;
     display: inline-block;
     border-radius: 25px;
-    width: 30px;
+    width: 35px;
+    height: 35px;
     line-height: 24px;
     text-align: center;
     padding: 2px 0 !important;
 }
 
-    .rounded-quiz.completed {
-        background-color: #666;
-        color: #36b9cc;
-    }
+.rounded-quiz.completed {
+    background-color: #666;
+    color: #36b9cc;
+}
 
 .number {
     color: #999;
@@ -347,10 +370,10 @@ video, audio {
     transition: 0.3s;
 }
 
-    .overlay a:hover,
-    .overlay a:focus {
-        color: #f1f1f1;
-    }
+.overlay a:hover,
+.overlay a:focus {
+    color: #f1f1f1;
+}
 
 .overlay .closebtn {
     position: absolute;
@@ -598,7 +621,7 @@ video, audio {
     box-shadow: 0 5px 35px rgba(0,0,0,.65);
     top: 10%;
     right: 5px;
-    background: #f854528c;
+    background: #f85452;
     max-width: 90%;
     min-width: 250px;
     pointer-events: none;
@@ -607,14 +630,14 @@ video, audio {
 }
 
 .notification.error {
-    background: #f78a8817;
+    background: #f78a88;
     color: #000;
     text-shadow: 2px 2px 2px rgb(206, 65, 55);
 }
 
 .notification.success {
-    background: #59ce7441;
-    color: #000000;
+    background: #59ce74;
+    color: #000;
     text-shadow: 2px 2px 2px rgb(55, 206, 55);
 }
 
@@ -622,4 +645,11 @@ video, audio {
     display: inline-block;
     width: 20px;
     height: 20px;
+}
+
+#btn-completed {
+    width: 100%;
+}
+#body-exam .justify-content-center {
+    margin: auto;
 }
