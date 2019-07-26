@@ -119,9 +119,12 @@ $(document).ready(function () {
     $("ul.dropdown-menu input[type=checkbox]").each(function () {
         $(this).change(function () {
             var line = "";
+            $('.subject_wrapper').empty();
             $("ul.dropdown-menu input[type=checkbox]").each(function () {
                 if ($(this).is(":checked")) {
                     line += $("+ span", this).text() + ";";
+                    id = $(this).attr('id');
+                    $('.subject_wrapper').append($("<input>", { type: "hidden", name: "Subject", value: id }));
                 }
             });
             $("#input-form").val(line);

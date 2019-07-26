@@ -68,51 +68,60 @@
                     <form>
                         <input type="hidden" name="Created" value="" />
                         <input type="hidden" name="ID" />
-                        <div class="form-row">
-                            @*<div class="form-group col-md-6">
+                        @*<div class="form-row">
+                            <div class="form-group col-md-6">
                                 <input type="text" class="form-control" name="Code" id="inputName" placeholder="mã cấp độ">
-                            </div>*@
+                            </div>
                             <div class="form-group col-md-6">
                                 <input type="text" class="form-control" name="Name" id="inputText" placeholder="Tên cấp độ">
                             </div>
+                        </div>*@
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control" name="Name" id="inputText" placeholder="Tên cấp độ">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <div class="row">
+                                    <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                                    <div class="col-sm-8">
+                                        <select id="input-option" name="SubjectID" class="form-control">
+                                            @{
+                                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                                {
+                                                    <option value="@listSubject[i].ID" selected>@listSubject[i].Name</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>                           
                         </div>
                         <div class="form-row">
-                            <div class="form-group row col-md-6">
-                                <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
-                                <div class="col-sm-8">
-                                    <select id="input-option" name="SubjectID" class="form-control">
-                                        @{
-                                            for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                            {
-                                                <option value="@listSubject[i].ID" selected>@listSubject[i].Name</option>
+                            <div class="form-group col-md-6">
+                                <div class="row">
+                                    <label for="staticText" class="col-sm-4 col-form-label">Cấp độ gốc:</label>
+                                    <div class="col-sm-8">
+                                        <select id="input-option" name="ParentID" class="form-control">
+                                            <option value="0" selected> ---- </option>
+                                            @{
+                                                for (int i = 0; listData != null && i < listData.Count; i++)
+                                                {
+                                                    <option value="@listData[i].ID" selected>@listData[i].Name</option>
+                                                }
                                             }
-                                        }
-                                    </select>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="form-group row col-md-6">
-                                <label for="staticText" class="col-sm-4 col-form-label">Cấp độ gốc:</label>
-                                <div class="col-sm-8">
-                                    <select id="input-option" name="ParentID" class="form-control">
-                                        <option value="0" selected> ---- </option>
-                                        @{
-                                            for (int i = 0; listData != null && i < listData.Count; i++)
-                                            {
-                                                <option value="@listData[i].ID" selected>@listData[i].Name</option>
-                                            }
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group row col-md-6">
-                                <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
-                                <div class="col-sm-8">
-                                    <select id="input-option" name="IsActive" class="form-control">
-                                        <option value="true" selected>Hoạt động</option>
-                                        <option value="false">Không hoạt động</option>
-                                    </select>
+                            <div class="form-group col-md-6">
+                                <div class="row">
+                                    <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
+                                    <div class="col-sm-8">
+                                        <select id="input-option" name="IsActive" class="form-control">
+                                            <option value="true" selected>Hoạt động</option>
+                                            <option value="false">Không hoạt động</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
