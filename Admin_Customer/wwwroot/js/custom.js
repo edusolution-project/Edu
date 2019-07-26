@@ -58,7 +58,6 @@ function start(obj) {
     $("#finish").removeClass("d-none");
     countdown();
 }
-
 function countdown() {
     clearTimeout(r);
     var time = $(".time-counter").text().trim();

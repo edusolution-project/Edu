@@ -74,14 +74,28 @@
                                 <input type="text" class="form-control" name="TeacherId" id="inputName" placeholder="Mã giáo viên">
                             </div>
                             <div class="form-group col-md-6">
-                                <select name="Subjects" class="form-control">
-                                    @{
-                                        for (int i = 0; subject != null && i < subject.Count; i++)
-                                        {
-                                            <option value="@subject[i].ID">@subject[i].Name</option>
-                                        }
-                                    }
-                                </select>
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                            Chọn <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            @{
+                                                for (int i = 0; subject != null && i < subject.Count; i++)
+                                                {
+                                                    <li>
+                                                        <a>
+                                                            <input type="checkbox" id="@subject[i].ID" /><span class="lbl"> @subject[i].Name </span>
+                                                        </a>
+                                                    </li>
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div class="subject_wrapper d-none">
+                                    </div>
+                                    <input id="input-form" type="text" class="form-control">
+                                </div>
                             </div>
                         </div>
                         <div class="form-row">
