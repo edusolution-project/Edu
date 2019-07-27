@@ -307,6 +307,7 @@ var render = {
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
                 }
+                itemBody.append($("<textarea>", { "class": "content-answer","onfocusout":"alert(this.value)"}))
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 ItemRow.append(itemBody);
                 container.append(tabsitem);
@@ -534,7 +535,7 @@ var render = {
     },
     mediaContent: function (data, wrapper, type = "") {
         if (data.Media != null) {
-            var mediaHolder = $("<div>", { "class": "ml-3 media-holder " + type });
+            var mediaHolder = $("<div>", { "class": "media-holder " + type });
             switch (type) {
                 case "IMG":
                     mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid lazy" }));
