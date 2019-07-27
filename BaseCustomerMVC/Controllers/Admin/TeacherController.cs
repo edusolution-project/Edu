@@ -190,6 +190,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 var oldData = _service.GetItemByID(item.ID);
                 if (oldData == null) return new JsonResult(null);
+                item.UserCreate = oldData.UserCreate;
+                item.CreateDate = oldData.CreateDate;
+                item.Address = oldData.Address;
                 _service.CreateOrUpdate(item);
 
                 var oldAccount = _accountService.CreateQuery().Find(t => t.UserID == item.ID && t.Type == "teacher").SingleOrDefault();
