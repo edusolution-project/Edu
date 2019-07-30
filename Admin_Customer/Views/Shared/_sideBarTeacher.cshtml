@@ -1,4 +1,10 @@
-﻿<!-- Sidebar -->
+﻿
+@*@{
+    var role = ViewBag.RoleCode as string;
+
+}*@
+<!-- Sidebar -->
+
 <nav class="navbar navbar-expand-lg navbar-light bg-white mb-4" id="accordionSidebar">
     <div class="container">
         <div class="row">
@@ -22,18 +28,19 @@
                             <span>Lớp của tôi</span>
                         </a>
                     </li>
-
+                    @*@if (role != null && role == "head-teacher")
+                    {*@
+                        <!-- Nav Item -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index" , "Curriculum")">
+                                <i class="fas fa-fw fa-bell"></i>
+                                <span>Quản lý giáo trình</span>
+                            </a>
+                        </li>
+                    @*}*@
                     <!-- Nav Item -->
                     <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index" , "Curriculum")">
-                            <i class="fas fa-fw fa-bell"></i>
-                            <span>Quản lý giáo trình</span>
-                        </a>
-                    </li>
-
-                    <!-- Nav Item -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index" , "Calendar")">
+                        <a class="nav-link" href="@Url.Action("Schedule" , "Class")">
                             <i class="fas fa-fw fa-users"></i>
                             <span>Lịch giảng dạy</span>
                         </a>

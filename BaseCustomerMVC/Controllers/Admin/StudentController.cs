@@ -69,7 +69,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
 
             var students = from r in DataResponse
-                           let account = _accountService.CreateQuery().Find(o => o.UserID == r.ID && o.Type == "student").First()
+                           let account = _accountService.CreateQuery().Find(o => o.UserID == r.ID && o.Type == "student").FirstOrDefault()
+                           where account != null
                            select _mapping.AutoOrtherType(r, new StudentViewModel()
                            {
                                AccountID = account.ID

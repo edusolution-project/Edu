@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -53,8 +54,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Detail(DefaultModel model, string ClassID)
         {
+            ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             if (model == null) return null;
-
             if (ClassID == null)
                 return RedirectToAction("Index", "Class");
             var currentClass = _classService.GetItemByID(ClassID);
@@ -65,12 +66,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return RedirectToAction("Index", "Class");
             ViewBag.Class = currentClass;
             ViewBag.Data = Data;
-            if (Data.TemplateType == LESSON_TEMPLATE.LECTURE)
-                return View();
-            else
-                return View("Exam");
-        }
+            ViewBag.Title = Data.Title;
 
+            //if (Data.TemplateType == LESSON_TEMPLATE.LECTURE)
+            return View();
+            //else
+            //    return View("Exam");
+        }
 
         [HttpPost]
         public JsonResult GetDetailsLesson(string ID)
@@ -195,6 +197,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Exam()
         {
+            ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             return View();
         }
 

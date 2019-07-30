@@ -38,12 +38,12 @@
                         <table id="scheduleTable" class="table table-bordered" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
-                                    <th>Tên bài học</th>
-                                    <th>Mô tả</th>
-                                    <th>Ngày bắt đầu</th>
-                                    <th>Ngày kết thúc</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
+                                    <th class="text-center">Tên bài học</th>
+                                    <th class="text-center">Mô tả</th>
+                                    <th class="text-center">Ngày bắt đầu</th>
+                                    <th class="text-center">Ngày kết thúc</th>
+                                    <th class="text-center">Trạng thái</th>
+                                    <th class="text-center">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -68,8 +68,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- DataTales Example -->
+                       
                         <div class="tab-student">
                             <div class="card">
                                 <div class="card-header">
@@ -91,15 +90,15 @@
                                         <table id="membersTable" class="table table-bordered" width="100%" cellspacing="0">
                                             <thead>
                                                 <tr>
-                                                    <th>STT</th>
-                                                    <th>Họ và tên</th>
-                                                    <th>Email</th>
-                                                    <th>Điện thoại</th>
-                                                    <th>Lớp</th>
-                                                    <th>Ngày tháng năm sinh</th>
-                                                    <th>Tình trạng khóa học</th>
-                                                    <th>Ngày học gần nhất</th>
-                                                    <th>Trạng thái</th>
+                                                    <th class="text-center">STT</th>
+                                                    <th class="text-center">Họ và tên</th>
+                                                    <th class="text-center">Email</th>
+                                                    <th class="text-center">Điện thoại</th>
+                                                    <th class="text-center">Lớp</th>
+                                                    <th class="text-center">Ngày tháng năm sinh</th>
+                                                    <th class="text-center">Tình trạng khóa học</th>
+                                                    <th class="text-center">Ngày học gần nhất</th>
+                                                    <th class="text-center">Trạng thái</th>
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -143,16 +142,14 @@
                             <table id="examTable" class="table table-bordered" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>
-                                        <th>Tên bài học</th>
-                                        <th>Mô tả</th>
-                                        <th>Thời gian bắt đầu</th>
-                                        <th>Thời gian kết thúc</th>
-                                        <th>Học viên tham gia</th>
+                                        <th class="text-center">Tên bài học</th>
+                                        <th class="text-center">Mô tả</th>
+                                        <th class="text-center">Thời gian bắt đầu</th>
+                                        <th class="text-center">Thời gian kết thúc</th>
+                                        <th class="text-center">Học viên tham gia</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -324,6 +321,26 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div class="table-responsive">
+                                    <table id="examDetailTable" class="table table-bordered" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center">STT</th>
+                                                <th class="text-center">Họ tên</th>
+                                                <th class="text-center">Thời gian làm bài</th>
+                                                <th class="text-center">Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -337,6 +354,7 @@
     var scheduleBody = $('#scheduleTable tbody');
     var membersBody = $('#membersTable tbody');
     var examBody = $('#examTable tbody');
+    var examDetailBody = $('#examDetailTable tbody');
     var scheduleCounter = 0;
     var memberCounter = 0;
 
@@ -398,32 +416,32 @@
                         var item = lessons[j];
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("unpublish", "LessonSchedule")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("unpublish", "LessonSchedule")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
 
                         var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
                         var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
 
                         if (item.ChapterID == null) {
-                            scheduleBody.append("<tr lid=\"" + item.ID + "\">" +
-                            "<td><a class='links' href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
+                            scheduleBody.append("<tr lid=\"" + item.ID + "\" cid=\"" + item.ScheduleID + "\">" +
+                            "<td><a class='links' href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</a></td>" +
                             "<td>---</td>" +
                             "<td dvalue=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
                             "<td dvalue=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" + active +
-                            "<td><button onclick=\"EditSchedule('" + item.ID + "')\" type='button' class='btn btn-primary action edit' data-toggle='tooltip' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +"</td > " +
+                            "<td><button onclick=\"EditSchedule('" + item.ScheduleID + "')\" type='button' class='btn btn-primary action edit' data-toggle='tooltip' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +"</td > " +
                             "</tr>"
                             );
                         }
                         else
                         {
-                            scheduleBody.find("tr[chapid=" + item.ChapterID + "]").after("<tr lid=\"" + item.ID + "\">" +
-                            "<td><a class='links' href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</td>" +
-                            "<td>---</td>" +
-                            "<td dvalue=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
-                            "<td dvalue=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" + active +
-                            "<td><button onclick=\"EditSchedule('" + item.ID + "')\" type='button' class='btn btn-primary action edit' data-toggle='tooltip' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +
+                            scheduleBody.find("tr[chapid=" + item.ChapterID + "]").after("<tr lid=\"" + item.ID + "\" cid=\"" + item.ScheduleID + "\">" +
+                            "<td><a class='links' href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@curentClass.ID'>" + item.Title + "</a></td>" +
+                            "<td>" + (item.Description==null?"":item.Description) + "</td>" +
+                            "<td dvalue=\"" + item.StartDate + "\" class='startdate text-center'><span>" + startdate + "</span></td>" +
+                            "<td dvalue=\"" + item.EndDate + "\" class='enddate text-center'><span>" + enddate + "</span></td>" + active +
+                            "<td class='text-center'><button onclick=\"EditSchedule('" + item.ScheduleID + "')\" type='button' class='btn btn-primary action edit' data-toggle='tooltip' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +
                             "</td > " +
                             "</tr>"
                             );
@@ -511,11 +529,11 @@
                         var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
 
                         examBody.append("<tr lid=\"" + item.ID + "\">" +
-                        "<td><a class='links' data-toggle=\"modal\" data-target=\"#examModal\" onclick=\"\" href=\"javascript:void(0)\">" + item.Title + "</td>" +
-                        "<td>---</td>" +
-                        "<td dvalue=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
-                        "<td dvalue=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" + 
-                        "<td>" + item.StudentJoins +  "</td > " +
+                        "<td><a class='links' data-toggle=\"modal\" data-target=\"#examModal\" onclick=\"\" href=\"LoadExamDetail('" + item.ID + "')\">" + item.Title + "</td>" +
+                        "<td>" + (item.Description==null?"":item.Description) + "</td>" +
+                        "<td dvalue=\"" + item.StartDate + "\" class='startdate text-center'><span>" + startdate + "</span></td>" +
+                        "<td dvalue=\"" + item.EndDate + "\" class='enddate text-center'><span>" + enddate + "</span></td>" +
+                        "<td class='text-center'>" + item.StudentJoins +  "</td > " +
                         "</tr>"
                         );
                     }
@@ -543,7 +561,7 @@
 
     function EditSchedule(id) {
 
-        var wrapper = $("[lid=" + id + "]");
+        var wrapper = $("[cid=" + id + "]");
 
         var startdateHolder = wrapper.find('.startdate');
         var enddateHolder = wrapper.find('.enddate');
@@ -583,7 +601,7 @@
     }
 
     function CancelEditSchedule(id) {
-        var wrapper = $("[lid=" + id + "]");
+        var wrapper = $("[cid=" + id + "]");
         var startdateHolder = wrapper.find('.startdate');
         var enddateHolder = wrapper.find('.enddate');
         startdateHolder.find(':visible').remove();
@@ -595,15 +613,70 @@
     }
 
     function SaveSchedule(id) {
-        var wrapper = $("[lid=" + id + "]");
+        var wrapper = $("[cid=" + id + "]");
         var startdate = wrapper.find($('#' + id + "_startdate")).val();
         var enddate = wrapper.find($('#' + id + "_enddate")).val();
         //Send request here
-        wrapper.find(".startdate").attr("dvalue", startdate);
-        wrapper.find(".startdate span").text($.datepicker.formatDate('dd/mm/yy', new Date(startdate)));
-        wrapper.find(".enddate").attr("dvalue", enddate);
-        wrapper.find(".enddate span").text($.datepicker.formatDate('dd/mm/yy', new Date(enddate)));
-        CancelEditSchedule(id);
+
+         $.ajax({
+            type: "POST",
+            url: '@Url.Action("UpdateSchedule", "LessonSchedule")',
+            data: {ID: id, StartDate: startdate, EndDate: enddate},
+            dataType:"json",
+            success: function (data) {
+                if (data.Error == null) {
+                    wrapper.find(".startdate").attr("dvalue", startdate);
+                    wrapper.find(".startdate span").text($.datepicker.formatDate('dd/mm/yy', new Date(startdate)));
+                    wrapper.find(".enddate").attr("dvalue", enddate);
+                    wrapper.find(".enddate span").text($.datepicker.formatDate('dd/mm/yy', new Date(enddate)));
+                    CancelEditSchedule(id);
+                }
+                else {
+                    alert(data.Error);
+                }
+            },
+            error: function() {
+                alert("Có lỗi, hãy thực hiện lại");
+            }
+        });
+
+
+    }
+
+    function LoadExamDetail(id) {
+         $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetExamList", "LessonSchedule")',
+            data: {ClassID: "@curentClass.ID"},
+            dataType:"json",
+            success: function (data) {
+                examBody.html("");
+
+                lessons = data.Data.Lessons;
+                //renderChapter("0");
+
+                if (lessons.length > 0) {
+                    for (j = lessons.length-1; j >= 0; j--) {
+                        var item = lessons[j];
+
+                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
+                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
+
+                        examBody.append("<tr lid=\"" + item.ID + "\">" +
+                        "<td><a class='links' data-toggle=\"modal\" data-target=\"#examModal\" onclick=\"\" href=\"LoadExamDetail('" + item.ID + "')\">" + item.Title + "</td>" +
+                        "<td>" + (item.Description==null?"":item.Description) + "</td>" +
+                        "<td dvalue=\"" + item.StartDate + "\" class='startdate text-center'><span>" + startdate + "</span></td>" +
+                        "<td dvalue=\"" + item.EndDate + "\" class='enddate text-center'><span>" + enddate + "</span></td>" +
+                        "<td class='text-center'>" + item.StudentJoins +  "</td > " +
+                        "</tr>"
+                        );
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
     }
 </script>
 

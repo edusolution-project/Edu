@@ -7,79 +7,82 @@
     var listModGrade = ViewBag.ModGrade as List<BaseCustomerEntity.Database.ModGradeEntity>;
     var listModSubject = ViewBag.ModSubject as List<BaseCustomerEntity.Database.ModSubjectEntity>;
     var user = ViewBag.User as string;
+    var role = ViewBag.RoleCode as string;
 }
 
 <!-- Begin Page Content -->
-    <div class="container">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <h4 class="m-0 font-weight-bold text-primary">Thông tin giáo trình</h4>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="float-right">
-                            <button type="button" onclick="addCourse()" class="btn btn-primary" data-placement="top" title="Tạo giáo trình" data-toggle="modal" data-target="#courseModal"> <i class="fas fa-plus"></i> </button>
-                        </div>
+<div class="container">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h4 class="m-0 font-weight-bold text-primary">Thông tin giáo trình</h4>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="float-right">
+                        <button type="button" onclick="addCourse()" class="btn btn-primary" data-placement="top" title="Tạo giáo trình" data-toggle="modal" data-target="#courseModal"> <i class="fas fa-plus"></i> </button>
                     </div>
                 </div>
+
             </div>
-
-            <div class="card-body">
-                <div class="search-filter">
-                    <div class="form-row">
-                        <div class="form-group row col-md-4">
-                            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
-                            <div class="col-sm-8">
-                                <select id="SubjectID" class="form-control" onchange="LoadGrade(this)">
-                                    @{
-                                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                        {
-                                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                        }
-
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group row col-md-4 offset-md-4">
-                            <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
-                            <div class="col-sm-8">
-                                <select id="GradeID" class="form-control" onchange="LoadCourse()">
-                                    @{
-                                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                        {
-                                            <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                        }
-
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table id="tblCurriculum" class="table table-bordered" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Tên giáo trình</th>
-                                <th>Tên môn học</th>
-                                <th>Cấp độ</th>
-                                <th>Mô tả</th>
-                                <th>Người tạo</th>
-                                <th>Ngày tạo</th>
-                                <th>Trạng thái</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-
         </div>
 
+        <div class="card-body">
+            <div class="search-filter">
+                <div class="form-row">
+                    <div class="form-group row col-md-4">
+                        <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                        <div class="col-sm-8">
+                            <select id="SubjectID" class="form-control" onchange="LoadGrade(this)">
+                                @{
+                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                    {
+                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                    }
+
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row col-md-4 offset-md-4">
+                        <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+                        <div class="col-sm-8">
+                            <select id="GradeID" class="form-control" onchange="LoadCourse()">
+                                @{
+                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                    {
+                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
+                                    }
+
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="tblCurriculum" class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th class="text-center">STT</th>
+                            <th class="text-center">Tên giáo trình</th>
+                            <th class="text-center">Tên môn học</th>
+                            <th class="text-center">Cấp độ</th>
+                            <th class="text-center">Mô tả</th>
+                            <th class="text-center">Người tạo</th>
+                            <th class="text-center">Ngày tạo</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @if (role == "head-teacher")
+    {
         <div class="card shadow clone mt-4">
             <div class="card-header">
                 <h4 class="m-0 font-weight-bold text-primary">Kho giáo trình</h4>
@@ -129,65 +132,65 @@
                 </div>
             </div>
         </div>
+    }
+</div>
+<!-- End of Main Content -->
 
-    </div>
-        <!-- End of Main Content -->
-
-        <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Sửa thông tin</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Sửa thông tin</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="@Url.Action("CreateOrUpdate","Curriculum")" id="modal-body" name="modalForm" enctype="multipart/form-data" method="post">
+                    <input type="hidden" name="ID" />
+                    <input type="hidden" name="CreateUser" value="@user" />
+                    <input type="hidden" name="IsActive" value="false" />
+                    <div class="form-group">
+                        <label class="col-form-label">Tên giáo trình:</label>
+                        <input type="text" class="form-control" name="Name" required>
                     </div>
-                    <div class="modal-body">
-                        <form action="@Url.Action("CreateOrUpdate","Curriculum")" id="modal-body" name="modalForm" enctype="multipart/form-data" method="post">
-                            <input type="hidden" name="ID" />
-                            <input type="hidden" name="CreateUser" value="@user" />
-                            <input type="hidden" name="IsActive" value="false" />
-                            <div class="form-group">
-                                <label class="col-form-label">Tên giáo trình:</label>
-                                <input type="text" class="form-control" name="Name" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-form-label">Môn học:</label>
-                                <select name="SubjectID" class="form-control" onchange="ChangeGrade(this)">
-                                    @{
-                                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                        {
-                                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                        }
+                    <div class="form-group">
+                        <label class="col-form-label">Môn học:</label>
+                        <select name="SubjectID" class="form-control" onchange="ChangeGrade(this, 'select[name=GradeID]')">
+                            @{
+                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                {
+                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                }
 
-                                    }
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-form-label">Cấp độ:</label>
-                                <select Name="GradeID" class="form-control">
-                                    @{
-                                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                        {
-                                            <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                        }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Cấp độ:</label>
+                        <select name="GradeID" class="form-control">
+                            @{
+                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                {
+                                    <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
+                                }
 
-                                    }
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="message-text" class="col-form-label">Mô tả:</label>
-                                <textarea class="form-control" name="Description"></textarea>
-                            </div>
-                        </form>
+                            }
+                        </select>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                        <button type="button" class="btn btn-primary" onclick="return Submit('modalForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Mô tả:</label>
+                        <textarea class="form-control" name="Description"></textarea>
                     </div>
-                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="return Submit('modalForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
             </div>
         </div>
+    </div>
+</div>
 
 
 <script>
@@ -217,9 +220,9 @@
                         item = data.Data[i];
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "Curriculum")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "Curriculum")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "Curriculum")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "Curriculum")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
                         var created = $.datepicker.formatDate('dd/mm/yy', new Date(item.Created));
 
@@ -230,8 +233,8 @@
                             "<td class=\"Grade\" val=\"" + item.GradeID + "\">" + item.GradeName + "</td>" +
                             "<td class=\"Description\">" + (item.Description == null ? "": item.Description) + "</td>" +
                             "<td>" + item.TeacherName + "</td>" +
-                            "<td>" + created + "</td>" + active +
-                            "<td><button type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#courseModal\"  onclick=\"EditCourse(this,'" + item.ID + "')\" data-placement=\"top\" title=\"Sửa\"> <i class=\"fas fa-edit\"></i> </button>" +
+                            "<td class='text-center'>" + created + "</td>" + active +
+                            "<td class='text-center'><button type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#courseModal\"  onclick=\"EditCourse(this,'" + item.ID + "')\" data-placement=\"top\" title=\"Sửa\"> <i class=\"fas fa-edit\"></i> </button>" +
                             "<button type=\"button\" class=\"btn btn-remove btn-danger\" onclick=\"if(confirm('Chắc chắn xóa?')){ ExcuteOnlyItem('" + item.ID + "', '@Url.Action("Remove","Curriculum")', ReloadCourse)}\" data-placement=\"top\" title=\"Xóa\"> <i class=\"fas fa-trash\"></i> </button></td>" +
                             "</tr>"
                         );

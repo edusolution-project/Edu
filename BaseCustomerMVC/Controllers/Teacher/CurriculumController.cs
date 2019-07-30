@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using System.Text;
 using System.Linq;
 using Core_v2.Globals;
+using System.Security.Claims;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -92,26 +93,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult Index(DefaultModel model)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var teacher = User.IsInRole("teacher") ? _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault() : new TeacherEntity();
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();//: new TeacherEntity();
 
-            var subject = new List<SubjectEntity>();
-            var grade = new List<GradeEntity>();
+            //if (!User.IsInRole("head-teacher"))
+            //    return Redirect("/");
 
             if (teacher != null && teacher.Subjects != null)
             {
-                subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
-                grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+                var subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                var grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+                ViewBag.Grade = grade;
+                ViewBag.Subject = subject;
             }
 
             var modsubject = _modsubjectService.GetAll().ToList();
             var modgrade = _modgradeService.GetAll().ToList();
 
-            ViewBag.Grade = grade;
-            ViewBag.Subject = subject;
             ViewBag.ModGrade = modgrade;
             ViewBag.ModSubject = modsubject;
             ViewBag.User = UserID;
 
+            ViewBag.RoleCode =  User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             ViewBag.Model = model;
             return View();
         }
@@ -120,6 +122,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             if (string.IsNullOrEmpty("ID"))
                 return RedirectToAction("Index");
+
+            //if (!User.IsInRole("head-teacher"))
+            //    return Redirect("/");
+
             var data = _service.GetItemByID(ID);
             if (data == null)
                 return RedirectToAction("Index");
@@ -130,7 +136,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var grade = new List<GradeEntity>();
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var teacher = User.IsInRole("teacher") ? _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault() : new TeacherEntity();
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
 
             if (teacher != null && teacher.Subjects != null)
@@ -145,13 +151,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Grade = grade;
             ViewBag.Subject = subject;
             ViewBag.User = UserID;
-
+            //ViewBag.RoleCode = "head-teacher";
 
             return View();
         }
 
         public IActionResult Lesson(DefaultModel model, string CourseID)
         {
+            //if (!User.IsInRole("head-teacher"))
+            //    return Redirect("/");
+
             if (CourseID == null)
                 return RedirectToAction("Index");
             var currentCourse = _service.GetItemByID(CourseID);
@@ -160,12 +169,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var Data = _lessonService.GetItemByID(model.ID);
             if (Data == null)
                 return RedirectToAction("Index");
+
+
             ViewBag.Course = currentCourse;
             ViewBag.Data = Data;
+            //ViewBag.RoleCode = "head-teacher";
             return View();
         }
-
-
 
         #region Course
 
@@ -557,36 +567,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 { "Model", model }
             };
             return new JsonResult(response);
-        }
-
-        [Obsolete]
-        [HttpPost]
-        public JsonResult GetListLessonPart(string LessonID)
-        {
-            var root = _lessonService.CreateQuery().Find(o => o.ID == LessonID).SingleOrDefault();
-            var data = new Dictionary<string, object> { };
-
-            if (root != null)
-            {
-                var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
-                if (listLessonPart != null && listLessonPart.Count > 0)
-                {
-                    var result = new List<LessonPartViewModel>();
-                    result.AddRange(listLessonPart.Select(o => new LessonPartViewModel(o)
-                    {
-                        Questions = _lessonPartQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new QuestionViewModel(q)
-                        {
-                            Answers = _lessonPartAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
-                        }).ToList()
-                    }));
-                    data = new Dictionary<string, object>
-                    {
-                        { "Data", result }
-                    };
-                };
-            }
-
-            return new JsonResult(data);
         }
 
         [HttpPost]

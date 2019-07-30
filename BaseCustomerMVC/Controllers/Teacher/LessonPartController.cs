@@ -386,6 +386,36 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //}
         }
 
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetList(string LessonID)
+        {
+            var root = _lessonService.CreateQuery().Find(o => o.ID == LessonID).SingleOrDefault();
+            var data = new Dictionary<string, object> { };
+
+            if (root != null)
+            {
+                var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                if (listLessonPart != null && listLessonPart.Count > 0)
+                {
+                    var result = new List<LessonPartViewModel>();
+                    result.AddRange(listLessonPart.Select(o => new LessonPartViewModel(o)
+                    {
+                        Questions = _questionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new QuestionViewModel(q)
+                        {
+                            Answers = _answerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
+                        }).ToList()
+                    }));
+                    data = new Dictionary<string, object>
+                    {
+                        { "Data", result }
+                    };
+                };
+            }
+
+            return new JsonResult(data);
+        }
+
         [HttpPost]
         public async Task<JsonResult> Remove(string ID)
         {

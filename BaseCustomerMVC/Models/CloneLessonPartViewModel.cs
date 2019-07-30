@@ -6,11 +6,13 @@ using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
-    public class CloneLessonPartViewModel : LessonPartEntity
+    public class CloneLessonPartViewModel : CloneLessonPartEntity
     {
+        public CloneLessonPartViewModel() { }
 
-        public CloneLessonPartViewModel(LessonPartEntity o)
+        public CloneLessonPartViewModel(CloneLessonPartEntity o)
         {
+            this.TeacherID = o.TeacherID;
             this.Created = o.Created;
             this.Description = o.Description;
             this.ID = o.ID;
@@ -27,6 +29,26 @@ namespace BaseCustomerMVC.Models
         }
         [JsonProperty("Questions")]
         public List<CloneQuestionViewModel> Questions { get; set; }
+        public CloneLessonPartEntity ToEntity()
+        {
+            return new CloneLessonPartEntity
+            {
+                OriginID = this.OriginID,
+                Created = this.Created,
+                Description = this.Description,
+                ID = this.ID,
+                IsExam = this.IsExam,
+                Order = this.Order,
+                ParentID = this.ParentID,
+                Point = this.Point,
+                Timer = this.Timer,
+                Title = this.Title,
+                Type = this.Type,
+                Updated = this.Updated,
+                Media = this.Media,
+                TeacherID = this.TeacherID
+            };
+        }
     }
 
     public class CloneQuestionViewModel : CloneLessonPartQuestionEntity
@@ -53,6 +75,24 @@ namespace BaseCustomerMVC.Models
 
         [JsonProperty("Answers")]
         public List<CloneLessonPartAnswerEntity> Answers { get; set; }
-              
+
+        public CloneLessonPartQuestionEntity ToEntity()
+        {
+            return new CloneLessonPartQuestionEntity
+            {
+                Created = this.Created,
+                Description = this.Description,
+                ID = this.ID,
+                Updated = this.Updated,
+                Content = this.Content,
+                CreateUser = this.CreateUser,
+                ParentID = this.ParentID,
+                Order = this.Order,
+                Point = this.Point,
+                Media = this.Media,
+                OriginID = this.OriginID,
+                TeacherID = this.TeacherID
+            };
+        }
     }
 }

@@ -37,7 +37,7 @@
 #dataTable .btn-primary,
 #dataTable .btn-danger {
     font-size: 0.8rem;
-    margin: auto 0.2rem;
+    margin: 0.2rem;
 }
 
 .bg-gradient-primary .nav-item:active,

@@ -51,31 +51,20 @@ var modalTitle = $("#modalTitle");
 var containerLesson = $("#lessonContainer");
 var userID = "";
 var clientID = "";
+var classID = $("#ClassID").val();
 
 
 var submitForm = function (event) {
     event.preventDefault();
     $('.btnSaveForm').hide();
-
     var Form = window.modalForm;
+
     var formdata = new FormData(Form);
-   
+
     if ($('textarea[name="Description"]').length > 0) {
         formdata.delete("Description");
         formdata.append("Description", myEditor.getData())
     }
-    var err = false;
-    var requires = $(Form).find(':required');
-    requires.each(function () {
-        if ($(this).val() == "" || $(this).val() == null) {
-            alert("Vui lòng nhập đủ thông tin");
-            $(this).focus();
-            $('.btnSaveForm').show();
-            err = true;
-            return false;
-        }
-    });
-    if (err) return false;
 
     var xhr = new XMLHttpRequest();
     var url = urlBase;
@@ -91,10 +80,10 @@ var submitForm = function (event) {
                         //document.location = urlLesson.Location + data.Data.ID;
                         document.location = document.location;
                         break;
-                    case "LessonPart/" + urlLessonPart.CreateOrUpdate:
+                    case "CloneLessonPart/" + urlLessonPart.CreateOrUpdate:
                         var part = data.Data;
                         //render.part(part);
-                        load.lesson(data.Data.ParentID);
+                        load.lesson(data.Data.ParentID, classID);
                 }
                 hideModal();
             }
@@ -136,10 +125,11 @@ var Create = {
         modalTitle.html("Tạo nội dung mới ");
         $(modalForm).empty();
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": lessonID }));
-        $('#action').val("LessonPart/" + urlLessonPart.CreateOrUpdate);
-        var selectTemplate = $("<select>", { "class": "templatetype form-control", "onchange": "chooseTemplate()", "name": "Type", "required":"required" });
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassID", "value": classID }));
+        $('#action').val("CloneLessonPart/" + urlLessonPart.CreateOrUpdate);
+        var selectTemplate = $("<select>", { "class": "templatetype form-control", "onchange": "chooseTemplate()", "name": "Type" });
         $(modalForm).append(selectTemplate);
-        $(selectTemplate).append("<option value=''>--- Chọn kiểu nội dung ---</option>")
+        $(selectTemplate).append("<option value='0'>--- Chọn kiểu nội dung ---</option>")
             .append("<option value='TEXT'>Nội dung văn bản</option>")
             .append("<option value='VIDEO'>Nội dung video</option>")
             .append("<option value='AUDIO'>Nội dung audio</option>")
@@ -194,7 +184,6 @@ var chooseTemplate = function () {
     template.lessonPart(type);
 }
 
-
 var lessonService = {
     renderData: function (data) {
         $(containerLesson).html("");
@@ -241,7 +230,7 @@ var lessonService = {
         }
         var lessonButton = $("<div>", { "class": "lesson-button" });
         var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sắp xếp", "onclick": "lessonService.renderSort()" });
-        var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Sửa", "onclick": "EditLesson('" + data.ID + "')" });
+        var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Sửa", "onclick": "lessonService.renderEdit('" + data.ID + "')" });
         var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Thêm nội dung", "onclick": "Create.lessonPart('" + data.ID + "')" });
         var close = $("<button>", { "class": "btn btn-primary btn-close", "text": "X", "onclick": "render.resetLesson()" });
         var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Xóa", "onclick": "lessonService.remove('" + data.ID + "')" });
@@ -256,12 +245,12 @@ var lessonService = {
 
         lessonButton.append(sort);
         sort.append(iconSort);
-        lessonButton.append(edit);
+        //lessonButton.append(edit);
         edit.append(iconEdit);
         lessonButton.append(create);
         create.append(iconCreate);
         //lessonHeader.append(close);
-        lessonButton.append(remove); //removeLesson
+        //lessonButton.append(remove); //removeLesson
         remove.append(iconTrash);
 
 
@@ -417,7 +406,7 @@ var lessonPartService = {
         var modalForm = window.modalForm;
         showModal();
         $(modalForm).empty();
-        var url = urlBase + "LessonPart/";
+        var url = urlBase + "CloneLessonPart/";
         $.ajax({
             type: "POST",
             url: url + "GetDetail",
@@ -432,7 +421,7 @@ var lessonPartService = {
         var modalForm = window.modalForm;
         showModal();
         $(modalForm).empty();
-        var url = urlBase + "LessonPart/";
+        var url = urlBase + "CloneLessonPart/";
         $.ajax({
             type: "POST",
             url: url + "GetDetail",
@@ -447,7 +436,7 @@ var lessonPartService = {
         var url = urlBase;
         $.ajax({
             type: "POST",
-            url: urlBase + "LessonPart/" + urlLessonPart.ChangePos,
+            url: urlBase + "CloneLessonPart/" + urlLessonPart.ChangePos,
             data: {
                 "ID": id,
                 "pos": pos
@@ -463,7 +452,7 @@ var lessonPartService = {
 
             $.ajax({
                 type: "POST",
-                url: urlBase + "LessonPart/" + urlLessonPart.Remove,
+                url: urlBase + "CloneLessonPart/" + urlLessonPart.Remove,
                 data: {
                     "ID": id
                 },
@@ -525,10 +514,11 @@ var render = {
         var modalForm = window.modalForm;
         modalTitle.html("Cập nhật nội dung");
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassID", "value": classID }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ID", "value": data.ID }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "Type", "value": data.Type }));
 
-        $('#action').val("LessonPart/" + urlLessonPart.CreateOrUpdate);
+        $('#action').val("CloneLessonPart/" + urlLessonPart.CreateOrUpdate);
 
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
         $(modalForm).append($("<div>", { "class": "question_template hide" }));
@@ -950,11 +940,11 @@ var load = {
     },
     listPart: function (lessonID, classID) {
 
-        var url = urlBase + "LessonPart/";
+        var url = urlBase + "CloneLessonPart/";
         $.ajax({
             type: "POST",
             url: url + urlLessonPart.List,
-            data: { LessonID: lessonID },
+            data: { LessonID: lessonID, ClassID: classID },
             dataType: "json",
             success: function (data) {
                 for (var i = 0; data.Data != null && i < data.Data.length; i++) {
@@ -1028,7 +1018,7 @@ var template = {
         if (type == "lesson1") {
             return [
                 {
-                    "Name": "Chỉnh sửa nội dung",
+                    "Name": "Tạo trang bài giảng",
                     "Hidden": [
                         {
                             "Name": "ID",
@@ -1060,7 +1050,7 @@ var template = {
         if (type == "lesson2") {
             return [
                 {
-                    "Name": "Chỉnh sửa nội dung",
+                    "Name": "Tạo trang bài kiểm tra",
                     "Hidden": [
                         {
                             "Name": "ID",
@@ -1085,15 +1075,9 @@ var template = {
                             "Type": "text",
                             "Length": "col-12"
                         }, {
-                            "DisplayName": "Thời gian (phút)",
+                            "DisplayName": "Thời gian làm bài (phút)",
                             "Name": "Timer",
                             "Value": (data != null && data.Timer != null) ? data.Timer : 0,
-                            "Type": "number",
-                            "Length": "col-6"
-                        }, {
-                            "DisplayName": "Số lượt làm bài:",
-                            "Name": "Timer",
-                            "Value": (data != null && data.Limit != null) ? data.Limit : 0,
                             "Type": "number",
                             "Length": "col-6"
                         }, {
@@ -1101,18 +1085,6 @@ var template = {
                             "Name": "Point",
                             "Value": (data != null && data.Point != null) ? data.Point : 0,
                             "Type": "number",
-                            "Length": "col-6"
-                        }, {
-                            "DisplayName": "Hệ số",
-                            "Name": "Multiple",
-                            "Value": (data != null && data.Multiple != null) ? data.Multiple : 0,
-                            "Type": "number",
-                            "Length": "col-6"
-                        }, {
-                            "DisplayName": "Kiểu bài kiểm tra",
-                            "Name": "Etype",
-                            "Value": (data != null && data.Etype != null) ? data.Etype : 0,
-                            "Type": "select",
                             "Length": "col-6"
                         }
                     ]
@@ -1424,6 +1396,7 @@ var template = {
                 }
                 else
                     addNewQuestion();
+
                 break;
             default:
                 alert("Not implement");
@@ -1490,7 +1463,7 @@ function toggleCompact(obj) {
 }
 
 var addNewQuestion = function (data = null) {
-    console.log(data);
+    //console.log(data);
     var container = $('.lesson_parts > .part_content');
     var template = $('.question_template > fieldset');
     var currentpos = $(container).find(".fieldQuestion").length;

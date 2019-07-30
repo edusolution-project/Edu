@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Areas\Teacher\Views\Lesson\Detail - Copy.cshtml" />
+    <Content Remove="Areas\Teacher\Views\Lesson\Exam - Copy.cshtml" />
     <Content Remove="compilerconfig.json" />
   </ItemGroup>
 

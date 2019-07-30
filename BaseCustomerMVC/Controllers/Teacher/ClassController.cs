@@ -52,7 +52,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult Index(DefaultModel model)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var teacher = User.IsInRole("teacher") ? _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault() : new TeacherEntity();
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
             var subject = new List<SubjectEntity>();
             var grade = new List<GradeEntity>();
@@ -65,9 +65,42 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Grade = grade;
             ViewBag.Subject = subject;
 
+            ViewBag.User = UserID;
             ViewBag.Model = model;
             return View();
         }
+
+        public IActionResult Detail(DefaultModel model)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
+            return View();
+        }
+
+        public IActionResult Schedule(DefaultModel model)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+
+            var subject = new List<SubjectEntity>();
+            var grade = new List<GradeEntity>();
+
+            if (teacher != null && teacher.Subjects != null)
+            {
+                subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+            }
+            ViewBag.Grade = grade;
+            ViewBag.Subject = subject;
+
+            ViewBag.User = UserID;
+            ViewBag.Model = model;
+            return View();
+        }
+
 
         [Obsolete]
         [HttpPost]
@@ -131,7 +164,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
             TeacherEntity teacher = null;
-            if (string.IsNullOrEmpty("UserID"))
+            if (string.IsNullOrEmpty(UserID))
                 UserID = User.Claims.GetClaimByType("UserID").Value;
             if (!string.IsNullOrEmpty(UserID) && UserID != "0")
             {
@@ -252,16 +285,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     })) }
             };
             return new JsonResult(response);
-        }
-
-        public IActionResult Detail(DefaultModel model)
-        {
-            if (model == null) return null;
-            var currentClass = _service.GetItemByID(model.ID);
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            return View();
         }
 
         [HttpPost]

@@ -17,7 +17,6 @@ namespace BaseCustomerMVC.Controllers.Student
     {
        
         private readonly ExamService _service;
-        
         private readonly ExamDetailService _examDetailService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly LessonService _lessonService;

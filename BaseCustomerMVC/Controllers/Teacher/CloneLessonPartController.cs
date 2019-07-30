@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using System.Text;
 using System.Linq;
 using Core_v2.Globals;
+using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -27,12 +28,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonPartQuestionService _lessonPartQuestionService;
 
         private readonly CloneLessonPartService _service;
-        private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
-        private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
+        private readonly CloneLessonPartAnswerService _cloneAnswerService;
+        private readonly CloneLessonPartQuestionService _cloneQuestionService;
         private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonpartMapping;
         private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonpartQuestionMapping;
         private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonpartAnswerMapping;
-
+        private readonly FileProcess _fileProcess;
 
         public CloneLessonPartController(
             GradeService gradeservice,
@@ -48,8 +49,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonPartAnswerService lessonPartAnswerService,
             CloneLessonPartService service,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
-            CloneLessonPartQuestionService cloneLessonPartQuestionService
-
+            CloneLessonPartQuestionService cloneLessonPartQuestionService,
+            FileProcess fileProcess
             )
         {
             _gradeService = gradeservice;
@@ -65,12 +66,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonPartAnswerService = lessonPartAnswerService;
 
             _service = service;
-            _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
-            _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
+            _cloneAnswerService = cloneLessonPartAnswerService;
+            _cloneQuestionService = cloneLessonPartQuestionService;
 
             _lessonpartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
             _lessonpartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
             _lessonpartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
+            _fileProcess = fileProcess;
         }
 
         [Obsolete]
@@ -89,9 +91,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     data.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
                     {
-                        Questions = _cloneLessonPartQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new CloneQuestionViewModel(q)
+                        Questions = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new CloneQuestionViewModel(q)
                         {
-                            Answers = _cloneLessonPartAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
+                            Answers = _cloneAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
                         }).ToList()
                     }));
 
@@ -115,9 +117,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         data.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
                         {
-                            Questions = _cloneLessonPartQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new CloneQuestionViewModel(q)
+                            Questions = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new CloneQuestionViewModel(q)
                             {
-                                Answers = _cloneLessonPartAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
+                                Answers = _cloneAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
                             }).ToList()
                         }));
                     }
@@ -129,6 +131,357 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 { "Data", data }
             };
             return new JsonResult(response);
+        }
+
+        [HttpPost]
+        public JsonResult GetDetail(string ID)
+        {
+            var part = _service.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+            if (part == null) return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        {"Error", "Data not found" }
+                    });
+            var full_item = new CloneLessonPartViewModel(part)
+            {
+                Questions = _cloneQuestionService.CreateQuery().Find(o => o.ParentID == part.ID).SortBy(o => o.Order).ThenBy(o => o.ID).ToList().Select(t =>
+                      new CloneQuestionViewModel(t)
+                      {
+                          Answers = _cloneAnswerService.CreateQuery().Find(a => a.ParentID == t.ID).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                      }).ToList()
+            };
+            return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", full_item },
+                        {"Error", null }
+                    });
+
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> CreateOrUpdate(CloneLessonPartViewModel item, string ClassID, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
+        {
+            var root = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID).SingleOrDefault();
+            var currentClass = _classService.CreateQuery().Find(o => o.ID == ClassID).SingleOrDefault();
+
+            if (root == null || currentClass == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", "Parent Item Not found" }
+                            });
+            }
+            //try
+            //{
+
+
+            if (item.Media != null && item.Media.Name == null) item.Media = null;//valid Media
+            var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
+            if (item.ID == "0" || item.ID == null) //create
+            {
+                item.Created = DateTime.Now;
+                item.TeacherID = currentClass.TeacherID;
+                var maxItem = _service.CreateQuery()
+                    .Find(o => o.ParentID == item.ParentID)
+                    .SortByDescending(o => o.Order).FirstOrDefault();
+                item.Order = maxItem != null ? maxItem.Order + 1 : 0;
+                item.Updated = DateTime.Now;
+                if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || files == null || !files.Any(f => f.Name == item.Media.Name))
+                {
+                    item.Media = null;
+                }
+                else
+                {
+                    var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                    if (file != null)
+                    {
+                        item.Media.Created = DateTime.Now;
+                        item.Media.Size = file.Length;
+                        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
+                    }
+                }
+            }
+            else // Update
+            {
+                var olditem = _service.GetItemByID(item.ID);
+                if (olditem == null)
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", "Item Not Found" }
+                            });
+
+                if ((olditem.Media != null && item.Media != null && olditem.Media.Path != item.Media.Path)
+                    || (olditem.Media == null && item.Media != null))//Media change
+                {
+                    if (files == null || !files.Any(f => f.Name == item.Media.Name))
+                        return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", "Upload Fails" }
+                            });
+
+                    var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();//update media
+                    item.Media.Created = DateTime.Now;
+                    item.Media.Size = file.Length;
+                    item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
+                }
+
+                item.Updated = DateTime.Now;
+                item.Created = olditem.Created;
+                item.Order = olditem.Order;
+            }
+
+            var lessonpart = item.ToEntity();
+            _service.CreateOrUpdate(lessonpart);
+            item.ID = lessonpart.ID;
+
+            if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+            {
+                _cloneQuestionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
+
+                foreach (var quizID in RemovedQuestions)
+                {
+                    _cloneAnswerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
+                }
+            }
+
+            if (RemovedAnswers != null & RemovedAnswers.Count > 0)
+                _cloneAnswerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
+
+            if (item.Questions != null && item.Questions.Count > 0)
+            {
+                foreach (var questionVM in item.Questions)
+                {
+                    questionVM.ParentID = item.ID;
+                    var quiz = questionVM.ToEntity();
+
+                    if (questionVM.Media != null && questionVM.Media.Name == null) questionVM.Media = null;
+
+                    if (questionVM.ID == "0" || questionVM.ID == null || _cloneQuestionService.GetItemByID(quiz.ID) == null)
+                    {
+                        var maxItem = _cloneQuestionService.CreateQuery()
+                            .Find(o => o.ParentID == lessonpart.ID)
+                            .SortByDescending(o => o.Order).FirstOrDefault();
+                        quiz.Order = maxItem != null ? maxItem.Order + 1 : 0;
+                        quiz.Created = DateTime.Now;
+                        quiz.Updated = DateTime.Now;
+
+                        if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || !files.Any(f => f.Name == quiz.Media.Name))
+                            quiz.Media = null;
+                        else
+                        {
+                            var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
+                            if (file != null)
+                            {
+                                quiz.Media.Created = DateTime.Now;
+                                quiz.Media.Size = file.Length;
+                                quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var oldquiz = _cloneQuestionService.GetItemByID(quiz.ID);
+                        if ((oldquiz.Media != null && quiz.Media != null && oldquiz.Media.Path != quiz.Media.Path)
+                            || (oldquiz.Media == null && quiz.Media != null))//Media change
+                        {
+
+                            if (oldquiz.Media != null && !string.IsNullOrEmpty(oldquiz.Media.Path))//Delete old file
+                                _fileProcess.DeleteFile(oldquiz.Media.Path);
+
+                            if (files == null || !files.Any(f => f.Name == quiz.Media.Name))
+                                quiz.Media = null;
+                            else
+                            {
+
+                                var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();//update media
+                                quiz.Media.Created = DateTime.Now;
+                                quiz.Media.Size = file.Length;
+                                quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                            }
+                        }
+
+                        quiz.Order = oldquiz.Order;
+                        quiz.Created = oldquiz.Created;
+                        quiz.Updated = DateTime.Now;
+                    }
+
+                    _cloneQuestionService.CreateOrUpdate(quiz);
+                    questionVM.ID = quiz.ID;
+
+                    if (questionVM.Answers != null && questionVM.Answers.Count > 0)
+                    {
+                        foreach (var answer in questionVM.Answers)
+                        {
+
+                            answer.ParentID = questionVM.ID;
+                            if (answer.Media != null && answer.Media.Name == null) answer.Media = null;
+
+                            if (answer.ID == "0" || answer.ID == null || _cloneAnswerService.GetItemByID(answer.ID) == null)
+                            {
+                                var maxItem = _cloneAnswerService.CreateQuery().Find(o => o.ParentID == quiz.ID).SortByDescending(o => o.Order).FirstOrDefault();
+                                answer.Order = maxItem != null ? maxItem.Order + 1 : 0;
+                                answer.Created = DateTime.Now;
+                                answer.Updated = DateTime.Now;
+
+                                if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || !files.Any(f => f.Name == answer.Media.Name))
+                                    answer.Media = null;
+                                else
+                                {
+                                    var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
+                                    if (file != null)
+                                    {
+                                        answer.Media.Created = DateTime.Now;
+                                        answer.Media.Size = file.Length;
+                                        answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var oldanswer = _cloneAnswerService.GetItemByID(answer.ID);
+                                if ((oldanswer.Media != null && answer.Media != null && oldanswer.Media.Path != answer.Media.Path)
+                            || (oldanswer.Media == null && answer.Media != null))//Media change
+                                {
+                                    if (oldanswer.Media != null && !string.IsNullOrEmpty(oldanswer.Media.Path))//Delete old file
+                                        _fileProcess.DeleteFile(oldanswer.Media.Path);
+
+                                    if (files == null || !files.Any(f => f.Name == answer.Media.Name))
+                                        answer.Media = null;
+                                    else
+                                    {
+
+                                        var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();//update media
+                                        answer.Media.Created = DateTime.Now;
+                                        answer.Media.Size = file.Length;
+                                        answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                    }
+                                }
+                                //else // No Media
+                                //{
+                                //    quiz.Media = null;
+                                //}
+                                answer.Order = oldanswer.Order;
+                                answer.Created = oldanswer.Created;
+                                answer.Updated = DateTime.Now;
+                            }
+                            _cloneAnswerService.CreateOrUpdate(answer);
+                        }
+                    }
+                }
+            }
+
+            IDictionary<string, object> valuePairs = new Dictionary<string, object>
+                        {
+                            { "Data", item },
+                            //{ "LessonPartExtends", files }
+                        };
+
+            return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", item },
+                                {"Error", null }
+                            });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> Remove(string ID)
+        {
+            try
+            {
+                var item = _service.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (item == null) return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", "Item Not Found" }
+                            });
+
+                var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID
+                //&& o.CreateUser == UserID TODO:remove later
+                ).SingleOrDefault(); //Chỉ remove được các part thuộc lesson do mình up
+
+                if (parentLesson != null)
+                {
+                    //var media = _LessonExtendService.CreateQuery().Find(o => o.LessonPartID == item.ID).ToList();
+                    //if (media != null && media.Count > 0)
+                    //{
+                    //    _fileProcess.DeleteFiles(media.Select(o => o.OriginalFile).ToList());
+                    //    await _LessonExtendService.RemoveRangeAsync(media.Select(o => o.ID));
+                    //}
+                    await RemoveLessonPart(ID);
+
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", "Remove OK" },
+                                {"Error", null }
+                            });
+                }
+                else
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", "Orphan item" }
+                            });
+
+
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", ex.Message}
+                            });
+            }
+        }
+
+        private async Task RemoveLessonPart(string ID)
+        {
+            try
+            {
+                var item = _service.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (item == null) return;
+
+                var questions = _cloneQuestionService.CreateQuery().Find(o => o.ParentID == ID).ToList();
+                for (int i = 0; questions != null && i < questions.Count; i++)
+                    RemoveQuestion(questions[i].ID);
+                _service.Remove(ID);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private void RemoveQuestion(string ID)
+        {
+            try
+            {
+                var item = _cloneQuestionService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (item == null) return;
+                _cloneAnswerService.CreateQuery().DeleteMany(o => o.ParentID == ID);
+                _cloneQuestionService.Remove(ID);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private void RemoveAnswer(string ID)
+        {
+            try
+            {
+                var item = _cloneAnswerService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (item == null) return;
+                _cloneAnswerService.Remove(ID);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         private void CloneLessonPart(CloneLessonPartEntity item)
@@ -152,7 +505,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private void CloneLessonQuestion(CloneLessonPartQuestionEntity item)
         {
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
-            _cloneLessonPartQuestionService.Collection.InsertOne(item);
+            _cloneQuestionService.Collection.InsertOne(item);
             var list = _lessonPartAnswerService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
             if (list != null)
             {
@@ -169,7 +522,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private void CloneLessonAnswer(CloneLessonPartAnswerEntity item)
         {
-            _cloneLessonPartAnswerService.Collection.InsertOne(item);
+            _cloneAnswerService.Collection.InsertOne(item);
         }
     }
 }

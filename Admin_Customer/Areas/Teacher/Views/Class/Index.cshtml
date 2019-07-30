@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
     var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var user = ViewBag.User as string;
 }
 
 
@@ -71,15 +72,16 @@
 
 
 <script>
-
+    
     function LoadData() {
+        var UserID = '@user';
         var searchText = $("#searchText").val();
         var subject = $("#SubjectID").val();
         var grade = $("#GradeID").val();
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "Class")',
-            data: { SearchText: searchText, SubjectID: subject, GradeID: grade },
+            data: { SearchText: searchText, SubjectID: subject, GradeID: grade, UserID: UserID },
             dataType:"json",
             success: function (data) {
                 var body = $('#dataTable tbody');

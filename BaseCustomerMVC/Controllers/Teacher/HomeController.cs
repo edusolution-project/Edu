@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Teacher
@@ -11,7 +12,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
     {
         public IActionResult Index()
         {
+            ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             return View();
         }
-    }   
+    }
 }
