@@ -6,12 +6,14 @@ using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
-    public class ClassActiveViewModel : ClassEntity
+    public class LearningHistoryViewModel : LearningHistoryEntity
     {
-        [JsonProperty("Progress")]
-        public int Progress { get; set; }
 
+        [JsonProperty("ClassName")]
+        public string ClassName { get; set; }
         [JsonProperty("SubjectName")]
         public string SubjectName { get; set; }
+        [JsonProperty("LessonName")]
+        public string LessonName { get; set; }
     }
 }

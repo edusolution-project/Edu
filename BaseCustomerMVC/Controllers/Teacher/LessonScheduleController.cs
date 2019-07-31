@@ -245,7 +245,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-
         [Obsolete]
         [HttpPost]
         public JsonResult GetExamList(DefaultModel model, string ClassID = "")

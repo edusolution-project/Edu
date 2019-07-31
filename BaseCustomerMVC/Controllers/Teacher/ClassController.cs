@@ -271,7 +271,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             }
             if (teacher != null)
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID && o.EndDate > DateTime.Now.Date));
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID && o.EndDate >= DateTime.Now.ToLocalTime().Date));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             var DataResponse = data;
@@ -281,7 +281,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse.ToList().Select(t=> _activeMapping.AutoOrtherType(t, new ClassActiveViewModel(){
-                    Progress = (int)((DateTime.Now - t.StartDate).TotalDays  * 100 / (t.EndDate - t.StartDate).TotalDays)
+                    Progress = (int)((DateTime.Now.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays  * 100 / (t.EndDate.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays)
                     })) }
             };
             return new JsonResult(response);

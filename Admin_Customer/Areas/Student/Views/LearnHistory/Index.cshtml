@@ -1,0 +1,119 @@
+﻿
+@{
+
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+    var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
+    ViewData["Title"] = "Lịch sử học tập";
+}
+<div class="container">
+    <!-- Begin Page Content -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách khóa học</h6>
+        </div>
+        <div class="card-body">
+            <div class="search-filter">
+                <div class="form-row">
+                    @*<div class="form-group row col-md-4">
+                            <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                            <div class="col-sm-8">
+                                <select id="SubjectID" class="form-control" onchange="LoadData()">
+                                    <option value="">-----</option>
+                                    @{
+                                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                        {
+                                            <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                        }
+
+                                    }
+                                </select>
+                            </div>
+                        </div>*@
+                    <div class="form-group row col-md-4">
+                        <label for="staticText" class="col-sm-4 col-form-label">Từ ngày:</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control datepicker" value="@DateTime.Now.ToString(" dd/MM/yyyy")" />
+                            <input type="hidden" name="StartDate" class="hiddenDate" id="StartDate" value="@DateTime.Now.ToString(" MM/dd/yyyy")">
+                        </div>
+                    </div>
+                    <div class="form-group row col-md-4">
+                        <label for="staticText" class="col-sm-4 col-form-label">Đến ngày:</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control datepicker" value="@DateTime.Now.AddDays(7).ToString(" dd/MM/yyyy")" />
+                            <input type="hidden" name="EndDate" class="hiddenDate" id="EndDate" value="@DateTime.Now.AddDays(7).ToString(" MM/dd/yyyy")">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="tbHistory" class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Môn học</th>
+                            <th>Tên khóa học</th>
+                            <th>Bài học</th>
+                            <th>Ngày học</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- End of Main Content -->
+</div>
+@section Scripts{
+    <script>
+
+            $('.datepicker').each(function () {
+            var fieldID = $(this).next().attr("id");
+            $(this).datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'dd/mm/yy',
+                altField: '#' + fieldID,
+                altFormat: 'yy-mm-dd'
+            });
+        }).change(function () {LoadData()});
+
+        function LoadData() {
+        var startDate = $("#StartDate").val()== void 0? "" :$("#StartDate").val();
+        var endDate = $("#EndDate").val()== void 0 ? "" :$("#EndDate").val();
+        var SubjectID = $("#SubjectID").val()== void 0 ? "" :$("#SubjectID").val();
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetList", "LearnHistory")',
+            data: {StartDate: startDate,EndDate: endDate, SubjectID: SubjectID},
+            dataType:"json",
+            success: function (data) {
+                var body = $('#tbHistory tbody');
+                body.html("");
+                if (data.Data.length > 0)
+                {
+
+                    //ID ,CourseID ,TeacherID ,Status ,EndDate ,StartDate ,Name ,CourseName ,StudentNumber,SubjectName, TeacherName ,GradeName
+
+                    for (i = 0; i < data.Data.length; ++i) {
+                        item = data.Data[i];
+
+                        var time = $.datepicker.formatDate('dd/mm/yy', new Date(item.Time));
+
+                        body.append("<tr>" +
+                            "<td><a href='@Url.Action("Detail", "MyCourse")/"+item.ClassID +"'>" + item.SubjectName + "</a></td>"+
+                            "<td><a href='@Url.Action("Detail", "MyCourse")/"+item.ClassID +"'>" + item.ClassName + "</a></td>" +
+                            "<td><a href='@Url.Action("Detail", "LessonToday")/" + item.LessonID + "/" + item.ClassID + "'>" + item.LessonName + "</a></td>" +
+                            "<td>" + time + "</td>" +
+                            "</tr>"
+                        );
+                    }
+                }
+            },
+            error: function (err) {
+                console.log(err.responseText)
+            }
+        });
+    };
+
+    LoadData();
+
+    </script>}

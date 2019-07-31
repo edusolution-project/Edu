@@ -1,95 +1,102 @@
 ﻿
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Dashboard";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
 }
 
-    <div class="container">
-        <!-- Begin Page Content -->
-        <div class="row">
+<div class="container">
+    <!-- Begin Page Content -->
+    <div class="row">
 
-            <!-- Content Column -->
-            <div class="col-lg-6 mb-4">
-
-                <!-- Project Card Example -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Khóa học của tôi</h6>
-                    </div>
-                    <div class="card-body">
-                        <h4 class="small font-weight-bold"><a href="student-calendar.html">First Certificate in English 1<span class="float-right">40%</span></a></h4>
-                        <div class="progress mb-4">
-                            <div class="progress-bar bg-warning" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        <h4 class="small font-weight-bold">Tiếng anh chuyên ngành <span class="float-right">60%</span></h4>
-                        <div class="progress mb-4">
-                            <div class="progress-bar" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        <h4 class="small font-weight-bold">Tiếng anh giao tiếp <span class="float-right">80%</span></h4>
-                        <div class="progress mb-4">
-                            <div class="progress-bar bg-info" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        <div class="float-right">
-                            <a href="#"> Xem tất cả</a>
-                        </div>
-                    </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <a href="@Url.Action("Index", "MyCourse")"><h6 class="m-0 font-weight-bold text-primary">Khóa học của tôi</h6></a>
                 </div>
-            </div>
-
-            <div class="col-lg-6 mb-4">
-                <!-- Illustrations -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Bài học hôm nay</h6>
+                <div class="card-body">
+                    <div class="card-content" id="myclassWrapper">
                     </div>
-                    <div class="card-body">
-                        <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
-                            <tbody>
-                                <tr><td colspan="2">Preliminary English</td></tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 1 Questions 1-7</a></td>
-                                </tr>
-
-                                </tr>
-                                <tr><td colspan="2">Preliminary English 2</td></tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Part 2 Questions 8-13</a></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="float-right">
-                            <a href="#"> Xem tất cả</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Approach -->
-                <div id="thao-luan" class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Thảo luận mới</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="item">
-                            <div class="title"><span class="text">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                            <br>
-                            <p>Hello teacher, I don't understand last lesson, can you help?</p>
-                        </div>
-                        <div class="item">
-                            <div class="title"><span class="text">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                            <br>
-                            <p>Hello teacher, I don't understand last lesson, can you help?</p>
-                        </div>
-                        <div class="item">
-                            <div class="title"><span class="text">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                            <br>
-                            <p>Hello teacher, I don't understand last lesson, can you help?</p>
-                        </div>
+                    <div class="float-right">
+                        <a href="@Url.Action("Index", "MyCourse")"> Xem tất cả</a>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- End of Main Content -->
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <a href="@Url.Action("Index", "LessonToday")"><h6 class="m-0 font-weight-bold text-primary">Bài học hôm nay</h6></a>
+                </div>
+                <div class="card-body">
+                    <table id="tbTodayLesson" class="table table-bordered" width="100%" cellspacing="0">
+                        <tbody></tbody>
+                    </table>
+                    <div class="float-right">
+                        <a href="@Url.Action("Index","LessonToday")"> Xem tất cả</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
+    <script>
+    function LoadMyClass() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetActiveList", "MyCourse")',
+            data: { },
+            dataType:"json",
+            success: function (data) {
+                var body = $('#myclassWrapper');
+                body.html("");
+                if (data.Data.length > 0)
+                {
+                    for (i = 0; i < data.Data.length; ++i) {
+                        item = data.Data[i];
+                        body.append(" <h4 class=\"small font-weight-bold\"><a href=\"@Url.Action("Detail", "MyCourse")/" + item.ID + "\">"  +  item.SubjectName + "</a><span class=\"float-right\">" + item.Progress + "%</span></h4>"+
+                    "<div class=\"progress mb-4\">"+
+                        "<div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + item.Progress + "%\" aria-valuenow=\"" + item.Progress + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div>"+
+                    "</div>"
+                        );
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    }
+
+    function LoadTodayLesson() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetTodayLessons", "LessonToday")',
+            data: {date: $.datepicker.formatDate('mm-dd-yy', new Date())},
+            dataType:"json",
+            success: function (data) {
+                var body = $('#tbTodayLesson tbody');
+                body.html("");
+                if (data.Data.length > 0)
+                {
+                    for (i = 0; i < data.Data.length; ++i) {
+                        item = data.Data[i];
+                        body.append("<tr><td colspan=\"2\"><a href=\"@Url.Action("Detail", "MyCourse")/" + item.ClassID + "\">"  +  item.SubjectName + "</a></td></tr>" +
+                            "<tr>" +
+                                "<td>" + (i + 1) + "</td>" +
+                                "<td><a class='links' href='@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "/" + item.ClassID + "'>" + item.Title + "</a></td>" +
+                            "</tr>");
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    }
+
+    $(document).ready(function(){
+        LoadMyClass();
+        LoadTodayLesson();
+    });
+    </script>
