@@ -62,10 +62,10 @@ var ExamStudent = (function () {
         }).join(''));
     }
     const arrIcon = {
-        "TEXT": "<i class='fa fa-file-word'></i> ",
-        "VIDEO": "<i class='fa fa-play-circle'></i> ",
-        "AUDIO": "<i class='fa fa-music'></i> ",
-        "IMG": "<i class='fa fa-file-image'></i> ",
+        "TEXT": "<i class='fas fa-file-word'></i> ",
+        "VIDEO": "<i class='fas fa-play-circle'></i> ",
+        "AUDIO": "<i class='fas fa-music'></i> ",
+        "IMG": "<i class='fas fa-file-image'></i> ",
         "DOC": "<i class='fas fa-file-word'></i> ",
         "VOCAB": "<i class='fas fa-file-word'></i> "
     };
@@ -119,17 +119,21 @@ var ExamStudent = (function () {
                     var resData = JSON.parse(res);
                     renderLesson(resData);
                     setCurrentData(resData);
-                    renderBoDem();
+                    if (resData.Data.TemplateType != 1) {
+                        renderBoDem();
+                        $("#counter").html(resData.Timer);
+                    }
                     startDragDrop();
-                    $("#counter").html(resData.Timer);
                 }
             });
         } else {
             renderLesson(data);
-            renderBoDem();
+            if (data.Data.TemplateType != 1) {
+                renderBoDem();
+                $("#counter").html(localStorage.getItem("Timer"));
+                countdown();
+            }
             startDragDrop();
-            $("#counter").html(localStorage.getItem("Timer"));
-            countdown();
         }
     }
     var setCurrentData = function (data) {
@@ -194,7 +198,7 @@ var ExamStudent = (function () {
     var rednerLessonPart = function (data, index) {
         writeLog("rednerLessonPart", data);
         var active = "";
-        if (index != void 0) {
+        if (index != void 0 && index == 0) {
             active = "show active";
         }
         var html = '<div id="pills-part-' + data.ID + '" class="tab-pane fade ' + active + '" role="tabpanel" aria-labelledby="pills-' + data.ID + '">';
@@ -315,13 +319,14 @@ var ExamStudent = (function () {
     var renderQUIZ3 = function (data) {
         var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5></div>';
         html += '<div class="row">';
-        html += '<div class="quiz-wrapper col-lg-9">' + renderMedia(data.Media);
+        html += '<div class="quiz-wrapper col-lg-8">' + renderMedia(data.Media);
         var answers = "";
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
+            var content = item.Content == null || item.Content == "null" || item.Content == void 0 ? "___" :item.Content;
             html += '<div class="quiz-item row" id="' + item.ID + '">';
-            html += '<div class="quiz-pane col-8"><div class="pane-item"><div class="quiz-text">' + item.Content + '</div></div></div>';
-            html += '<div class="answer-pane col-4 ui-droppable" data-id="' + item.ID + '"><div class="pane-item placeholder">Thả câu trả lời tại đây</div></div>';
+            html += '<div class="quiz-pane col-6"><div class="pane-item"><div class="quiz-text">' + content + '</div></div></div>';
+            html += '<div class="answer-pane col-6 ui-droppable" data-id="' + item.ID + '"><div class="pane-item placeholder">Thả câu trả lời tại đây</div></div>';
             html += '</div>';
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
@@ -336,7 +341,7 @@ var ExamStudent = (function () {
             }
         }
         html += '</div>';
-        html += '<div class="answer-wrapper no-child col-lg-3 ui-droppable">' + answers + '</div>';
+        html += '<div class="answer-wrapper no-child col-lg-4 ui-droppable">' + answers + '</div>';
         html += '</div>';
         return html;
     }
@@ -372,11 +377,12 @@ var ExamStudent = (function () {
             var icon = arrIcon[item.Type];
             if (icon == void 0) icon = (i + 1).toString() + " - " + arrIcon["TEXT"];
             tabList += rednerLessonPart(item, i);
+            var title = item.Title == void 0 || item.Title == null || item.Title == "null" ? "" : item.Title;
             if (i == 0) {
-                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link active" data-toggle="pill" href="#pills-part-' + item.ID + '" role="tab" aria-controls="pills-' + item.ID + '" aria-selected="false">' + icon + '' + item.Title + '</a></li>';
+                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link active" data-toggle="pill" href="#pills-part-' + item.ID + '" role="tab" aria-controls="pills-' + item.ID + '" aria-selected="false">' + icon + '' + title + '</a></li>';
             }
             else {
-                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link" data-toggle="pill" href="#pills-part-' + item.ID + '" role="tab" aria-controls="pills-' + item.ID + '" aria-selected="false">' + icon + '' + item.Title + '</a></li>';
+                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link" data-toggle="pill" href="#pills-part-' + item.ID + '" role="tab" aria-controls="pills-' + item.ID + '" aria-selected="false">' + icon + '' + title + '</a></li>';
             }
         }
         html += '</ul></div></div>';
