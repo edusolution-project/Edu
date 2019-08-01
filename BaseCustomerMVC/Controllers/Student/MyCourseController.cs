@@ -148,7 +148,7 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == _class.ID);
                 var learned = _learningHistoryService.CreateQuery().Aggregate().Match(o => o.ClassID == _class.ID).Group(o => o.LessonID,
-                    o => new { LastJoin = o.Select(x => x.Time).Max() }).ToList().Count();
+                    o => new { x = o.Select(x => 1).First() }).ToList().Count();
                 responseData.Add(_activeMapping.AutoOrtherType(_class, new ClassActiveViewModel()
                 {
                     Progress = (int)(totalLessons != 0 ? learned * 100 / totalLessons : 0),
@@ -398,12 +398,17 @@ namespace BaseCustomerMVC.Controllers.Student
             var filter = new List<FilterDefinition<StudentEntity>>();
             filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
             var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
-            var studentsView = students.ToList().Select(t => _studentMapping.AutoOrtherType(t, new ClassMemberViewModel()
-            {
-                ClassName = currentClass.Name,
-                ClassStatus = "Đang học",
-                LastJoinDate = DateTime.Now
-            })).ToList();
+            var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == currentClass.ID);
+            var studentsView = (from r in students.ToList()
+                                let learned = _learningHistoryService.CreateQuery().AsQueryable()
+                                .Where(t => t.StudentID == r.ID && t.ClassID == currentClass.ID)
+                                .GroupBy(t => new { t.StudentID, t.ClassID, t.LessonID }).Count()
+                                select _studentMapping.AutoOrtherType(r, new ClassMemberViewModel()
+                                {
+                                    ClassName = currentClass.Name,
+                                    ClassStatus = "Đang học",
+                                    Progress = (int)(totalLessons != 0 ? learned * 100 / totalLessons : 0),
+                                })).ToList();
 
             var response = new Dictionary<string, object>
             {
@@ -457,13 +462,15 @@ namespace BaseCustomerMVC.Controllers.Student
                 Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
+                           let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassID == model.ID).SortByDescending(o => o.ID).FirstOrDefault()
                            select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
                                ScheduleID = schedule.ID,
                                StartDate = schedule.StartDate,
                                EndDate = schedule.EndDate,
                                IsActive = schedule.IsActive,
-                               IsView = _learningHistoryService.CreateQuery().Count(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassID == model.ID) > 0
+                               IsView = lastjoin != null,
+                               LastJoin = lastjoin != null ? lastjoin.Time : DateTime.MinValue
                            })).ToList()
             };
 
