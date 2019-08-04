@@ -10,6 +10,7 @@ var ExamStudent = (function () {
     function countdown() {
         clearTimeout(r);
         var time = $(".time-counter").text().trim();
+        if (time == "" || time == null) return;
         var minutes = parseInt(time.split(":")[0]);
         var second = parseInt(time.split(":")[1]);
         if (second > 0) {
@@ -44,6 +45,7 @@ var ExamStudent = (function () {
         lesson_id: "",
         class_id: ""
     }
+    // mã hóa
     function b64EncodeUnicode(str) {
         if (str == null || str == void 0 || str == "") return "";
         // first we use encodeURIComponent to get percent-encoded UTF-8,
@@ -54,6 +56,7 @@ var ExamStudent = (function () {
                 return String.fromCharCode('0x' + p1);
             }));
     }
+    // giải mã
     function b64DecodeUnicode(str) {
         if (str == null || str == void 0 || str == "") return "";
         // Going backwards: from bytestream, to percent-encoding, to original string.
@@ -61,6 +64,7 @@ var ExamStudent = (function () {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
     }
+    // icon show menu left
     const arrIcon = {
         "TEXT": "<i class='fas fa-file-word'></i> ",
         "VIDEO": "<i class='fas fa-play-circle'></i> ",
@@ -69,8 +73,10 @@ var ExamStudent = (function () {
         "DOC": "<i class='fas fa-file-word'></i> ",
         "VOCAB": "<i class='fas fa-file-word'></i> "
     };
+    //icon thông báo , thành công và thất bại
     const iconSuccess = '<div class="icon icon-success"><?xml version="1.0" encoding="iso-8859-1"?><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve"><circle style="fill:#25AE88;" cx="25" cy="25" r="25"/><polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" points="38,15 22,33 12,25 "/><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg></div>';
     const iconError = '<div class="icon icon-error"><?xml version="1.0" encoding="iso-8859-1"?><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve"><circle style="fill:#D75A4A;" cx="25" cy="25" r="25"/><polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;" points="16,34 25,25 34,16"/><polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;" points="16,16 25,25 34,34"/><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg></div>';
+    //thông báo
     var notification = function (type, msg, timeOut) {
         if (type == void 0 || type == null) type = "success";
         var all = document.querySelectorAll(".notification");
@@ -95,6 +101,7 @@ var ExamStudent = (function () {
             }
         }, timeOut + (all.length * 1000));
     }
+    //hiện thị thông báo
     var setShowNotification = function () {
         var all = document.querySelectorAll(".notification");
         for (var i = 0; i < all.length; i++) {
@@ -192,10 +199,14 @@ var ExamStudent = (function () {
             }
         }
     }
+    /// tồn tại exam cũ thì return true;
     var checkExam = function () {
+        var exam = document.getElementById("ExamID");
+        if (exam == null || exam.value == void 0 || exam.value == null || exam.value == "") return false;
         return localStorage.getItem("CurrentExam") != null && localStorage.getItem("CurrentExam") != void 0 && localStorage.getItem("CurrentExam") != "" && localStorage.getItem("CurrentExam") != typeof(void 0);
     }
-    var rednerLessonPart = function (data, index) {
+    //render bài tập
+    var rednerLessonPart = function (data, index,type) {
         writeLog("rednerLessonPart", data);
         var active = "";
         if (index != void 0 && index == 0) {
@@ -204,15 +215,15 @@ var ExamStudent = (function () {
         var html = '<div id="pills-part-' + data.ID + '" class="tab-pane fade ' + active + '" role="tabpanel" aria-labelledby="pills-' + data.ID + '">';
         html += '<div class="part-box ' + data.Type + '" id="' + data.ID + '">';
         switch (data.Type) {
-            case "QUIZ1": html += renderQUIZ1(data);
+            case "QUIZ1": html += type == 0 ? renderQUIZ1(data) : renderQUIZ1_BG(data);
                 break;
-            case "QUIZ2": html += renderQUIZ2(data);
+            case "QUIZ2": html += type == 0 ? renderQUIZ2(data) : renderQUIZ2_BG(data);
                 break;
-            case "QUIZ3": html += renderQUIZ3(data);
+            case "QUIZ3": html += type == 0 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
                 break;
-            case "ESSAY": html += renderESSAY(data);
+            case "ESSAY": html += type == 0 ? renderESSAY(data) : renderESSAY_BG(data);
                 break;
-            case "VOCAB": html += renderVOCAB(data);
+            case "VOCAB": html += type == 0 ? renderVOCAB(data) : renderVOCAB_BG(data);
                 break;
             case "DOC": html += renderDOC(data);
                 break;
@@ -355,6 +366,111 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
+    /// bg
+    var renderVOCAB_BG = function (data) {
+        if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
+        var title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>';
+        var html = title + '<div class="media-wrapper">';
+        html += '<div class="media-holder ' + data.Type + '">Not Support</div>';
+        html += '</div>';
+        return html;
+    }
+    var renderQUIZ1_BG = function (data) {
+        if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
+        var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
+        html += '<div class="quiz-wrapper">';
+        for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+            var item = data.Questions[i];
+            html += '<div class="quiz-item" id="' + item.ID + '">';
+            html += '<div class="quiz-box-header"><h5 class="title"> - ' + item.Content + ' (' + item.Point + 'đ)</h5>' + renderMedia(item.Media) + '</div>';
+            html += '<div class="answer-wrapper">';
+            for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
+                var answer = item.CloneAnswers[x];
+                html += '<fieldset class="answer-item" id="' + answer.ID + '">';
+                html += '<div class="form-check">';
+                html += '<input id="' + answer.ID + '" type="radio" data-type="QUIZ1" value="' + answer.Content + '" class="input-checkbox answer-checkbox form-check-input" onclick="AnswerQuestion(this)" name="rd_' + item.ID + '">';
+                html += '<label class="answer-text form-check-label" for="' + answer.ID + '">' + answer.Content + '</label>';
+                html += '</div>';
+                html += renderMedia(answer.Media);
+                html += '</fieldset>';
+            }
+            html += '</div></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    var renderQUIZ2_BG = function (data) {
+        if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
+        var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
+        html += '<div class="quiz-wrapper">';
+        for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+            var item = data.Questions[i];
+            var itemContent = item.Content == null ? "Câu hỏi số " + (i + 1) + " : " : item.Content;
+            html += '<div class="quiz-item" id="' + item.ID + '">';
+            html += '<div class="quiz-box-header"><h5 class="title"> - ' + itemContent + ' (' + item.Point + 'đ)</h5>' + renderMedia(item.Media) + '</div>';
+            html += '<div class="answer-wrapper">';
+            html += '<fieldset class="answer-item" id="quiz2-' + item.ID + '">';
+            var content = "";
+            for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
+                var answer = item.CloneAnswers[x];
+                content += content == "" ? answer.Content : " | " + answer.Content;
+            }
+            html += '<input id="inputQZ2-' + item.ID + '" data-type="QUIZ2" type="text" class="input-text answer-text" placeholder="' + content + '" onfocusout="AnswerQuestion(this)">';
+            html += '</fieldset>';
+            html += '</div></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+    var renderQUIZ3_BG = function (data) {
+        if (checkExam()) {
+            var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5></div>';
+            html += '<div class="row">';
+            html += '<div class="quiz-wrapper col-lg-8">' + renderMedia(data.Media);
+            var answers = "";
+            for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                var item = data.Questions[i];
+                var content = item.Content == null || item.Content == "null" || item.Content == void 0 ? "___" : item.Content;
+                html += '<div class="quiz-item row" id="' + item.ID + '">';
+                html += '<div class="quiz-pane col-6"><div class="pane-item"><div class="quiz-text">' + content + '</div></div></div>';
+                html += '<div class="answer-pane col-6 ui-droppable" data-id="' + item.ID + '"><div class="pane-item placeholder">Thả câu trả lời tại đây</div></div>';
+                html += '</div>';
+                for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
+                    var answer = item.CloneAnswers[x];
+                    var media = renderMedia(answer.Media);
+                    if (media == "") {
+                        answers += '<fieldset data-type="QUIZ3" class="answer-item ui-draggable ui-draggable-handle" id="' + answer.ID + '"><label class="answer-text">' + answer.Content + '</label></fieldset>';
+                    }
+                    else {
+                        answers += '<fieldset data-type="QUIZ3" class="answer-item ui-draggable ui-draggable-handle" id="' + answer.ID + '">' + media + '</fieldset>';
+                    }
+
+                }
+            }
+            html += '</div>';
+            html += '<div class="answer-wrapper no-child col-lg-4 ui-droppable">' + answers + '</div>';
+            html += '</div>';
+            return html;
+        }
+        else {
+            return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
+        }
+        
+    }
+    var renderESSAY_BG = function (data) {
+        if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
+        var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
+        html += '<div class="quiz-wrapper">';
+        html += '<div class="quiz-item" id="' + data.ID + '"></div>';
+        html += '<div class="answer-wrapper">';
+        html += '<div class="answer-content"><textarea data-type="ESSAY" id="essay-' + data.ID + '" class="form-control" row="3" placeholder="Câu trả lời tự luận" onfocusout="AnswerQuestion(this)"></textarea></div>';
+        html += '</div>';
+        html += '</div>';
+        return html;
+    }
+    ///end bg
+
     var renderMedia = function (data) {
         if (data == null || data == void 0 || data == "") return "";
         var arr = data.Extension.split('/');
@@ -375,14 +491,14 @@ var ExamStudent = (function () {
         for (var i = 0; i < data.Parts.length; i++) {
             var item = data.Parts[i];
             var icon = arrIcon[item.Type];
-            if (icon == void 0) icon = (i + 1).toString() + " - " + arrIcon["TEXT"];
-            tabList += rednerLessonPart(item, i);
+            if (icon == void 0) icon = arrIcon["TEXT"];
+            tabList += rednerLessonPart(item, i, data.TemplateType);
             var title = item.Title == void 0 || item.Title == null || item.Title == "null" ? "" : item.Title;
             if (i == 0) {
-                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link active" data-toggle="pill" href="#pills-part-' + item.ID + '" role="tab" aria-controls="pills-' + item.ID + '" aria-selected="false">' + icon + '' + title + '</a></li>';
+                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link active" data-toggle="pill" href="#pills-part-' + item.ID + '" role="tab" aria-controls="pills-' + item.ID + '" aria-selected="false">' + (i + 1).toString() + " - " + icon + '' + title + '</a></li>';
             }
             else {
-                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link" data-toggle="pill" href="#pills-part-' + item.ID + '" role="tab" aria-controls="pills-' + item.ID + '" aria-selected="false">' + icon + '' + title + '</a></li>';
+                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link" data-toggle="pill" href="#pills-part-' + item.ID + '" role="tab" aria-controls="pills-' + item.ID + '" aria-selected="false">' + (i + 1).toString() + " - " + icon + '' + title + '</a></li>';
             }
         }
         html += '</ul></div></div>';
@@ -584,7 +700,6 @@ var ExamStudent = (function () {
             case "QUIZ2":
                 var quiz = document.getElementById("inputQZ2-" + quizID);
                 quiz.setAttribute("value", answerValue);
-                console.log(quiz);
                 break;
             case "QUIZ3":
                 var quiz = document.getElementById(quizID);
@@ -596,7 +711,6 @@ var ExamStudent = (function () {
                 break;
             case "ESSAY":
                 var quiz = document.getElementById("essay-" + quizID);
-                console.log(quiz);
                 quiz.innerHTML = answerValue;
                 break;
             default: return;
