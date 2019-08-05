@@ -675,7 +675,7 @@ var ExamStudent = (function () {
                     $('#lessonContainer').removeClass('col-md-10');
                     $(".lesson-container").append('<div class="card show mb-4"></div>');
                     $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Bạn đã hoàn thành bài thi</h3></div>');
-                    $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Tổng điểm trắc nghiệm</h3> (' + data.point + '/' + data.maxPoint+')</div>');
+                    $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Tổng điểm trắc nghiệm (' + data.point + '/' + data.maxPoint +')</h3></div>');
                     $(".card").append('<div class="content card-body d-flex justify-content-center"></div>');
                     $(".content").append('<a href="#" onclick="goBack()"> Quay về trang bài học </a>');
                     localStorage.clear();
