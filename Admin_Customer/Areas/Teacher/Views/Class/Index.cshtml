@@ -20,6 +20,7 @@
                         <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
                         <div class="col-sm-8">
                             <select id="SubjectID" class="form-control" onchange="LoadGrade()">
+                                <option value="">----</option>
                                 @{
                                     for (int i = 0; listSubject != null && i < listSubject.Count; i++)
                                     {
@@ -101,9 +102,9 @@
                             "<td>" + item.SubjectName + "</td>" +
                             "<td>" + item.GradeName + "</td>" +
                             "<td>" + item.TeacherName + "</td>" +
-                            "<td>" + item.Students.length + "</td>" +
-                            "<td>" + startdate + "</td>" +
-                            "<td>" + enddate +"</td>"+ active +
+                            "<td class='text-center'>" + item.Students.length + "</td>" +
+                            "<td class='text-center'>" + startdate + "</td>" +
+                            "<td class='text-center'>" + enddate +"</td>"+ active +
                             "</tr>"
                         );
                     }
@@ -118,6 +119,7 @@
     function LoadGrade() {
         var subject = $("#SubjectID").val();
         var grade = $("#GradeID").val();
+        if(subject === "") subject = "---";
         $('#GradeID option:gt(0)[for!=' + subject + ']').hide();
         $('#GradeID option:gt(0)[for=' + subject + ']').show();
         //if ($('#GradeID option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {

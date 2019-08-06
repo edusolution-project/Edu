@@ -1,15 +1,15 @@
 ﻿@{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
-    var curentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = curentClass.Name;
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    ViewData["Title"] = currentClass.Name;
 }
 
 <!-- Begin Page Content -->
 <div class="container">
     <div class="card shadow mb-4">
         <div class="card-header">
-            <h3 class="m-0 font-weight-bold text-primary">@curentClass.Name</h3>
+            <h3 class="m-0 font-weight-bold text-primary">@currentClass.Name</h3>
         </div>
         <div class="card-body">
             <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
@@ -177,7 +177,7 @@
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetSchedules", "MyCourse")',
-            data: { ID: '@curentClass.ID' },
+            data: { ID: '@currentClass.ID' },
             dataType:"json",
             success: function (data) {
                 scheduleCounter = 1;
@@ -243,7 +243,7 @@
                             isView = "";
                         }
                         var rowData = "<tr lid=\"" + item.ID + "\">" +
-                            "<td class=" + isView + "><a href='" + (item.IsActive ? ("@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "/@curentClass.ID") : "javascript:LockNotify()") + "'>" + item.Title + "</td>" +
+                            "<td class=" + isView + "><a href='" + (item.IsActive ? ("@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "/@currentClass.ID") : "javascript:LockNotify()") + "'>" + item.Title + "</td>" +
                             "<td class='text-center'>" + (item.Description == null? "---":item.Description) + "</td>" +
                             "<td value=\"" + item.StartDate + "\" class='startdate text-center'><span>" + startdate + "</span></td>" +
                             "<td value=\"" + item.EndDate + "\" class='enddate text-center'><span>" + enddate + "</span></td>" +
@@ -272,7 +272,7 @@
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetMembers", "MyCourse")',
-            data: {ID: "@curentClass.ID"},
+            data: {ID: "@currentClass.ID"},
             dataType:"json",
             success: function (data) {
                 memberCounter = 1;

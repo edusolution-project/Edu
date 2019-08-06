@@ -35,6 +35,7 @@
                         <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
                         <div class="col-sm-8">
                             <select id="SubjectID" class="form-control" onchange="LoadGrade(this)">
+                                <option value="">---</option>
                                 @{
                                     for (int i = 0; listSubject != null && i < listSubject.Count; i++)
                                     {
@@ -49,6 +50,7 @@
                         <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
                         <div class="col-sm-8">
                             <select id="GradeID" class="form-control" onchange="LoadCourse()">
+                                <option value="" for="all">---</option>
                                 @{
                                     for (int i = 0; listGrade != null && i < listGrade.Count; i++)
                                     {
@@ -121,14 +123,6 @@
                     </div>
                 </div>
                 <div id="modCourseWrapper" class="card-deck">
-                    <div class="card">
-                        <img src="~/img/english.jpg" class="img-fluid lazy" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Combo "Hack não 1500 từ tiếng Anh" + "Hack não IELTS" (Trọn bộ 3 cuốn)</h5>
-                            <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-                            <button type="button" class="btn btn-primary"><i class="fas fa-download"></i> Tải về</button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -146,12 +140,12 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="@Url.Action("CreateOrUpdate","Curriculum")" id="modal-body" name="modalForm" enctype="multipart/form-data" method="post">
+                <form action="@Url.Action("CreateOrUpdate","Curriculum")" id="modal-body" name="cloneForm" enctype="multipart/form-data" method="post">
                     <input type="hidden" name="ID" />
                     <input type="hidden" name="CreateUser" value="@user" />
                     <input type="hidden" name="IsActive" value="false" />
                     <div class="form-group">
-                        <label class="col-form-label">Tên giáo trình:</label>
+                        <label class="col-form-label">Tên giáo trình mới:</label>
                         <input type="text" class="form-control" name="Name" required>
                     </div>
                     <div class="form-group">
@@ -186,16 +180,82 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('modalForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
+                <button type="button" class="btn btn-primary" onclick="return Submit('cloneForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="cloneModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Tải giáo trình</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form action="@Url.Action("Clone","Curriculum")" id="modal-body" name="modalForm" enctype="multipart/form-data" method="post">
+                    <input type="hidden" name="CourseID" id="rootCourseID" />
+                    <input type="hidden" name="CreateUser" value="@user" />
+                    <input type="hidden" name="IsActive" value="false" />
+                    <div>
+                        <div class="form-group">
+                            <label class="col-form-label">Giáo trình gốc:</label>
+                            <input type="text" class="form-control lock" id="rootCourseName" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Tên giáo trình:</label>
+                        <input type="text" class="form-control" name="Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Môn học:</label>
+                        <select name="SubjectID" class="form-control" onchange="ChangeGrade(this, 'select[name=GradeID]')" required>
+                            <option value="">--- Chọn môn học ---</option>
+                            @{
+                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                {
+                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Cấp độ:</label>
+                        <select name="GradeID" class="form-control" required>
+                            <option value="">--- Chọn cấp độ ---</option>
+                            @{
+                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                {
+                                    <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID" style="display:none">@listGrade[i].Name</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="col-form-label">Mô tả:</label>
+                        <textarea class="form-control" name="Description"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="return Submit('modalForm', '@Url.Action("Clone","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
             </div>
         </div>
     </div>
 </div>
 
 
+
 <script>
 
-    var modal = $("#courseModal");
+    var modal = $(".modal");
     var modalTitle = $("#modalTitle");
     var containerLesson = $("#lessonContainer");
     var userID = "";
@@ -235,11 +295,11 @@
                             "<td>" + item.TeacherName + "</td>" +
                             "<td class='text-center'>" + created + "</td>" + active +
                             "<td class='text-center'><button type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#courseModal\"  onclick=\"EditCourse(this,'" + item.ID + "')\" data-placement=\"top\" title=\"Sửa\"> <i class=\"fas fa-edit\"></i> </button>" +
-                            "<button type=\"button\" class=\"btn btn-remove btn-danger\" onclick=\"if(confirm('Chắc chắn xóa?')){ ExcuteOnlyItem('" + item.ID + "', '@Url.Action("Remove","Curriculum")', ReloadCourse)}\" data-placement=\"top\" title=\"Xóa\"> <i class=\"fas fa-trash\"></i> </button></td>" +
+                            "<button type=\"button\" class=\"btn btn-remove btn-danger\" onclick=\"if(confirm('Chắc chắn xóa?')){ showLoading(); ExcuteOnlyItem('" + item.ID + "', '@Url.Action("Remove","Curriculum")', ReloadCourse)}\" data-placement=\"top\" title=\"Xóa\"> <i class=\"fas fa-trash\"></i> </button></td>" +
                             "</tr>"
                         );
                     }
-                    $('.btn').tooltip();
+                    $('.btn').tooltip({trigger : 'hover'});
                 }
                 hideLoading();
             },
@@ -275,7 +335,7 @@
                             "<div class='card-body'>" +
                                 "<h5 class=\"card-title\">" + item.Name + "</h5>" +
                                 "<p class=\"card-text\">" + item.Name + "</p>" +
-                                "<button type=\"button\" class=\"btn btn-primary\" onclick=\"Take('" + item.ID + "')\"><i class=\"fas fa-download mr-2\"></i>Tải về</button>" +
+                                "<button type=\"button\" class=\"btn btn-primary\" data-toggle='modal' data-target='#cloneModal' onclick=\"ShowClone('" + item.ID + "','" + item.Name + "')\"><i class=\"fas fa-download mr-2\"></i>Tải về</button>" +
                             "</div>" +
                             "</div>" +
                             "</div>"
@@ -291,34 +351,19 @@
         });
     };
 
-    function Take(rootCourseID) {
-        if (confirm("Xác nhận tải giáo trình này?")) {
-            var subject = $("#SubjectID").val();
-            var grade = $("#GradeID").val();
-            showLoading();
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("Clone", "Curriculum")',
-                data: { CourseID: rootCourseID, SubjectID: subject, GradeID: grade },
-                dataType: "json",
-                success: function (data) {
-                    if (data == "OK")
-                        LoadCourse();
-                    hideLoading();
-                },
-                error: function () {
-                    alert("Error");
-                    hideLoading();
-                }
-            });
-        }
+    function ShowClone(id, name) {
+        $('#rootCourseID').val(id);
+        $('#rootCourseName').val(name);
     }
 
     function ChangeGrade(obj, wrapper) {
         var subject = $(obj).val();
         var grade = $(wrapper).val();
+        if(subject == "") subject = "---";
+        if(grade == "") grade = "---";
         $(wrapper).find('option[for!=' + subject + ']').hide();
         $(wrapper).find('option[for=' + subject + ']').show();
+        $(wrapper).find('option[for=all]').show();
         if ($(wrapper).find('option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {
             $(wrapper).val($(wrapper).find('option[for=' + subject + ']:first').attr('value'));
         }
@@ -344,7 +389,7 @@
             return;
         else {
             $("body").append($("<div>", { "class": "loadingState", "style": "background: black;position: fixed;top: 0;left: 0;right: 0;bottom: 0;opacity: 0.9;z-index: 9999;" }));
-            $("body > .loadingState").append($("<div>", { "text": "Đang nạp dữ liệu...", "style":"padding:10px 50px; border-radius: 10px; background: #CCC; font-size:26px; position:absolute; left: calc(50% - 120px); top: 45%;" }));
+            $("body > .loadingState").append($("<div>", { "text": "Đang xử lý...", "style":"padding:10px 50px; border-radius: 10px; background: #CCC; font-size:26px; position:absolute; left: calc(50% - 120px); top: 45%;" }));
         }
     }
 
@@ -378,15 +423,9 @@
         ChangeGrade(sbj,grd);
     }
 
-    function DeleteCourse(obj, ID) {
-        var modalForm = $(window.modalForm);
-        showModal();
-        modalTitle.html("Chọn Template");
-        modalForm.html(template.Type('lesson'));
-    }
-
     function ReloadCourse(e){
         console.log(e);
+        hideLoading();
         hideModal();
         LoadCourse();
     }

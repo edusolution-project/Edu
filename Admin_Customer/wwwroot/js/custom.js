@@ -89,7 +89,7 @@ function endtime() {
 
 /* tooltip */
 $(document).ready(function () {
-    $('.btn').tooltip();
+    $('.btn').tooltip({ trigger:'hover' });
     //$('.lazy').Lazy();
 });
 

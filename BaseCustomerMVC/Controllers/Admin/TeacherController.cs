@@ -270,12 +270,12 @@ namespace BaseCustomerMVC.Controllers.Admin
                             string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
                             string name = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
                             string subjectname = workSheet.Cells[i, 8].Value == null ? "" : workSheet.Cells[i, 8].Value.ToString().Trim();
-                            var subject = _subjectService.CreateQuery().Find(t => t.Name == subjectname).SingleOrDefault();
+                            var subject = _subjectService.CreateQuery().Find(t => subjectname.Split(',').Contains(t.Name.ToLower().Trim())).ToList();
                             var item = new TeacherEntity
                             {
                                 FullName = name,
                                 TeacherId = code,
-                                Subjects = subject != null ? new List<string> { subject.ID } : null,
+                                Subjects = (subject != null && subject.Count > 0 ? subject.Select(s => s.ID).ToList() : null),
                                 DateBorn = workSheet.Cells[i, 4].Value == null ? DateTime.MinValue : (DateTime.Parse(workSheet.Cells[i, 4].Value.ToString())),
                                 Email = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
                                 Phone = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString(),
@@ -348,7 +348,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var stream = new MemoryStream();
             var dataview = list.Select(t => _mapping.AutoOrtherType(t, new TeacherViewModel()
             {
-                SubjectList = _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList()
+                SubjectList = t.Subjects != null ? _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList() : new List<SubjectEntity>()
             })).ToList();
             var index = 0;
             var dataResponse = dataview.Select(o => new
@@ -360,7 +360,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 o.Email,
                 Dien_thoai = o.Phone,
                 Dia_chi = o.Address,
-                Chuyen_mon = o.SubjectList.Select(t => t.Name),
+                Chuyen_mon = ((o.SubjectList != null && o.SubjectList.Count > 0) ? o.SubjectList.Select(t => t.Name).Aggregate(func: (result, item) => result + "," + item) : ""),
                 Trang_thai = o.IsActive ? "Hoạt động" : "Đang khóa"
             });
 

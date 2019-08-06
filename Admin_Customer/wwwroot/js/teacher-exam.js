@@ -14,6 +14,11 @@ var urlLesson = {
     "ChangePos": "ChangeLessonPosition"
 };
 
+var urlExam = {
+    "Detail": "GetDetail",
+};
+
+
 //lessonpart
 var urlLessonPart = {
     "List": "GetListLessonPart",
@@ -62,7 +67,7 @@ var lessonService = {
         lessonBox.append(lessonContainer);
         var lessonContent = $("<div>", { "class": "card shadow mb-4" });
         lessonContainer.append(lessonContent);
-        //header
+
         var lessonHeader = $("<div>", { "class": "card-header" });
         lessonContent.append(lessonHeader);
 
@@ -71,12 +76,8 @@ var lessonService = {
         lessonHeader.append(row);
 
         //header
-        var ButtonStart = $("<div>", { "class": "d-flex justify-content-center pt-5 pb-5" });
-        var btnButton = $("<div>", { "class": "btn btn-primary btn-lesson", "onclick": "start(this)", "text": " Bắt đầu bài học" });
-        lessonContent.append(ButtonStart);
-        ButtonStart.append(btnButton);
-        //Body
-        var cardBody = $("<div>", { "id": "check-student", "class": "card-body d-none" });
+
+        var cardBody = $("<div>", { "id": "check-student", "class": "card-body" });
         lessonContent.append(cardBody);
         //row
         var lessonRow = $("<div>", { "class": "row" });
@@ -114,47 +115,28 @@ var lessonService = {
         //lessonHeader.append(remove); //removeLesson
 
 
-        lessonRow.append(tabsleft);
+        //lessonRow.append(tabsleft);
         tabsleft.append(lessontabs);
         lessontabs.append(tabs);
 
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.ID });
 
-        var bodyright = $("<div>", { "class": "col-md-10" });
-        var button = $("<div>", { "class": "text-right col-lg-4" });
-        row.append(button);
-
-        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "data-toggle": "tooltip", "title": "Quay lại", "onclick": "tab_goback()" });
-        var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
-        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "data-toggle": "tooltip", "title": "Tiếp tục", "onclick": "tab_gonext()" });
-        var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
-        button.append(prevtab);
-        prevtab.append(iconprev);
-        button.append(nexttab);
-        nexttab.append(iconnext);
-
+        var bodyright = $("<div>", { "class": "col-md-12" });
         var tabscontent = $("<div>", { "id": "pills-tabContent", "class": "tab-content" });
         lessonBody.append(tabscontent);
 
         lessonRow.append(bodyright);
-
-
-        // add lesson part
-        var createLessonPart = $("<div>", { "class": "add-lesson-part" });
-        var btn = $("<a>", { "class": "btn btn-sm btn-success", "text": "Thêm nội dung", "href": "javascript:void(0)", "onclick": "Create.lessonPart('" + data.ID + "')" });
-        //createLessonPart.append(btn);
-
-        var newLessonPart = $("<div>", { "class": "new-lesson-part", "id": data.ID + new Date().getDate() });
-
         bodyright.append(lessonBody);
-
-        //lessonContainer.append(createLessonPart);
-        //lessonContainer.append(newLessonPart);
         lessonBox.append(lessonContainer);
 
-        //var lessonContainerBackground = $("<div>", { "class": "lesson-container-bg" });
-        //containerLesson.append(lessonContainerBackground);
         containerLesson.append(lessonBox);
+        var pointBox = $("<div>", { "class": "point-box", "style": " margin: 10px; padding: 10px; border: dashed 1px #CCC" });
+        var totalPoint = $("<div>");
+        totalPoint.html("Tổng điểm: 0");
+        var confirmPoint = $("<button>", { "class": "btn btn-sm btn-edit", "text": "Lưu điểm", "onclick": "", "style": "background: #CCC", "onclick":"alert(\"Đã lưu bảng điểm\")" });
+        pointBox.append(totalPoint);
+        pointBox.append(confirmPoint);
+        lessonBody.append(pointBox);
     },
     renderSort: function () {
         $(".lesson-body").toggleClass("sorting");
@@ -315,143 +297,31 @@ var render = {
         if (data.Point > 0) {
             point = " (" + data.Point + "đ)";
         }
+        var container = $(".tab-content");
+        var tabsitem = $("<div>", { "id": "pills-part-" + data.QuestionID, "class": "tab-pane fade", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+        var itembody = $("<div>", { "class": "card-body" });
+        tabsitem.append(itembody);
 
-        var container = $("#" + data.ParentID).find(".tab-content");
-        var tabContainer = $("#menu-left #pills-tab");
-
-
-        //tabs         
-        var lessonitem = $("<li>", { "class": "nav-item" });
-        var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
-        lessonitem.append(itemtitle);
-        tabContainer.append(lessonitem);
-
-        // tabs content
-        var tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane fade", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
-        //var itembody = $("<div>", { "class": "card-body" });
-        //tabsitem.append(itembody);
-
-        var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
-        var itemrow = $("<div>", { "class": "row"});
+        var itembox = $("<div>", { "class": "part-box", "id": data.ID });
         tabsitem.append(itembox);
 
-        var boxHeader = $("<div>", { "class": "part-box-header" });
-        if (data.Title != null) {
-            boxHeader.append($("<h5>", { "class": "title font-weight-bold", "text": data.Title + time + point }));
+        var itemBody = $("<div>", { "class": "content-wrapper" });
+        if (data.Question != null) {
+            itemBody.append($("<div>", { "class": "doc-content" }).html(data.Question));
         }
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Thu gọn", "onclick": "toggleCompact(this)" }));
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "Create.removePart('" + data.ID + "')" }));
-        itembox.append(boxHeader);
-        itembox.append(itemrow);
-        switch (data.Type) {
-            case "TEXT":
-                var itemBody = $("<div>", { "class": "content-wrapper" });
-                if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
-                }
-                itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                break;
-            case "IMG":
-                var itemBody = $("<div>", { "class": "media-wrapper" });
-                render.mediaContent(data, itemBody, "IMG");
-                if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                break;
-            case "AUDIO":
-                var itemBody = $("<div>", { "class": "media-wrapper" });
-                render.mediaContent(data, itemBody, "AUDIO");
-                if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                break;
-            case "VIDEO":
-                var itemBody = $("<div>", { "class": "media-wrapper" });
-                render.mediaContent(data, itemBody, "VIDEO");
-                if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                break;
-            case "DOC":
-                var itemBody = $("<div>", { "class": "media-wrapper" });
-                render.mediaContent(data, itemBody, "DOC");
-                if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                break;
-            case "QUIZ1":
-            case "QUIZ2":
-                var itemBody = $("<div>", { "class": "quiz-wrapper" });
-                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                itembox.append(itemBody);
-                render.mediaContent(data, itemBody, "");
-                container.append(tabsitem);
-                //Render Content
+        var resultHolder = $("<div>", { "class": "result-Holder" });
+        var chooseAnswer = $("<div>");
+        chooseAnswer.html("Trả lời: " + data.AnswerValue);
+        var correctAnswer = $("<div>");
+        correctAnswer.html("Đáp án: " + data.RealAnswerValue);
+        var point = $("<div>");
+        point.html("Điểm: " + data.Point);
 
-                //Render Question
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var quizitem = data.Questions[i];
-                    render.questions(quizitem, data.Type);
-                }
-                break;
-            case "QUIZ3":
-                var itemBody = $("<div>", { "class": "quiz-wrapper col-lg-8" });
-                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                itemrow.append(itemBody);
-                render.mediaContent(data, itemBody, "");
-                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-lg-4" });
-                itemrow.append(answers_box);
-                $(answers_box).droppable({
-                    tolerance: "intersect",
-                    accept: ".answer-item",
-                    activeClass: "hasAnswer",
-                    hoverClass: "answerHover",
-                    drop: function (event, ui) {
-                        var prevHolder = ui.helper.data('parent');
-                        $(prevHolder).find(".placeholder").show();
-                        $(this).append($(ui.draggable));
-                    }
-                });
-                container.append(tabsitem);
-                //Render Question
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var quizitem = data.Questions[i];
-                    render.questions(quizitem, data.Type);
-                }
-                break;
-            case "ESSAY":
-                var itemBody = $("<div>", { "class": "content-wrapper" });
-                if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
-                }
-                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                var itemBody = $("<div>", { "class": "quiz-wrapper" });
-                itembox.append(itemBody);
-                render.mediaContent(data, itemBody, "");
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var quizitem = data.Questions[i];
-                    render.questions(quizitem, data.Type);
-                }
-                break;
-        }
-
-        if (tabContainer.find(".nav-item").length == 1) {
-            itemtitle.addClass("active");
-            tabsitem.addClass("show active");
-        }
+        resultHolder.append(chooseAnswer).append(correctAnswer).append(point);
+        itemBody.append(resultHolder);
+        itembox.append(itemBody);
+        container.append(tabsitem);
+        tabsitem.addClass("show active");
     },
     questions: function (data, template) {
         //add quiz indicator to question panel
@@ -574,7 +444,7 @@ var render = {
             case "QUIZ2":
 
                 if ($(container).find(".answer-item").length == 0) {
-                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text form-control", "placeholder": data.Content,  "onchange": "answerQuestion(this,'" + data.ParentID + "')" }));
+                    answer.append($("<input>", { "type": "text", "class": "input-text answer-text form-control", "placeholder": data.Content, "onchange": "answerQuestion(this,'" + data.ParentID + "')" }));
                     container.append(answer);
                 }
                 else {
@@ -613,13 +483,13 @@ var render = {
 
                 container.append(answer);
                 break;
-            default: 
+            default:
                 var form = $("<div>", { "class": "form-check" });
                 answer.append(form);
                 form.append($("<input>", { "type": "hidden" }));
-                form.append($("<input>", { "id": data.ID , "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
+                form.append($("<input>", { "id": data.ID, "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
-                    form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID , "text": data.Content}));
+                    form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "text": data.Content }));
                 render.mediaContent(data, answer);
                 container.append(answer);
                 break;
@@ -667,7 +537,7 @@ var render = {
             var mediaHolder = $("<div>", { "class": "media-holder " + type });
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "class": "img-fluid lazy" , "src": data.Media.Path }));
+                    mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path }));
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -696,22 +566,24 @@ var render = {
 };
 
 var load = {
-    lesson: function (id, classid) {
-        if (id != $("#LessonID").val())
-            document.location = urlLesson.Location + id;
-        else {
-            var url = urlBase + "Lesson/";
-            $.ajax({
-                type: "POST",
-                url: url + urlLesson.Details,
-                data: { ID: id },
-                dataType: "json",
-                success: function (data) {
-                    render.lesson(data.Data);
-                    load.listPart(data.Data.ID, classid);
+    exam: function (id) {
+        var url = urlBase + "Exam/";
+        $.ajax({
+            type: "POST",
+            url: url + urlExam.Detail,
+            data: { ID: id },
+            dataType: "json",
+            success: function (data) {
+                if (data.Error == null) {
+                    render.lesson(data.Lesson);
+                    render.lessonPart(data.Data);
+                } else {
+                    alert("Có lỗi kết nối, vui lòng thử lại");
+                    console.log(data.Error);
                 }
-            });
-        }
+                //load.listPart(data.Data.ID, classid);
+            }
+        });
     },
     listPart: function (lessonID, classID) {
         var url = urlBase + "CloneLessonPart/";

@@ -30,9 +30,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartService _service;
         private readonly CloneLessonPartAnswerService _cloneAnswerService;
         private readonly CloneLessonPartQuestionService _cloneQuestionService;
+
         private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonpartMapping;
         private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonpartQuestionMapping;
         private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonpartAnswerMapping;
+
         private readonly FileProcess _fileProcess;
 
         public CloneLessonPartController(
@@ -86,7 +88,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (root != null && currentClass != null)
             {
-                var listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.TeacherID == currentClass.TeacherID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                var listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.ClassID == currentClass.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
                 if (listCloneLessonPart != null && listCloneLessonPart.Count > 0)
                 {
                     data.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
@@ -98,9 +100,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }));
 
                 }
-                else
+                else //TODO: TEMPORARY USE - REMOVE LATER
                 {
-                    //Clone from lesson part
+                    //Clone from lesson part - Temporary
                     var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
                     if (listLessonPart != null && listLessonPart.Count > 0)
                     {
@@ -110,10 +112,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             clonepart.ID = null;
                             clonepart.OriginID = lessonpart.ID;
                             clonepart.TeacherID = currentClass.TeacherID;
+                            clonepart.ClassID = currentClass.ID;
                             CloneLessonPart(clonepart);
                         }
 
-                        listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.TeacherID == currentClass.TeacherID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                        listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.ClassID == currentClass.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
 
                         data.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
                         {
@@ -410,7 +413,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //    _fileProcess.DeleteFiles(media.Select(o => o.OriginalFile).ToList());
                     //    await _LessonExtendService.RemoveRangeAsync(media.Select(o => o.ID));
                     //}
-                    await RemoveLessonPart(ID);
+                    RemoveLessonPart(ID);
 
                     return new JsonResult(new Dictionary<string, object>
                             {
@@ -437,7 +440,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private async Task RemoveLessonPart(string ID)
+        private void RemoveLessonPart(string ID)
         {
             try
             {
@@ -486,7 +489,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private void CloneLessonPart(CloneLessonPartEntity item)
         {
-            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             _service.Collection.InsertOne(item);
             var list = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
             if (list != null)

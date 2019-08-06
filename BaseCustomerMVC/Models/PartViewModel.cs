@@ -6,7 +6,7 @@ using Core_v2.Repositories;
 
 namespace BaseCustomerMVC.Models
 {
-    public class PartViewModel:CloneLessonPartEntity
+    public class PartViewModel: CloneLessonPartEntity
     {
         [JsonProperty("Name")]
         public string Name { get; set; }

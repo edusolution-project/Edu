@@ -570,7 +570,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        public JsonResult Clone(string CourseID, string GradeID, string SubjectID)
+        public JsonResult Clone(string CourseID, CourseEntity newcourse)
         {
 
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
@@ -589,11 +589,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var clone_course = new CourseEntity()
                     {
                         OriginID = course.ID,
-                        Name = course.Name,
+                        Name = newcourse.Name,
                         Code = course.Code,
-                        Description = course.Description,
-                        GradeID = GradeID,
-                        SubjectID = SubjectID,
+                        Description = newcourse.Description,
+                        GradeID = newcourse.GradeID,
+                        SubjectID = newcourse.SubjectID,
                         CreateUser = _userCreate,
                         Created = DateTime.Now,
                         Updated = DateTime.Now,

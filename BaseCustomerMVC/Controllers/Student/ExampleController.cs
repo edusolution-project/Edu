@@ -15,7 +15,7 @@ namespace BaseCustomerMVC.Controllers.Student
 {
     public class ExampleController : StudentController
     {
-       
+
         private readonly ExamService _service;
         private readonly ExamDetailService _examDetailService;
         private readonly LessonScheduleService _lessonScheduleService;
@@ -30,7 +30,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public ExampleController(ExamService service,
             ExamDetailService examDetailService
-        ,StudentService studentService
+        , StudentService studentService
             , ClassService classService
             , LessonService lessonService
             , LessonScheduleService lessonScheduleService
@@ -85,8 +85,8 @@ namespace BaseCustomerMVC.Controllers.Student
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
-            var mapping = new MappingEntity<ExamEntity,ExamViewModel>(); 
-            var std = DataResponse.Select(o => mapping.AutoOrtherType(o,new ExamViewModel()
+            var mapping = new MappingEntity<ExamEntity, ExamViewModel>();
+            var std = DataResponse.Select(o => mapping.AutoOrtherType(o, new ExamViewModel()
             {
                 LessonScheduleName = _lessonService.GetItemByID(_lessonScheduleService.GetItemByID(o.LessonScheduleID).LessonID).Title,
                 StudentName = _studentService.GetItemByID(o.StudentID).FullName
@@ -147,17 +147,17 @@ namespace BaseCustomerMVC.Controllers.Student
         public JsonResult Create(ExamEntity item)
         {
             var userid = User.Claims.GetClaimByType("UserID").Value;
-            if(string.IsNullOrEmpty(item.ID) || item.ID == "0")
+            if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 var _lesson = _lessonService.GetItemByID(item.LessonID);
                 var _class = _classService.GetItemByID(item.ClassID);
-                if(_class == null)
+                if (_class == null)
                 {
                     return new JsonResult("No Class for Student");
                 }
                 var _currentSchedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID);
                 var _schedule = _currentSchedule != null && _currentSchedule.Count() > 0 ? _currentSchedule.FirstOrDefault() : null;
-                if(_schedule != null)
+                if (_schedule != null)
                 {
                     item.LessonScheduleID = _schedule.ID;
                     item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
@@ -168,15 +168,14 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
                 else
                 {
-                   item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
-                   && o.StudentID == userid
-                   && o.Status == true
-                   && o.TeacherID == _class.TeacherID).Count();
+                    item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
+                    && o.StudentID == userid
+                    && o.Status == true
+                    && o.TeacherID == _class.TeacherID).Count();
                 }
                 item.Timer = _lesson.Timer;
                 item.Point = 0;
-               
-                
+
                 item.StudentID = userid;
                 item.TeacherID = _class.TeacherID;
                 item.ID = null;
@@ -193,7 +192,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(item);
         }
         [HttpPost]
-        public JsonResult GetCurrentExam(string ClassID,string LessonID)
+        public JsonResult GetCurrentExam(string ClassID, string LessonID)
         {
             var userID = User.Claims.GetClaimByType("UserID").Value;
             var x = _service.CreateQuery().Find(o => o.ClassID == ClassID && o.LessonID == LessonID && o.Status == false && o.StudentID == userID).FirstOrDefault();
@@ -214,6 +213,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     Time = DateTime.Now,
                     StudentID = User.Claims.GetClaimByType("UserID").Value
                 });
+
                 if (string.IsNullOrEmpty(item.ID) || item.ID == "0" || item.ID == "null")
                 {
                     var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();
@@ -221,13 +221,18 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (oldItem == null)
                     {
                         item.Created = DateTime.Now;
+                        var question = _cloneLessonPartQuestionService.GetItemByID(item.QuestionID);
+                        if (question == null)
+                            return new JsonResult("Data Error");
+                        item.LessonPartID = question.ParentID;
+                        item.QuestionValue = question.Content;
+                        item.MaxPoint = question.Point;
                         var xitem = map.AutoWithoutID(item, new ExamDetailEntity() { });
                         _examDetailService.CreateOrUpdate(xitem);
                         return new JsonResult(xitem);
                     }
                     else
                     {
-                        
                         var xitem = map.Auto(oldItem, item);
                         _examDetailService.CreateOrUpdate(xitem);
                         return new JsonResult(xitem);
@@ -242,16 +247,16 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else
             {
-                return new JsonResult("Accept Deny");
+                return new JsonResult("Access Deny");
             }
         }
 
         //submit form
         [HttpPost]
-        public JsonResult CompleteExam(string ExamID,string StudentID)
+        public JsonResult CompleteExam(string ExamID, string StudentID)
         {
             var example = _service.GetItemByID(ExamID);
-            if(example == null)
+            if (example == null)
             {
                 return new JsonResult("Data not found");
             }
@@ -285,14 +290,14 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(example);
         }
 
-        
+
         public IActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;
             return View();
         }
-        
-        public IActionResult Details(DefaultModel model, string id,string ClassID)
+
+        public IActionResult Details(DefaultModel model, string id, string ClassID)
         {
             if (string.IsNullOrEmpty(id))
             {

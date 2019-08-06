@@ -14,7 +14,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("ExamID")]
         public string ExamID { get; set; }
         [JsonProperty("LessonPartID")]
-        public string LessonPartID { get; set; } 
+        public string LessonPartID { get; set; }
         [JsonProperty("QuestionID")]
         public string QuestionID { get; set; }
         [JsonProperty("AnswerID")]
@@ -29,6 +29,8 @@ namespace BaseCustomerEntity.Database
         public string RealAnswerValue { get; set; }
         [JsonProperty("Point")]
         public double Point { get; set; }
+        [JsonProperty("MaxPoint")]
+        public double MaxPoint { get; set; }
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
         [JsonProperty("Updated")]

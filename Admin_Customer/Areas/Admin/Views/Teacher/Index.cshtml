@@ -23,8 +23,8 @@
                         <div class="float-right">
                             <button type="button" class="btn btn-primary" onclick="Add(this)" data-placement="top" title="Thêm giáo viên" data-toggle="modal" data-target="#editModal"> <i class="fas fa-plus"></i> </button>
                             <button type="button" class="btn btn-primary" data-toggle="modal" data-placement="top" title="Nhập file dữ liệu" data-target="#importModal"> <i class="fas fa-upload"></i> </button>
-                            <button type="button" class="btn btn-primary" data-placement="top" title="Xuất file dữ liệu" onclick="Export('FormControl','@Url.Action(" Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>
-                            <button type="button" class="btn btn-danger" data-placement="top" title="Xóa" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action(" Delete","teacher")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
+                            <button type="button" class="btn btn-primary" data-placement="top" title="Xuất file dữ liệu" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>
+                            <button type="button" class="btn btn-danger" data-placement="top" title="Xóa" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","teacher")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
                         </div>
                     </div>
                 </div>
@@ -147,7 +147,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action(" Create", "teacher" )','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "teacher" )','create',LoadData)">Lưu lại</button>
                 </div>
             </div>
         }
@@ -178,7 +178,7 @@
                 </div>
                 <div class="modal-footer">
                     <div class="button-left">
-                        <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action(" Export", "teacher" )')">Tải file mẫu</button>
+                        <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')">Tải file mẫu</button>
                     </div>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                     <button type="button" class="btn btn-primary btn-submit" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
@@ -211,7 +211,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action(" ChangePass", "Account" )','changepass',checkPassUpdate)">Lưu lại</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action("ChangePass", "Account" )','changepass',checkPassUpdate)">Lưu lại</button>
                 </div>
             }
         </div>
