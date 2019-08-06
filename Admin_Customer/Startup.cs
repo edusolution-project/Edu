@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
+using BaseHub;
 using Core_v2.Globals;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -73,6 +74,10 @@ namespace Admin_Customer
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ChatHub>("/chatHub");
+            });
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<MyHub>("/hub");
             });
 
             app.UseMvc(routes =>

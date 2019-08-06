@@ -1833,6 +1833,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BaseCustomerMVC\BaseCustomerMVC.csproj" />
+    <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
   </ItemGroup>
 
 </Project>

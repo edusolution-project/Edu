@@ -10,45 +10,45 @@ namespace BaseCustomerEntity.Globals
     {
         public static IServiceCollection AddServiceBase(this IServiceCollection services)
         {
-            services.AddTransient<AccountService>();
-            services.AddTransient<PermissionService>();
-            services.AddTransient<RoleService>();
-            services.AddTransient<StudentService>();
-            services.AddTransient<TeacherService>();            
-            services.AddTransient<AccountLogService>();
-            services.AddTransient<ModProgramService>();
-            services.AddTransient<ModCourseService>();
-            services.AddTransient<ModChapterService>();
-            services.AddTransient<ModSubjectService>();
-            services.AddTransient<ModGradeService>();
-            services.AddTransient<ModLessonService>();
-            services.AddTransient<ModLessonPartService>();
-            services.AddTransient<ModLessonExtendService>();
-            services.AddTransient<ModLessonPartAnswerService>();
-            services.AddTransient<ModLessonPartQuestionService>();
+            services.AddSingleton<AccountService>();
+            services.AddSingleton<PermissionService>();
+            services.AddSingleton<RoleService>();
+            services.AddSingleton<StudentService>();
+            services.AddSingleton<TeacherService>();            
+            services.AddSingleton<AccountLogService>();
+            services.AddSingleton<ModProgramService>();
+            services.AddSingleton<ModCourseService>();
+            services.AddSingleton<ModChapterService>();
+            services.AddSingleton<ModSubjectService>();
+            services.AddSingleton<ModGradeService>();
+            services.AddSingleton<ModLessonService>();
+            services.AddSingleton<ModLessonPartService>();
+            services.AddSingleton<ModLessonExtendService>();
+            services.AddSingleton<ModLessonPartAnswerService>();
+            services.AddSingleton<ModLessonPartQuestionService>();
 
-            services.AddTransient<ProgramService>();
-            services.AddTransient<CourseService>();
-            services.AddTransient<ChapterService>();
-            services.AddTransient<SubjectService>();
-            services.AddTransient<GradeService>();
-            services.AddTransient<LessonService>();
-            services.AddTransient<LessonPartService>();
-            services.AddTransient<LessonExtendService>();
-            services.AddTransient<LessonPartAnswerService>();
-            services.AddTransient<LessonPartQuestionService>();
-            services.AddTransient<LessonScheduleService>();
+            services.AddSingleton<ProgramService>();
+            services.AddSingleton<CourseService>();
+            services.AddSingleton<ChapterService>();
+            services.AddSingleton<SubjectService>();
+            services.AddSingleton<GradeService>();
+            services.AddSingleton<LessonService>();
+            services.AddSingleton<LessonPartService>();
+            services.AddSingleton<LessonExtendService>();
+            services.AddSingleton<LessonPartAnswerService>();
+            services.AddSingleton<LessonPartQuestionService>();
+            services.AddSingleton<LessonScheduleService>();
 
-            services.AddTransient<CloneLessonPartService>();
-            services.AddTransient<CloneLessonPartAnswerService>();
-            services.AddTransient<CloneLessonPartQuestionService>();
+            services.AddSingleton<CloneLessonPartService>();
+            services.AddSingleton<CloneLessonPartAnswerService>();
+            services.AddSingleton<CloneLessonPartQuestionService>();
 
-            services.AddTransient<ClassService>();
-            services.AddTransient<ClassProgressService>();
+            services.AddSingleton<ClassService>();
+            services.AddSingleton<ClassProgressService>();
 
-            services.AddTransient<ExamService>();
-            services.AddTransient<ExamDetailService>();
-            services.AddTransient<LearningHistoryService>();
+            services.AddSingleton<ExamService>();
+            services.AddSingleton<ExamDetailService>();
+            services.AddSingleton<LearningHistoryService>();
             return services;
         }
     }
