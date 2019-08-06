@@ -215,15 +215,15 @@ var ExamStudent = (function () {
         html += '<div class="part-box ' + data.Type + '" id="' + data.ID + '">';
      
         switch (data.Type) {
-            case "QUIZ1": html += type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data);
+            case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data);
                 break;
-            case "QUIZ2": html += type == 2 ? renderQUIZ2(data) : renderQUIZ2_BG(data);
+            case "QUIZ2": html += renderQUIZ2(data);//type == 2 ? renderQUIZ2(data) : renderQUIZ2_BG(data);
                 break;
-            case "QUIZ3": html += type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
+            case "QUIZ3": html += renderQUIZ3(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
                 break;
-            case "ESSAY": html += type == 2 ? renderESSAY(data) : renderESSAY_BG(data);
+            case "ESSAY": html += renderESSAY(data); //type == 2 ? renderESSAY(data) : renderESSAY_BG(data);
                 break;
-            case "VOCAB": html += type == 2 ? renderVOCAB(data) : renderVOCAB_BG(data);
+            case "VOCAB": html += renderVOCAB(data); //type == 2 ? renderVOCAB(data) : renderVOCAB_BG(data);
                 break;
             case "DOC": html += renderDOC(data);
                 break;
