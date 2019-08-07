@@ -75,7 +75,7 @@ var lessonService = {
 
         //header
         var ButtonStart = $("<div>", { "class": "d-flex justify-content-center pt-5 pb-5" });
-        var btnButton = $("<div>", { "class": "btn btn-primary", "onclick": "BeginExam(this,'" + data.ID + "','" + C_classID+"')", "text": " Bắt đầu làm bài thi" });
+        var btnButton = $("<div>", { "class": "btn btn-primary", "onclick": "BeginExam(this,'" + data.ID + "','" + C_classID + "')", "text": " Bắt đầu làm bài thi" });
         lessonContent.append(ButtonStart);
         ButtonStart.append(btnButton);
         //Body
@@ -111,7 +111,7 @@ var lessonService = {
         var edit = $("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "lessonService.renderEdit('" + data.ID + "')" });
         var close = $("<a>", { "class": "btn btn-sm btn-close", "text": "X", "onclick": "render.resetLesson()" });
         var remove = $("<a>", { "class": "btn btn-sm btn-remove", "text": "Xóa", "onclick": "lessonService.remove('" + data.ID + "')" });
-        
+
 
 
         lessonRow.append(tabsleft);
@@ -165,16 +165,16 @@ var render = {
     lesson: function (data) {
         lessonService.renderData(data);
     },
-    lessonPart: function (data,lsid,clsid) {
+    lessonPart: function (data, lsid, clsid) {
         for (var i = 0; data != null && i < data.length; i++) {
             var lessonpart = data[i];
             if (lessonpart.Title == null) continue;
-            render.part(lessonpart,lsid,clsid);
+            render.part(lessonpart, lsid, clsid);
         }
 
     },
     part: function (data) {
-        
+
         var time = "", point = "";
 
         if (data.Timer > 0) {
@@ -204,7 +204,7 @@ var render = {
 
         //item row
         //var ItemRow = $("<div>", { "class": "row"});
-        
+
         var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {
             boxHeader.append($("<h5>", { "class": "title", "text": data.Title + time + point }));
@@ -307,7 +307,7 @@ var render = {
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
                 }
-                itemBody.append($("<textarea>", { "class": "content-answer","onfocusout":"alert(this.value)"}))
+                itemBody.append($("<textarea>", { "class": "content-answer", "onfocusout": "alert(this.value)" }))
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 ItemRow.append(itemBody);
                 container.append(tabsitem);
@@ -457,7 +457,7 @@ var render = {
                 var placeholder = $("#" + data.ParentID).find(".answer-pane");
                 $(placeholder).attr("data-id", data.ParentID)
                 $(placeholder).removeClass("no-child");
-                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây"}));
+                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
 
                 if (data.Content != null)
@@ -469,20 +469,20 @@ var render = {
                 else
                     answer.append($("<label>", { "class": "answer-text", "text": data.Content }));
 
-                    answer.draggable({
-                        cursor: "move",
-                        helper: 'clone',
-                        revert: "true",
-                        scroll: true,
-                        start: function (event, ui) {
-                           
-                        },
-                        stop: function (event, ui) {
-                            
-                        }
-                    });
+                answer.draggable({
+                    cursor: "move",
+                    helper: 'clone',
+                    revert: "true",
+                    scroll: true,
+                    start: function (event, ui) {
 
-                    container.append(answer);
+                    },
+                    stop: function (event, ui) {
+
+                    }
+                });
+
+                container.append(answer);
                 break;
             default:
                 var form = $("<div>", { "class": "form-check" });
@@ -552,7 +552,7 @@ var render = {
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "src": data.Media.Path , "class": "img-fluid lazy" }));
+                            mediaHolder.append($("<img>", { "src": data.Media.Path, "class": "img-fluid lazy" }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
@@ -579,7 +579,7 @@ var load = {
         $.ajax({
             type: "POST",
             url: url,
-            data: { LessonID: id, ClassID: classid},
+            data: { LessonID: id, ClassID: classid },
             dataType: "json",
             success: function (data) {
                 if (data.Exam != null && data.Exam != void 0) {
@@ -594,7 +594,7 @@ var load = {
                         start();
                         $("#counter").html(data.Timer);
                     }
-                    
+
                     countdown();
                 } else {
                     render.lesson(data.Data);
@@ -673,22 +673,22 @@ function answerQuestion(obj, quizid, answerID, answerValue) {
     markQuestion(quizid, answerID);
     var dataform = new FormData();
     dataform.append("ID", obj.parentElement.parentElement.parentElement.getAttribute("data-id"));
-        dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
-        dataform.append("AnswerID", answerID);
-        dataform.append("QuestionID", quizid);
-        dataform.append("AnswerValue", answerValue);
-        Ajax(urlChose, "POST", dataform, false)
-            .then(function (res) {
-                if (res != "Accept Deny") {
-                    var data = JSON.parse(res);
-                    obj.parentElement.parentElement.parentElement.setAttribute("data-id", data.ID);
-                    SetCurrentExam()
-                }
+    dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
+    dataform.append("AnswerID", answerID);
+    dataform.append("QuestionID", quizid);
+    dataform.append("AnswerValue", answerValue);
+    Ajax(urlChose, "POST", dataform, false)
+        .then(function (res) {
+            if (res != "Accept Deny") {
+                var data = JSON.parse(res);
+                obj.parentElement.parentElement.parentElement.setAttribute("data-id", data.ID);
+                SetCurrentExam()
+            }
         })
         .catch(function (err) {
             console.log(err);
         })
-    
+
 }
 
 function markQuestion(quizid, answerid) {
@@ -711,18 +711,18 @@ function markQuestion(quizid, answerid) {
 
 function BeginExam(_this, LessonID, ClassID) {
     var dataform = new FormData();
-        dataform.append("ClassID", ClassID);
-        dataform.append("LessonID", LessonID);
-        Ajax(urlStart, "POST", dataform, false)
-            .then(function (res) {
-                var data = JSON.parse(res);
-                document.querySelector("input[name='ExamID']").value = data.ID;
-                start(_this);
-                SetCurrentExam();
-            })
-            .catch(function (err) {
-                console.log(err);
-            })
+    dataform.append("ClassID", ClassID);
+    dataform.append("LessonID", LessonID);
+    Ajax(urlStart, "POST", dataform, false)
+        .then(function (res) {
+            var data = JSON.parse(res);
+            document.querySelector("input[name='ExamID']").value = data.ID;
+            start(_this);
+            SetCurrentExam();
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
 }
 
 function GetCurrentExam() {
@@ -730,16 +730,16 @@ function GetCurrentExam() {
     dataform.append("ClassID", ClassID);
     dataform.append("LessonID", LessonID);
     return Ajax(urlCurrentExam, "POST", dataform, true)
-    .then(function (res) {
-        if (res == null) return;
-        var data = JSON.parse(res);
-        document.querySelector("input[name='ExamID']").value = data.ID;
-        
-        start();
-    })
-    .catch(function (err) {
-        console.log(err);
-    })
+        .then(function (res) {
+            if (res == null) return;
+            var data = JSON.parse(res);
+            document.querySelector("input[name='ExamID']").value = data.ID;
+
+            start();
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
 }
 //exampleid
 function LoadCurrentExam() {
@@ -750,17 +750,17 @@ function LoadCurrentExam() {
     $("#lessonContainer").html(html);
     $("#quiz-number_123").html(html2);
     $("#quizNavigator").html(html3);
-    
+
     $(".answer-item").draggable({
         cursor: "move",
         helper: 'clone',
         revert: "true",
         scroll: true,
         start: function (event, ui) {
-           
+
         },
         stop: function (event, ui) {
-           
+
         }
     });
     $('.answer-pane.ui-droppable').droppable({
@@ -796,7 +796,7 @@ function LoadCurrentExam() {
             prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
             //$(prevHolder).find(".placeholder").show();
             $(this).append($(ui.draggable));
-            answerQuestion(this, quiz, typeof(void 0), "");
+            answerQuestion(this, quiz, typeof (void 0), "");
         }
     });
 }
@@ -809,35 +809,60 @@ function SetCurrentExam() {
     localStorage.setItem($("input[name='ExamID']").val() + "_Quiz", html2);
     localStorage.setItem($("input[name='ExamID']").val(), html);
 }
+
 function RemoveCurrentExam() {
     localStorage.removeItem($("input[name='ExamID']").val() + "_QuizNav");
     localStorage.removeItem($("input[name='ExamID']").val() + "_Quiz");
     localStorage.removeItem($("input[name='ExamID']").val());
 }
 //hoàn thành
-function ExamComplete(url) {
-    if (confirm("Có phải bạn muốn nộp bài")) {
+function ExamComplete(url, force) {
+
+    if (!force) { // chưa hết giờ
+        if (confirm("Có phải bạn muốn nộp bài")) {
+            var exam = document.querySelector("input[name='ExamID']");
+            var dataform = new FormData();
+            dataform.append("ExamID", exam.value);
+            return Ajax(url, "POST", dataform, true)
+                .then(function (res) {
+                    if (res == null) return;
+                    var data = JSON.parse(res);
+                    RemoveCurrentExam();
+                    $(".lesson-container").empty();
+                    $("#quizNavigator").addClass('d-none');
+                    $("#finish").addClass('d-none');
+                    $('#lessonContainer').removeClass('col-md-10');
+                    $(".lesson-container").append('<div class="card show mb-4"></div>');
+                    $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Bạn đã hoàn thành bài thi</h3></div>');
+                    $(".card").append('<div class="content card-body d-flex justify-content-center"></div>');
+                    $(".content").append('<a href="#" onclick="goBack()"> Quay về trang bài học </a>');
+                })
+                .catch(function (err) {
+                    console.log(err);
+                })
+        }
+    }
+    else //hết giờ => bắt buộc nộp bài 
+    {
         var exam = document.querySelector("input[name='ExamID']");
-        var dataform = new FormData();
-        dataform.append("ExamID", exam.value);
-        return Ajax(url, "POST", dataform, true)
-            .then(function (res) {
-                if (res == null) return;
-                var data = JSON.parse(res);
-                RemoveCurrentExam();
-                $(".lesson-container").empty(); 
-                $("#quizNavigator").addClass('d-none');
-                $("#finish").addClass('d-none');
-                $('#lessonContainer').removeClass('col-md-10');
-                $(".lesson-container").append('<div class="card show mb-4"></div>');
-                $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Bạn đã hoàn thành bài thi</h3></div>');
-                $(".card").append('<div class="content card-body d-flex justify-content-center"></div>');
-                $(".content").append('<a href="#" onclick="goBack()"> Quay về trang bài học </a>');
-            })
-            .catch(function (err) {
-                console.log(err);
-            })
-    } else {
-        //
+            var dataform = new FormData();
+            dataform.append("ExamID", exam.value);
+            return Ajax(url, "POST", dataform, true)
+                .then(function (res) {
+                    if (res == null) return;
+                    var data = JSON.parse(res);
+                    RemoveCurrentExam();
+                    $(".lesson-container").empty();
+                    $("#quizNavigator").addClass('d-none');
+                    $("#finish").addClass('d-none');
+                    $('#lessonContainer').removeClass('col-md-10');
+                    $(".lesson-container").append('<div class="card show mb-4"></div>');
+                    $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Bạn đã hoàn thành bài thi</h3></div>');
+                    $(".card").append('<div class="content card-body d-flex justify-content-center"></div>');
+                    $(".content").append('<a href="#" onclick="goBack()"> Quay về trang bài học </a>');
+                })
+                .catch(function (err) {
+                    console.log(err);
+                })
     }
 }

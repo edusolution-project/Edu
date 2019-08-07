@@ -15,7 +15,7 @@ namespace BaseCustomerMVC.Controllers.Student
 {
     public class ExampleController : StudentController
     {
-       
+
         private readonly ExamService _service;
         private readonly ExamDetailService _examDetailService;
         private readonly LessonScheduleService _lessonScheduleService;
@@ -28,13 +28,13 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ClassService _classService;
         private readonly LearningHistoryService _learningHistoryService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
-        private readonly LessonPartQuestionService _lessonPartQuestionService; 
+        private readonly LessonPartQuestionService _lessonPartQuestionService;
 
         public ExampleController(ExamService service,
             LessonPartAnswerService lessonPartAnswerService,
             LessonPartQuestionService lessonPartQuestionService,
             ExamDetailService examDetailService
-        ,StudentService studentService
+        , StudentService studentService
             , ClassService classService
             , LessonService lessonService
             , LessonScheduleService lessonScheduleService
@@ -87,8 +87,8 @@ namespace BaseCustomerMVC.Controllers.Student
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
-            var mapping = new MappingEntity<ExamEntity,ExamViewModel>(); 
-            var std = DataResponse.Select(o => mapping.AutoOrtherType(o,new ExamViewModel()
+            var mapping = new MappingEntity<ExamEntity, ExamViewModel>();
+            var std = DataResponse.Select(o => mapping.AutoOrtherType(o, new ExamViewModel()
             {
                 LessonScheduleName = _lessonService.GetItemByID(_lessonScheduleService.GetItemByID(o.LessonScheduleID).LessonID).Title,
                 StudentName = _studentService.GetItemByID(o.StudentID).FullName
@@ -149,58 +149,73 @@ namespace BaseCustomerMVC.Controllers.Student
         public JsonResult Create(ExamEntity item)
         {
             var userid = User.Claims.GetClaimByType("UserID").Value;
-            if(string.IsNullOrEmpty(item.ID) || item.ID == "0")
+
+
+
+
+            if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 var _lesson = _lessonService.GetItemByID(item.LessonID);
                 var _class = _classService.GetItemByID(item.ClassID);
-                if(_class == null)
+
+                if (_class == null)
                 {
-                    return new JsonResult("No Class for Student");
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "No Class for Student" }
+                    });
                 }
-                var _currentSchedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID);
-                var _schedule = _currentSchedule != null && _currentSchedule.Count() > 0 ? _currentSchedule.FirstOrDefault() : null;
-                if(_schedule != null)
+
+                var _schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID).FirstOrDefault();
+                if (_schedule == null)
                 {
-                    item.LessonScheduleID = _schedule.ID;
-                    item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
-                    && o.StudentID == userid
-                    && o.Status == true
-                    && o.TeacherID == _class.TeacherID
-                    && o.LessonScheduleID == _schedule.ID).Count();
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "No Schedule for Class" }
+                    });
                 }
-                else
+
+                var marked = _service.CreateQuery().Find(o => o.LessonScheduleID == _schedule.ID && o.StudentID == userid && o.Marked).FirstOrDefault();
+                if (marked != null)
                 {
-                   item.Number = (int)_service.CreateQuery().Find(o => o.Timer == _lesson.Timer
-                   && o.StudentID == userid
-                   && o.Status == true
-                   && o.TeacherID == _class.TeacherID).Count();
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "This exam has been marked!" }
+                    });
                 }
+
+                item.LessonScheduleID = _schedule.ID;
                 item.Timer = _lesson.Timer;
                 item.Point = 0;
-               
-                
+                item.MaxPoint = _lesson.Point;
                 item.StudentID = userid;
                 item.TeacherID = _class.TeacherID;
                 item.ID = null;
                 item.Created = DateTime.Now;
                 item.CurrentDoTime = DateTime.Now;
                 item.Status = false;
-                item.Number = (int)_service.CreateQuery().Find(o => o.LessonScheduleID == item.LessonScheduleID && o.StudentID == item.StudentID).Count() + 1;
+                item.Number = (int)_service.CreateQuery().CountDocuments(o => o.LessonScheduleID == item.LessonScheduleID && o.StudentID == item.StudentID) + 1;
+                item.Marked = false;
             }
             else
             {
                 item.Updated = DateTime.Now;
             }
             _service.CreateOrUpdate(item);
-            return new JsonResult(item);
+            return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Data", item }
+                    });
         }
+
         [HttpPost]
-        public JsonResult GetCurrentExam(string ClassID,string LessonID)
+        public JsonResult GetCurrentExam(string ClassID, string LessonID)
         {
             var userID = User.Claims.GetClaimByType("UserID").Value;
             var x = _service.CreateQuery().Find(o => o.ClassID == ClassID && o.LessonID == LessonID && o.Status == false && o.StudentID == userID).FirstOrDefault();
             return new JsonResult(x);
         }
+
         [HttpPost]
         public JsonResult CreateDetails(ExamDetailEntity item)
         {
@@ -223,13 +238,26 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (oldItem == null)
                     {
                         item.Created = DateTime.Now;
+                        if (!String.IsNullOrEmpty(item.QuestionID))
+                        {
+                            var question = _cloneLessonPartQuestionService.GetItemByID(item.QuestionID);
+                            if (question == null)
+                                return new JsonResult("Data Error");
+                            item.LessonPartID = question.ParentID;
+                            item.QuestionValue = question.Content;
+                            item.MaxPoint = question.Point;
+                        }
+                        else // Essay
+                        {
+                            item.MaxPoint = exam.MaxPoint;
+                        }
                         var xitem = map.AutoWithoutID(item, new ExamDetailEntity() { });
                         _examDetailService.CreateOrUpdate(xitem);
                         return new JsonResult(xitem);
                     }
                     else
                     {
-                        
+
                         var xitem = map.Auto(oldItem, item);
                         _examDetailService.CreateOrUpdate(xitem);
                         return new JsonResult(xitem);
@@ -244,7 +272,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else
             {
-                return new JsonResult("Accept Deny");
+                return new JsonResult("Access Deny");
             }
         }
 
@@ -253,96 +281,90 @@ namespace BaseCustomerMVC.Controllers.Student
         [Obsolete]
         public JsonResult CompleteExam(string ExamID)
         {
-            var example = _service.GetItemByID(ExamID);
-            if(example == null)
+            var exam = _service.GetItemByID(ExamID);
+
+            if (exam == null)
             {
                 return new JsonResult("Data not found");
             }
-            if (example.Status)
+            if (exam.Status)
             {
-                return new JsonResult("Accept deny");
+                return new JsonResult("Access deny");
             }
-            example.Status = true;
+            exam.Status = true;
+
+            var lesson = _lessonService.GetItemByID(exam.LessonID);
+
             double point = 0;
+
             var userID = User.Claims.GetClaimByType("UserID").Value;
-            //phair kiem tra lai
-            var listDetails = _examDetailService.Collection.Find(o => o.ExamID == example.ID).ToList();
-            var lesson = _lessonService.GetItemByID(example.LessonID);
-            var mappingAnswer = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
-            var mappingQuestion = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
+            var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
+
             for (int i = 0; listDetails != null && i < listDetails.Count; i++)
             {
                 var examDetail = listDetails[i];
+
                 //bài tự luận
                 if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
-                
-                // câu trả lời của học viên
-                var item = _cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID);
-                if(item == null)
+
+                var part = _cloneLessonPartService.GetItemByID(examDetail.LessonPartID);
+                if (part == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
+
+                var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
+                if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
+
+                var _realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
+
+                CloneLessonPartAnswerEntity _realanswer = null;
+
+                //bài chọn hoặc nối đáp án
+                if (!string.IsNullOrEmpty(examDetail.AnswerID))
                 {
-                    var current = _lessonPartAnswerService.GetItemByID(examDetail.AnswerID);
-                    item = current != null ? mappingAnswer.AutoOrtherType(current,new CloneLessonPartAnswerEntity() { }) : null;
-                }
-                // câu trả lời của bài tập
-                var _realAnswer = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID && (!string.IsNullOrEmpty(o.TeacherID) && o.TeacherID == example.TeacherID))?.SingleOrDefault();
-                if (_realAnswer == null)
-                {
-                    var current = _lessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
-                    if (current.Count > 1)
+                    var answer = _cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID);
+                    if (answer == null) continue;//Lưu lỗi => bỏ qua ko tính điểm
+
+                    switch (part.Type)
                     {
-                        for(int z = 0; z < current.Count; z++)
-                        {
-                            if (!string.IsNullOrEmpty(item.Content) && item.Content.ToLower() == current[z].Content.ToLower() || (item.Media != null && item.Media == current[z].Media)){
-                                var xx = current[z];
-                                if (xx != null) _realAnswer = mappingAnswer.AutoOrtherType(xx, new CloneLessonPartAnswerEntity() { });
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var xx = current.Count() == 1 ? current?.SingleOrDefault() : null;
-                        if (xx != null) _realAnswer = mappingAnswer.AutoOrtherType(xx, new CloneLessonPartAnswerEntity() { });
+                        case "QUIZ1": //chọn đáp án
+                            _realanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID);//chọn đúng đáp án
+                            break;
+                        case "QUIZ3": //nối đáp án
+                            _realanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID || (!string.IsNullOrEmpty(t.Content) && t.Content == answer.Content)); //chọn đúng đáp án (check trường hợp sai ID nhưng cùng content (2 đáp án có hình ảnh, ID khác nhau nhưng cùng content (nội dung như nhau)))
+                            break;
                     }
                 }
-                if (_realAnswer != null)
+                else //bài điền từ
                 {
-                    if (item != null && (item.IsCorrect || (!string.IsNullOrEmpty(item.Content) && item.Content == _realAnswer.Content || (item.Media != null && item.Media == _realAnswer.Media))))
-                    {
-                        examDetail.RealAnswerID = item.ID;
-                        examDetail.RealAnswerValue = item.Content;
-                        var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
-                        if(question == null)
-                        {
-                            var currentQuestion = _lessonPartQuestionService.GetItemByID(examDetail.QuestionID);
-                            question = currentQuestion != null ? mappingQuestion.AutoOrtherType(currentQuestion, new CloneLessonPartQuestionEntity()):null;
-                        }
-                        point += question != null ? question.Point : 0;
-                        examDetail.Point = question != null ? question.Point : 0;
-                    }
-                    else
-                    {
-                        examDetail.RealAnswerID = _realAnswer.ID;
-                        examDetail.RealAnswerValue = _realAnswer.Content;
-                    }
-                    examDetail.Updated = DateTime.Now;
-                    _examDetailService.CreateOrUpdate(examDetail);
+                    _realanswer = _realAnswers.FirstOrDefault(t => t.Content.ToLower() == examDetail.AnswerValue.ToLower()); //điền từ đúng, chấp nhận viết hoa viết thường
                 }
+
+                if (_realanswer != null)
+                {
+                    point += question.Point;
+                    examDetail.Point = question.Point;
+                    examDetail.RealAnswerID = _realanswer.ID;
+                    examDetail.RealAnswerValue = _realanswer.Content;
+                }
+
+                examDetail.Updated = DateTime.Now;
+                _examDetailService.CreateOrUpdate(examDetail);
             }
-            example.Point = point;
-            example.Updated = DateTime.Now;
-            _service.CreateOrUpdate(example);
-            return new JsonResult(new { Point = point, MaxPoint = lesson.Point}) ;
+            exam.Point = point;
+            exam.Updated = DateTime.Now;
+            exam.MaxPoint = lesson.Point;
+
+            _service.CreateOrUpdate(exam);
+            return new JsonResult(new { Point = point, MaxPoint = lesson.Point });
         }
 
-        
+
         public IActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;
             return View();
         }
-        
-        public IActionResult Details(DefaultModel model, string id,string ClassID)
+
+        public IActionResult Details(DefaultModel model, string id, string ClassID)
         {
             if (string.IsNullOrEmpty(id))
             {

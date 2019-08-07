@@ -162,6 +162,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
+        [DisableRequestSizeLimit]
         public async Task<JsonResult> CreateOrUpdate(CloneLessonPartViewModel item, string ClassID, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
         {
             var root = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID).SingleOrDefault();
@@ -185,6 +186,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 item.Created = DateTime.Now;
                 item.TeacherID = currentClass.TeacherID;
+                item.ClassID = currentClass.ID;
                 var maxItem = _service.CreateQuery()
                     .Find(o => o.ParentID == item.ParentID)
                     .SortByDescending(o => o.Order).FirstOrDefault();
@@ -234,6 +236,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.Updated = DateTime.Now;
                 item.Created = olditem.Created;
                 item.Order = olditem.Order;
+                item.ClassID = currentClass.ID;
             }
 
             var lessonpart = item.ToEntity();

@@ -242,7 +242,9 @@ namespace BaseCustomerMVC.Controllers.Student
             if (Data.TemplateType == LESSON_TEMPLATE.LECTURE)
                 return View();
             else
+            {
                 return View("Exam");
+            }
         }
 
     }

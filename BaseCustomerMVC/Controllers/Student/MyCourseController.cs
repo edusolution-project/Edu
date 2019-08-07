@@ -25,24 +25,16 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
+        private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
+        private readonly MappingEntity<ClassEntity, MyClassViewModel> _mappingList;
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly StudentService _studentService;
+        private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _studentMapping;
         private readonly ChapterService _chapterService;
         private readonly LearningHistoryService _learningHistoryService;
-
-        private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
-        private readonly MappingEntity<ClassEntity, MyClassViewModel> _mappingList;
-        private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _studentMapping;
-        private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
-
-        private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
-        private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
-        private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
-
-
         public MyCourseController(ClassService service
             , CourseService courseService
             , TeacherService teacherService
@@ -79,16 +71,11 @@ namespace BaseCustomerMVC.Controllers.Student
             _cloneLessonPartService = cloneLessonPartService;
             _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
             _lessonPartService = lessonPartService;
-            _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
-            _mappingList = new MappingEntity<ClassEntity, MyClassViewModel>();
+            _mapping = new Core_v2.Globals.MappingEntity<LessonEntity, LessonScheduleViewModel>();
+            _mappingList = new Core_v2.Globals.MappingEntity<ClassEntity, MyClassViewModel>();
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
             _studentMapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
-            _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
-
-            _lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
-            _lessonPartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
-            _lessonPartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
         }
 
         [Obsolete]
@@ -138,38 +125,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 { "Model", model }
             };
             return new JsonResult(respone);
-        }
-
-
-        public JsonResult GetActiveList()
-        {
-            var filter = new List<FilterDefinition<ClassEntity>>();
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Students.Contains(UserID) && o.EndDate >= DateTime.Now.ToLocalTime().Date));
-
-            var activeClasses = _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)).ToList();
-
-            var responseData = new List<ClassActiveViewModel>();
-
-            var subjects = _subjectService.GetAll().ToList();
-            foreach (var _class in activeClasses)
-            {
-                var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == _class.ID);
-                var learned = _learningHistoryService.CreateQuery().Aggregate().Match(o => o.ClassID == _class.ID).Group(o => o.LessonID,
-                    o => new { x = o.Select(x => 1).First() }).ToList().Count();
-                responseData.Add(_activeMapping.AutoOrtherType(_class, new ClassActiveViewModel()
-                {
-                    Progress = (int)(totalLessons != 0 ? learned * 100 / totalLessons : 0),
-                    SubjectName = subjects.SingleOrDefault(s => s.ID == _class.SubjectID).Name
-                }));
-            }
-
-            var response = new Dictionary<string, object>
-            {
-                { "Data", responseData }
-            };
-            return new JsonResult(response);
         }
 
 
@@ -227,116 +182,91 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
-                return new JsonResult(
-                new Dictionary<string, object> { { "Error", "Student not found" } });
-
-
-
+            {
+                return null;
+            }
             var lesson = _lessonService.GetItemByID(LessonID);
-            if (lesson == null)
-                return new JsonResult(
-                new Dictionary<string, object> { { "Error", "Lesson not found" } });
+            if (lesson == null) return null;
+            var listPart = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == ClassID).ToList();
 
-            var currentClass = _service.GetItemByID(ClassID);
-            if (currentClass == null)
-                return new JsonResult(
-                new Dictionary<string, object> { { "Error", "Class not found" } });
 
-            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == ClassID).ToList();
-
-            //Create learning history
             _learningHistoryService.CreateHist(new LearningHistoryEntity()
             {
                 ClassID = ClassID,
                 LessonID = LessonID,
                 Time = DateTime.Now,
-                StudentID = userId
+                StudentID = User.Claims.GetClaimByType("UserID").Value
             });
 
+
+            // var listPartOriginal = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID);
             bool IsNull = false;
-            if (listParts == null || listParts.Count <= 0)
+            if (listPart == null || listPart.Count <= 0)
             {
                 var listparts = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).ToList();
                 if (listparts != null)
                 {
-                    //Ko map mà clone lesson, bao giờ giáo viên cũng sẽ clone trước
-                    //Clone from lesson part - Temporary
-                    var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
-                    if (listLessonPart != null && listLessonPart.Count > 0)
-                    {
-                        var _lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
-                        foreach (var lessonpart in listLessonPart)
-                        {
-                            var clonepart = _lessonPartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity());
-                            clonepart.ID = null;
-                            clonepart.OriginID = lessonpart.ID;
-                            clonepart.TeacherID = currentClass.TeacherID;
-                            clonepart.ClassID = currentClass.ID;
-                            CloneLessonPart(clonepart);
-                        }
-
-                        listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == LessonID && o.ClassID == currentClass.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
-                    }
+                    var mapp = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
+                    listPart = listparts.Select(o => mapp.AutoOrtherType(o, new CloneLessonPartEntity() { })).ToList();
                 }
+                IsNull = true;
             }
-
-            var listData = listParts.ToList();
+            var listData = listPart.ToList();
             var exam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassID == ClassID && o.StudentID == userId && o.Status == false).FirstOrDefault();
-
             if (exam == null || _examService.IsOverTime(exam.ID))
             {
-                //if (!IsNull)
-                //{
-                MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
-                MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
-                MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
-                var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
+                if (!IsNull)
                 {
-                    Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                    MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
+                    MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+                    MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
+                    var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
                     {
-                        Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
-                            .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
-                            {
-                                CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
-                            }))?.ToList()
-                    })).ToList()
-                });
+                        Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                        {
+                            Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                                .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                                {
+                                    CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
+                                }))?.ToList()
+                        })).ToList()
+                    });
 
-                var respone = new Dictionary<string, object> { { "Data", dataResponse } };
-                return new JsonResult(respone);
-                //}
-                //else
-                //{
-                //    MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
-                //    MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
-                //    MappingEntity<LessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<LessonPartQuestionEntity, QuestionViewModel>();
-                //    MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> mapAnswer = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
-                //    var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
-                //    {
-                //        Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
-                //        {
-                //            Questions = _lessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
-                //                .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
-                //                {
-                //                    CloneAnswers = _lessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList().Select(y => mapAnswer.AutoOrtherType(y, new CloneLessonPartAnswerEntity()
-                //                    {
-                //                        IsCorrect = false
-                //                    })).ToList()
-                //                }))?.ToList()
-                //        })).ToList()
-                //    });
+                    var respone = new Dictionary<string, object> { { "Data", dataResponse } };
+                    return new JsonResult(respone);
+                }
+                else
+                {
+                    MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
+                    MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+                    MappingEntity<LessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<LessonPartQuestionEntity, QuestionViewModel>();
+                    MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> mapAnswer = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
+                    var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
+                    {
+                        Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                        {
+                            Questions = _lessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                                .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                                {
+                                    CloneAnswers = _lessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList().Select(y => mapAnswer.AutoOrtherType(y, new CloneLessonPartAnswerEntity()
+                                    {
+                                        IsCorrect = false
+                                    })).ToList()
+                                }))?.ToList()
+                        })).ToList()
+                    });
 
-                //    var respone = new Dictionary<string, object> { { "Data", dataResponse } };
-                //    return new JsonResult(respone);
-                //}
+                    var respone = new Dictionary<string, object> { { "Data", dataResponse } };
+                    return new JsonResult(respone);
+                }
             }
-            else //TODO: Double check here
+            else
             {
                 var listED = _examDetailService.CreateQuery().Find(o => o.ExamID == exam.ID).ToList();
                 var timere = exam.CurrentDoTime.AddMinutes(exam.Timer) - DateTime.UtcNow;
-                // so sanh va dua ra dap an cua sinh vien ????
-                //if (!IsNull)
-                //{
+                // so sanh va dua ra dap an cua sinh vien
+                if (!IsNull)
+                {
                     MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
                     MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
                     MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
@@ -365,42 +295,42 @@ namespace BaseCustomerMVC.Controllers.Student
                         }
                     };
                     return new JsonResult(respone);
-                //}
-                //else NO MORE MAPPING FROM LESSON PART
-                //{
-                //    MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
-                //    MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
-                //    MappingEntity<LessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<LessonPartQuestionEntity, QuestionViewModel>();
-                //    MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> mapAnswer = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
-                //    var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
-                //    {
-                //        Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
-                //        {
-                //            Questions = _lessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
-                //                .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
-                //                {
-                //                    CloneAnswers = _lessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList().Select(y => mapAnswer.AutoOrtherType(y, new CloneLessonPartAnswerEntity()
-                //                    {
-                //                        IsCorrect = false
-                //                    })).ToList()
-                //                }))?.ToList()
-                //        })).ToList()
-                //    });
+                }
+                else
+                {
+                    MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
+                    MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+                    MappingEntity<LessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<LessonPartQuestionEntity, QuestionViewModel>();
+                    MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> mapAnswer = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
+                    var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
+                    {
+                        Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                        {
+                            Questions = _lessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                                .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                                {
+                                    CloneAnswers = _lessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList().Select(y => mapAnswer.AutoOrtherType(y, new CloneLessonPartAnswerEntity()
+                                    {
+                                        IsCorrect = false
+                                    })).ToList()
+                                }))?.ToList()
+                        })).ToList()
+                    });
 
-                //    var respone = new Dictionary<string, object>
-                //    {
-                //        {
-                //            "Data", dataResponse
-                //        },
-                //        {
-                //             "Exam", exam
-                //        },
-                //        {
-                //            "Timer", timere.Minutes < 10 ? "0"+  timere.Minutes+":"+timere.Seconds: timere.Minutes+":"+timere.Seconds
-                //        }
-                //    };
-                //    return new JsonResult(respone);
-                //}
+                    var respone = new Dictionary<string, object>
+                    {
+                        {
+                            "Data", dataResponse
+                        },
+                        {
+                             "Exam", exam
+                        },
+                        {
+                            "Timer", timere.Minutes < 10 ? "0"+  timere.Minutes+":"+timere.Seconds: timere.Minutes+":"+timere.Seconds
+                        }
+                    };
+                    return new JsonResult(respone);
+                }
             }
         }
 
@@ -434,17 +364,12 @@ namespace BaseCustomerMVC.Controllers.Student
             var filter = new List<FilterDefinition<StudentEntity>>();
             filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
             var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
-            var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == currentClass.ID);
-            var studentsView = (from r in students.ToList()
-                                let learned = _learningHistoryService.CreateQuery().AsQueryable()
-                                .Where(t => t.StudentID == r.ID && t.ClassID == currentClass.ID)
-                                .GroupBy(t => new { t.StudentID, t.ClassID, t.LessonID }).Count()
-                                select _studentMapping.AutoOrtherType(r, new ClassMemberViewModel()
-                                {
-                                    ClassName = currentClass.Name,
-                                    ClassStatus = "Đang học",
-                                    Progress = (int)(totalLessons != 0 ? learned * 100 / totalLessons : 0),
-                                })).ToList();
+            var studentsView = students.ToList().Select(t => _studentMapping.AutoOrtherType(t, new ClassMemberViewModel()
+            {
+                ClassName = currentClass.Name,
+                ClassStatus = "Đang học",
+                LastJoinDate = DateTime.Now
+            })).ToList();
 
             var response = new Dictionary<string, object>
             {
@@ -457,6 +382,42 @@ namespace BaseCustomerMVC.Controllers.Student
             };
             return new JsonResult(response);
         }
+
+
+        public JsonResult GetActiveList()
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Students.Contains(UserID) && o.EndDate >= DateTime.Now.ToLocalTime().Date));
+
+            var activeClasses = _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)).ToList();
+
+            var responseData = new List<ClassActiveViewModel>();
+
+            var subjects = _subjectService.GetAll().ToList();
+
+            var _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
+
+            foreach (var _class in activeClasses)
+            {
+                var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == _class.ID);
+                var learned = _learningHistoryService.CreateQuery().Aggregate().Match(o => o.ClassID == _class.ID).Group(o => o.LessonID,
+                    o => new { x = o.Select(x => 1).First() }).ToList().Count();
+                responseData.Add(_activeMapping.AutoOrtherType(_class, new ClassActiveViewModel()
+                {
+                    Progress = (int)(totalLessons != 0 ? learned * 100 / totalLessons : 0),
+                    SubjectName = subjects.SingleOrDefault(s => s.ID == _class.SubjectID).Name
+                }));
+            }
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", responseData }
+            };
+            return new JsonResult(response);
+        }
+
         [Obsolete]
         [HttpPost]
         public JsonResult GetSchedules(DefaultModel model)
@@ -498,15 +459,16 @@ namespace BaseCustomerMVC.Controllers.Student
                 Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
-                           let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassID == model.ID).SortByDescending(o => o.ID).FirstOrDefault()
+                           let histories = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID)
                            select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
                                ScheduleID = schedule.ID,
                                StartDate = schedule.StartDate,
                                EndDate = schedule.EndDate,
                                IsActive = schedule.IsActive,
-                               IsView = lastjoin != null,
-                               LastJoin = lastjoin != null ? lastjoin.Time : DateTime.MinValue
+                               IsView = histories.Count() > 0,
+                               LastJoin = (histories.SortByDescending(h => h.Time).FirstOrDefault() ?? new LearningHistoryEntity()).Time
+
                            })).ToList()
             };
 
@@ -549,51 +511,5 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Class = currentClass;
             return View();
         }
-
-
-        //TEMPORARY CLONE
-        private void CloneLessonPart(CloneLessonPartEntity item)
-        {
-            _cloneLessonPartService.Collection.InsertOne(item);
-            var list = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
-            if (list != null)
-            {
-                foreach (var question in list)
-                {
-                    var cloneQuestion = _lessonPartQuestionMapping.AutoOrtherType(question, new CloneLessonPartQuestionEntity());
-                    cloneQuestion.OriginID = question.ID;
-                    cloneQuestion.ParentID = item.ID;
-                    cloneQuestion.ID = null;
-                    cloneQuestion.ClassID = item.ClassID;
-                    CloneLessonQuestion(cloneQuestion);
-                }
-            }
-        }
-
-        private void CloneLessonQuestion(CloneLessonPartQuestionEntity item)
-        {
-            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
-            _cloneLessonPartQuestionService.Collection.InsertOne(item);
-            var list = _lessonPartAnswerService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
-            if (list != null)
-            {
-                foreach (var answer in list)
-                {
-                    var cloneAnswer = _lessonPartAnswerMapping.AutoOrtherType(answer, new CloneLessonPartAnswerEntity());
-                    cloneAnswer.OriginID = answer.ID;
-                    cloneAnswer.ParentID = item.ID;
-                    cloneAnswer.ID = null;
-                    cloneAnswer.ClassID = item.ClassID;
-                    CloneLessonAnswer(cloneAnswer);
-                }
-            }
-        }
-
-        private void CloneLessonAnswer(CloneLessonPartAnswerEntity item)
-        {
-            _cloneLessonPartAnswerService.Collection.InsertOne(item);
-        }
-
-
     }
 }

@@ -33,6 +33,7 @@ namespace BaseCustomerMVC.Models
         {
             return new CloneLessonPartEntity
             {
+                ClassID = this.ClassID,
                 OriginID = this.OriginID,
                 Created = this.Created,
                 Description = this.Description,
@@ -47,6 +48,7 @@ namespace BaseCustomerMVC.Models
                 Updated = this.Updated,
                 Media = this.Media,
                 TeacherID = this.TeacherID
+                
             };
         }
     }
@@ -91,7 +93,8 @@ namespace BaseCustomerMVC.Models
                 Point = this.Point,
                 Media = this.Media,
                 OriginID = this.OriginID,
-                TeacherID = this.TeacherID
+                TeacherID = this.TeacherID,
+                ClassID = this.ClassID,
             };
         }
     }

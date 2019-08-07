@@ -19,6 +19,8 @@ namespace Admin_Customer
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+            //.UseHttpSys(options => { options.MaxRequestBodySize = 100_000_000; })
+            //.UseKestrel(options => { options.Limits.MaxRequestBodySize = null; })
+            .UseStartup<Startup>();
     }
 }

@@ -666,11 +666,11 @@ var render = {
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itembox.append(itemBody);
                 render.mediaContent(data, itemBody, "");
-                totalQuiz = data.Questions.length;
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    render.questions(item, data.Type);
-                }
+                //totalQuiz = data.Questions.length;
+                //for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                //    var item = data.Questions[i];
+                //    render.questions(item, data.Type);
+                //}
                 break;
         }
 
@@ -1164,7 +1164,7 @@ var template = {
         var answer_template_holder = $('.answer_template');
         answer_template_holder.empty();
 
-        contentholder.append($("<label>", { "class": "title", "text": "Tiêu đề:" }));
+        contentholder.append($("<label>", { "class": "title pt-2", "text": "Tiêu đề:" }));
         contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Nhập tiêu đề" }));
         if (data != null && data.Title != null)
             contentholder.find("[name=Title]").val(data.Title);
@@ -1210,12 +1210,12 @@ var template = {
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 break;
             case "QUIZ1"://Trắc nghiệm chuẩn
-                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
+                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion position-relative mt-3", "Order": 0 });
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "onclick": "questionService.remove(this)", "tabindex": -1 }));
-                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Nội dung câu hỏi" }));
+                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control mt-3", "placeholder": "Nội dung câu hỏi" }));
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(questionTemplate.find(".media_holder"), "Questions.");
                 questionTemplate.append($("<div>", { "class": "media_preview" }));
@@ -1356,9 +1356,14 @@ var template = {
             case "ESSAY"://Tự luận
                 contentholder.append($("<label>", { "class": "title", "text": "Nhập nội dung văn bản" }));
                 contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung văn bản" }));
-                if (data != null && data.description != null)
-                    contentholder.find("[name=Description]").val(data.description);
-
+                contentholder.append($("<label>", { "class": "title pt-2", "text": "Điểm:" }));
+                contentholder.append($("<input>", { "type": "number", "name": "Point", "class": "input-text form-control col-md-2", "placeholder": "Nhập điểm" }));
+                if (data != null) {
+                    if (data.Description != null)
+                        contentholder.find("[name=Description]").val(data.Description);
+                    if (data.Point != null)
+                        contentholder.find("[name=Point]").val(data.Point);
+                }
                 ClassicEditor
                     .create(document.querySelector('#editor'))
                     .then(newEditor => {
@@ -1367,36 +1372,6 @@ var template = {
                     .catch(error => {
                         console.error(error);
                     });
-
-                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
-                questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
-                questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
-                questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
-
-                var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Nội dung câu hỏi", "tabindex": 0 }));
-                quizWrapper.append($("<div>", { "class": "media_holder" }));
-                render.mediaAdd(quizWrapper.find(".media_holder"), "Questions.");
-                quizWrapper.append($("<div>", { "class": "media_preview" }));
-                quizWrapper.append($("<label>", { "class": "input_label", "text": "Điểm" }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Điểm", "value": "1", "tabindex": 0 }));
-                questionTemplate.append(quizWrapper);
-
-                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media", "tabindex": -1 }));
-                contentholder.append($("<div>", { "class": "media_holder" }));
-                render.mediaAdd(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
-                contentholder.append($("<div>", { "class": "media_preview" }));
-                contentholder.append($("<div>", { "class": "part_content " + type }));
-
-                if (data != null && data.Questions != null) {
-                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                        var quiz = data.Questions[i];
-                        addNewQuestion(quiz);
-                    }
-                }
-                else
-                    addNewQuestion();
-
                 break;
             default:
                 alert("Not implement");
@@ -1490,7 +1465,6 @@ var addNewQuestion = function (data = null) {
         $(this).attr("name", $(this).attr("name").replace("Questions.", "Questions[" + (currentpos) + "]."));
     });
     $(container).append(clone);
-    console.log(data);
     if (data != null && data.Answers != null) {
         for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
             var answer = data.Answers[i];
@@ -1513,7 +1487,6 @@ var addNewAnswer = function (obj, wrapper = null, data = null) {
     var clone = template.clone();
     var currentpos = $(container).find(".answer-box").length;
 
-    console.log(data);
     if (data != null) {
         if (data.ID != null)
             $(clone).find("[name='Questions.Answers.ID']").val(data.ID);

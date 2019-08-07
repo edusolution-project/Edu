@@ -32,10 +32,15 @@ namespace BaseCustomerEntity.Database
         public DateTime CurrentDoTime { get; set; }
         [JsonProperty("Point")]
         public double Point { get; set; }
+        [JsonProperty("MaxPoint")]
+        public double MaxPoint { get; set; }
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
         [JsonProperty("Updated")]
         public DateTime Updated { get; set; }
+        [JsonProperty("Marked")]
+        public bool Marked { get; set; }
+
 
     }
     public class ExamService : ServiceBase<ExamEntity>
@@ -67,6 +72,6 @@ namespace BaseCustomerEntity.Database
             CreateOrUpdate(exam);
             return Task.CompletedTask;
         }
-        
+
     }
 }

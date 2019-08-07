@@ -75,9 +75,9 @@
     position: relative;
 }
 
-#icon-submenu .fas:hover {
-    color: #1865f2;
-}
+    #icon-submenu .fas:hover {
+        color: #1865f2;
+    }
 
 #list-detail .sub-menu,
 #list-detail .sidebar,
@@ -235,9 +235,9 @@ video, audio {
     border-left: 1px solid #ddd;
 }
 
-.bg-news-right .media .img-fluid {
-    max-width: 50px;
-}
+    .bg-news-right .media .img-fluid {
+        max-width: 50px;
+    }
 /* css btn toggle*/
 .btn-toggle.btn-lg.active {
     transition: background-color 0.5s;
@@ -302,10 +302,10 @@ video, audio {
     padding: 2px 0 !important;
 }
 
-.rounded-quiz.completed {
-    background-color: #666;
-    color: #36b9cc;
-}
+    .rounded-quiz.completed {
+        background-color: #666;
+        color: #36b9cc;
+    }
 
 .number {
     color: #999;
@@ -327,13 +327,13 @@ video, audio {
     cursor: pointer;
 }
 
-.number .completed {
-    color: #ff0000;
-}
+    .number .completed {
+        color: #ff0000;
+    }
 
-.number .finish {
-    color: #36b9cc;
-}
+    .number .finish {
+        color: #36b9cc;
+    }
 
 .overlay {
     display: none;
@@ -346,9 +346,9 @@ video, audio {
     background-color: rgba(0,0,0, 0.9);
 }
 
-.overlay .btn-outline-secondary {
-    margin: 0 0px 10px 8px;
-}
+    .overlay .btn-outline-secondary {
+        margin: 0 0px 10px 8px;
+    }
 
 .overlay-content {
     position: relative;
@@ -365,10 +365,10 @@ video, audio {
     transition: 0.3s;
 }
 
-.overlay a:hover,
-.overlay a:focus {
-    color: #f1f1f1;
-}
+    .overlay a:hover,
+    .overlay a:focus {
+        color: #f1f1f1;
+    }
 
 .overlay .closebtn {
     position: absolute;
@@ -440,9 +440,9 @@ video, audio {
     text-align: center;
 }
 
-.QUIZ3 .answer-pane .pane-item {
-    border: 1px dashed #4e73df;
-}
+    .QUIZ3 .answer-pane .pane-item {
+        border: 1px dashed #4e73df;
+    }
 
 .QUIZ3 .ui-draggable-handle {
     margin: 5px auto;
@@ -453,9 +453,9 @@ video, audio {
     border-color: #4e73df;
 }
 
-.QUIZ3 .ui-draggable-handle .img-fluid {
-    width: 75%;
-}
+    .QUIZ3 .ui-draggable-handle .img-fluid {
+        width: 75%;
+    }
 
 .QUIZ3 .no-child .ui-draggable-handle {
     color: #333;
@@ -486,7 +486,7 @@ video, audio {
 /* custom sesson */
 .lesson-modal .lesson_parts .part_content .fieldQuestion .quiz-remove {
     right: 10px;
-    padding: 3px 7px 1px 8px;
+    padding: 3px 7px 1px 7px;
     border-radius: 40px;
     line-height: 20px;
 }
@@ -496,16 +496,6 @@ video, audio {
     border: solid 1px #ccc;
     cursor: pointer;
     color: #ccc;
-}
-
-.lesson-modal .lesson_parts .part_content .fieldQuestion .fieldset_title,
-.lesson-modal .lesson_parts .part_content .fieldQuestion .quiz-remove,
-.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-remove {
-    font-weight: bold;
-    position: absolute;
-    top: -15px;
-    background: #fff;
-    padding: 5px;
 }
 
 .lesson-modal .lesson_parts .part_content .fieldQuestion .answer-wrapper .answer-box .answer-text,
@@ -530,13 +520,6 @@ video, audio {
     border: solid 1px #333;
 }
 
-.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-remove {
-    right: -10px;
-    line-height: 11px;
-    top: -8px;
-    border-radius: 10px;
-    padding: 4px 4px 1px 4px;
-}
 
 .lesson-modal .lesson_parts .part_content .fieldQuestion .fieldset_title,
 .lesson-modal .lesson_parts .part_content .fieldQuestion .quiz-remove,
@@ -545,8 +528,16 @@ video, audio {
     position: absolute;
     top: -15px;
     background: #fff;
-    padding: 5px;
 }
+
+.lesson-modal .lesson_parts .part_content .fieldQuestion .answer-remove {
+    right: -10px;
+    line-height: 11px;
+    top: -8px;
+    border-radius: 10px;
+    padding: 3px 3px 1px 3px;
+}
+
 
 .lesson-modal .lesson_parts .part_content .fieldQuestion .answer-wrapper .btnAddAnswer {
     vertical-align: top;
@@ -623,27 +614,28 @@ video, audio {
     white-space: nowrap;
 }
 
-.notification.error {
-    background: #f78a88;
-    color: #000;
-    text-shadow: 2px 2px 2px rgb(206, 65, 55);
-}
+    .notification.error {
+        background: #f78a88;
+        color: #000;
+        text-shadow: 2px 2px 2px rgb(206, 65, 55);
+    }
 
-.notification.success {
-    background: #59ce74;
-    color: #000;
-    text-shadow: 2px 2px 2px rgb(55, 206, 55);
-}
+    .notification.success {
+        background: #59ce74;
+        color: #000;
+        text-shadow: 2px 2px 2px rgb(55, 206, 55);
+    }
 
-.notification .icon {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-}
+    .notification .icon {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+    }
 
 #btn-completed {
     width: 100%;
 }
+
 #body-exam .justify-content-center {
     margin: auto;
 }
