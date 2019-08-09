@@ -273,6 +273,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         quiz.Order = maxItem != null ? maxItem.Order + 1 : 0;
                         quiz.Created = DateTime.Now;
                         quiz.Updated = DateTime.Now;
+                        quiz.ClassID = item.ClassID;
+                        quiz.LessonID = item.ParentID;
 
                         if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || !files.Any(f => f.Name == quiz.Media.Name))
                             quiz.Media = null;
@@ -301,7 +303,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 quiz.Media = null;
                             else
                             {
-
                                 var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();//update media
                                 quiz.Media.Created = DateTime.Now;
                                 quiz.Media.Size = file.Length;
@@ -312,6 +313,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         quiz.Order = oldquiz.Order;
                         quiz.Created = oldquiz.Created;
                         quiz.Updated = DateTime.Now;
+                        quiz.ClassID = item.ClassID;
+                        quiz.LessonID = item.ParentID;
                     }
 
                     _cloneQuestionService.CreateOrUpdate(quiz);
@@ -372,6 +375,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 answer.Order = oldanswer.Order;
                                 answer.Created = oldanswer.Created;
                                 answer.Updated = DateTime.Now;
+                                answer.ClassID = item.ClassID;
                             }
                             _cloneAnswerService.CreateOrUpdate(answer);
                         }
@@ -502,6 +506,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     cloneQuestion.OriginID = question.ID;
                     cloneQuestion.ParentID = item.ID;
                     cloneQuestion.ID = null;
+                    cloneQuestion.ClassID = item.ClassID;
+                    cloneQuestion.LessonID = item.ParentID;
                     CloneLessonQuestion(cloneQuestion);
                 }
             }

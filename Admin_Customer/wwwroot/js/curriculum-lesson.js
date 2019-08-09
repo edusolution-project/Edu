@@ -1569,6 +1569,13 @@ var addNewAnswer = function (obj, wrapper = null, data = null) {
         $(wrapper).find(".btnAddAnswer").before(clone);
 }
 
+function toggleCorrectAnswer(obj) {
+
+    var isChecked = $(obj).prop('checked');
+    $(obj).prev().val(isChecked);
+    if ($(obj).parent().hasClass("selected") != isChecked)
+        $(obj).parent().toggleClass("selected");
+}
 
 var showModal = function () {
     modal.modal('show');

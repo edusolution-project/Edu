@@ -6,8 +6,6 @@ namespace BaseCustomerMVC.Models
 {
     public class TeacherExamDetailViewModel:ExamDetailEntity
     {
-        [JsonProperty("LessonScheduleName")]
-        public string LessonScheduleName { get; set; }
         [JsonProperty("Question")]
         public string Question { get; set; }
         //[JsonProperty("AnswerID")]

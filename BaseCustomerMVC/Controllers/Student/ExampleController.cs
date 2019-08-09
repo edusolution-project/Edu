@@ -315,7 +315,14 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 var _realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
 
-                CloneLessonPartAnswerEntity _realanswer = null;
+                CloneLessonPartAnswerEntity _correctanswer = null;
+
+                var realanswer = _realAnswers.FirstOrDefault();
+                if (realanswer != null)
+                {
+                    examDetail.RealAnswerID = realanswer.ID;
+                    examDetail.RealAnswerValue = realanswer.Content;
+                }
 
                 //bài chọn hoặc nối đáp án
                 if (!string.IsNullOrEmpty(examDetail.AnswerID))
@@ -323,27 +330,28 @@ namespace BaseCustomerMVC.Controllers.Student
                     var answer = _cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID);
                     if (answer == null) continue;//Lưu lỗi => bỏ qua ko tính điểm
 
+
                     switch (part.Type)
                     {
                         case "QUIZ1": //chọn đáp án
-                            _realanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID);//chọn đúng đáp án
+                            _correctanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID);//chọn đúng đáp án
                             break;
                         case "QUIZ3": //nối đáp án
-                            _realanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID || (!string.IsNullOrEmpty(t.Content) && t.Content == answer.Content)); //chọn đúng đáp án (check trường hợp sai ID nhưng cùng content (2 đáp án có hình ảnh, ID khác nhau nhưng cùng content (nội dung như nhau)))
+                            _correctanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID || (!string.IsNullOrEmpty(t.Content) && t.Content == answer.Content)); //chọn đúng đáp án (check trường hợp sai ID nhưng cùng content (2 đáp án có hình ảnh, ID khác nhau nhưng cùng content (nội dung như nhau)))
                             break;
                     }
                 }
                 else //bài điền từ
                 {
-                    _realanswer = _realAnswers.FirstOrDefault(t => t.Content.ToLower() == examDetail.AnswerValue.ToLower()); //điền từ đúng, chấp nhận viết hoa viết thường
+                    _correctanswer = _realAnswers.FirstOrDefault(t => t.Content.ToLower() == examDetail.AnswerValue.ToLower()); //điền từ đúng, chấp nhận viết hoa viết thường
                 }
 
-                if (_realanswer != null)
+                if (_correctanswer != null)
                 {
                     point += question.Point;
                     examDetail.Point = question.Point;
-                    examDetail.RealAnswerID = _realanswer.ID;
-                    examDetail.RealAnswerValue = _realanswer.Content;
+                    examDetail.RealAnswerID = _correctanswer.ID;
+                    examDetail.RealAnswerValue = _correctanswer.Content;
                 }
 
                 examDetail.Updated = DateTime.Now;
@@ -352,11 +360,15 @@ namespace BaseCustomerMVC.Controllers.Student
             exam.Point = point;
             exam.Updated = DateTime.Now;
             exam.MaxPoint = lesson.Point;
+            exam.QuestionsDone = listDetails.Count();
+            //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
+            exam.QuestionsTotal =
+                _cloneLessonPartQuestionService.Collection.Count(t => t.LessonID == lesson.ID) +
+                _cloneLessonPartService.Collection.Count(t => t.ParentID == lesson.ID && t.Type == "essay");
 
             _service.CreateOrUpdate(exam);
             return new JsonResult(new { Point = point, MaxPoint = lesson.Point });
         }
-
 
         public IActionResult Index(DefaultModel model)
         {

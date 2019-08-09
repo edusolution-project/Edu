@@ -549,10 +549,6 @@ video, audio {
     color: #fff !important;
 }
 
-.lesson-modal .btn-primary.btnAddFile {
-    margin: 10px 0;
-}
-
 .lesson-modal .btn-danger {
     position: relative;
     left: 10px;
@@ -638,6 +634,11 @@ video, audio {
 
 #body-exam .justify-content-center {
     margin: auto;
+}
+
+.doc-content img {
+    width: auto;
+    max-width: 100%;
 }
 
 /* css input dropdown */

@@ -449,6 +449,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     cloneQuestion.ParentID = item.ID;
                     cloneQuestion.ID = null;
                     cloneQuestion.ClassID = item.ClassID;
+                    cloneQuestion.LessonID = item.ParentID;
                     CloneLessonQuestion(cloneQuestion);
                 }
             }

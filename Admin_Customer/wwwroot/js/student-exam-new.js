@@ -289,7 +289,7 @@ var ExamStudent = (function () {
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
             html += '<div class="quiz-item" id="' + item.ID + '">';
-            html += '<div class="quiz-box-header"><h5 class="title"> - ' + item.Content + ' (' + item.Point + 'đ)</h5>' + renderMedia(item.Media) + '</div>';
+            html += '<div class="quiz-box-header"><h5 class="title">(' + item.Point + 'đ) ' + item.Content + '</h5>' + renderMedia(item.Media) + '</div>';
             html += '<div class="answer-wrapper">';
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
@@ -314,7 +314,7 @@ var ExamStudent = (function () {
             var item = data.Questions[i];
             var itemContent = item.Content == null ? "Câu hỏi số " + (i + 1) + " : " : item.Content;
             html += '<div class="quiz-item" id="' + item.ID + '">';
-            html += '<div class="quiz-box-header"><h5 class="title"> - ' + itemContent + ' (' + item.Point + 'đ)</h5>' + renderMedia(item.Media) + '</div>';
+            html += '<div class="quiz-box-header"><h5 class="title">(' + item.Point + 'đ) ' + itemContent + '</h5>' + renderMedia(item.Media) + '</div>';
             html += '<div class="answer-wrapper">';
             html += '<fieldset class="answer-item" id="quiz2-' + item.ID + '">';
             var content = "";

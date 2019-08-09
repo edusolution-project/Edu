@@ -27,7 +27,7 @@
                     <a class="nav-link" id="exam-tab" data-toggle="tab" href="#examlist" role="tab" aria-controls="exam" aria-selected="false" onclick="LoadExam()">Thi / Kiểm tra</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="score-tab" data-toggle="tab" href="#scorelist" role="tab" aria-controls="scores" aria-selected="false">Bảng điểm</a>
+                    <a class="nav-link" id="score-tab" data-toggle="tab" href="#scorelist" role="tab" aria-controls="scores" aria-selected="false" onclick="LoadScoreBoard()">Bảng điểm</a>
                 </li>
             </ul>
 
@@ -159,24 +159,17 @@
                         <table class="table table-bordered" id="scoreTable" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
-                                    <th class="text-center">STT</th>
-                                    <th class="text-center">Họ và tên</th>
-                                    <th class="text-center">Lớp</th>
-                                    <th class="text-center">Điểm thành phần</th>
-                                    <th class="text-center">Điểm cuối khóa</th>
-                                    <th class="text-center">Hệ số</th>
+                                    <th class="text-center align-middle" rowspan="2">STT</th>
+                                    <th class="text-center align-middle" rowspan="2">Họ và tên</th>
+                                    <th class="text-center" colspan="3">Điểm</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-center">Thành  phần</th>
+                                    <th class="text-center">Cuối kì</th>
+                                    <th class="text-center">TB</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td><a href="#" data-toggle="modal" data-target="#">Phạm Anh Tuấn</a></td>
-                                    <td>HV001</td>
-                                    <td>23.5</td>
-                                    <td>0</td>
-                                    <td>1.0</td>
-                                </tr>
-                            </tbody>
+                            <tbody></tbody>
                         </table>
                     </div>
                 </div>
@@ -188,29 +181,29 @@
                 <div class="modal-content">
                     @using (Html.BeginForm("ImportStudent", "Class", FormMethod.Post, new { enctype = "multipart/form-data", name = "ImportForm" }))
                     {
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <div class="row">
-                                <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
-                                <div class="chose-file col-sm-9">
-                                    <input type="file" name="file" class="form-control-file" id="FormControlFile">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
+                                    <div class="chose-file col-sm-9">
+                                        <input type="file" name="file" class="form-control-file" id="FormControlFile">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="button-left">
-                            <button type="button" class="btn btn-secondary">Tải file mẫu</button>
+                        <div class="modal-footer">
+                            <div class="button-left">
+                                <button type="button" class="btn btn-secondary">Tải file mẫu</button>
+                            </div>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                            <button type="button" class="btn btn-primary btn-submit" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadMembers)">Lưu lại</button>
                         </div>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                        <button type="button" class="btn btn-primary btn-submit" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadMembers)">Lưu lại</button>
-                    </div>
                     }
                 </div>
             </div>
@@ -236,6 +229,7 @@
                                                 <th class="text-center">Họ tên</th>
                                                 <th class="text-center">Thời gian làm bài</th>
                                                 <th class="text-center">Trạng thái</th>
+                                                <th class="text-center">Điểm</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -267,11 +261,11 @@
                                     <table id="scoreDetailTable" class="table table-bordered" width="100%" cellspacing="0">
                                         <thead>
                                             <tr>
-                                                <th class="text-center">STT</th>
-                                                <th class="text-center">Tên bài thi</th>
-                                                <th class="text-center">Thời gian làm bài</th>
+                                                <th class="text-center align-middle" rowspan="2">STT</th>
+                                                <th class="text-center align-middle" rowspan="2">Tên bài thi</th>
+                                                <th class="text-center align-middle" rowspan="2">Ngày làm bài</th>
                                                 <th class="text-center" colspan="2">Điểm</th>
-                                                <th class="text-center">Hệ số</th>
+                                                <th class="text-center align-middle" rowspan="2">Hệ số</th>
                                             </tr>
                                             <tr>
                                                 <th class="text-center">Thành phần</th>
@@ -610,7 +604,8 @@
                         "<td class='text-center'>" + (j + 1) + "</td>" +
                         "<td class='text-center'><a href=\"@Url.Action("Detail", "Exam")/" + item.ID + "\" target=\"_blank\">" + item.StudentName + "</a></td>" +
                         "<td class='text-center'><span>" + date + "</span></td>" +
-                        "<td class='text-center'>" + (item.Status ? "Hoàn thành":"Chưa hoàn thành")  +  "</td > " +
+                        "<td class='text-center'>" + (item.Marked ? "Đã chấm điểm" : (item.Status ? "Chờ chấm điểm":"Đang làm bài"))  +  "</td > " +
+                        "<td class='text-center'>" + ((item.Marked || item.Status) ? (item.Point + "/" + item.MaxPoint) : "---")  +  "</td > " +
                         "</tr>"
                         );
                     }
@@ -622,32 +617,28 @@
         });
     }
 
-    function LoadScoreBoard()    {
+    function LoadScoreBoard(){
         $.ajax({
             type: "POST",
-            url: '@Url.Action("GetList", "Score")',
+            url: '@Url.Action("GetClassScores", "Score")',
             data: {ClassID: "@currentClass.ID"},
             dataType:"json",
             success: function (data) {
                 scoreBody.html("");
 
-                items = data.Data.Score;
-                //renderChapter("0");
+                items = data.Data;
 
-                if (lessons.length > 0) {
-                    for (j = 0; j < lessons.length; j++) {
-                        var item = lessons[j];
+                if (items.length > 0) {
+                    for (j = 0; j < items.length; j++) {
+                        var item = items[j];
 
-                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
-                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
-
-                        examBody.append("<tr lid=\"" + item.ID + "\">" +
-                        "<td><a class='links' data-toggle=\"modal\" data-target=\"#scoreModal\" onclick=\"LoadBoardDetail('" + item.StudentID + "')\" href=\"javascript:void(0)\">" + item.Title + "</td>" +
-                        "<td>" + (item.Description==null?"":item.Description) + "</td>" +
-                        "<td dvalue=\"" + item.StartDate + "\" class='startdate text-center'><span>" + startdate + "</span></td>" +
-                        "<td dvalue=\"" + item.EndDate + "\" class='enddate text-center'><span>" + enddate + "</span></td>" +
-                        "<td class='text-center'>" + item.StudentJoins +  "</td > " +
-                        "</tr>"
+                        scoreBody.append("<tr>" +
+                                    "<td class='text-center'>" + (j + 1) + "</td>" +
+                                    "<td class='text-center'><a class='links' data-toggle=\"modal\" data-target=\"#scoreModal\" onclick='LoadBoardDetail(\"" + item.StudentID + "\",\"@currentClass.ID\")'  href=\"javascript:void(0)\">" + item.StudentName + "</a></td>" +
+                                    "<td class='text-center'>" + item.AvgPartial + "</td>" +
+                                    "<td class='text-center'>" + item.AvgEnd + "</td>" +
+                                    "<td class='text-center'>" + item.AvgScore + "</td>" +
+                                "</tr>"
                         );
                     }
                 }
@@ -658,8 +649,51 @@
         });
     }
 
-    function LoadBoardDetail()
+    function LoadBoardDetail(StudentID, ClassID)
     {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetStudentScores", "Score")',
+            data: {ClassID: ClassID, StudentID: StudentID},
+            dataType:"json",
+            success: function (data) {
+                scoreDetailBody.html("");
+
+                items = data.Data;
+
+                var sum = 0;
+                var count = 0;
+                var studentname = "";
+                if (items.length > 0) {
+                    for (j = 0; j < items.length; j++) {
+                        var item = items[j];
+                        sum += item.Point * item.Multiple;
+                        count += item.Multiple;
+                        var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.Updated));
+                        scoreDetailBody.append("<tr>" +
+                                    "<td class='text-center'>" + (j + 1) + "</td>" +
+                                    "<td class='text-center'><a href=\"@Url.Action("Detail", "Exam")/" + item.ExamID + "\" target=\"_blank\">" + item.LessonName + "</a></td>" +
+                                    "<td class='text-center'>" + date + "</td>" +
+                                    "<td class='text-center'>" + (item.ScoreType == "@BaseCustomerEntity.Database.LESSON_ETYPE.PARTIAL" ? item.Point : "") + "</td>" +
+                                    "<td class='text-center'>" + (item.ScoreType == "@BaseCustomerEntity.Database.LESSON_ETYPE.END" ?item.Point : "") + "</td>" +
+                                    "<td class='text-center'>" + item.Multiple + "</td>" +
+                                "</tr>"
+                        );
+                        studentname = item.StudentName;
+                    }
+
+                    scoreDetailBody.append("<tr>" +
+                                                "<td class='text-right pr-2' colspan='3'>Điểm TB</td>" +
+                                                "<td class='text-center' id='avgScore' colspan='2'>" + (count > 0 ? sum / count : "0") +"</td>" +
+                                                "<td class='text-center'>---</td>" +
+                                            "</tr>");
+                    $("#scoreModal span[name=student]").text(studentname);
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
     }
 
 </script>

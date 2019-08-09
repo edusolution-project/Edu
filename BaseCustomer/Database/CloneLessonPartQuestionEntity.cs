@@ -12,6 +12,8 @@ namespace BaseCustomerEntity.Database
         public string TeacherID { get; set; }
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
+        [JsonProperty("LessonID")]
+        public string LessonID { get; set; }
     }
     public class CloneLessonPartQuestionService : ServiceBase<CloneLessonPartQuestionEntity>
     {

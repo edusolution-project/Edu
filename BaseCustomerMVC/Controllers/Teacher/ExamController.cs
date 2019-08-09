@@ -24,12 +24,9 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonPartQuestionService _lessonPartQuestionService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
 
-
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
-
-
 
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
@@ -91,7 +88,10 @@ namespace BaseCustomerMVC.Controllers.Student
                                   StudentID = student.ID,
                                   StudentName = student.FullName,
                                   Created = exam.Created,
-                                  Status = exam.Status
+                                  Status = exam.Status,
+                                  Marked = exam.Marked,
+                                  Point = exam.Point,
+                                  MaxPoint = exam.MaxPoint
                               }).ToList();
 
 
@@ -142,9 +142,9 @@ namespace BaseCustomerMVC.Controllers.Student
 
 
                 var filter = Builders<ExamDetailEntity>.Filter.Where(o => o.ExamID == ID);
-                var data = _examDetailService.Collection.Find(filter);
+                var examdetails = _examDetailService.Collection.Find(filter);
 
-                if (data.Count() == 0)
+                if (examdetails.Count() == 0)
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
@@ -154,18 +154,26 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
                 }
 
-                var DataResponse = data.ToList();
+                var _examdetails = examdetails.ToList();
 
                 var mapping = new MappingEntity<ExamDetailEntity, TeacherExamDetailViewModel>();
                 var partmapping = new MappingEntity<CloneLessonPartEntity, ExamPartViewModel>();
 
 
-                var result = new MappingEntity<LessonEntity, TeacherExamViewModel>().AutoOrtherType(lesson, new TeacherExamViewModel());
+                var result = new MappingEntity<ExamEntity, TeacherExamViewModel>().AutoOrtherType(exam, new TeacherExamViewModel()
+                {
+                    StudentName = student.FullName,
+                    ClassName = currentClass.Name,
+                    LessonName = lesson.Title,
+                    Multiple = lesson.Multiple,
+                    TeacherName = _teacherService.GetItemByID(exam.TeacherID).FullName,
+                    MarkDate = exam.Marked ? exam.Updated : DateTime.MinValue
+                });
 
                 result.Parts = (from p in parts
                                 select partmapping.AutoOrtherType(p, new ExamPartViewModel()
                                 {
-                                    ExamDetails = (from r in DataResponse
+                                    ExamDetails = (from r in _examdetails
                                                    where r.LessonPartID == p.ID
                                                    let answer = r.AnswerID != null ? _cloneLessonPartAnswerService.GetItemByID(r.AnswerID)
                                                        ?? _lessonPartAnswerService.GetItemByID(r.AnswerID) //TEMP
@@ -173,23 +181,18 @@ namespace BaseCustomerMVC.Controllers.Student
                                                    let question = _cloneLessonPartQuestionService.GetItemByID(r.QuestionID)
                                                    ?? _lessonPartQuestionService.GetItemByID(r.QuestionID) //TEMP
                                                    where question != null
-                                                   //let correctAnswer = _cloneLessonPartAnswerService.CreateQuery().Find(t => t.ParentID == question.ID && t.IsCorrect).ToList()
-                                                   //let correctAnswerOrg = _lessonPartAnswerService.CreateQuery().Find(t => t.ParentID == question.ID && t.IsCorrect).ToList() // TEMP
-                                                   //let realanswer = (string.IsNullOrEmpty(r.RealAnswerID) || r.RealAnswerID == "0") ? (correctAnswer.FirstOrDefault() ?? correctAnswerOrg.FirstOrDefault()) : null
-                                                   select //mapping.AutoOrtherType(r,new TeacherExamDetailViewModel(){
+                                                   select
                                                    new TeacherExamDetailViewModel()
                                                    {
+                                                       ID = r.ID,
+                                                       LessonPartID = question.ParentID,
                                                        QuestionID = question.ID,
                                                        AnswerID = answer != null ? answer.ID : null,
                                                        AnswerValue = answer != null ? answer.Content : r.AnswerValue,
-                                                       Question = question != null ? question.Content : "",
-                                                       //RealAnswerID = realanswer != null ? realanswer.ID : realanswer != null ? realanswer.ID : null,
-                                                       //RealAnswerValue = realanswer != null ? realanswer.Content : realanswer != null ? realanswer.Content : r.RealAnswerValue,
+                                                       QuestionValue = question != null ? question.Content : r.QuestionValue,
+                                                       RealAnswerValue = r.RealAnswerValue,
                                                        Point = r.Point,
                                                        MaxPoint = question.Point,
-                                                       //CorrectAnswerOrg = correctAnswerOrg,
-                                                       //CorrectAnswer = correctAnswer,
-                                                       StudentName = student.FullName
                                                    }
                                     ).ToList()
                                 })).ToList();
@@ -197,7 +200,6 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 var response = new Dictionary<string, object>
                 {
-                    { "Lesson", lesson },
                     { "Data", result }
                 };
                 return new JsonResult(response);

@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace BaseCustomerMVC.Models
 {
-    public class ExamViewModel:ExamEntity
+    public class ExamViewModel : ExamEntity
     {
         [JsonProperty("LessonScheduleName")]
         public string LessonScheduleName { get; set; }

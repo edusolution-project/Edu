@@ -19,18 +19,24 @@ namespace BaseCustomerEntity.Database
         public string LessonID { get; set; }
 
         [JsonProperty("TeacherID")]
-        public DateTime TeacherID { get; set; }
-        
+        public string TeacherID { get; set; }
+
         [JsonProperty("ScoreType")]
         public int ScoreType { get; set; }
 
+        [JsonProperty("Point")]
+        public double Point { get; set; }
+        
+        [JsonProperty("MaxPoint")]
+        public double MaxPoint { get; set; }
+
         [JsonProperty("Multiple")]
-        public int Multiple { get; set; }
+        public double Multiple { get; set; }
 
         [JsonProperty("Updated")]
         public DateTime Updated { get; set; }
     }
-    
+
     public class ScoreService : ServiceBase<ScoreEntity>
     {
         public ScoreService(IConfiguration config) : base(config)

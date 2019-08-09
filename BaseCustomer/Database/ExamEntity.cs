@@ -40,7 +40,10 @@ namespace BaseCustomerEntity.Database
         public DateTime Updated { get; set; }
         [JsonProperty("Marked")]
         public bool Marked { get; set; }
-
+        [JsonProperty("QuestionsTotal")]
+        public long QuestionsTotal { get; set; }
+        [JsonProperty("QuestionsDone")]
+        public long QuestionsDone { get; set; }
 
     }
     public class ExamService : ServiceBase<ExamEntity>

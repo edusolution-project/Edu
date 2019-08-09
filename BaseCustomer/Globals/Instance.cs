@@ -13,8 +13,9 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<AccountService>();
             services.AddSingleton<PermissionService>();
             services.AddSingleton<RoleService>();
+            services.AddSingleton<ScoreService>();
             services.AddSingleton<StudentService>();
-            services.AddSingleton<TeacherService>();            
+            services.AddSingleton<TeacherService>();
             services.AddSingleton<AccountLogService>();
             services.AddSingleton<ModProgramService>();
             services.AddSingleton<ModCourseService>();

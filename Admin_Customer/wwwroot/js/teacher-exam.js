@@ -16,6 +16,7 @@ var urlLesson = {
 
 var urlExam = {
     "Detail": "GetDetail",
+    "SaveScore": "Score/Save"
 };
 
 
@@ -64,59 +65,49 @@ var lessonService = {
         //var lessonBox = $("<div>", { "class": "lesson lesson-box p-fixed" });
         var lessonBox = $("<div>", { "class": "lesson lesson-box" });
         var lessonContainer = $("<div>", { "class": "lesson-container" });
+        var lessonForm = $("<form>", { "id": data.ID });
+
+        lessonForm.append($("<input>", { "type": "hidden", "name": "ExamID", "value": data.ID }));
+
         lessonBox.append(lessonContainer);
         var lessonContent = $("<div>", { "class": "card shadow mb-4" });
+
         lessonContainer.append(lessonContent);
+
 
         var lessonHeader = $("<div>", { "class": "card-header" });
         lessonContent.append(lessonHeader);
-
+        lessonContent.append(lessonForm);
         //row
         var row = $("<div>", { "class": "row" });
         lessonHeader.append(row);
 
         //header
-
         var cardBody = $("<div>", { "id": "check-student", "class": "card-body" });
-        lessonContent.append(cardBody);
+        lessonForm.append(cardBody);
+
         //row
         var lessonRow = $("<div>", { "class": "row" });
         cardBody.append(lessonRow);
 
 
-        var tabsleft = $("<div>", { "id": "menu-left", "class": "col-md-2" });
         var lessontabs = $("<div>", { "class": "lesson-tabs" });
         var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
 
 
-        var title = $("<div>", { "class": "lesson-header-title col-lg-4", "text": data.Title });
-        row.append(title);
+        var titleRow = $("<div>", { "class": "lesson-header-title" })
+        var title = $("<div>");
+        var examInfo = $("<div>")
+        titleRow.append(title);
+        titleRow.append(examInfo);
+        row.append(titleRow);
 
-        if (data.TemplateType == 2) {
-            if (data.Timer > 0) {
-                title.text(title.text() + " - thời gian: " + data.Timer + "p");
+        title.text(data.ClassName + " / " + data.LessonName + " - Điểm chuẩn: " + data.MaxPoint + "đ - Hệ số: " + data.Multiple);
 
-                var counter = $("<div>", { "class": "text-center col-lg-4", "text": "Thời gian làm bài " });
-                var counterdate = $("<span>", { "id": "counter", "class": "time-counter", "text": (data.Timer < 10 ? ("0" + data.Timer) : data.Timer) + ":00" });
-                counter.append(counterdate);
-                row.append(counter);
-            }
-            if (data.Point > 0) {
-                title.text(title.text() + " (" + data.Point + "đ)");
-            }
-        }
-        var sort = $("<a>", { "class": "btn btn-sm btn-sort", "text": "Sắp xếp", "onclick": "lessonService.renderSort()" });
-        var edit = $("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "lessonService.renderEdit('" + data.ID + "')" });
-        var close = $("<a>", { "class": "btn btn-sm btn-close", "text": "X", "onclick": "render.resetLesson()" });
-        var remove = $("<a>", { "class": "btn btn-sm btn-remove", "text": "Xóa", "onclick": "lessonService.remove('" + data.ID + "')" });
-        //lessonHeader.append(sort);
-        //lessonHeader.append(edit);
-        //lessonHeader.append(close);
-        //lessonHeader.append(remove); //removeLesson
+        var completeTime = $.datepicker.formatDate('dd/mm/yy', new Date(data.Updated));
 
+        examInfo.text("Học viên: " + data.StudentName + " - Ngày nộp bài: " + completeTime)
 
-        //lessonRow.append(tabsleft);
-        tabsleft.append(lessontabs);
         lessontabs.append(tabs);
 
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.ID });
@@ -126,17 +117,30 @@ var lessonService = {
         lessonBody.append(tabscontent);
 
         lessonRow.append(bodyright);
+
+        bodyright.append($("<h4>", { "text": "Nội dung học viên đã làm:" }));
+
         bodyright.append(lessonBody);
-        lessonBox.append(lessonContainer);
+
+        bodyright.append($("<h5>", { "text": "Số lượng câu hoàn thành:" + data.QuestionsDone + " / " + data.QuestionsTotal }));
+
+        //lessonBox.append(lessonContainer);
 
         containerLesson.append(lessonBox);
-        var pointBox = $("<div>", { "class": "point-box", "style": " margin: 10px; padding: 10px; border: dashed 1px #CCC" });
+        var pointBox = $("<div>", { "class": "point-box", "class": "mt-2 mb-2 p-2", "style": "border: dashed 1px #CCC" });
         var totalPoint = $("<div>");
-        totalPoint.html("Tổng điểm: 0");
-        var confirmPoint = $("<button>", { "class": "btn btn-sm btn-edit", "text": "Lưu điểm", "onclick": "", "style": "background: #CCC", "onclick":"alert(\"Đã lưu bảng điểm\")" });
+        totalPoint.html("<h4>Tổng điểm: " + data.Point + "/" + data.MaxPoint + "</h4>");
         pointBox.append(totalPoint);
-        pointBox.append(confirmPoint);
-        lessonBody.append(pointBox);
+
+        if (data.Marked) {
+            var markedBox = $("<div>", { "text": "Bài thi đã được chấm lúc " + new Date(data.MarkDate).toLocaleDateString() + " bởi " + data.TeacherName });
+            pointBox.append(markedBox);
+        }
+        else {
+            var confirmPoint = $("<button>", { "class": "btn btn-sm btn-primary", "text": "Lưu điểm", "onclick": "SaveScore('" + data.ID + "')" });
+            pointBox.append(confirmPoint);
+        }
+        cardBody.append(pointBox);
     },
     renderSort: function () {
         $(".lesson-body").toggleClass("sorting");
@@ -251,7 +255,6 @@ var lessonService = {
         modalTitle.html("Chọn Template");
         modalForm.html(template.Type('lesson'));
     }
-
 }
 
 var render = {
@@ -289,36 +292,50 @@ var render = {
 
     },
     part: function (data) {
-        var time = "", point = "";
-
-        if (data.Timer > 0) {
-            time = " (" + data.Timer + "p)";
-        }
-        if (data.Point > 0) {
-            point = " (" + data.Point + "đ)";
-        }
+        //if (data.Timer > 0) {
+        //    time = " (" + data.Timer + "p)";
+        //}
+        //if (data.Point > 0) {
+        //    point = " (" + data.Point + "đ)";
+        //}
         var container = $(".tab-content");
         var tabsitem = $("<div>", { "id": "pills-part-" + data.QuestionID, "class": "tab-pane fade", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
-        var itembody = $("<div>", { "class": "card-body" });
+        var itembody = $("<div>", { "class": "card-body m-0 p-0 pt-2" });
         tabsitem.append(itembody);
 
-        var itembox = $("<div>", { "class": "part-box", "id": data.ID });
+
+        var partTitle = $("<h6>", { "text": data.Title, "class": "font-weight-bold" });
+        itembody.append(partTitle);
+
+        var itembox = $("<div>", { "class": "question-part-box", "id": data.ID });
         tabsitem.append(itembox);
-
+        var questions = data.ExamDetails;
         var itemBody = $("<div>", { "class": "content-wrapper" });
-        if (data.Question != null) {
-            itemBody.append($("<div>", { "class": "doc-content" }).html(data.Question));
-        }
-        var resultHolder = $("<div>", { "class": "result-Holder" });
-        var chooseAnswer = $("<div>");
-        chooseAnswer.html("Trả lời: " + data.AnswerValue);
-        var correctAnswer = $("<div>");
-        correctAnswer.html("Đáp án: " + data.RealAnswerValue);
-        var point = $("<div>");
-        point.html("Điểm: " + data.Point);
+        if (questions != null && questions.length > 0) {
+            for (var i = 0; i < questions.length; i++) {
+                var question = questions[i];
+                if (question.QuestionValue != null) {
+                    var resultHolder = $("<div>", { "class": "result-Holder" });
 
-        resultHolder.append(chooseAnswer).append(correctAnswer).append(point);
-        itemBody.append(resultHolder);
+                    resultHolder.append($("<input>", { "type": "hidden", "name": "ExamDetails[" + i + "].ID", "value": question.ID }));
+
+                    resultHolder.append($("<div>", { "class": "question-content" }).html("Q: " + question.QuestionValue));
+                    var chooseAnswer = $("<div>");
+                    chooseAnswer.html("A: " + question.AnswerValue);
+                    var correctAnswer = $("<div>");
+                    correctAnswer.html("C: " + question.RealAnswerValue);
+                    var point = $("<div>");
+                    point.append($("<span>", { "text": "Điểm: " }));
+                    point.append($("<input>", { "type": "text", "readonly": "readonly", "name": "ExamDetails[" + i + "].Point", "value": question.Point, "style": "width:50px", "class": "text-right d-inline-block form-control" }));
+                    point.append($("<span>", { "text": " / " + question.MaxPoint }));
+                }
+                resultHolder.append(chooseAnswer).append(correctAnswer).append(point);
+                itemBody.append(resultHolder);
+            }
+        }
+
+
+
         itembox.append(itemBody);
         container.append(tabsitem);
         tabsitem.addClass("show active");
@@ -331,11 +348,12 @@ var render = {
         //render question
         switch (template) {
             case "QUIZ2":
+                point = " (" + data.Point + "đ)";
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
-                boxHeader.append($("<div>", { "class": "quiz-text", "text": data.Content }));
+                boxHeader.append($("<div>", { "class": "quiz-text", "text": data.Content + point }));
                 render.mediaContent(data, boxHeader);
                 quizitem.append(boxHeader);
 
@@ -355,6 +373,7 @@ var render = {
                 }
                 break;
             case "QUIZ3":
+                point = " (" + data.Point + "đ)";
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -366,7 +385,7 @@ var render = {
 
                 var pane_item = $("<div>", { "class": "pane-item" });
                 if (data.Media == null) {
-                    pane_item.append($("<div>", { "class": "quiz-text", "text": data.Content }));
+                    pane_item.append($("<div>", { "class": "quiz-text", "text": data.Content + point }));
                 } else {
                     render.mediaContent(data, pane_item);
                 }
@@ -575,8 +594,8 @@ var load = {
             dataType: "json",
             success: function (data) {
                 if (data.Error == null) {
-                    render.lesson(data.Lesson);
-                    render.lessonPart(data.Data);
+                    render.lesson(data.Data);
+                    render.lessonPart(data.Data.Parts);
                 } else {
                     alert("Có lỗi kết nối, vui lòng thử lại");
                     console.log(data.Error);
@@ -639,6 +658,30 @@ var load = {
         file.click();
     }
 };
+
+function SaveScore(examid) {
+
+    var myform = document.getElementById(examid);
+    var fd = new FormData(myform);
+    $.ajax({
+        url: urlBase + urlExam.SaveScore,
+        data: fd,
+        cache: false,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function (data) {
+            if (data.Err != null) {
+                alert(data.Err);
+            }
+            else {
+                alert("Đã lưu bảng điểm");
+            }
+            // do something with the result
+        }
+    });
+    return false;
+}
 
 function answerQuestion(obj, quizid) {
     $('.quiz-item#' + quizid + " .quiz-extend").show();
