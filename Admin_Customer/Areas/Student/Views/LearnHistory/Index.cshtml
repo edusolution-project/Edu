@@ -5,12 +5,24 @@
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
     ViewData["Title"] = "Lịch sử học tập";
 }
+
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+    </div>
+</div>
+<script>
+    $('.sidebar-item.history').addClass("active");
+</script>
+
 <div class="container">
     <!-- Begin Page Content -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
+    <div class="card mb-4">
+        @*<div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Danh sách khóa học</h6>
-        </div>
+        </div>*@
         <div class="card-body">
             <div class="search-filter">
                 <div class="form-row">

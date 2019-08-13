@@ -2,5 +2,17 @@
   {
     "outputFile": "wwwroot/css/sb-admin-2.css",
     "inputFile": "wwwroot/scss/sb-admin-2.scss"
+  },
+  {
+    "outputFile": "wwwroot/scss/_sidebar.css",
+    "inputFile": "wwwroot/scss/_sidebar.scss"
+  },
+  {
+    "outputFile": "wwwroot/css/layout.css",
+    "inputFile": "wwwroot/css/layout.scss"
+  },
+  {
+    "outputFile": "wwwroot/css/_sidebar.css",
+    "inputFile": "wwwroot/css/_sidebar.scss"
   }
 ]

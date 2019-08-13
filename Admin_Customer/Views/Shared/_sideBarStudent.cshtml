@@ -1,63 +1,63 @@
 ﻿<!-- Sidebar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white mb-4" id="accordionSidebar">
-    <div class="container">
-        <div class="row">
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-Content" aria-controls="navbar-Content" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
 
-            <div class="collapse navbar-collapse" id="navbar-Content">
-                <ul class="navbar-nav mr-auto">
-                    <!-- Nav Item -->
-                    <li class="nav-item active">
-                        <a class="nav-link" href="@Url.Action("Index" , "Home")">
-                            <i class="fas fa-fw fa-home"></i>
-                        </a>
-                    </li>
+<nav class="sidebar collapse position-fixed col p-0 m-0">
 
-                    <!-- Nav Item -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index" , "MyCourse")">
-                            <i class="fas fa-graduation-cap"></i>
-                            <span>Khóa học của tôi</span>
-                        </a>
-                    </li>
+    <div id="sidebar-content">
+        <ul class="sidebar-holder p-0">
+            <li class="sidebar-item home">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
+                    <i></i>
+                </a>
+            </li>
 
-                    <!-- Nav Item -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index" , "LessonToday")">
-                            <i class="fas fa-calendar"></i>
-                            <span>Lịch học</span>
-                        </a>
-                    </li>
+            <li class="sidebar-item profile">
+                <a class="nav-link p-0" href="#">
+                    <i></i>
+                    <span>Thông tin cá nhân</span>
+                </a>
+            </li>
 
-                    <!-- Nav Item -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index" , "LearnHistory")">
-                            <i class="fas fa-history"></i>
-                            <span>Lịch sử học tập</span>
-                        </a>
-                    </li>
+            <li class="sidebar-item course">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "MyCourse" )">
+                    <i></i>
+                    <span>Khóa học của tôi</span>
+                </a>
+            </li>
 
-                    <!-- Nav Item -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index" , "News")">
-                            <i class="fas fa-comments"></i>
-                            <span>Thảo luận</span>
-                        </a>
-                    </li>
+            <li class="sidebar-item lesson">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "LessonToday" )">
+                    <i></i>
+                    <span>Lịch học</span>
+                </a>
+            </li>
 
-                    <!-- Nav Item -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index" , "Statistic")">
-                            <i class="fas fa-fw fa-bell"></i>
-                            <span>Thông báo mới</span>
-                        </a>
-                    </li>
+            <li class="sidebar-item history">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "LearnHistory" )">
+                    <i></i>
+                    <span>Lịch sử học tập</span>
+                </a>
+            </li>
 
-                </ul>
-            </div>
-        </div>
+            <li class="sidebar-item comments">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Comment" )">
+                    <i></i>
+                    <span>Thảo luận</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item announcements">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "News" )">
+                    <i></i>
+                    <span>Thông báo mới</span>
+                </a>
+            </li>
+        </ul>
+
     </div>
+    <button class="sidebar-toggler" type="button" data-toggle="collapse" data-target=".sidebar" aria-controls="sidebar-content" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="sidebar-toggler-icon"></i>
+    </button>
 </nav>
 <!-- End of Sidebar -->
+<style>
+</style>

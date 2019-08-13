@@ -1,0 +1,101 @@
+.sidebar {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 200px;
+    background-color: #e5e5e5;
+    z-index: 1;
+    height: auto !important;
+
+    span {
+        margin-left: 50px;
+        line-height: 42px;
+        color: #48bde5;
+    }
+
+    &.collapse:not(.show) {
+        width: 51px;
+        display: block;
+
+        span {
+            display: none;
+        }
+    }
+
+    .sidebar-holder {
+        list-style: none;
+        background-color: #000;
+    }
+
+    li, .sidebar-toggler-icon {
+        cursor: pointer;
+        background-image: url('../css/images/sidebar.png');
+        width: 100%;
+        background-repeat: no-repeat;
+        filter: opacity(0.9);
+        height: 42px;
+        display: block;
+        background-color: #FFF;
+
+        &.home {
+            background-color: #000054;
+            height: 75px;
+        }
+
+        &.profile {
+            background-position-y: -76px;
+        }
+
+        &.course {
+            background-position-y: - 120px;
+        }
+
+        &.lesson {
+            background-position-y: - 162px;
+        }
+
+        &.history {
+            background-position-y: - 204px;
+        }
+
+        &.comments {
+            background-position-y: - 330px;
+        }
+
+        &.announcements {
+            background-position-y: - 288px;
+        }
+
+        &:hover, &.active {
+            filter: none;
+        }
+
+        .nav-link {
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+
+    .sidebar-toggler {
+        border: none;
+        background-color: #000;
+        width: 100%;
+        padding: 0;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        outline: none;
+
+        .sidebar-toggler-icon {
+            background-position-y: -368px;
+        }
+    }
+}
+
+.sidebar-collapse {
+
+    span {
+        display: none;
+    }
+}

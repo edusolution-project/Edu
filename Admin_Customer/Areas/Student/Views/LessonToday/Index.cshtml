@@ -1,16 +1,28 @@
 ﻿
 @{
-    ViewData["Title"] = "Learning Schedule";
+    ViewData["Title"] = "Lịch học";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
     var user = ViewBag.User as string;
 }
+
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+    </div>
+</div>
+<script>
+    $('.sidebar-item.lesson').addClass("active");
+</script>
+
 <div class="container">
     <!-- Begin Page Content -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
+    <div class="card mb-4">
+        @*<div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Bài học đang diễn ra</h6>
-        </div>
+        </div>*@
         <div class="card-body">
             <div class="search-filter">
                 <div class="form-row">
@@ -63,6 +75,9 @@
     </div>
     <!-- End of Main Content -->
 </div>
+
+
+
 @section Scripts{
     <script>
 

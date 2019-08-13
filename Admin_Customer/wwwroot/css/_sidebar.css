@@ -1,0 +1,63 @@
+﻿.sidebar {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 200px;
+  background-color: #e5e5e5;
+  z-index: 1;
+  height: auto !important; }
+  .sidebar span {
+    margin-left: 50px;
+    line-height: 42px;
+    color: #48bde5; }
+  .sidebar.collapse:not(.show) {
+    width: 51px;
+    display: block; }
+    .sidebar.collapse:not(.show) span {
+      display: none; }
+  .sidebar .sidebar-holder {
+    list-style: none;
+    background-color: #000; }
+  .sidebar li, .sidebar .sidebar-toggler-icon {
+    cursor: pointer;
+    background-image: url("images/sidebar.png");
+    width: 100%;
+    background-repeat: no-repeat;
+    filter: opacity(0.9);
+    height: 42px;
+    display: block;
+    background-color: #FFF; }
+    .sidebar li.home, .sidebar .sidebar-toggler-icon.home {
+      background-color: #000054;
+      height: 75px; }
+    .sidebar li.profile, .sidebar .sidebar-toggler-icon.profile {
+      background-position-y: -76px; }
+    .sidebar li.course, .sidebar .sidebar-toggler-icon.course {
+      background-position-y: -120px; }
+    .sidebar li.lesson, .sidebar .sidebar-toggler-icon.lesson {
+      background-position-y: -162px; }
+    .sidebar li.history, .sidebar .sidebar-toggler-icon.history {
+      background-position-y: -204px; }
+    .sidebar li.comments, .sidebar .sidebar-toggler-icon.comments {
+      background-position-y: -330px; }
+    .sidebar li.announcements, .sidebar .sidebar-toggler-icon.announcements {
+      background-position-y: -288px; }
+    .sidebar li:hover, .sidebar li.active, .sidebar .sidebar-toggler-icon:hover, .sidebar .sidebar-toggler-icon.active {
+      filter: none; }
+    .sidebar li .nav-link, .sidebar .sidebar-toggler-icon .nav-link {
+      width: 100%;
+      height: 100%; }
+  .sidebar .sidebar-toggler {
+    border: none;
+    background-color: #000;
+    width: 100%;
+    padding: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    outline: none; }
+    .sidebar .sidebar-toggler .sidebar-toggler-icon {
+      background-position-y: -368px; }
+
+.sidebar-collapse span {
+  display: none; }

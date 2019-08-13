@@ -2,14 +2,26 @@
 
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
-    ViewData["Title"] = "Khóa học của tôi - Danh sách khóa học";
+    ViewData["Title"] = "Danh sách khóa học";
 }
+
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+    </div>
+</div>
+<script>
+    $('.sidebar-item.course').addClass("active");
+</script>
+
 <div class="container">
     <!-- Begin Page Content -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
+    <div class="card mb-4">
+        @*<div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Danh sách khóa học</h6>
-        </div>
+        </div>*@
         <div class="card-body">
             <div class="table-responsive">
                 <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
@@ -19,9 +31,9 @@
                             <th class="text-center">Môn học</th>
                             <th class="text-center">Lớp tiến chỉ</th>
                             @*
-                            <th class="text-center">Giáo trình</th>*@
+                                <th class="text-center">Giáo trình</th>*@
                             @*
-                            <th>Cấp độ</th>*@
+                                <th>Cấp độ</th>*@
                             <th class="text-center">Giáo viên</th>
                             <th class="text-center">Ngày bắt đầu</th>
                             <th class="text-center">Ngày kết thúc</th>
@@ -35,7 +47,7 @@
     <!-- End of Main Content -->
 </div>
 @section Scripts{
-<script>
+    <script>
         function LoadData() {
         var searchText = $("#searchText").val() == void 0? "" :$("#searchText").val();
         var startDate = $("#startDate_sort").val()== void 0? "" :$("#startDate_sort").val();
@@ -79,4 +91,4 @@
 
     LoadData();
 
-</script>}
+    </script>}

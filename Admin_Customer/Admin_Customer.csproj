@@ -11,10 +11,21 @@
     <Content Remove="Areas\Teacher\Views\Lesson\Detail - Copy.cshtml" />
     <Content Remove="Areas\Teacher\Views\Lesson\Exam - Copy.cshtml" />
     <Content Remove="compilerconfig.json" />
+    <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
+    <Content Remove="Views\Shared\_sideBarTeacher - Copy.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Views\Shared\_LayoutStudent.oldcshtml" />
+    <None Remove="Views\Shared\_LayoutTeacher.oldcshtml" />
   </ItemGroup>
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\scss\sb-admin-2.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Views\Shared\_LayoutStudent.oldcshtml" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,43 +4,77 @@
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
 }
 
-<div class="container">
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+        <div class="card-content course-box" id="myclassWrapper">
+            @*<div class="course-item">
+                    <div class="course-info">
+                        <h3>
+                            ClassName
+                        </h3>
+                        <h4>
+                            CourseCode
+                        </h4>
+                        <h5>
+                            CourseName
+                        </h5>
+                        <div class="action">
+                            <button class="alert"></button>
+                            <button class="news"></button>
+                            <button class="comments"></button>
+                        </div>
+                    </div>
+                </div>*@
+
+        </div>
+    </div>
+</div>
+<script>
+    $('.sidebar-item.home').addClass("active");
+</script>
+
+
+
+@*<div class="container">
     <!-- Begin Page Content -->
     <div class="row">
 
-        <div class="col-lg-6 mb-4">
+
+
+
+        @*<div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <a href="@Url.Action("Index", "MyCourse")"><h6 class="m-0 font-weight-bold text-primary">Khóa học của tôi</h6></a>
                 </div>
                 <div class="card-body">
-                    <div class="card-content" id="myclassWrapper">
-                    </div>
+
                     <div class="float-right">
                         <a href="@Url.Action("Index", "MyCourse")"> Xem tất cả</a>
                     </div>
                 </div>
             </div>
-        </div>
+        </div>*@
 
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <a href="@Url.Action("Index", "LessonToday")"><h6 class="m-0 font-weight-bold text-primary">Bài học hôm nay</h6></a>
-                </div>
-                <div class="card-body">
-                    <table id="tbTodayLesson" class="table table-bordered" width="100%" cellspacing="0">
-                        <tbody></tbody>
-                    </table>
-                    <div class="float-right">
-                        <a href="@Url.Action("Index","LessonToday")"> Xem tất cả</a>
-                    </div>
+@*<div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <a href="@Url.Action("Index", "LessonToday")"><h6 class="m-0 font-weight-bold text-primary">Bài học hôm nay</h6></a>
+            </div>
+            <div class="card-body">
+                <table id="tbTodayLesson" class="table table-bordered" width="100%" cellspacing="0">
+                    <tbody></tbody>
+                </table>
+                <div class="float-right">
+                    <a href="@Url.Action("Index","LessonToday")"> Xem tất cả</a>
                 </div>
             </div>
         </div>
-
-    </div>
-    <script>
+    </div>*@
+<script>
 
     function LoadMyClass() {
         $.ajax({
@@ -55,11 +89,18 @@
                 {
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
-                        body.append(" <h4 class=\"small font-weight-bold\"><a href=\"@Url.Action("Detail", "MyCourse")/" + item.ID + "\">"  +  item.SubjectName + "</a><span class=\"float-right\">" + item.Progress + "%</span></h4>"+
-                    "<div class=\"progress mb-4\">"+
-                        "<div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + item.Progress + "%\" aria-valuenow=\"" + item.Progress + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div>"+
-                    "</div>"
-                        );
+                        body.append("<a href=\"@Url.Action("Detail", "MyCourse")/" + item.ID + "\">" +
+                                        "<div class='course-item'>" +
+                                        "<div class='course-info'>" +
+                                            "<h3>" + item.SubjectName + "</h3>" +
+                                            "<h4>" + item.Name + "</h4>" +
+                                            "<div class='action-wrapper'>" +
+                                                "<a class='actionlink announcement' href='@Url.Action("News", "MyCourse")/" + item.ID + "'></a>" +
+                                                "<a class='actionlink assignment' href='@Url.Action("Assignment", "MyCourse")/" + item.ID + "'></a>" +
+                                                "<a class='actionlink comment' href='@Url.Action("Comments", "MyCourse")/" + item.ID + "'></a>" +
+                                            "</div>" +
+                                        "</div>" +
+                                    "</div></a>");
                     }
                 }
             },
@@ -100,4 +141,8 @@
         LoadMyClass();
         LoadTodayLesson();
     });
-    </script>
+</script>
+@*body.append(" <h4 class=\"small font-weight-bold\"><a href=\"@Url.Action("Detail", "MyCourse")/" + item.ID + "\">"  +  item.SubjectName + "</a><span class=\"float-right\">" + item.Progress + "%</span></h4>"+
+    "<div class=\"progress mb-4\">"+
+        "<div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + item.Progress + "%\" aria-valuenow=\"" + item.Progress + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div>"+
+    "</div>"*@
