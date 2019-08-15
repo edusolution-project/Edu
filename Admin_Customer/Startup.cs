@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
 using BaseHub;
+using BaseHub.Globals;
 using Core_v2.Globals;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -44,6 +45,7 @@ namespace Admin_Customer
             services.AddLogs();
             services.AddTransient<IndefindCtrlService>();
             services.AddServiceBase();
+            services.AddServiceHubBase();
             services.AddScoped<FileProcess>();
             //services.AddMvc(options=> {
             //    options.Filters.Add<PermissionAttribute>();

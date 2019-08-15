@@ -7,10 +7,10 @@ using System.Text;
 
 namespace BaseHub.Database
 {
-    public class ChatEntity : EntityBase
+    public class ChatPrivateEntity : EntityBase
     {
-        [JsonProperty("GroupID")]
-        public string GroupID { get; set; }
+        [JsonProperty("Receiver")]
+        public string Receiver { get; set; }
         [JsonProperty("Sender")]
         public string Sender { get; set; }
         [JsonProperty("Content")]
@@ -23,9 +23,9 @@ namespace BaseHub.Database
         public DateTime Created { get; set; }
 
     }
-    public class ChatService : ServiceBase<ChatEntity>
+    public class ChatPrivateService : ServiceBase<ChatPrivateEntity>
     {
-        public ChatService(IConfiguration config) : base(config)
+        public ChatPrivateService(IConfiguration config) : base(config)
         {
 
         }

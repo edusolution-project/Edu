@@ -1,0 +1,59 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+    var classList = ViewBag.Data as List<BaseCustomerEntity.Database.ClassEntity>;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-3">
+            <div id="list-group"></div>
+        </div>
+        <div class="col-9">
+            <div id="context-group"></div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        function LoadData() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetList", "MyCourse")',
+            data: {},
+            dataType:"json",
+            success: function (data) {
+                var listGroup = data.Data;
+                for (var i = 0; listGroup != null && i < listGroup.length; i++) {
+                    const item = listGroup[i];
+                    $("#list-group").append("<div data-type='group' data-id=" + item.ID + " onclick='onloadMessage(this)'>" + item.Name + "</div>");
+                    connection.invoke("GoToClass", item.ID);
+                }
+            },
+            error: function (err) {
+                console.log(err.responseText)
+            }
+        });
+    };
+
+        $(document).ready(function () {
+            LoadData();
+        })
+        function onloadMessage(_this) {
+            var type = _this.dataset.type;
+            var groupName = _this.dataset.id;
+            connection.add
+        }
+        connection.on("JoinGroup", function (data) {
+            console.log(data);
+        })
+        connection.on("LeaveGroup", function (data) {
+            console.log(data);
+        })
+        connection.on("CommentNewFeed", function (data) {
+            console.log(data);
+        })
+    </script>
+}
+
