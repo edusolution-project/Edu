@@ -43,10 +43,12 @@ namespace BaseHub.Database
                 CreateOrUpdate(item);
             }
         }
+        [Obsolete]
         public GroupEntity GetItemByName(string groupName)
         {
-            var _item = CreateQuery().Find(o => o.Name == groupName).First();
-            return _item ?? null;
+            var _item = CreateQuery().Find(o => o.Name == groupName);
+            if (_item.Count() <= 0 || _item == null) return null;
+            return _item?.First();
         }
         [Obsolete]
         public Task AddMemeber(string groupName,string userID)
