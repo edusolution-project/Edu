@@ -12,7 +12,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
-    public class MyCourseController : StudentController
+    public class CourseController : StudentController
     {
         private readonly ClassService _service;
         private readonly CourseService _courseService;
@@ -34,7 +34,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LearningHistoryService _learningHistoryService;
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
-        private readonly MappingEntity<ClassEntity, MyClassViewModel> _mappingList;
+        private readonly MappingEntity<ClassEntity, StudentClassViewModel> _mappingList;
         private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _studentMapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
 
@@ -43,7 +43,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
 
 
-        public MyCourseController(ClassService service
+        public CourseController(ClassService service
             , CourseService courseService
             , TeacherService teacherService
             , SubjectService subjectService
@@ -80,7 +80,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
             _lessonPartService = lessonPartService;
             _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
-            _mappingList = new MappingEntity<ClassEntity, MyClassViewModel>();
+            _mappingList = new MappingEntity<ClassEntity, StudentClassViewModel>();
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
             _studentMapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
@@ -123,7 +123,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
 
-            var std = DataResponse.Select(o => _mappingList.AutoOrtherType(o, new MyClassViewModel()
+            var std = DataResponse.Select(o => _mappingList.AutoOrtherType(o, new StudentClassViewModel()
             {
                 CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
                 StudentNumber = o.Students.Count,
@@ -161,7 +161,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 //filter.Add(Builders<LessonEntity>.Filter.Where(o=> schedules.Select(x => x.LessonID).Contains(o.ID)));
                 var data = _lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter));
                 var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList();
-
 
                 var respone = new Dictionary<string, object>
                 {
@@ -250,11 +249,11 @@ namespace BaseCustomerMVC.Controllers.Student
 
             if (exam == null || _examService.IsOverTime(exam.ID))
             {
-                MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
+                MappingEntity<LessonEntity, StudentLessonViewModel> mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
                 MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
                 MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
 
-                var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
+                var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
                 {
                     Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
                     {
@@ -275,10 +274,10 @@ namespace BaseCustomerMVC.Controllers.Student
                 var timere = exam.CurrentDoTime.AddMinutes(exam.Timer) - DateTime.UtcNow;
                 // so sanh va dua ra dap an cua sinh vien ????
 
-                MappingEntity<LessonEntity, LessonViewModel> mapping = new MappingEntity<LessonEntity, LessonViewModel>();
+                MappingEntity<LessonEntity, StudentLessonViewModel> mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
                 MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
                 MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
-                var dataResponse = mapping.AutoOrtherType(lesson, new LessonViewModel()
+                var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
                 {
                     Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
                     {
@@ -475,6 +474,45 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         public IActionResult Detail(DefaultModel model, string id)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(id);
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            if (currentClass.Students.IndexOf(userId) < 0)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
+            return View();
+        }
+
+        public IActionResult Syllabus(DefaultModel model, string id)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(id);
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            if (currentClass.Students.IndexOf(userId) < 0)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
+            return View();
+        }
+
+        public IActionResult Modules(DefaultModel model, string id)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(id);
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            if (currentClass.Students.IndexOf(userId) < 0)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
+            return View();
+        }
+
+        public IActionResult Assignment(DefaultModel model, string id)
         {
             if (model == null) return null;
             var currentClass = _service.GetItemByID(id);

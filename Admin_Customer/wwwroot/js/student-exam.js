@@ -594,7 +594,6 @@ var load = {
                         start();
                         $("#counter").html(data.Timer);
                     }
-
                     countdown();
                 } else {
                     render.lesson(data.Data);
@@ -658,6 +657,7 @@ var load = {
         file.click();
     }
 };
+
 function answerQuestion(obj, quizid, answerID, answerValue) {
     //console.log(obj, quizid, answerID, answerValue);
     //$('.quiz-item#' + quizid + " .quiz-extend").show();

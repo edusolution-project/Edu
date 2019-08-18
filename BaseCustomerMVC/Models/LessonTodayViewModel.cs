@@ -7,13 +7,13 @@ using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
-    public class LessonTodayViewModel : ClassEntity
+    public class TodayClassViewModel : ClassEntity
     {
         [JsonProperty("Lessons")]
         public List<LessonScheduleTodayViewModel> Lessons { get; set; } = new List<LessonScheduleTodayViewModel>() { };
 
     }
-    public class LessonScheduleTodayViewModel : LessonViewModel
+    public class LessonScheduleTodayViewModel : StudentLessonViewModel
     {
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }

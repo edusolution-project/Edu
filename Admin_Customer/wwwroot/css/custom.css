@@ -417,6 +417,7 @@ video, audio {
     line-height: inherit;
     text-align: justify;
     color: #333;
+    font-size: 1rem;
 }
 
 .QUIZ1 .quiz-wrapper .answer-wrapper .media-holder .img-fluid {
@@ -444,6 +445,16 @@ video, audio {
         border: 1px dashed #4e73df;
     }
 
+        .QUIZ3 .answer-pane .pane-item .placeholder {
+            z-index: -1;
+        }
+
+.QUIZ3 .ui-draggable-dragging {
+    box-shadow: 0 0 2px #000;
+    min-width: 200px;
+    background-color: #4e73df;
+}
+
 .QUIZ3 .ui-draggable-handle {
     margin: 5px auto;
     border-radius: 5px;
@@ -451,7 +462,10 @@ video, audio {
     color: #fff;
     background-color: #4e73df;
     border-color: #4e73df;
+    z-index: 2;
+    cursor: move;
 }
+
 
     .QUIZ3 .ui-draggable-handle .img-fluid {
         width: 75%;

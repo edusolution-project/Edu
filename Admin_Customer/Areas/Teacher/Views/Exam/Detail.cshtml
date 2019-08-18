@@ -8,7 +8,8 @@
 
 <!-- Page Heading -->
 <div class="container">
-    <div class="breadcumb" style="padding: 0 0 15px; font-weight:bold;">
+    <div class="breadcumb" style="        padding: 0 0 15px;
+        font-weight: bold;">
         <a href="@Url.Action("Detail","Class")/@Class.ID">@Class.Name</a> / @Lesson.Title
     </div>
 
@@ -23,6 +24,7 @@
         load.exam($("#ExamID").val());
     });
 </script>
+
 @section Script{
     <script src="~/js/teacher-exam.js"></script>
 }

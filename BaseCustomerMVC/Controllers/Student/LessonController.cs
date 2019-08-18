@@ -12,7 +12,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
-    public class LessonTodayController : StudentController
+    public class LessonController : StudentController
     {
         // bài học hôm nay.
         private readonly LessonScheduleService _lessonScheduleService;
@@ -22,7 +22,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly SubjectService _subjectService;
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
 
-        public LessonTodayController(
+        public LessonController(
             LessonScheduleService lessonScheduleService,
             ClassService classService,
             LessonService lessonService,
@@ -59,7 +59,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             if (data != null && data.Count > 0)
             {
-                var mapping = new MappingEntity<ClassEntity, LessonTodayViewModel>();
+                var mapping = new MappingEntity<ClassEntity, TodayClassViewModel>();
                 var map2 = new MappingEntity<LessonEntity, LessonScheduleTodayViewModel>() { };
                 //id class
                 var listID = data.Select(o => o.ID).ToList();
@@ -68,7 +68,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 // có list lessonid
                 var listIDSchedule = schedule.Select(x => x.LessonID).ToList();
 
-                var resData = data.Select(o => mapping.AutoOrtherType(o, new LessonTodayViewModel()
+                var resData = data.Select(o => mapping.AutoOrtherType(o, new TodayClassViewModel()
                 {
                     Lessons = schedule != null ? _lessonService.Collection.Find(y => listIDSchedule.Contains(y.ID)).ToList()
                         .Select(y => map2.AutoOrtherType(y, new LessonScheduleTodayViewModel()
@@ -195,10 +195,25 @@ namespace BaseCustomerMVC.Controllers.Student
         /// <param name="id">LessonID</param>
         /// <param name="ClassID">ClassID</param>
         /// <returns></returns>
-        public IActionResult LessonStudent(DefaultModel model, string id, string ClassID)
+        public IActionResult Detail(DefaultModel model, string id, string ClassID)
         {
             ViewBag.LessonID = id;
             ViewBag.ClassID = ClassID;
+            if (ClassID == null)
+                return RedirectToAction("Index", "Class");
+            var currentClass = _classService.GetItemByID(ClassID);
+            if (currentClass == null)
+                return RedirectToAction("Index", "Class");
+            var lesson = _lessonService.GetItemByID(model.ID);
+            if (lesson == null)
+                return RedirectToAction("Index", "Class");
+
+            //if(lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+            //{
+            //    var lastestExam = _
+            //}
+
+            ViewBag.Type = lesson.TemplateType;
             return View();
         }
 
@@ -225,27 +240,27 @@ namespace BaseCustomerMVC.Controllers.Student
             }
         }
 
-        public IActionResult Detail(DefaultModel model, string ClassID)
-        {
-            if (model == null) return null;
+        //public IActionResult Detail(DefaultModel model, string ClassID)
+        //{
+        //    if (model == null) return null;
 
-            if (ClassID == null)
-                return RedirectToAction("Index", "Class");
-            var currentClass = _classService.GetItemByID(ClassID);
-            if (currentClass == null)
-                return RedirectToAction("Index", "Class");
-            var Data = _lessonService.GetItemByID(model.ID);
-            if (Data == null)
-                return RedirectToAction("Index", "Class");
-            ViewBag.Class = currentClass;
-            ViewBag.Data = Data;
-            if (Data.TemplateType == LESSON_TEMPLATE.LECTURE)
-                return View();
-            else
-            {
-                return View("Exam");
-            }
-        }
+        //    if (ClassID == null)
+        //        return RedirectToAction("Index", "Class");
+        //    var currentClass = _classService.GetItemByID(ClassID);
+        //    if (currentClass == null)
+        //        return RedirectToAction("Index", "Class");
+        //    var Data = _lessonService.GetItemByID(model.ID);
+        //    if (Data == null)
+        //        return RedirectToAction("Index", "Class");
+        //    ViewBag.Class = currentClass;
+        //    ViewBag.Data = Data;
+        //    if (Data.TemplateType == LESSON_TEMPLATE.LECTURE)
+        //        return View();
+        //    else
+        //    {
+        //        return View("Exam");
+        //    }
+        //}
 
     }
 }

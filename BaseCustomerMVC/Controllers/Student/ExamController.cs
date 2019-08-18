@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
-    public class ExampleController : StudentController
+    public class ExamController : StudentController
     {
 
         private readonly ExamService _service;
@@ -30,7 +30,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
 
-        public ExampleController(ExamService service,
+        public ExamController(ExamService service,
             LessonPartAnswerService lessonPartAnswerService,
             LessonPartQuestionService lessonPartQuestionService,
             ExamDetailService examDetailService
@@ -213,6 +213,8 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             var userID = User.Claims.GetClaimByType("UserID").Value;
             var x = _service.CreateQuery().Find(o => o.ClassID == ClassID && o.LessonID == LessonID && o.Status == false && o.StudentID == userID).FirstOrDefault();
+            if (x != null)
+                x.CurrentDoTime = DateTime.Now;
             return new JsonResult(x);
         }
 

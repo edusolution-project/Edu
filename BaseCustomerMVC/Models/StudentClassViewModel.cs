@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
-    public class MyClassViewModel:EntityBase
+    public class StudentClassViewModel:EntityBase
     {
         [JsonProperty("Name")]
         public string Name { get; set; }

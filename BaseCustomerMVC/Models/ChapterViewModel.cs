@@ -12,6 +12,6 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("Name")]
         public string Name { get; set; }
         [JsonProperty("Lessons")]
-        public List<LessonViewModel> Lessons { get; set; } = new List<LessonViewModel>() { };
+        public List<StudentLessonViewModel> Lessons { get; set; } = new List<StudentLessonViewModel>() { };
     }
 }

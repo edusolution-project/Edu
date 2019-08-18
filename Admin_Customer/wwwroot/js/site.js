@@ -178,7 +178,6 @@ function hideModal() {
     $('body').removeClass("modal-open");
 }
 
-
 function ToggleStatus(obj) {
     var action = $(obj).attr("onclick");
     if (action.indexOf("UnPublish") > 0)
@@ -254,4 +253,10 @@ function LocalStore(ExamID, value) {
 }
 function LoadLocalStore(ExamID) {
     return localStorage.getItem(ExamID);
+}
+
+function toggleCollapse(obj) {
+    var target = $(obj).attr('data-target');
+    $(target).collapse('toggle');
+    $(obj).find("i").toggleClass("expand"); 
 }

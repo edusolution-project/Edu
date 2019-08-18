@@ -14,7 +14,7 @@
     </div>
 </div>
 <script>
-    $('.sidebar-item.history').addClass("active");
+    var activeTab = "calendar";
 </script>
 
 <div class="container">
@@ -111,9 +111,9 @@
                         var time = $.datepicker.formatDate('dd/mm/yy', new Date(item.Time));
 
                         body.append("<tr>" +
-                            "<td><a href='@Url.Action("Detail", "MyCourse")/"+item.ClassID +"'>" + item.SubjectName + "</a></td>"+
-                            "<td><a href='@Url.Action("Detail", "MyCourse")/"+item.ClassID +"'>" + item.ClassName + "</a></td>" +
-                            "<td><a href='@Url.Action("Detail", "LessonToday")/" + item.LessonID + "/" + item.ClassID + "'>" + item.LessonName + "</a></td>" +
+                            "<td><a href='@Url.Action("Detail", "Course")/"+item.ClassID +"'>" + item.SubjectName + "</a></td>"+
+                            "<td><a href='@Url.Action("Detail", "Course")/"+item.ClassID +"'>" + item.ClassName + "</a></td>" +
+                            "<td><a href='@Url.Action("Detail", "Lesson")/" + item.LessonID + "/" + item.ClassID + "'>" + item.LessonName + "</a></td>" +
                             "<td class='text-center'>" + time + "</td>" +
                             "</tr>"
                         );

@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BaseCustomerMVC.Controllers.Student
+namespace BaseCustomerMVC.Controllers.Teacher
 {
     public class ExamController : TeacherController
     {

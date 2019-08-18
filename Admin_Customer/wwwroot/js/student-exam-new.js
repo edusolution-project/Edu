@@ -1,5 +1,6 @@
 ﻿
 var Debug = true;
+
 var writeLog = function (name, msg) {
     if (Debug) {
         console.log(name, msg);
@@ -126,7 +127,6 @@ var ExamStudent = (function () {
                     renderLesson(resData);
                     setCurrentData(resData);
                     if (resData.Data.TemplateType != 1) {
-                        renderBoDem();
                         $("#counter").html(resData.Timer);
                     }
                     startDragDrop();
@@ -137,7 +137,11 @@ var ExamStudent = (function () {
             if (data.Data.TemplateType != 1) {
                 renderBoDem();
                 $("#counter").html(localStorage.getItem("Timer"));
-                countdown();$('.quizNumber').removeClass("d-none");
+                var currentExam = localStorage.getItem("CurrentExam");
+                if (currentExam != null) {
+                    countdown();
+                    $('.quizNumber').removeClass("d-none");
+                }
             }
             startDragDrop();
         }
@@ -146,6 +150,7 @@ var ExamStudent = (function () {
         var enData = b64EncodeUnicode(JSON.stringify(data))
         localStorage.setItem(config.lesson_id + "_" + config.class_id, enData);
     }
+
     var currentData = function () {
         var dataform = new FormData();
         dataform.append("ClassID", config.class_id);
@@ -155,6 +160,22 @@ var ExamStudent = (function () {
             else {
                 var data = JSON.parse(res);
                 document.querySelector("input[name='ExamID']").value = data.ID;
+                //TODO: currentTimer here;
+                var current = data.CurrentDoTime;
+                var start = data.Created;
+                var timer = moment(current) - moment(start);
+                if (moment(timer).minutes() >= data.Timer)//Timeout
+                {
+                    localStorage.setItem("Timer", "00:00");
+                    ExamComplete(true);
+                }
+                else {
+                    var _sec = 59 - moment(timer).second();
+                    var _minutes = data.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
+                    var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
+                    localStorage.setItem("Timer", timer);
+                }
+                $("#counter").html(localStorage.getItem("Timer"));
             }
         });
         var data = localStorage.getItem(config.lesson_id + "_" + config.class_id);
@@ -165,8 +186,8 @@ var ExamStudent = (function () {
             return JSON.parse(enData);
         }
     }
+
     var renderLesson = function (data) {
-        var tab = '<div class="text-right col-lg-4"><button class="prevtab btn btn-success mr-2" data-toggle="tooltip" title="Quay lại" onclick="tab_goback()"><i class="fas fa-arrow-left"></i></button><button class="nexttab btn btn-success" data-toggle="tooltip" title="Tiếp tục" onclick="tab_gonext()"><i class="fas fa-arrow-right"></i></button></div>';
         writeLog("renderLesson", data);
         var container = document.getElementById(config.id);
         if (container == null) throw "Element id " + config.id + " not exist - create now";
@@ -187,7 +208,10 @@ var ExamStudent = (function () {
             if (localStorage.getItem("Timer") == null) localStorage.setItem("Timer", counter);
             container.innerHTML = '<div class="" id="lessonContainer"></div>';
             var lessonContainer = container.querySelector("#lessonContainer");
-            lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-4">' + data.Data.Title + '</div><div class="text-center col-lg-4">Thời gian làm bài <span id="counter" class="time-counter">' + counter + '</span></div>' + tab + '</div></div><div id="body-exam" class="card-body"></div></div></div></div>';
+            lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-4">' + data.Data.Title + '</div><div class="text-center col-lg-4">Thời gian làm bài <span id="counter" class="time-counter">' + counter + '</span></div></div></div><div id="body-exam" class="card-body"></div></div></div></div>';
+
+
+
             var bodyExam = lessonContainer.querySelector("#body-exam");
             var content = checkExam()
                 ? renderContent(data.Data)
@@ -240,52 +264,51 @@ var ExamStudent = (function () {
         return html;
     }
     var renderTEXT = function (data) {
-        var title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="content-wrapper">';
-        html += '<div class="row"></div>';
+        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
+        var html = title + '<div class="content-wrapper col-md-10 d-inline-block align-top">';
         html += '<div class="doc-content">' + data.Description + '</div>';
         html += '</div>';
         return html;
     }
     var renderVIDEO = function (data) {
-        var title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper">';
+        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
+        var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
         html += '<div class="media-holder VIDEO"><video controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the video tag</video></div>';
         html += '</div>';
         return html;
     }
     var renderAUDIO = function (data) {
-        var title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper">';
+        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
+        var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
         html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the audio tag</audio></div>';
         html += '</div>';
         return html;
     }
     var renderIMG = function (data) {
-        var title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper">';
+        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
+        var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
         html += '<div class="media-holder ' + data.Type + '"><img src="' + data.Media.Path + '" title="' + data.Title + '" class="img-fluid lazy"></div>';
         html += '</div>';
         return html;
     }
     var renderDOC = function (data) {
-        var title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper">';
+        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
+        var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
         html += '<div class="media-holder ' + data.Type + '"><embed src="' + data.Media.Path + '" style="width: 100%; height: 800px; border:1px solid"></div>';
         html += '</div>';
         return html;
     }
     var renderVOCAB = function (data) {
-        var title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper">';
+        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
+        var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
         html += '<div class="media-holder ' + data.Type + '">Not Support</div>';
         html += '</div>';
         return html;
     }
     var renderQUIZ1 = function (data) {
         writeLog("renderQUIZ1", data);
-        var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
-        html += '<div class="quiz-wrapper">';
+        var html = '<div class="part-box-header col-md-4 d-inline-block sticky-top"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
+        html += '<div class="quiz-wrapper col-md-8 d-inline-block align-top">';
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
             html += '<div class="quiz-item" id="' + item.ID + '">';
@@ -308,8 +331,8 @@ var ExamStudent = (function () {
     }
     var renderQUIZ2 = function (data) {
         writeLog("renderQUIZ2", data);
-        var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
-        html += '<div class="quiz-wrapper">';
+        var html = '<div class="part-box-header col-md-4 d-inline-block sticky-top"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
+        html += '<div class="quiz-wrapper col-md-8 d-inline-block align-top">';
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
             var itemContent = item.Content == null ? "Câu hỏi số " + (i + 1) + " : " : item.Content;
@@ -331,9 +354,9 @@ var ExamStudent = (function () {
     }
     var renderQUIZ3 = function (data) {
         writeLog("renderQUIZ3", data);
-        var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5></div>';
-        html += '<div class="row">';
-        html += '<div class="quiz-wrapper col-lg-8">' + renderMedia(data.Media);
+        var html = '<div class="part-box-header col-md-4 d-inline-block sticky-top"> <h5 class="title">' + data.Title + '</h5></div>';
+        html += '<div class="col-md-8 d-inline-block align-top">';
+        html += '<div class="quiz-wrapper col-lg-8  d-inline-block align-top">' + renderMedia(data.Media);
         var answers = "";
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
@@ -355,7 +378,7 @@ var ExamStudent = (function () {
             }
         }
         html += '</div>';
-        html += '<div class="answer-wrapper no-child col-lg-4 ui-droppable">' + answers + '</div>';
+        html += '<div class="answer-wrapper no-child col-lg-4 ui-droppable d-inline-block align-top">' + answers + '</div>';
         html += '</div>';
         return html;
     }
@@ -491,7 +514,10 @@ var ExamStudent = (function () {
     }
     var renderContent = function (data) {
         var tabList = '<div id="pills-tabContent" class="tab-content">';
-        var html = '<div id="menu-left" class="col-md-2"><div class="lesson-tabs"><ul id="pills-tab" class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical">';
+        var html = '<div id="nav-menu" class="col-md-12 mb-3 pb-3">';
+
+        html += '<div class="col-md-1 text-left d-inline-block"><button class="prevtab btn btn-success" data-toggle="tooltip" title="Quay lại" onclick="tab_goback()"><i class="fas fa-arrow-left"></i></button></div>'; //left button
+        html += '<div class="lesson-tabs col-md-10 d-inline-block"><ul id="pills-tab" class="nav nav-pills compact" onclick="toggle_tab_compact()">';
         for (var i = 0; i < data.Parts.length; i++) {
             var item = data.Parts[i];
             var icon = arrIcon[item.Type];
@@ -499,15 +525,17 @@ var ExamStudent = (function () {
             tabList += rednerLessonPart(item, i, data.TemplateType);
             var title = item.Title == void 0 || item.Title == null || item.Title == "null" ? "" : item.Title;
             if (i == 0) {
-                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link active" data-toggle="pill" href="#pills-part-' + item.ID + '" role="tab" aria-controls="pills-' + item.ID + '" aria-selected="false">' + (i + 1).toString() + " - " + icon + '' + title + '</a></li>';
+                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link active" data-toggle="pill" data-target="#pills-part-' + item.ID + '" onclick="tab_set_active(this)">' + (i + 1).toString() + " - " + icon + '' + title + '</a></li>';
             }
             else {
-                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link" data-toggle="pill" href="#pills-part-' + item.ID + '" role="tab" aria-controls="pills-' + item.ID + '" aria-selected="false">' + (i + 1).toString() + " - " + icon + '' + title + '</a></li>';
+                html += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link" data-toggle="pill" data-target="#pills-part-' + item.ID + '" onclick="tab_set_active(this)">' + (i + 1).toString() + " - " + icon + '' + title + '</a></li>';
             }
         }
-        html += '</ul></div></div>';
+        html += '</ul></div>';
+        html += '<div class="col-md-1 text-right d-inline-block"><button class="nexttab btn btn-success" data-toggle="tooltip" title="Tiếp tục" onclick="tab_gonext()"><i class="fas fa-arrow-right"></i></button></div>'; //right button
+        html += '</div>';
         tabList += '</div>';
-        html += '<div class="col-md-10"><div class="lesson-body" id="' + data.ID + '">' + tabList + '</div></div>';
+        html += '<div class="col-md-12"><div class="lesson-body" id="' + data.ID + '">' + tabList + '</div></div>';
         return html;
     }
     var beginExam = function (_this) {
@@ -523,9 +551,9 @@ var ExamStudent = (function () {
                     // chưa viết hàm khác kịp (chỉ load những phần chưa load);
                     localStorage.setItem("CurrentExam", data.Data.ID);
                     getCurrentData();
+                    renderBoDem();
+                    countdown();
                     $('.quizNumber').removeClass("d-none");
-                    //countdown();
-
                 } else {
                     notification("error", data.Error, 3000);
                 }
@@ -533,6 +561,9 @@ var ExamStudent = (function () {
             .catch(function (err) {
                 notification("error", err, 3000);
             })
+    }
+    var goBack = function () {
+        document.location = "/student/Course/Modules/" + config.class_id;
     }
     var version = function () {
         return "1.0.0";
@@ -672,25 +703,25 @@ var ExamStudent = (function () {
                     $(".lesson-container").empty();
                     $("#quizNavigator").addClass('d-none');
                     $("#finish").addClass('d-none');
+                    $(".quiz-number").remove();
                     $('#lessonContainer').removeClass('col-md-10');
                     $(".lesson-container").append('<div class="card show mb-4"></div>');
                     $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Bạn đã hoàn thành bài thi</h3></div>');
                     $(".card").append('<div class="card-body d-flex justify-content-center"><h3>Tổng điểm trắc nghiệm (' + data.point + '/' + data.maxPoint + ')</h3></div>');
                     $(".card").append('<div class="content card-body d-flex justify-content-center"></div>');
-                    $(".content").append('<a href="#" onclick="goBack()"> Quay về trang bài học </a>');
+                    $(".content").append('<a href="#" onclick="window.GoBack()"> Quay về trang bài học </a>');
                     localStorage.clear();
                 })
                 .catch(function (err) {
                     console.log(err);
                 });
         }
-
     }
     var delAnswerForStudent = function (quizID) {
         localStorage.removeItem(config.lesson_id + config.class_id + quizID);
         renderBoDem();
-        document.getElementById("")
-        startDragDrop();
+        //document.getElementById("")
+        //startDragDrop();
         var xxx = document.getElementById("quizNav" + quizID);
         if (xxx != null) {
             xxx.classList.remove("completed");
@@ -701,7 +732,7 @@ var ExamStudent = (function () {
         var value = quizID + "~~" + answerID + "~~" + answerValue + "~~" + type;
         localStorage.setItem(config.lesson_id + config.class_id + quizID, value);
         renderBoDem();
-        startDragDrop();
+        //startDragDrop();
         var xxx = document.getElementById("quizNav" + quizID);
         if (xxx != null) {
             xxx.classList.add("completed");
@@ -759,9 +790,27 @@ var ExamStudent = (function () {
                 var item = $(ui.draggable);
                 var prevHolder = $(ui.helper).parent();
                 prevHolder.remove($(ui.helper));
-                //$(prevHolder).find(".placeholder").show();
-                $(this).html("");
+                var quiz = prevHolder.data("questionId");
+
+                if ($(this).find(".answer-item").length > 0) {//remove all answer to box
+                    $(".answer-wrapper").append($(this).find(".answer-item"));
+                }
                 $(this).append(item);
+
+                if ($(prevHolder).find(".answer-item").length == 1) {
+                    if ($(prevHolder).find(".placeholder").length > 0)
+                        $(prevHolder).find(".placeholder").show();
+                    else
+                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
+                }
+
+
+                var quiz = prevHolder.data("questionId");
+                if (quiz != null) { delAnswerForStudent(quiz); }
+                $(this).find(".placeholder").hide();
+
+
+
                 //item.data("parent", questionID);
                 AnswerQuestion(this);
             }
@@ -772,14 +821,22 @@ var ExamStudent = (function () {
             activeClass: "hasAnswer",
             hoverClass: "answerHover",
             drop: function (event, ui) {
+                $(this).find(".placeholder").hide();
                 var prevHolder = $(ui.helper).parent();
-                var quiz = prevHolder.data("id");
-                if (quiz == void 0 || quiz == null || quiz == "") return;
+                var quiz = prevHolder.data("questionId");
+                if (quiz != null) { delAnswerForStudent(quiz); }
                 prevHolder.remove($(ui.helper));
-                prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
-                //$(prevHolder).find(".placeholder").show();
+
                 $(this).append($(ui.draggable));
-                AnswerQuestion(this);
+
+                if ($(prevHolder).find(".answer-item").length == 1) {
+                    if ($(prevHolder).find(".placeholder").length > 0)
+                        $(prevHolder).find(".placeholder").show();
+                    else
+                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
+                }
+
+                //AnswerQuestion(this);
             }
         });
     }
@@ -804,7 +861,7 @@ var ExamStudent = (function () {
             quiz_number_123.querySelector(".completed").innerHTML = count;
             quiz_number_123.querySelector(".total").innerHTML = listQuiz.length;
         } else {
-            document.body.innerHTML += '<span id="quiz-number_123" style="top:30%" class="number quizNumber d-none" onclick="openNav()"><span class="completed">' + count + '</span> / <span class="total">' + listQuiz.length + '</span></span>';
+            document.getElementById("lessonContainer").innerHTML += '<span id="quiz-number_123" style="top:30%" class="number quizNumber d-none" onclick="openNav()"><span class="completed">' + count + '</span> / <span class="total">' + listQuiz.length + '</span></span>';
         }
         var html = '<div id="quizNavigator" class="overlay">';
         html += '<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>';
@@ -830,6 +887,7 @@ var ExamStudent = (function () {
         }
         startDragDrop();
     }
+
     window.ExamStudent = {} || ExamStudent;
     ExamStudent.onReady = onReady;
     ExamStudent.Version = version;
@@ -837,5 +895,7 @@ var ExamStudent = (function () {
     window.BeginExam = beginExam;
     window.AnswerQuestion = AnswerQuestion;
     window.ExamComplete = ExamComplete;
+    window.GoBack = goBack;
+
     return ExamStudent;
 }());

@@ -52,56 +52,56 @@
                                     <td>Đóng</td>
                                 </tr>
                                 <tr>
-                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Bài giảng số 1</a></td>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 1</a></td>
                                     <td>test</td>
                                     <td>07/06/2019</td>
                                     <td>07/06/2019</td>
                                     <td>Mở</td>
                                 </tr>
                                 <tr>
-                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Bài giảng số 3</a></td>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 3</a></td>
                                     <td>test</td>
                                     <td>07/06/2019</td>
                                     <td>07/06/2019</td>
                                     <td>Mở</td>
                                 </tr>
                                 <tr>
-                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Bài giảng số 4</a></td>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 4</a></td>
                                     <td>test</td>
                                     <td>07/06/2019</td>
                                     <td>07/06/2019</td>
                                     <td>Mở</td>
                                 </tr>
                                 <tr>
-                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Bài giảng số 5</a></td>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 5</a></td>
                                     <td>test</td>
                                     <td>07/06/2019</td>
                                     <td>07/06/2019</td>
                                     <td>Mở</td>
                                 </tr>
                                 <tr>
-                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Bài giảng số 6</a></td>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 6</a></td>
                                     <td>test</td>
                                     <td>07/06/2019</td>
                                     <td>07/06/2019</td>
                                     <td>Mở</td>
                                 </tr>
                                 <tr>
-                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Bài giảng số 7</a></td>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 7</a></td>
                                     <td>test</td>
                                     <td>07/06/2019</td>
                                     <td>07/06/2019</td>
                                     <td>Mở</td>
                                 </tr>
                                 <tr>
-                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Bài giảng số 8</a></td>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 8</a></td>
                                     <td>test</td>
                                     <td>07/06/2019</td>
                                     <td>07/06/2019</td>
                                     <td>Mở</td>
                                 </tr>
                                 <tr>
-                                    <td><a href="@Url.Action("LessonStudent" , "LessonToday")">Bài giảng số 9</a></td>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 9</a></td>
                                     <td>test</td>
                                     <td>07/06/2019</td>
                                     <td>31/06/2019</td>
@@ -502,7 +502,7 @@
     var GradeID = $("#GradeID").val();
     $.ajax({
         type: "POST",
-        url: '@Url.Action("GetDetails", "MyCourse")',
+        url: '@Url.Action("GetDetails", "Course")',
         data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, SubjectID: SubjectID, GradeID: GradeID, CourseID : '@_courseID',ClassID:'@_classID' },
         dataType: "json",
         async: false,
@@ -517,7 +517,7 @@
                     item = data.Data[i];
                     var active = "";
                     var title = "";
-                    var url = "@Url.Action("LessonStudent","LessonToday")" + "/" + item.ID+"/"+'@_classID'
+                    var url = "@Url.Action("Detail","Lesson")" + "/" + item.ID+"/"+'@_classID'
                     if (item.IsActive) {
                         title = "<td><a href='"+url+"' title=" + item.Title + ">" + item.Title + "</a></td>";
                         active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";

@@ -1,0 +1,20 @@
+﻿@{
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+}
+
+<nav role="navigation" aria-label="Class Navigation Menu">
+    <ul id="section-tabs">
+        <li class="section"><a href="@Url.Action("Detail","Course")/@currentClass.ID" title="Trang chủ lớp" class="home" tabindex="0">Trang chủ lớp</a></li>
+        <li class="section"><a href="#" title="Thông báo" class="announcements" tabindex="0">Thông báo</a></li>
+        <li class="section"><a href="@Url.Action("Syllabus","Course")/@currentClass.ID" title="Giới thiệu" class="syllabus" tabindex="0">Giới thiệu</a></li>
+        <li class="section"><a href="@Url.Action("Modules","Course")/@currentClass.ID" title="Cấu trúc bài" class="modules" tabindex="0">Cấu trúc bài</a></li>
+        <li class="section"><a href="@Url.Action("Assignment","Course")/@currentClass.ID" title="Kiểm tra" class="assignments" tabindex="0">Kiểm tra</a></li>
+        <li class="section"><a href="#" title="Thảo luận" class="discussions" tabindex="0">Thảo luận</a></li>
+        <li class="section"><a href="#" title="Danh sách lớp" class="people" tabindex="0">Thành viên lớp</a></li>
+        <li class="section"><a href="/#" title="Bảng điểm" class="grades" tabindex="0">Bảng điểm</a></li>
+    </ul>
+</nav>
+
+<script>
+    $('.sub-sidebar .' + activeSub).parent().addClass('active');
+</script>

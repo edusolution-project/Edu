@@ -32,6 +32,9 @@ namespace BaseCustomerEntity.Database
         public bool IsActive { get; set; }
         [JsonProperty("Order")]
         public int Order { get; set; }
+
+        [JsonProperty("Description")]
+        public string Description { get; set; }
     }
     public class ChapterService : ServiceBase<ChapterEntity>
     {

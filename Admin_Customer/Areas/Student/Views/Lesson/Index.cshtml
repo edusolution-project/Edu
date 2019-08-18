@@ -14,7 +14,7 @@
     </div>
 </div>
 <script>
-    $('.sidebar-item.lesson').addClass("active");
+    var activeTab = "calendar";
 </script>
 
 <div class="container">
@@ -101,7 +101,7 @@
         var endDate = $("#EndDate").val();
         $.ajax({
             type: "POST",
-            url: '@Url.Action("GetActiveList", "LessonToday")',
+            url: '@Url.Action("GetActiveList", "Lesson")',
             data: { SearchText: searchText, SubjectID: subject, GradeID: grade, StartDate: startDate, EndDate: endDate, UserID: UserID, PageSize:0 },
             dataType:"json",
             success: function (data) {
@@ -116,9 +116,9 @@
                         var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
 
                         body.append("<tr lid=\"" + item.ID + "\">" +
-                        "<td class='text-center'><a class='links' href='@Url.Action("Detail", "MyCourse")/" + item.ClassID + "'>" + item.SubjectName + "</a></td>" +
-                        "<td><a class='links' href='@Url.Action("Detail", "MyCourse")/" + item.ClassID + "'>" + item.ClassName + "</a></td>" +
-                        "<td><a class='links' href='@Url.Action("LessonStudent", "LessonToday")/" + item.ID + "/" + item.ClassID + "'>" + item.Title + "</a></td>" +
+                        "<td class='text-center'><a class='links' href='@Url.Action("Detail", "Course")/" + item.ClassID + "'>" + item.SubjectName + "</a></td>" +
+                        "<td><a class='links' href='@Url.Action("Detail", "Course")/" + item.ClassID + "'>" + item.ClassName + "</a></td>" +
+                        "<td><a class='links' href='@Url.Action("Detail", "Lesson")/" + item.ID + "/" + item.ClassID + "'>" + item.Title + "</a></td>" +
 
                         "<td dvalue=\"" + item.StartDate + "\" class='startdate text-center'><span>" + startdate + "</span></td>" +
                         "<td dvalue=\"" + item.EndDate + "\" class='enddate text-center'><span>" + enddate + "</span></td>" +

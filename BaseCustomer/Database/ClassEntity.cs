@@ -33,7 +33,10 @@ namespace BaseCustomerEntity.Database
         public int Order { get; set; }
         [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
-        [JsonProperty("EndDate")]
+        [JsonProperty("Description")]
+        public string Description { get; set; }
+        [JsonProperty("Image")]
+        public string Image { get; set; }
         public DateTime EndDate { get; set; }
 
 

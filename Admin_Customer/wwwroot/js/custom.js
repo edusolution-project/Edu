@@ -15,7 +15,7 @@ function tab_gonext() {
         $(pane[i]).removeClass('show active');
         $(pane[i + 1]).addClass('show active');
     }
-
+    tab_scroll_active();
 };
 
 function tab_goback() {
@@ -33,7 +33,27 @@ function tab_goback() {
         $(pane[i]).removeClass('show active');
         $(pane[i - 1]).addClass('show active');
     }
+    tab_scroll_active();
 };
+
+function tab_scroll_active() {
+    var firsttab = $('#pills-tab .nav-item:eq(0)');
+    var activetab = $('#pills-tab .nav-item .active').parent();
+    $('#pills-tab').scrollTop(activetab.offset().top - firsttab.offset().top)
+}
+
+function tab_set_active(obj) {
+    var r = setTimeout(function () {
+        var firsttab = $('#pills-tab .nav-item:eq(0)');
+        var activetab = $(obj).parent();
+        $('#pills-tab').scrollTop(activetab.offset().top - firsttab.offset().top);
+    }, 50);
+}
+
+
+function toggle_tab_compact() {
+    $('#pills-tab').toggleClass("compact");
+}
 
 /* check all input */
 function toggleAll(obj, wrapperid) {
@@ -47,10 +67,6 @@ function setToggle(wrapperid) {
     $(wrapper).find('input[type=checkbox]:first').prop("checked", $(wrapper).find("[name=cid]:not(:checked)").length === 0);
 }
 
-/* check student */
-function goBack() {
-    document.location = '/student/MyCourse';
-}
 function start(obj) {
     $(obj).parent().removeClass("d-flex").hide();
     $("#check-student").removeClass("d-none");
@@ -83,13 +99,13 @@ function countdown() {
     }, 1000);
 }
 function endtime() {
-    //document.location = 'LessonToday';
+    //document.location = 'Lesson';
     //alert("Thời gian làm bài đã kết thúc! Cảm ơn bạn");
 }
 
 /* tooltip */
 $(document).ready(function () {
-    $('.btn').tooltip({ trigger:'hover' });
+    $('.btn').tooltip({ trigger: 'hover' });
     //$('.lazy').Lazy();
 });
 

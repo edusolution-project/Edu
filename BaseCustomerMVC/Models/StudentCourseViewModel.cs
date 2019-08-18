@@ -5,7 +5,7 @@ using System;
 
 namespace BaseCustomerMVC.Models
 {
-    public class MyCourseViewModel
+    public class StudentCourseViewModel
     {
         [JsonProperty("ID")]
         public string ID { get; set; }
@@ -18,7 +18,7 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("Chapters")]
         public List<ChapterViewModel> Chapters { get; set; } = new List<ChapterViewModel>() { };
         [JsonProperty("Lessons")]
-        public List<LessonViewModel> Lessons { get; set; } = new List<LessonViewModel>() { };
+        public List<StudentLessonViewModel> Lessons { get; set; } = new List<StudentLessonViewModel>() { };
     }
     
 
