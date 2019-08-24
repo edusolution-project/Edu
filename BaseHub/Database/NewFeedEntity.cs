@@ -9,6 +9,10 @@ namespace BaseHub.Database
 {
     public class NewFeedEntity : EntityBase
     {
+        [JsonProperty("ParentID")]
+        public string ParentID { get; set; }
+        [JsonProperty("Title")]
+        public string Title { get; set; }// nội dung
         [JsonProperty("Content")]
         public string Content { get; set; }// nội dung
         [JsonProperty("Medias")]

@@ -1,10 +1,19 @@
 ﻿
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Thảo luận";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var classList = ViewBag.Data as List<BaseCustomerEntity.Database.ClassEntity>;
 }
-
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+    </div>
+</div>
+<script>
+    var activeTab = "comments";
+</script>
 <div class="container">
     <div class="row">
         <div class="col-3">
@@ -20,7 +29,7 @@
         function LoadData() {
         $.ajax({
             type: "POST",
-            url: '@Url.Action("GetList", "MyCourse")',
+            url: '@Url.Action("GetList", "Course")',
             data: {},
             dataType:"json",
             success: function (data) {
