@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BaseHub.Database
 {
-    public class CommentEntity : EntityBase
+    public class NewFeedEntity : EntityBase
     {
         [JsonProperty("Content")]
         public string Content { get; set; }// nội dung
@@ -17,10 +17,8 @@ namespace BaseHub.Database
         public DateTime TimePost { get; set; }
         [JsonProperty("Poster")]
         public string Poster { get; set; } // userid
-        [JsonProperty("NewFeedID")]
-        public string NewFeedID { get; set; }
-        [JsonProperty("ParentID")]
-        public string ParentID { get; set; }
+        [JsonProperty("GroupID")]
+        public string GroupID { get; set; }
         [JsonProperty("PosterName")]
         public string PosterName { get; set; } // tên người đăng
         [JsonProperty("Likes")]
@@ -28,9 +26,9 @@ namespace BaseHub.Database
         [JsonProperty("UnLikes")]
         public List<string> UnLikes { get; set; }
     }
-    public class CommentService : ServiceBase<CommentEntity>
+    public class NewFeedService : ServiceBase<NewFeedEntity>
     {
-        public CommentService(IConfiguration config) : base(config)
+        public NewFeedService(IConfiguration config) : base(config)
         {
 
         }
