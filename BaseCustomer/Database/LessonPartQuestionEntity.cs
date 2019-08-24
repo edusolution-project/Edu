@@ -28,6 +28,8 @@ namespace BaseCustomerEntity.Database
         public Media Media { get; set; }
         [JsonProperty("ParentID")]
         public string ParentID { get; set; }
+        [JsonProperty("CourseID")]
+        public string CourseID { get; set; }
 
     }
     public class LessonPartQuestionService : ServiceBase<LessonPartQuestionEntity>

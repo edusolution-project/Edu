@@ -329,9 +329,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             });
 
                 _chapterService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
-
+                _lessonService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
+                _lessonPartAnswerService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
+                _lessonPartQuestionService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
+                _lessonPartQuestionService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
 
                 var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).ToList();
+
                 if (lessons != null)
                 {
                     foreach (var lesson in lessons)
@@ -572,7 +576,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult Clone(string CourseID, CourseEntity newcourse)
         {
-
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             var item = _modservice.GetItemByID(CourseID); //publisher
             if (item != null)
@@ -718,7 +721,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Timer = _child.Timer,
                         Type = _child.Type,
                         Updated = DateTime.Now,
-                        Created = DateTime.Now
+                        Created = DateTime.Now,
+                        CourseID = item.CourseID,
                     };
                     if (_item.Media != null && _item.Media.Path != null)
                         if (!_item.Media.Path.StartsWith("http://"))
@@ -749,7 +753,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Order = _child.Order,
                         ParentID = item.ID,
                         Updated = DateTime.Now,
-                        Created = DateTime.Now
+                        Created = DateTime.Now,
+                        CourseID = item.CourseID,
                     };
                     //change Media path
                     if (_item.Media != null && _item.Media.Path != null)
@@ -780,7 +785,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Order = _child.Order,
                         ParentID = item.ID,
                         Updated = DateTime.Now,
-                        Created = DateTime.Now
+                        Created = DateTime.Now,
+                        CourseID = item.CourseID
                     };
                     if (_item.Media != null && _item.Media.Path != null)
                         if (!_item.Media.Path.StartsWith("http://"))

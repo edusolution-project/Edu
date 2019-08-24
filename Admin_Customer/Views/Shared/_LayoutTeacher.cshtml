@@ -3,24 +3,40 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <title>@ViewBag.Title</title>
     <!-- Custom fonts for this template-->
+    @*
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700&amp;subset=latin-ext&amp;display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">*@
     <link href="~/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
     <!-- Custom styles for this template-->
-    <link rel="stylesheet" href="~/css/sb-admin-2.css">
-    <link rel="stylesheet" href="~/css/custom.css">
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/css/custom.css" rel="stylesheet">
+    <link href="~/css/_sidebar.min.css" rel="stylesheet" />
+    <link href="~/css/layout.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/jquery-ui.min.css" />
+
     <script type="text/javascript" src="~/vendor/jquery/jquery.min.js"></script>
-    <script type="text/javascript" src="~/js/site.js"></script>
     <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="~/js/custom.js"></script>
     <script type="text/javascript" src="~/js/plugins/jquery.lazy.min.js"></script>
     <script type="text/javascript" src="~/js/plugins/jquery.lazy.plugins.min.js"></script>
-    <script type="text/javascript" src="~/js/plugins/ckeditor.js"></script>
-    <script src="~/js/jquery-ui-timepicker-addon.js"></script>
+    <script src="~/js/plugins/ck4/ckeditor.js"></script>
+    <script src="~/js/moment.min.js"></script>
+    <script type="text/javascript" src="~/js/popper.min.js"></script>
+    <script type="text/javascript" src="~/vendor/bootstrap/js/bootstrap.js"></script>
+    <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
+    <script src="~/js/site.js"></script>
+
 </head>
 <body>
+    <script>
+        var activeTab;
+    </script>
     <!-- Page Wrapper -->
     <div id="wrapper">
 
@@ -29,11 +45,12 @@
 
             <!-- Main Content -->
             <div id="content">
-                @await Html.PartialAsync("_topmenu")
 
-                @await Html.PartialAsync("_sideBarTeacher");
+                @await Html.PartialAsync("_sideBarTeacher")
 
-                @RenderBody()
+                <div class="right-content">
+                    @RenderBody()
+                </div>
 
                 <!-- Footer -->
                 @await Html.PartialAsync("_Footer")
@@ -45,22 +62,14 @@
         </div>
         <!-- End of Page Wrapper -->
         <!-- Scroll to Top Button-->
-        <a class="scroll-to-top rounded" href="#page-top">
-            <i class="fas fa-angle-up"></i>
-        </a>
+        @*<a class="scroll-to-top rounded" href="#page-top">
+                <i class="fas fa-angle-up"></i>
+            </a>*@
     </div>
     <!-- Logout Modal-->
     @await Html.PartialAsync("_modalLogout")
 
-
-    @RenderSection("Script", false)
     @RenderSection("Scripts", false)
-    <!-- Bootstrap core JavaScript-->
-    <script type="text/javascript" src="~/js/popper.min.js"></script>
-    <script type="text/javascript" src="~/vendor/bootstrap/js/bootstrap.js"></script>
-    <!-- Core plugin JavaScript-->
-    <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
-    <!-- Custom scripts for all pages-->
-    <script type="text/javascript" src="~/js/sb-admin-2.min.js"></script>
+
 </body>
 </html>

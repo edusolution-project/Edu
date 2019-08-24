@@ -35,6 +35,10 @@ namespace BaseCustomerEntity.Database
         public DateTime Created { get; set; }
         [JsonProperty("Updated")]
         public DateTime Updated { get; set; }
+        [JsonProperty("ClassID")]
+        public string ClassID {get;set;}
+        [JsonProperty("StudentID")]
+        public string StudentID {get;set;}
 
     }
     public class ExamDetailService : ServiceBase<ExamDetailEntity>

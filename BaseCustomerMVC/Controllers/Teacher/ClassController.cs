@@ -30,10 +30,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly IHostingEnvironment _env;
 
+        private readonly FileProcess _fileProcess;
+
         public ClassController(GradeService gradeservice
            , SubjectService subjectService, TeacherService teacherService, ClassService service,
             CourseService courseService, ChapterService chapterService, LessonService lessonService, LessonScheduleService lessonScheduleService,
-            StudentService studentService, IHostingEnvironment evn)
+            StudentService studentService, IHostingEnvironment evn,
+            FileProcess fileProcess)
         {
             _gradeService = gradeservice;
             _subjectService = subjectService;
@@ -47,6 +50,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _mapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
             _env = evn;
+            _fileProcess = fileProcess;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -82,22 +86,38 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Schedule(DefaultModel model)
         {
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            //var UserID = User.Claims.GetClaimByType("UserID").Value;
+            //var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
-            var subject = new List<SubjectEntity>();
-            var grade = new List<GradeEntity>();
+            //var subject = new List<SubjectEntity>();
+            //var grade = new List<GradeEntity>();
 
-            if (teacher != null && teacher.Subjects != null)
-            {
-                subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
-                grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
-            }
-            ViewBag.Grade = grade;
-            ViewBag.Subject = subject;
+            //if (teacher != null && teacher.Subjects != null)
+            //{
+            //    subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+            //    grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+            //}
 
-            ViewBag.User = UserID;
-            ViewBag.Model = model;
+            //ViewBag.Grade = grade;
+            //ViewBag.Subject = subject;
+
+            //ViewBag.User = UserID;
+            //ViewBag.Model = model;
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
+            return View();
+        }
+
+        public IActionResult Members(DefaultModel model)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
             return View();
         }
 
@@ -281,11 +301,70 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse.ToList().Select(t=> _activeMapping.AutoOrtherType(t, new ClassActiveViewModel(){
-                    Progress = (int)((DateTime.Now.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays  * 100 / (t.EndDate.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays)
-                    })) }
+                    Progress = (int)((DateTime.Now.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays  * 100 / (t.EndDate.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays),
+                    SubjectName = _subjectService.GetItemByID(t.SubjectID).Name
+                    }))
+                    }
             };
             return new JsonResult(response);
         }
+
+
+        [HttpPost]
+        [DisableRequestSizeLimit]
+        public async Task<JsonResult> SaveInfo(ClassEntity entity)
+        {
+
+            if (String.IsNullOrEmpty(entity.ID))
+            {
+                new JsonResult(
+                    new Dictionary<string, object>
+                    {
+                        { "Error", "Không có thông tin lớp"}
+                    });
+            }
+
+            var currentClass = _service.GetItemByID(entity.ID);
+            if (currentClass == null)
+                if (String.IsNullOrEmpty(entity.ID))
+                {
+                    new JsonResult(
+                        new Dictionary<string, object>
+                        {
+                        { "Error", "Không có thông tin lớp"}
+                        });
+                }
+
+            try
+            {
+                var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
+                if (files != null && files.Count > 0)
+                {
+                    var file = files[0];
+
+                    var filename = currentClass.ID + "_" + DateTime.Now.ToUniversalTime().ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                    currentClass.Image = await _fileProcess.SaveMediaAsync(file, filename);
+                }
+                currentClass.Description = entity.Description;
+                _service.CreateOrUpdate(currentClass);
+
+                return new JsonResult(
+                    new Dictionary<string, object>
+                    {
+                        { "Data", currentClass }
+                    }
+                );
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(
+                        new Dictionary<string, object>
+                        {
+                            { "Error", e.Message}
+                        });
+            }
+        }
+
 
         [HttpPost]
         [Obsolete]

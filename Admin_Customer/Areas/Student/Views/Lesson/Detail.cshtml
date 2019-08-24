@@ -1,10 +1,12 @@
 ﻿
 @{
-    ViewData["Title"] = "Index";
+    
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
     var _lessonID = ViewBag.LessonID as string;
     var _classID = ViewBag.ClassID as string;
+    var currentLesson = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
+    ViewData["Title"] = currentLesson.Title;
 }
 <div class="container-fluid">
     <!-- Begin Page Content -->
@@ -36,7 +38,8 @@
                 load: '@Url.Action("GetLesson", "Course")',
                 current: '@Url.Action("GetCurrentExam","Exam")',
                 start: '@Url.Action("Create","Exam")',
-                chosen: '@Url.Action("CreateDetails","Exam")',
+                answer: '@Url.Action("CreateDetail","Exam")',
+                removeans: '@Url.Action("RemoveDetail","Exam")',
                 end: '@Url.Action("CompleteExam","Exam")'
             },
             lesson_id: '@_lessonID',
@@ -45,37 +48,45 @@
     var widget = new ExamStudent.onReady(config);
     </script>
     <style>
-    #nav-menu {
-        border-bottom: dashed 1px #CCC;
-        height: 64px;
-    }
-
-        #nav-menu .lesson-tab {
-            height: 42px;
+        #nav-menu {
+            height: 64px;
+            z-index: 2;
         }
 
-    #pills-tab {
-        width: 100%;
-        overflow: hidden;
-        background: #DDD;
-        border: solid 1px #999;
-        z-index: 1021;
-        border-radius: 10px;
-    }
-
-        #pills-tab.compact {
-            height: 42px;
-            background: #DDD;
-        }
-
-        #pills-tab .nav-item {
-            width: 100%;
-        }
-
-            #pills-tab .nav-item .nav-link {
-                padding: 3px 10px;
-                cursor:pointer;
+            #nav-menu.bd-top {
+                border-top: dashed 1px #CCC;
             }
 
-    </style>    
+            #nav-menu.bd-bottom {
+                border-bottom: dashed 1px #CCC;
+            }
+
+
+            #nav-menu .lesson-tab {
+                height: 42px;
+            }
+
+        #pills-tab {
+            width: 100%;
+            overflow: hidden;
+            background: #DDD;
+            border: solid 1px #999;
+            z-index: 1021;
+            border-radius: 10px;
+        }
+
+            #pills-tab.compact {
+                height: 42px;
+                background: #DDD;
+            }
+
+            #pills-tab .nav-item {
+                width: 100%;
+            }
+
+                #pills-tab .nav-item .nav-link {
+                    padding: 3px 10px;
+                    cursor: pointer;
+                }
+    </style>
 }

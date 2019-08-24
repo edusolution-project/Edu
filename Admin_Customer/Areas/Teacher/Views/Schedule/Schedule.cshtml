@@ -1,0 +1,161 @@
+﻿@{
+    ViewData["Title"] = "Lớp học của tôi";
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>
+    ;
+    var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>
+        ;
+    var user = ViewBag.User as string;
+}
+
+
+<!-- Begin Page Content -->
+<div class="container">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Lịch giảng dạy</h6>
+        </div>
+        <div class="card-body">
+            <div class="search-filter">
+                <div class="form-row">
+                    <div class="form-group row col-md-4">
+                        <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                        <div class="col-sm-8">
+                            <select id="SubjectID" class="form-control" onchange="LoadData()">
+                                @{
+                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                    {
+                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                    }
+
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    @*<div class="form-group row col-md-4">
+                                <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+                                <div class="col-sm-8">
+                                    <select id="GradeID" class="form-control" onchange="LoadData()">
+                                        <option value="">-- Tất cả --</option>
+                                        @{
+                                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                        {
+                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
+                                        }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                    *@
+                    <div class="form-group row col-md-4">
+                        <label for="staticText" class="col-sm-4 col-form-label">Từ ngày:</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control datepicker" value="@DateTime.Now.ToString(" dd/MM/yyyy")" />
+                            <input type="hidden" name="StartDate" class="hiddenDate" id="StartDate" value="@DateTime.Now.ToString(" MM/dd/yyyy")">
+                        </div>
+                    </div>
+                    <div class="form-group row col-md-4">
+                        <label for="staticText" class="col-sm-4 col-form-label">Đến ngày:</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control datepicker" value="@DateTime.Now.AddDays(7).ToString(" dd/MM/yyyy")" />
+                            <input type="hidden" name="EndDate" class="hiddenDate" id="EndDate" value="@DateTime.Now.AddDays(7).ToString(" MM/dd/yyyy")">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr class="text-center">
+                            <th>Môn</th>
+                            <th>Lớp</th>
+                            <th>Tên bài học</th>
+                            <th>Thời gian bắt đầu</th>
+                            <th>Thời gian kết thúc</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End of Main Content -->
+
+
+<script>
+    $('.datepicker').each(function () {
+        var fieldID = $(this).next().attr("id");
+        $(this).datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: 'dd/mm/yy',
+            altField: '#' + fieldID,
+            altFormat: 'yy-mm-dd'
+        });
+    }).change(function () {LoadData();})
+
+    function LoadData() {
+        var UserID = '@user';
+        var searchText = $("#searchText").val();
+        var subject = $("#SubjectID").val();
+        var grade = $("#GradeID").val();
+        var startDate = $("#StartDate").val();
+        var endDate = $("#EndDate").val();
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetList", "LessonSchedule")',
+            data: { SearchText: searchText, SubjectID: subject, GradeID: grade, StartDate: startDate, EndDate: endDate, UserID: UserID, PageSize:0 },
+            dataType:"json",
+            success: function (data) {
+                var scheduleBody = $('#dataTable tbody');
+                scheduleBody.html("");
+                lessons = data.Data;
+                if (lessons.length > 0) {
+                    for (j = 0; j < lessons.length; j++) {
+                        var item = lessons[j];
+                        var active = "";
+                        if (item.IsActive) {
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("unpublish", "LessonSchedule")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                        } else {
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                        }
+                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
+                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
+                        scheduleBody.append("<tr lid=\"" + item.ID + "\">" +
+                        "<td class='text-center'>" + item.SubjectName + "</td>" +
+                        "<td><a class='links' href='@Url.Action("Detail", "Class")/" + item.ClassID + "'>" + item.ClassName + "</a></td>" +
+                        "<td><a class='links' href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=" + item.ClassID + "'>" + item.Title + "</a></td>" +
+
+                        "<td dvalue=\"" + item.StartDate + "\" class='startdate text-center'><span>" + startdate + "</span></td>" +
+                        "<td dvalue=\"" + item.EndDate + "\" class='enddate text-center'><span>" + enddate + "</span></td>" + active +
+                        "</tr>"
+                        );
+
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    };
+
+    function LoadGrade() {
+        var subject = $("#SubjectID").val();
+        var grade = $("#GradeID").val();
+        $('#GradeID option:gt(0)[for!=' + subject + ']').hide();
+        $('#GradeID option:gt(0)[for=' + subject + ']').show();
+        //if ($('#GradeID option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {
+           $('#GradeID').val($('#GradeID option:visible:first').attr('value'));
+        //}
+        LoadData();
+    }
+
+    $(document).ready(function () {
+        LoadGrade();
+    });
+</script>

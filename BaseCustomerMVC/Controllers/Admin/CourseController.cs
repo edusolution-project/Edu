@@ -31,6 +31,9 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly LessonPartService _lessonPartService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
+        private readonly ExamService _examService;
+        private readonly ExamDetailService _examDetailService;
+
 
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneAnswerService;
@@ -53,6 +56,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             StudentService studentService,
             LessonService lessonService,
             LessonScheduleService lessonScheduleService,
+            ExamService examService,
+            ExamDetailService examDetailService,
 
             LessonPartService lessonPartService,
             LessonPartQuestionService lessonPartQuestionService,
@@ -73,6 +78,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             _studentService = studentService;
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
+            _examService = examService;
+            _examDetailService = examDetailService;
 
             _lessonPartService = lessonPartService;
             _lessonPartQuestionService = lessonPartQuestionService;
@@ -280,6 +287,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                     _cloneLessonPartService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     _cloneQuestionService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     _cloneAnswerService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    _examService.Collection.DeleteMany(o=> ids.Contains(o.ClassID));
+                    _examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     var delete = _service.Collection.DeleteMany(o => ids.Contains(o.ID));
                     return new JsonResult(delete);
                 }

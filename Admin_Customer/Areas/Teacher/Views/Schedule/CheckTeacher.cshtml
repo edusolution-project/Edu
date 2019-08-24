@@ -1,0 +1,341 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+<!-- Page Heading -->
+<div id="check">    
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">Bài kiểm tra số 1</h6>
+            <div class="float-right">Thời gian làm bài: 20:00 | Tổng điểm: 20</div>
+        </div>
+        <div class="card-body">
+            <div class="part-box-header">
+                <h4 class="title">1. Choose correct answers</h4>
+            </div>
+            <div class="item">
+                <h4 class="title">1 This week's prize is  (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A a music cassette</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B two concert tickets</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C a classical CD</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">2 This week's prize is  (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A a music cassette</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B two concert tickets</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C a classical CD</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">3 This week's prize is  (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A a music cassette</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B two concert tickets</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C a classical CD</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">4 This week's prize is  (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A a music cassette</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B two concert tickets</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C a classical CD</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">5 This week's prize is  (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A a music cassette</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B two concert tickets</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C a classical CD</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">6 This week's prize is  (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A a music cassette</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B two concert tickets</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C a classical CD</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">7 This week's prize is  (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A a music cassette</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B two concert tickets</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C a classical CD</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">8 This week's prize is  (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A a music cassette</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B two concert tickets</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C a classical CD</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">9 The person who wrote the music lived in (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A Italy</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B Spain</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C France</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">10 What else shares the title of this music? (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A Italy</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B Spain</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C France</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">11 What did people do when they first heard the music? (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A Italy</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B Spain</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C France</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">12 This piece of music has been (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A Italy</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B Spain</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C France</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <h4 class="title">13 This piece of music has been (1đ)</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">A Italy</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item selected">
+                            <input type="hidden" value="true"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">B Spain</label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset class="answer-item">
+                            <input type="hidden"><input type="checkbox" class="input-checkbox answer-checkbox" onclick="toggleCorrectAnswer(this)">
+                            <label class="answer-text">C France</label>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+
+            <div class="part-box ESSAY">
+                <div class="part-box-header">
+                    <h4 class="title">2. Write an essay for the following content ( 30đ )</h4>
+                </div>
+                <div class="content-wrapper">
+                    <div class="doc-content">
+                        <ul>
+                            <li>Over 80,000 entries and 215,000 pronunciations using the International Phonetic Alphabet.</li>
+                            <li>Includes proper names as well as general vocabulary.</li>
+                            <li>CD-ROM and online version include spoken pronunciations in British and American English.</li>
+                            <li>Panels give information on sounds and phonetics terminology.</li>
+                            <li>CD-ROM includes exercises, pronunciation pronunciation practice, and phonetic search facility for comparing sounds.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="text-center">
+                <button class="btn btn-primary">Thêm nội dung</button>
+            </div>
+        </div>
+    </div>
+</div>

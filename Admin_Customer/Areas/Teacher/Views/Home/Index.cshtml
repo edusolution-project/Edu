@@ -3,9 +3,20 @@
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
 }
 
-
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+        <div class="card-content course-box" id="myclassWrapper">
+        </div>
+    </div>
+</div>
+<script>
+    activeTab = "dashboard";
+</script>
 <!-- Begin Page Content -->
-<div class="container">
+@*<div class="container">
     <div class="row">
         <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
@@ -36,47 +47,9 @@
                     </div>
                 </div>
             </div>
-
-            @*<!-- Approach -->
-            <div id="thao-luan" class="card shadow mb-4 hide">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Thảo luận mới</h6>
-                </div>
-                <div class="card-body">
-                    <div class="item">
-                        <div class="title"><span class="text">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <br>
-                        <p>Hello teacher, I don't understand last lesson, can you help?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <br>
-                        <p>Hello teacher, I don't understand last lesson, can you help?</p>
-                    </div>
-                    <div class="item">
-                        <div class="title"><span class="text">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
-                        <br>
-                        <p>Hello teacher, I don't understand last lesson, can you help?</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Approach -->
-            <div class="card shadow mb-4 hide">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Tin tức</h6>
-                </div>
-                <div class="card-body">
-                    <p>New class for beginer will open soon! Register now!</p>
-                    <div class="float-right">
-                        <a href="#"> Xem tất cả</a>
-                    </div>
-                </div>
-            </div>*@
-
         </div>
     </div>
-</div>
+</div>*@
 <!-- End of Main Content -->
 <script>
     function LoadMyClass() {
@@ -92,11 +65,26 @@
                 {
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
-                        body.append(" <h4 class=\"small font-weight-bold\"><a href=\"@Url.Action("Detail", "Class")/" + item.ID + "\">"  +  item.Name + "</a><span class=\"float-right\">" + item.Progress + "%</span></h4>"+
+
+
+                        body.append("<a href=\"@Url.Action("Detail", "Class")/" + item.ID + "\">" +
+                                        "<div class='course-item' " + (item.Image == null ? "" : "style='background-image:url(\"" + item.Image + "\")'")  + ">" +
+                                        "<div class='course-info'>" +
+                                            "<h3>" + item.Name + "</h3>" +
+                                            "<h4><div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + item.Progress + "%;height:24px;\" aria-valuenow=\"" + item.Progress + "\" aria-valuemin=\"0\" aria-valuemax=\"100\">" + item.Progress + "%</div></h4>" +
+                                            "<div class='action-wrapper'>" +
+                                                "<a class='actionlink announcement' href='@Url.Action("News", "Course")/" + item.ID + "'></a>" +
+                                                "<a class='actionlink assignment' href='@Url.Action("Assignment", "Course")/" + item.ID + "'></a>" +
+                                                "<a class='actionlink comment' href='@Url.Action("Comments", "Course")/" + item.ID + "'></a>" +
+                                            "</div>" +
+                                        "</div>" +
+                                    "</div></a>");
+
+                        @*body.append(" <h4 class=\"small font-weight-bold\"><a href=\"@Url.Action("Detail", "Class")/" + item.ID + "\">"  +  item.Name + "</a><span class=\"float-right\">" + item.Progress + "%</span></h4>"+
                     "<div class=\"progress mb-4\">"+
                         "<div class=\"progress-bar\" role=\"progressbar\" style=\"width: " + item.Progress + "%\" aria-valuenow=\"" + item.Progress + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div>"+
                     "</div>"
-                        );
+                        );*@
                     }
                 }
             },
@@ -132,7 +120,6 @@
             }
         });
     }
-
 
     $(document).ready(function(){
         LoadMyClass();

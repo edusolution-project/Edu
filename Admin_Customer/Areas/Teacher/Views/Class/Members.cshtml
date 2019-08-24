@@ -1,0 +1,287 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    ViewData["Title"] = currentClass.Name + " - Danh sách lớp";
+}
+
+<script>
+    activeTab = "course";
+    modulesLink = "@Url.Action("Modules", "Course")/@currentClass.ID";
+    activeSub = "syllabus";
+</script>
+
+
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+        <div class="sub-sidebar">
+            @await Html.PartialAsync("_subSidebarTeacher")
+        </div>
+        <div class="main-content">
+            <div class="intro-wrapper content-block">
+                <div class="block-title row">
+                    <h2 class="col-md-11">@currentClass.Name</h2><button class="btn btn-info col-md-1" onclick="editClassInfo()" data-toggle="modal" data-target="#infoModal">Cập nhật</button>
+                </div>
+                <div class="course-syllabus">
+
+                    @if (!String.IsNullOrEmpty(currentClass.Image))
+                    {
+                        <img src="@currentClass.Image" title="@currentClass.Name" class="courseImg" />
+                    }
+                    @if (!String.IsNullOrEmpty(currentClass.Description))
+                    {
+                        <div class="courseDescription">
+                            @Html.Raw(currentClass.Description)
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="modal fade bd-modal-lg" role="dialog" aria-hidden="true" id="infoModal">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Cập nhật thông tin lớp</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-2 form-label p-3" for="classAvatarEdit">Chọn ảnh:</label>
+                                    <div>
+                                        <button class="btn btn-info btnAddFile" onclick="chooseFile(this)" tabindex="-1">Chọn file</button>
+                                        <input type="file" name="classAvatarEdit" class="d-none" id="classAvatarEdit" onchange="changeMedia(this)" accept="image/*">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="col-sm-2 form-label p-3" for="classDescriptionEdit">Thông tin lớp:</label>
+                                    <div class="col-sm-10">
+                                        <textarea name="classDescriptionEdit" id="classDescriptionEdit"></textarea>
+                                    </div>
+                                    <script>
+                                        CKEDITOR.replace("classDescriptionEdit");
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary btn-submit" data-dismiss="modal" onclick="saveClassInfo()">Lưu</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="syllabus-wrapper content-block">
+                <table class="w-100 table-big-title table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width:10%" class="text-center">
+                                <h3>
+                                    STT
+                                </h3>
+                            </th>
+                            <th style="width:50%">
+                                <h3>
+                                    Tên chương
+                                </h3>
+                            </th>
+                            <th style="width:40%">
+                                <h3>
+                                    Luyện tập
+                                </h3>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="assignment-wrapper content-block">
+                <div class="block-title">
+                    <h2>Kiểm tra & Đánh giá</h2>
+                </div>
+                <table class="w-100 table-hover table-normal-title">
+                    <thead>
+                        <tr style="font-weight:700">
+                            <th style="width:20%">
+                                Ngày
+                            </th>
+                            <th style="width:60%">
+                                Chi tiết
+                            </th>
+                            <th style="width:20%" class="text-right">Kết thúc</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+    var chapters = [];
+    var lessons = [];
+    var scheduleBody = $('.modules-wrapper');
+    var syllabusBody = $('.syllabus-wrapper tbody');
+    var assignmentBody = $('.assignment-wrapper tbody');
+
+    function LoadSchedule() {
+        chapters = [];
+        lessons = [];
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetList", "LessonSchedule")',
+            data: {ClassID: '@currentClass.ID' },
+            dataType:"json",
+            success: function (data) {
+                scheduleCounter = 1;
+                syllabusBody.html("");
+
+                chapters = data.Data.Chapters;
+                lessons = data.Data.Lessons;
+                rcCounter = 0;
+
+                if (chapters.length > 0) {
+                    for (i = 0; i < chapters.length; ++i) {
+                        var chapter = chapters[i];
+                        var parent = scheduleBody;
+
+                        if (chapter.ParentID == null) {
+                            chapter.ParentID = "0";
+                        }
+                        if (chapter.ParentID === "0")
+                        {
+                            var chapContent = $("<tr id='chap" + chapter.ID + "'>");
+                            chapContent.append($("<td>", {"class":"text-center", "text": ++rcCounter}));
+                            chapContent.append($("<td>").append($("<a>", {
+                                    "class":"action-link",
+                                    "href": modulesLink + "#" + chapter.ID,
+                                    "text": chapter.Name
+                                    })));
+                            chapContent.append($("<td>"));
+
+                            syllabusBody.append(chapContent);
+                        }
+                    }
+                }
+                if (lessons.length > 0) {
+                    for (j = 0; j < lessons.length; j++) {
+                        var item = lessons[j];
+
+                        var startdate = moment(item.StartDate).format('DD/MM/YYYY');
+                        var enddate = moment(item.Enddate).format('DD/MM/YYYY');
+
+                        if(item.TemplateType === 2 && item.ChapterID  != "0")
+                        {
+                            if ($('tr#chap' + item.ChapterID + ' td:last div').length == 0) {
+                            $('tr#chap' + item.ChapterID + ' td:last').append($("<div>").append(
+                                    $("<a>", {
+                                        "text": item.Title + " (" + startdate + ")"
+                                    }))
+                                );
+                            }
+                        }
+
+                        var assigmentRow = $("<tr>");
+                        assigmentRow.append($("<td>", {"text":startdate}));
+                        assigmentRow.append($("<td>").append($("<i class='assignment-icon icon'>")).append($("<a>", {
+                                        "href": "@Url.Action("Detail", "Lesson")/" + item.ID + "/@currentClass.ID",
+                                        "class": "action-link",
+                                        "text": item.Title ,
+                                        "style": "margin-left:5px;"
+                                    })));
+                        assigmentRow.append($("<td>", { "class":"text-right", "text":enddate}));
+                        assignmentBody.append(assigmentRow);
+
+                    }
+                }
+            },
+            error: function (res) {
+                console.log(res.responseText);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        LoadSchedule();
+    });
+
+    function editClassInfo(){
+        CKEDITOR.instances['classDescriptionEdit'].setData($('.intro-wrapper .courseDescription').html());
+        if ($('.intro-wrapper .courseImg').length > 0) {
+            if($('#classAvatarEdit').siblings("img").length > 0)                
+                $('#classAvatarEdit').siblings("img").attr('src', $('.intro-wrapper .courseImg').attr('src'));
+            else
+                $('#classAvatarEdit').parent().prepend($("<img>", {'src': $('.intro-wrapper .courseImg').attr('src')}));
+        }
+        $('#classAvatarEdit').siblings("button").text("Chọn file");
+        $('#classAvatarEdit').val(null);
+    }
+
+    function saveClassInfo()
+    {
+        var classid = '@currentClass.ID';
+        var description = CKEDITOR.instances.classDescriptionEdit.getData();
+        var fileuploads = $('#classAvatarEdit');
+        var ufiles = fileuploads[0].files;
+
+        if (window.FormData !== undefined) {
+            var data = new FormData();
+            if (ufiles.length > 0) {
+                for (var x = 0; x < ufiles.length; x++) {
+                    data.append(ufiles[x].name, ufiles[x]);
+                }
+            }
+
+            data.append("ID", classid);
+            data.append("Description", description);
+
+            $.ajax({
+                type: "POST",
+                url: '/Teacher/Class/SaveInfo',
+                contentType: false,
+                processData: false,
+                data: data,
+                success: function (data) {
+                    if(data.Error == null)
+                        renderClassInfo(data);
+                    else
+                        alert(data.Error);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.log(thrownError);
+                    alert("Có lỗi, vui lòng kiểm tra lại kết nối");
+                }
+            });
+        }
+    }
+
+    function chooseFile(obj) {
+        $(obj).siblings("input[type=file]").focus().click();
+    }
+
+    function changeMedia(obj) {
+        var file = $(obj)[0].files[0];
+        $(obj).siblings(".btnAddFile").text(file.name);
+        $(obj).siblings("img").remove();
+    }
+
+    function renderClassInfo(data)
+    {
+        var currentClass = data.Data;
+        if($('.intro-wrapper .courseImg').length > 0)
+            $('.intro-wrapper .courseImg').attr('src', currentClass.Image);
+        $('.intro-wrapper .courseDescription').html(currentClass.Description);
+
+    }
+    </script>
+}

@@ -26,6 +26,8 @@ namespace BaseCustomerEntity.Database
         public Media Media { get; set; }
         [JsonProperty("Order")]
         public int Order { get; set; }
+        [JsonProperty("CourseID")]
+        public string CourseID { get; set; }
 
     }
     public class LessonPartAnswerService : ServiceBase<LessonPartAnswerEntity>

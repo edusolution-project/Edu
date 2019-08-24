@@ -108,6 +108,7 @@ table {
                     background-repeat: no-repeat;
                     background-image: url('images/defCAvatar.png');
                     filter: opacity(0.75);
+                    background-size: auto 100%;
 
                     &:hover {
                         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
@@ -202,6 +203,19 @@ table {
 
                 @at-root .sub-sidebar ~ .main-content {
                     padding-left: 190px;
+                }
+
+                .intro-wrapper {
+
+                    .courseImg {
+                        margin: 12px 0 0;
+                        max-width: 100%;
+                        max-height: 200px;
+                    }
+
+                    .courseDescription {
+                        margin: 12px 0 0;
+                    }
                 }
             }
 
@@ -339,7 +353,7 @@ footer {
     height: 40px;
     line-height: 40px;
     text-align: center;
-    z-index: 0 !important;
+    z-index: 2 !important;
     filter: opacity(0.8);
     background-color: $base_blue;
     color: white;

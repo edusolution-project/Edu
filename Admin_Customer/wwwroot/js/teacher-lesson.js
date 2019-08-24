@@ -552,7 +552,7 @@ var render = {
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         tabsitem.append(itembox);
 
-        //var ItemRow = $("<div>", { "class": "row" });
+        var ItemRow = $("<div>", { "class": "row" });
 
         var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {

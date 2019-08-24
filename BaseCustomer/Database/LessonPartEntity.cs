@@ -11,6 +11,7 @@ namespace BaseCustomerEntity.Database
     {
         [JsonProperty("OriginID")]
         public string OriginID { get; set; }
+
         [JsonProperty("ParentID")]
         public string ParentID { get; set; } // chính là lessonID
         [JsonProperty("Title")]
@@ -33,6 +34,8 @@ namespace BaseCustomerEntity.Database
         public int Order { get; set; }
         [JsonProperty("Media")]
         public Media Media { get; set; }
+        [JsonProperty("CourseID")]
+        public string CourseID { get; set; }
     }
 
     public class LessonPartService : ServiceBase<LessonPartEntity>

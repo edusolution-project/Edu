@@ -679,7 +679,7 @@ function answerQuestion(obj, quizid, answerID, answerValue) {
     dataform.append("AnswerValue", answerValue);
     Ajax(urlChose, "POST", dataform, false)
         .then(function (res) {
-            if (res != "Accept Deny") {
+            if (res != "Access Deny") {
                 var data = JSON.parse(res);
                 obj.parentElement.parentElement.parentElement.setAttribute("data-id", data.ID);
                 SetCurrentExam()

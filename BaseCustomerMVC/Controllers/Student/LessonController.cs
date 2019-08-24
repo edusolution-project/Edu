@@ -212,7 +212,7 @@ namespace BaseCustomerMVC.Controllers.Student
             //{
             //    var lastestExam = _
             //}
-
+            ViewBag.Lesson = lesson;
             ViewBag.Type = lesson.TemplateType;
             return View();
         }

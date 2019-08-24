@@ -302,7 +302,7 @@
                 {
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
-                        console.log(item);
+                        //console.log(item);
                         var active = "";
                         if (item.IsActive) {
                             active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "Course")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
@@ -339,11 +339,14 @@
 
     $(document).ready(function () {
         loadCourse();
-        LoadData();
+        LoadGrade();
+        //LoadData();
     });
 
     function LoadGrade() {
         var subject = $("#SubjectID").val();
+        if(subject === '')
+            subject = '---';
         var grade = $("#GradeID").val();
         $('#GradeID option:gt(0)[for!=' + subject + ']').hide();
         $('#GradeID option:gt(0)[for=' + subject + ']').show();

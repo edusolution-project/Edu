@@ -245,9 +245,10 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             var listData = listParts.ToList();
-            var exam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassID == ClassID && o.StudentID == userId && o.Status == false).FirstOrDefault();
 
-            if (exam == null || _examService.IsOverTime(exam.ID))
+            var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassID == ClassID && o.StudentID == userId).SortByDescending(o => o.Created).FirstOrDefault();
+
+            if (lastexam == null)
             {
                 MappingEntity<LessonEntity, StudentLessonViewModel> mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
                 MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
@@ -270,13 +271,12 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else //TODO: Double check here
             {
-                //var listED = _examDetailService.CreateQuery().Find(o => o.ExamID == exam.ID).ToList(); ?? WHAT IS THIS
-                var timere = exam.CurrentDoTime.AddMinutes(exam.Timer) - DateTime.UtcNow;
-                // so sanh va dua ra dap an cua sinh vien ????
-
+                //if (_examService.IsOverTime(lastexam.ID))
+                //{
                 MappingEntity<LessonEntity, StudentLessonViewModel> mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
                 MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
                 MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
+
                 var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
                 {
                     Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
@@ -288,20 +288,53 @@ namespace BaseCustomerMVC.Controllers.Student
                             }))?.ToList()
                     })).ToList()
                 });
+                var timeSpan = lastexam.Status ? new TimeSpan(0, 0, lesson.Timer, 0) : (lastexam.Created.AddMinutes(lastexam.Timer) - DateTime.UtcNow);
+                return new JsonResult(
+                    new Dictionary<string, object> {
+                        { "Data", dataResponse },
+                        { "Exam", lastexam },
+                        { "Timer", (timeSpan.Minutes < 10 ? "0":"") +  timeSpan.Minutes + ":" + (timeSpan.Seconds < 10 ? "0":"") + timeSpan.Seconds }
+                    });
+                //}
+                //else
+                //{
 
-                var respone = new Dictionary<string, object>
-                    {
-                        {
-                            "Data", dataResponse
-                        },
-                        {
-                             "Exam", exam
-                        },
-                        {
-                            "Timer", timere.Minutes < 10 ? "0"+  timere.Minutes + ":" + timere.Seconds : timere.Minutes + ":" + timere.Seconds
-                        }
-                    };
-                return new JsonResult(respone);
+                //    //var listED = _examDetailService.CreateQuery().Find(o => o.ExamID == exam.ID).ToList(); ?? WHAT IS THIS
+
+                //    //Khong su dung currentDotime de check thoi gian, chi so sanh voi thoi gian bat dau lam bai: Created
+                //    //var timere = exam.CurrentDoTime.AddMinutes(exam.Timer) - DateTime.UtcNow;
+                //    var timere = lastexam.Created.AddMinutes(lastexam.Timer) - DateTime.UtcNow;
+                //    // so sanh va dua ra dap an cua sinh vien ????
+
+                //    MappingEntity<LessonEntity, StudentLessonViewModel> mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
+                //    MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+                //    MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel> mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
+                //    var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
+                //    {
+                //        Parts = listData.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                //        {
+                //            Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                //                .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                //                {
+                //                    CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
+                //                }))?.ToList()
+                //        })).ToList()
+                //    });
+
+                //    var respone = new Dictionary<string, object>
+                //    {
+                //        {
+                //            "Data", dataResponse
+                //        },
+                //        {
+                //             "Exam", lastexam
+                //        },
+                //        {
+                //            "Timer", timere.Minutes < 10 ? "0"+  timere.Minutes + ":" + timere.Seconds : timere.Minutes + ":" + timere.Seconds
+                //        }
+                //    };
+                //    return new JsonResult(respone);
+                //}
             }
         }
 
@@ -524,7 +557,6 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Class = currentClass;
             return View();
         }
-
 
         //TEMPORARY CLONE
         private void CloneLessonPart(CloneLessonPartEntity item)

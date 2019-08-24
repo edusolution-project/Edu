@@ -37,6 +37,7 @@ namespace BaseCustomerEntity.Database
         public string Description { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
+        [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }
 
 

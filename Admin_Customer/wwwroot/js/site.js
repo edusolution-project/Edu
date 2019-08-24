@@ -46,6 +46,7 @@ var Ajax = function (url, method, data, async) {
         request.send(data);
     });
 }
+
 function Submit(formName, url, actionName, fn) {
     var form = document.querySelector('form[name="' + formName + '"]');
     var _url = url == "" || url == void 0 || url == null ? form.action : url;
@@ -87,6 +88,7 @@ function Submit(formName, url, actionName, fn) {
             console.log(actionName, res);
         });
 }
+
 function Export(formName, url) {
     var form = document.querySelector('form[name="' + formName + '"]');
     var arr_input = form.querySelector('input[name="ArrID"]');
@@ -112,6 +114,7 @@ function Export(formName, url) {
     var _url = url + query;
     window.open(_url, "_blank");
 }
+
 function Add(_this) {
     var modal = document.querySelector(_this.getAttribute("data-target"));
     var form = modal.querySelector('form');
@@ -129,6 +132,7 @@ function Add(_this) {
     }
     $(form).find("input:disabled").removeAttr("disabled");
 }
+
 function Edit(id, urlGetData, urlPostData, _this) {
     var modal = document.querySelector(_this.getAttribute("data-target"));
     var form = modal.querySelector('form');
@@ -164,6 +168,7 @@ function Edit(id, urlGetData, urlPostData, _this) {
         }
     });
 }
+
 function ExcuteOnlyItem(id, url, fn) {
     var data = new FormData();
     data.append("ArrID", id);
@@ -172,6 +177,7 @@ function ExcuteOnlyItem(id, url, fn) {
         console.log(res)
     })
 }
+
 function hideModal() {
     $('.modal').hide();
     $('.modal-backdrop').hide();
@@ -187,76 +193,69 @@ function ToggleStatus(obj) {
     $(obj).toggleClass("btn-success").toggleClass("btn-danger");
 }
 
-//var urlStart = '@Url.Action("Create","Example")';
-function StartDoExam(url, Timer, TeacherID, ClassID, LessonID, LessonScheduleID, StudentID) {
-    var dataform = new FormData();
-    dataform.append("Timer", Timer);
-    dataform.append("TeacherID", TeacherID);
-    dataform.append("ClassID", ClassID);
-    dataform.append("LessonID", LessonID);
-    dataform.append("LessonScheduleID", LessonScheduleID);
-    dataform.append("StudentID", StudentID);
-    Ajax(url, "POST", dataform, false)
-        .then(function (res) {
-            console.log(res);
-        })
-        .catch(function (err) {
-            console.log(err);
-        })
-
-}
-//var urlComplete = '@Url.Action("CompleteExam","Example")';
-function CompelteExample(url, ExamID, StudentID) {
-    var dataform = new FormData();
-    dataform.append("ExamID", ExamID);
-    dataform.append("StudentID", StudentID);
-    Ajax(url, "POST", dataform, false)
-        .then(function (res) {
-            console.log(res);
-        })
-        .catch(function (err) {
-            console.log(err);
-        })
-}
-//var urlChose = '@Url.Action("CreateDetails","Example")';
-function ChosenAnswer(url, ID, ExamID, QuestionID, AnswerID, StudentID, AnswerValue) {
-    var dataform = new FormData();
-    dataform.append("ExamID", ExamID);
-    dataform.append("ID", ID);
-    dataform.append("AnswerID", AnswerID);
-    dataform.append("QuestionID", QuestionID);
-    dataform.append("StudentID", StudentID);
-    dataform.append("AnswerValue", AnswerValue);
-    Ajax(url, "POST", dataform, false)
-        .then(function (res) {
-            console.log(res);
-        })
-        .catch(function (err) {
-            console.log(err);
-        })
-}
-
-function OverTime(ExamID, StudentID) {
-    var dataform = new FormData();
-    dataform.append("ExamID", ExamID);
-    dataform.append("StudentID", StudentID);
-    Ajax(url, "POST", dataform, false)
-        .then(function (res) {
-            console.log(res);
-        })
-        .catch(function (err) {
-            console.log(err);
-        })
-}
-function LocalStore(ExamID, value) {
-    localStorage.setItem(ExamID, value);
-}
-function LoadLocalStore(ExamID) {
-    return localStorage.getItem(ExamID);
-}
-
 function toggleCollapse(obj) {
     var target = $(obj).attr('data-target');
     $(target).collapse('toggle');
-    $(obj).find("i").toggleClass("expand"); 
+    $(obj).find("i").toggleClass("expand");
+}
+
+
+//icon thông báo , thành công và thất bại
+var iconSuccess = '<div class="notify-icon icon-success"><?xml version="1.0" encoding="iso-8859-1"?><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve"><circle style="fill:#25AE88;" cx="25" cy="25" r="25"/><polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" points="38,15 22,33 12,25 "/></svg></div>';
+var iconError = '<div class="notify-icon icon-error"><?xml version="1.0" encoding="iso-8859-1"?><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve"><circle style="fill:#D75A4A;" cx="25" cy="25" r="25"/><polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;" points="16,34 25,25 34,16"/><polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;" points="16,16 25,25 34,34"/></svg></div>';
+//thông báo
+
+
+// mã hóa
+function b64EncodeUnicode(str) {
+    if (str == null || str == void 0 || str == "") return "";
+    // first we use encodeURIComponent to get percent-encoded UTF-8,
+    // then we convert the percent encodings into raw bytes which
+    // can be fed into btoa.
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        function toSolidBytes(match, p1) {
+            return String.fromCharCode('0x' + p1);
+        }));
+}
+
+// giải mã
+function b64DecodeUnicode(str) {
+    if (str == null || str == void 0 || str == "") return "";
+    // Going backwards: from bytestream, to percent-encoding, to original string.
+    return decodeURIComponent(atob(str).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
+
+var notification = function (type, msg, timeOut) {
+    if (type == void 0 || type == null) type = "success";
+    var all = document.querySelectorAll(".notification");
+    if (type == "success") {
+        if (all == null || all.length == 0 || all == void 0) {
+            document.body.innerHTML += "<div class='notification success' id='notification_0'>" + iconSuccess + " " + msg + "</div>";
+        } else {
+            document.body.innerHTML += "<div id='notification_" + all.length + "' class='notification success' style='top:" + (10 + 6 * all.length) + "%'>" + iconSuccess + " " + msg + "</div>";
+        }
+    } else {
+        if (all == null || all.length == 0 || all == void 0) {
+            document.body.innerHTML += "<div class='notification error' id='notification_0'>" + iconError + " " + msg + "</div>";
+        } else {
+            document.body.innerHTML += "<div id='notification_" + all.length + "' class='notification error' style='top:" + (10 + 6 * all.length) + "%'>" + iconError + " " + msg + "</div>";
+        }
+    }
+    setTimeout(function () {
+        var item = document.getElementById("notification_" + all.length);
+        if (item != null) {
+            item.remove();
+            setShowNotification();
+        }
+    }, timeOut + (all.length * 1000));
+}
+
+//hiện thị thông báo
+var setShowNotification = function () {
+    var all = document.querySelectorAll(".notification");
+    for (var i = 0; i < all.length; i++) {
+        all[i].style.top = (10 + 6 * i) + "%";
+    }
 }

@@ -30,7 +30,7 @@
                     @if (!String.IsNullOrEmpty(currentClass.Description))
                     {
                         <div class="courseDescription">
-                            @currentClass.Description
+                            @Html.Raw(currentClass.Description)
                         </div>
                     }
                 </div>
@@ -51,7 +51,7 @@
                             </th>
                             <th style="width:40%">
                                 <h3>
-                                    Hoạt động & Kiểm tra
+                                    Luyện tập
                                 </h3>
                             </th>
                         </tr>

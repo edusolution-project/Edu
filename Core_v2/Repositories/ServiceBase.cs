@@ -75,7 +75,7 @@ namespace Core_v2.Repositories
             }
             else
             {
-                var oldItem = _collection.Find(o => o.ID == item.ID).First();
+                var oldItem = _collection.Find(o => o.ID == item.ID).FirstOrDefault();
                 if(oldItem != null)
                 {
                     var newItem = _mapping.Auto(oldItem, item);

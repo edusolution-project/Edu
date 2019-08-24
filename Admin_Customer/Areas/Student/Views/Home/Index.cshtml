@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Dashboard - " + DateTime.Now.ToString("dd/MM/yyyy");
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
 }
 
@@ -17,28 +17,6 @@
     activeTab = "dashboard";
 </script>
 
-
-
-@*<div class="container">
-    <!-- Begin Page Content -->
-    <div class="row">
-
-
-
-
-        @*<div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <a href="@Url.Action("Index", "Course")"><h6 class="m-0 font-weight-bold text-primary">Khóa học của tôi</h6></a>
-                </div>
-                <div class="card-body">
-
-                    <div class="float-right">
-                        <a href="@Url.Action("Index", "Course")"> Xem tất cả</a>
-                    </div>
-                </div>
-            </div>
-        </div>*@
 
 @*<div class="col-lg-6 mb-4">
         <div class="card shadow mb-4">
@@ -70,8 +48,9 @@
                 {
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
+                        console.log(item);
                         body.append("<a href=\"@Url.Action("Detail", "Course")/" + item.ID + "\">" +
-                                        "<div class='course-item'>" +
+                                        "<div class='course-item' " + (item.Image == null ? "" : "style='background-image:url(\"" + item.Image + "\")'")  + ">" +
                                         "<div class='course-info'>" +
                                             "<h3>" + item.SubjectName + "</h3>" +
                                             "<h4>" + item.Name + "</h4>" +

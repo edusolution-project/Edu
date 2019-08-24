@@ -1,0 +1,78 @@
+﻿
+@*@{
+    var role = ViewBag.RoleCode as string;
+
+}*@
+<!-- Sidebar -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white mb-4" id="accordionSidebar">
+    <div class="container">
+        <div class="row">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-Content" aria-controls="navbar-Content" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbar-Content">
+                <ul class="navbar-nav mr-auto">
+                    <!-- Nav Item -->
+                    <li class="nav-item active">
+                        <a class="nav-link" href="@Url.Action("Index" , "Home")">
+                            <i class="fas fa-fw fa-home"></i>
+                        </a>
+                    </li>
+
+                    <!-- Nav Item -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index" , "Class")">
+                            <i class="fas fa-fw fa-bell"></i>
+                            <span>Lớp của tôi</span>
+                        </a>
+                    </li>
+                    @*@if (role != null && role == "head-teacher")
+                    {*@
+                        <!-- Nav Item -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index" , "Curriculum")">
+                                <i class="fas fa-fw fa-bell"></i>
+                                <span>Quản lý giáo trình</span>
+                            </a>
+                        </li>
+                    @*}*@
+                    <!-- Nav Item -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Schedule" , "Class")">
+                            <i class="fas fa-fw fa-users"></i>
+                            <span>Lịch giảng dạy</span>
+                        </a>
+                    </li>
+
+                    <!-- Nav Item -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index" , "Discussion")">
+                            <i class="fas fa-fw fa-users"></i>
+                            <span>Thảo luận</span>
+                        </a>
+                    </li>
+
+                    <!-- Nav Item -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index" , "News")">
+                            <i class="fas fa-fw fa-users"></i>
+                            <span>Tin tức</span>
+                        </a>
+                    </li>
+
+                    <!-- Nav Item -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index" , "Statistic")">
+                            <i class="fas fa-fw fa-users"></i>
+                            <span>Báo cáo</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+<!-- End of Sidebar -->
