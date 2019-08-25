@@ -25,7 +25,7 @@ var Render = (function () {
         itemRender.innerHTML += "<div class='item-new-feed__time'>" + formatDate(_time) + "</div>";
         itemRender.innerHTML += "<div class='item-new-feed__sender'>" + _sender + "</div>";
         itemRender.innerHTML += "<div class='fn'><button class='item-new-feed__like'>Like</button><button data-id='" + item.ID + "' class='item-new-feed__reply' data-toggle='modal' data-target='#new-feed__reply--popup'>Reply</button></div>";
-        
+        itemRender.innerHTML += "<div class='list-comment'></div>";
     }
     var renderNewFeed = function (item, container, comment) {
         if (item == null) {
