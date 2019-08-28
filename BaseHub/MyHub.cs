@@ -13,45 +13,109 @@ namespace BaseHub
     {
         private readonly static ConnectionMapping<string> _connections = new ConnectionMapping<string>();
         private readonly static GroupMapping<string> _groups = new GroupMapping<string>();
+        private readonly NewFeedService _newFeedService;
+        private readonly CommentService _commentService;
         private readonly ChatService _chatService;
-        public MyHub(ChatService chatService)
+        private readonly GroupService _groupService;
+        private readonly ChatPrivateService _chatPrivateService;
+        public MyHub(ChatPrivateService chatPrivateService,NewFeedService newFeedService, CommentService commentService, ChatService chatService, GroupService groupService)
         {
+            _newFeedService = newFeedService;
+            _commentService = commentService;
             _chatService = chatService;
+            _groupService = groupService;
+            _chatPrivateService = chatPrivateService;
         }
-        public Task GoToClass(string className)
+        public  Task GoToClass(string className)
         {
-            _groups.Add(Context.ConnectionId, className);
-            Groups.AddToGroupAsync(className, Context.ConnectionId);
-            string message = UserName + " đã vào lớp";
-            return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+            try
+            {
+                if (!_groups.GetGroupConnections(Context.ConnectionId).Contains(className))
+                {
+                     _groupService.AddMemeber(className, UserID);
+                    _groups.Add(Context.ConnectionId, className);
+                     Groups.AddToGroupAsync(Context.ConnectionId, className);
+                    string message = UserName + " đã vào lớp";
+                    return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+                }
+                else
+                {
+                    return Task.CompletedTask;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
-        public Task OutOfTheClassroom(string className)
+        public async Task OutOfTheClassroom(string className)
         {
-            _groups.Remove(Context.ConnectionId, className);
-            Groups.RemoveFromGroupAsync(className, Context.ConnectionId);
+             _groups.Remove(Context.ConnectionId, className);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, className);
             string message = UserName + " đã ra khỏi lớp";
-            return Clients.Group(className).SendAsync("LeaveGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+            await Clients.Group(className).SendAsync("LeaveGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
         }
-        public Task SendToGroup(string groupName, string message)
+        /// <summary>
+        /// Chat trong group
+        /// </summary>
+        /// <param name="groupName"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        private Task ChatToGroup(string groupName, ChatEntity item)
         {
-            return Clients.Group(groupName).SendAsync("ReceiveGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+            var group = _groupService.GetItemByName(groupName);
+            if (group == null)
+                return Task.CompletedTask;
+            item.GroupID = group.ID;
+            item.Sender = UserID;
+            item.Created = DateTime.Now;
+            _chatService.CreateOrUpdate(item);
+            return Clients.Group(groupName).SendAsync("ChatGroup", new { UserSend = UserName, Message = item, Time = DateTime.Now, Type = UserType });
         }
-        public Task SendToUser(string userId, string message)
+        /// <summary>
+        /// Chat trong new feed
+        /// </summary>
+        /// <param name="groupName"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public Task CommentToNewFeed(string groupName, CommentEntity message)
         {
-            return Clients.User(userId).SendAsync("ReceiveUser", new { UserSend = UserName,Message = message,Time = DateTime.Now, Type = UserType });
+            var group = _groupService.GetItemByName(groupName);
+            if (group == null)
+                return Task.CompletedTask;
+            message.Poster = UserID;
+            message.PosterName = UserName;
+            message.TimePost = DateTime.Now;
+            _commentService.CreateOrUpdate(message);
+            return Clients.Group(groupName).SendAsync("CommentNewFeed", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+        }
+        /// <summary>
+        /// chat riêng
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public Task ChatToUser(string userId, ChatPrivateEntity message)
+        {
+            message.Created = DateTime.Now;
+            message.Sender = UserID;
+            message.Receiver = userId;
+            _chatPrivateService.CreateOrUpdate(message);
+            var receiver = _connections.GetConnections(userId);
+            return Clients.Users(receiver.ToList()).SendAsync("Receive", new { UserSend = UserName,Message = message,Time = DateTime.Now, Type = UserType });
         }
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
             // offline
             RemoveAllGroup();
-            _connections.Remove(KeyUser, Context.ConnectionId);
+            _connections.Remove(UserID, Context.ConnectionId);
             return base.OnDisconnectedAsync(exception);
         }
         public override Task OnConnectedAsync()
         {
             //online
-            _connections.Add(KeyUser, Context.ConnectionId);
+            _connections.Add(UserID, Context.ConnectionId);
             return base.OnConnectedAsync();
         }
         protected string KeyUser
@@ -75,11 +139,18 @@ namespace BaseHub
                 return Context.User.Identity.Name;
             }
         }
+        protected string UserID
+        {
+            get
+            {
+                return Context.User?.FindFirst("UserID")?.Value;
+            }
+        }
         protected Task RemoveAllGroup()
         {
             var userid = Context.ConnectionId;
             var listGroup = _groups.GetGroupConnections(userid);
-            if (listGroup != null && listGroup.Count() > 0)
+            if (listGroup != null || listGroup.Count() > 0)
             {
                 foreach(string item in listGroup)
                 {
@@ -87,6 +158,7 @@ namespace BaseHub
                     Groups.RemoveFromGroupAsync(userid, item);
                 }
             }
+            Clients.Groups(listGroup.ToList()).SendAsync("Offline",UserName + "Offline");
             return Task.CompletedTask;
         }
     }

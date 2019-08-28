@@ -1,4 +1,5 @@
 ﻿using Core_v2.Repositories;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,22 +9,30 @@ namespace BaseHub.Database
 {
     public class CommentEntity : EntityBase
     {
-        [JsonProperty("NewID")]
-        public string NewID { get; set; }
+        [JsonProperty("Content")]
+        public string Content { get; set; }// nội dung
+        [JsonProperty("Medias")]
+        public List<MediaEntity> Medias { get; set; } // docx, ảnh , video , audio , ...
+        [JsonProperty("TimePost")]
+        public DateTime TimePost { get; set; }
+        [JsonProperty("Poster")]
+        public string Poster { get; set; } // userid
+        [JsonProperty("NewFeedID")]
+        public string NewFeedID { get; set; }
         [JsonProperty("ParentID")]
         public string ParentID { get; set; }
-        [JsonProperty("Sender")]
-        public string Sender { get; set; }
-        [JsonProperty("Time")]
-        public DateTime Time { get; set; }
-        [JsonProperty("Content")]
-        public string Content { get; set; }
-        [JsonProperty("Medias")]
-        public List<MediaModel> Medias { get; set; }
+        [JsonProperty("PosterName")]
+        public string PosterName { get; set; } // tên người đăng
         [JsonProperty("Likes")]
         public List<string> Likes { get; set; }
-        [JsonProperty("Tags")]
-        public List<string> Tags { get; set; }
+        [JsonProperty("UnLikes")]
+        public List<string> UnLikes { get; set; }
+    }
+    public class CommentService : ServiceBase<CommentEntity>
+    {
+        public CommentService(IConfiguration config) : base(config)
+        {
 
+        }
     }
 }

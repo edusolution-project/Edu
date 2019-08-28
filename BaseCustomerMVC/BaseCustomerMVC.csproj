@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BaseCustomer\BaseCustomerEntity.csproj" />
+    <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
   </ItemGroup>
 
   <ItemGroup>

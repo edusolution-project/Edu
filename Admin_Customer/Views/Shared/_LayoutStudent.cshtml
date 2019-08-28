@@ -24,8 +24,16 @@
     <script type="text/javascript" src="~/js/custom.js"></script>
     <script type="text/javascript" src="~/js/plugins/jquery.lazy.min.js"></script>
     <script type="text/javascript" src="~/js/plugins/jquery.lazy.plugins.min.js"></script>
-    <script type="text/javascript" src="~/js/plugins/ckeditor.js"></script>
+    @*<script type="text/javascript" src="~/js/plugins/ckeditor.js"></script>*@
+    <script src="~/js/ckeditor/ckeditor.js"></script>
     <script src="~/js/moment.min.js"></script>
+    <script src="~/js/lib/config.url.base.js"></script>
+    <script src="~/js/moment.min.js"></script>
+    <script src="~/js/lib/notification/notification.js"></script>
+    <script src="~/js/lib/xhr.js"></script>
+    <script src="~/js/hubs/render.html.js"></script>
+    <script src="~/lib/signalr/signalr.js"></script>
+    <script src="~/js/hubs/connection.js"></script>
 </head>
 <body>
     <script>
@@ -62,9 +70,6 @@
     </div>
     <!-- Logout Modal-->
     @await Html.PartialAsync("_modalLogout")
-
-    @RenderSection("Script", false)
-    @RenderSection("Scripts", false)
     <!-- Bootstrap core JavaScript-->
     <script type="text/javascript" src="~/js/popper.min.js"></script>
     <script type="text/javascript" src="~/vendor/bootstrap/js/bootstrap.js"></script>
@@ -73,5 +78,7 @@
     <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
     <!-- Custom scripts for all pages-->
     <script type="text/javascript" src="~/js/sb-admin-2.min.js"></script>
+    @RenderSection("Script", false)
+    @RenderSection("Scripts", false)
 </body>
 </html>
