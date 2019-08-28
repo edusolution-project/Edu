@@ -66,6 +66,7 @@ var ExamStudent = (function () {
         writeLog(this.__proto__.constructor.name, config);
         getCurrentData();
     }
+
     var getCurrentData = function () {
         var data = currentData();
         if (data == null || data == {} || data == "" || data == "{}" || data == void 0) {
@@ -105,6 +106,7 @@ var ExamStudent = (function () {
             startDragDrop();
         }
     }
+
     var setCurrentData = function (data) {
         var enData = b64EncodeUnicode(JSON.stringify(data))
         localStorage.setItem(config.lesson_id + "_" + config.class_id, enData);
@@ -249,6 +251,7 @@ var ExamStudent = (function () {
         html += '</div></div>';
         return html;
     }
+
     var renderTEXT = function (data) {
         var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
         var html = title + '<div class="content-wrapper col-md-10 d-inline-block align-top">';
@@ -256,6 +259,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderVIDEO = function (data) {
         var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
         var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
@@ -263,6 +267,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderAUDIO = function (data) {
         var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
         var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
@@ -270,6 +275,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderIMG = function (data) {
         var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
         var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
@@ -277,6 +283,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderDOC = function (data) {
         var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
         var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
@@ -284,6 +291,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderVOCAB = function (data) {
         var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
         var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
@@ -291,6 +299,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderQUIZ1 = function (data) {
         writeLog("renderQUIZ1", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-info" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
@@ -316,6 +325,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderQUIZ2 = function (data) {
         writeLog("renderQUIZ2", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-info" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
@@ -340,6 +350,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderQUIZ3 = function (data) {
         writeLog("renderQUIZ3", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-info" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
@@ -371,6 +382,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderESSAY = function (data) {
         writeLog("renderESSAY", data);
         var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5><div class="description">' + data.Description + '</div>' + renderMedia(data.Media) + '</div>';
@@ -392,6 +404,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderQUIZ1_BG = function (data) {
         //if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
         var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
@@ -416,6 +429,7 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
+
     var renderQUIZ2_BG = function (data) {
         //if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
         var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
@@ -439,41 +453,43 @@ var ExamStudent = (function () {
         html += '</div>';
         return html;
     }
-    var renderQUIZ3_BG = function (data) {
-        //if (checkExam()) {
-        var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5></div>';
-        html += '<div class="row">';
-        html += '<div class="quiz-wrapper col-lg-8">' + renderMedia(data.Media);
-        var answers = "";
-        for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-            var item = data.Questions[i];
-            var content = item.Content == null || item.Content == "null" || item.Content == void 0 ? "___" : item.Content;
-            html += '<div class="quiz-item row" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
-            html += '<div class="quiz-pane col-6"><div class="pane-item"><div class="quiz-text">' + content + '</div></div></div>';
-            html += '<div class="answer-pane col-6 ui-droppable" data-id="' + item.ID + '"><div class="pane-item placeholder">Thả câu trả lời tại đây</div></div>';
-            html += '</div>';
-            for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
-                var answer = item.CloneAnswers[x];
-                var media = renderMedia(answer.Media);
-                if (media == "") {
-                    answers += '<fieldset data-type="QUIZ3" class="answer-item" id="' + answer.ID + '"><label class="answer-text">' + answer.Content + '</label></fieldset>';
-                }
-                else {
-                    answers += '<fieldset data-type="QUIZ3" class="answer-item" id="' + answer.ID + '">' + media + '</fieldset>';
-                }
 
+    var renderQUIZ3_BG = function (data) {
+        if (checkExam()) {
+            var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5></div>';
+            html += '<div class="row">';
+            html += '<div class="quiz-wrapper col-lg-8">' + renderMedia(data.Media);
+            var answers = "";
+            for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                var item = data.Questions[i];
+                var content = item.Content == null || item.Content == "null" || item.Content == void 0 ? "___" : item.Content;
+                html += '<div class="quiz-item row" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
+                html += '<div class="quiz-pane col-6"><div class="pane-item"><div class="quiz-text">' + content + '</div></div></div>';
+                html += '<div class="answer-pane col-6 ui-droppable" data-id="' + item.ID + '"><div class="pane-item placeholder">Thả câu trả lời tại đây</div></div>';
+                html += '</div>';
+                for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
+                    var answer = item.CloneAnswers[x];
+                    var media = renderMedia(answer.Media);
+                    if (media == "") {
+                        answers += '<fieldset data-type="QUIZ3" class="answer-item" id="' + answer.ID + '"><label class="answer-text">' + answer.Content + '</label></fieldset>';
+                    }
+                    else {
+                        answers += '<fieldset data-type="QUIZ3" class="answer-item" id="' + answer.ID + '">' + media + '</fieldset>';
+                    }
+
+                }
             }
+            html += '</div>';
+            html += '<div class="answer-wrapper no-child col-lg-4 ui-droppable">' + answers + '</div>';
+            html += '</div>';
+            return html;
         }
-        html += '</div>';
-        html += '<div class="answer-wrapper no-child col-lg-4 ui-droppable">' + answers + '</div>';
-        html += '</div>';
-        return html;
-        //}
-        //else {
-        //    return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
-        //}
+        else {
+            return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
+        }
 
     }
+
     var renderESSAY_BG = function (data) {
         if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
         var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
@@ -534,6 +550,7 @@ var ExamStudent = (function () {
             '<div class="col-md-12"><div class="lesson-body" id="' + data.ID + '">' + tabList + '</div></div>' + nav_bottom;
         return html;
     }
+
     var beginExam = function (_this) {
         var dataform = new FormData();
         dataform.append("LessonID", config.lesson_id);
@@ -558,12 +575,15 @@ var ExamStudent = (function () {
                 notification("error", err, 3000);
             })
     }
+
     var goBack = function () {
         document.location = "/student/Course/Modules/" + config.class_id;
     }
+
     var version = function () {
         return "1.0.0";
     }
+
     // ghép config default với config customer
     var groupConfig = function (options) {
         if (options == null || typeof (options) == "undefined") return config;
@@ -571,6 +591,7 @@ var ExamStudent = (function () {
             if (options.hasOwnProperty(key)) config[key] = options[key];
         return config;
     }
+
     /// Ajax.then var data = JSON.parse(res);
     var Ajax = function (url, data, method, async) {
         writeLog(url, data);
@@ -613,6 +634,7 @@ var ExamStudent = (function () {
             request.send(data);
         });
     }
+
     var AnswerQuestion = function (_this) {
         // dataset trên item
         var dataset = _this.dataset;
@@ -687,6 +709,7 @@ var ExamStudent = (function () {
             saveAnswerForStudent(questionId, answerID, value, type);
         }
     }
+
     var ExamComplete = function (isOvertime) {
         if (isOvertime || confirm("Có phải bạn muốn nộp bài")) {
             var exam = document.querySelector("input[name='ExamID']");
@@ -713,6 +736,7 @@ var ExamStudent = (function () {
                 });
         }
     }
+
     var delAnswerForStudent = function (quizID) {
         localStorage.removeItem(config.lesson_id + config.class_id + quizID);
         var dataform = new FormData();
@@ -760,6 +784,7 @@ var ExamStudent = (function () {
             xxx.classList.add("completed");
         }
     }
+
     var rendAgain = function (value) {
         var arr = value.split('~~');
         var quizID = arr[0];
@@ -790,6 +815,7 @@ var ExamStudent = (function () {
             default: return;
         }
     }
+
     var startDragDrop = function () {
         $(".answer-item").draggable({
             cursor: "move",
@@ -864,6 +890,7 @@ var ExamStudent = (function () {
             }
         });
     }
+
     var renderBoDem = function () {
         var listQuiz = document.querySelectorAll(".quiz-item");
         var count = 0;
@@ -913,6 +940,7 @@ var ExamStudent = (function () {
     }
 
     window.ExamStudent = {} || ExamStudent;
+    
     ExamStudent.onReady = onReady;
     ExamStudent.Version = version;
     ExamStudent.Notification = notification;

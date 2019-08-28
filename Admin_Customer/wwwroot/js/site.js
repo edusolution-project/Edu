@@ -48,6 +48,7 @@ var Ajax = function (url, method, data, async) {
 }
 
 function Submit(formName, url, actionName, fn) {
+
     var form = document.querySelector('form[name="' + formName + '"]');
     var _url = url == "" || url == void 0 || url == null ? form.action : url;
     var _method = form.method;
@@ -81,10 +82,15 @@ function Submit(formName, url, actionName, fn) {
     $(form).find("input:disabled").removeAttr("disabled");
 
     var data = new FormData(form);
+    showLoading("Đang cập nhật ...");
     Ajax(_url, _method, data, true)
         .then(function (res) {
+            hideLoading();
             if (fn != void 0) fn(res);
         }).catch(function (res) {
+            hideLoading();
+            //notification("err", "Có lỗi, vui lòng thực hiện lại", 2000);
+            alert('Có lỗi, vui lòng thực hiện lại');
             console.log(actionName, res);
         });
 }
@@ -199,12 +205,10 @@ function toggleCollapse(obj) {
     $(obj).find("i").toggleClass("expand");
 }
 
-
 //icon thông báo , thành công và thất bại
 var iconSuccess = '<div class="notify-icon icon-success"><?xml version="1.0" encoding="iso-8859-1"?><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve"><circle style="fill:#25AE88;" cx="25" cy="25" r="25"/><polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" points="38,15 22,33 12,25 "/></svg></div>';
 var iconError = '<div class="notify-icon icon-error"><?xml version="1.0" encoding="iso-8859-1"?><svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve"><circle style="fill:#D75A4A;" cx="25" cy="25" r="25"/><polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;" points="16,34 25,25 34,16"/><polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;" points="16,16 25,25 34,34"/></svg></div>';
 //thông báo
-
 
 // mã hóa
 function b64EncodeUnicode(str) {
@@ -258,4 +262,20 @@ var setShowNotification = function () {
     for (var i = 0; i < all.length; i++) {
         all[i].style.top = (10 + 6 * i) + "%";
     }
+}
+
+
+function showLoading(message) {
+    if ($("body > .loadingState").length > 0)
+        return;
+    else {
+        $("body").append($("<div>", { "class": "loadingState", "style": "background: black;position: fixed;top: 0;left: 0;right: 0;bottom: 0;opacity: 0.9;z-index: 9999;" }));
+        if (message == null || message == "")
+            message = "Đang xử lý...";
+        $("body > .loadingState").append($("<div>", { "text": message, "style": "padding:10px 50px; border-radius: 10px; background: #CCC; font-size:26px; position:absolute; left: calc(50% - 120px); top: 45%;" }));
+    }
+}
+
+function hideLoading() {
+    $("body > .loadingState").remove();
 }

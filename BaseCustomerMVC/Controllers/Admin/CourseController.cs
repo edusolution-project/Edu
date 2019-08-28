@@ -195,7 +195,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 item.ID = null;
                 item.Created = DateTime.Now;
-                _service.CreateQuery().InsertOne(item);
+                _service.CreateOrUpdate(item);
 
                 //Create Class => Create Lesson Schedule & Clone all lesson
                 var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
@@ -225,10 +225,20 @@ namespace BaseCustomerMVC.Controllers.Admin
             else
             {
                 var oldData = _service.GetItemByID(item.ID);
-                if (oldData == null) return new JsonResult(null);
-                item.Updated = DateTime.Now;
-                _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                if (oldData == null) return new JsonResult(new Dictionary<string, object>()
+                {
+                    {"Error", "Dữ liệu không đúng" }
+                });
+                if (item.Code != oldData.Code)
+                {
+                    if (_service.CreateQuery().Find(t => t.Code == item.Code).FirstOrDefault() != null)
+                        return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Mã môn học đã được sử dụng" }
+                        });
+                }
 
+                oldData.Updated = DateTime.Now;
                 if (item.CourseID != oldData.CourseID)
                 {
                     //remove old schedule & cloned lesson part
@@ -242,7 +252,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     if (lessons != null)
                         foreach (LessonEntity lesson in lessons)
                         {
-                            _lessonScheduleService.CreateQuery().InsertOne(new LessonScheduleEntity
+                            _lessonScheduleService.CreateOrUpdate(new LessonScheduleEntity
                             {
                                 ClassID = item.ID,
                                 LessonID = lesson.ID,
@@ -252,6 +262,15 @@ namespace BaseCustomerMVC.Controllers.Admin
                             CloneLesson(lesson, item);
                         }
                 }
+
+                oldData.Code = item.Code;
+                oldData.StartDate = item.StartDate;
+                oldData.EndDate = item.EndDate;
+                oldData.CourseID = item.CourseID;
+                oldData.GradeID = item.GradeID;
+                oldData.TeacherID = item.TeacherID;
+
+                _service.CreateOrUpdate(oldData);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -287,7 +306,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     _cloneLessonPartService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     _cloneQuestionService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     _cloneAnswerService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
-                    _examService.Collection.DeleteMany(o=> ids.Contains(o.ClassID));
+                    _examService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     _examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     var delete = _service.Collection.DeleteMany(o => ids.Contains(o.ID));
                     return new JsonResult(delete);
@@ -382,25 +401,27 @@ namespace BaseCustomerMVC.Controllers.Admin
                 stream.Close();
                 try
                 {
-                    var readStream = new FileStream(filePath, FileMode.Open);
-                    using (ExcelPackage package = new ExcelPackage(readStream))
+                    using (var readStream = new FileStream(filePath, FileMode.Open))
                     {
-                        ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
-                        int totalRows = workSheet.Dimension.Rows;
-                        studentList = new List<StudentEntity>();
-                        for (int i = 1; i <= totalRows; i++)
+                        using (ExcelPackage package = new ExcelPackage(readStream))
                         {
-                            if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                            var studentEmail = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
-                            var student = _studentService.CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
-                            if (student != null)
-                                studentList.Add(student);
-                        }
+                            ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
+                            int totalRows = workSheet.Dimension.Rows;
+                            studentList = new List<StudentEntity>();
+                            for (int i = 1; i <= totalRows; i++)
+                            {
+                                if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
+                                var studentEmail = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
+                                var student = _studentService.CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
+                                if (student != null)
+                                    studentList.Add(student);
+                            }
 
-                        var listID = studentList.Select(o => o.ID);
-                        itemCourse.Students.AddRange(listID);
-                        itemCourse.Students = itemCourse.Students.Distinct().ToList();
-                        _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
+                            var listID = studentList.Select(o => o.ID);
+                            itemCourse.Students.AddRange(listID);
+                            itemCourse.Students = itemCourse.Students.Distinct().ToList();
+                            _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
+                        }
                     }
                     System.IO.File.Delete(filePath);
                 }

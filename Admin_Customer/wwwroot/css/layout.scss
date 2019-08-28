@@ -48,7 +48,6 @@ table {
     }
 }
 
-
 .right-content {
     .sidebar.collapse:not(.show) ~ & {
         margin-left: 52px;
@@ -70,7 +69,8 @@ table {
             }
 
             h1 {
-                font-size: 1.8rem;
+                font-size: 1.6rem;
+                text-transform: uppercase;
             }
 
             h2 {
@@ -227,13 +227,18 @@ table {
                     padding: 24px;
                     border-bottom: dashed 1px #CCC;
                     font-weight: 600;
+                    position: relative;
+
+                    .modules {
+                        padding-right: 0;
+                    }
 
                     &-title {
                         padding: 0 0 5px;
                         font-size: 1rem;
                         cursor: pointer;
 
-                        i {
+                        i.toggleExpand {
                             display: inline-block;
                             width: 0;
                             height: 0;
@@ -300,8 +305,6 @@ table {
     }
 }
 
-
-
 table {
     &.table-big-title {
         thead {
@@ -347,6 +350,26 @@ table {
 
 .icon {
     @include icon-style;
+}
+
+.item-row {
+    .row-action {
+        display: none;
+
+        i {
+            padding: 0 5px;
+            position: relative;
+            cursor: pointer;
+
+            &:hover {
+                color: blue;
+            }
+        }
+    }
+
+    &:hover .row-action {
+        display: block;
+    }
 }
 
 footer {

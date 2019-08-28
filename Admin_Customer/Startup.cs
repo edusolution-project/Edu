@@ -84,6 +84,10 @@ namespace Admin_Customer
             {
                 routes.MapRoute(
                    name: "areas",
+                   template: "{area:exists}/{controller=Home}/{action=Index}"
+                 );
+                routes.MapRoute(
+                   name: "areas",
                    template: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
                  );
                 routes.MapRoute(

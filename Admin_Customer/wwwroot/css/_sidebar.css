@@ -44,6 +44,8 @@
       background-position-y: -330px; }
     .sidebar .sidebar-item.announcements, .sidebar .sidebar-toggler-icon.announcements {
       background-position-y: -288px; }
+    .sidebar .sidebar-item.curriculum, .sidebar .sidebar-toggler-icon.curriculum {
+      background-position-y: -288px; }
     .sidebar .sidebar-item:hover, .sidebar .sidebar-item.active, .sidebar .sidebar-toggler-icon:hover, .sidebar .sidebar-toggler-icon.active {
       filter: none; }
     .sidebar .sidebar-item .nav-link, .sidebar .sidebar-toggler-icon .nav-link {

@@ -7,8 +7,8 @@
 
 <script>
     activeTab = "course";
-    modulesLink = "@Url.Action("Modules", "Course")/@currentClass.ID";
-    activeSub = "syllabus";
+    modulesLink = "@Url.Action("Modules", "Class")/@currentClass.ID";
+    activeSub = "home";
 </script>
 
 
@@ -40,60 +40,23 @@
                 </div>
             </div>
 
-            <div class="modal fade bd-modal-lg" role="dialog" aria-hidden="true" id="infoModal">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Cập nhật thông tin lớp</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <div class="row pb-3">
-                                    <label class="col-sm-2 form-label align-top" for="classAvatarEdit">Chọn ảnh:</label>
-                                    <div class="col-sm-10 align-top">
-                                        <button class="btn btn-info btnAddFile align-top" onclick="chooseFile(this)" tabindex="-1">Chọn file</button>
-                                        <input type="file" name="classAvatarEdit" class="d-none" id="classAvatarEdit" onchange="changeMedia(this)" accept="image/*">
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <label class="col-sm-2 form-label align-top" for="classDescriptionEdit">Thông tin lớp:</label>
-                                    <div class="col-sm-10 align-top">
-                                        <textarea name="classDescriptionEdit" id="classDescriptionEdit"></textarea>
-                                    </div>
-                                    <script>
-                                        CKEDITOR.replace("classDescriptionEdit");
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-info btn-submit" data-dismiss="modal" onclick="saveClassInfo()">Lưu</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="syllabus-wrapper content-block">
                 <table class="w-100 table-big-title table-hover">
                     <thead>
                         <tr>
-                            <th style="width:10%" class="text-center">
+                            <th class="width:10%" class="text-center">
                                 <h3>
                                     STT
                                 </h3>
                             </th>
-                            <th style="width:50%">
+                            <th style="width:40%">
                                 <h3>
                                     Tên chương
                                 </h3>
                             </th>
-                            <th style="width:40%">
+                            <th style="width:50%">
                                 <h3>
-                                    Luyện tập
+                                    Hoạt động
                                 </h3>
                             </th>
                         </tr>
@@ -101,9 +64,10 @@
                     <tbody></tbody>
                 </table>
             </div>
+
             <div class="assignment-wrapper content-block">
                 <div class="block-title">
-                    <h2>Kiểm tra & Đánh giá</h2>
+                    <h2>Các hoạt động đánh giá</h2>
                 </div>
                 <table class="w-100 table-hover table-normal-title">
                     <thead>
@@ -112,9 +76,9 @@
                                 Ngày
                             </th>
                             <th style="width:60%">
-                                Chi tiết
+                                Nội dung
                             </th>
-                            <th style="width:20%" class="text-right">Kết thúc</th>
+                            <th style="width:20%" class="text-right"></th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -123,6 +87,77 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade bd-modal-lg" role="dialog" aria-hidden="true" id="infoModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập nhật thông tin lớp</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="row pb-3">
+                        <label class="col-sm-2 form-label align-top" for="classAvatarEdit">Chọn ảnh:</label>
+                        <div class="col-sm-10 align-top">
+                            <button class="btn btn-info btnAddFile align-top" onclick="chooseFile(this)" tabindex="-1">Chọn file</button>
+                            <input type="file" name="classAvatarEdit" class="d-none" id="classAvatarEdit" onchange="changeMedia(this)" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-2 form-label align-top" for="classDescriptionEdit">Thông tin lớp:</label>
+                        <div class="col-sm-10 align-top">
+                            <textarea name="classDescriptionEdit" id="classDescriptionEdit"></textarea>
+                        </div>
+                        <script>
+                            CKEDITOR.replace("classDescriptionEdit");
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info btn-submit" data-dismiss="modal" onclick="saveClassInfo()">Lưu</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="chapterModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="@Url.Action("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
+                    <input type="hidden" name="ID" />
+                    <input type="hidden" name="ClassID" value="@currentClass.ID" />
+                    <input type="hidden" name="ParentID" value="" />
+
+                    <div class="form-group">
+                        <label class="col-form-label">Tên chương mục:</label>
+                        <input type="text" class="form-control" name="Name" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Mô tả:</label>
+                        <textarea class="form-control" name="Description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("UpdateChapterInfo","Class")','update' , LoadChapters)">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @section Scripts {
     <script>
@@ -133,63 +168,73 @@
     var syllabusBody = $('.syllabus-wrapper tbody');
     var assignmentBody = $('.assignment-wrapper tbody');
 
-    function LoadSchedule() {
-        chapters = [];
-        lessons = [];
+    function LoadChapters(data) {
+        if (data != null) {
+            var json = JSON.parse(data);
+            if (json.Error != null) {
+                alert(json.Error);
+                return false;
+            }
+            hideModal();
+        }
 
-        $.ajax({
+        chapters = [];
+         $.ajax({
             type: "POST",
-            url: '@Url.Action("GetList", "LessonSchedule")',
-            data: {ClassID: '@currentClass.ID' },
+            url: '@Url.Action("GetMainChapters", "Class")',
+            data: {ID: '@currentClass.ID' },
             dataType:"json",
             success: function (data) {
                 scheduleCounter = 1;
                 syllabusBody.html("");
-
-                chapters = data.Data.Chapters;
-                lessons = data.Data.Lessons;
                 rcCounter = 0;
 
+                chapters = data.Data;
                 if (chapters.length > 0) {
                     for (i = 0; i < chapters.length; ++i) {
                         var chapter = chapters[i];
-                        var parent = scheduleBody;
-
-                        if (chapter.ParentID == null) {
-                            chapter.ParentID = "0";
-                        }
-                        if (chapter.ParentID === "0")
-                        {
-                            var chapContent = $("<tr id='chap" + chapter.ID + "'>");
-                            chapContent.append($("<td>", {"class":"text-center", "text": ++rcCounter}));
-                            chapContent.append($("<td>").append($("<a>", {
-                                    "class":"action-link",
-                                    "href": modulesLink + "#" + chapter.ID,
-                                    "text": chapter.Name
-                                    })));
-                            chapContent.append($("<td>"));
-
-                            syllabusBody.append(chapContent);
-                        }
+                        var chapContent = $("<tr id='chap" + chapter.ID + "' class='item-row'>");
+                        chapContent.append($("<td>", {"class":"text-center", "text": ++rcCounter}));
+                        var leftContent = $("<div>", {"class": "col-sm-10"});
+                        var rightContent = $("<div>", {"class": "col-sm-2 text-right row-action"});
+                        chapContent.append($("<td>").append($("<a>", {
+                                "class":"action-link",
+                                "name":"Name",
+                                "href": modulesLink + "#" + chapter.ID,
+                                "text": chapter.Name
+                                })));
+                        chapContent.append($("<td class='row'>").append(leftContent).append(rightContent));
+                        if(chapter.Description != null)
+                            leftContent.append($("<span>", {"name": "Description"}).append(chapter.Description.replace(/\n/g,"<br/>")));
+                        rightContent.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "pid": chapter.ParentID, "title": "Sửa", "onclick" : "EditChapter(this, '" + chapter.ID + "'); return false;" }));
+                        syllabusBody.append(chapContent);
                     }
+                    $('.row-action i').tooltip();
                 }
+            },
+            error: function (res) {
+                console.log(res.responseText);
+            }
+        });
+    }
+
+    function LoadAssignments()
+    {
+        lessons = [];
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetAssignments", "LessonSchedule")',
+            data: {ClassID: '@currentClass.ID' },
+            dataType:"json",
+            success: function (data) {
+                lessons = data.Data.Lessons;
                 if (lessons.length > 0) {
                     for (j = 0; j < lessons.length; j++) {
                         var item = lessons[j];
 
                         var startdate = moment(item.StartDate).format('DD/MM/YYYY');
                         var enddate = moment(item.Enddate).format('DD/MM/YYYY');
-
-                        if(item.TemplateType === 2 && item.ChapterID  != "0")
-                        {
-                            if ($('tr#chap' + item.ChapterID + ' td:last div').length == 0) {
-                            $('tr#chap' + item.ChapterID + ' td:last').append($("<div>").append(
-                                    $("<a>", {
-                                        "text": item.Title + " (" + startdate + ")"
-                                    }))
-                                );
-                            }
-                        }
 
                         var assigmentRow = $("<tr>");
                         assigmentRow.append($("<td>", {"text":startdate}));
@@ -199,9 +244,8 @@
                                         "text": item.Title ,
                                         "style": "margin-left:5px;"
                                     })));
-                        assigmentRow.append($("<td>", { "class":"text-right", "text":enddate}));
+                        assigmentRow.append($("<td>", { "class":"text-right font-italic", "text": "hạn cuối " + enddate}));
                         assignmentBody.append(assigmentRow);
-
                     }
                 }
             },
@@ -211,8 +255,10 @@
         });
     }
 
+
     $(document).ready(function () {
-        LoadSchedule();
+        LoadChapters();
+        LoadAssignments();
     });
 
     function editClassInfo(){
@@ -244,7 +290,7 @@
 
             data.append("ID", classid);
             data.append("Description", description);
-
+            showLoading("Đang cập nhật nội dung...");
             $.ajax({
                 type: "POST",
                 url: '/Teacher/Class/SaveInfo',
@@ -252,17 +298,32 @@
                 processData: false,
                 data: data,
                 success: function (data) {
-                    if(data.Error == null)
+                    if (data.Error == null)
                         renderClassInfo(data);
                     else
                         alert(data.Error);
+                    hideLoading();
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     console.log(thrownError);
                     alert("Có lỗi, vui lòng kiểm tra lại kết nối");
+                    hideLoading();
                 }
             });
         }
+    }
+
+    function EditChapter(obj, ID) {
+        var modal = $("#chapterModal");
+        var modalTitle = modal.find("#modalTitle");
+        modalTitle.text("Cập nhật chương mục");
+        var name = $(obj).parent().parent().parent().find("[name=Name]").text().trim();
+        var description = $(obj).parent().parent().parent().find("[name=Description]").text().trim();
+        var parent = $(obj).attr("pid");
+        modal.find("[name=Name]").val(name);
+        modal.find("[name=Description]").val(description);
+        modal.find("[name=ParentID]").val(parent);
+        modal.find("[name=ID]").val(ID);
     }
 
     function chooseFile(obj) {
@@ -278,8 +339,12 @@
     function renderClassInfo(data)
     {
         var currentClass = data.Data;
+        if (currentClass.Image != null) {
         if($('.intro-wrapper .courseImg').length > 0)
             $('.intro-wrapper .courseImg').attr('src', currentClass.Image);
+        else
+            $('.course-syllabus').prepend($("<img>", {"class":"courseImg", "src": currentClass.Image }));
+        }
         $('.intro-wrapper .courseDescription').html(currentClass.Description);
 
     }

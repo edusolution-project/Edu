@@ -122,6 +122,81 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetAssignments(DefaultModel model, string ClassID = "", string UserID = "")
+        {
+            TeacherEntity teacher = null;
+            if (string.IsNullOrEmpty(UserID))
+                UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+            {
+                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+                if (teacher == null)
+                {
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giảng viên" }
+                    });
+                }
+            }
+
+            if (string.IsNullOrEmpty(ClassID))
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var currentClass = _classService.GetItemByID(ClassID);
+            if (currentClass == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var course = _courseService.GetItemByID(currentClass.CourseID);
+
+            if (course == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giáo trình" }
+                    });
+            }
+
+            var classSchedule = new ClassScheduleViewModel(course)
+            {
+                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.Etype > 0).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                           let schedule = _service.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
+                           where schedule != null
+                           select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               StartDate = schedule.StartDate,
+                               EndDate = schedule.EndDate,
+                               IsActive = schedule.IsActive
+                           })).ToList()
+            };
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", classSchedule },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+
         [Obsolete]
         [HttpPost]
         public JsonResult GetActiveList(DefaultModel model, string ClassID = "", string UserID = "", string SubjectID = "")

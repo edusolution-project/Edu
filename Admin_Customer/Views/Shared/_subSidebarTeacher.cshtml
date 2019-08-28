@@ -4,14 +4,14 @@
 
 <nav role="navigation" aria-label="Class Navigation Menu">
     <ul id="section-tabs">
-        <li class="section"><a href="@Url.Action("Detail","Class")/@currentClass.ID" title="Trang chủ lớp" class="home" tabindex="0">Trang chủ lớp</a></li>
-        <li class="section"><a href="#" title="Thông báo" class="announcements" tabindex="0">Thông báo</a></li>
-        <li class="section"><a href="@Url.Action("Syllabus","Class")/@currentClass.ID" title="Giới thiệu" class="syllabus" tabindex="0">Giới thiệu</a></li>
-        <li class="section"><a href="@Url.Action("Schedule","Class")/@currentClass.ID" title="Cấu trúc bài" class="modules" tabindex="0">Cấu trúc bài</a></li>
-        <li class="section"><a href="@Url.Action("Assignment","Class")/@currentClass.ID" title="Kiểm tra" class="assignments" tabindex="0">Kiểm tra</a></li>
-        <li class="section"><a href="#" title="Thảo luận" class="discussions" tabindex="0">Thảo luận</a></li>
-        <li class="section"><a href="@Url.Action("Members","Class")/@currentClass.ID" title="Danh sách lớp" class="people" tabindex="0">Thành viên lớp</a></li>
-        <li class="section"><a href="@Url.Action("ScoreBoard","Class")/@currentClass.ID" title="Bảng điểm" class="grades" tabindex="0">Bảng điểm</a></li>
+        <li class="section"><a href="@Url.Action("Detail","Class")/@currentClass.ID" title="Trang chủ" class="home" tabindex="0">Trang chủ</a></li>
+        <li class="section"><a href="@Url.Action("Announcements","Class")/@currentClass.ID" title="Thông báo" class="announcements" tabindex="0">Thông báo</a></li>
+        @*<li class="section"><a href="@Url.Action("Syllabus","Class")/@currentClass.ID" title="Giới thiệu" class="syllabus" tabindex="0">Giới thiệu</a></li>*@
+        <li class="section"><a href="@Url.Action("Modules","Class")/@currentClass.ID" title="Cấu trúc môn học" class="modules" tabindex="0">Cấu trúc môn học</a></li>
+        <li class="section"><a href="@Url.Action("Assignments","Class")/@currentClass.ID" title="Bài kiểm tra" class="assignments" tabindex="0">Bài kiểm tra</a></li>
+        <li class="section"><a href="@Url.Action("Discussions","Class")/@currentClass.ID" title="Trao đổi" class="discussions" tabindex="0">Trao đổi</a></li>
+        <li class="section"><a href="@Url.Action("Members","Class")/@currentClass.ID" title="Danh sách học viên" class="people" tabindex="0">Danh sách học viên</a></li>
+        <li class="section"><a href="#" title="Học trực tuyến" class="onlineleanring" tabindex="0">Học trực tuyến</a></li>
     </ul>
 </nav>
 

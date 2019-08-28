@@ -539,7 +539,6 @@ var render = {
         var container = $("#" + data.ParentID).find(".tab-content");
         var tabContainer = $("#menu-left #pills-tab");
 
-
         //tabs         
         var lessonitem = $("<li>", { "class": "nav-item" });
         var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });

@@ -56,7 +56,7 @@ namespace BaseCustomerEntity.Database
 
     public class LESSON_ETYPE
     {
-        public const int PARTIAL = 1, END = 2;
+        public const int PRACTICE = 0, WEEKLY = 1, CHECKPOINT = 2, EXPERIMENT = 3, INTERSHIP = 4, END = 5;
     }
 
     public class LessonService : ServiceBase<LessonEntity>

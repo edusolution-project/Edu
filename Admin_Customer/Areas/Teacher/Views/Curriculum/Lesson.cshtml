@@ -57,7 +57,10 @@
                         <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
                             <label class="col-form-label">Kiểu bài kiểm tra:</label>
                             <select name="Etype" class="form-control" required>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PARTIAL">Thành phần</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Bài kiểm tra tuần</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Bài tập lớn</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.EXPERIMENT">Báo cáo thí nghiệm</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.INTERSHIP">Báo cáo thực tập</option>
                                 <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">Cuối kì</option>
                             </select>
                         </div>
@@ -132,6 +135,6 @@
     }
 
 </script>
-@section Script{
+@section Scripts{
     <script src="~/js/curriculum-lesson.js"></script>
 }

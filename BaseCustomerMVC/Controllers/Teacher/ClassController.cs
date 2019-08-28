@@ -23,6 +23,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassService _service;
         private readonly CourseService _courseService;
         private readonly ChapterService _chapterService;
+        private readonly ChapterExtendService _chapterExtendService;
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
@@ -34,7 +35,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public ClassController(GradeService gradeservice
            , SubjectService subjectService, TeacherService teacherService, ClassService service,
-            CourseService courseService, ChapterService chapterService, LessonService lessonService, LessonScheduleService lessonScheduleService,
+            CourseService courseService, ChapterService chapterService, ChapterExtendService chapterExtendService, LessonService lessonService, LessonScheduleService lessonScheduleService,
             StudentService studentService, IHostingEnvironment evn,
             FileProcess fileProcess)
         {
@@ -44,6 +45,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _courseService = courseService;
             _service = service;
             _chapterService = chapterService;
+            _chapterExtendService = chapterExtendService;
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
@@ -84,25 +86,38 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public IActionResult Schedule(DefaultModel model)
+        public IActionResult Modules(DefaultModel model)
         {
-            //var UserID = User.Claims.GetClaimByType("UserID").Value;
-            //var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
+            return View();
+        }
 
-            //var subject = new List<SubjectEntity>();
-            //var grade = new List<GradeEntity>();
+        public IActionResult Assignments(DefaultModel model)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
+            return View();
+        }
 
-            //if (teacher != null && teacher.Subjects != null)
-            //{
-            //    subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
-            //    grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
-            //}
+        public IActionResult Discussions(DefaultModel model)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
+            return View();
+        }
 
-            //ViewBag.Grade = grade;
-            //ViewBag.Subject = subject;
-
-            //ViewBag.User = UserID;
-            //ViewBag.Model = model;
+        public IActionResult Announcements(DefaultModel model)
+        {
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)
@@ -121,7 +136,160 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
+        [HttpPost]
+        public JsonResult GetMainChapters(string ID)
+        {
+            try
+            {
+                var currentClass = _service.GetItemByID(ID);
+                if (currentClass == null)
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy lớp học" }
+                    });
 
+                var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == "0").ToList();
+                var chapterExtends = _chapterExtendService.Search(currentClass.ID);
+
+                foreach (var chapter in chapters)
+                {
+                    var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
+                    if (extend != null) chapter.Description = extend.Description;
+                }
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", chapters }
+                };
+
+                return new JsonResult(response);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message }
+                });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult UpdateChapterInfo(string ClassID, ChapterEntity chapter)
+        {
+            try
+            {
+                var currentClass = _service.GetItemByID(ClassID);
+                if (currentClass == null)
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy lớp học" }
+                    });
+
+                var currentChapter = _chapterService.CreateQuery().Find(c => c.ID == chapter.ID).FirstOrDefault();
+                if (currentChapter == null)
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy chương" }
+                    });
+
+                var chapterExtend = _chapterExtendService.Search(ClassID, chapter.ID).SingleOrDefault();
+                if (chapterExtend == null)
+                {
+                    chapterExtend = new ChapterExtendEntity
+                    {
+                        ChapterID = chapter.ID,
+                        ClassID = ClassID
+                    };
+                }
+                chapterExtend.Description = chapter.Description;
+                _chapterExtendService.CreateOrUpdate(chapterExtend);
+
+                currentChapter.Description = chapter.Description;
+
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", currentChapter }
+                };
+
+                return new JsonResult(response);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message }
+                });
+            }
+        }
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetSchedules(DefaultModel model)
+        {
+            TeacherEntity teacher = null;
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+            {
+                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+                if (teacher == null)
+                {
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Error", "Không có thông tin giảng viên" }
+                    });
+                }
+            }
+            if (string.IsNullOrEmpty(model.ID))
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Error","Không có thông tin lớp học" },
+                });
+            }
+
+            var currentClass = _service.GetItemByID(model.ID);
+
+            if (currentClass == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var course = _courseService.GetItemByID(currentClass.CourseID);
+
+            if (course == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giáo trình" }
+                    });
+            }
+            var _scheduleMapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
+            var classSchedule = new ClassScheduleViewModel(course)
+            {
+                Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
+                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
+                           where schedule != null
+                           select _scheduleMapping.AutoOrtherType(r, new LessonScheduleViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               StartDate = schedule.StartDate,
+                               EndDate = schedule.EndDate,
+                               IsActive = schedule.IsActive
+                           })).ToList()
+            };
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", classSchedule },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
         [Obsolete]
         [HttpPost]
         public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "", string UserID = "")
@@ -309,7 +477,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-
         [HttpPost]
         [DisableRequestSizeLimit]
         public async Task<JsonResult> SaveInfo(ClassEntity entity)
@@ -364,7 +531,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         });
             }
         }
-
 
         [HttpPost]
         [Obsolete]

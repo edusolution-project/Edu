@@ -89,7 +89,7 @@
                 </a>
             </li>
 
-            <li class="sidebar-item announcements">
+            <li class="sidebar-item curriculum">
                 <a class="nav-link p-0" href="@Url.Action("Index", "Curriculum" )">
                     <i></i>
                     <span>Giáo trình</span>
@@ -131,8 +131,8 @@
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
                         body.append(
-                            "<li>" +
-                            "<a href='@Url.Action("Detail", "Class")/" + item.ID + "' class='action-link'><h5 class='title'>" +
+                            "<li >" +
+                            "<a href='@Url.Action("Detail","Class")/" + item.ID + "' class='action-link'><h5 class='title'>" +
                                 item.Name +
                             "</h5><h6 class='description'>" +
                                 item.SubjectName +

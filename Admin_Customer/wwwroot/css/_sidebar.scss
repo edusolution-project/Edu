@@ -72,6 +72,10 @@
             background-position-y: - 288px;
         }
 
+        &.curriculum {
+            background-position-y: - 288px;
+        }
+
         &:hover, &.active {
             filter: none;
         }
@@ -176,7 +180,7 @@
             list-style: none;
             padding: 0;
 
-            .action-link {               
+            .action-link {
                 padding-bottom: 5px;
 
                 .title {

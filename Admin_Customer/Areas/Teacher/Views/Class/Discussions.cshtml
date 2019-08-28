@@ -2,13 +2,13 @@
 
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name + " - Danh sách học viên";
+    ViewData["Title"] = currentClass.Name + " - Trao đổi";
 }
 
 <script>
     activeTab = "course";
     modulesLink = "@Url.Action("Modules", "Course")/@currentClass.ID";
-    activeSub = "people";
+    activeSub = "discussions";
 </script>
 
 

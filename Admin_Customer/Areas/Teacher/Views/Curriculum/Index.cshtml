@@ -10,6 +10,10 @@
     var role = ViewBag.RoleCode as string;
 }
 
+<script>
+    activeTab = "curriculum";
+</script>
+
 <!-- Begin Page Content -->
 <div class="container">
     <div class="card shadow mb-4">
@@ -383,19 +387,6 @@
         LoadGrade($("#SubjectID"));
         LoadModGrade($("#ModSubjectID"));
     });
-
-    function showLoading() {
-        if ($("body > .loadingState").length > 0)
-            return;
-        else {
-            $("body").append($("<div>", { "class": "loadingState", "style": "background: black;position: fixed;top: 0;left: 0;right: 0;bottom: 0;opacity: 0.9;z-index: 9999;" }));
-            $("body > .loadingState").append($("<div>", { "text": "Đang xử lý...", "style":"padding:10px 50px; border-radius: 10px; background: #CCC; font-size:26px; position:absolute; left: calc(50% - 120px); top: 45%;" }));
-        }
-    }
-
-    function hideLoading() {
-        $("body > .loadingState").remove();
-    }
 
     function EditCourse(obj, ID) {
         modalTitle.text("Cập nhật nội dung");

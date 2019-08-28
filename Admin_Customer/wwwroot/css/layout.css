@@ -28,7 +28,8 @@ table thead tr, table thead th {
     color: #e60028;
     font-weight: normal; }
   .right-content .left-col .page-title h1, .right-content .left-col .block-title h1 {
-    font-size: 1.8rem; }
+    font-size: 1.6rem;
+    text-transform: uppercase; }
   .right-content .left-col .page-title h2, .right-content .left-col .block-title h2 {
     font-size: 1.5rem; }
   .right-content .left-col .page-title {
@@ -126,12 +127,15 @@ table thead tr, table thead th {
       .right-content .left-col .main-container .modules-wrapper .modules {
         padding: 24px;
         border-bottom: dashed 1px #CCC;
-        font-weight: 600; }
+        font-weight: 600;
+        position: relative; }
+        .right-content .left-col .main-container .modules-wrapper .modules .modules {
+          padding-right: 0; }
         .right-content .left-col .main-container .modules-wrapper .modules-title {
           padding: 0 0 5px;
           font-size: 1rem;
           cursor: pointer; }
-          .right-content .left-col .main-container .modules-wrapper .modules-title i {
+          .right-content .left-col .main-container .modules-wrapper .modules-title i.toggleExpand {
             display: inline-block;
             width: 0;
             height: 0;
@@ -140,7 +144,7 @@ table thead tr, table thead th {
             border-left: 5px solid #000;
             border-right: 0;
             margin-right: 7px; }
-            .right-content .left-col .main-container .modules-wrapper .modules-title i.expand {
+            .right-content .left-col .main-container .modules-wrapper .modules-title i.toggleExpand.expand {
               border-left: 5px solid transparent;
               border-right: 5px solid transparent;
               border-top: 5px solid #000;
@@ -216,6 +220,18 @@ table.table-hover tbody tr:hover {
   position: relative; }
   .icon.assignment {
     background-position: -110px 0; }
+
+.item-row .row-action {
+  display: none; }
+  .item-row .row-action i {
+    padding: 0 5px;
+    position: relative;
+    cursor: pointer; }
+    .item-row .row-action i:hover {
+      color: blue; }
+
+.item-row:hover .row-action {
+  display: block; }
 
 footer {
   height: 40px;

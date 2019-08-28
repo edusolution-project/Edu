@@ -31,6 +31,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<ProgramService>();
             services.AddSingleton<CourseService>();
             services.AddSingleton<ChapterService>();
+            services.AddSingleton<ChapterExtendService>();
             services.AddSingleton<SubjectService>();
             services.AddSingleton<GradeService>();
             services.AddSingleton<LessonService>();

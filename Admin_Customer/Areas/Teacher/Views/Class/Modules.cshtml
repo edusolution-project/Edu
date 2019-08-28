@@ -1,7 +1,7 @@
 ﻿@{
-    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name + " - Cấu trúc chương trình";
+    ViewData["Title"] = currentClass.Name + " - Chương trình học";
 }
 
 <script>
@@ -15,7 +15,7 @@
     </div>
     <div class="main-container">
         <div class="sub-sidebar">
-            @await Html.PartialAsync("_subSidebarStudent")
+            @await Html.PartialAsync("_subSidebarTeacher")
         </div>
         <div class="main-content">
             <div class="modules-wrapper">
@@ -24,7 +24,7 @@
     </div>
 </div>
 
-@section Script{
+@section Scripts {
     <script>
 
     var chapters = [];
@@ -37,7 +37,7 @@
 
         $.ajax({
             type: "POST",
-            url: '@Url.Action("GetSchedules", "Course")',
+            url: '@Url.Action("GetSchedules", "Class")',
             data: { ID: '@currentClass.ID' },
             dataType:"json",
             success: function (data) {
@@ -57,13 +57,16 @@
                         }
 
                         var chapContent = $("<div>", { "id": chapter.ID, "pid": chapter.ParentID, "class":"modules" });
-                        var chapTitle = $("<div>", { "class":"modules-title", "data-target":"#" + chapter.ID + " .modules-content:first", "onclick":"toggleCollapse(this)" });
-                        chapTitle.append($("<i>", {"class":"expand toggleExpand"}))
+                        var chapTitle = $("<div>", { "class":"modules-title row", "data-target":"#" + chapter.ID + " .modules-content:first", "onclick":"toggleCollapse(this)" });
+                        var title_cPart = $("<div>", {"class":"col-md-12"});
+                        var title_ePart = $("<div>", {"class":"col-md-0 text-right"})
+                        title_cPart.append($("<i>", {"class":"expand toggleExpand"}))
                             .append($("<a>", {
                                 "class":"action-link",
                                 "href": modulesLink + "#" + chapter.ID,
                                 "text": chapter.Name
                                 }));
+                        chapTitle.append(title_cPart).append(title_ePart);
                         chapContent.append(chapTitle);
                         chapContent.append($("<div>", { "class":"modules-content collapse show"}));
 
@@ -85,9 +88,9 @@
                         var item = lessons[j];
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td class='text-center'><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' disabled> <div class='handle'></div> </button></td>";
+                            active = "<button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("unpublish", "LessonSchedule")',ToggleStatus(this))\"> <div class='handle'></div> </button>";
                         } else {
-                            active = "<td class='text-center'><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger' disabled> <div class='handle'></div> </button></td>";
+                            active = "<button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger' onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\"> <div class='handle'></div> </button>";
                         }
 
                         var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
@@ -101,20 +104,25 @@
                             isView = "";
                         }
 
-                        var rowData = $("<div>", {"class":"modules-content-item"});
-                        rowData.append($("<span>", {"class":"modules-content-item-icon" + (item.TemplateType === 2?" assignment":"")}));
+                        var rowData = $("<div>", {"class":"modules-content-item row"});
+                        var leftPart = $("<div>", {"class":"col-md-10"});
+                        var rightPart = $("<div>", {"class":"col-md-2 text-right"});
+                        leftPart.append($("<span>", {"class":"modules-content-item-icon" + (item.TemplateType === 2? (" assignment atype" + item.Etype):"")}));
+                        rightPart.append(active);
                         var itemData = $("<div>", {"class":"modules-content-item-info"});
                         itemData.append($("<a>", {
                                 "class":"action-link",
-                                "href": (item.IsActive ? ("@Url.Action("Detail", "Lesson")/" + item.ID + "/@currentClass.ID") : "javascript:LockNotify()"),
+                                "href": "@Url.Action("Detail", "Lesson")/" + item.ID + "/@currentClass.ID",
                                 "text": item.Title
                             }));
+
                         if(item.Description != null)
                         {
                             itemData.append($("<span>", {"class":"description", "text": item.Description}));
                         }
 
-                        rowData.append(itemData);
+                        leftPart.append(itemData);
+                        rowData.append(leftPart).append(rightPart);
 
                         if (item.ChapterID == null) {
                             scheduleBody.append(rowData);

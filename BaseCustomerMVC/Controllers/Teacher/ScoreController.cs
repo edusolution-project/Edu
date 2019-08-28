@@ -163,8 +163,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                .GroupBy(o => o.StudentID).Select(r => new ScoreSummaryViewModel
                {
                    StudentID = r.Key,
-                   PartialScore = r.Sum(t => t.ScoreType == LESSON_ETYPE.PARTIAL ? t.Point * t.Multiple : 0),
-                   PartialSum = r.Sum(t => t.ScoreType == LESSON_ETYPE.PARTIAL ? t.Multiple : 0),
+                   //PartialScore = r.Sum(t => t.ScoreType != LESSON_ETYPE.PARTIAL ? t.Point * t.Multiple : 0),
+                   //PartialSum = r.Sum(t => t.ScoreType != LESSON_ETYPE.PARTIAL ? t.Multiple : 0),
                    EndingScore = r.Sum(t => t.ScoreType == LESSON_ETYPE.END ? t.Point * t.Multiple : 0),
                    EndingSum = r.Sum(t => t.ScoreType == LESSON_ETYPE.END ? t.Multiple : 0),
                }).ToList();

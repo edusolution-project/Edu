@@ -82,6 +82,7 @@
                                 </th>
                                 <th class='text-center'>STT</th>
                                 <th class='text-center'>Tên khóa học</th>
+                                <th class='text-center'>Mã khóa học</th>
                                 <th class='text-center'>Tên giáo viên</th>
                                 <th class='text-center'>Số HV</th>
                                 <th class='text-center'>Ngày bắt đầu</th>
@@ -117,6 +118,10 @@
                             <input type="text" class="form-control" name="Name" placeholder="Tên khóa học" required>
                         </div>
                         <div class="form-group col-md-6">
+                            <label for="staticText" class="col-form-label">Mã khóa học:</label>
+                            <input type="text" class="form-control" name="Code" placeholder="Mã khóa học" required>
+                        </div>
+                        <div class="form-group col-md-4">
                             <label for="staticText" class="col-form-label">Môn học:</label>
                             <select name="SubjectID" class="form-control" onchange="LoadGradeInput(this)" required>
                                 <option value="">--- Chọn cấp độ --- </option>
@@ -129,7 +134,7 @@
                                 }
                             </select>
                         </div>
-                        <div class="form-group col-md-6">
+                        <div class="form-group col-md-4">
                             <label for="staticText" class="col-form-label">Cấp độ:</label>
                             <select name="GradeID" class="form-control" onchange="filterCourse()" required>
                                 <option value="">--- Chọn cấp độ --- </option>
@@ -142,7 +147,7 @@
                                 }
                             </select>
                         </div>
-                        <div class="form-group col-md-6">
+                        <div class="form-group col-md-4">
                             <label for="staticText" class="col-form-label">Giáo trình:</label>
                             <select name="CourseID" class="form-control" onfocus="filterCourse()" required>
                                 <option value="">--- Chọn giáo trình --- </option>
@@ -283,13 +288,23 @@
         }
     }
 
-    function LoadData() {
-        var searchText = $("#searchText").val();
-        var startDate = $("#startDate_sort").val();
-        var endDate = $("#endDate_sort").val();
-        var SubjectID = $("#SubjectID").val();
-        var GradeID = $("#GradeID").val();
-        $.ajax({
+    function LoadData(err) {
+        if (err != null) {
+            var item = JSON.parse(err);
+            if (item.Error != null) {
+                //notification("err", item.Error, 2000);
+                alert(item.Error);
+            }
+        }
+        else 
+        {
+            var searchText = $("#searchText").val();
+            var startDate = $("#startDate_sort").val();
+            var endDate = $("#endDate_sort").val();
+            var SubjectID = $("#SubjectID").val();
+            var GradeID = $("#GradeID").val();
+
+            $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "Course")',
             data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, SubjectID: SubjectID, GradeID: GradeID},
@@ -317,6 +332,7 @@
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td class='text-center'>" + (i + 1) + "</td>" +
                             "<td>" + item.Name + "</td>" +
+                            "<td>" + (item.Code == null ? "" : item.Code) + "</td>" +
                             "<td>" + item.TeacherName + "</td>" +
                             "<td class='text-center'>" + item.Students.length + "</td>" +
                             "<td class='text-center'>" + startdate + "</td>" +
@@ -328,13 +344,14 @@
                             "</tr>"
                         );
                     }
-                    $('.btn').tooltip({ trigger:'hover' });
+                    //$('.btn').tooltip({ trigger:'hover' });
                 }
             },
             error: function() {
                 alert("Error");
             }
         });
+        }
     };
 
     $(document).ready(function () {

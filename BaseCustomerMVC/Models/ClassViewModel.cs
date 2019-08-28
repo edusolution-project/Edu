@@ -12,6 +12,7 @@ namespace BaseCustomerMVC.Models
         public ClassViewModel(ClassEntity item)
         {
             ID = item.ID;
+            Code = item.Code;
             Name = item.Name;
             GradeID = item.GradeID;
             SubjectID = item.SubjectID;

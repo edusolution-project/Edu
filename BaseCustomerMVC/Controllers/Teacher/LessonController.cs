@@ -97,6 +97,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+
         [HttpPost]
         public JsonResult Join(string ID, string JoinLesson)
         {
