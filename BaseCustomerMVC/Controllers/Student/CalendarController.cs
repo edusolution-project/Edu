@@ -15,54 +15,39 @@ namespace BaseCustomerMVC.Controllers.Student
 {
     public class CalendarController : StudentController
     {
-        // bài học hôm nay.
         private readonly CalendarService _calendarService;
         private readonly CalendarLogService _calendarLogService;
         private readonly CalendarReportService _calendarReportService;
-
+        private readonly CalendarHelper _calendarHelper;
+        private readonly ClassService _classService;
         public CalendarController(
             CalendarService calendarService,
             CalendarLogService calendarLogService,
-            CalendarReportService calendarReportService
+            CalendarReportService calendarReportService,
+            CalendarHelper calendarHelper,
+            ClassService classService
             )
         {
             this._calendarService = calendarService;
             this._calendarLogService = calendarLogService;
             this._calendarReportService = calendarReportService;
+            _calendarHelper = calendarHelper;
+            _classService = classService;
         }
-        [HttpPost]
-        [Obsolete]
-        public Task<JsonResult>  GetList(DefaultModel model)
+
+        public IActionResult Index(DefaultModel model)
         {
-            var filter = new List<FilterDefinition<CalendarEntity>>();
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return null;
-            }
-            else
-            {
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.TeacherID == userId));
-            }
-            if (model.StartDate > DateTime.MinValue)
-            {
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.StartDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
-            }
-            if (model.EndDate > DateTime.MinValue)
-            {
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.EndDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
-            }
-            var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
-            model.TotalRecord = data.Count();
-            var DataResponse = data == null || data.Count() <= 0 ? null :data.ToList();
-            //var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-            //    ? data.ToList()
-            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
-            //Task.Factory.StartNew(() => {
-            //    Task inner = Task.Factory.StartNew(() => { });
-            //    return Task.FromResult(new JsonResult(model));
-            //});
-            return Task.FromResult(new JsonResult(DataResponse));
+            ViewBag.Model = model;
+            return View();
+        }
+        [Obsolete]
+        public Task<JsonResult> GetList(DefaultModel model)
+        {
+            var userId = User?.FindFirst("UserID").Value;
+            var listClass = _classService.Collection.Find(o => o.Students.Contains(userId))?.ToList();
+            if (listClass == null) return Task.FromResult(new JsonResult(null));
+            var data = _calendarHelper.GetListEvent(model.StartDate, model.EndDate, listClass.Select(o => o.ID).ToList());
+            return Task.FromResult(new JsonResult(data));
         }
         [HttpPost]
         [Obsolete]
@@ -71,41 +56,18 @@ namespace BaseCustomerMVC.Controllers.Student
             var DataResponse = _calendarService.GetItemByID(id);
             return Task.FromResult(new JsonResult(DataResponse));
         }
-        [HttpPost]
-        public CalendarEntity Create(CalendarEntity item)
-        {
-            // check validate
-            
-            return _calendarService.CreateOrUpdate(item);
-        }
-        [HttpPost]
-        public bool Delete(string id)
-        {
-            //validate
-            return _calendarService.Remove(id) != null;
-        }
-
-
-        //private bool validate()
+        //[HttpPost]
+        //[Obsolete]
+        //public bool Create(CalendarEntity item)
         //{
-        //    var filter = new List<FilterDefinition<CalendarEntity>>();
-        //    var userId = User.Claims.GetClaimByType("UserID").Value;
-        //    if (string.IsNullOrEmpty(userId))
-        //    {
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.TeacherID == userId));
-        //    }
-        //    if (model.StartDate > DateTime.MinValue)
-        //    {
-        //        filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.StartDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
-        //    }
-        //    if (model.EndDate > DateTime.MinValue)
-        //    {
-        //        filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.EndDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
-        //    }
+        //    // check validate
+        //    return _calendarHelper.CreateEvent(item).Result;
+        //}
+        //[HttpPost]
+        //[Obsolete]
+        //public bool Delete(string id)
+        //{
+        //    return _calendarHelper.RemoveEvent(id).Result;
         //}
     }
 }

@@ -47,6 +47,7 @@ namespace Admin_Customer
             services.AddServiceBase();
             services.AddServiceHubBase();
             services.AddScoped<FileProcess>();
+            services.AddSingleton<CalendarHelper>();
             //services.AddMvc(options=> {
             //    options.Filters.Add<PermissionAttribute>();
             //}).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);

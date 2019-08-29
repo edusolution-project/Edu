@@ -12,7 +12,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Title")]
         public string Title { get; set; }
         [JsonProperty("GroupID")]
-        public string GroupID { get; set; }
+        public string GroupID { get; set; } // classid
         [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]
