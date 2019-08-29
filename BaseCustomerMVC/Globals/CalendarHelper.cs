@@ -42,9 +42,10 @@ namespace BaseCustomerMVC.Globals
         public Task<bool> RemoveEvent(string id)
         {
             var delItem = _calendarService.GetItemByID(id);
-            if (delItem != null && delItem.StartDate > DateTime.Now.AddHours(1))
+            if (delItem != null && (delItem.StartDate > DateTime.Now.AddHours(1)|| delItem.EndDate > DateTime.Now.AddHours(1)))
             {
-                _calendarService.Remove(id);
+                delItem.IsDel = true;
+                _calendarService.CreateOrUpdate(delItem);
                 return Task.FromResult(true);
             }
             return Task.FromResult(false);
@@ -61,27 +62,24 @@ namespace BaseCustomerMVC.Globals
                 Builders<CalendarEntity>.Filter.Where(o => o.GroupID == classID)
             };
             var data = _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter))?.ToList();
-            return data == null;
+            return data == null || data.Count() == 0;
         }
 
         [Obsolete]
         public List<CalendarEventModel> GetListEvent(DateTime startDate,DateTime endDate,List<string> classList)
         {
             var filter = new List<FilterDefinition<CalendarEntity>>();
-            if (classList != null && classList.Count > 0)
+            //if (classList != null && classList.Count > 0)
+            //{
+            //    filter.Add(Builders<CalendarEntity>.Filter.Where(o => classList.Contains(o.GroupID)));
+            //}
+            if (startDate > DateTime.MinValue && endDate > DateTime.MinValue)
             {
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => classList.Contains(o.GroupID)));
+                var _startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
+                var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
+                filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.StartDate >= _startDate || o.EndDate <= _endDate));
             }
-            if (startDate > DateTime.MinValue)
-            {
-                //new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0)
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.StartDate >= startDate));
-            }
-            if (endDate > DateTime.MinValue)
-            {
-                //new DateTime(endDate.Year, endDate.Month,endDate.Day, 23, 59, 59)
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.EndDate <= endDate));
-            }
+            filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.IsDel == false));
             var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
             var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList().Select(o=> new CalendarEventModel() {
                 end = o.EndDate,
@@ -89,8 +87,7 @@ namespace BaseCustomerMVC.Globals
                 groupid = o.GroupID,
                 id = o.ID,
                 title = o.Title,
-                url = o.UrlRoom
-                
+                url = o.UrlRoom == null ? "" : o.UrlRoom
             }).ToList();
             return DataResponse;
         }

@@ -8,21 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Areas\Teacher\Views\Lesson\Detail - Copy.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Lesson\Exam - Copy.cshtml" />
     <Content Remove="compilerconfig.json" />
-    <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
-    <Content Remove="Views\Shared\_sideBarTeacher - Copy.cshtml" />
-    <Content Remove="wwwroot\js\student-exam.js~RF16ce98a.TMP" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Views\Shared\_LayoutStudent.oldcshtml" />
-    <None Remove="Views\Shared\_LayoutTeacher.oldcshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="wwwroot\scss\sb-admin-2.css" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,7 +21,14 @@
     <None Include="Areas\Admin\Views\Student\Index.cshtml" />
     <None Include="Areas\Admin\Views\Subject\Index.cshtml" />
     <None Include="Areas\Admin\Views\Teacher\Index.cshtml" />
+    <None Include="Areas\Student\Views\Calendar\Index.cshtml" />
+    <None Include="Areas\Student\Views\Course\Assignment.cshtml" />
+    <None Include="Areas\Student\Views\Course\Modules.cshtml" />
+    <None Include="Areas\Student\Views\Course\Syllabus.cshtml" />
+    <None Include="Areas\Student\Views\Discuss\Detail.cshtml" />
+    <None Include="Areas\Student\Views\Discuss\Index.cshtml" />
     <None Include="Areas\Student\Views\Home\Index.cshtml" />
+    <None Include="Areas\Student\Views\LearnHistory\Index.cshtml" />
     <None Include="Areas\Student\Views\Lesson\Lecture.cshtml" />
     <None Include="Areas\Student\Views\Lesson\Exam.cshtml" />
     <None Include="Areas\Student\Views\Lesson\Index.cshtml" />
@@ -51,16 +44,46 @@
     <None Include="Areas\Teacher\Views\Calendar\Lesson.cshtml" />
     <None Include="Areas\Teacher\Views\Class\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Class\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Class\Schedule.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Lesson.cshtml" />
     <None Include="Areas\Teacher\Views\Discussion\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Exam\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Home\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Lesson\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Lesson\Exam.cshtml" />
     <None Include="Areas\Teacher\Views\News\Index.cshtml" />
     <None Include="compilerconfig.json" />
+    <None Include="Views\Error\Index.cshtml" />
+    <None Include="Views\Home\ForgotPassword.cshtml" />
+    <None Include="Views\Home\Index.cshtml" />
+    <None Include="Views\Home\Login.cshtml" />
+    <None Include="Views\Home\Register.cshtml" />
+    <None Include="Views\Shared\_CookieConsentPartial.cshtml" />
+    <None Include="Views\Shared\_Footer.cshtml" />
+    <None Include="Views\Shared\_header.cshtml" />
+    <None Include="Views\Shared\_Layout.cshtml" />
+    <None Include="Views\Shared\_LayoutAdmin.cshtml" />
+    <None Include="Views\Shared\_LayoutStudent.cshtml" />
+    <None Include="Views\Shared\_LayoutTeacher.cshtml" />
+    <None Include="Views\Shared\_modalLogout.cshtml" />
+    <None Include="Views\Shared\_sideBarAdmin.cshtml" />
+    <None Include="Views\Shared\_sideBarStudent.cshtml" />
+    <None Include="Views\Shared\_sideBarTeacher.cshtml" />
+    <None Include="Views\Shared\_subSidebarStudent.cshtml" />
+    <None Include="Views\Shared\_topmenu.cshtml" />
+    <None Include="Views\Shared\_TopMenuAdmin.cshtml" />
+    <None Include="Views\Shared\_ValidationScriptsPartial.cshtml" />
+    <None Include="wwwroot\5d42b1874acf292ba895a24a_StudentList-20190723211217484.xlsx01082019043258" />
+    <None Include="wwwroot\css\layout.scss" />
+    <None Include="wwwroot\css\uivar.scss" />
+    <None Include="wwwroot\css\_sidebar.scss" />
+    <None Include="wwwroot\img\undraw_posting_photo.svg" />
     <None Include="wwwroot\js\ckeditor\adapters\jquery.js" />
+    <None Include="wwwroot\js\ckeditor\CHANGES.md" />
+    <None Include="wwwroot\js\ckeditor\ckeditor.js" />
+    <None Include="wwwroot\js\ckeditor\config.js" />
     <None Include="wwwroot\js\ckeditor\lang\af.js" />
     <None Include="wwwroot\js\ckeditor\lang\ar.js" />
     <None Include="wwwroot\js\ckeditor\lang\az.js" />
@@ -131,6 +154,7 @@
     <None Include="wwwroot\js\ckeditor\lang\vi.js" />
     <None Include="wwwroot\js\ckeditor\lang\zh-cn.js" />
     <None Include="wwwroot\js\ckeditor\lang\zh.js" />
+    <None Include="wwwroot\js\ckeditor\LICENSE.md" />
     <None Include="wwwroot\js\ckeditor\plugins\a11yhelp\dialogs\a11yhelp.js" />
     <None Include="wwwroot\js\ckeditor\plugins\a11yhelp\dialogs\lang\af.js" />
     <None Include="wwwroot\js\ckeditor\plugins\a11yhelp\dialogs\lang\ar.js" />
@@ -2353,6 +2377,7 @@
     <None Include="wwwroot\js\ckeditor\plugins\wsc\dialogs\wsc_ie.js" />
     <None Include="wwwroot\js\ckeditor\plugins\wsc\LICENSE.md" />
     <None Include="wwwroot\js\ckeditor\plugins\xml\plugin.js" />
+    <None Include="wwwroot\js\ckeditor\README.md" />
     <None Include="wwwroot\js\ckeditor\samples\img\logo.svg" />
     <None Include="wwwroot\js\ckeditor\samples\js\sample.js" />
     <None Include="wwwroot\js\ckeditor\samples\js\sf.js" />
@@ -2379,17 +2404,36 @@
     <None Include="wwwroot\js\ckeditor\skins\moono-lisa\readme.md" />
     <None Include="wwwroot\js\ckeditor\skins\moono\readme.md" />
     <None Include="wwwroot\js\ckeditor\skins\moono\skin.js" />
+    <None Include="wwwroot\js\ckeditor\styles.js" />
     <None Include="wwwroot\js\ckeditor\vendor\promise.js" />
+    <None Include="wwwroot\js\curriculum-lesson.js" />
+    <None Include="wwwroot\js\custom.js" />
+    <None Include="wwwroot\js\demo\datatables-demo.js" />
+    <None Include="wwwroot\js\fullcalendar.min.js" />
+    <None Include="wwwroot\js\hub-student.js" />
     <None Include="wwwroot\js\hubs\connection.js" />
     <None Include="wwwroot\js\hubs\newfeed.base.js" />
     <None Include="wwwroot\js\hubs\render.html.js" />
+    <None Include="wwwroot\js\jquery-ui-timepicker-addon.js" />
+    <None Include="wwwroot\js\jquery-ui.min.js" />
+    <None Include="wwwroot\js\jquery.min.js" />
+    <None Include="wwwroot\js\lesson.js" />
     <None Include="wwwroot\js\lib\ckeditor.js" />
     <None Include="wwwroot\js\lib\config.js" />
     <None Include="wwwroot\js\lib\config.url.base.js" />
+    <None Include="wwwroot\js\lib\datetimepicker\jquery.datetimepicker.js" />
+    <None Include="wwwroot\js\lib\datetimepicker\jquery.mousewheel.js" />
+    <None Include="wwwroot\js\lib\datetimepicker\php-date-formatter.min.js" />
     <None Include="wwwroot\js\lib\notification\notification.js" />
     <None Include="wwwroot\js\lib\notification\notification.scss" />
     <None Include="wwwroot\js\lib\Security\base64.js" />
     <None Include="wwwroot\js\lib\xhr.js" />
+    <None Include="wwwroot\js\moment-with-locales.min.js" />
+    <None Include="wwwroot\js\moment.js" />
+    <None Include="wwwroot\js\moment.min.js" />
+    <None Include="wwwroot\js\plugins\ckeditor.js" />
+    <None Include="wwwroot\js\plugins\jquery.lazy.min.js" />
+    <None Include="wwwroot\js\plugins\jquery.lazy.plugins.min.js" />
     <None Include="wwwroot\js\plugins\translations\ar.js" />
     <None Include="wwwroot\js\plugins\translations\ast.js" />
     <None Include="wwwroot\js\plugins\translations\az.js" />
@@ -2444,6 +2488,44 @@
     <None Include="wwwroot\js\plugins\translations\vi.js" />
     <None Include="wwwroot\js\plugins\translations\zh-cn.js" />
     <None Include="wwwroot\js\plugins\translations\zh.js" />
+    <None Include="wwwroot\js\popper.min.js" />
+    <None Include="wwwroot\js\sb-admin-2.min.js" />
+    <None Include="wwwroot\js\lib\schedule.js" />
+    <None Include="wwwroot\js\lib\schedule.js.map" />
+    <None Include="wwwroot\js\site.js" />
+    <None Include="wwwroot\js\student-exam-new.js" />
+    <None Include="wwwroot\js\student-exam.js" />
+    <None Include="wwwroot\js\teacher-exam.js" />
+    <None Include="wwwroot\js\teacher-lesson.js" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.js" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.js.map" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js" />
+    <None Include="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map" />
+    <None Include="wwwroot\lib\bootstrap\LICENSE" />
+    <None Include="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js" />
+    <None Include="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js" />
+    <None Include="wwwroot\lib\jquery-validation\dist\additional-methods.js" />
+    <None Include="wwwroot\lib\jquery-validation\dist\additional-methods.min.js" />
+    <None Include="wwwroot\lib\jquery-validation\dist\jquery.validate.js" />
+    <None Include="wwwroot\lib\jquery-validation\dist\jquery.validate.min.js" />
+    <None Include="wwwroot\lib\jquery-validation\LICENSE.md" />
+    <None Include="wwwroot\lib\jquery\dist\jquery.js" />
+    <None Include="wwwroot\lib\jquery\dist\jquery.min.js" />
+    <None Include="wwwroot\lib\jquery\dist\jquery.min.map" />
+    <None Include="wwwroot\lib\signalr\dist\browser\signalr.js" />
+    <None Include="wwwroot\lib\signalr\dist\browser\signalr.min.js" />
+    <None Include="wwwroot\lib\signalr\signalr.js" />
+    <None Include="wwwroot\lib\signalr\signalr.min.js" />
     <None Include="wwwroot\scss\navs\_global.scss" />
     <None Include="wwwroot\scss\navs\_sidebar.scss" />
     <None Include="wwwroot\scss\navs\_topbar.scss" />
@@ -4170,6 +4252,11 @@
   <ItemGroup>
     <ProjectReference Include="..\BaseCustomerMVC\BaseCustomerMVC.csproj" />
     <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="wwwroot\Files\IMG\20190723\" />
   </ItemGroup>
 
 </Project>
