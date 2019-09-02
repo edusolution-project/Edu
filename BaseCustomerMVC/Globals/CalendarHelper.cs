@@ -42,7 +42,7 @@ namespace BaseCustomerMVC.Globals
         public Task<bool> RemoveEvent(string id)
         {
             var delItem = _calendarService.GetItemByID(id);
-            if (delItem != null && (delItem.StartDate > DateTime.Now.AddHours(1)|| delItem.EndDate > DateTime.Now.AddHours(1)))
+            if (delItem != null)
             {
                 delItem.IsDel = true;
                 _calendarService.CreateOrUpdate(delItem);

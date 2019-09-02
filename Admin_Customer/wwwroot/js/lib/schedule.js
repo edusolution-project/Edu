@@ -17014,20 +17014,20 @@ var Schedule = /** @class */ (function () {
                         }
                     }
                 };
-                optionsInput.selectable = true;
+                optionsInput.selectable = false;
                 optionsInput.select = function (arg) {
-                    var title = prompt('Event Title:');
-                    if (title) {
-                        if (_self._calendar != undefined)
-                            _self._calendar.addEvent({
-                                title: title,
-                                start: arg.start,
-                                end: arg.end,
-                                allDay: arg.allDay
-                            });
-                    }
-                    if (_self._calendar != undefined)
-                        _self._calendar.unselect();
+                    // var title = prompt('Event Title:');
+                    // if (title) {
+                    //     if(_self._calendar != undefined)
+                    //     _self._calendar.addEvent({
+                    //         title: title,
+                    //         start: arg.start,
+                    //         end: arg.end,
+                    //         allDay: arg.allDay
+                    //     })
+                    // }
+                    // if(_self._calendar != undefined)
+                    // _self._calendar.unselect();
                 },
                     optionsInput.eventClick = function (info) {
                         var id = info.event.id;
