@@ -15,6 +15,8 @@ namespace BaseCustomerMVC.Globals
         private readonly ClassService _classService;
         private readonly TeacherService _teacherService;
         private readonly LessonScheduleService _lessonScheduleService;
+
+        [Obsolete]
         public CalendarHelper(
             CalendarService calendarService, 
             LessonScheduleService lessonScheduleService,
@@ -28,6 +30,7 @@ namespace BaseCustomerMVC.Globals
             _classService = classService;
             _teacherService = teacherService;
             _lessonScheduleService = lessonScheduleService;
+            ScheduleAutoConvertEvent();
         }
         public Task<CalendarEntity> CreateEvent(CalendarEntity item)
         {
@@ -106,8 +109,11 @@ namespace BaseCustomerMVC.Globals
         public bool ConvertCalendarFromSchedule(LessonScheduleEntity item, string userCreate)
         {
             var lesson = _lessonService.GetItemByID(item.LessonID);
+            if (lesson == null) return false;
             var ourClass = _classService.GetItemByID(item.ClassID);
+            if (ourClass == null) return false;
             var teacher = _teacherService.GetItemByID(ourClass.TeacherID);
+            if (teacher == null) return false;
             var calendar = new CalendarEntity()
             {
                 Created = DateTime.Now,
