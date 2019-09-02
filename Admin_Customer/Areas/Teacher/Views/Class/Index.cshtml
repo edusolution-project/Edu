@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Lớp học của tôi";
+    ViewData["Title"] = "Danh sách khóa học";
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
     var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
@@ -7,73 +7,98 @@
 }
 
 
-<!-- Begin Page Content -->
-<div class="container">
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Các lớp đã được phân công</h6>
-        </div>
-        <div class="card-body">
-            <div class="search-filter">
-                <div class="form-row">
-                    <div class="form-group row col-md-4">
-                        <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
-                        <div class="col-sm-8">
-                            <select id="SubjectID" class="form-control" onchange="LoadGrade()">
-                                <option value="">----</option>
-                                @{
-                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                    {
-                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                    }
+<script>
+    activeTab = "course";
 
+/**/</script>
+
+<div class="left-col">
+    <div class="page-title row">
+        <h1 class="col-md-11">@ViewData["Title"]</h1>
+    </div>
+    <!-- Begin Page Content -->
+    <div class="main-container">
+        <div class="search-filter">
+            <div class="form-row">
+                <div class="form-group row col-md-4">
+                    <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                    <div class="col-sm-8">
+                        <select id="SubjectID" class="form-control" onchange="LoadGrade()">
+                            <option value="">----</option>
+                            @{
+                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                {
+                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
                                 }
-                            </select>
-                        </div>
+
+                            }
+                        </select>
                     </div>
-                    <div class="form-group row col-md-4 offset-4">
-                        <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
-                        <div class="col-sm-8">
-                            <select id="GradeID" class="form-control" onchange="LoadData()">
-                                <option value="">-- Tất cả --</option>
-                                @{
-                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                    {
-                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                    }
-
+                </div>
+                <div class="form-group row col-md-4 offset-4">
+                    <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+                    <div class="col-sm-8">
+                        <select id="GradeID" class="form-control" onchange="LoadData()">
+                            <option value="">-- Tất cả --</option>
+                            @{
+                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                {
+                                    <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
                                 }
-                            </select>
-                        </div>
+
+                            }
+                        </select>
                     </div>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
-                    <thead>
-                        <tr class="text-center">
-                            <th>STT</th>
-                            <th>Tên lớp</th>
-                            <th>Môn học</th>
-                            <th>Cấp độ</th>
-                            <th>Giáo viên</th>
-                            <th>Học viên đăng ký</th>
-                            <th>Ngày bắt đầu</th>
-                            <th>Ngày kết thúc</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+        </div>
+
+
+        <div class="active-region">
+            <div class="block-title">
+                <h2>Các lớp đang diễn ra</h2>
             </div>
+            <table id="activeCourse" class="table" width="100%" cellspacing="0">
+                <thead>
+                    <tr class="text-center">
+                        <th class="text-left">STT</th>
+                        <th class="text-left">Tên lớp</th>
+                        <th class="text-left">Môn học</th>
+                        <th class="text-left">Cấp độ</th>
+                        @*<th>Giáo viên</th>*@
+                        <th class="text-center">Học viên đăng ký</th>
+                        <th class="text-center">Thời gian</th>
+                        @*<th>Trạng thái</th>*@
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="past-region" style="display: none">
+            <div class="block-title">
+                <h2>Đã kết thúc</h2>
+            </div>
+            <table id="pastCourse" class="table" width="100%" cellspacing="0">
+                <thead>
+                    <tr class="text-center">
+                        <th class="text-left">STT</th>
+                        <th class="text-left">Tên lớp</th>
+                        <th class="text-left">Môn học</th>
+                        <th class="text-left">Cấp độ</th>
+                        @*<th>Giáo viên</th>*@
+                        <th class="text-center">Học viên đăng ký</th>
+                        <th class="text-center">Thời gian</th>
+                        @*<th>Trạng thái</th>*@
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>
-<!-- End of Main Content -->
-
 
 <script>
-    
+
     function LoadData() {
         var UserID = '@user';
         var searchText = $("#searchText").val();
@@ -85,28 +110,42 @@
             data: { SearchText: searchText, SubjectID: subject, GradeID: grade, UserID: UserID },
             dataType:"json",
             success: function (data) {
-                var body = $('#dataTable tbody');
-                body.html("");
+                var activeCourse = $('#activeCourse tbody');
+                var pastCourse = $('#pastCourse tbody');
+                activeCourse.html("");
+                pastCourse.html("");
                 if (data.Data.length > 0)
                 {
+                    var counter = 0;
+                    var pastcounter = 0;
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
-                        var active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' disabled> <div class='handle'></div> </button></td>";
+                        //var active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' disabled> <div class='handle'></div> </button></td>";
 
-                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
-                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
+                        var startdate = moment(item.StartDate).format('DD/MM/YYYY');
+                        var enddate = moment(item.EndDate).format('DD/MM/YYYY');
+                        var today = new Date();
 
-                        body.append("<tr>" +
-                            "<td>" + (i + 1) + "</td>" +
-                            "<td><a href='@Url.Action("Detail", "Class")/" + item.ID + "'>" + item.Name + "</td>" +
-                            "<td>" + item.SubjectName + "</td>" +
-                            "<td>" + item.GradeName + "</td>" +
-                            "<td>" + item.TeacherName + "</td>" +
-                            "<td class='text-center'>" + item.Students.length + "</td>" +
-                            "<td class='text-center'>" + startdate + "</td>" +
-                            "<td class='text-center'>" + enddate +"</td>"+ active +
-                            "</tr>"
-                        );
+                        var past = moment(today).diff(moment(item.EndDate), 'days') > 0;
+
+                        var count = past ? ++pastcounter : ++counter;
+
+                        var row =
+                            "<tr>" +
+                                "<td>" + count + "</td>" +
+                                "<td><a href='@Url.Action("Detail", "Class")/" + item.ID + "'>" + item.Name + "</td>" +
+                                "<td>" + item.SubjectName + "</td>" +
+                                "<td>" + item.GradeName + "</td>" +
+                                "<td class='text-center'>" + item.Students.length + "</td>" +
+                                "<td class='text-center'>" + startdate + " - " + enddate +"</td>"+
+                            "</tr>";
+                        if (past) {
+                            $('.past-region').show();
+                             pastCourse.append(row);
+                        }
+                        else {
+                            activeCourse.append(row);
+                        }
                     }
                 }
             },

@@ -6,7 +6,7 @@
 
 <script>
     activeTab = "course";
-    modulesLink = "@Url.Action("Modules","Course")";
+    modulesLink = "@Url.Action("Modules", "Course")";
     activeSub = "modules";
 </script>
 <div class="left-col">
@@ -23,7 +23,16 @@
         </div>
     </div>
 </div>
-
+<style>
+    .text-holder {
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        font-weight: 500;
+        text-align: right;
+        outline: none;
+    }
+</style>
 @section Scripts {
     <script>
 
@@ -93,19 +102,11 @@
                             active = "<button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger' onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\"> <div class='handle'></div> </button>";
                         }
 
-                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
-                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
-                        var lastjoin = "---";
-                        var isView = "";
-                        if (item.IsView) {
-                            isView = "IsView";
-                            lastjoin = $.datepicker.formatDate('dd/mm/yy', new Date(item.LastJoin))
-                        } else {
-                            isView = "";
-                        }
+                        var startdate = moment(item.StartDate).format('DD/MM/YYYY');
+                        var enddate = moment(item.EndDate).format('DD/MM/YYYY');
 
                         var rowData = $("<div>", {"class":"modules-content-item row"});
-                        var leftPart = $("<div>", {"class":"col-md-10"});
+                        var leftPart = $("<div>", {"class":"col-md-6"});
                         var rightPart = $("<div>", {"class":"col-md-2 text-right"});
                         leftPart.append($("<span>", {"class":"modules-content-item-icon" + (item.TemplateType === 2? (" assignment atype" + item.Etype):"")}));
                         rightPart.append(active);
@@ -122,7 +123,12 @@
                         }
 
                         leftPart.append(itemData);
-                        rowData.append(leftPart).append(rightPart);
+                        rowData.append(leftPart)
+                            .append($("<div>", {"class":"col-md-2 text-right"})
+                                .append($("<input>", {"sid": item.ScheduleID, "target":"StartDate", "type":"text", "readonly":"readonly","class":"text-holder", "value": startdate, "onchange":"updateSchedule(this)"})))
+                            .append($("<div>", {"class":"col-md-2 text-right"})
+                                .append($("<input>",{"sid": item.ScheduleID, "target":"EndDate", "type":"text", "readonly":"readonly","class":"text-holder", "value": enddate, "onchange":"updateSchedule(this)"})))
+                            .append(rightPart);
 
                         if (item.ChapterID == null) {
                             scheduleBody.append(rowData);
@@ -133,6 +139,12 @@
                             parent.append(rowData);
                         }
                     }
+
+                    $('.text-holder').datepicker({
+                      changeMonth: true,
+                      changeYear: true,
+                      dateFormat: "dd/mm/yy"
+                    });
                 }
                 if(window.location.hash != "")
                 {
@@ -148,9 +160,33 @@
         });
     }
 
-    function LockNotify() {
-        alert("Bài học chưa được mở!");
-        return false;
+    function updateSchedule(obj) {
+        var currentval = $(obj).val();
+        var scheduleid = $(obj).attr("sid");
+        var startdate = moment($(obj).parent().parent().find("[target=StartDate]").val(),"DD/MM/YYYY").format("MM-DD-YYYY");
+        var enddate = moment($(obj).parent().parent().find("[target=EndDate]").val(),"DD/MM/YYYY").format("MM-DD-YYYY");
+        console.log(startdate);
+        console.log(enddate);
+
+        $(obj).val(currentval + "...")
+        $.ajax({
+                type: "POST",
+                url: '@Url.Action("Update", "LessonSchedule")',
+                data:
+                {
+                    ID: scheduleid,
+                    StartDate: startdate,
+                    EndDate: enddate
+                },
+                dataType:"json",
+                success: function (data) {
+                    $(obj).val(currentval);
+                },
+                error: function (res) {
+                    console.log(res.responseText);
+                }
+            });
+
     }
 
     $(document).ready(function () {

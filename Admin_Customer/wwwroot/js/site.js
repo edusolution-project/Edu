@@ -199,6 +199,14 @@ function ToggleStatus(obj) {
     $(obj).toggleClass("btn-success").toggleClass("btn-danger");
 }
 
+function ToggleSwitch(obj) {
+    var action = $(obj).attr("onclick");
+    if (action.indexOf("UnPublish") > 0)
+        $(obj).attr("onclick", action.replace("UnPublish", "Publish"));
+    else
+        $(obj).attr("onclick", action.replace("Publish", "UnPublish"));
+}
+
 function toggleCollapse(obj) {
     var target = $(obj).attr('data-target');
     $(target).collapse('toggle');
@@ -278,4 +286,13 @@ function showLoading(message) {
 
 function hideLoading() {
     $("body > .loadingState").remove();
+}
+
+function stopAllMedia() {
+    $("video").each(function () {
+        $(this)[0].pause();
+    });
+    $("audio").each(function () {
+        $(this)[0].pause();
+    });
 }

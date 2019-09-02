@@ -9,6 +9,7 @@ function tab_gonext() {
     //        break;
     //    }
     //}
+    stopAllMedia();
 
     var panes = $('.tab-pane');
     var index = panes.index($('.tab-pane.active'));
@@ -31,7 +32,7 @@ function tab_goback() {
     //        break;
     //    }
     //}
-
+    stopAllMedia();
 
     var panes = $('.tab-pane');
     var index = panes.index($('.tab-pane.active'));

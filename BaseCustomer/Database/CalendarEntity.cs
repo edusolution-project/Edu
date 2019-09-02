@@ -31,6 +31,8 @@ namespace BaseCustomerEntity.Database
         public string CreateUser { get; set; }
         [JsonProperty("Status")]
         public int Status { get; set; } = 0;
+        [JsonProperty("IsDel")]
+        public bool IsDel { get; set; } = false;
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
     }

@@ -131,7 +131,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return RedirectToAction("Index");
 
             ViewBag.Data = data;
-            ViewBag.Title = "Chi tiết giáo trình - " + data.Name;
+            ViewBag.Title = data.Name;
             var subject = new List<SubjectEntity>();
             var grade = new List<GradeEntity>();
 

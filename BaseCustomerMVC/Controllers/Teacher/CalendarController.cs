@@ -20,16 +20,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CalendarService _calendarService;
         private readonly CalendarLogService _calendarLogService;
         private readonly CalendarReportService _calendarReportService;
-
+        private readonly CalendarHelper _calendarHelper;
+        private readonly ClassService _classService;
         public CalendarController(
             CalendarService calendarService,
             CalendarLogService calendarLogService,
-            CalendarReportService calendarReportService
+            CalendarReportService calendarReportService,
+            CalendarHelper calendarHelper,
+            ClassService classService
             )
         {
             this._calendarService = calendarService;
             this._calendarLogService = calendarLogService;
             this._calendarReportService = calendarReportService;
+            _calendarHelper = calendarHelper;
+            _classService = classService;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -38,46 +43,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [Obsolete]
-        public Task<JsonResult> GetList(DefaultModel model)
+        public Task<JsonResult> GetList(DefaultModel model,DateTime start,DateTime end)
         {
-            var filter = new List<FilterDefinition<CalendarEntity>>();
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return null;
-            }
-            else
-            {
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.TeacherID == userId));
-            }
-            if (model.StartDate > DateTime.MinValue)
-            {
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.StartDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
-            }
-            if (model.EndDate > DateTime.MinValue)
-            {
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.EndDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
-            }
-            var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
-            model.TotalRecord = data.Count();
-            var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList();
-            DataResponse.Select(o => new CalendarEventModel()
-            {
-                id = o.ID,
-                start = o.StartDate,
-                end = o.EndDate,
-                title = o.Title,
-                groupid = o.GroupID,
-                url = (o.StartDate >= DateTime.Now && o.EndDate <= DateTime.Now) ? o.UrlRoom : ""
-            });
-            //var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-            //    ? data.ToList()
-            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
-            //Task.Factory.StartNew(() => {
-            //    Task inner = Task.Factory.StartNew(() => { });
-            //    return Task.FromResult(new JsonResult(model));
-            //});
-            return Task.FromResult(new JsonResult(DataResponse));
+            var userId = User?.FindFirst("UserID").Value;
+            var listClass = _classService.Collection.Find(o => o.TeacherID == userId)?.ToList();
+            if (listClass == null) return Task.FromResult(new JsonResult(null));
+            var data = _calendarHelper.GetListEvent(start, end, listClass.Select(o=>o.ID).ToList());
+            if(data == null) return Task.FromResult(new JsonResult(new {}));
+            return Task.FromResult(new JsonResult(data));
         }
         [HttpPost]
         [Obsolete]
@@ -91,42 +64,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public CalendarEntity Create(CalendarEntity item)
         {
             // check validate
-            if (validate(item.StartDate, item.EndDate)) return _calendarService.CreateOrUpdate(item);
-            else return null;
+           return _calendarHelper.CreateEvent(item).Result;
         }
         [HttpPost]
         [Obsolete]
         public bool Delete(string id)
         {
-            //validate
-            var item = _calendarService.GetItemByID(id);
-            if (item == null || item.Status == 1) return false;
-            return _calendarService.Remove(id) != null;
-        }
-
-        [Obsolete]
-        private bool validate(DateTime startDate, DateTime endDate)
-        {
-            if (startDate == DateTime.MinValue || endDate == DateTime.MinValue) return false;
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (startDate <= DateTime.Now || endDate <= DateTime.Now) return false;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return false;
-            }
-            var filter = new List<FilterDefinition<CalendarEntity>>();
-            filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.TeacherID == userId));
-            filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.StartDate >= startDate));
-            filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.EndDate <= endDate));
-            var data = _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter));
-            if(data.Count() <= 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return _calendarHelper.RemoveEvent(id).Result;
         }
     }
 }

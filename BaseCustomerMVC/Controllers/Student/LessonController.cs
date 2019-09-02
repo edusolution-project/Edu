@@ -197,8 +197,6 @@ namespace BaseCustomerMVC.Controllers.Student
         /// <returns></returns>
         public IActionResult Detail(DefaultModel model, string id, string ClassID)
         {
-            ViewBag.LessonID = id;
-            ViewBag.ClassID = ClassID;
             if (ClassID == null)
                 return RedirectToAction("Index", "Class");
             var currentClass = _classService.GetItemByID(ClassID);
@@ -207,11 +205,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var lesson = _lessonService.GetItemByID(model.ID);
             if (lesson == null)
                 return RedirectToAction("Index", "Class");
-
-            //if(lesson.TemplateType == LESSON_TEMPLATE.EXAM)
-            //{
-            //    var lastestExam = _
-            //}
+            ViewBag.Class = currentClass;
             ViewBag.Lesson = lesson;
             ViewBag.Type = lesson.TemplateType;
             return View();

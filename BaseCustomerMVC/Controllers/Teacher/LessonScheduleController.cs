@@ -24,6 +24,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SubjectService _subjectService;
         private readonly ExamService _examService;
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
+        private readonly CalendarHelper _calendarHelper;
 
         public LessonScheduleController(
             // GradeService gradeservice
@@ -35,7 +36,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonService lessonService,
             LessonScheduleService service,
             SubjectService subjectService,
-            ExamService examService)
+            ExamService examService,
+            CalendarHelper calendarHelper
+            )
         {
             //_gradeService = gradeservice;
             //_subjectService = subjectService;
@@ -47,6 +50,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _subjectService = subjectService;
             _service = service;
             _examService = examService;
+            _calendarHelper = calendarHelper;
             _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
         }
 
@@ -453,8 +457,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult UpdateSchedule(LessonScheduleEntity entity)
+        public JsonResult Update(LessonScheduleEntity entity)
         {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
             if (entity == null || string.IsNullOrEmpty(entity.ID))
             {
                 return new JsonResult(new Dictionary<string, object> {
@@ -473,8 +478,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 oldItem.StartDate = entity.StartDate;
                 oldItem.EndDate = entity.EndDate;
+                _calendarHelper.ConvertCalendarFromSchedule(oldItem, UserID);
+                _service.CreateOrUpdate(oldItem);
 
-                _service.CreateQuery().ReplaceOne(o => o.ID == oldItem.ID, oldItem);
                 return new JsonResult(new Dictionary<string, object> {
                         {"Data",oldItem },
                         {"Error", null }

@@ -352,3 +352,4 @@ Admin_Customer/Views/Shared/_sideBarTeacher - Copy.cshtml
 Admin_Customer/Views/Shared/_sideBarStudent - Copy.cshtml
 Admin_Customer/Views/Shared/_LayoutTeacher.oldcshtml
 Admin_Customer/Views/Shared/_LayoutStudent.oldcshtml
+*.rar

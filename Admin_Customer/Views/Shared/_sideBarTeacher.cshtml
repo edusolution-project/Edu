@@ -50,7 +50,7 @@
             <li class="sidebar-item dashboard">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
                     <i></i>
-                    <span>Dashboard</span>
+                    <span>Bảng điều khiển</span>
                 </a>
             </li>
 
@@ -63,9 +63,7 @@
                     <div>
                         <h4>Lớp học</h4>
                         <hr role="presentation">
-                        <ul class="action-wrapper">
-                          
-                        </ul>
+                        <ul class="action-wrapper"></ul>
                         <hr role="presentation">
 
                         <a href="@Url.Action("Index","Class")" class="btn action-link">
@@ -143,7 +141,7 @@
                 else {
                     body.append("<li>Chưa có lớp nào đang học</li>");
                 }
- 
+
             },
             error: function (err) {
                 console.log(err.responseText)

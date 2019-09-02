@@ -85,8 +85,15 @@
     width: 100% !important;
 }
 
-#menu-left {
-    border-right: 1px solid #ccc;
+#menu-tab {
+    position:absolute;
+    top: 0;
+    left: 0;
+    background: #FFF;
+    z-index:999;
+    padding: 7px;
+    border: solid 1px #999;
+    border-radius:15px;
 }
 
 #list-detail .nav-item .nav-link:hover {
