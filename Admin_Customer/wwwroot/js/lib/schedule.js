@@ -4834,16 +4834,16 @@ var RAW_EN_LOCALE = {
         prevYear: 'prev year',
         nextYear: 'next year',
         year: 'year',
-        today: 'today',
-        month: 'month',
-        week: 'week',
-        day: 'day',
-        list: 'list'
+        today: 'Hôm nay',
+        month: 'Tháng',
+        week: 'Tuần',
+        day: 'Ngày',
+        list: 'Danh sách'
     },
     weekLabel: 'W',
-    allDayText: 'all-day',
-    eventLimitText: 'more',
-    noEventsMessage: 'No events to display'
+    allDayText: 'Cả ngày',
+    eventLimitText: 'thêm',
+    noEventsMessage: 'Không có sự kiện nào'
 };
 function parseRawLocales(explicitRawLocales) {
     var defaultCode = explicitRawLocales.length > 0 ? explicitRawLocales[0].code : 'en';
@@ -17005,9 +17005,9 @@ var Schedule = /** @class */ (function () {
                 };
                 optionsInput.customButtons = {
                     addEvent: {
-                        text: 'add event',
+                        text: 'Thêm sự kiện',
                         click: function (e) {
-                            _self._$('#modalTitle').html("<div>Thêm event</div>");
+                            _self._$('#modalTitle').html("<div>Thêm sự kiện</div>");
                             //_self._$('#modalBody').html("");
                             _self._$('#eventUrl').attr('href', "");
                             _self._$('#calendarModal').modal();

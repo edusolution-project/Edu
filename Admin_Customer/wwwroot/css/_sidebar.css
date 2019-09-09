@@ -31,7 +31,7 @@
     background-color: #FFF; }
     .sidebar .sidebar-item.home, .sidebar .sidebar-toggler-icon.home {
       background-color: #000054;
-      height: 75px; }
+      height: 60px; }
     .sidebar .sidebar-item.profile, .sidebar .sidebar-toggler-icon.profile {
       background-position-y: -76px; }
     .sidebar .sidebar-item.dashboard, .sidebar .sidebar-toggler-icon.dashboard {
@@ -46,6 +46,8 @@
       background-position-y: -288px; }
     .sidebar .sidebar-item.curriculum, .sidebar .sidebar-toggler-icon.curriculum {
       background-position-y: -288px; }
+    .sidebar .sidebar-item.guide, .sidebar .sidebar-toggler-icon.guide {
+      background-position-y: -330px; }
     .sidebar .sidebar-item:hover, .sidebar .sidebar-item.active, .sidebar .sidebar-toggler-icon:hover, .sidebar .sidebar-toggler-icon.active {
       filter: none; }
     .sidebar .sidebar-item .nav-link, .sidebar .sidebar-toggler-icon .nav-link {

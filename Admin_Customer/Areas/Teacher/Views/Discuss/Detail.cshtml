@@ -1,0 +1,119 @@
+﻿
+@{
+    ViewData["Title"] = "Detail";
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+    var classID = ViewBag.ClassID;
+}
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+    </div>
+</div>
+<script>
+    var activeTab = "comments";
+</script>
+<div class="container">
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+        Add
+    </button>
+    <div id="list-new-feed"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Discuss</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="PostNewFeed" action="@Url.Action("PostNewFeed","Discuss")" method="post">
+                    <input type="hidden" name="GroupID" value="@classID" />
+                    <div class="form-group">
+                        <label>Title :</label>
+                        <input type="text" class="form-control" name="Title" placeholder="Tiêu đề">
+                    </div>
+                    <div class="form-group">
+                        <label>Nội dung :</label>
+                        <input type="hidden" name="Content" id="editor1">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btn-new-feed" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="new-feed__reply--popup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Reply</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form name="CommentFeed" method="post">
+                    <input type="hidden" name="GroupID" value="@classID" />
+                    <input type="hidden" name="ParentID" value="" />
+                    <div class="form-group">
+                        <label>Title :</label>
+                        <input type="text" class="form-control" name="Title" placeholder="Tiêu đề">
+                    </div>
+                    <div class="form-group">
+                        <label>Nội dung :</label>
+                        <input type="hidden" name="Content" id="editor2">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btn-new-feed-reply" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button type="button" id="tesst">Submit</button>
+@section Scripts{
+    <script src="~/js/hubs/newfeed.base.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var newFeed = new Newfeed({
+                url: {
+                    post: "@Url.Action("PostNewFeed","Discuss")",
+                    load: "@Url.Action("GetListNewFeed","Discuss")"
+                },
+                group_id: '@classID'
+            });
+            newFeed.load(0, 5);
+            CKEDITOR.replace('editor1');
+            CKEDITOR.replace('editor2');
+            document.getElementById("btn-new-feed").addEventListener("click", function () {
+                var datax = CKEDITOR.instances.editor1.getData();
+                var form = window.PostNewFeed;
+                form.querySelector('#editor1').value = datax;
+                var data = new FormData(form);
+                newFeed.post(data);
+            });
+            document.getElementById("btn-new-feed-reply").addEventListener("click", function () {
+                var datax = CKEDITOR.instances.editor2.getData();
+                var form = window.CommentFeed;
+                form.querySelector('#editor2').value = datax;
+                form.querySelector('input[name="ParentID"]').value = form.querySelector('input[name="ParentID"]').value;
+                var data = new FormData(form);
+                newFeed.post(data);
+            });
+        });
+
+    </script>
+}

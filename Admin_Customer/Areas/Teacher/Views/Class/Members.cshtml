@@ -21,10 +21,98 @@
             @await Html.PartialAsync("_subSidebarTeacher")
         </div>
         <div class="main-content">
+            <table id="membersTable" class="table" width="100%" cellspacing="0">
+                <thead>
+                    <tr class="text-center align-middle">
+                        <th class="text-center align-middle">STT</th>
+                        <th class="text-center align-middle">Họ và tên</th>
+                        <th class="text-center align-middle">Email</th>
+                        <th class="text-center align-middle">Lớp</th>
+                        <th class="text-center align-middle">Ngày sinh</th>
+                        <th class="text-center align-middle">Vai trò</th>
+                        <th class="text-center align-middle">Tiến độ</th>
+                        <th class="text-center align-middle">Ngày hoạt động <br /> gần nhất</th>
+                        <th class="text-center align-middle">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>
 
 @section Scripts {
+    <script>
 
+        var membersBody = $('#membersTable tbody');
+
+    function LoadMembers() {
+        members = [];
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetListMember", "Class")',
+            data: {ID: "@currentClass.ID"},
+            dataType:"json",
+            success: function (data) {
+                memberCounter = 1;
+                membersBody.html("");
+
+                teacher = data.Data.Teacher;
+                var date = moment(new Date(teacher.DateBorn)).format('DD/MM/YYYY');
+                membersBody.append("<tr>" +
+                                "<td>" + 1 + "</td>" +
+                                "<td>" + teacher.FullName + "</td>" +
+                                "<td>" + teacher.Email + "</td>" +
+                                //"<td>" + (student.Phone == null ?"" : student.Phone)  + "</td>" +
+                                "<td class='text-center'>---</td>" +
+                                "<td class='text-center'>GV</td>" +
+                                "<td class='text-center'>" + date + "</td>" +
+                                "<td class='text-center'>---</td>" +
+                                "<td class='text-center'>---</td>" +
+                                "<td class='text-center'>---</td>" +
+                            "</tr>"
+                        );
+
+
+
+                members = data.Data.Students;
+
+                if (members.length > 0) {
+                    for (j = 0; j < members.length; j++) {
+                        console.log(members[j]);
+                        var student = members[j];
+
+                        var date = moment(new Date(student.DateBorn)).format('DD/MM/YYYY');
+                        var lastdate = moment(new Date(student.LastJoinDate)).format('DD/MM/YYYY');
+
+                        membersBody.append("<tr>" +
+                                "<td>" + (j + 2) + "</td>" +
+                                "<td>" + student.FullName + "</td>" +
+                                "<td>" + student.Email + "</td>" +
+                                //"<td>" + (student.Phone == null ?"" : student.Phone)  + "</td>" +
+                                "<td class='text-center'>" + (student.Class == null ?"" : student.Class[0])  + "</td>" +
+                                "<td class='text-center'>HV</td>" +
+                                "<td class='text-center'>" + date + "</td>" +
+                                "<td>" +
+                                    "<div class=\"progress\">" +
+                                        "<div class=\"progress-bar bg-success\" role=\"progressbar\" style=\"width: 0%\" aria-valuenow=\"0\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div>" +
+                                    "</div>" +
+                                "</td>" +
+                                "<td class='text-center'>" + lastdate + "</td>" +
+                                "<td>Đang học</td>" +
+                            "</tr>"
+                        );
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        LoadMembers();
+    });
+    </script>
 }

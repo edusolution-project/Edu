@@ -62,6 +62,7 @@ namespace Core_v2.Repositories
         {
             return _collection.Find(o => o.ID == id)?.SingleOrDefault();
         }
+
         public IFindFluent<T, T> GetAll(){
             return _collection.Find(_ => true);
         } 

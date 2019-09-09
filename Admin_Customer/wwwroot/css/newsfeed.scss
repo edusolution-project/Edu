@@ -1,0 +1,75 @@
+@import "uivar.scss";
+
+.item-new-feed {
+    cursor: pointer;
+
+    &__topic {
+        padding: 10px;
+        border-bottom: solid 1px #CCC;
+    }
+
+    &__title {
+        color: $base_red;
+        font-weight: 500;
+        font-size: 1.3em;
+        padding-top: 5px;
+    }
+
+    &__content {
+        padding: 3px 0;
+        font-size: 1em;
+
+        p {
+            margin-bottom: 0;
+        }
+    }
+
+    &__time {
+        color: #999;
+        font-size: 0.8em;
+        font-style: italic;
+    }
+
+    &__sender {
+        color: $base_red;
+    }
+
+    &.item-new-feed__reply {
+        border-bottom: dashed 1px #CCC;
+    }
+
+    .btn {
+        display: none;
+
+        &.feed_annouce {
+            padding: 0;
+        }
+
+        &.active {
+            display: inline-block;
+        }
+    }
+
+    &:hover .btn {
+        display: inline-block;
+    }
+}
+
+.item-feed-full {
+    .title_row {
+        margin-right: 0;
+        border-bottom: solid 1px #CCC;
+
+        div:last-child {
+            padding: 0;
+        }
+    }
+
+    &__title {
+        font-size: 1.8em;
+        font-weight: 500;
+        color: $base_red;
+        padding-bottom: 7px;
+        width: 100%;
+    }
+}

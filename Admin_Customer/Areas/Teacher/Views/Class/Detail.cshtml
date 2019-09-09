@@ -22,19 +22,49 @@
         </div>
         <div class="main-content">
             <div class="intro-wrapper content-block">
-                <div class="block-title row">
+                <div class="block-title row mr-0">
                     <h2 class="col-md-11">@currentClass.Name</h2><button class="btn btn-info col-md-1" onclick="editClassInfo()" data-toggle="modal" data-target="#infoModal">Cập nhật</button>
                 </div>
-                <div class="course-syllabus">
+                <div class="course-info">
 
                     @if (!String.IsNullOrEmpty(currentClass.Image))
                     {
                         <img src="@currentClass.Image" title="@currentClass.Name" class="courseImg" />
                     }
-                    @if (!String.IsNullOrEmpty(currentClass.Description))
+                    @if (!String.IsNullOrEmpty(currentClass.Syllabus))
                     {
-                        <div class="courseDescription">
-                            @Html.Raw(currentClass.Description)
+                        <div class="block-title mt-3">
+                            <h2>Đề cương môn học</h2>
+                        </div>
+                        <div class="course-syllabus">
+                            @Html.Raw(currentClass.Syllabus)
+                        </div>
+                    }
+                    @if (!String.IsNullOrEmpty(currentClass.Modules))
+                    {
+                        <div class="block-title mt-3">
+                            <h2>Nội dung môn học</h2>
+                        </div>
+                        <div class="course-modules">
+                            @Html.Raw(currentClass.Modules)
+                        </div>
+                    }
+                    @if (!String.IsNullOrEmpty(currentClass.LearningOutcomes))
+                    {
+                        <div class="block-title mt-3">
+                            <h2>Mục tiêu đầu ra</h2>
+                        </div>
+                        <div class="course-outcomes">
+                            @Html.Raw(currentClass.LearningOutcomes)
+                        </div>
+                    }
+                    @if (!String.IsNullOrEmpty(currentClass.References))
+                    {
+                        <div class="block-title mt-3">
+                            <h2>Tài liệu tham khảo</h2>
+                        </div>
+                        <div class="course-references">
+                            @Html.Raw(currentClass.References)
                         </div>
                     }
                 </div>
@@ -83,43 +113,6 @@
                     </thead>
                     <tbody></tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade bd-modal-lg" role="dialog" aria-hidden="true" id="infoModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Cập nhật thông tin lớp</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <div class="row pb-3">
-                        <label class="col-sm-2 form-label align-top" for="classAvatarEdit">Chọn ảnh:</label>
-                        <div class="col-sm-10 align-top">
-                            <button class="btn btn-info btnAddFile align-top" onclick="chooseFile(this)" tabindex="-1">Chọn file</button>
-                            <input type="file" name="classAvatarEdit" class="d-none" id="classAvatarEdit" onchange="changeMedia(this)" accept="image/*">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <label class="col-sm-2 form-label align-top" for="classDescriptionEdit">Thông tin lớp:</label>
-                        <div class="col-sm-10 align-top">
-                            <textarea name="classDescriptionEdit" id="classDescriptionEdit"></textarea>
-                        </div>
-                        <script>
-                            CKEDITOR.replace("classDescriptionEdit");
-                        </script>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-info btn-submit" data-dismiss="modal" onclick="saveClassInfo()">Lưu</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
@@ -262,55 +255,7 @@
     });
 
     function editClassInfo(){
-        CKEDITOR.instances['classDescriptionEdit'].setData($('.intro-wrapper .courseDescription').html());
-        if ($('.intro-wrapper .courseImg').length > 0) {
-            if($('#classAvatarEdit').siblings("img").length > 0)
-                $('#classAvatarEdit').siblings("img").attr('src', $('.intro-wrapper .courseImg').attr('src'));
-            else
-                $('#classAvatarEdit').parent().prepend($("<img>", {'src': $('.intro-wrapper .courseImg').attr('src'), "class":"imgPreview pb-3", "style":"max-width: 100%; max-height: 100px;"}));
-        }
-        $('#classAvatarEdit').siblings("button").text("Chọn file");
-        $('#classAvatarEdit').val(null);
-    }
-
-    function saveClassInfo()
-    {
-        var classid = '@currentClass.ID';
-        var description = CKEDITOR.instances.classDescriptionEdit.getData();
-        var fileuploads = $('#classAvatarEdit');
-        var ufiles = fileuploads[0].files;
-
-        if (window.FormData !== undefined) {
-            var data = new FormData();
-            if (ufiles.length > 0) {
-                for (var x = 0; x < ufiles.length; x++) {
-                    data.append(ufiles[x].name, ufiles[x]);
-                }
-            }
-
-            data.append("ID", classid);
-            data.append("Description", description);
-            showLoading("Đang cập nhật nội dung...");
-            $.ajax({
-                type: "POST",
-                url: '/Teacher/Class/SaveInfo',
-                contentType: false,
-                processData: false,
-                data: data,
-                success: function (data) {
-                    if (data.Error == null)
-                        renderClassInfo(data);
-                    else
-                        alert(data.Error);
-                    hideLoading();
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    console.log(thrownError);
-                    alert("Có lỗi, vui lòng kiểm tra lại kết nối");
-                    hideLoading();
-                }
-            });
-        }
+        document.location = '@Url.Action("Edit","Class", new {ID = currentClass.ID })';
     }
 
     function EditChapter(obj, ID) {
@@ -334,19 +279,6 @@
         var file = $(obj)[0].files[0];
         $(obj).siblings(".btnAddFile").text(file.name);
         $(obj).siblings("img").remove();
-    }
-
-    function renderClassInfo(data)
-    {
-        var currentClass = data.Data;
-        if (currentClass.Image != null) {
-        if($('.intro-wrapper .courseImg').length > 0)
-            $('.intro-wrapper .courseImg').attr('src', currentClass.Image);
-        else
-            $('.course-syllabus').prepend($("<img>", {"class":"courseImg", "src": currentClass.Image }));
-        }
-        $('.intro-wrapper .courseDescription').html(currentClass.Description);
-
     }
     </script>
 }

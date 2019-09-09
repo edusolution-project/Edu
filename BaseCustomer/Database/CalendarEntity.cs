@@ -35,6 +35,8 @@ namespace BaseCustomerEntity.Database
         public bool IsDel { get; set; } = false;
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
+        [JsonProperty("ScheduleID")]
+        public string ScheduleID { get; set; }
     }
     public class CalendarService : ServiceBase<CalendarEntity>
     {

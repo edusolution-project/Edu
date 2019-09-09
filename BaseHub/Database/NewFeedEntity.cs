@@ -29,6 +29,15 @@ namespace BaseHub.Database
         public List<string> Likes { get; set; }
         [JsonProperty("UnLikes")]
         public List<string> UnLikes { get; set; }
+        [JsonProperty("ReplyCount")]
+        public int ReplyCount { get; set; }
+        [JsonProperty("FeedType")]
+        public int FeedType { get; set; }
+    }
+
+    public class FEED_TYPE
+    {
+        public const int NORMAL = 0, ANNOUCEMENT = 1;
     }
     public class NewFeedService : ServiceBase<NewFeedEntity>
     {

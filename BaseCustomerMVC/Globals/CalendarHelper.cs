@@ -16,7 +16,7 @@ namespace BaseCustomerMVC.Globals
         private readonly TeacherService _teacherService;
         private readonly LessonScheduleService _lessonScheduleService;
         public CalendarHelper(
-            CalendarService calendarService, 
+            CalendarService calendarService,
             LessonScheduleService lessonScheduleService,
             LessonService lessonService,
             ClassService classService,
@@ -39,6 +39,7 @@ namespace BaseCustomerMVC.Globals
             }
             return Task.FromResult<CalendarEntity>(null);
         }
+
         public Task<bool> RemoveEvent(string id)
         {
             var delItem = _calendarService.GetItemByID(id);
@@ -51,7 +52,7 @@ namespace BaseCustomerMVC.Globals
             return Task.FromResult(false);
         }
 
-        private bool existEvent(DateTime startDate, DateTime endDate,string classID)
+        private bool existEvent(DateTime startDate, DateTime endDate, string classID)
         {
             var filter = new List<FilterDefinition<CalendarEntity>>
             {
@@ -66,7 +67,7 @@ namespace BaseCustomerMVC.Globals
         }
 
         [Obsolete]
-        public List<CalendarEventModel> GetListEvent(DateTime startDate,DateTime endDate,List<string> classList)
+        public List<CalendarEventModel> GetListEvent(DateTime startDate, DateTime endDate, List<string> classList)
         {
             var filter = new List<FilterDefinition<CalendarEntity>>();
             //if (classList != null && classList.Count > 0)
@@ -81,7 +82,8 @@ namespace BaseCustomerMVC.Globals
             }
             filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.IsDel == false));
             var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
-            var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList().Select(o=> new CalendarEventModel() {
+            var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList().Select(o => new CalendarEventModel()
+            {
                 end = o.EndDate,
                 start = o.StartDate,
                 groupid = o.GroupID,
@@ -92,22 +94,40 @@ namespace BaseCustomerMVC.Globals
             return DataResponse;
         }
 
+        public CalendarEntity GetByScheduleId(string scheduleID)
+        {
+            return _calendarService.CreateQuery().Find(t => t.ScheduleID == scheduleID).SingleOrDefault();
+        }
+
+        public long Remove(string ID)
+        {
+            return _calendarService.CreateQuery().DeleteMany(t => t.ID == ID).DeletedCount;
+        }
+
         [Obsolete]
         public Task ScheduleAutoConvertEvent()
         {
-           var data = _lessonScheduleService.GetAll()?.ToList();
-            for (int i = 0; data != null && i < data.Count() ; i++)
+            var data = _lessonScheduleService.GetAll()?.ToList();
+            for (int i = 0; data != null && i < data.Count(); i++)
             {
                 var item = data[i];
-                ConvertCalendarFromSchedule(item, "");
+                if (item.IsActive)
+                    ConvertCalendarFromSchedule(item, "");
             }
             return Task.CompletedTask;
         }
+
         public bool ConvertCalendarFromSchedule(LessonScheduleEntity item, string userCreate)
         {
             var lesson = _lessonService.GetItemByID(item.LessonID);
+            if (lesson == null)
+                return false;
             var ourClass = _classService.GetItemByID(item.ClassID);
+            if (ourClass == null)
+                return false;
             var teacher = _teacherService.GetItemByID(ourClass.TeacherID);
+            if (teacher == null)
+                return false;
             var calendar = new CalendarEntity()
             {
                 Created = DateTime.Now,
@@ -121,14 +141,15 @@ namespace BaseCustomerMVC.Globals
                 Status = 0,
                 LimitNumberUser = 0,
                 UrlRoom = string.Empty,
-                UserBook = new List<string>()
+                UserBook = new List<string>(),
+                ScheduleID = item.ID
             };
-            if (existEvent(calendar.StartDate, calendar.EndDate, calendar.GroupID))
-            {
-                _calendarService.CreateOrUpdate(calendar);
-                return true;
-            }
-            return false;
+            //if (existEvent(calendar.StartDate, calendar.EndDate, calendar.GroupID))
+            //{
+            _calendarService.CreateOrUpdate(calendar);
+            return true;
+            //}
+            //return false;
         }
     }
 }

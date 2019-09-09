@@ -18,10 +18,11 @@ var Comment = (function (hub) {
     var config = {
         url: {
             post: "",
-            load: "/student/discuss/GetListComment",
+            load: _urlListComment,
             feel: ""
         },
-        parent_id:""
+        container: "list-comment",
+        parent_id: ""
     }
     function Comment(options) {
         this._ajax = new MyAjax();
@@ -37,13 +38,20 @@ var Comment = (function (hub) {
     Comment.prototype.loadConfig = function (options) {
         this._config = groupConfig(options);
     }
-    Comment.prototype.load = function (classID,take, skip) {
+    Comment.prototype.load = function (classID, take, skip) {
+        
         const _self = this;
         const _obj = { newFeedID: classID == void 0 || null || "" ? _self._config.parent_id : classID, skip: skip || 0, take: take || 5 };
         var dataFrm = _self._ajax.creatFormData(_obj);
         this._ajax.proccess("POST", _self._config.url.load, dataFrm).then(function (data) {
+
             var jsonData = JSON.parse(data);
-            const container = document.getElementById(classID == void 0 || null || "" ? _self._config.parent_id : classID);
+            const container = document.getElementById(_self._config.container);
+
+            if (skip == 0) {
+                container.innerHTML = "";
+            }
+            //document.getElementById(classID == void 0 || null || "" ? _self._config.parent_id : classID);
             for (var i = 0; jsonData != null && i < jsonData.length; i++) {
                 var item = jsonData[i];
                 if (item.Content == "" || item.Content == null || item.Content == void 0) continue;
@@ -62,7 +70,7 @@ var Newfeed = (function (hub) {
             feel: ""
         },
         group_id: "",
-        id:"list-new-feed"
+        id: "list-new-feed"
     }
     var comment;
     function Newfeed(options) {
@@ -87,7 +95,14 @@ var Newfeed = (function (hub) {
         document.addEventListener('click', function (event) {
             var _self = event.target;
             if (event.target.classList.contains("item-new-feed__title")) {
-                comment.load(event.target.parentElement.id);
+                var _id = event.target.parentElement.getAttribute("fid");
+                var newFeed = new Newfeed({});
+                $('.item-new-feed__topic.active').removeClass('active');
+                $('#' + event.target.parentElement.id).addClass('active');
+                //prepare modal
+                $('#new-feed__reply--popup input[name=ParentID]').val(_id);
+                newFeed._render.Orginal(_id);
+                comment.load(_id,5,0);
             }
             if (event.target.classList.contains('item-new-feed__like')) {
                 console.log('like');
@@ -101,33 +116,43 @@ var Newfeed = (function (hub) {
                     reply_popup.querySelector('input[name="ParentID"]').value = _self.dataset.id;
                 }
             }
+            
             console.log(event.target, event.target.classList);
         });
     }
     Newfeed.prototype.load = function (skip, take) {
+        
         const _self = this;
         var dataFrm = _self._ajax.creatFormData({ classID: _self._config.group_id, skip: skip, take: take });
         this._ajax.proccess("POST", _self._config.url.load, dataFrm).then(function (data) {
             var jsonData = JSON.parse(data);
             const container = document.getElementById(_self._config.id);
-            for (var i = -1; jsonData != null &&  i < jsonData.length; i++) {
-                if (i >= 0) {
+            container.innerHTML = "";
+
+            //for (var i = -1; jsonData != null &&  i < jsonData.length; i++) { //???
+            //    if (i >= 0) {
+            if (jsonData != null && jsonData.length > 0)
+                for (var i = 0; jsonData != null && i < jsonData.length; i++) {
                     var item = jsonData[i];
                     if (item.Content == "" || item.Content == null || item.Content == void 0) continue;
-                    _self._render.NewFeed(item, container, _self._comment);
-                } else {
-                    _self._render.NewFeed(null, container, _self._comment);
+                    var init = skip == 0 && i == 0;
+                    _self._render.NewFeed(item, container, _self._comment, init);
+                    if (init) comment.load(item.ID);
                 }
-            }
+            //} else {
+            //    _self._render.NewFeed(null, container, _self._comment);
+            //}
+            //}
             addEvent();
         })
-        .catch(function (err) { console.error(err); });
+            .catch(function (err) { console.error(err); });
     }
-    Newfeed.prototype.post = function (dataForm) {
+    Newfeed.prototype.post = function (dataForm, callback) {
         this._ajax.proccess("POST", this._config.url.post, dataForm).then(function (data) {
-            
+            if (callback != null)
+                callback(data);
         })
-        .catch(function (err) { console.error(err); });
+        .catch(function (err) { console.error(err); alert("Có lỗi, vui lòng thực hiện lại"); });
     }
     return Newfeed;
 }(connection))

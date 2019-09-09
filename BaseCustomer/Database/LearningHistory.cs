@@ -28,10 +28,13 @@ namespace BaseCustomerEntity.Database
     }
     public class LearningHistoryService : ServiceBase<LearningHistoryEntity>
     {
-        public LearningHistoryService(IConfiguration config) : base(config)
-        {
+        private ClassProgressService _classProgressService;
 
+        public LearningHistoryService(IConfiguration config, ClassProgressService classProgressService) : base(config)
+        {
+            _classProgressService = classProgressService;
         }
+
         public Task CreateHist(LearningHistoryEntity item)
         {
             var oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
@@ -55,6 +58,7 @@ namespace BaseCustomerEntity.Database
                 item.State = oldItem.Count;
             }
             CreateOrUpdate(item);
+            _classProgressService.UpdateLastLearn(item);
             return Task.CompletedTask;
         }
     }

@@ -35,15 +35,22 @@ namespace BaseCustomerEntity.Database
         public int Order { get; set; }
         [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
+        [JsonProperty("Syllabus")]
+        public string Syllabus { get; set; }
+        [JsonProperty("Modules")]
+        public string Modules { get; set; }
+        [JsonProperty("References")]
+        public string References { get; set; }
+        [JsonProperty("LearningOutcomes")]
+        public string LearningOutcomes { get; set; }
         [JsonProperty("Description")]
         public string Description { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
         [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }
-
-
     }
+
     public class ClassService : ServiceBase<ClassEntity>
     {
         public ClassService(IConfiguration config) : base(config)

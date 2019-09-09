@@ -76,6 +76,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
+        public IActionResult Edit(DefaultModel model)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (currentClass.TeacherID != UserID)
+                return RedirectToAction("Index");
+            var subject = _subjectService.GetItemByID(currentClass.SubjectID);
+            ViewBag.Class = currentClass;
+            ViewBag.Subject = subject;
+            return View();
+        }
+
+
         public IActionResult Detail(DefaultModel model)
         {
             if (model == null) return null;
@@ -512,7 +528,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var filename = currentClass.ID + "_" + DateTime.Now.ToUniversalTime().ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
                     currentClass.Image = await _fileProcess.SaveMediaAsync(file, filename);
                 }
-                currentClass.Description = entity.Description;
+                currentClass.Description = entity.Description ?? "";
+                currentClass.Syllabus = entity.Syllabus ?? "";
+                currentClass.Modules = entity.Modules ?? "";
+                currentClass.LearningOutcomes = entity.LearningOutcomes ?? "";
+                currentClass.References = entity.References ?? "";
                 _service.CreateOrUpdate(currentClass);
 
                 return new JsonResult(

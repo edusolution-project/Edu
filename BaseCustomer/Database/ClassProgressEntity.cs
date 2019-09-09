@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace BaseCustomerEntity.Database
 {
@@ -11,7 +12,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
         [JsonProperty("CompletedLessons")]
-        public int CompletedLessons { get; set; }
+        public List<string> CompletedLessons { get; set; }
         [JsonProperty("TotalLessons")]
         public int TotalLessons { get; set; }
         [JsonProperty("LastLesson")]
@@ -22,9 +23,40 @@ namespace BaseCustomerEntity.Database
     }
     public class ClassProgressService : ServiceBase<ClassProgressEntity>
     {
-        public ClassProgressService(IConfiguration config) : base(config)
-        {
+        private ClassService _classService;
+        private LessonService _lessonService;
 
+        public ClassProgressService(IConfiguration config, ClassService classService, LessonService lessonService) : base(config)
+        {
+            _classService = classService;
+            _lessonService = lessonService;
+        }
+
+        public void UpdateLastLearn(LearningHistoryEntity item)
+        {
+            var currentClass = _classService.GetItemByID(item.ClassID);
+            var progress = GetItemByClassID(item.ClassID);
+            if (progress == null)
+            {
+                //create new progress
+                progress = new ClassProgressEntity()
+                {
+                    CompletedLessons = new List<string>() { },
+                    TotalLessons = (int)_lessonService.CreateQuery().CountDocuments(t => t.CourseID == currentClass.CourseID),
+                    ClassID = currentClass.ID,
+
+                };
+            }
+            progress.LastDate = DateTime.Now;
+            progress.LastLessonID = item.LessonID;
+            if (progress.CompletedLessons.IndexOf(item.LessonID) <= 0)
+                progress.CompletedLessons.Add(item.LessonID);
+            CreateOrUpdate(progress);
+        }
+
+        public ClassProgressEntity GetItemByClassID(string ClassID)
+        {
+            return CreateQuery().Find(t => t.ClassID == ClassID).FirstOrDefault();
         }
     }
 }

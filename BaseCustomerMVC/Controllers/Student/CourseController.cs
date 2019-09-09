@@ -25,6 +25,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
+
+        private readonly ClassProgressService _progressService;
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
@@ -57,6 +59,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
             , LessonPartService lessonPartService
+            , ClassProgressService progressService
             , ExamService examService
             , ExamDetailService examDetailService
             , StudentService studentService
@@ -79,6 +82,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _cloneLessonPartService = cloneLessonPartService;
             _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
             _lessonPartService = lessonPartService;
+            _progressService = progressService;
             _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
             _mappingList = new MappingEntity<ClassEntity, StudentClassViewModel>();
             _lessonPartQuestionService = lessonPartQuestionService;
@@ -123,13 +127,15 @@ namespace BaseCustomerMVC.Controllers.Student
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
 
+
             var std = DataResponse.Select(o => _mappingList.AutoOrtherType(o, new StudentClassViewModel()
             {
                 CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
                 StudentNumber = o.Students.Count,
                 SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                 GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "" : _gradeService.GetItemByID(o.GradeID).Name,
-                TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" : _teacherService.GetItemByID(o.TeacherID).FullName
+                TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" : _teacherService.GetItemByID(o.TeacherID).FullName,
+                Progress = _progressService.GetItemByClassID(o.ID)
             })).ToList();
 
             var respone = new Dictionary<string, object>
@@ -487,6 +493,69 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(response);
         }
 
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetAssignments(DefaultModel model)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            if (string.IsNullOrEmpty(model.ID))
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null || currentClass.Students.IndexOf(UserID) < 0)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var course = _courseService.GetItemByID(currentClass.CourseID);
+
+            if (course == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giáo trình" }
+                    });
+            }
+
+            var classSchedule = new ClassScheduleViewModel(course)
+            {
+                //Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
+                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.Etype > 0).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
+                           let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassID == model.ID).SortByDescending(o => o.ID).FirstOrDefault()
+                           select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               StartDate = schedule.StartDate,
+                               EndDate = schedule.EndDate,
+                               IsActive = schedule.IsActive,
+                               IsView = lastjoin != null,
+                               LastJoin = lastjoin != null ? lastjoin.Time : DateTime.MinValue
+                           })).ToList()
+            };
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", classSchedule },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+
+
         public IActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;
@@ -557,6 +626,17 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Class = currentClass;
             return View();
         }
+
+        public IActionResult Discussions(DefaultModel model)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
+            return View();
+        }
+
 
         //TEMPORARY CLONE
         private void CloneLessonPart(CloneLessonPartEntity item)

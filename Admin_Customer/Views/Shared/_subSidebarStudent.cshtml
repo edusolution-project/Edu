@@ -4,13 +4,13 @@
 
 <nav role="navigation" aria-label="Class Navigation Menu">
     <ul id="section-tabs">
-        <li class="section"><a href="@Url.Action("Detail","Course")/@currentClass.ID" title="Trang chủ" class="home" tabindex="0">Trang chủ lớp</a></li>
+        <li class="section"><a href="@Url.Action("Detail","Course")/@currentClass.ID" title="Trang chủ" class="home" tabindex="0">Trang chủ</a></li>
         <li class="section"><a href="#" title="Thông báo" class="announcements" tabindex="0">Thông báo</a></li>
         <li class="section"><a href="@Url.Action("Modules","Course")/@currentClass.ID" title="Cấu trúc môn học" class="modules" tabindex="0">Cấu trúc môn học</a></li>
         <li class="section"><a href="@Url.Action("Assignment","Course")/@currentClass.ID" title="Bài kiểm tra" class="assignments" tabindex="0">Bài kiểm tra</a></li>
-        <li class="section"><a href="#" title="Thảo luận" class="discussions" tabindex="0">Trao đổi</a></li>
+        <li class="section"><a href="@Url.Action("Discussions","Course")/@currentClass.ID" title="Trao đổi" class="discussions" tabindex="0">Trao đổi</a></li>
         <li class="section"><a href="#" title="Danh sách lớp" class="people" tabindex="0">Danh sách lớp</a></li>
-        <li class="section"><a href="/#" title="Bảng điểm" class="grades" tabindex="0">Bảng điểm</a></li>
+        <li class="section"><a href="#" title="Bảng điểm" class="grades" tabindex="0">Bảng điểm</a></li>
     </ul>
 </nav>
 

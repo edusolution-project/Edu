@@ -52,6 +52,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if(data == null) return Task.FromResult(new JsonResult(new {}));
             return Task.FromResult(new JsonResult(data));
         }
+
         [HttpPost]
         [Obsolete]
         public Task<JsonResult> GetDetail(string id)

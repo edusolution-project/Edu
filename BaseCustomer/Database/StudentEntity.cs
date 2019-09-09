@@ -1,5 +1,6 @@
 ﻿using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Text;
 
 namespace BaseCustomerEntity.Database
 {
-    public class StudentEntity:EntityBase
+    public class StudentEntity : EntityBase
     {
         [JsonProperty("StudentId")]
         public string StudentId { get; set; } // mã sinh viên
@@ -36,7 +37,6 @@ namespace BaseCustomerEntity.Database
     {
         public StudentService(IConfiguration configuration) : base(configuration)
         {
-
         }
     }
 }

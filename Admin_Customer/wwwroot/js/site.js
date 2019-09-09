@@ -207,10 +207,21 @@ function ToggleSwitch(obj) {
         $(obj).attr("onclick", action.replace("Publish", "UnPublish"));
 }
 
-function toggleCollapse(obj) {
-    var target = $(obj).attr('data-target');
+function toggleCollapse(obj, id) {
+    //var target = $(obj).attr('data-target');
+    var target = '#' + id + ' .modules-content:first';
     $(target).collapse('toggle');
-    $(obj).find("i").toggleClass("expand");
+
+    var collapseButton = $(obj).parent().parent().find('.fa-minus-square');
+    var collapseIndicator = $(obj).parent().parent().find('.fa-caret-down');
+
+    if ($(collapseButton).hasClass("fa-plus-square")) {
+        $(collapseButton).attr('data-original-title', 'Thu gọn');
+    }
+    else
+        $(collapseButton).attr('data-original-title', 'Mở rộng');
+    $(collapseButton).toggleClass("fa-plus-square");
+    $(collapseIndicator).toggleClass("fa-caret-right");
 }
 
 //icon thông báo , thành công và thất bại

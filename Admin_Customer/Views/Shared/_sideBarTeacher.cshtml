@@ -81,9 +81,9 @@
             </li>
 
             <li class="sidebar-item comments">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Comment" )">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )">
                     <i></i>
-                    <span>Thảo luận</span>
+                    <span>Trao đổi</span>
                 </a>
             </li>
 
@@ -91,6 +91,12 @@
                 <a class="nav-link p-0" href="@Url.Action("Index", "Curriculum" )">
                     <i></i>
                     <span>Giáo trình</span>
+                </a>
+            </li>
+            <li class="sidebar-item guide">
+                <a class="nav-link p-0" href="#">
+                    <i></i>
+                    <span>Hướng dẫn</span>
                 </a>
             </li>
         </ul>
@@ -139,7 +145,7 @@
                     }
                 }
                 else {
-                    body.append("<li>Chưa có lớp nào đang học</li>");
+                    body.append("<li>Không có lớp nào hoạt động</li>");
                 }
 
             },

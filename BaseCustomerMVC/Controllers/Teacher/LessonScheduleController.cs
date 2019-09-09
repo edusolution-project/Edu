@@ -478,7 +478,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 oldItem.StartDate = entity.StartDate;
                 oldItem.EndDate = entity.EndDate;
-                _calendarHelper.ConvertCalendarFromSchedule(oldItem, UserID);
+                UpdateCalendar(oldItem, UserID);
                 _service.CreateOrUpdate(oldItem);
 
                 return new JsonResult(new Dictionary<string, object> {
@@ -488,6 +488,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        private void UpdateCalendar(LessonScheduleEntity entity, string userid)
+        {
+            var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
+            if (oldcalendar != null)
+                _calendarHelper.Remove(oldcalendar.ID);
+            _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
+        }
 
+        [Obsolete]
+        public JsonResult CreateCalendar()
+        {
+            _calendarHelper.ScheduleAutoConvertEvent();
+            return new JsonResult("OK");
+        }
     }
 }

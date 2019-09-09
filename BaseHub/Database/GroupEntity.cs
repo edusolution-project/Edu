@@ -16,8 +16,8 @@ namespace BaseHub.Database
         public string Name { get; set; }
         [JsonProperty("DisplayName")]
         public string DisplayName { get; set; }
-        [JsonProperty("Memebers")]
-        public List<string> Memebers { get; set; } = new List<string>();
+        [JsonProperty("Members")]
+        public List<string> Members { get; set; } = new List<string>();
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
 
@@ -51,7 +51,7 @@ namespace BaseHub.Database
             return _item?.First();
         }
         [Obsolete]
-        public Task AddMemeber(string groupName,string userID)
+        public Task AddMember(string groupName,string userID)
         {
             char _sp = new char() {  };
             string _groupName = "";
@@ -67,7 +67,7 @@ namespace BaseHub.Database
                 {
                     Created = DateTime.Now,
                     DisplayName = "",
-                    Memebers = new List<string>() { userID },
+                    Members = new List<string>() { userID },
                     Name= groupName
                 };
                 CreateOrUpdate(item);
@@ -75,9 +75,9 @@ namespace BaseHub.Database
             else
             {
                 var first = _item.First();
-                if (!first.Memebers.Contains(userID))
+                if (!first.Members.Contains(userID))
                 {
-                    first.Memebers.Add(userID);
+                    first.Members.Add(userID);
                     CreateOrUpdate(first);
                 }
             }
@@ -92,9 +92,9 @@ namespace BaseHub.Database
             }
             else
             {
-                if (!_item.Memebers.Contains(userID))
+                if (!_item.Members.Contains(userID))
                 {
-                    _item.Memebers.Remove(userID);
+                    _item.Members.Remove(userID);
                     CreateOrUpdate(_item);
                 }
             }

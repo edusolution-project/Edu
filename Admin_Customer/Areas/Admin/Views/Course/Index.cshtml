@@ -288,13 +288,15 @@
         }
     }
 
-    function LoadData(err) {
-        if (err != null) {
-            var item = JSON.parse(err);
+    function LoadData(res) {
+        if (res != null) {
+            var item = JSON.parse(res);
             if (item.Error != null) {
                 //notification("err", item.Error, 2000);
                 alert(item.Error);
             }
+            else
+                hideModal();
         }
         else 
         {

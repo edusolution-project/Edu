@@ -46,6 +46,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly FileProcess _fileProcess;
 
         private readonly LessonScheduleService _lessonScheduleService;
+        private readonly CalendarHelper _calendarHelper;
         private readonly IHostingEnvironment _env;
 
         public CourseController(ClassService service,
@@ -67,7 +68,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
             FileProcess fileProcess,
-
+            CalendarHelper calendarHelper,
             IHostingEnvironment evn)
         {
             _service = service;
@@ -92,6 +93,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             _lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
             _lessonPartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
             _lessonPartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
+            _calendarHelper = calendarHelper;
+
             _fileProcess = fileProcess;
 
             _env = evn;
@@ -195,7 +198,17 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 item.ID = null;
                 item.Created = DateTime.Now;
+
+                if (!String.IsNullOrEmpty(item.Code))
+                {
+                    if (_service.CreateQuery().Find(t => t.Code == item.Code).FirstOrDefault() != null)
+                        return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Mã môn học đã được sử dụng" }
+                        });
+                }
                 _service.CreateOrUpdate(item);
+
 
                 //Create Class => Create Lesson Schedule & Clone all lesson
                 var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
@@ -248,21 +261,24 @@ namespace BaseCustomerMVC.Controllers.Admin
                     //Create Class => Create Lesson Schedule & Clone all lesson
                     var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
 
-                    var schedules = new List<LessonScheduleEntity>();
                     if (lessons != null)
                         foreach (LessonEntity lesson in lessons)
                         {
-                            _lessonScheduleService.CreateOrUpdate(new LessonScheduleEntity
+                            var schedule = new LessonScheduleEntity
                             {
                                 ClassID = item.ID,
                                 LessonID = lesson.ID,
                                 StartDate = item.StartDate,
                                 EndDate = item.EndDate
-                            });
+                            };
+                            _lessonScheduleService.CreateOrUpdate(schedule);
+
+                            _calendarHelper.ConvertCalendarFromSchedule(schedule, "");
+
                             CloneLesson(lesson, item);
                         }
                 }
-
+                oldData.Name = item.Name;
                 oldData.Code = item.Code;
                 oldData.StartDate = item.StartDate;
                 oldData.EndDate = item.EndDate;

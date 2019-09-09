@@ -1,0 +1,189 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var subject = ViewBag.Subject as BaseCustomerEntity.Database.SubjectEntity;
+    ViewData["Title"] = currentClass.Name + " - Soạn thảo nội dung";
+}
+
+<script>
+    activeTab = "course";
+    modulesLink = "@Url.Action("Modules", "Class")/@currentClass.ID";
+    activeSub = "editinfo";
+</script>
+
+
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+        <div class="sub-sidebar">
+            @await Html.PartialAsync("_subSidebarTeacher")
+        </div>
+        <div class="main-content">
+            <div class="intro-wrapper content-block">
+                <div class="modal-body">
+                    <div class="form-group">
+                        @if (!String.IsNullOrEmpty(currentClass.Image))
+                        {
+                            <div class="row pb-3">
+                                <img src="@currentClass.Image" title="@currentClass.Name" class="courseImg" />
+                            </div>
+                        }
+                        <div class="row pb-3">
+                            <label class="col-sm-2 form-label align-top" for="classAvatarEdit">Chọn ảnh:</label>
+                            <div class="col-sm-10 align-top">
+                                <button class="btn btn-info btnAddFile align-top" onclick="chooseFile(this)" tabindex="-1">Chọn file</button>
+                                <input type="file" name="classAvatarEdit" class="d-none" id="classAvatarEdit" onchange="changeMedia(this)" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-md-2 form-label align-top">Tên môn:</label>
+                            <label class="col-md-10 form-label align-top"><b>@subject?.Name</b></label>
+                        </div>
+                        <div class="row pb-3">
+                            <label class="col-md-2 form-label align-top">Mã môn:</label>
+                            <label class="col-md-10 form-label align-top"><b>@subject?.Code</b></label>
+                        </div>
+                        <div class="row pb-3">
+                            <label class="col-sm-2 form-label align-top" for="classSyllabus">Đề cương môn học:</label>
+                            <div class="col-sm-10 align-top">
+                                <textarea name="classSyllabus" id="classSyllabus"></textarea>
+                                <div class="d-none">
+                                    @Html.Raw(currentClass.Syllabus)
+                                </div>
+                            </div>
+
+                            <script>
+                                CKEDITOR.replace("classSyllabus",
+                                    {
+                                        extraPlugins: 'embed,autoembed,image2',
+                                        embed_provider: '//ckeditor.iframe.ly/api/oembed?url={url}&callback={callback}',
+                                        image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],
+                                        image2_disableResizer: true
+                                    }
+                                );
+                                CKEDITOR.instances.classSyllabus.setData($('#classSyllabus').siblings('.d-none').html());
+                            </script>
+                        </div>
+                        <div class="row pb-3">
+                            <label class="col-sm-2 form-label align-top" for="classModules">Nội dung môn học:</label>
+                            <div class="col-sm-10 align-top">
+                                <textarea name="classModules" id="classModules"></textarea>
+                                <div class="d-none">
+                                    @Html.Raw(currentClass.Modules)
+                                </div>
+                            </div>
+                            <script>
+                                CKEDITOR.replace("classModules",
+                                    {
+                                        extraPlugins: 'embed,autoembed,image2',
+                                        embed_provider: '//ckeditor.iframe.ly/api/oembed?url={url}&callback={callback}',
+                                        image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],
+                                        image2_disableResizer: true
+                                    }
+                                );
+                                CKEDITOR.instances.classModules.setData($('#classModules').siblings('.d-none').html());
+                            </script>
+                        </div>
+                        <div class="row pb-3">
+                            <label class="col-sm-2 form-label align-top" for="classLearningOutcomes">Mục tiêu đầu ra:</label>
+                            <div class="col-sm-10 align-top">
+                                <textarea name="classLearningOutcomes" id="classLearningOutcomes"></textarea>
+                                <div class="d-none">
+                                    @Html.Raw(currentClass.LearningOutcomes)
+                                </div>
+                            </div>
+                            <script>
+                                CKEDITOR.replace("classLearningOutcomes",
+                                    {
+                                        extraPlugins: 'embed,autoembed,image2',
+                                        embed_provider: '//ckeditor.iframe.ly/api/oembed?url={url}&callback={callback}',
+                                        image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],
+                                        image2_disableResizer: true
+                                    }
+                                );
+                                CKEDITOR.instances.classLearningOutcomes.setData($('#classLearningOutcomes').siblings('.d-none').html());
+                            </script>
+                        </div>
+                        <div class="row pb-3">
+                            <label class="col-sm-2 form-label align-top" for="classReferences">Tài liệu tham khảo:</label>
+                            <div class="col-sm-10 align-top">
+                                <textarea name="classReferences" id="classReferences"></textarea>
+                                <div class="d-none">
+                                    @Html.Raw(currentClass.References)
+                                </div>
+                            </div>
+                            <script>
+                                CKEDITOR.replace("classReferences");
+                                CKEDITOR.instances.classReferences.setData($('#classReferences').siblings('.d-none').html());
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info btn-submit" onclick="saveClassInfo()">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+    function saveClassInfo()
+    {
+        var classid = '@currentClass.ID';
+        var syllabus = CKEDITOR.instances.classSyllabus.getData();
+        if(syllabus == "<p></p>") syllabus = "";
+        var modules = CKEDITOR.instances.classModules.getData();
+        if(modules == "<p></p>") modules = "";
+        var references = CKEDITOR.instances.classReferences.getData();
+        if(references == "<p></p>") references = "";
+        var learningOutcomes = CKEDITOR.instances.classLearningOutcomes.getData();
+        if(learningOutcomes == "<p></p>") learningOutcomes = "";
+        var fileuploads = $('#classAvatarEdit');
+        var ufiles = fileuploads[0].files;
+
+        if (window.FormData !== undefined) {
+            var data = new FormData();
+            if (ufiles.length > 0) {
+                for (var x = 0; x < ufiles.length; x++) {
+                    data.append(ufiles[x].name, ufiles[x]);
+                }
+            }
+
+            data.append("ID", classid);
+            //data.append("Description", description);
+            data.append("Syllabus", syllabus);
+            data.append("Modules", modules);
+            data.append("References", references);
+            data.append("LearningOutcomes", learningOutcomes);
+            showLoading("Đang cập nhật nội dung...");
+            $.ajax({
+                type: "POST",
+                url: '/Teacher/Class/SaveInfo',
+                contentType: false,
+                processData: false,
+                data: data,
+                success: function (data) {
+                    if (data.Error == null)
+                    {
+                        document.location = '@Url.Action("Detail","Class", new { ID = currentClass.ID})';
+                    }
+                    else
+                        alert(data.Error);
+                    hideLoading();
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.log(thrownError);
+                    alert("Có lỗi, vui lòng kiểm tra lại kết nối");
+                    hideLoading();
+                }
+            });
+        }
+    }
+    </script>
+}

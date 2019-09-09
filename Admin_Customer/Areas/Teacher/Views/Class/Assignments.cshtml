@@ -23,7 +23,16 @@
         </div>
     </div>
 </div>
-
+<style>
+    .text-holder {
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        font-weight: 500;
+        text-align: right;
+        outline: none;
+    }
+</style>
 @section Script{
     <script>
 
@@ -47,22 +56,32 @@
                 lessons = data.Data.Lessons;
 
                 var oContent = $("<div>", { "id": "ongoing", "class":"modules" });
-                var oTitle = $("<div>", { "class":"modules-title", "data-target":"#ongoing .modules-content:first", "onclick":"toggleCollapse(this)" });
-                oTitle.append($("<i>", {"class":"expand"}))
+                var oTitle = $("<div>", { "class":"modules-title row", "data-target":"#ongoing .modules-content:first"});
+                var otitle_cPart = $("<div>", {"class":"col-md-11"});
+                var otitle_ePart = $("<div>", {"class":"col-md-1 text-right"});     
+                otitle_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, 'ongoing')" }));
+                otitle_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right", "onclick": "toggleCollapse(this, 'ongoing')"}))
                     .append($("<a>", {
                         "class":"action-link",
-                        "text": "Danh sách bài thi"
+                        "text": "Danh sách bài thi",
+                        "onclick": "toggleCollapse(this, 'ongoing')"
                         }));
+                oTitle.append(otitle_cPart).append(otitle_ePart);
                 oContent.append(oTitle);
                 oContent.append($("<div>", { "class":"modules-content collapse show"}));
 
                 var pContent = $("<div>", { "id": "past-assignment", "class":"modules" });
-                var pTitle = $("<div>", { "class":"modules-title", "data-target":"#past-assignment .modules-content:first", "onclick":"toggleCollapse(this)" });
-                pTitle.append($("<i>", {"class":"expand"}))
-                    .append($("<a>", {
-                        "class":"action-link",
-                        "text": "Bài đã kết thúc"
-                        }));
+                var pTitle = $("<div>", { "class":"modules-title row", "data-target":"#past-assignment .modules-content:first"});
+                var title_cPart = $("<div>", {"class":"col-md-11"});
+                var title_ePart = $("<div>", {"class":"col-md-1 text-right"});
+                title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, 'past-assignment')" }));
+                title_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right",  "onclick": "toggleCollapse(this, 'past-assignment')"}))
+                            .append($("<a>", {
+                                "class":"action-link",
+                                "text": "Bài đã kết thúc",
+                                "onclick": "toggleCollapse(this, 'past-assignment')"
+                                }));
+                pTitle.append(title_cPart).append(title_ePart);
                 pContent.append(pTitle);
                 pContent.append($("<div>", { "class":"modules-content collapse show"}));
 
@@ -74,36 +93,39 @@
                         var item = lessons[j];
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td class='text-center'><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' disabled> <div class='handle'></div> </button></td>";
+                            active = "<button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("unpublish", "LessonSchedule")',ToggleStatus(this))\"> <div class='handle'></div> </button>";
                         } else {
-                            active = "<td class='text-center'><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger' disabled> <div class='handle'></div> </button></td>";
+                            active = "<button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger' onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\"> <div class='handle'></div> </button>";
                         }
 
-                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
-                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
-                        var lastjoin = "---";
-                        var isView = "";
-                        if (item.IsView) {
-                            isView = "IsView";
-                            lastjoin = $.datepicker.formatDate('dd/mm/yy', new Date(item.LastJoin))
-                        } else {
-                            isView = "";
-                        }
+                        var startdate = moment(item.StartDate).format('DD/MM/YYYY');
+                        var enddate = moment(item.EndDate).format('DD/MM/YYYY');
 
-                        var rowData = $("<div>", {"class":"modules-content-item"});
-                        rowData.append($("<span>", {"class":"modules-content-item-icon" + (item.TemplateType === 2?" assignment":"")}));
+                        var rowData = $("<div>", {"class":"modules-content-item row"});
+                        var leftPart = $("<div>", {"class":"col-md-6"});
+                        var rightPart = $("<div>", {"class":"col-md-2 text-right"});
+                        leftPart.append($("<span>", {"class":"modules-content-item-icon" + (item.TemplateType === 2? (" assignment atype" + item.Etype):"")}));
+                        rightPart.append(active);
                         var itemData = $("<div>", {"class":"modules-content-item-info"});
                         itemData.append($("<a>", {
                                 "class":"action-link",
-                                "href": (item.IsActive ? ("@Url.Action("Detail", "Lesson")/" + item.ID + "/@currentClass.ID") : "javascript:LockNotify()"),
+                                "href": "@Url.Action("Detail", "Lesson")/" + item.ID + "/@currentClass.ID",
                                 "text": item.Title
                             }));
+
                         if(item.Description != null)
                         {
                             itemData.append($("<span>", {"class":"description", "text": item.Description}));
                         }
+                        leftPart.append(itemData);
+                        rowData.append(leftPart)
+                            .append($("<div>", {"class":"col-md-2 text-right"})
+                                .append($("<input>", {"sid": item.ScheduleID, "target":"StartDate", "type":"text", "readonly":"readonly","class":"text-holder", "value": startdate, "onchange":"updateSchedule(this)"})))
+                            .append($("<div>", {"class":"col-md-2 text-right"})
+                                .append($("<input>",{"sid": item.ScheduleID, "target":"EndDate", "type":"text", "readonly":"readonly","class":"text-holder", "value": enddate, "onchange":"updateSchedule(this)"})))
+                            .append(rightPart);
 
-                        rowData.append(itemData);
+                        //rowData.append(itemData);
 
                         if (moment(item.EndDate) > new Date())
                             parent = bodyWrapper.find(".modules#ongoing .modules-content:first");
@@ -111,6 +133,12 @@
                             parent = bodyWrapper.find(".modules#past-assignment .modules-content:first");
                         parent.append(rowData);
                     }
+
+                    $('.text-holder').datepicker({
+                      changeMonth: true,
+                      changeYear: true,
+                      dateFormat: "dd/mm/yy"
+                    });
                 }
                 if(window.location.hash != "")
                 {
@@ -126,10 +154,35 @@
         });
     }
 
-    function LockNotify() {
-        alert("Bài học chưa được mở!");
-        return false;
+    function updateSchedule(obj) {
+        var currentval = $(obj).val();
+        var scheduleid = $(obj).attr("sid");
+        var startdate = moment($(obj).parent().parent().find("[target=StartDate]").val(),"DD/MM/YYYY").format("MM-DD-YYYY");
+        var enddate = moment($(obj).parent().parent().find("[target=EndDate]").val(),"DD/MM/YYYY").format("MM-DD-YYYY");
+        console.log(startdate);
+        console.log(enddate);
+
+        $(obj).val(currentval + "...")
+        $.ajax({
+                type: "POST",
+                url: '@Url.Action("Update", "LessonSchedule")',
+                data:
+                {
+                    ID: scheduleid,
+                    StartDate: startdate,
+                    EndDate: enddate
+                },
+                dataType:"json",
+                success: function (data) {
+                    $(obj).val(currentval);
+                },
+                error: function (res) {
+                    console.log(res.responseText);
+                }
+            });
+
     }
+
 
     $(document).ready(function () {
         LoadSchedule();

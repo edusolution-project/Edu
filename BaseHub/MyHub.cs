@@ -32,7 +32,7 @@ namespace BaseHub
             {
                 if (!_groups.GetGroupConnections(Context.ConnectionId).Contains(className))
                 {
-                     _groupService.AddMemeber(className, UserID);
+                     _groupService.AddMember(className, UserID);
                     _groups.Add(Context.ConnectionId, className);
                      Groups.AddToGroupAsync(Context.ConnectionId, className);
                     string message = UserName + " đã vào lớp";
@@ -152,7 +152,7 @@ namespace BaseHub
             var listGroup = _groups.GetGroupConnections(userid);
             if (listGroup != null || listGroup.Count() > 0)
             {
-                foreach(string item in listGroup)
+                foreach(string item in listGroup.ToList())
                 {
                     _groups.Remove(userid, item);
                     Groups.RemoveFromGroupAsync(userid, item);

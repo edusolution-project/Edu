@@ -37,7 +37,7 @@
 
         $.ajax({
             type: "POST",
-            url: '@Url.Action("GetSchedules", "Course")',
+            url: '@Url.Action("GetAssignments", "Course")',
             data: { ID: '@currentClass.ID' },
             dataType:"json",
             success: function (data) {
@@ -47,22 +47,32 @@
                 lessons = data.Data.Lessons;
 
                 var oContent = $("<div>", { "id": "ongoing", "class":"modules" });
-                var oTitle = $("<div>", { "class":"modules-title", "data-target":"#ongoing .modules-content:first", "onclick":"toggleCollapse(this)" });
-                oTitle.append($("<i>", {"class":"expand"}))
+                var oTitle = $("<div>", { "class":"modules-title row", "data-target":"#ongoing .modules-content:first"});
+                var otitle_cPart = $("<div>", {"class":"col-md-11"});
+                var otitle_ePart = $("<div>", {"class":"col-md-1 text-right"});     
+                otitle_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, 'ongoing')" }));
+                otitle_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right", "onclick": "toggleCollapse(this, 'ongoing')"}))
                     .append($("<a>", {
                         "class":"action-link",
-                        "text": "Danh sách bài thi"
+                        "text": "Danh sách bài thi",
+                        "onclick": "toggleCollapse(this, 'ongoing')"
                         }));
+                oTitle.append(otitle_cPart).append(otitle_ePart);
                 oContent.append(oTitle);
                 oContent.append($("<div>", { "class":"modules-content collapse show"}));
 
                 var pContent = $("<div>", { "id": "past-assignment", "class":"modules" });
-                var pTitle = $("<div>", { "class":"modules-title", "data-target":"#past-assignment .modules-content:first", "onclick":"toggleCollapse(this)" });
-                pTitle.append($("<i>", {"class":"expand"}))
-                    .append($("<a>", {
-                        "class":"action-link",
-                        "text": "Bài đã kết thúc"
-                        }));
+                var pTitle = $("<div>", { "class":"modules-title row", "data-target":"#past-assignment .modules-content:first"});
+                var title_cPart = $("<div>", {"class":"col-md-11"});
+                var title_ePart = $("<div>", {"class":"col-md-1 text-right"});
+                title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, 'past-assignment')" }));
+                title_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right",  "onclick": "toggleCollapse(this, 'past-assignment')"}))
+                            .append($("<a>", {
+                                "class":"action-link",
+                                "text": "Bài đã kết thúc",
+                                "onclick": "toggleCollapse(this, 'past-assignment')"
+                                }));
+                pTitle.append(title_cPart).append(title_ePart);
                 pContent.append(pTitle);
                 pContent.append($("<div>", { "class":"modules-content collapse show"}));
 

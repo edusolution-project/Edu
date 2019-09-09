@@ -37,6 +37,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _fileProcess = fileProcess;
             _hubContext = hubContext;
         }
+
         public IActionResult Index()
         {
             ViewBag.Data = _classService.Collection.Find(o => o.Students.Contains(User.Claims.GetClaimByType("UserID").Value)).ToList();
@@ -57,7 +58,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var group = _groupService.GetItemByName(classID);
             if (group == null)
             {
-                _groupService.AddMemeber(classID, User?.FindFirst("UserID").Value);
+                _groupService.AddMember(classID, User?.FindFirst("UserID").Value);
             }
             var listData = _newFeedService.Collection.Find(o => o.GroupID == classID && !string.IsNullOrEmpty(o.Content) && string.IsNullOrEmpty(o.ParentID));
             if (listData.Count() == 0) return Task.FromResult(new JsonResult(null));
@@ -89,6 +90,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 return new JsonResult(listData.SortByDescending(o => o.TimePost).ToList());
             }
         }
+        
         [HttpPost]
         public Task<object> PostNewFeed(NewFeedEntity item)
         {
@@ -103,6 +105,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
             return Task.FromResult<object>(new { StatusCode = 200 });
         }
+        
+        
         //[HttpPost]
         //public Task<object> PostComment(string title, string content, string groupID,string parentID)
         //{

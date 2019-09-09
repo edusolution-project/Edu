@@ -1,4 +1,5 @@
-﻿using BaseCustomerMVC.Globals;
+﻿using BaseCustomerEntity.Database;
+using BaseCustomerMVC.Globals;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -9,12 +10,17 @@ namespace BaseCustomerMVC.Controllers.Student
 {
     public class HomeController : StudentController
     {
-        public HomeController()
+        private StudentService _studentService;
+        
+        public HomeController(StudentService studentService)
         {
+            _studentService = studentService;
         }
 
         public IActionResult Index()
         {
+            var student = _studentService.GetItemByID(User.Claims.GetClaimByType("UserID").Value);
+            ViewBag.Student = student;
             return View();
         }
     }

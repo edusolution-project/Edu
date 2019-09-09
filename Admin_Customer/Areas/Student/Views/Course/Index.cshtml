@@ -2,7 +2,7 @@
 
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
-    ViewData["Title"] = "Danh sách lớp học";
+    ViewData["Title"] = "Danh sách môn học";
 }
 
 <script>
@@ -16,16 +16,16 @@
     <div class="main-container">
         <div class="active-region">
             <div class="block-title">
-                <h2>Các lớp đang diễn ra</h2>
+                <h2>Các môn đang học</h2>
             </div>
             <table id="activeCourse" class="table" width="100%" cellspacing="0">
                 <thead>
                     <tr>
                         <th></th>
                         <th style="width:27%">Môn học</th>
-                        <th style="width:27%">Lớp tín chỉ</th>
-                        <th style="width:20%">Giáo viên</th>
-                        <th style="width:20%" class="text-center">Thời gian</th>
+                        <th style="width:27%">Học kỳ</th>
+                        <th style="width:20%">Trạng thái</th>
+                        <th style="width:20%" class="text-center">Kết quả</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -33,16 +33,16 @@
         </div>
         <div class="past-region" style="display: none">
             <div class="block-title">
-                <h2>Đã kết thúc</h2>
+                <h2>Các môn đã học</h2>
             </div>
             <table id="pastCourse" class="table" width="100%" cellspacing="0">
                 <thead>
                     <tr>
                         <th></th>
                         <th style="width:27%">Môn học</th>
-                        <th style="width:27%">Lớp tín chỉ</th>
-                        <th style="width:20%">Giáo viên</th>
-                        <th style="width:20%" class="text-center">Thời gian</th>
+                        <th style="width:27%">Học kỳ</th>
+                        <th style="width:20%">Trạng thái</th>
+                        <th style="width:20%" class="text-center">Kết quả</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -82,7 +82,7 @@
                             "<td class='text-center'>"+ count +"</td>"+
                             "<td><a href='"+'@Url.Action("Detail", "Course")' + "/" + item.ID + "' class='action-link'>" + item.SubjectName + "</a></td>" +
                             "<td>" + item.Name + "</td>" +
-                            "<td>" + item.TeacherName + "</td>" +
+                            //"<td>" + item.TeacherName + "</td>" +
                             "<td class='text-center'>" + startdate + " - " + enddate+ "</td>" +
                             "</tr>";
                         if (past) {

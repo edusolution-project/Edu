@@ -45,7 +45,7 @@
 
         &.home {
             background-color: #000054;
-            height: 75px;
+            height: 60px;
         }
 
         &.profile {
@@ -53,27 +53,31 @@
         }
 
         &.dashboard {
-            background-position-y: - 120px;
+            background-position-y: -120px;
         }
 
         &.course {
-            background-position-y: - 162px;
+            background-position-y: -162px;
         }
 
         &.calendar {
-            background-position-y: - 204px;
+            background-position-y: -204px;
         }
 
         &.comments {
-            background-position-y: - 245px;
+            background-position-y: -245px;
         }
 
         &.announcements {
-            background-position-y: - 288px;
+            background-position-y: -288px;
         }
 
         &.curriculum {
-            background-position-y: - 288px;
+            background-position-y: -288px;
+        }
+
+        &.guide {
+            background-position-y: -330px;
         }
 
         &:hover, &.active {

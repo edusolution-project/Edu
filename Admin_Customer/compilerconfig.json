@@ -14,5 +14,9 @@
   {
     "outputFile": "wwwroot/css/_sidebar.css",
     "inputFile": "wwwroot/css/_sidebar.scss"
+  },
+  {
+    "outputFile": "wwwroot/css/newsfeed.css",
+    "inputFile": "wwwroot/css/newsfeed.scss"
   }
 ]
