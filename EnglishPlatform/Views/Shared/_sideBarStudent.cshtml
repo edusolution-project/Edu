@@ -1,0 +1,174 @@
+﻿<!-- Sidebar -->
+<nav class="sidebar collapse position-fixed col p-0 m-0">
+
+    <div id="sidebar-content">
+        <ul class="sidebar-holder p-0">
+            <li class="sidebar-item home">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
+                    <i></i>
+                </a>
+            </li>
+
+            <li class="sidebar-item profile">
+                <a class="nav-link p-0" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')">
+                    <i></i>
+                    <span>Thông tin cá nhân</span>
+                </a>
+                <div class="extra">
+                    <div class="avatarHolder">
+                        @{
+                            var name = User.Identity.Name;
+                            var shortname = name[0].ToString();
+                            var hchar = name.Split(' ');
+                            if (hchar.Length > 1)
+                            {
+                                shortname += hchar[1][0];
+                            }
+                        }
+
+                        <div aria-label="User profile picture" class="avatar">
+                            <div class="shortname">@shortname</div>
+                        </div>
+
+                        <h2 class="fullname">@User.Identity.Name</h2>
+
+                        <form action="/logout" method="post">
+                            <button type="submit" class="btn my-btn btn-logout">
+                                Đăng xuất
+                            </button>
+                        </form>
+                        <hr role="presentation">
+                        <ul class="action-wrapper">
+                            <li>
+                                <a href="#" class="btn my-btn action-link">Profile</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+
+            <li class="sidebar-item dashboard">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
+                    <i></i>
+                    <span>Bảng điều khiển</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item course" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')" title="Course">
+                <a class="nav-link p-0">
+                    <i></i>
+                    <span>Danh sách khóa học</span>
+                </a>
+                <div class="extra" id="sidebar-course-holder">
+                    <div>
+                        <h4>Lớp học</h4>
+                        <hr role="presentation">
+                        <ul class="action-wrapper">
+                          
+                        </ul>
+                        <hr role="presentation">
+
+                        <a href="@Url.Action("Index","Course")" class="btn action-link">
+                            Xem tất cả các môn
+                        </a>
+                    </div>
+                </div>
+            </li>
+
+            <li class="sidebar-item calendar">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )">
+                    <i></i>
+                    <span>Lịch học</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item comments">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )">
+                    <i></i>
+                    <span>Trao đổi</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item announcements">
+                <a class="nav-link p-0" href="@Url.Action("Index", "News" )">
+                    <i></i>
+                    <span>Thông báo mới</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div id="extra-sidebar" class="collapse">
+        <button type="button" class="btn btn-close my-btn" onclick="closeExtra()">X</button>
+        <div class="content">
+
+        </div>
+    </div>
+    <button class="sidebar-toggler" type="button" data-toggle="collapse" data-target=".sidebar" aria-controls="sidebar-content" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="sidebar-toggler-icon"></i>
+    </button>
+</nav>
+<!-- End of Sidebar -->
+<script>
+
+    $(document).ready(function () {
+        $('.sidebar-item.' + activeTab).addClass("active");
+        $(".right-content").click(function () {
+            closeExtra();
+        });
+        getCourseList();
+    });
+
+    function getCourseList() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetActiveList", "Course")',
+            data: {},
+            dataType:"json",
+            success: function (data) {
+                var body = $('#sidebar-course-holder .action-wrapper');
+                body.html("");
+                if (data.Data.length > 0) {
+                    for (i = 0; i < data.Data.length; ++i) {
+                        item = data.Data[i];
+                        body.append(
+                            "<li>" +
+                            "<a href='@Url.Action("Detail", "Course")/" + item.ID + "' class='action-link'><h5 class='title'>" +
+                                item.SubjectName +
+                            "</h5><h6 class='description'>" +
+                                item.Name +
+                            "</h6></a>" +
+                            "</li>");
+                    }
+                }
+                else {
+                    body.append("<li>Không có lớp nào hoạt động</li>");
+                }
+ 
+            },
+            error: function (err) {
+                console.log(err.responseText)
+            }
+        });
+    }
+
+    function showExtra(tab) {
+        if ($('#extra-sidebar.show').length == 0) {
+            setActiveSidebar(tab);
+            $('#extra-sidebar .content').empty().append($('.sidebar-item.' + tab + " .extra").clone());
+        } else {
+            setActiveSidebar(activeTab);
+        }
+    }
+
+    function closeExtra() {
+        setActiveSidebar(activeTab);
+        $('#extra-sidebar').removeClass('show');
+    }
+
+    function setActiveSidebar(tab) {
+        $('.sidebar-item.active').removeClass("active");
+        $('.sidebar-item.' + tab).addClass("active");
+    }
+
+
+</script>

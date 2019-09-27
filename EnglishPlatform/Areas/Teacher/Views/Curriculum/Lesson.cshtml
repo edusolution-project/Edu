@@ -1,0 +1,167 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
+    var Course = ViewBag.Course as BaseCustomerEntity.Database.CourseEntity;
+    ViewData["Title"] = Data.Title;
+}
+<div class="left-col">
+    <div class="page-title">
+        <h1><a href="@Url.Action("Detail","Curriculum")/@Course.ID">@Course.Name</a> / @Data.Title</h1>
+    </div>
+    <div class="main-container">
+        <div id="lessonContainer">
+        </div>
+        <input type="hidden" id="action" value="" />
+        <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
+            <div class="modal-dialog modal-xl lesson-modal" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Cập nhật thông tin bài</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="@Url.Action("CreateOrUpdate","Lesson")" id="modal-body" name="lessonForm" enctype="multipart/form-data">
+                            <input type="hidden" name="ID" value="@Data.ID" />
+                            <input type="hidden" name="CourseID" value="@Course.ID" />
+                            <input type="hidden" name="ChapterID" value="" />
+                            <div class="form-group">
+                                <label class="col-form-label">Kiểu bài:</label>
+                                <select name="TemplateType" class="form-control" onchange="SelectTemplate()">
+                                    <option value="1">Bài giảng</option>
+                                    <option value="2">Bài tập</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-form-label">Tên bài:</label>
+                                <input type="text" class="form-control" name="Title" required>
+                            </div>
+                            <div class="form-group" style="width: 45%;  display:inline-block; margin-right: 5%;" for="examOnly">
+                                <label class="col-form-label">Thời gian (phút):</label>
+                                <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required>
+                            </div>
+                            <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
+                                <label class="col-form-label">Số lượt làm bài:</label>
+                                <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required>
+                            </div>
+                            <div class="form-group" style="width: 45%; display:inline-block; margin-right: 5%;" for="examOnly">
+                                <label class="col-form-label">Điểm:</label>
+                                <input type="text" class="form-control" name="Point" placeholder="0" required>
+                            </div>
+                            <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
+                                <label class="col-form-label">Hệ số:</label>
+                                <input type="text" class="form-control" name="Multiple" placeholder="> 0" required>
+                            </div>
+                            <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
+                                <label class="col-form-label">Kiểu bài kiểm tra:</label>
+                                <select name="Etype" class="form-control" required>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Bài luyện tập</option>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Bài kiểm tra tuần</option>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Bài tập lớn</option>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.EXPERIMENT">Báo cáo thí nghiệm</option>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.INTERSHIP">Báo cáo thực tập</option>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">Cuối kì</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event, '#lessonModal', RefreshPage())">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="partModal">
+            <div class="modal-dialog modal-xl lesson-modal" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Tạo nội dung mới</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="#" id="modal-body" name="partForm" enctype="multipart/form-data"></form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="LessonID" value="@Data.ID" />
+    <input type="hidden" id="ChapterID" value="@Data.ChapterID" />
+    <input type="hidden" id="CourseID" value="@Data.CourseID" />
+</div>
+<script>
+
+    function LoadLesson() {
+        load.lesson($("#LessonID").val(), $("#CourseID").val());
+    }
+
+    function RefreshPage() {
+        document.location = document.location;
+    }
+
+
+    $(document).ready(function () {
+        LoadLesson();
+    });
+
+    function SelectTemplate(type) {
+        var modal = $("#lessonModal");
+        if (type != null && type != "")
+            modal.find("[name=TemplateType]").val(type);
+        var template = modal.find("[name=TemplateType]").val();
+        switch (template) {
+            case "1": //bài giảng
+                modal.find("[for=examOnly]").hide();
+                modal.find("[for=examOnly] input").prop("required", false);
+                modal.find("[for=examOnly] select").prop("required", false);
+                break;
+            default:
+                modal.find("[for=examOnly]").show();
+                modal.find("[for=examOnly] input").prop("required", true);
+                modal.find("[for=examOnly] select").prop("required", true);
+                break;
+        }
+    }
+
+    function EditLesson(ID) {
+        var modal = $('#lessonModal');
+        $.ajax({
+            type: "POST",
+            url: urlBase + "lesson/" + urlLesson.Details,
+            data: { ID: ID },
+            dataType: "json",
+            success: function (data) {
+                if (data.Data != null) {
+                    var item = data.Data;
+                    SelectTemplate(item.TemplateType);
+                    //template.lesson(data.Data.TemplateType, data.Data);
+                    modal.find("[name=Title]").val(item.Title);
+                    modal.find("[name=ChapterID]").val(item.ChapterID);
+                    modal.find("[name=ID]").val(item.ID);
+                    modal.find("[name=Point]").val(item.Point);
+                    modal.find("[name=Timer]").val(item.Timer);
+                    modal.find("[name=Limit]").val(item.Limit);
+                    modal.find("[name=Multiple]").val(item.Multiple);
+                    modal.find("[name=Etype]").val(item.Etype);
+                }
+                else {
+                    alert("Có lỗi kết nối, vui lòng thực hiện lại thao tác")
+                }
+            }
+        });
+
+        return false;
+    }
+
+</script>
+@section Scripts{
+    <script src="~/js/curriculum-lesson.js"></script>
+}

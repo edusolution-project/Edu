@@ -20,11 +20,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CourseService _courseService;
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
-        private readonly LessonScheduleService _service;
+        private readonly LessonScheduleService _lessonScheduleService;
         private readonly SubjectService _subjectService;
         private readonly ExamService _examService;
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
         private readonly CalendarHelper _calendarHelper;
+        private readonly LearningHistoryService _learningHistoryService;
 
         public LessonScheduleController(
             // GradeService gradeservice
@@ -36,6 +37,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonService lessonService,
             LessonScheduleService service,
             SubjectService subjectService,
+            LearningHistoryService learningHistoryService,
             ExamService examService,
             CalendarHelper calendarHelper
             )
@@ -48,9 +50,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _chapterService = chapterService;
             _lessonService = lessonService;
             _subjectService = subjectService;
-            _service = service;
+            _lessonScheduleService = service;
             _examService = examService;
             _calendarHelper = calendarHelper;
+            _learningHistoryService = learningHistoryService;
             _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
         }
 
@@ -107,7 +110,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _service.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
                            where schedule != null
                            select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
@@ -181,7 +184,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var classSchedule = new ClassScheduleViewModel(course)
             {
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.Etype > 0).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _service.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
                            where schedule != null
                            select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
@@ -196,6 +199,70 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 { "Data", classSchedule },
                 { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetMarks(DefaultModel model, string ClassID = "", string UserID = "")
+        {
+            TeacherEntity teacher = null;
+            if (string.IsNullOrEmpty(UserID))
+                UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+            {
+                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+                if (teacher == null)
+                {
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giảng viên" }
+                    });
+                }
+            }
+
+            if (string.IsNullOrEmpty(ClassID))
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var currentClass = _classService.GetItemByID(ClassID);
+            if (currentClass == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var course = _courseService.GetItemByID(currentClass.CourseID);
+
+            if (course == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin giáo trình" }
+                    });
+            }
+
+            var marklist = _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.Etype > 0);
+            var total = marklist.ToList().Sum(t => t.Point * t.Multiple);
+            var markSummaries =
+                from r in marklist.ToList()
+                group r by r.Etype into marks
+                select new MarkViewModel { Type = marks.Key, Multiple = marks.Sum(t => t.Point * t.Multiple) * 100 / total, Name = GetMarkText(marks.Key) };
+            var response = new Dictionary<string, object>
+            {
+                { "Data", markSummaries.ToList() }
             };
             return new JsonResult(response);
         }
@@ -234,7 +301,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var activeClass = _classService.CreateQuery().Find(Builders<ClassEntity>.Filter.And(classFilter)).ToList();
             var activeClassIDs = activeClass.Select(t => t.ID).ToList();
 
-            var data = (from r in _service.CreateQuery().Find(o => activeClassIDs.Contains(o.ClassID) && o.IsActive && o.EndDate >= model.StartDate && o.StartDate <= model.EndDate).ToList()
+            var data = (from r in _lessonScheduleService.CreateQuery().Find(o => activeClassIDs.Contains(o.ClassID) && o.IsActive && o.EndDate >= model.StartDate && o.StartDate <= model.EndDate).ToList()
                         let currentClass = activeClass.SingleOrDefault(o => o.ID == r.ClassID)
                         let subject = subjects.SingleOrDefault(s => s.ID == currentClass.SubjectID)
                         select _mapping.AutoOrtherType(_lessonService.GetItemByID(r.LessonID), new LessonScheduleViewModel()
@@ -258,7 +325,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             };
             return new JsonResult(response);
         }
-
 
         [Obsolete]
         [HttpPost]
@@ -294,7 +360,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var enddate = date.AddDays(1);
             foreach (var _class in activeClass)
             {
-                var schedule = _service.CreateQuery().Find(o => o.ClassID == _class.ID && o.IsActive && o.EndDate >= startdate && o.StartDate <= enddate).FirstOrDefault();
+                var schedule = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.IsActive && o.EndDate >= startdate && o.StartDate <= enddate).FirstOrDefault();
                 if (schedule != null)
                 {
                     var lesson = _lessonService.GetItemByID(schedule.LessonID);
@@ -375,7 +441,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var examlist = new ClassScheduleViewModel(course)
             {
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.TemplateType == LESSON_TEMPLATE.EXAM).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _service.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
                            where schedule != null
                            let students = //_examService.Collection.Aggregate().Match(o => o.LessonScheduleID == schedule.ID).Group(o => o.StudentID, g => new { Result = 1 }).ToList()
                            _examService.CreateQuery().Distinct(t => t.StudentID, s => s.LessonScheduleID == schedule.ID).ToList()
@@ -401,28 +467,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [Obsolete]
         public JsonResult Publish(DefaultModel model)
         {
-
             if (model.ArrID.Length <= 0)
             {
                 return new JsonResult(null);
             }
             else
             {
+                var listID = new List<string> { model.ArrID };
                 if (model.ArrID.Contains(","))
-                {
-                    var filter = Builders<LessonScheduleEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive != true);
-                    var update = Builders<LessonScheduleEntity>.Update.SetOnInsert("IsActive", true);
-                    var publish = _service.Collection.UpdateMany(filter, update, new UpdateOptions() { IsUpsert = true });
-                    return new JsonResult(publish);
-                }
-                else
-                {
-                    var filter = Builders<LessonScheduleEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive != true);
-                    var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", true);
-                    var publish = _service.Collection.UpdateMany(filter, update, new UpdateOptions() { IsUpsert = true });
-                    return new JsonResult(publish);
-                }
+                    listID = model.ArrID.Split(',').ToList();
 
+                var filter = Builders<LessonScheduleEntity>.Filter.Where(o => listID.Contains(o.ID) && o.IsActive != true);
+                var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", true);
+                var publish = _lessonScheduleService.Collection.UpdateMany(filter, update, new UpdateOptions() { IsUpsert = true });
+                return new JsonResult(publish);
             }
         }
 
@@ -440,14 +498,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     var filter = Builders<LessonScheduleEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == true);
                     var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", false);
-                    var publish = _service.Collection.UpdateMany(filter, update);
+                    var publish = _lessonScheduleService.Collection.UpdateMany(filter, update);
                     return new JsonResult(publish);
                 }
                 else
                 {
                     var filter = Builders<LessonScheduleEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == true);
                     var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", false);
-                    var publish = _service.Collection.UpdateMany(filter, update);
+                    var publish = _lessonScheduleService.Collection.UpdateMany(filter, update);
                     return new JsonResult(publish);
                 }
 
@@ -469,7 +527,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             else
             {
-                var oldItem = _service.GetItemByID(entity.ID);
+                var oldItem = _lessonScheduleService.GetItemByID(entity.ID);
                 if (oldItem == null)
                     return new JsonResult(new Dictionary<string, object> {
                         {"Data",null },
@@ -479,7 +537,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldItem.StartDate = entity.StartDate;
                 oldItem.EndDate = entity.EndDate;
                 UpdateCalendar(oldItem, UserID);
-                _service.CreateOrUpdate(oldItem);
+                _lessonScheduleService.CreateOrUpdate(oldItem);
 
                 return new JsonResult(new Dictionary<string, object> {
                         {"Data",oldItem },
@@ -493,7 +551,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
             if (oldcalendar != null)
                 _calendarHelper.Remove(oldcalendar.ID);
-            _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
+            if (entity.IsActive)
+                _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
         }
 
         [Obsolete]
@@ -501,6 +560,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             _calendarHelper.ScheduleAutoConvertEvent();
             return new JsonResult("OK");
+        }
+        
+        private string GetMarkText(int type)
+        {
+            switch (type)
+            {
+                case LESSON_ETYPE.PRACTICE:
+                    return "Bài luyện tập";
+                case LESSON_ETYPE.WEEKLY:
+                    return "Bài kiểm tra tuần";
+                case LESSON_ETYPE.CHECKPOINT:
+                    return "Bài tập lớn";
+                case LESSON_ETYPE.EXPERIMENT:
+                    return "Báo cáo thí nghiệm";
+                case LESSON_ETYPE.INTERSHIP:
+                    return "Báo cáo thực tập";
+                case LESSON_ETYPE.END:
+                    return "Cuối kì";
+                default:
+                    return "";
+            }
         }
     }
 }

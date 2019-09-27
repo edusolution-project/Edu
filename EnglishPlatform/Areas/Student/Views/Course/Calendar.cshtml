@@ -1,0 +1,549 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+    var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
+    var _courseID = ViewBag.CourseID as string;
+    var _classID = ViewBag.ClassID as string;
+}
+
+<!-- Begin Page Content -->
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <h3 class="m-0 font-weight-bold text-primary">First Certificate in English 1</h3>
+        </div>
+        <br>
+        <div class="card-body">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Lịch học</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Danh sách lớp</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Thảo luận</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-scores" data-toggle="tab" href="#scores" role="tab" aria-controls.="scores" aria-selected="false">Bảng điểm</a>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <br>
+                    <div class="table-responsive">
+                        <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Tên bài học</th>
+                                    <th>Mô tả</th>
+                                    <th>Thời gian bắt đầu</th>
+                                    <th>thời gian kết thúc</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><a href="javascript:alert('Bài học chưa được mở')">Bài giảng số 2</a></td>
+                                    <td>test</td>
+                                    <td>07/06/2019</td>
+                                    <td>31/06/2019</td>
+                                    <td>Đóng</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 1</a></td>
+                                    <td>test</td>
+                                    <td>07/06/2019</td>
+                                    <td>07/06/2019</td>
+                                    <td>Mở</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 3</a></td>
+                                    <td>test</td>
+                                    <td>07/06/2019</td>
+                                    <td>07/06/2019</td>
+                                    <td>Mở</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 4</a></td>
+                                    <td>test</td>
+                                    <td>07/06/2019</td>
+                                    <td>07/06/2019</td>
+                                    <td>Mở</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 5</a></td>
+                                    <td>test</td>
+                                    <td>07/06/2019</td>
+                                    <td>07/06/2019</td>
+                                    <td>Mở</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 6</a></td>
+                                    <td>test</td>
+                                    <td>07/06/2019</td>
+                                    <td>07/06/2019</td>
+                                    <td>Mở</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 7</a></td>
+                                    <td>test</td>
+                                    <td>07/06/2019</td>
+                                    <td>07/06/2019</td>
+                                    <td>Mở</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 8</a></td>
+                                    <td>test</td>
+                                    <td>07/06/2019</td>
+                                    <td>07/06/2019</td>
+                                    <td>Mở</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="@Url.Action("Detail" , "Lesson")">Bài giảng số 9</a></td>
+                                    <td>test</td>
+                                    <td>07/06/2019</td>
+                                    <td>31/06/2019</td>
+                                    <td>Đóng</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="@Url.Action("Index" , "CheckStudent")">Bài kiểm tra số 1</a></td>
+                                    <td>test</td>
+                                    <td>07/06/2019</td>
+                                    <td>07/06/2019</td>
+                                    <td>Mở</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="profile" role="tabpanel">
+                    <br>
+                    <div class="table-responsive">
+                        <div class="card shadow">
+                            <div class="card-header">
+                                <h6 class="m-0 font-weight-bold text-primary">Thông tin giáo viên</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <img class="img-fluid" src="~/img/Luna-Blaise.jpg">
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <h3 class="m-0 font-weight-bold text-primary">Họ và tên: Valerie Luna</h3>
+                                        <p>Quốc tịch: America</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+                        <!-- DataTales Example -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">Thông tin sinh viên</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="dataTable" class="table table-bordered" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>Họ và tên</th>
+                                                <th>Email</th>
+                                                <th>Điện thoại</th>
+                                                <th>Lớp</th>
+                                                <th>Tuổi</th>
+                                                <th>Ngày tháng năm sinh</th>
+                                                <th>Tình trạng khóa học</th>
+                                                <th>Ngày học gần nhất</th>
+                                                <th>Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Phạm Anh Tuấn</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV001</td>
+                                                <td>61</td>
+                                                <td>2011/04/25</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Đang học</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Garrett Winters</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV002</td>
+                                                <td>63</td>
+                                                <td>2011/07/25</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Chưa học</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Ashton Cox</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV003</td>
+                                                <td>66</td>
+                                                <td>2009/01/12</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Đã hoàn thành</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Cedric Kelly</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV004</td>
+                                                <td>22</td>
+                                                <td>2012/03/29</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Airi Satou</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV005</td>
+                                                <td>33</td>
+                                                <td>2008/11/28</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Brielle Williamson</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV006</td>
+                                                <td>61</td>
+                                                <td>2012/12/02</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Herrod Chandler</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV007</td>
+                                                <td>59</td>
+                                                <td>2012/08/06</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Rhona Davidson</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV008</td>
+                                                <td>55</td>
+                                                <td>2010/10/14</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Colleen Hurst</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV009</td>
+                                                <td>39</td>
+                                                <td>2009/09/15</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Sonya Frost</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV010</td>
+                                                <td>23</td>
+                                                <td>2008/12/13</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Jena Gaines</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV011</td>
+                                                <td>30</td>
+                                                <td>2008/12/19</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Quinn Flynn</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV012</td>
+                                                <td>22</td>
+                                                <td>2013/03/03</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Charde Marshall</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV013</td>
+                                                <td>36</td>
+                                                <td>2008/10/16</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Haley Kennedy</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV014</td>
+                                                <td>43</td>
+                                                <td>2012/12/18</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Tatyana Fitzpatrick</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV015</td>
+                                                <td>19</td>
+                                                <td>2010/03/17</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Michael Silva</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV016</td>
+                                                <td>66</td>
+                                                <td>2012/11/27</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Paul Byrd</td>
+                                                <td>test@gmail.com</td>
+                                                <td>1234567890</td>
+                                                <td>HV017</td>
+                                                <td>64</td>
+                                                <td>2010/06/09</td>
+                                                <td>
+                                                    <div class="progress">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </td>
+                                                <td>07/06/2019</td>
+                                                <td>Hoạt động</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="contact" role="tabpanel">
+                    <div id="thao-luan" class="card shadow mb-4 mt-4">
+                        <div class="pl-3 pr-3 pt-3">
+                            <h6 class="m-0 font-weight-bold text">Thảo luận mới</h6>
+                            <hr class="line mb-0">
+                        </div>
+                        <div class="card-body">
+                            <div class="item">
+                                <div class="title"><span class="text font-weight-bold">Hoàng Thái Long, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
+                                <p>Phạm Anh Tuấn: vào đây xem nhé: http://educoo.vn</p>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card shadow mb-4">
+                        <div class="pl-3 pr-3 pt-3">
+                            <h6 class="m-0 font-weight-bold text">Thảo luận</h6>
+                            <hr class="line mb-0">
+                        </div>
+                        <div class="card-body">
+                            <div class="item">
+                                <div class="title"><span class="text font-weight-bold">Hoàng Thái Long, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
+                                <p>Phạm Anh Tuấn: vào đây xem nhé: http://educoo.vn</p>
+                            </div>
+                            <div class="item">
+                                <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
+                                <p>Xin chào, ai có bài tập bổ trợ cho bài 1, cho mình mượn với</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="scores" role="tabpanel">
+                    <br>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Họ và tên</th>
+                                    <th>Lớp</th>
+                                    <th>Ngày thi</th>
+                                    <th>Điểm thi</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày chấm thi</th>
+                                    <th>Người chấm thi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><a href="#" data-toggle="modal" data-target=".bd-example-modal-lg">Phạm Anh Tuấn</a></td>
+                                    <td>HV001</td>
+                                    <td>2011/04/25</td>
+                                    <td>23.5</td>
+                                    <td>Đã hoàn thành</td>
+                                    <td>2011/04/25</td>
+                                    <td>Valerie Luna</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- End of Main Content -->
+
+@section Scripts{ 
+    <script>
+    function LoadData() {
+    var searchText = $("#searchText").val();
+    var startDate = $("#startDate_sort").val();
+    var endDate = $("#endDate_sort").val();
+    var SubjectID = $("#SubjectID").val();
+    var GradeID = $("#GradeID").val();
+    $.ajax({
+        type: "POST",
+        url: '@Url.Action("GetDetails", "Course")',
+        data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, SubjectID: SubjectID, GradeID: GradeID, CourseID : '@_courseID',ClassID:'@_classID' },
+        dataType: "json",
+        async: false,
+        success: function (data) {
+            var body = $('#dataTable > tbody');
+            body.html("");
+            if (data.Data != null)
+            {
+                //ID ,Name ,Status ,EndDate ,StartDate
+                debugger;
+                for (i = 0; i < data.Data.length; ++i) {
+                    item = data.Data[i];
+                    var active = "";
+                    var title = "";
+                    var url = "@Url.Action("Detail","Lesson")" + "/" + item.ID+"/"+'@_classID'
+                    if (item.IsActive) {
+                        title = "<td><a href='"+url+"' title=" + item.Title + ">" + item.Title + "</a></td>";
+                        active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                    } else {
+                        active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                        title = "<td><a href=\"javascript:alert('Bài học chưa được mở')\" title=" + item.Title + ">" + item.Title + "</a></td>";
+                    }
+                    debugger;
+                    body.append("<tr>" + title +
+                        "<td><a href='"+url+"' title=" + item.Title + ">" + item.Title + "</a></td>" +
+                        "<td>" + new Date(item.StartDate).toLocaleDateString() + "</td>" +
+                        "<td>" + new Date(item.EndDate).toLocaleDateString() + "</td>" +
+                        active +
+                        "</tr>");
+                }
+            }
+        },
+        error: function() {
+            alert("Error");
+        }
+    });
+};
+
+$(document).ready(function () {
+    LoadData();
+});
+
+    </script>
+}

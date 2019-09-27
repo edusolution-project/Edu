@@ -48,6 +48,7 @@ namespace BaseHub
                 throw ex;
             }
         }
+
         public async Task OutOfTheClassroom(string className)
         {
              _groups.Remove(Context.ConnectionId, className);
@@ -61,6 +62,7 @@ namespace BaseHub
         /// <param name="groupName"></param>
         /// <param name="item"></param>
         /// <returns></returns>
+
         private Task ChatToGroup(string groupName, ChatEntity item)
         {
             var group = _groupService.GetItemByName(groupName);
@@ -78,6 +80,7 @@ namespace BaseHub
         /// <param name="groupName"></param>
         /// <param name="message"></param>
         /// <returns></returns>
+
         public Task CommentToNewFeed(string groupName, CommentEntity message)
         {
             var group = _groupService.GetItemByName(groupName);
@@ -89,6 +92,7 @@ namespace BaseHub
             _commentService.CreateOrUpdate(message);
             return Clients.Group(groupName).SendAsync("CommentNewFeed", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
         }
+
         /// <summary>
         /// chat riêng
         /// </summary>

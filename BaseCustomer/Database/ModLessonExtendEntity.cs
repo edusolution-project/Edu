@@ -27,7 +27,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ModLessonExtendService : ServiceBase<ModLessonExtendEntity>
     {
-        public ModLessonExtendService(IConfiguration config) : base(config, "ModLessonExtends", "VES")
+        public ModLessonExtendService(IConfiguration config) : base(config, "ModLessonExtends", config.GetSection("dbName:Publisher").Value)
         {
 
         }

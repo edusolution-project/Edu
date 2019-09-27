@@ -1,0 +1,69 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Outer Row -->
+<div class="row justify-content-center">
+
+    <div class="col-xl-10 col-lg-12 col-md-9">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+                    <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+                    <div class="col-lg-6">
+                        <div class="p-4">
+                            <div class="text-center">
+                                <h1 class="h4 text-gray-900 mb-4">Đăng nhập tài khoản!</h1>
+                            </div>
+                            @using (Html.BeginForm("Login", "Home", FormMethod.Post, new { @name = "LoginForm" }))
+                            {
+                                Html.AntiForgeryToken();
+                                <div class="form-group">
+                                    <input type="email" name="UserName" class="form-control form-control-user" placeholder="Tên tài khoản hoặc địa chỉ email" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" name="PassWord" class="form-control form-control-user" placeholder="Mật khẩu" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <select class="custom-select" name="Type">
+                                        <option value="student" selected>Sinh Viên</option>
+                                        <option value="teacher">Giảng viên</option>
+                                        <option value="admin">Quản trị viên</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox small">
+                                        <input type="checkbox" name="IsRemmember" class="custom-control-input" id="customCheck" value="0">
+                                        <label class="custom-control-label" for="customCheck" onclick="Remember()">Lưu tài khoản</label>
+                                    </div>
+                                </div>
+                                <input type="button" class="btn btn-primary btn-user btn-block" onclick="submit(this)" value="Đăng nhập tài khoản">
+                                <hr>
+                            }
+                            <div class="text-center">
+                                @Html.ActionLink("Thay đổi mật khẩu?", "forgotpassword", "home", null, new { @class = "small" })<br />
+                                @Html.ActionLink("Đăng ký mới?", "register", "home", null, new { @class = "small" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    var Remember = function () {
+        var customCheck = document.getElementById("customCheck");
+        customCheck.value = !customCheck.checked;
+    }
+    var submit = function (t) {
+        var form = t.parrent;
+
+        form.submit();
+    }
+</script>
+

@@ -1,0 +1,103 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+    var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var currentLesson = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
+    ViewData["Title"] = currentLesson.Title;
+}
+
+<script>
+    activeTab = "course";
+</script>
+
+<div class="left-col">
+    <div class="page-title">
+        <h1><a href="@Url.Action("Assignment","Course")/@currentClass.ID">@currentClass.Name</a> / @currentLesson.Title</h1>
+    </div>
+
+    <div class="container-fluid main-container">
+        <!-- Begin Page Content -->
+        <div id="exam-student">
+        </div>
+        <!-- End of Main Content -->
+        <input type="hidden" name="ExamID" id="ExamID" value="" />
+    </div>
+</div>
+@section Scripts{
+    <script>
+        function openNav() {
+            $('#lessonContainer').addClass('col-md-10');
+            $("#quizNavigator").show();
+            $("#quiz-number_123").hide();
+        }
+
+        function closeNav() {
+            $('#lessonContainer').removeClass('col-md-10');
+            $("#quizNavigator").hide();
+            $("#quiz-number_123").show();
+        }
+
+    </script>
+    <script src="~/js/student-exam-new.js"></script>
+    <script>
+        localStorage.clear();
+
+        var config = {
+                id: "exam-student",
+                url: {
+                    load: '@Url.Action("GetLesson", "Course")',
+                    current: '@Url.Action("GetCurrentExam", "Exam")',
+                    start: '@Url.Action("Create", "Exam")',
+                    answer: '@Url.Action("CreateDetail", "Exam")',
+                    removeans: '@Url.Action("RemoveDetail", "Exam")',
+                    end: '@Url.Action("CompleteExam", "Exam")'
+                },
+                lesson_id: '@currentLesson.ID',
+                class_id: '@currentClass.ID'
+        }
+        var widget = new ExamStudent.onReady(config);
+    </script>
+    <style>
+        #nav-menu {
+            height: 64px;
+            z-index: 2;
+        }
+
+            #nav-menu.bd-top {
+                border-top: dashed 1px #CCC;
+            }
+
+            #nav-menu.bd-bottom {
+                border-bottom: dashed 1px #CCC;
+            }
+
+
+            #nav-menu .lesson-tab {
+                height: 42px;
+            }
+
+        #pills-tab {
+            width: 100%;
+            overflow: hidden;
+            background: #DDD;
+            border: solid 1px #999;
+            z-index: 1021;
+            border-radius: 10px;
+        }
+
+            #pills-tab.compact {
+                height: 42px;
+                background: #DDD;
+            }
+
+            #pills-tab .nav-item {
+                width: 100%;
+            }
+
+                #pills-tab .nav-item .nav-link {
+                    padding: 3px 10px;
+                    cursor: pointer;
+                }
+    </style>
+}

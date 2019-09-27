@@ -190,6 +190,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 var oldData = _service.GetItemByID(item.ID);
                 if (oldData == null) return new JsonResult(null);
+                item.ID = oldData.ID;
                 item.UserCreate = oldData.UserCreate;
                 item.CreateDate = oldData.CreateDate;
                 item.Address = oldData.Address;

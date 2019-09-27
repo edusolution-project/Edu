@@ -35,7 +35,7 @@ namespace BaseCustomerEntity.Database
 
     public class ModLessonPartService : ServiceBase<ModLessonPartEntity>
     {
-        public ModLessonPartService(IConfiguration config) : base(config, "ModLessonParts", "VES")
+        public ModLessonPartService(IConfiguration config) : base(config, "ModLessonParts", config.GetSection("dbName:Publisher").Value)
         {
 
         }

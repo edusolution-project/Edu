@@ -33,7 +33,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ModChapterService : ServiceBase<ModChapterEntity>
     {
-        public ModChapterService(IConfiguration config) : base(config, "ModChapters","VES")
+        public ModChapterService(IConfiguration config) : base(config, "ModChapters", config.GetSection("dbName:Publisher").Value)
         {
 
         }

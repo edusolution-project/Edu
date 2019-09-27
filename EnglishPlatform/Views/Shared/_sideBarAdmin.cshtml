@@ -1,0 +1,119 @@
+﻿@using BaseCustomerMVC.Globals
+@using System.Security.Claims
+@{
+    var model = ViewBag.Model;
+}
+<!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="@Url.Action("Index","Home")">
+            <div class="sidebar-brand-icon rotate-n-15">
+                <i class="fas fa-laugh-wink"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">@User.Claims.GetClaimByType(ClaimTypes.Name).Value</div>
+        </a>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
+
+        <!-- Nav Item -->
+        <li class="nav-item active">
+            <a class="nav-link" href="@Url.Action("Index","Home")">
+                <i class="fas fa-fw fa-tachometer-alt"></i>
+                <span>Trang chủ</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Nav Item -->
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index","Account")">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Quản trị viên</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Nav Item -->
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index","Teacher")">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Quản lý Giáo viên</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Nav Item -->
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index","Student")">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Quản lý Học viên</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Nav Item -->
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index","Course")">
+                <i class="fas fa-fw fa-bell"></i>
+                <span>Quản lý Khóa học</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Nav Item -->
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index","Subject")">
+                <i class="fas fa-fw fa-bell"></i>
+                <span>Quản lý Chương trình</span>
+            </a>
+        </li>
+
+        <hr class="sidebar-divider">
+
+        <!-- Nav Item -->
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index","Grade")">
+                <i class="fas fa-fw fa-bell"></i>
+                <span>Quản lý Trình độ</span>
+            </a>
+        </li>
+
+        <hr class="sidebar-divider">
+
+        <!-- Nav Item -->
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index","Curriculum")">
+                <i class="fas fa-fw fa-bell"></i>
+                <span>Quản lý Giáo trình</span>
+            </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Nav Item -->
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index","Statistic")">
+                <i class="fas fa-fw fa-bell"></i>
+                <span>Báo cáo thống kê</span>
+            </a>
+        </li>
+
+        <!-- Sidebar Toggler (Sidebar) -->
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
+
+    </ul>
+<!-- End of Sidebar -->

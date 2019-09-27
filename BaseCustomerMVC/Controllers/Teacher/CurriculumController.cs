@@ -9,13 +9,14 @@ using System.Text;
 using System.Linq;
 using Core_v2.Globals;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
     public class CurriculumController : TeacherController
     {
         private readonly CourseService _service;
-        private readonly ProgramService _programService;
+        //private readonly ProgramService _programService;
         private readonly SubjectService _subjectService;
         private readonly ChapterService _chapterService;
         private readonly GradeService _gradeService;
@@ -65,7 +66,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 , ModLessonExtendService modlessonExtendService)
         {
             _service = service;
-            _programService = programService;
+            //_programService = programService;
             _subjectService = subjectService;
             _chapterService = chapterService;
             _gradeService = gradeService;
@@ -77,7 +78,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _teacherService = teacherService;
             _modservice = modservice;
             _classService = classService;
-            _modprogramService = modprogramService;
+            //_modprogramService = modprogramService;
             _modsubjectService = modsubjectService;
             _modchapterService = modchapterService;
             _modgradeService = modgradeService;
@@ -113,7 +114,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.ModSubject = modsubject;
             ViewBag.User = UserID;
 
-            ViewBag.RoleCode =  User.Claims.GetClaimByType(ClaimTypes.Role).Value;
+            ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             ViewBag.Model = model;
             return View();
         }
@@ -386,7 +387,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (model.ArrID.Contains(","))
                 {
                     var filter = Builders<CourseEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive != true);
-                    var update = Builders<CourseEntity>.Update.SetOnInsert("IsActive", true);
+                    var update = Builders<CourseEntity>.Update.Set("IsActive", true);
                     var publish = _service.Collection.UpdateMany(filter, update, new UpdateOptions() { IsUpsert = true });
                     return new JsonResult(publish);
                 }
@@ -541,7 +542,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #endregion Chapter
 
-
         [Obsolete]
         [HttpPost]
         public JsonResult GetCourseDetail(DefaultModel model)
@@ -574,7 +574,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        public JsonResult Clone(string CourseID, CourseEntity newcourse)
+        public async Task<JsonResult> Clone(string CourseID, CourseEntity newcourse)
         {
             var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             var item = _modservice.GetItemByID(CourseID); //publisher
@@ -586,8 +586,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var course = _modservice.GetItemByID(CourseID);
                 if (course != null)
                 {
-                    var chapter_root = _modchapterService.CreateQuery().Find(o => o.CourseID == CourseID && o.ParentID == "0").ToList();
-                    var lesson = _modlessonService.CreateQuery().Find(o => o.CourseID == CourseID).ToList();
+                    var chapter_root = _modchapterService.CreateQuery().Find(o => o.CourseID == CourseID && o.ParentID == "0");
+                    var lesson_root = _modlessonService.CreateQuery().Find(o => o.CourseID == CourseID && o.ChapterID == "0");
 
                     var clone_course = new CourseEntity()
                     {
@@ -605,77 +605,95 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Order = course.Order
                     };
                     _service.Collection.InsertOne(clone_course);
-                    if (chapter_root != null && chapter_root.Count > 0)
+
+                    //if (chapter_root != null && chapter_root.CountDocuments() > 0)
+                    //{
+                    foreach (var chapter in chapter_root.ToEnumerable())
                     {
-                        var clone_chapter = chapter_root.Select(o => new ChapterEntity()
+                        await CloneChapter(new ChapterEntity()
                         {
-                            OriginID = o.ID,
-                            Name = o.Name,
-                            Code = o.Code,
+                            OriginID = chapter.ID,
+                            Name = chapter.Name,
+                            Code = chapter.Code,
                             CourseID = clone_course.ID,
-                            ParentID = o.ParentID,
-                            ParentType = o.ParentType,
+                            ParentID = chapter.ParentID,
+                            ParentType = chapter.ParentType,
                             CreateUser = _userCreate,
                             Created = DateTime.Now,
                             Updated = DateTime.Now,
                             IsActive = true,
                             IsAdmin = false,
-                            Order = o.Order
-                        }).ToList();
-                        for (int i = 0; i < clone_chapter.Count; i++)
-                        {
-                            CloneChapter(clone_chapter[i]);
-                        }
+                            Order = chapter.Order
+                        }, _userCreate);
                     }
+                    //}
 
-                    var clone_lesson = lesson.Select(o => new LessonEntity()
+                    foreach (var o in lesson_root.ToEnumerable())
                     {
-                        Media = o.Media,
-                        ChapterID = _chapterService.Collection.Find(x => x.OriginID == o.ChapterID && x.CourseID == clone_course.ID).First() != null ? _chapterService.Collection.Find(x => x.OriginID == o.ChapterID && x.CourseID == clone_course.ID).First().ID : "0",
-                        CreateUser = _userCreate,
-                        Code = o.Code,
-                        OriginID = o.ID,
-                        CourseID = clone_course.ID,
-                        IsParentCourse = o.IsParentCourse,
-                        IsAdmin = false,
-                        Timer = o.Timer,
-                        Point = o.Point,
-                        IsActive = o.IsActive,
-                        Title = o.Title,
-                        TemplateType = o.TemplateType,
-                        Order = o.Order,
-                        Created = DateTime.Now,
-                        Updated = DateTime.Now
-                    }).ToList();
-
-                    if (clone_lesson != null)
-                    {
-                        for (int i = 0; i < clone_lesson.Count; i++)
+                        await CloneLesson(new LessonEntity()
                         {
-                            var lessonItem = clone_lesson[i];
-                            CloneLesson(lessonItem);
-                        }
+                            Media = o.Media,
+                            ChapterID = "0",
+                            CreateUser = _userCreate,
+                            Code = o.Code,
+                            OriginID = o.ID,
+                            CourseID = CourseID,
+                            IsParentCourse = o.IsParentCourse,
+                            IsAdmin = false,
+                            Timer = o.Timer,
+                            Point = o.Point,
+                            IsActive = o.IsActive,
+                            Title = o.Title,
+                            TemplateType = o.TemplateType,
+                            Order = o.Order,
+                            Created = DateTime.Now,
+                            Updated = DateTime.Now
+                        }, _userCreate);
                     }
                 }
             }
             return new JsonResult("OK");
         }
 
-        private void CloneChapter(ChapterEntity item)
+        private async Task CloneChapter(ChapterEntity item, string _userCreate)
         {
-            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             _chapterService.Collection.InsertOne(item);
 
-            var listChild = _modchapterService.Collection.Find(o => o.ParentID == item.OriginID).ToList();
-            if (listChild.Count > 0)
+            var lessons = _modlessonService.CreateQuery().Find(o => o.ChapterID == item.OriginID);
+
+            foreach (var o in lessons.ToEnumerable())
             {
-                var listChildClone = listChild.Select(o => new ChapterEntity()
+                await CloneLesson(new LessonEntity()
+                {
+                    Media = o.Media,
+                    ChapterID = item.ID,
+                    CreateUser = _userCreate,
+                    Code = o.Code,
+                    OriginID = o.ID,
+                    CourseID = item.CourseID,
+                    IsParentCourse = o.IsParentCourse,
+                    IsAdmin = false,
+                    Timer = o.Timer,
+                    Point = o.Point,
+                    IsActive = o.IsActive,
+                    Title = o.Title,
+                    TemplateType = o.TemplateType,
+                    Order = o.Order,
+                    Created = DateTime.Now,
+                    Updated = DateTime.Now
+                }, _userCreate);
+            }
+
+            var subChapters = _modchapterService.Collection.Find(o => o.ParentID == item.OriginID);
+            foreach (var o in subChapters.ToEnumerable())
+            {
+                await CloneChapter(new ChapterEntity()
                 {
                     OriginID = o.ID,
                     Name = o.Name,
                     Code = o.Code,
                     CourseID = item.CourseID,
-                    ParentID = item.ID,//Edit by VietPhung 20190701
+                    ParentID = item.ID, //Edit by VietPhung 20190701
                     ParentType = o.ParentType,
                     CreateUser = _userCreate,
                     Created = DateTime.Now,
@@ -683,122 +701,101 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     IsActive = true,
                     IsAdmin = false,
                     Order = o.Order
-                }).ToList();
-                for (int i = 0; i < listChildClone.Count; i++)
-                {
-                    var _item = listChildClone[i];
-                    CloneChapter(_item);
-                }
+                }, _userCreate);
             }
-
         }
 
-        private void CloneLesson(LessonEntity item)
+        private async Task CloneLesson(LessonEntity item, string _userCreate)
         {
-            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             if (item.Media != null && item.Media.Path != null)
                 if (!item.Media.Path.StartsWith("http://"))
                     item.Media.Path = "http://publisher.edusolution.vn" + item.Media.Path;
 
             _lessonService.CreateQuery().InsertOne(item);
 
-            var lessonpart = _modlessonPartService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
-            if (lessonpart != null)
+            var parts = _modlessonPartService.CreateQuery().Find(o => o.ParentID == item.OriginID);
+            foreach (var _child in parts.ToEnumerable())
             {
-                for (int i = 0; i < lessonpart.Count; i++)
+                var _item = new LessonPartEntity()
                 {
-                    var _child = lessonpart[i];
-                    var _item = new LessonPartEntity()
-                    {
-                        OriginID = _child.ID,
-                        Title = _child.Title,
-                        Description = _child.Description,
-                        IsExam = _child.IsExam,
-                        Media = _child.Media,
-                        Point = _child.Point,
-                        Order = _child.Order,
-                        ParentID = item.ID,
-                        Timer = _child.Timer,
-                        Type = _child.Type,
-                        Updated = DateTime.Now,
-                        Created = DateTime.Now,
-                        CourseID = item.CourseID,
-                    };
-                    if (_item.Media != null && _item.Media.Path != null)
-                        if (!_item.Media.Path.StartsWith("http://"))
-                            _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
-                    CloneLessonPart(_item);
-                }
+                    OriginID = _child.ID,
+                    Title = _child.Title,
+                    Description = _child.Description,
+                    IsExam = _child.IsExam,
+                    Media = _child.Media,
+                    Point = _child.Point,
+                    Order = _child.Order,
+                    ParentID = item.ID,
+                    Timer = _child.Timer,
+                    Type = _child.Type,
+                    Updated = DateTime.Now,
+                    Created = DateTime.Now,
+                    CourseID = item.CourseID,
+                };
+                if (_item.Media != null && _item.Media.Path != null)
+                    if (!_item.Media.Path.StartsWith("http://"))
+                        _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
+                await CloneLessonPart(_item, _userCreate);
             }
         }
 
-        private void CloneLessonPart(LessonPartEntity item)
+        private async Task CloneLessonPart(LessonPartEntity item, string _userCreate)
         {
-            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             _lessonPartService.Collection.InsertOne(item);
-            var list = _modlessonPartQuestionService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
-            if (list != null)
+            var questions = _modlessonPartQuestionService.CreateQuery().Find(o => o.ParentID == item.OriginID);
+            foreach (var _child in questions.ToEnumerable())
             {
-                for (int i = 0; i < list.Count; i++)
+                var _item = new LessonPartQuestionEntity()
                 {
-                    var _child = list[i];
-                    var _item = new LessonPartQuestionEntity()
-                    {
-                        OriginID = _child.ID,
-                        Content = _child.Content,
-                        CreateUser = _userCreate,
-                        Description = _child.Description,
-                        Media = _child.Media,
-                        Point = _child.Point,
-                        Order = _child.Order,
-                        ParentID = item.ID,
-                        Updated = DateTime.Now,
-                        Created = DateTime.Now,
-                        CourseID = item.CourseID,
-                    };
-                    //change Media path
-                    if (_item.Media != null && _item.Media.Path != null)
-                        if (!_item.Media.Path.StartsWith("http://"))
-                            _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
-                    CloneLessonQuestion(_item);
-                }
+                    OriginID = _child.ID,
+                    Content = _child.Content,
+                    CreateUser = _userCreate,
+                    Description = _child.Description,
+                    Media = _child.Media,
+                    Point = _child.Point,
+                    Order = _child.Order,
+                    ParentID = item.ID,
+                    Updated = DateTime.Now,
+                    Created = DateTime.Now,
+                    CourseID = item.CourseID,
+                };
+                //change Media path
+                if (_item.Media != null && _item.Media.Path != null)
+                    if (!_item.Media.Path.StartsWith("http://"))
+                        _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
+                await CloneLessonQuestion(_item, _userCreate);
             }
         }
 
-        private void CloneLessonQuestion(LessonPartQuestionEntity item)
+        private async Task CloneLessonQuestion(LessonPartQuestionEntity item, string _userCreate)
         {
-            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             _lessonPartQuestionService.Collection.InsertOne(item);
-            var list = _modlessonPartAnswerService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
-            if (list != null)
+            var answers = _modlessonPartAnswerService.CreateQuery().Find(o => o.ParentID == item.OriginID);
+            foreach (var _child in answers.ToEnumerable())
             {
-                for (int i = 0; i < list.Count; i++)
+                var _item = new LessonPartAnswerEntity()
                 {
-                    var _child = list[i];
-                    var _item = new LessonPartAnswerEntity()
-                    {
-                        OriginID = _child.ID,
-                        Content = _child.Content,
-                        CreateUser = _userCreate,
-                        IsCorrect = _child.IsCorrect,
-                        Media = _child.Media,
-                        Order = _child.Order,
-                        ParentID = item.ID,
-                        Updated = DateTime.Now,
-                        Created = DateTime.Now,
-                        CourseID = item.CourseID
-                    };
-                    if (_item.Media != null && _item.Media.Path != null)
-                        if (!_item.Media.Path.StartsWith("http://"))
-                            _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
-                    CloneLessonAnswer(_item);
-                }
+                    OriginID = _child.ID,
+                    Content = _child.Content,
+                    CreateUser = _userCreate,
+                    IsCorrect = _child.IsCorrect,
+                    Media = _child.Media,
+                    Order = _child.Order,
+                    ParentID = item.ID,
+                    Updated = DateTime.Now,
+                    Created = DateTime.Now,
+                    CourseID = item.CourseID
+                };
+                if (_item.Media != null && _item.Media.Path != null)
+                    if (!_item.Media.Path.StartsWith("http://"))
+                        _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
+                await CloneLessonAnswer(_item);
             }
         }
 
-        private void CloneLessonAnswer(LessonPartAnswerEntity item)
+        private async Task CloneLessonAnswer(LessonPartAnswerEntity item)
         {
-            _lessonPartAnswerService.Collection.InsertOne(item);
+            await _lessonPartAnswerService.Collection.InsertOneAsync(item);
         }
     }
 }

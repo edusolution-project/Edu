@@ -457,6 +457,46 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
+        public JsonResult GetMarks(DefaultModel model)
+        {
+            if (string.IsNullOrEmpty(model.ID))
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không tìm thấy thông tin lớp" }
+                    });
+            var currentClass = _service.GetItemByID(model.ID);
+            if (currentClass == null)
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không tìm thấy thông tin lớp" }
+                    });
+            var teacher = _teacherService.GetItemByID(currentClass.TeacherID);
+
+            var filter = new List<FilterDefinition<StudentEntity>>();
+            filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
+            var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
+            var studentsView = students.ToList().Select(t => _mapping.AutoOrtherType(t, new ClassMemberViewModel()
+            {
+                ClassName = currentClass.Name,
+                ClassStatus = "Đang học",
+                LastJoinDate = DateTime.Now
+            })).ToList();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data",new Dictionary<string, object> {
+                        {"Teacher",teacher },
+                        {"Students",studentsView }
+                    }
+                },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+
         public JsonResult GetActiveList()
         {
             var filter = new List<FilterDefinition<ClassEntity>>();

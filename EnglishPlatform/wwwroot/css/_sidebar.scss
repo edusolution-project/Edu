@@ -1,0 +1,209 @@
+@import "uivar.scss";
+
+.sidebar {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 200px;
+    z-index: 3;
+    height: auto !important;
+
+    span {
+        margin-left: 50px;
+        line-height: 42px;
+        color: #48bde5;
+    }
+
+    &.collapse:not(.show) {
+        width: 51px;
+        display: block;
+
+        span {
+            display: none;
+        }
+    }
+
+    #sidebar-content {
+        height: 100%;
+        background-color: #e5e5e5;
+    }
+
+    .sidebar-holder {
+        list-style: none;
+        background-color: #000;
+    }
+
+    .sidebar-item, .sidebar-toggler-icon {
+        cursor: pointer;
+        background-image: url('../css/images/sidebar.png');
+        width: 100%;
+        background-repeat: no-repeat;
+        filter: opacity(0.9);
+        height: 42px;
+        display: block;
+        background-color: #FFF;
+
+        &.home {
+            background-color: #000054;
+            height: 60px;
+        }
+
+        &.profile {
+            background-position-y: -76px;
+        }
+
+        &.dashboard {
+            background-position-y: -120px;
+        }
+
+        &.course {
+            background-position-y: -162px;
+        }
+
+        &.calendar {
+            background-position-y: -204px;
+        }
+
+        &.comments {
+            background-position-y: -245px;
+        }
+
+        &.announcements {
+            background-position-y: -288px;
+        }
+
+        &.curriculum {
+            background-position-y: -288px;
+        }
+
+        &.guide {
+            background-position-y: -330px;
+        }
+
+        &:hover, &.active {
+            filter: none;
+        }
+
+        .nav-link {
+            width: 100%;
+            height: 100%;
+        }
+
+        .extra {
+            display: none;
+        }
+    }
+
+    .sidebar-toggler {
+        border: none;
+        background-color: #000;
+        width: 100%;
+        padding: 0;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        outline: none;
+
+        .sidebar-toggler-icon {
+            background-position-y: -368px;
+        }
+    }
+
+    #extra-sidebar {
+        height: 100%;
+        width: 250px;
+        position: absolute;
+        background: #FFF;
+        padding: 0;
+        top: 0;
+        box-shadow: 5px 2px 5px 0 rgba(49, 40, 40, 0.17);
+        right: 100px;
+        transition: right .3s;
+        display: block !important;
+        z-index: -1;
+        overflow: auto;
+
+        .content {
+            padding: 20px;
+        }
+
+
+        &.collapse.show {
+            right: -250px;
+        }
+
+        .btn-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-weight: bold;
+            border: none;
+            background: none;
+            font-size: 20px;
+            line-height: 14px;
+            outline: none;
+            padding: 0.2rem;
+        }
+
+        .avatarHolder {
+
+            .avatar {
+                width: 2.5em;
+                height: 2.5em;
+                border: solid 2px #d4d4d4;
+                border-radius: 100%;
+                text-align: center;
+                margin: auto;
+                font-size: 1.75rem;
+                cursor: pointer;
+
+                .shortname {
+                    line-height: 2.37em;
+                    color: $base_red;
+                }
+            }
+
+            .fullname {
+                font-size: 1.2rem;
+                text-align: center;
+            }
+
+            form {
+                text-align: center;
+
+                .btn-logout {
+                    font-size: 13px;
+                    background: #EEE;
+                    margin: 1.5rem 0px;
+                    padding: 0.2rem;
+                }
+            }
+        }
+
+        .action-wrapper {
+            list-style: none;
+            padding: 0;
+
+            .action-link {
+                padding-bottom: 5px;
+
+                .title {
+                    font-size: 1rem;
+                    padding-bottom: 3px;
+                }
+
+                .description {
+                    font-size: 0.9rem;
+                    font-weight: normal;
+                }
+            }
+        }
+    }
+}
+
+.sidebar-collapse {
+
+    span {
+        display: none;
+    }
+}

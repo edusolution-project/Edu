@@ -1,0 +1,19 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+
+<!-- Page Heading -->
+<div id="lessonContainer">
+</div>
+
+<input type="hidden" id="LessonID" value="" />
+<input type="hidden" id="ChapterID" value="" />
+<input type="hidden" id="CourseID" value="" />
+<script>
+    $(document).ready(function () {
+        load.lesson('');
+    });
+</script>

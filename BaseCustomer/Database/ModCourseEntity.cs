@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BaseCustomerEntity.Database
@@ -36,9 +37,9 @@ namespace BaseCustomerEntity.Database
     }
     public class ModCourseService : ServiceBase<ModCourseEntity>
     {
-        public ModCourseService(IConfiguration config) : base(config, "ModCourses", "VES")
+        public ModCourseService(IConfiguration config) : base(config, "ModCourses", config.GetSection("dbName:Publisher").Value)
         {
-
+            
         }
 
         public object GetItemByCode(string code)

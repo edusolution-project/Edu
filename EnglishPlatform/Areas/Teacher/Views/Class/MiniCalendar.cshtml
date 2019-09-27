@@ -1,0 +1,75 @@
+﻿@{
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+}
+
+<link href="~/css/calendar/core.css" rel="stylesheet" />
+<link href="~/css/calendar/daygrid.css" rel="stylesheet" />
+<link href="~/css/calendar/list.css" rel="stylesheet" />
+<link href="~/css/calendar/timegrid.css" rel="stylesheet" />
+
+<div id="schedule" class="pt-3"></div>
+<script src="~/js/lib/schedule-mini.js"></script>
+
+<script>
+
+    var schedulex = new CalendarLib.Schedule($);
+    schedulex.onLoad({
+        type: "@User?.FindFirst("Type").Value",
+        controller: 'Calendar'
+    });
+</script>
+
+<style>
+    .fc-content {
+        font-size: 9px;
+        cursor: pointer;
+    }
+
+    .fc-center {
+        font-size: 7px;
+    }
+
+    .fc-toolbar.fc-header-toolbar {
+            margin-bottom: .5em;
+        }
+
+    .fc-toolbar .fc-button {
+        padding: .1em .2em .1em;
+        line-height: 1em;
+    }
+
+    .fc-dayGrid-view .fc-body .fc-row {
+        min-height: 3em;
+    }
+
+    .fc-row.fc-week
+    {
+        max-height:40px;
+    }
+    .fc-scroller {
+        height: auto !important;
+    }
+
+    .fc-day-header {
+        font-weight: normal;
+        border: solid 1px #CCC !important;
+        /*font-size: 11px;*/
+    }
+
+        .fc-day-header span {
+            font-size: 11px;
+        }
+
+    .fc-day-top {
+        text-align: right;
+        padding-right: 3px !important;
+    }
+
+    .fc-button .fc-icon {
+        font-size: 1em;
+    }
+
+    .fc-icon {
+        height: 1em;
+    }
+</style>

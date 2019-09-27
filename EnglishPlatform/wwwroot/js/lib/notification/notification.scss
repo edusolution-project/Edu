@@ -1,0 +1,40 @@
+﻿$bg-color-success:#59ce74;
+$bg-color-error: #f78a88;
+@mixin textShadowNotification($color) {
+    text-shadow: 2px 2px 2px $color;
+}
+.notification {
+    position: fixed;
+    padding: 10px 20px;
+    color: #000;
+    font-size: 14px;
+    text-align: left;
+    border: 0;
+    border-radius: 5px;
+    box-shadow: 0 5px 35px rgba(0,0,0,.65);
+    top: 10%;
+    right: 5px;
+    background: #f85452;
+    max-width: 90%;
+    min-width: 250px;
+    pointer-events: none;
+    font-weight: 600;
+    white-space: nowrap;
+
+
+    &.error {
+        background: $bg-color-error;
+        @include textShadowNotification(rgb(206, 65, 55));
+    }
+
+    &.success {
+        background: $bg-color-success;
+        @include textShadowNotification(rgb(55, 206, 55));
+    }
+
+    .icon {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+    }
+}

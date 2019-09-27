@@ -1,0 +1,145 @@
+﻿@{
+    ViewData["Title"] = "Quản lý role";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var listData = ViewBag.Data as List<BaseCustomerEntity.Database.RoleEntity>;
+}
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
+    {
+        <input type="hidden" name="ArrID" value="" />
+        <!-- DataTales Example -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="text-right">
+                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","role")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
+                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
+                            <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "role")')"> <i class="fas fa-file-export"></i> </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="input-group"><input type="checkbox" aria-label="Checkbox" onclick="toggleAll(this, 'dataTable')"></div>
+                                </th>
+                                <th>STT</th>
+                                <th>Mã môn</th>
+                                <th>tên</th>
+                                <th>Ngày tạo</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /.container-fluid -->
+    }
+</div>
+<!-- Modal Create Form -->
+<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        @using (Html.BeginForm("Create", "role", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
+        {
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalCenterTitle">Tạo môn học</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <input type="hidden" name="Created" value="" />
+                        <input type="hidden" name="ID" />
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control" name="Code" id="inputName" placeholder="mã môn">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control" name="Name" id="inputText" placeholder="Tên môn">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group row col-md-6">
+                                <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
+                                <div class="col-sm-8">
+                                    <select id="input-option" name="IsActive" class="form-control">
+                                        <option value="true" selected>Hoạt động</option>
+                                        <option value="false">Không hoạt động</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "role")','create',LoadData)">Lưu lại</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
+       
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetList", "role")',
+            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
+            dataType:"json",
+            success: function (data) {
+                var body = $('#dataTable tbody');
+                body.html("");
+                if (data.Data.length > 0)
+                {
+                    for (i = 0; i < data.Data.length; ++i) {
+                        item = data.Data[i];
+                        console.log(item);
+                        var active = "";
+                        if (item.IsActive) {
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","role")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                        } else {
+                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","role")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                        }
+                        body.append("<tr>" +
+                            "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
+                            "<td>" + (i + 1) + "</td>" +
+                            "<td>" + item.Code +"</td>" +
+                            "<td>" + item.Name + "</td>" +
+                            "<td>" +  item.Type +"</td>"+active +
+                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","role")','@Url.Action("create","role")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","role")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "</td > " +
+                            "</tr>"
+                        );
+                    }
+                    $('.btn').tooltip({ trigger:'hover' });
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    };
+
+    $(document).ready(function () {
+        LoadData();
+    });
+</script>

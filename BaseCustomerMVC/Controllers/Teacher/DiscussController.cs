@@ -44,7 +44,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public Task<JsonResult> GetListNewFeed(string classID, int skip, int take = 0)
+        public Task<JsonResult> GetListNewFeed(string classID, int skip, int take = 0, int FeedType = -1)
         {
             if (string.IsNullOrEmpty(classID)) return Task.FromResult(new JsonResult(null));
             var group = _groupService.GetItemByName(classID);
@@ -52,10 +52,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 _groupService.AddMember(classID, User?.FindFirst("UserID").Value);
             }
+            var filter = new List<FilterDefinition<NewFeedEntity>> {
+                Builders<NewFeedEntity>.Filter.Eq(o => o.GroupID, classID),
+                Builders<NewFeedEntity>.Filter.Eq(o=>o.ParentID, null)
+            };
+            if (FeedType > 0)
+                filter.Add(Builders<NewFeedEntity>.Filter.Eq(o => o.FeedType, FeedType));
 
-            var listData = _newFeedService.Collection.Find(o => o.GroupID == classID
-            //&& !string.IsNullOrEmpty(o.Content) 
-            && string.IsNullOrEmpty(o.ParentID));
+            var listData = _newFeedService.Collection.Find(Builders<NewFeedEntity>.Filter.And(filter));
             if (listData.Count() == 0) return Task.FromResult(new JsonResult(null));
             if (listData.Count() >= take)
             {
@@ -67,6 +71,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Task.FromResult(new JsonResult(listData.SortByDescending(o => o.TimePost).ToList()));
             }
         }
+
         [HttpPost]
         [Obsolete]
         public JsonResult GetListComment(string newFeedID, int skip, int take)
@@ -85,6 +90,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(listData.SortByDescending(o => o.TimePost).ToList());
             }
         }
+
+        [HttpPost]
+        [Obsolete]
+        public JsonResult ToggleFeedType(NewFeedEntity entity)
+        {
+            var newFeed = _newFeedService.GetItemByID(entity.ID);
+            if (newFeed == null)
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Error", "Thông tin không chính xác" }
+                    });
+            newFeed.FeedType = entity.FeedType;
+            _newFeedService.CreateOrUpdate(newFeed);
+            return new JsonResult(new Dictionary<string, object> {
+                        {"Data", newFeed }
+                    });
+        }
+
 
         [HttpPost]
         public Task<object> PostNewFeed(NewFeedEntity item)

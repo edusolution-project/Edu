@@ -12,18 +12,28 @@ namespace Core_v2.Repositories
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
         private readonly IMongoCollection<T> _collection;
-        private readonly MappingEntity<T,T> _mapping;
+        private readonly MappingEntity<T, T> _mapping;
         public ServiceBase(IConfiguration config, string tableName, string dbName = "")
         {
             _config = config;
             _tableName = tableName;
             string _dbname = "";
-            if(string.IsNullOrEmpty(dbName)) _dbname = _config.GetSection("dbName:Default").Value;
-            else _dbname = _config.GetSection("dbName:"+dbName).Value;
-            _client = new MongoClient(_config.GetConnectionString(_dbname));
+            string _connectionName = "";
+            if (string.IsNullOrEmpty(dbName))
+            {
+                _connectionName = _config.GetSection("dbName:Default").Value;
+                _dbname = _config.GetSection("dbName:Default").Value;
+            }
+            else
+            {
+                _connectionName = dbName;
+                _dbname = dbName;
+            }
+            /* _config.GetSection("dbName:"+dbName).Value;*/
+            _client = new MongoClient(_config.GetConnectionString(_connectionName));
             _database = _client.GetDatabase(_dbname);
             _collection = _database.GetCollection<T>(tableName);
-            _mapping = new MappingEntity<T,T>();
+            _mapping = new MappingEntity<T, T>();
         }
         public ServiceBase(IConfiguration config, string dbName = "")
         {
@@ -46,7 +56,7 @@ namespace Core_v2.Repositories
             }
         }
 
-        public MappingEntity<T,T> Map
+        public MappingEntity<T, T> Map
         {
             get
             {
@@ -63,13 +73,14 @@ namespace Core_v2.Repositories
             return _collection.Find(o => o.ID == id)?.SingleOrDefault();
         }
 
-        public IFindFluent<T, T> GetAll(){
+        public IFindFluent<T, T> GetAll()
+        {
             return _collection.Find(_ => true);
-        } 
+        }
 
         public T CreateOrUpdate(T item)
         {
-            if(string.IsNullOrEmpty(item.ID) || item.ID == "0")
+            if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 _collection.InsertOne(item);
                 return item;
@@ -77,10 +88,10 @@ namespace Core_v2.Repositories
             else
             {
                 var oldItem = _collection.Find(o => o.ID == item.ID).FirstOrDefault();
-                if(oldItem != null)
+                if (oldItem != null)
                 {
-                    var newItem = _mapping.Auto(oldItem, item);
-                    _collection.ReplaceOne(o=>o.ID == newItem.ID,newItem);
+                    var newItem = _mapping.Auto(oldItem, item);//stupid mapping
+                    _collection.ReplaceOne(o => o.ID == newItem.ID, newItem);
                     return newItem;
                 }
                 else
@@ -100,7 +111,7 @@ namespace Core_v2.Repositories
                 var oldItem = _collection.Find(o => o.ID == ID).First();
                 if (oldItem != null)
                 {
-                   return _collection.DeleteOne(o => o.ID == ID);
+                    return _collection.DeleteOne(o => o.ID == ID);
                 }
                 else
                 {

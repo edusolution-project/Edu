@@ -31,7 +31,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ModSubjectService : ServiceBase<ModSubjectEntity>
     {
-        public ModSubjectService(IConfiguration config) : base(config, "ModSubject", "VES")
+        public ModSubjectService(IConfiguration config) : base(config, "ModSubject", config.GetSection("dbName:Publisher").Value)
         {
         }
         public object GetItemByCode(string code)

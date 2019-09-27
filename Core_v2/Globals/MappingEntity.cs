@@ -55,7 +55,7 @@ namespace Core_v2.Globals
                 if (newProps.Contains(item))
                 {
                     var value = item.GetValue(oldItem);
-                    if ((newItem[item.Name] == null || item.Name == "IsActive") && value != null)
+                    if ((newItem[item.Name] == null || item.Name == "IsActive") && value != null)//stupid maping
                     {
                         newItem[item.Name] = value;
                     }

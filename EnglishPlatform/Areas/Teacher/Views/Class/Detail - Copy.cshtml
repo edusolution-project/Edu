@@ -1,0 +1,700 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    ViewData["Title"] = currentClass.Name;
+}
+
+
+<!-- Begin Page Content -->
+<div class="container">
+    <div class="card show mb-4">
+        <div class="card-header">
+            <h3 class="m-0 font-weight-bold text-primary">@currentClass.Name</h3>
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="lesson-tab" data-toggle="tab" href="#lessonlist" role="tab" aria-controls="lesson" aria-selected="true" onclick="LoadSchedule()">Lịch giảng dạy</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="member-tab" data-toggle="tab" href="#memberlist" role="tab" aria-controls="member" aria-selected="false" onclick="LoadMembers()">Danh sách lớp</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="comment-tab" data-toggle="tab" href="#commentlist" role="tab" aria-controls="comment" aria-selected="false">Thảo luận</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="exam-tab" data-toggle="tab" href="#examlist" role="tab" aria-controls="exam" aria-selected="false" onclick="LoadExam()">Thi / Kiểm tra</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="score-tab" data-toggle="tab" href="#scorelist" role="tab" aria-controls="scores" aria-selected="false" onclick="LoadScoreBoard()">Bảng điểm</a>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="lessonlist" role="tabpanel" aria-labelledby="home-tab">
+                    <div class="table-responsive">
+                        <table id="scheduleTable" class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Tên bài học</th>
+                                    <th class="text-center">Mô tả</th>
+                                    <th class="text-center">Ngày bắt đầu</th>
+                                    <th class="text-center">Ngày kết thúc</th>
+                                    <th class="text-center">Trạng thái</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="memberlist" role="tabpanel">
+                    <div class="table-responsive">
+                        <div class="tab-teacher card mb-4">
+                            <div class="card-header">
+                                <h5 class="m-0 font-weight-bold text-primary">Thông tin giáo viên</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <img class="img-fluid" src="~/img/Luna-Blaise.jpg">
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <h3 class="m-0 font-weight-bold text-primary">GV <span id="TeacherName"></span></h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-student">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <h5 class="m-0 font-weight-bold text-primary">Danh sách sinh viên</h5>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="text-right">
+                                                <button type="button" class="btn btn-primary" onclick="ImportSV('@currentClass.ID','ImportForm')" data-toggle="modal" data-target="#importModal">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="membersTable" class="table table-bordered" width="100%" cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">STT</th>
+                                                    <th class="text-center">Họ và tên</th>
+                                                    <th class="text-center">Email</th>
+                                                    <th class="text-center">Điện thoại</th>
+                                                    <th class="text-center">Lớp</th>
+                                                    <th class="text-center">Ngày tháng năm sinh</th>
+                                                    <th class="text-center">Tình trạng khóa học</th>
+                                                    <th class="text-center">Ngày học gần nhất</th>
+                                                    <th class="text-center">Trạng thái</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="commentlist" role="tabpanel">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text">Thảo luận mới</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="item">
+                                <div class="title"><span class="text">Charde Marshall, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
+                                <br>
+                                <p>Hi teacher, what's is the main content of next lesson?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text">Thảo luận</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="item">
+                                <div class="title"><span class="text font-weight-bold">Phạm Anh Tuấn, </span><span class="date">14/6/2019</span><span class="time">14:23:30pm</span></div>
+                                <p>Hi teacher, what's is the main content of next lesson?</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="examlist" role="tabpanel">
+                    <div class="check">
+                        <div class="table-responsive">
+                            <table id="examTable" class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Tên bài học</th>
+                                        <th class="text-center">Mô tả</th>
+                                        <th class="text-center">Thời gian bắt đầu</th>
+                                        <th class="text-center">Thời gian kết thúc</th>
+                                        <th class="text-center">Học viên tham gia</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="scorelist" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="scoreTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center align-middle" rowspan="2">STT</th>
+                                    <th class="text-center align-middle" rowspan="2">Họ và tên</th>
+                                    <th class="text-center" colspan="3">Điểm</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-center">Thành  phần</th>
+                                    <th class="text-center">Cuối kì</th>
+                                    <th class="text-center">TB</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" id="importModal" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    @using (Html.BeginForm("ImportStudent", "Class", FormMethod.Post, new { enctype = "multipart/form-data", name = "ImportForm" }))
+                    {
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="ModalCenterTitle">Thêm nhanh từ file</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
+                                    <div class="chose-file col-sm-9">
+                                        <input type="file" name="file" class="form-control-file" id="FormControlFile">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div class="button-left">
+                                <button type="button" class="btn btn-secondary">Tải file mẫu</button>
+                            </div>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                            <button type="button" class="btn btn-primary btn-submit" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadMembers)">Lưu lại</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="examModal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <form>
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="ModalCenterTitle">Danh sách học viên làm bài kiểm tra</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div class="table-responsive">
+                                    <table id="examDetailTable" class="table table-bordered" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center">STT</th>
+                                                <th class="text-center">Họ tên</th>
+                                                <th class="text-center">Thời gian làm bài</th>
+                                                <th class="text-center">Trạng thái</th>
+                                                <th class="text-center">Điểm</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="scoreModal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <form>
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="ModalCenterTitle">Bảng điểm chi tiết - <span name="student"></span></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div class="table-responsive">
+                                    <table id="scoreDetailTable" class="table table-bordered" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center align-middle" rowspan="2">STT</th>
+                                                <th class="text-center align-middle" rowspan="2">Tên bài thi</th>
+                                                <th class="text-center align-middle" rowspan="2">Ngày làm bài</th>
+                                                <th class="text-center" colspan="2">Điểm</th>
+                                                <th class="text-center align-middle" rowspan="2">Hệ số</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-center">Thành phần</th>
+                                                <th class="text-center">Cuối kì</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    var chapters = [];
+    var lessons = [];
+    var scheduleBody = $('#scheduleTable tbody');
+    var membersBody = $('#membersTable tbody');
+    var examBody = $('#examTable tbody');
+    var scoreBody = $('#scoreTable tbody');
+    var examDetailBody = $('#examDetailTable tbody');
+    var scoreDetailBody = $('#scoreDetailTable tbody');
+    var scheduleCounter = 0;
+    var memberCounter = 0;
+
+    function LoadSchedule() {
+        chapters = [];
+        lessons = [];
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetList", "LessonSchedule")',
+            data: {ClassID: "@currentClass.ID"},
+            dataType:"json",
+            success: function (data) {
+                scheduleCounter = 1;
+                scheduleBody.html("");
+
+                chapters = data.Data.Chapters;
+                lessons = data.Data.Lessons;
+                //renderChapter("0");
+
+                if (chapters.length > 0) {
+                    for (i = 0; i < chapters.length; ++i) {
+                        var chapter = chapters[i];
+                        var parent = scheduleBody;
+
+                        var chapLV = 0;
+                        if (chapter.ParentID == null) {
+                            chapter.ParentID = "0";
+                        }
+
+                        if (chapter.ParentID != "0")
+                        {
+                            parent = scheduleBody.find("tr[chapid=" + chapter.ParentID +"]");
+                        }
+
+                        var chapContent = $("<tr>", {"chapid":chapter.ID, "pid": chapter.ParentID, "clv": chapLV});
+                        chapContent.append("<td colspan='6'><b>" + chapter.Name + "</b>");
+
+                        if (chapter.ParentID === "0") {
+                            scheduleBody.append(chapContent);
+                        }
+                        else
+                        {
+                            var siblings = parent.find("tr[pid=" + chapter.ParentID + "]");
+
+                            if (siblings.length > 0) {
+                                $(siblings).last().after(chapContent);
+                            }
+                            else
+                            {
+                                parent.after(chapContent);
+                            }
+                        }
+                    }
+                }
+
+
+                if (lessons.length > 0) {
+                    for (j = lessons.length-1; j >= 0; j--) {
+                        var item = lessons[j];
+                        var active = "";
+                        if (item.IsActive) {
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("unpublish", "LessonSchedule")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                        } else {
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                        }
+
+                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
+                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
+
+                        if (item.ChapterID == null) {
+                            scheduleBody.append("<tr lid=\"" + item.ID + "\" cid=\"" + item.ScheduleID + "\">" +
+                            "<td><a class='links' href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@currentClass.ID'>" + item.Title + "</a></td>" +
+                            "<td>---</td>" +
+                            "<td dvalue=\"" + item.StartDate + "\" class='startdate'><span>" + startdate + "</span></td>" +
+                            "<td dvalue=\"" + item.EndDate + "\" class='enddate'><span>" + enddate + "</span></td>" + active +
+                            "<td><button onclick=\"EditSchedule('" + item.ScheduleID + "')\" type='button' class='btn btn-primary action edit' data-toggle='tooltip' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +"</td > " +
+                            "</tr>"
+                            );
+                        }
+                        else
+                        {
+                            scheduleBody.find("tr[chapid=" + item.ChapterID + "]").after("<tr lid=\"" + item.ID + "\" cid=\"" + item.ScheduleID + "\">" +
+                            "<td><a class='links' href='@Url.Action("Detail", "Lesson")/" + item.ID + "?ClassID=@currentClass.ID'>" + item.Title + "</a></td>" +
+                            "<td>" + (item.Description==null?"":item.Description) + "</td>" +
+                            "<td dvalue=\"" + item.StartDate + "\" class='startdate text-center'><span>" + startdate + "</span></td>" +
+                            "<td dvalue=\"" + item.EndDate + "\" class='enddate text-center'><span>" + enddate + "</span></td>" + active +
+                            "<td class='text-center'><button onclick=\"EditSchedule('" + item.ScheduleID + "')\" type='button' class='btn btn-primary action edit' data-toggle='tooltip' data-placement='top' title='Sửa'> <i class='fas fa-edit'></i> </button>" +
+                            "</td > " +
+                            "</tr>"
+                            );
+                        }
+                    }
+                }
+                $('.btn').tooltip({ trigger:'hover' });
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    };
+
+    function LoadMembers() {
+        members = [];
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetListMember", "Class")',
+            data: {ID: "@currentClass.ID"},
+            dataType:"json",
+            success: function (data) {
+                memberCounter = 1;
+                membersBody.html("");
+
+                teacher = data.Data.Teacher;
+
+                $('#TeacherName').text(teacher.FullName);
+
+                members = data.Data.Students;
+                //renderChapter("0");
+
+                if (members.length > 0) {
+                    for (j = 0; j < members.length; j++) {
+                        console.log(members[j]);
+                        var student = members[j];
+
+                        var date = $.datepicker.formatDate('dd/mm/yy', new Date(student.DateBorn));
+                        var lastdate = $.datepicker.formatDate('dd/mm/yy', new Date(student.LastJoinDate));
+
+                        membersBody.append("<tr>" +
+                                "<td>" + (j + 1) + "</td>" +
+                                "<td>" + student.FullName + "</td>" +
+                                "<td>" + student.Email + "</td>" +
+                                "<td>" + (student.Phone == null ?"" : student.Phone)  + "</td>" +
+                                "<td>" + (student.Class == null ?"" : student.Class[0])  + "</td>" +
+                                "<td>" + date + "</td>" +
+                                "<td>" +
+                                    "<div class=\"progress\">" +
+                                        "<div class=\"progress-bar bg-success\" role=\"progressbar\" style=\"width: 0%\" aria-valuenow=\"0\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div>" +
+                                    "</div>" +
+                                "</td>" +
+                                "<td>" + lastdate + "</td>" +
+                                "<td>Đang học</td>" +
+                            "</tr>"
+                        );
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    }
+
+    function LoadExam() {
+        chapters = [];
+        lessons = [];
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetExamList", "LessonSchedule")',
+            data: {ClassID: "@currentClass.ID"},
+            dataType:"json",
+            success: function (data) {
+                examBody.html("");
+
+                lessons = data.Data.Lessons;
+                //renderChapter("0");
+
+                if (lessons.length > 0) {
+                    for (j = 0; j < lessons.length; j++) {
+                        var item = lessons[j];
+
+                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
+                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
+
+                        examBody.append("<tr lid=\"" + item.ID + "\">" +
+                        "<td><a class='links' data-toggle=\"modal\" data-target=\"#examModal\" onclick=\"LoadExamDetail('" + item.ID + "')\" href=\"javascript:void(0)\">" + item.Title + "</td>" +
+                        "<td>" + (item.Description==null?"":item.Description) + "</td>" +
+                        "<td dvalue=\"" + item.StartDate + "\" class='startdate text-center'><span>" + startdate + "</span></td>" +
+                        "<td dvalue=\"" + item.EndDate + "\" class='enddate text-center'><span>" + enddate + "</span></td>" +
+                        "<td class='text-center'>" + item.StudentJoins +  "</td > " +
+                        "</tr>"
+                        );
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    };
+
+    function ImportSV(id, formName) {
+        var form = document.querySelector('form[name="' + formName + '"]');
+        var input = form.querySelector('input[name="ID"]');
+        if (input == null) {
+            form.innerHTML += '<input type="hidden" name="ID" value="' + id + '" />';
+        } else {
+            input.value = id;
+        }
+    }
+
+    $(document).ready(function () {
+        LoadSchedule();
+    });
+
+    function EditSchedule(id) {
+
+        var wrapper = $("[cid=" + id + "]");
+
+        var startdateHolder = wrapper.find('.startdate');
+        var enddateHolder = wrapper.find('.enddate');
+
+
+        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(startdateHolder.attr('dvalue')));
+        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(enddateHolder.attr('dvalue')));
+
+        startdateHolder.find('span').hide();
+        startdateHolder.append($("<input>", {"type":"text", "class":"date-input form-control"})).append($("<input>", {"type":"hidden", "id" : id + "_startdate", "value":startdateHolder.attr('dvalue')}));
+        enddateHolder.find('span').hide();
+        enddateHolder.append($("<input>", {"type":"text", "class":"date-input form-control"}))
+            .append($("<input>", {"type":"hidden", "id":id + "_enddate", "value": enddateHolder.attr('dvalue')}));
+
+
+
+        wrapper.find(".edit").after("<button onclick=\"CancelEditSchedule('" + id + "')\" type='button' class='btn btn-primary action undo' data-toggle='tooltip' data-placement='top' title='Hủy'> <i class='fas fa-undo'></i> </button>")
+            .after("<button onclick=\"SaveSchedule('" + id + "')\" type='button' class='btn btn-primary action save' data-toggle='tooltip' data-placement='top' title='Lưu'> <i class='fas fa-save'></i> </button>")
+        wrapper.find(".edit").hide()
+
+        $(startdateHolder).find(".date-input").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'dd/mm/yy',
+                altField: '#' + id + "_startdate",
+                altFormat: 'yy-mm-dd'
+        }).val(startdate);
+
+        $(enddateHolder).find(".date-input").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'dd/mm/yy',
+                altField: '#' + id + "_enddate",
+                altFormat: 'yy-mm-dd'
+        }).val(enddate);
+
+    }
+
+    function CancelEditSchedule(id) {
+        var wrapper = $("[cid=" + id + "]");
+        var startdateHolder = wrapper.find('.startdate');
+        var enddateHolder = wrapper.find('.enddate');
+        startdateHolder.find(':visible').remove();
+        enddateHolder.find(':visible').remove();
+        startdateHolder.find(':not(:visible)').show();
+        enddateHolder.find(':not(:visible)').show();
+        wrapper.find('.action:visible').remove();
+        wrapper.find('.action:not(:visible)').show();
+    }
+
+    function SaveSchedule(id) {
+        var wrapper = $("[cid=" + id + "]");
+        var startdate = wrapper.find($('#' + id + "_startdate")).val();
+        var enddate = wrapper.find($('#' + id + "_enddate")).val();
+        //Send request here
+
+         $.ajax({
+            type: "POST",
+            url: '@Url.Action("UpdateSchedule", "LessonSchedule")',
+            data: {ID: id, StartDate: startdate, EndDate: enddate},
+            dataType:"json",
+            success: function (data) {
+                if (data.Error == null) {
+                    wrapper.find(".startdate").attr("dvalue", startdate);
+                    wrapper.find(".startdate span").text($.datepicker.formatDate('dd/mm/yy', new Date(startdate)));
+                    wrapper.find(".enddate").attr("dvalue", enddate);
+                    wrapper.find(".enddate span").text($.datepicker.formatDate('dd/mm/yy', new Date(enddate)));
+                    CancelEditSchedule(id);
+                }
+                else {
+                    alert(data.Error);
+                }
+            },
+            error: function() {
+                alert("Có lỗi, hãy thực hiện lại");
+            }
+        });
+    }
+
+    function LoadExamDetail(id) {
+         $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetListStudents", "Exam")',
+            data: {ID: id, ClassID: '@currentClass.ID'},
+            dataType:"json",
+            success: function (data) {
+                examDetailBody.html("");
+
+                lessons = data.Data.Lessons;
+                //renderChapter("0");
+
+                if (data.Data.length > 0) {
+                    for (j = 0; j < data.Data.length; j++) {
+                        var item = data.Data[j];
+
+                        var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.Created));
+
+                        examDetailBody.append("<tr>" +
+                        "<td class='text-center'>" + (j + 1) + "</td>" +
+                        "<td class='text-center'><a href=\"@Url.Action("Detail", "Exam")/" + item.ID + "\" target=\"_blank\">" + item.StudentName + "</a></td>" +
+                        "<td class='text-center'><span>" + date + "</span></td>" +
+                        "<td class='text-center'>" + (item.Marked ? "Đã chấm điểm" : (item.Status ? "Chờ chấm điểm":"Đang làm bài"))  +  "</td > " +
+                        "<td class='text-center'>" + ((item.Marked || item.Status) ? (item.Point + "/" + item.MaxPoint) : "---")  +  "</td > " +
+                        "</tr>"
+                        );
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    }
+
+    function LoadScoreBoard(){
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetClassScores", "Score")',
+            data: {ClassID: "@currentClass.ID"},
+            dataType:"json",
+            success: function (data) {
+                scoreBody.html("");
+
+                items = data.Data;
+
+                if (items.length > 0) {
+                    for (j = 0; j < items.length; j++) {
+                        var item = items[j];
+
+                        scoreBody.append("<tr>" +
+                                    "<td class='text-center'>" + (j + 1) + "</td>" +
+                                    "<td class='text-center'><a class='links' data-toggle=\"modal\" data-target=\"#scoreModal\" onclick='LoadBoardDetail(\"" + item.StudentID + "\",\"@currentClass.ID\")'  href=\"javascript:void(0)\">" + item.StudentName + "</a></td>" +
+                                    "<td class='text-center'>" + item.AvgPartial + "</td>" +
+                                    "<td class='text-center'>" + item.AvgEnd + "</td>" +
+                                    "<td class='text-center'>" + item.AvgScore + "</td>" +
+                                "</tr>"
+                        );
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    }
+
+    function LoadBoardDetail(StudentID, ClassID)
+    {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetStudentScores", "Score")',
+            data: {ClassID: ClassID, StudentID: StudentID},
+            dataType:"json",
+            success: function (data) {
+                scoreDetailBody.html("");
+
+                items = data.Data;
+
+                var sum = 0;
+                var count = 0;
+                var studentname = "";
+                if (items.length > 0) {
+                    for (j = 0; j < items.length; j++) {
+                        var item = items[j];
+                        sum += item.Point * item.Multiple;
+                        count += item.Multiple;
+                        var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.Updated));
+                        scoreDetailBody.append("<tr>" +
+                                    "<td class='text-center'>" + (j + 1) + "</td>" +
+                                    "<td class='text-center'><a href=\"@Url.Action("Detail", "Exam")/" + item.ExamID + "\" target=\"_blank\">" + item.LessonName + "</a></td>" +
+                                    "<td class='text-center'>" + date + "</td>" +
+                                    "<td class='text-center'>" + (item.ScoreType == "@BaseCustomerEntity.Database.LESSON_ETYPE.PARTIAL" ? item.Point : "") + "</td>" +
+                                    "<td class='text-center'>" + (item.ScoreType == "@BaseCustomerEntity.Database.LESSON_ETYPE.END" ?item.Point : "") + "</td>" +
+                                    "<td class='text-center'>" + item.Multiple + "</td>" +
+                                "</tr>"
+                        );
+                        studentname = item.StudentName;
+                    }
+
+                    scoreDetailBody.append("<tr>" +
+                                                "<td class='text-right pr-2' colspan='3'>Điểm TB</td>" +
+                                                "<td class='text-center' id='avgScore' colspan='2'>" + (count > 0 ? sum / count : "0") +"</td>" +
+                                                "<td class='text-center'>---</td>" +
+                                            "</tr>");
+                    $("#scoreModal span[name=student]").text(studentname);
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    }
+
+</script>
+

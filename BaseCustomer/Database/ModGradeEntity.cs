@@ -33,9 +33,9 @@ namespace BaseCustomerEntity.Database
     }
     public class ModGradeService : ServiceBase<ModGradeEntity>
     {
-        public ModGradeService(IConfiguration config) : base(config, "ModGrades", "VES")
+        public ModGradeService(IConfiguration config) : base(config, "ModGrades", config.GetSection("dbName:Publisher").Value)
         {
-
+           
         }
 
         public ModGradeEntity GetItemByCode(string code)

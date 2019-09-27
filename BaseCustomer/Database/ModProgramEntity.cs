@@ -36,7 +36,7 @@ namespace BaseCustomerEntity.Database
     }
     public class ModProgramService : ServiceBase<ModProgramEntity>
     {
-        public ModProgramService(IConfiguration config) : base(config, "ModPrograms", "VES")
+        public ModProgramService(IConfiguration config) : base(config, "ModPrograms", config.GetSection("dbName:Publisher").Value)
         {
 
         }
