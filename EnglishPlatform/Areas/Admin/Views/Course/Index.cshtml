@@ -124,7 +124,7 @@
                         <div class="form-group col-md-4">
                             <label for="staticText" class="col-form-label">Môn học:</label>
                             <select name="SubjectID" class="form-control" onchange="LoadGradeInput(this)" required>
-                                <option value="">--- Chọn cấp độ --- </option>
+                                <option value="">--- Chọn môn học --- </option>
                                 @{
                                     for (int i = 0; listSubject != null && i < listSubject.Count; i++)
                                     {
@@ -299,9 +299,9 @@
                 document.location = document.location;
             }
             //hideModal();
-            
+
         }
-        else 
+        else
         {
             var searchText = $("#searchText").val();
             var startDate = $("#startDate_sort").val();

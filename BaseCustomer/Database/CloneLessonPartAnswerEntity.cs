@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace BaseCustomerEntity.Database
 {
@@ -17,7 +18,19 @@ namespace BaseCustomerEntity.Database
     {
         public CloneLessonPartAnswerService(IConfiguration config) : base(config)
         {
+            var indexs = new List<CreateIndexModel<CloneLessonPartAnswerEntity>>
+            {
+                //CourseID_1
+                new CreateIndexModel<CloneLessonPartAnswerEntity>(
+                    new IndexKeysDefinitionBuilder<CloneLessonPartAnswerEntity>()
+                    .Ascending(t => t.CourseID)),
+                //ParentID_1
+                new CreateIndexModel<CloneLessonPartAnswerEntity>(
+                    new IndexKeysDefinitionBuilder<CloneLessonPartAnswerEntity>()
+                    .Ascending(t=> t.ParentID))
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
     }
 }

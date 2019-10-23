@@ -401,40 +401,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-                var item = _service.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
-                if (item == null) return new JsonResult(new Dictionary<string, object>
-                            {
-                                { "Data", null },
-                                {"Error", "Item Not Found" }
-                            });
-
-                var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID
+                //var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID
                 //&& o.CreateUser == UserID TODO:remove later
-                ).SingleOrDefault(); //Chỉ remove được các part thuộc lesson do mình up
+                //).FirstOrDefault(); //Chỉ remove được các part thuộc lesson do mình up
+                //TODO: Check for safety later
 
-                if (parentLesson != null)
-                {
-                    //var media = _LessonExtendService.CreateQuery().Find(o => o.LessonPartID == item.ID).ToList();
-                    //if (media != null && media.Count > 0)
-                    //{
-                    //    _fileProcess.DeleteFiles(media.Select(o => o.OriginalFile).ToList());
-                    //    await _LessonExtendService.RemoveRangeAsync(media.Select(o => o.ID));
-                    //}
-                    RemoveLessonPart(ID);
+                await RemoveLessonPart(ID);
 
-                    return new JsonResult(new Dictionary<string, object>
+                return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", "Remove OK" },
                                 {"Error", null }
                             });
-                }
-                else
-                    return new JsonResult(new Dictionary<string, object>
-                            {
-                                { "Data", null },
-                                {"Error", "Orphan item" }
-                            });
-
 
             }
             catch (Exception ex)
@@ -447,17 +425,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private void RemoveLessonPart(string ID)
+        private async Task RemoveLessonPart(string ID)
         {
             try
             {
                 var item = _service.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
                 if (item == null) return;
 
-                var questions = _cloneQuestionService.CreateQuery().Find(o => o.ParentID == ID).ToList();
-                for (int i = 0; questions != null && i < questions.Count; i++)
-                    RemoveQuestion(questions[i].ID);
-                _service.Remove(ID);
+                var questionIds = _cloneQuestionService.CreateQuery().Find(o => o.ParentID == ID).Project(t => t.ID).ToList();
+                for (int i = 0; questionIds != null && i < questionIds.Count; i++)
+                    await RemoveQuestion(questionIds[i]);
+                await _service.RemoveAsync(ID);
             }
             catch (Exception ex)
             {
@@ -465,28 +443,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private void RemoveQuestion(string ID)
+        private async Task RemoveQuestion(string ID)
         {
             try
             {
-                var item = _cloneQuestionService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                var item = _cloneQuestionService.CreateQuery().Find(o => o.ID == ID).Project(t => t.ID).FirstOrDefault();
                 if (item == null) return;
-                _cloneAnswerService.CreateQuery().DeleteMany(o => o.ParentID == ID);
-                _cloneQuestionService.Remove(ID);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        private void RemoveAnswer(string ID)
-        {
-            try
-            {
-                var item = _cloneAnswerService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
-                if (item == null) return;
-                _cloneAnswerService.Remove(ID);
+                await _cloneAnswerService.CreateQuery().DeleteManyAsync(o => o.ParentID == ID);
+                await _cloneQuestionService.RemoveAsync(ID);
             }
             catch (Exception ex)
             {

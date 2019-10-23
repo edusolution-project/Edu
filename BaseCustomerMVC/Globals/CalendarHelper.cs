@@ -132,7 +132,7 @@ namespace BaseCustomerMVC.Globals
             {
                 Created = DateTime.Now,
                 CreateUser = userCreate,
-                EndDate = item.EndDate,
+                EndDate = item.StartDate,
                 StartDate = item.StartDate,
                 GroupID = item.ClassID,
                 Title = lesson.Title,

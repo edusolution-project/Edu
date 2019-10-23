@@ -7,6 +7,8 @@
     width: 200px;
     z-index: 3;
     height: auto !important;
+    transition: width 0.5s;
+    transition-timing-function: ease;
 
     span {
         margin-left: 50px;
@@ -44,8 +46,12 @@
         background-color: #FFF;
 
         &.home {
-            background-color: #000054;
+            background-image: url(../img/logo.jpg);
+            background-size: auto 52px;
+            background-color: #FFF;
             height: 60px;
+            filter: none;
+            background-position: 0 3px;
         }
 
         &.profile {

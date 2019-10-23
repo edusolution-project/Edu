@@ -27,7 +27,15 @@ namespace BaseCustomerEntity.Database
     {
         public AccountLogService(IConfiguration configuration) : base(configuration)
         {
+            var indexs = new List<CreateIndexModel<AccountLogEntity>>
+            {
+                //Token_1
+                new CreateIndexModel<AccountLogEntity>(
+                    new IndexKeysDefinitionBuilder<AccountLogEntity>()
+                    .Ascending(t => t.Token))
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
         public AccountLogEntity GetItemByToken(string token)
         {

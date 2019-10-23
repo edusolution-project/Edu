@@ -20,55 +20,52 @@
         <div class="sub-sidebar">
             @await Html.PartialAsync("_subSidebarTeacher")
         </div>
-
         <div class="main-content">
             <div class="row">
                 <div class="col-md-10">
                     <div class="intro-wrapper content-block">
-                        <div class="block-title row mr-0">
-                            <h2 class="col-md-11">@currentClass.Name</h2><button class="btn btn-info col-md-1" onclick="editClassInfo()" data-toggle="modal" data-target="#infoModal">Cập nhật</button>
-                        </div>
-                        <div class="course-info">
+                        <div class="block-title">
+                            <h2>@currentClass.Name</h2>
 
                             @if (!String.IsNullOrEmpty(currentClass.Image))
                             {
-                            <img src="@currentClass.Image" title="@currentClass.Name" class="courseImg" />
+                                <img src="@currentClass.Image" title="@currentClass.Name" class="courseImg" />
                             }
                             @if (!String.IsNullOrEmpty(currentClass.Syllabus))
                             {
-                            <div class="block-title mt-3">
-                                <h2>Đề cương môn học</h2>
-                            </div>
-                            <div class="course-syllabus">
-                                @Html.Raw(currentClass.Syllabus)
-                            </div>
+                                <div class="block-title mt-3">
+                                    <h2>Đề cương môn học</h2>
+                                </div>
+                                <div class="course-syllabus">
+                                    @Html.Raw(currentClass.Syllabus)
+                                </div>
                             }
                             @if (!String.IsNullOrEmpty(currentClass.Modules))
                             {
-                            <div class="block-title mt-3">
-                                <h2>Nội dung môn học</h2>
-                            </div>
-                            <div class="course-modules">
-                                @Html.Raw(currentClass.Modules)
-                            </div>
+                                <div class="block-title mt-3">
+                                    <h2>Nội dung môn học</h2>
+                                </div>
+                                <div class="course-modules">
+                                    @Html.Raw(currentClass.Modules)
+                                </div>
                             }
                             @if (!String.IsNullOrEmpty(currentClass.LearningOutcomes))
                             {
-                            <div class="block-title mt-3">
-                                <h2>Mục tiêu đầu ra</h2>
-                            </div>
-                            <div class="course-outcomes">
-                                @Html.Raw(currentClass.LearningOutcomes)
-                            </div>
+                                <div class="block-title mt-3">
+                                    <h2>Mục tiêu đầu ra</h2>
+                                </div>
+                                <div class="course-outcomes">
+                                    @Html.Raw(currentClass.LearningOutcomes)
+                                </div>
                             }
                             @if (!String.IsNullOrEmpty(currentClass.References))
                             {
-                            <div class="block-title mt-3">
-                                <h2>Tài liệu tham khảo</h2>
-                            </div>
-                            <div class="course-references">
-                                @Html.Raw(currentClass.References)
-                            </div>
+                                <div class="block-title mt-3">
+                                    <h2>Tài liệu tham khảo</h2>
+                                </div>
+                                <div class="course-references">
+                                    @Html.Raw(currentClass.References)
+                                </div>
                             }
                         </div>
                     </div>
@@ -89,7 +86,7 @@
                                     </th>
                                     <th style="width:40%">
                                         <h3>
-                                            Hoạt động đánh giá
+                                            Hoạt động
                                         </h3>
                                     </th>
                                 </tr>
@@ -127,39 +124,40 @@
     </div>
 </div>
 
-<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="chapterModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="@Url.Action("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="ID" />
-                    <input type="hidden" name="ClassID" value="@currentClass.ID" />
-                    <input type="hidden" name="ParentID" value="" />
+@section Modals{
+    <div class="modal fade edit-modal" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="chapterModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="@Url.Action("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="ID" />
+                        <input type="hidden" name="ClassID" value="@currentClass.ID" />
+                        <input type="hidden" name="ParentID" value="" />
 
-                    <div class="form-group">
-                        <label class="col-form-label">Tên chương mục:</label>
-                        <input type="text" class="form-control" name="Name" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Mô tả:</label>
-                        <textarea class="form-control" name="Description" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("UpdateChapterInfo","Class")','update' , LoadChapters)">Lưu</button>
+                        <div class="form-group">
+                            <label class="col-form-label">Tên chương mục:</label>
+                            <input type="text" class="form-control" name="Name" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Mô tả:</label>
+                            <textarea class="form-control" name="Description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("UpdateChapterInfo","Class")','update' , LoadChapters)">Lưu</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
+}
 
 @section Scripts {
     <script>

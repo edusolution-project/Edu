@@ -477,8 +477,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var questions = _questionService.CreateQuery().Find(o => o.ParentID == ID).ToList();
                 for (int i = 0; questions != null && i < questions.Count; i++)
-                    RemoveQuestion(questions[i].ID);
-                _lessonPartService.Remove(ID);
+                    await RemoveQuestion(questions[i].ID);
+                await _lessonPartService.RemoveAsync(ID);
             }
             catch (Exception ex)
             {
@@ -486,34 +486,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private void RemoveQuestion(string ID)
+        private async Task RemoveQuestion(string ID)
         {
             try
             {
-                var item = _questionService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
-                if (item == null) return;
-                _answerService.CreateQuery().DeleteMany(o => o.ParentID == ID);
-                _questionService.Remove(ID);
+                //var item = _questionService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                //if (item == null) return;
+                await _answerService.CreateQuery().DeleteManyAsync(o => o.ParentID == ID);
+                await _questionService.RemoveAsync(ID);
             }
             catch (Exception ex)
             {
                 throw ex;
             }
         }
-
-        private void RemoveAnswer(string ID)
-        {
-            try
-            {
-                var item = _answerService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
-                if (item == null) return;
-                _answerService.Remove(ID);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
     }
 }

@@ -55,7 +55,23 @@ namespace BaseCustomerEntity.Database
     {
         public ClassService(IConfiguration config) : base(config)
         {
+            var indexs = new List<CreateIndexModel<ClassEntity>>
+            {
+                //SubjectID_1_GradeID_1_TeacherID_1
+                new CreateIndexModel<ClassEntity>(
+                    new IndexKeysDefinitionBuilder<ClassEntity>()
+                    .Ascending(t => t.SubjectID)
+                    .Ascending(t=> t.GradeID)
+                    .Ascending(t=> t.TeacherID)),
+                //TeacherID_1SubjectID_1_GradeID_1_
+                new CreateIndexModel<ClassEntity>(
+                    new IndexKeysDefinitionBuilder<ClassEntity>()
+                    .Ascending(t=> t.TeacherID)
+                    .Ascending(t => t.SubjectID)
+                    .Ascending(t=> t.GradeID))
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
     }
 }

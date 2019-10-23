@@ -116,11 +116,11 @@ namespace BaseCustomerMVC.Controllers.Student
             if (oldItem != null)
             {
                 item.Time = DateTime.Now;
-                item.State = 0;
+                item.ViewCount = 0;
             }
             else
             {
-                item.State = oldItem.Count;
+                item.ViewCount = oldItem.Count;
                 item.Time = DateTime.Now;
             }
             _service.CreateOrUpdate(item);

@@ -39,7 +39,6 @@ namespace BaseCustomerEntity.Database
     {
         public ModCourseService(IConfiguration config) : base(config, "ModCourses", config.GetSection("dbName:Publisher").Value)
         {
-            
         }
 
         public object GetItemByCode(string code)

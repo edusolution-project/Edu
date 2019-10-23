@@ -54,8 +54,16 @@
                 </a>
             </li>
 
-            <li class="sidebar-item course" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')" title="Course">
-                <a class="nav-link p-0">
+            <li class="sidebar-item course" 
+                @*data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')"*@ 
+                title="Course">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Course" )">
+                    <i></i>
+                    <span>Danh sách môn học</span>
+                </a>
+
+
+                @*<a class="nav-link p-0">
                     <i></i>
                     <span>Danh sách khóa học</span>
                 </a>
@@ -64,7 +72,6 @@
                         <h4>Lớp học</h4>
                         <hr role="presentation">
                         <ul class="action-wrapper">
-                          
                         </ul>
                         <hr role="presentation">
 
@@ -72,7 +79,7 @@
                             Xem tất cả các môn
                         </a>
                     </div>
-                </div>
+                </div>*@
             </li>
 
             <li class="sidebar-item calendar">
@@ -115,7 +122,7 @@
         $(".right-content").click(function () {
             closeExtra();
         });
-        getCourseList();
+        //getCourseList();
     });
 
     function getCourseList() {

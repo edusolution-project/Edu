@@ -2,7 +2,7 @@
 
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
-    ViewData["Title"] = "Danh sách môn học";
+    ViewData["Title"] = "Khóa học của tôi";
 }
 
 <script>
@@ -15,17 +15,17 @@
     </div>
     <div class="main-container">
         <div class="active-region">
-            <div class="block-title">
-                <h2>Các môn đang học</h2>
+            <div class="block-title pt-2 pb-2">
+                <h2>Khóa học đang diễn ra</h2>
             </div>
             <table id="activeCourse" class="table" width="100%" cellspacing="0">
                 <thead>
-                    <tr>
-                        <th></th>
-                        <th style="width:27%">Môn học</th>
-                        <th style="width:27%">Học kỳ</th>
-                        <th style="width:20%">Trạng thái</th>
-                        <th style="width:20%" class="text-center">Kết quả</th>
+                    <tr class="text-center">
+                        <th class="text-center">STT</th>
+                        <th class="text-left">Môn</th>
+                        <th class="text-left">Khóa học</th>
+                        <th class="text-center">Thời gian</th>
+                        <th class="text-center">Bài học hoàn thành</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -38,11 +38,11 @@
             <table id="pastCourse" class="table" width="100%" cellspacing="0">
                 <thead>
                     <tr>
-                        <th></th>
-                        <th style="width:27%">Môn học</th>
-                        <th style="width:27%">Học kỳ</th>
-                        <th style="width:20%">Trạng thái</th>
-                        <th style="width:20%" class="text-center">Kết quả</th>
+                        <th class="text-center">STT</th>
+                        <th class="text-left">Môn</th>
+                        <th class="text-left">Khóa học</th>
+                        <th class="text-center">Thời gian</th>
+                        <th class="text-center">Kết quả</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -53,6 +53,7 @@
 
 @section Scripts{
     <script>
+
         function LoadData() {
         $.ajax({
             type: "POST",
@@ -72,19 +73,26 @@
 
                         var startdate = moment(item.StartDate).format('DD/MM/YYYY');
                         var enddate = moment(item.EndDate).format('DD/MM/YYYY');
+
+                        var totalLesson = 1;
+                        var completeLesson = 0;
+                        if (item.Progress != null) {
+                            completeLesson = item.Progress.CompletedLessons.length;
+                            totalLesson = item.Progress.TotalLessons;
+                        }
+
                         var today = new Date();
-
                         var past = moment(today).diff(moment(item.EndDate), 'days') > 0;
-
                         var count = past ? ++pastcounter : ++counter;
 
                         var row ="<tr>" +
                             "<td class='text-center'>"+ count +"</td>"+
-                            "<td><a href='"+'@Url.Action("Detail", "Course")' + "/" + item.ID + "' class='action-link'>" + item.SubjectName + "</a></td>" +
-                            "<td>" + item.Name + "</td>" +
+                            "<td><a href='"+'@Url.Action("Detail", "Course")' + "/" + item.ID + "' >" + item.SubjectName + "</a></td>" +
+                            "<td><a href='"+'@Url.Action("Detail", "Course")' + "/" + item.ID + "' >" + item.Name + "</a></td>" +
                             //"<td>" + item.TeacherName + "</td>" +
-                            "<td class='text-center'>" + startdate + " - " + enddate+ "</td>" +
-                            "</tr>";
+                            "<td class='text-center'>" + startdate + " - " + enddate + "</td>" +
+                             "<td class='text-center'>" + Math.ceil(completeLesson * 100 / totalLesson) + "%</td>"+
+                        "</tr>";
                         if (past) {
                             $('.past-region').show();
                              pastBody.append(row);
@@ -103,4 +111,5 @@
 
     LoadData();
 
-    </script>}
+    </script>
+}

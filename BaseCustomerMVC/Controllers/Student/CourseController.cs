@@ -35,6 +35,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
         private readonly StudentService _studentService;
         private readonly ChapterService _chapterService;
+        private readonly ChapterProgressService _chapterProgressService;
+        private readonly ChapterExtendService _chapterExtendService;
         private readonly LearningHistoryService _learningHistoryService;
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
@@ -54,6 +56,8 @@ namespace BaseCustomerMVC.Controllers.Student
             , GradeService gradeService
             , LessonService lessonService
             , ChapterService chapterService
+            , ChapterProgressService chapterProgressService
+            , ChapterExtendService chapterExtendService
             , LessonPartQuestionService lessonPartQuestionService
             , LessonPartAnswerService lessonPartAnswerService
             , LessonScheduleService lessonScheduleService
@@ -70,6 +74,8 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             _learningHistoryService = learningHistoryService;
             _chapterService = chapterService;
+            _chapterExtendService = chapterExtendService;
+            _chapterProgressService = chapterProgressService;
             _studentService = studentService;
             _examService = examService;
             _examDetailService = examDetailService;
@@ -137,12 +143,12 @@ namespace BaseCustomerMVC.Controllers.Student
                 SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                 GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "" : _gradeService.GetItemByID(o.GradeID).Name,
                 TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" : _teacherService.GetItemByID(o.TeacherID).FullName,
-                Progress = _progressService.GetItemByClassID(o.ID)
+                Progress = _progressService.GetItemByClassID(o.ID, userId)
             })).ToList();
 
             var respone = new Dictionary<string, object>
             {
-                { "Data", std},
+                { "Data", std },
                 { "Model", model }
             };
             return new JsonResult(respone);
@@ -313,6 +319,7 @@ namespace BaseCustomerMVC.Controllers.Student
             if (currentClass.Students.IndexOf(userId) < 0)
                 return RedirectToAction("Index");
             ViewBag.Class = currentClass;
+            ViewBag.UserID = userId;
             return View();
         }
 
@@ -355,6 +362,20 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
+        public IActionResult References(DefaultModel model, string id)
+        {
+            if (model == null) return null;
+            var currentClass = _service.GetItemByID(id);
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            if (currentClass.Students.IndexOf(userId) < 0)
+                return RedirectToAction("Index");
+            ViewBag.Class = currentClass;
+            return View();
+        }
+
+
         public IActionResult Discussions(DefaultModel model)
         {
             if (model == null) return null;
@@ -365,6 +386,54 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
+        [HttpPost]
+        public JsonResult GetMainChapters(string ID, string UserID)
+        {
+            try
+            {
+                var currentClass = _service.GetItemByID(ID);
+                if (currentClass == null)
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy lớp học" }
+                    });
+
+                var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == "0").ToList();
+                var chapterExtends = _chapterExtendService.Search(currentClass.ID);
+
+                var listProgress = new List<ChapterProgressViewModel>();
+
+                foreach (var chapter in chapters)
+                {
+                    var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
+                    var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, UserID);
+                    if (extend != null) chapter.Description = extend.Description;
+                    var viewModel = new MappingEntity<ChapterEntity, ChapterProgressViewModel>().AutoOrtherType(chapter, new ChapterProgressViewModel());
+                    if (progress != null)
+                    {
+                        viewModel.TotalLessons = progress.TotalLessons;
+                        viewModel.CompletedLessons = progress.CompletedLessons.Count;
+                        viewModel.LastDate = progress.LastDate;
+                        viewModel.LastLessonID = progress.LastLessonID;
+                    }
+                    listProgress.Add(viewModel);
+                }
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", listProgress }
+                };
+
+                return new JsonResult(response);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    { "Error", ex.Message }
+                });
+            }
+        }
 
 
     }

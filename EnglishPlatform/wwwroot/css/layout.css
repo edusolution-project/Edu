@@ -5,6 +5,9 @@
     color: #e60028;
     border-radius: 5px; }
 
+.btn:disabled {
+  background: #999; }
+
 .my-tooltips {
   filter: opacity(75); }
 
@@ -13,6 +16,9 @@
   color: #000; }
   .action-link:hover {
     text-decoration: underline; }
+
+.box-link:hover {
+  text-decoration: none; }
 
 table.no-border thead tr, table.no-border thead th {
   border: none !important; }
@@ -42,7 +48,14 @@ table.table-hover tbody tr:hover {
   background-color: #E5F2F8; }
 
 .right-content {
-  padding-bottom: 40px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /*transition: 0.3s ease-in;*/
+  /*transition-delay: 0.5s;*/
+  padding-bottom: 28px;
   /*position: fixed;
     top: 0;
     left: 0;
@@ -59,25 +72,32 @@ table.table-hover tbody tr:hover {
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden; }
-    .right-content .left-col .page-title h1, .right-content .left-col .page-title h2, .right-content .left-col .block-title h1, .right-content .left-col .block-title h2 {
-      color: #e60028;
-      font-weight: normal; }
-    .right-content .left-col .page-title h1, .right-content .left-col .block-title h1 {
-      font-size: 1.6rem;
-      text-transform: uppercase; }
-    .right-content .left-col .page-title h2, .right-content .left-col .block-title h2 {
-      font-size: 1.5rem; }
+    .right-content .left-col .page-title, .right-content .left-col .block-title {
+      /*h1 {
+                font-size: 1.2rem;
+                text-transform: none;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }*/ }
+      .right-content .left-col .page-title h1, .right-content .left-col .page-title h2, .right-content .left-col .block-title h1, .right-content .left-col .block-title h2 {
+        color: #e60028;
+        font-weight: 500;
+        font-size: 1.2rem;
+        margin-bottom: 0;
+        padding: .5rem 0; }
     .right-content .left-col .page-title {
       border-bottom: solid 1px #CCC;
       padding-bottom: 8px; }
       .right-content .left-col .page-title.row {
         margin: 0; }
     .right-content .left-col .main-container {
-      padding: 12px 0;
+      height: 100%;
       position: relative; }
       .right-content .left-col .main-container .content-block {
-        padding: 12px 0;
-        border-bottom: dashed 1px #CCC; }
+        border-bottom: dashed 1px #CCC;
+        margin-bottom: 12px; }
       .right-content .left-col .main-container .course-box {
         padding: 10px; }
         .right-content .left-col .main-container .course-box .course-item {
@@ -128,7 +148,7 @@ table.table-hover tbody tr:hover {
         width: 180px;
         margin-left: -10px;
         position: absolute;
-        top: 24px; }
+        /*top: 24px;*/ }
         .right-content .left-col .main-container .sub-sidebar ul {
           list-style: none;
           padding: 0; }
@@ -149,7 +169,8 @@ table.table-hover tbody tr:hover {
               .right-content .left-col .main-container .sub-sidebar ul li.active a {
                 color: #FFF; }
       .right-content .left-col .main-container .main-content {
-        min-height: 300px; }
+        min-height: 300px;
+        margin-top: 12px; }
         .sub-sidebar ~ .main-content {
           padding-left: 190px; }
         .right-content .left-col .main-container .main-content .intro-wrapper .courseImg {
@@ -251,10 +272,11 @@ table.table-hover tbody tr:hover {
   display: inline-block; }
 
 footer {
-  height: 40px;
-  line-height: 40px;
+  height: 28px;
+  line-height: 28px;
   text-align: center;
   z-index: 2 !important;
   filter: opacity(0.8);
   background-color: #004085;
-  color: white; }
+  color: white;
+  font-size: 13px; }

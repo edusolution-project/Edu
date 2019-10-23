@@ -42,7 +42,19 @@ namespace BaseCustomerEntity.Database
     {
         public LessonPartService(IConfiguration config) : base(config)
         {
+            var indexs = new List<CreateIndexModel<LessonPartEntity>>
+            {
+                //CourseID_1
+                new CreateIndexModel<LessonPartEntity>(
+                    new IndexKeysDefinitionBuilder<LessonPartEntity>()
+                    .Ascending(t => t.CourseID)),
+                //ParentID_1
+                new CreateIndexModel<LessonPartEntity>(
+                    new IndexKeysDefinitionBuilder<LessonPartEntity>()
+                    .Ascending(t=> t.ParentID))
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
     }
 }

@@ -27,5 +27,10 @@ namespace BaseCustomerMVC.Models
         public string SubjectName { get; set; }
         [JsonProperty("LastJoin")]
         public DateTime LastJoin { get; set; }
+        [JsonProperty("DoPoint")]
+        public double DoPoint { get; set; }
+        [JsonProperty("Tried")]
+        public long Tried { get; set; }
+
     }
 }

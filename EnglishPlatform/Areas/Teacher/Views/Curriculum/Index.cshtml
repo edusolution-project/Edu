@@ -24,7 +24,7 @@
 
     <!-- Begin Page Content -->
     <div class="main-container">
-        <div class="search-filter">
+        <div class="search-filter pt-3">
             <div class="form-row">
                 <div class="form-group row col-md-4">
                     <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
@@ -125,126 +125,128 @@
     </div>
     <!-- End of Main Content -->
 </div>
-<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Sửa thông tin</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="@Url.Action("CreateOrUpdate","Curriculum")" id="modal-body" name="cloneForm" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="ID" />
-                    <input type="hidden" name="CreateUser" value="@user" />
-                    <input type="hidden" name="IsActive" value="false" />
-                    <div class="form-group">
-                        <label class="col-form-label">Tên giáo trình mới:</label>
-                        <input type="text" class="form-control" name="Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Môn học:</label>
-                        <select name="SubjectID" class="form-control" onchange="ChangeGrade(this, 'select[name=GradeID]')">
-                            @{
-                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                {
-                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                }
 
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Cấp độ:</label>
-                        <select name="GradeID" class="form-control">
-                            @{
-                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                {
-                                    <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                }
+@section Modals{
 
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="message-text" class="col-form-label">Mô tả:</label>
-                        <textarea class="form-control" name="Description"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('cloneForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="cloneModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Tải giáo trình</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="@Url.Action("Clone","Curriculum")" id="modal-body" name="modalForm" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="CourseID" id="rootCourseID" />
-                    <input type="hidden" name="CreateUser" value="@user" />
-                    <input type="hidden" name="IsActive" value="false" />
-                    <div>
+    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Sửa thông tin</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="@Url.Action("CreateOrUpdate","Curriculum")" id="modal-body" name="cloneForm" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="ID" />
+                        <input type="hidden" name="CreateUser" value="@user" />
+                        <input type="hidden" name="IsActive" value="false" />
                         <div class="form-group">
-                            <label class="col-form-label">Giáo trình gốc:</label>
-                            <input type="text" class="form-control lock" id="rootCourseName" readonly>
+                            <label class="col-form-label">Tên giáo trình mới:</label>
+                            <input type="text" class="form-control" name="Name" required>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Tên giáo trình:</label>
-                        <input type="text" class="form-control" name="Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Môn học:</label>
-                        <select name="SubjectID" class="form-control" onchange="ChangeGrade(this, 'select[name=GradeID]')" required>
-                            <option value="">--- Chọn môn học ---</option>
-                            @{
-                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                {
-                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Cấp độ:</label>
-                        <select name="GradeID" class="form-control" required>
-                            <option value="">--- Chọn cấp độ ---</option>
-                            @{
-                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                {
-                                    <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID" style="display:none">@listGrade[i].Name</option>
-                                }
+                        <div class="form-group">
+                            <label class="col-form-label">Môn học:</label>
+                            <select name="SubjectID" class="form-control" onchange="ChangeGrade(this, 'select[name=GradeID]')">
+                                @{
+                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                    {
+                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                    }
 
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="message-text" class="col-form-label">Mô tả:</label>
-                        <textarea class="form-control" name="Description"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('modalForm', '@Url.Action("Clone","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Cấp độ:</label>
+                            <select name="GradeID" class="form-control">
+                                @{
+                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                    {
+                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
+                                    }
+
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="col-form-label">Mô tả:</label>
+                            <textarea class="form-control" name="Description"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('cloneForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
+    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="cloneModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Tải giáo trình</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="@Url.Action("Clone","Curriculum")" id="modal-body" name="modalForm" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="CourseID" id="rootCourseID" />
+                        <input type="hidden" name="CreateUser" value="@user" />
+                        <input type="hidden" name="IsActive" value="false" />
+                        <div>
+                            <div class="form-group">
+                                <label class="col-form-label">Giáo trình gốc:</label>
+                                <input type="text" class="form-control lock" id="rootCourseName" readonly>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Tên giáo trình:</label>
+                            <input type="text" class="form-control" name="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Môn học:</label>
+                            <select name="SubjectID" class="form-control" onchange="ChangeGrade(this, 'select[name=GradeID]')" required>
+                                <option value="">--- Chọn môn học ---</option>
+                                @{
+                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                    {
+                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Cấp độ:</label>
+                            <select name="GradeID" class="form-control" required>
+                                <option value="">--- Chọn cấp độ ---</option>
+                                @{
+                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                    {
+                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID" style="display:none">@listGrade[i].Name</option>
+                                    }
 
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="col-form-label">Mô tả:</label>
+                            <textarea class="form-control" name="Description"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('modalForm', '@Url.Action("Clone","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <script>
 

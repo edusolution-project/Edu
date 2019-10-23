@@ -2,6 +2,7 @@
 using Core_v2.Interfaces;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using System.Threading.Tasks;
 
 namespace Core_v2.Repositories
 {
@@ -118,6 +119,13 @@ namespace Core_v2.Repositories
                     return null;
                 }
             }
+        }
+
+        public async Task RemoveAsync(string ID)
+        {
+            if (string.IsNullOrEmpty(ID) || ID == "0")
+                return;
+            await _collection.DeleteManyAsync(t => t.ID == ID);
         }
     }
 }

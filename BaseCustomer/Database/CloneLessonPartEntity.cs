@@ -11,7 +11,7 @@ namespace BaseCustomerEntity.Database
     {
         [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
-        
+
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
 
@@ -21,7 +21,19 @@ namespace BaseCustomerEntity.Database
     {
         public CloneLessonPartService(IConfiguration config) : base(config)
         {
+            var indexs = new List<CreateIndexModel<CloneLessonPartEntity>>
+            {
+                //ClassID_1_ParentID_1
+                new CreateIndexModel<CloneLessonPartEntity>(
+                    new IndexKeysDefinitionBuilder<CloneLessonPartEntity>()
+                    .Ascending(t => t.ClassID).Ascending(t=> t.ParentID)),
+                //ParentID_1
+                new CreateIndexModel<CloneLessonPartEntity>(
+                    new IndexKeysDefinitionBuilder<CloneLessonPartEntity>()
+                    .Ascending(t=> t.ParentID))
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
     }
 }

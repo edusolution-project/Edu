@@ -494,22 +494,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             else
             {
+                var listID = new List<string> { model.ArrID };
                 if (model.ArrID.Contains(","))
-                {
-                    var filter = Builders<LessonScheduleEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == true);
-                    var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", false);
-                    var publish = _lessonScheduleService.Collection.UpdateMany(filter, update);
-                    return new JsonResult(publish);
-                }
-                else
-                {
-                    var filter = Builders<LessonScheduleEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == true);
-                    var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", false);
-                    var publish = _lessonScheduleService.Collection.UpdateMany(filter, update);
-                    return new JsonResult(publish);
-                }
+                    listID = model.ArrID.Split(',').ToList();
 
-
+                var filter = Builders<LessonScheduleEntity>.Filter.Where(o => listID.Contains(o.ID) && o.IsActive == true);
+                var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", false);
+                var publish = _lessonScheduleService.Collection.UpdateMany(filter, update);
+                return new JsonResult(publish);
             }
         }
 

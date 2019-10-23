@@ -300,7 +300,6 @@ var lessonService = {
         nav_bottom.append($('<div>', { "class": "col-md-8 text-center" }));
         nav_bottom.append($('<div>', { "class": "col-md-2 text-right" }).append(nexttab));
         lessonFooter.append(nav_bottom);
-
         lessonContent.append(lessonFooter);
 
 

@@ -32,7 +32,7 @@
                             @*
                                 <th>Giáo viên</th>*@
                             <th class="text-center">Học viên đăng ký</th>
-                            <th class="text-center">Thời gian</th>
+                            <th class="text-center">Ngày kết thúc</th>
                             @*
                                 <th>Trạng thái</th>*@
                         </tr>
@@ -40,7 +40,7 @@
                     <tbody></tbody>
                 </table>
                 <div id="placeholderActive">
-                    Đang nạp dữ liệu
+                    <i class="fas fa-circle-notch fa-spin"></i> Đang tải dữ liệu ...
                 </div>
             </div>
             <div class="past-region" style="display: none">
@@ -107,6 +107,9 @@
             data: { },
             dataType:"json",
             success: function (data) {
+
+                $('#placeholderActive').hide();
+
                 var activeCourse = $('#activeCourse tbody');
                 var pastCourse = $('#pastCourse tbody');
                 activeCourse.html("");

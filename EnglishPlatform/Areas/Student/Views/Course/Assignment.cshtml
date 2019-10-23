@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name + " - Cấu trúc chương trình";
+    ViewData["Title"] = currentClass.Name + " - Bài đánh giá";
 }
 
 <script>
@@ -24,7 +24,7 @@
     </div>
 </div>
 
-@section Script{
+@section Scripts {
     <script>
 
     var chapters = [];
@@ -49,7 +49,7 @@
                 var oContent = $("<div>", { "id": "ongoing", "class":"modules" });
                 var oTitle = $("<div>", { "class":"modules-title row", "data-target":"#ongoing .modules-content:first"});
                 var otitle_cPart = $("<div>", {"class":"col-md-11"});
-                var otitle_ePart = $("<div>", {"class":"col-md-1 text-right"});     
+                var otitle_ePart = $("<div>", {"class":"col-md-1 text-right"});
                 otitle_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, 'ongoing')" }));
                 otitle_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right", "onclick": "toggleCollapse(this, 'ongoing')"}))
                     .append($("<a>", {
@@ -82,38 +82,46 @@
                 if (lessons.length > 0) {
                     for (j = 0; j < lessons.length; j++) {
                         var item = lessons[j];
-                        var active = "";
-                        if (item.IsActive) {
-                            active = "<td class='text-center'><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' disabled> <div class='handle'></div> </button></td>";
-                        } else {
-                            active = "<td class='text-center'><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger' disabled> <div class='handle'></div> </button></td>";
-                        }
 
-                        var startdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.StartDate));
-                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
-                        var lastjoin = "---";
-                        var isView = "";
-                        if (item.IsView) {
-                            isView = "IsView";
-                            lastjoin = $.datepicker.formatDate('dd/mm/yy', new Date(item.LastJoin))
-                        } else {
-                            isView = "";
-                        }
+                        var rowData = $("<div>", { "class": "modules-content-item row m-0" });
 
-                        var rowData = $("<div>", {"class":"modules-content-item"});
-                        rowData.append($("<span>", {"class":"modules-content-item-icon" + (item.TemplateType === 2?" assignment":"")}));
-                        var itemData = $("<div>", {"class":"modules-content-item-info"});
+                        var period = "";
+                        var itemStatus = null;
+
+                        if (!item.IsActive) {
+                            itemStatus = $("<i>", { class: "fas fa-lock", style: "top: 10px; right: 10px;" });
+                            period = "---"
+                        }
+                        else {
+                            period = moment(item.StartDate).format('DD/MM/YYYY') + " - " + moment(item.EndDate).format('DD/MM/YYYY');
+                        }
+                            
+
+                        var icon = $("<span>", { "class": "modules-content-item-icon" + (item.TemplateType === 2 ? " assignment" : "") })
+                        var itemData = $("<div>", { "class": "modules-content-item-info" });
                         itemData.append($("<a>", {
-                                "class":"action-link",
-                                "href": (item.IsActive ? ("@Url.Action("Detail", "Lesson")/" + item.ID + "/@currentClass.ID") : "javascript:LockNotify()"),
-                                "text": item.Title
-                            }));
+                            "class": "action-link",
+                            "href": (item.IsActive ? ("@Url.Action("Detail", "Lesson")/" + item.ID + "/@currentClass.ID") : "javascript:LockNotify()"),
+                            "text": item.Title
+                        }));
+
+                        var lastjoin = "---";
+
+                        var historyInfo = null;
+                        if (item.IsView) {
+                            lastjoin = moment(item.LastJoin).format('DD/MM/YYYY hh:mm A')
+                            historyInfo = $("<i>", {class:"font-weight-normal", style:"font-size: 80%", html: "Làm lần cuối: " + lastjoin + " <br/>Điểm lần " + item.Tried + ": <b class='" + (item.DoPoint > 50 ? "text-success":"text-danger") +  "'>" + item.DoPoint.toFixed(0) + "%</b>" });
+                        }
+
                         if(item.Description != null)
                         {
                             itemData.append($("<span>", {"class":"description", "text": item.Description}));
                         }
 
-                        rowData.append(itemData);
+                        rowData.append($("<div>", { class: "col-md-6" }).append(icon).append(itemData))
+                            .append($("<div>", { class: "col-md-2" }).append(period))
+                            .append($("<div>", { class: "col-md-3" }).append(historyInfo))
+                            .append($("<div>", {class: "col-md-1 text-center"}).append(itemStatus));
 
                         if (moment(item.EndDate) > new Date())
                             parent = bodyWrapper.find(".modules#ongoing .modules-content:first");

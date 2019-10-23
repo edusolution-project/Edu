@@ -252,6 +252,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
 
                 oldData.Updated = DateTime.Now;
+
+
                 if (item.CourseID != oldData.CourseID)
                 {
                     //remove old schedule & cloned lesson part
@@ -284,6 +286,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 oldData.TeacherID = item.TeacherID;
 
                 _service.CreateOrUpdate(oldData);
+
+                _courseService.Collection.UpdateOneAsync<CourseEntity>(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {

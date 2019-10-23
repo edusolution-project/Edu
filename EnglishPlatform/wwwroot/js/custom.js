@@ -148,7 +148,7 @@ function endtime() {
 }
 
 function togglePanelWidth(obj) {
-    var parent = $(obj).parent();
+    var parent = $(obj).parent().parent().parent();
     if (parent.hasClass("col-md-6")) {
         parent.removeClass("col-md-6").addClass("col-md-2");
         parent.siblings().removeClass("col-md-6").addClass("col-md-10");

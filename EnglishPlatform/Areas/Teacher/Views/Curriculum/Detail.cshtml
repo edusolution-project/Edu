@@ -11,8 +11,6 @@
     var user = ViewBag.User as string;
 }
 
-
-
 <script>
     activeTab = "curriculum";
 </script>
@@ -30,205 +28,209 @@
     </div>
 </div>
 
-<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Sửa thông tin</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="@Url.Action("CreateOrUpdate","Curriculum")" name="courseForm" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="ID" />
-                    <input type="hidden" name="CreateUser" value="@user" />
-                    <input type="hidden" name="IsActive" value="false" />
-                    <div class="form-group">
-                        <label class="col-form-label">Tên giáo trình:</label>
-                        <input type="text" class="form-control" name="Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Môn học:</label>
-                        <select name="SubjectID" class="form-control" onchange="ChangeGrade(this)">
-                            @{
-                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                {
-                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+
+@section Modals {
+
+    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Sửa thông tin</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="@Url.Action("CreateOrUpdate","Curriculum")" name="courseForm" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="ID" />
+                        <input type="hidden" name="CreateUser" value="@user" />
+                        <input type="hidden" name="IsActive" value="false" />
+                        <div class="form-group">
+                            <label class="col-form-label">Tên giáo trình:</label>
+                            <input type="text" class="form-control" name="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Môn học:</label>
+                            <select name="SubjectID" class="form-control" onchange="ChangeGrade(this)">
+                                @{
+                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                    {
+                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                    }
+
                                 }
-
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Cấp độ:</label>
-                        <select Name="GradeID" class="form-control">
-                            @{
-                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                {
-                                    <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                }
-
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="message-text" class="col-form-label">Mô tả:</label>
-                        <textarea class="form-control" name="Description"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('courseForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="chapterModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="@Url.Action("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="ID" />
-                    <input type="hidden" name="CourseID" value="@Data.ID" />
-                    <div class="form-group">
-                        <label class="col-form-label">Tên chương mục:</label>
-                        <input type="text" class="form-control" name="Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Chương mục cấp trên:</label>
-                        <select name="ParentID" class="form-control">
-                            <option value="0">------</option>
-                            @{
-                                for (int i = 0; listChapter != null && i < listChapter.Count; i++)
-                                {
-                                    <option value="@listChapter[i].ID">@listChapter[i].Name</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-form-label">Mô tả:</label>
-                        <textarea class="form-control" name="Description" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("CreateOrUpdateChapter","Curriculum")','update' , ReloadCourse)">Lưu</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="@Url.Action("CreateOrUpdate","Lesson")" name="lessonForm" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="ID" />
-                    <input type="hidden" name="CourseID" value="@Data.ID" />
-                    <input type="hidden" name="ChapterID" value="" />
-                    <div class="row">
-                        <div class="form-group col-md-12">
-                            <label class="col-form-label">Kiểu bài:</label>
-                            <select name="TemplateType" class="form-control" onchange="SelectTemplate()">
-                                <option value="1">Bài giảng</option>
-                                <option value="2">Bài tập</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-md-12">
-                            <label class="col-form-label">Tên bài:</label>
-                            <input type="text" class="form-control" name="Title" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-md-6" for="examOnly">
-                            <label class="col-form-label">Thời gian (phút):</label>
-                            <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required>
-                        </div>
-                        <div class="form-group col-md-6" for="examOnly">
-                            <label class="col-form-label">Số lượt làm bài:</label>
-                            <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-md-6" for="examOnly">
-                            <label class="col-form-label">Điểm:</label>
-                            <input type="text" class="form-control" name="Point" placeholder="0" required>
-                        </div>
-                        <div class="form-group col-md-6" for="examOnly">
-                            <label class="col-form-label">Hệ số:</label>
-                            <input type="text" class="form-control" name="Multiple" placeholder="> 0" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-md-6" for="examOnly">
-                            <label class="col-form-label">Kiểu bài kiểm tra:</label>
-                            <select name="Etype" class="form-control" required>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Bài luyện tập</option>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Bài kiểm tra tuần</option>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Bài tập lớn</option>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.EXPERIMENT">Báo cáo thí nghiệm</option>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.INTERSHIP">Báo cáo thực tập</option>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">Cuối kì</option>
+                        <div class="form-group">
+                            <label class="col-form-label">Cấp độ:</label>
+                            <select Name="GradeID" class="form-control">
+                                @{
+                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                    {
+                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
+                                    }
+
+                                }
                             </select>
                         </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@Url.Action("CreateOrUpdate","Lesson")','update' , ReloadCourse)">Lưu</button>
+                        <div class="form-group">
+                            <label for="message-text" class="col-form-label">Mô tả:</label>
+                            <textarea class="form-control" name="Description"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('courseForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="joinLessonModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Ghép nội dung</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="@Url.Action("CreateOrUpdate","Lesson")" name="joinLessonModal" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="ID" />
-                    <input type="hidden" name="ChapterID" value="" />
-                    <div class="form-group">
-                        <label class="col-form-label">Ghép bài:</label><br />
-                        <label name="rootItem"></label><br />
-                        <label class="col-form-label">với bài:</label>
-                        <select name="JoinLesson" class="form-control" required></select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@Url.Action("Join","Lesson")','join' , ReloadCourse)">Lưu</button>
+    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="chapterModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="@Url.Action("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="ID" />
+                        <input type="hidden" name="CourseID" value="@Data.ID" />
+                        <div class="form-group">
+                            <label class="col-form-label">Tên chương mục:</label>
+                            <input type="text" class="form-control" name="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Chương mục cấp trên:</label>
+                            <select name="ParentID" class="form-control">
+                                <option value="0">------</option>
+                                @{
+                                    for (int i = 0; listChapter != null && i < listChapter.Count; i++)
+                                    {
+                                        <option value="@listChapter[i].ID">@listChapter[i].Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Mô tả:</label>
+                            <textarea class="form-control" name="Description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("CreateOrUpdateChapter","Curriculum")','update' , ReloadCourse)">Lưu</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="@Url.Action("CreateOrUpdate","Lesson")" name="lessonForm" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="ID" />
+                        <input type="hidden" name="CourseID" value="@Data.ID" />
+                        <input type="hidden" name="ChapterID" value="" />
+                        <div class="row">
+                            <div class="form-group col-md-12">
+                                <label class="col-form-label">Kiểu bài:</label>
+                                <select name="TemplateType" class="form-control" onchange="SelectTemplate()">
+                                    <option value="1">Bài giảng</option>
+                                    <option value="2">Bài tập</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-12">
+                                <label class="col-form-label">Tên bài:</label>
+                                <input type="text" class="form-control" name="Title" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6" for="examOnly">
+                                <label class="col-form-label">Thời gian (phút):</label>
+                                <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required>
+                            </div>
+                            <div class="form-group col-md-6" for="examOnly">
+                                <label class="col-form-label">Số lượt làm bài:</label>
+                                <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6" for="examOnly">
+                                <label class="col-form-label">Điểm:</label>
+                                <input type="text" class="form-control" name="Point" placeholder="0" required>
+                            </div>
+                            <div class="form-group col-md-6" for="examOnly">
+                                <label class="col-form-label">Hệ số:</label>
+                                <input type="text" class="form-control" name="Multiple" placeholder="> 0" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6" for="examOnly">
+                                <label class="col-form-label">Kiểu bài kiểm tra:</label>
+                                <select name="Etype" class="form-control" required>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Bài luyện tập</option>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Bài kiểm tra tuần</option>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Bài tập lớn</option>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.EXPERIMENT">Báo cáo thí nghiệm</option>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.INTERSHIP">Báo cáo thực tập</option>
+                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">Cuối kì</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@Url.Action("CreateOrUpdate","Lesson")','update' , ReloadCourse)">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="joinLessonModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Ghép nội dung</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="@Url.Action("CreateOrUpdate","Lesson")" name="joinLessonModal" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="ID" />
+                        <input type="hidden" name="ChapterID" value="" />
+                        <div class="form-group">
+                            <label class="col-form-label">Ghép bài:</label><br />
+                            <label name="rootItem"></label><br />
+                            <label class="col-form-label">với bài:</label>
+                            <select name="JoinLesson" class="form-control" required></select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@Url.Action("Join","Lesson")','join' , ReloadCourse)">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <style>
     .nav-item {
@@ -240,6 +242,7 @@
         display: block;
     }
 </style>
+
 <script>
 
     var chapters = [];
@@ -312,7 +315,7 @@
                     title_cPart.append("Thêm nội dung");
                     title_ePart.append($("<i>", { "class": "fas fa-plus-square", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương mục", "onclick": "AddChapter('0'); return false;" }));
                     chapTitle.append(title_cPart).append(title_ePart);
-                    chapContent.append(chapTitle);                    
+                    chapContent.append(chapTitle);
                     modulesBody.append(chapContent);
                 }
 
@@ -545,7 +548,6 @@
         LoadData();
     });
 </script>
-
 
 <style>
     #accordionSidebar .nav-item .nav-link #icon-submenu .fas {

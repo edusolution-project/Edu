@@ -36,6 +36,23 @@ namespace BaseCustomerEntity.Database
         public AccountService(IConfiguration configuration) : base(configuration)
         {
 
+            var indexs = new List<CreateIndexModel<AccountEntity>>
+            {
+                //UserName_1
+                new CreateIndexModel<AccountEntity>(
+                    new IndexKeysDefinitionBuilder<AccountEntity>()
+                    .Ascending(t => t.UserName)),
+                //UserID_1
+                new CreateIndexModel<AccountEntity>(
+                    new IndexKeysDefinitionBuilder<AccountEntity>()
+                    .Ascending(t => t.UserID)),
+                //RoleID_1_UserName_1
+                new CreateIndexModel<AccountEntity>(
+                    new IndexKeysDefinitionBuilder<AccountEntity>()
+                    .Ascending(t => t.RoleID).Ascending(t=> t.UserName)),
+            };
+
+            Collection.Indexes.CreateManyAsync(indexs);
         }
 
 

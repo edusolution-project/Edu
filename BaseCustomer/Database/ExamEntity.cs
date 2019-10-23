@@ -50,7 +50,18 @@ namespace BaseCustomerEntity.Database
     {
         public ExamService(IConfiguration configuration) : base(configuration)
         {
+            var indexs = new List<CreateIndexModel<ExamEntity>>
+            {
+                //ClassID_1_LessonID_1_StudentID_1_ID_-1
+                new CreateIndexModel<ExamEntity>(
+                    new IndexKeysDefinitionBuilder<ExamEntity>()
+                    .Ascending(t=> t.ClassID)
+                    .Ascending(t=> t.LessonID)
+                    .Ascending(t=> t.StudentID)
+                    .Descending(t=> t.ID))
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
         /// <summary>
         /// ID Exam

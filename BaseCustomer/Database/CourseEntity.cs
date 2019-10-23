@@ -34,6 +34,8 @@ namespace BaseCustomerEntity.Database
         public bool IsAdmin { get; set; }
         [JsonProperty("IsActive")]
         public bool IsActive { get; set; }
+        [JsonProperty("IsUsed")]
+        public bool IsUsed { get; set; }
         [JsonProperty("Order")]
         public int Order { get; set; }
     }

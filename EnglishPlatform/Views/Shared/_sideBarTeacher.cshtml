@@ -60,25 +60,30 @@
                     <span>Soạn bài giảng</span>
                 </a>
             </li>
-
-            <li class="sidebar-item course" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')" title="Course">
-                <a class="nav-link p-0">
+            <li class="sidebar-item course" title="Course">
+                <a class="nav-link p-0" href="@Url.Action("Index","Class")">
                     <i></i>
                     <span>Quản lý lớp học</span>
                 </a>
-                <div class="extra" id="sidebar-course-holder">
-                    <div>
-                        <h4>Lớp học</h4>
-                        <hr role="presentation">
-                        <ul class="action-wrapper"></ul>
-                        <hr role="presentation">
-
-                        <a href="@Url.Action("Index","Class")" class="btn action-link">
-                            Xem tất cả các lớp
-                        </a>
-                    </div>
-                </div>
             </li>
+            @*<li class="sidebar-item course" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')" title="Course">
+                    <a class="nav-link p-0">
+                        <i></i>
+                        <span>Quản lý lớp học</span>
+                    </a>
+                    <div class="extra" id="sidebar-course-holder">
+                        <div>
+                            <h4>Lớp học</h4>
+                            <hr role="presentation">
+                            <ul class="action-wrapper"></ul>
+                            <hr role="presentation">
+
+                            <a href="@Url.Action("Index","Class")" class="btn action-link">
+                                Xem tất cả các lớp
+                            </a>
+                        </div>
+                    </div>
+                </li>*@
 
             <li class="sidebar-item calendar">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )">
@@ -95,7 +100,7 @@
             </li>
 
             <li class="sidebar-item guide">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "References" )">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )">
                     <i></i>
                     <span>Bí kíp hay</span>
                 </a>

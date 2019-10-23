@@ -21,6 +21,9 @@
             <div class="row">
                 <div class="col-md-10">
                     <div class="modules-wrapper">
+                        <div class="p-3">
+                            <i class="fas fa-circle-notch fa-spin"></i> Đang tải dữ liệu ...
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-2">
@@ -39,6 +42,7 @@
         font-weight: 500;
         text-align: right;
         outline: none;
+        width: 100%;
     }
 </style>
 @section Scripts {
@@ -54,7 +58,7 @@
 
         $.ajax({
             type: "POST",
-            url: '@Url.Action("GetSchedules", "Class")',
+            url: '@Url.Action("GetSchedules", "Lesson")',
             data: { ID: '@currentClass.ID' },
             dataType:"json",
             success: function (data) {
@@ -77,12 +81,12 @@
                         var chapTitle = $("<div>", { "class":"modules-title row", "data-target":"#" + chapter.ID + " .modules-content:first"});
                         var title_cPart = $("<div>", {"class":"col-md-11"});
                         var title_ePart = $("<div>", {"class":"col-md-1 text-right"});
-                        title_ePart.append($("<i>", { "class": "far fa-minus-square show fa-plus-square", "title": "Mở rộng", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }));
-                        title_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right", "onclick": "toggleCollapse(this, '" + chapter.ID + "')"}))
+                        title_ePart.append($("<i>", { "class": "far fa-minus-square show fa-plus-square", "title": "Mở rộng", "onclick": "toggleCollapse(this, '" + chapter.ID + "');loadSubContent(this, '" + chapter.ID + "');" }));
+                        title_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right",  "onclick": "toggleCollapse(this, '" + chapter.ID + "');loadSubContent(this, '" + chapter.ID + "');"}))
                             .append($("<a>", {
                                 "class":"action-link",
                                 "text": chapter.Name,
-                                 "onclick": "toggleCollapse(this, '" + chapter.ID + "')"
+                                 "onclick": "toggleCollapse(this, '" + chapter.ID + "');loadSubContent(this, '" + chapter.ID + "');"
                                 }));
                         chapTitle.append(title_cPart).append(title_ePart);
                         chapContent.append(chapTitle);
@@ -101,6 +105,37 @@
                     }
                 }
 
+
+                if(window.location.hash != "")
+                {
+                    var anchor = window.location.hash;
+                    $(anchor).find('.fa-minus-square').focus().click();
+                    $(function() {
+                        $('.left-col').scrollTop( $(anchor).offset().top );
+                    });
+                }
+            },
+            error: function (res) {
+                console.log(res.responseText);
+            }
+        });
+    }
+
+    function loadSubContent(obj, chapterid) {
+        chapters = [];
+        lessons = [];
+        var indicator = $(obj).parent().parent().find('.fa-minus-square');
+        if ($(indicator).attr("loaded") == "1")
+            return false;
+        $(indicator).addClass("fas fa-spinner fa-spin");
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetChapterContent", "Lesson")',
+            data: { ID: '@currentClass.ID', ChapterID: chapterid},
+            dataType:"json",
+            success: function (data) {
+                $(indicator).attr("loaded", "1");
+                lessons = data.Data.Lessons;
                 if (lessons.length > 0) {
                     for (j = 0; j < lessons.length; j++) {
                         var item = lessons[j];
@@ -111,8 +146,10 @@
                             active = "<button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger' onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\"> <div class='handle'></div> </button>";
                         }
 
-                        var startdate = moment(item.StartDate).format('DD/MM/YYYY');
-                        var enddate = moment(item.EndDate).format('DD/MM/YYYY');
+                        var startdate = "---";
+                        if(moment(item.StartDate) > new Date(2018,1,1)) startdate = moment(item.StartDate).format('DD/MM/YYYY');
+                        var enddate = "---";
+                        if(moment(item.EndDate) > new Date(2018,1,1)) enddate = moment(item.EndDate).format('DD/MM/YYYY');
 
                         var rowData = $("<div>", {"class":"modules-content-item row"});
                         var leftPart = $("<div>", {"class":"col-md-6"});
@@ -148,21 +185,14 @@
                             parent.append(rowData);
                         }
                     }
-
                     $('.text-holder').datepicker({
-                      changeMonth: true,
-                      changeYear: true,
-                      dateFormat: "dd/mm/yy"
+                        defaultDate: 0,
+                        changeMonth: true,
+                        changeYear: true,
+                        dateFormat: "dd/mm/yy"
                     });
                 }
-                if(window.location.hash != "")
-                {
-                    var anchor = window.location.hash;
-                    $(anchor).find('.fa-minus-square').focus().click();
-                    $(function() {
-                        $(document).scrollTop( $(anchor).offset().top );
-                    });
-                }
+                $(indicator).removeClass("fas fa-spinner fa-spin");
             },
             error: function (res) {
                 console.log(res.responseText);

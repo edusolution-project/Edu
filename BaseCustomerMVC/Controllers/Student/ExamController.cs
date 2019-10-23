@@ -196,10 +196,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.QuestionsDone = 0;
                 item.Marked = false;
             }
-            else
-            {
-                item.Updated = DateTime.Now;
-            }
+            item.Updated = DateTime.Now;
             _examService.CreateOrUpdate(item);
             return new JsonResult(new Dictionary<string, object>
                     {
@@ -218,14 +215,13 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult CreateDetail(ExamDetailEntity item)
+        public async Task<JsonResult> CreateDetail(ExamDetailEntity item)
         {
             if (!_examService.IsOverTime(item.ExamID))
             {
                 var exam = _examService.GetItemByID(item.ExamID);
 
-
-                _learningHistoryService.CreateHist(new LearningHistoryEntity()
+                await _learningHistoryService.CreateHist(new LearningHistoryEntity()
                 {
                     ClassID = exam.ClassID,
                     LessonID = exam.LessonID,
@@ -308,17 +304,17 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else
             {
-                return new JsonResult("Access Deny");
+                return new JsonResult("Access Denied");
             }
         }
 
         [HttpPost]
-        public JsonResult RemoveDetail(ExamDetailEntity item)
+        public async Task<JsonResult> RemoveDetail(ExamDetailEntity item)
         {
             if (!_examService.IsOverTime(item.ExamID))
             {
                 var exam = _examService.GetItemByID(item.ExamID);
-                _learningHistoryService.CreateHist(new LearningHistoryEntity()
+                await _learningHistoryService.CreateHist(new LearningHistoryEntity()
                 {
                     ClassID = exam.ClassID,
                     LessonID = exam.LessonID,
@@ -434,7 +430,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 _cloneLessonPartService.Collection.Count(t => t.ParentID == lesson.ID && t.Type == "essay");
 
             _examService.CreateOrUpdate(exam);
-            return new JsonResult(new { Point = point, MaxPoint = lesson.Point });
+            return new JsonResult(new { Point = point, MaxPoint = lesson.Point, ID = exam.ID, Number = exam.Number, Limit = lesson.Limit });
         }
 
         public IActionResult Index(DefaultModel model)
