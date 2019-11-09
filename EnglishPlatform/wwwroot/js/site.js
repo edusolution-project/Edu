@@ -57,7 +57,7 @@ function Submit(formName, url, actionName, fn) {
 
     requires.each(function () {
         if ($(this).val() == "" || $(this).val() == null) {
-            alert("Vui lòng nhập đủ thông tin");
+            alert("Please fill in required fields");
             $(this).focus();
             err = true;
             return false;
@@ -180,7 +180,8 @@ function ExcuteOnlyItem(id, url, fn) {
     data.append("ArrID", id);
     Ajax(url, "POST", data, true).then(function (res) {
         if (fn != void 0) fn(res);
-        console.log(res)
+        console.log(res);
+        return false;
     })
 }
 
@@ -216,10 +217,10 @@ function toggleCollapse(obj, id) {
     var collapseIndicator = $(obj).parent().parent().find('.fa-caret-down');
 
     if ($(collapseButton).hasClass("fa-plus-square")) {
-        $(collapseButton).attr('data-original-title', 'Thu gọn');
+        $(collapseButton).attr('data-original-title', 'Collapse');
     }
     else
-        $(collapseButton).attr('data-original-title', 'Mở rộng');
+        $(collapseButton).attr('data-original-title', 'Expand');
     $(collapseButton).toggleClass("fa-plus-square");
     $(collapseIndicator).toggleClass("fa-caret-right");
 }

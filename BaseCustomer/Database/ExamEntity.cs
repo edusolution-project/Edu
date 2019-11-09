@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -48,6 +49,13 @@ namespace BaseCustomerEntity.Database
     }
     public class ExamService : ServiceBase<ExamEntity>
     {
+        private ExamDetailService _examDetailService { get; set; }
+        private CloneLessonPartService _cloneLessonPartService { get; set; }
+        private CloneLessonPartQuestionService _cloneLessonPartQuestionService { get; set; }
+        private CloneLessonPartAnswerService _cloneLessonPartAnswerService { get; set; }
+        private LessonService _lessonService { get; set; }
+
+
         public ExamService(IConfiguration configuration) : base(configuration)
         {
             var indexs = new List<CreateIndexModel<ExamEntity>>
@@ -62,6 +70,12 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+
+            _examDetailService = new ExamDetailService(configuration);
+            _cloneLessonPartService = new CloneLessonPartService(configuration);
+            _cloneLessonPartQuestionService = new CloneLessonPartQuestionService(configuration);
+            _cloneLessonPartAnswerService = new CloneLessonPartAnswerService(configuration);
+            _lessonService = new LessonService(configuration);
         }
         /// <summary>
         /// ID Exam
@@ -72,6 +86,7 @@ namespace BaseCustomerEntity.Database
         {
             var item = GetItemByID(ID);
             if (item == null) return false;
+            if (item.Timer == 0) return false;
             double count = (item.Created.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
             if (count <= 0)
             {
@@ -87,5 +102,98 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
+        public ExamEntity Complete(ExamEntity exam, LessonEntity lesson, out double point)
+        {
+            exam.Status = true;
+            point = 0;
+            var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
+
+            for (int i = 0; listDetails != null && i < listDetails.Count; i++)
+            {
+                var examDetail = listDetails[i];
+
+                //bài tự luận
+                if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
+
+                var part = _cloneLessonPartService.GetItemByID(examDetail.LessonPartID);
+                if (part == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
+
+                var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
+                if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
+
+                var _realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
+
+                CloneLessonPartAnswerEntity _correctanswer = null;
+
+                var realanswer = _realAnswers.FirstOrDefault();
+                if (realanswer != null)
+                {
+                    examDetail.RealAnswerID = realanswer.ID;
+                    examDetail.RealAnswerValue = realanswer.Content;
+                }
+
+                //bài chọn hoặc nối đáp án
+                if (!string.IsNullOrEmpty(examDetail.AnswerID))
+                {
+                    var answer = _cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID);
+                    if (answer == null) continue;//Lưu lỗi => bỏ qua ko tính điểm
+
+
+                    switch (part.Type)
+                    {
+                        case "QUIZ1": //chọn đáp án
+                            _correctanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID);//chọn đúng đáp án
+                            break;
+                        case "QUIZ3": //nối đáp án
+                            _correctanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID || (!string.IsNullOrEmpty(t.Content) && t.Content == answer.Content)); //chọn đúng đáp án (check trường hợp sai ID nhưng cùng content (2 đáp án có hình ảnh, ID khác nhau nhưng cùng content (nội dung như nhau)))
+                            break;
+                    }
+                }
+                else //bài điền từ
+                {
+                    if (examDetail.AnswerValue != null)
+                    {
+                        List<string> quiz2answer = new List<string>();
+                        foreach (var answer in _realAnswers)
+                        {
+                            if (!string.IsNullOrEmpty(answer.Content))
+                                foreach (var ans in answer.Content.Split('/'))
+                                {
+                                    if (!string.IsNullOrEmpty(ans.Trim()))
+                                        quiz2answer.Add(ans.Trim().ToLower());
+                                }
+                        }
+
+                        if (quiz2answer.Contains(examDetail.AnswerValue.ToLower().Trim()))
+                            _correctanswer = _realAnswers.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
+                    }
+
+                }
+
+                if (_correctanswer != null)
+                {
+                    point += question.Point;
+                    examDetail.Point = question.Point;
+                    examDetail.RealAnswerID = _correctanswer.ID;
+                    examDetail.RealAnswerValue = _correctanswer.Content;
+                }
+
+                examDetail.Updated = DateTime.Now;
+                _examDetailService.CreateOrUpdate(examDetail);
+
+
+            }
+            exam.Point = point;
+            exam.Updated = DateTime.Now;
+            exam.MaxPoint = lesson.Point;
+            exam.QuestionsDone = listDetails.Count();
+            //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
+            exam.QuestionsTotal =
+                _cloneLessonPartQuestionService.Collection.CountDocuments(t => t.LessonID == lesson.ID) +
+                _cloneLessonPartService.Collection.CountDocuments(t => t.ParentID == lesson.ID && t.Type == "essay");
+
+            CreateOrUpdate(exam);
+            return exam;
+        }
     }
 }

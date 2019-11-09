@@ -53,7 +53,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonScheduleService = lessonScheduleService;
         }
 
-        public IActionResult Detail(DefaultModel model, string ClassID)
+        public IActionResult Detail(DefaultModel model, string ClassID, int frameview = 0)
         {
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             if (model == null) return null;
@@ -69,10 +69,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Data = Data;
             ViewBag.Title = Data.Title;
 
-            //if (Data.TemplateType == LESSON_TEMPLATE.LECTURE)
+            if (frameview == 1)
+                return View("FrameDetails");
             return View();
-            //else
-            //    return View("Exam");
         }
 
         [HttpPost]
@@ -269,8 +268,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             };
             return new JsonResult(response);
         }
-
-
 
         [HttpPost]
         public JsonResult CreateOrUpdate(LessonEntity item)

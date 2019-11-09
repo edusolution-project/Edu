@@ -2,7 +2,7 @@
 
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
-    ViewData["Title"] = "Khóa học của tôi";
+    ViewData["Title"] = "My Courses";
 }
 
 <script>
@@ -16,16 +16,16 @@
     <div class="main-container">
         <div class="active-region">
             <div class="block-title pt-2 pb-2">
-                <h2>Khóa học đang diễn ra</h2>
+                <h2>Ongoing</h2>
             </div>
             <table id="activeCourse" class="table" width="100%" cellspacing="0">
                 <thead>
                     <tr class="text-center">
-                        <th class="text-center">STT</th>
-                        <th class="text-left">Môn</th>
-                        <th class="text-left">Khóa học</th>
-                        <th class="text-center">Thời gian</th>
-                        <th class="text-center">Bài học hoàn thành</th>
+                        <th class="text-center">Index</th>
+                        <th class="text-left">Subject</th>
+                        <th class="text-left">Course</th>
+                        <th class="text-center">Period</th>
+                        <th class="text-center">Progress</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -33,16 +33,16 @@
         </div>
         <div class="past-region" style="display: none">
             <div class="block-title">
-                <h2>Các môn đã học</h2>
+                <h2>Past Enrollments</h2>
             </div>
             <table id="pastCourse" class="table" width="100%" cellspacing="0">
                 <thead>
                     <tr>
-                        <th class="text-center">STT</th>
-                        <th class="text-left">Môn</th>
-                        <th class="text-left">Khóa học</th>
-                        <th class="text-center">Thời gian</th>
-                        <th class="text-center">Kết quả</th>
+                        <th class="text-center">Index</th>
+                        <th class="text-left">Subject</th>
+                        <th class="text-left">Course</th>
+                        <th class="text-center">Period</th>
+                        <th class="text-center">Result</th>
                     </tr>
                 </thead>
                 <tbody></tbody>

@@ -2,7 +2,7 @@
 
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name + " - Danh sách học viên";
+    ViewData["Title"] = currentClass.Name + " - Members List";
 }
 
 <script>
@@ -26,15 +26,12 @@
                     <table id="membersTable" class="table" width="100%" cellspacing="0">
                         <thead>
                             <tr class="text-center align-middle">
-                                <th class="text-center align-middle">STT</th>
-                                <th class="text-center align-middle">Họ và tên</th>
+                                <th class="text-center align-middle">Index</th>
+                                <th class="text-center align-middle">Name</th>
                                 <th class="text-center align-middle">Email</th>
-                                <th class="text-center align-middle">Lớp</th>
-                                <th class="text-center align-middle">Ngày sinh</th>
-                                <th class="text-center align-middle">Vai trò</th>
-                                <th class="text-center align-middle">Tiến độ</th>
-                                <th class="text-center align-middle">Ngày hoạt động <br /> gần nhất</th>
-                                <th class="text-center align-middle">Trạng thái</th>
+                                <th class="text-center align-middle">Progress</th>
+                                <th class="text-center align-middle">Last seen</th>
+                                <th class="text-center align-middle">Result</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -65,21 +62,21 @@
                 memberCounter = 1;
                 membersBody.html("");
 
-                teacher = data.Data.Teacher;
-                var date = moment(new Date(teacher.DateBorn)).format('DD/MM/YYYY');
-                membersBody.append("<tr>" +
-                                "<td>" + 1 + "</td>" +
-                                "<td>" + teacher.FullName + "</td>" +
-                                "<td>" + teacher.Email + "</td>" +
-                                //"<td>" + (student.Phone == null ?"" : student.Phone)  + "</td>" +
-                                "<td class='text-center'>---</td>" +
-                                "<td class='text-center'>GV</td>" +
-                                "<td class='text-center'>" + date + "</td>" +
-                                "<td class='text-center'>---</td>" +
-                                "<td class='text-center'>---</td>" +
-                                "<td class='text-center'>---</td>" +
-                            "</tr>"
-                        );
+                //teacher = data.Data.Teacher;
+                //var date = moment(new Date(teacher.DateBorn)).format('DD/MM/YYYY');
+                //membersBody.append("<tr>" +
+                //                "<td>" + 1 + "</td>" +
+                //                "<td>" + teacher.FullName + "</td>" +
+                //                "<td>" + teacher.Email + "</td>" +
+                //                //"<td>" + (student.Phone == null ?"" : student.Phone)  + "</td>" +
+                //                "<td class='text-center'>---</td>" +
+                //                "<td class='text-center'>GV</td>" +
+                //                "<td class='text-center'>" + date + "</td>" +
+                //                "<td class='text-center'>---</td>" +
+                //                "<td class='text-center'>---</td>" +
+                //                "<td class='text-center'>---</td>" +
+                //            "</tr>"
+                //        );
 
 
 
@@ -98,16 +95,16 @@
                                 "<td>" + student.FullName + "</td>" +
                                 "<td>" + student.Email + "</td>" +
                                 //"<td>" + (student.Phone == null ?"" : student.Phone)  + "</td>" +
-                                "<td class='text-center'>" + (student.Class == null ?"" : student.Class[0])  + "</td>" +
-                                "<td class='text-center'>HV</td>" +
-                                "<td class='text-center'>" + date + "</td>" +
+                                //"<td class='text-center'>" + (student.Class == null ?"" : student.Class[0])  + "</td>" +
+                                //"<td class='text-center'>HV</td>" +
+                                //"<td class='text-center'>" + date + "</td>" +
                                 "<td>" +
                                     "<div class=\"progress\">" +
                                         "<div class=\"progress-bar bg-success\" role=\"progressbar\" style=\"width: 0%\" aria-valuenow=\"0\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div>" +
                                     "</div>" +
                                 "</td>" +
                                 "<td class='text-center'>" + lastdate + "</td>" +
-                                "<td>Đang học</td>" +
+                                "<td>---</td>" +
                             "</tr>"
                         );
                     }

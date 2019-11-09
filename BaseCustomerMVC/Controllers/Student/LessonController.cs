@@ -406,16 +406,17 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var currentTimespan = new TimeSpan(0, 0, lesson.Timer, 0);
 
-                if (!lastexam.Status) //bài kt cũ chưa xong => check thời gian làm bài
+                if (!lastexam.Status && lesson.Timer > 0) //bài kt cũ chưa xong => check thời gian làm bài
                 {
                     var endtime = (lastexam.Created.AddMinutes(lastexam.Timer));
                     if (endtime < DateTime.UtcNow) // hết thời gian 
                     {
                         // => kết thúc bài kt
+                        lastexam = _examService.Complete(lastexam, lesson, out _);
                         //throw new NotImplementedException();
-                        lastexam.Status = true;
-                        //TODO: Chấm điểm last exam
-                        _examService.CreateOrUpdate(lastexam);
+                        //lastexam.Status = true;
+                        ////TODO: Chấm điểm last exam
+                        //_examService.CreateOrUpdate(lastexam);
                     }
                 }
 

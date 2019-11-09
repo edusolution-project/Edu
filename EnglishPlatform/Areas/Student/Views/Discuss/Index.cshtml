@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewData["Title"] = "Trao đổi";
+    ViewData["Title"] = "Discussion";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var classList = ViewBag.Data as List<BaseCustomerEntity.Database.ClassEntity>;
 }
@@ -12,7 +12,7 @@
     <div class="page-title row">
         <h1 class="col-md-11">@ViewData["Title"]</h1>
         <div class="col-md-1 text-right p-0">
-            <button type="button" class="btn btn-primary" data-placement="top" title="Tạo thảo luận" data-toggle="modal" data-target="#commentModal"> <i class="fas fa-plus"></i> </button>
+            <button type="button" class="btn btn-primary" data-placement="top" title="Create new conversation" data-toggle="modal" data-target="#commentModal"> <i class="fas fa-plus"></i> </button>
         </div>
     </div>
     <div class="main-container">
@@ -28,68 +28,6 @@
             </div>
         </div>
     </div>
-
-    <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="commentModalLabel">Tạo thảo luận mới</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form name="PostNewFeed" action="@Url.Action("PostNewFeed","Discuss")" method="post">
-                        <input type="hidden" name="GroupID" value="" />
-                        <div class="form-group">
-                            <label>Tiêu đề :</label>
-                            <input type="text" class="form-control" name="Title" placeholder="Tiêu đề">
-                        </div>
-                        <div class="form-group">
-                            <label>Nội dung :</label>
-                            <input type="hidden" name="Content" id="editorComment">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="btn-new-feed" data-dismiss="modal">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Modal -->
-    <div class="modal fade" id="new-feed__reply--popup" tabindex="-1" role="dialog" aria-labelledby="replyModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="replyModalLabel">Reply</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form name="CommentFeed" method="post">
-                        <input type="hidden" name="GroupID" value="" />
-                        <input type="hidden" name="ParentID" value="" />
-                        @*<div class="form-group">
-                                <label>Tiêu đề :</label>
-                                <input type="text" class="form-control" name="Title" placeholder="Tiêu đề">
-                            </div>*@
-                        <div class="form-group">
-                            <label>Nội dung :</label>
-                            <input type="hidden" name="Content" id="editorReply">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="btn-new-feed-reply" data-dismiss="modal">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 @section Scripts{
@@ -167,4 +105,69 @@
     }
     </script>
 
+}
+
+@section Modals{
+
+    <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="commentModalLabel">Create new conversation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="PostNewFeed" action="@Url.Action("PostNewFeed","Discuss")" method="post">
+                        <input type="hidden" name="GroupID" value="" />
+                        <div class="form-group">
+                            @*<label>Title :</label>*@
+                            <input type="text" class="form-control" name="Title" placeholder="Title">
+                        </div>
+                        <div class="form-group">
+                            <input type="hidden" name="Content" id="editorComment">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="btn-new-feed" data-dismiss="modal">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="new-feed__reply--popup" tabindex="-1" role="dialog" aria-labelledby="replyModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="replyModalLabel">Reply</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="CommentFeed" method="post">
+                        <input type="hidden" name="GroupID" value="" />
+                        <input type="hidden" name="ParentID" value="" />
+                        @*<div class="form-group">
+                                <label>Title :</label>
+                                <input type="text" class="form-control" name="Title" placeholder="Title">
+                            </div>*@
+                        <div class="form-group">
+                            @*<label>Nội dung :</label>*@
+                            <input type="hidden" name="Content" id="editorReply">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="btn-new-feed-reply" data-dismiss="modal">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

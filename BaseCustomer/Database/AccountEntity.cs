@@ -67,5 +67,10 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Count(o => o.UserName == userName) > 0;
         }
+
+        public AccountEntity GetAccountByEmail(string email)
+        {
+            return Collection.Find(o => o.UserName == email)?.SingleOrDefault();
+        }
     }
 }

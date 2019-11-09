@@ -137,7 +137,7 @@ var lessonService = {
             pointBox.append(markedBox);
         }
         else {
-            var confirmPoint = $("<button>", { "class": "btn btn-sm btn-primary", "text": "Lưu điểm", "onclick": "SaveScore('" + data.ID + "')" });
+            var confirmPoint = $("<button>", { "class": "btn btn-sm btn-primary", "text": "Save điểm", "onclick": "SaveScore('" + data.ID + "')" });
             pointBox.append(confirmPoint);
         }
         cardBody.append(pointBox);
@@ -675,7 +675,7 @@ function SaveScore(examid) {
                 alert(data.Err);
             }
             else {
-                alert("Đã lưu bảng điểm");
+                alert("Đã Save bảng điểm");
             }
             // do something with the result
         }

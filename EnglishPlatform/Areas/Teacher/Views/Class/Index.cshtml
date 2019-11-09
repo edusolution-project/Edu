@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Danh sách khóa học";
+    ViewData["Title"] = "My Classes";
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
     var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
@@ -25,10 +25,10 @@
             <div class="search-filter pt-3">
                 <div class="form-row">
                     <div class="form-group row col-md-4">
-                        <label for="staticText" class="col-sm-4 col-form-label">Môn học:</label>
+                        <label for="staticText" class="col-sm-4 col-form-label">Subject:</label>
                         <div class="col-sm-8">
                             <select id="SubjectID" class="form-control" onchange="LoadGrade()">
-                                <option value="">----</option>
+                                <option value="">-- All --</option>
                                 @{
                                     for (int i = 0; listSubject != null && i < listSubject.Count; i++)
                                     {
@@ -40,10 +40,10 @@
                         </div>
                     </div>
                     <div class="form-group row col-md-4 offset-4">
-                        <label for="staticText" class="col-sm-4 col-form-label">Trình độ:</label>
+                        <label for="staticText" class="col-sm-4 col-form-label">Grade:</label>
                         <div class="col-sm-8">
                             <select id="GradeID" class="form-control" onchange="LoadData()">
-                                <option value="">-- Tất cả --</option>
+                                <option value="">-- Not set --</option>
                                 @{
                                     for (int i = 0; listGrade != null && i < listGrade.Count; i++)
                                     {
@@ -60,18 +60,18 @@
 
             <div class="active-region">
                 <div class="block-title">
-                    <h2>Lớp đang hoạt động</h2>
+                    <h2>Ongoing</h2>
                 </div>
                 <table id="activeCourse" class="table" width="100%" cellspacing="0">
                     <thead>
                         <tr class="text-center">
-                            <th class="text-left">STT</th>
-                            <th class="text-left">Tên lớp</th>
-                            <th class="text-left">Môn học</th>
-                            <th class="text-left">Cấp độ</th>
+                            <th class="text-left">Index</th>
+                            <th class="text-left">Class</th>
+                            <th class="text-left">Subject</th>
+                            <th class="text-left">Grade</th>
                             @*<th>Giáo viên</th>*@
-                            <th class="text-center">Học viên đăng ký</th>
-                            <th class="text-center">Thời gian</th>
+                            <th class="text-center">Registered Students</th>
+                            <th class="text-center">Period</th>
                             @*<th>Trạng thái</th>*@
                         </tr>
                     </thead>
@@ -80,18 +80,18 @@
             </div>
             <div class="past-region" style="display: none">
                 <div class="block-title">
-                    <h2>Lớp đã kết thúc</h2>
+                    <h2>Past Classes</h2>
                 </div>
                 <table id="pastCourse" class="table" width="100%" cellspacing="0">
                     <thead>
                         <tr class="text-center">
-                            <th class="text-left">STT</th>
-                            <th class="text-left">Tên lớp</th>
-                            <th class="text-left">Môn học</th>
-                            <th class="text-left">Cấp độ</th>
+                            <th class="text-left">Index</th>
+                            <th class="text-left">Class</th>
+                            <th class="text-left">Subject</th>
+                            <th class="text-left">Grade</th>
                             @*<th>Giáo viên</th>*@
-                            <th class="text-center">Học viên đăng ký</th>
-                            <th class="text-center">Thời gian</th>
+                            <th class="text-center">Registered Students</th>
+                            <th class="text-center">Period</th>
                             @*<th>Trạng thái</th>*@
                         </tr>
                     </thead>

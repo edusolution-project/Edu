@@ -18,6 +18,8 @@ namespace BaseCustomerEntity.Database
         public string Description { get; set; }
         [JsonProperty("Code")]
         public string Code { get; set; }
+        [JsonProperty("Image")]
+        public string Image { get; set; }
         [JsonProperty("CreateUser")]
         public string CreateUser { get; set; }
         [JsonProperty("Created")]
@@ -38,6 +40,10 @@ namespace BaseCustomerEntity.Database
         public bool IsUsed { get; set; }
         [JsonProperty("Order")]
         public int Order { get; set; }
+        [JsonProperty("Outline")]
+        public string Outline { get; set; }             // Đề cương môn học
+        [JsonProperty("LearningOutcomes")]
+        public string LearningOutcomes { get; set; }  // Mục tiêu môn học
     }
     public class CourseService : ServiceBase<CourseEntity>
     {

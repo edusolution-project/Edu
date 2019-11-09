@@ -148,9 +148,9 @@
                             </select>
                         </div>
                         <div class="form-group col-md-4">
-                            <label for="staticText" class="col-form-label">Giáo trình:</label>
+                            <label for="staticText" class="col-form-label">Curriculum:</label>
                             <select name="CourseID" class="form-control" onfocus="filterCourse()" required>
-                                <option value="">--- Chọn giáo trình --- </option>
+                                <option value="">--- Chọn Curriculum --- </option>
                             </select>
                         </div>
                         <div class="form-group col-md-6">
@@ -186,8 +186,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "Course" )','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "Course" )','create',LoadData)">Save lại</button>
                 </div>
             </div>
         }
@@ -220,8 +220,8 @@
                     <div class="button-left">
                         <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action("ExportTemplate", "student")')">Tải file mẫu</button>
                     </div>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Save lại</button>
                 </div>
             }
         </div>

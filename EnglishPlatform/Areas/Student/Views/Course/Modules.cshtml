@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name + " - Cấu trúc chương trình";
+    ViewData["Title"] = currentClass.Name + " - Modules";
 }
 
 <script>
@@ -20,7 +20,7 @@
         <div class="main-content">
             <div class="modules-wrapper">
                 <div class="p-3">
-                    <i class="fas fa-circle-notch fa-spin"></i> Đang tải dữ liệu ...
+                    <i class="fas fa-circle-notch fa-spin"></i> Loading ...
                 </div>
             </div>
         </div>
@@ -62,8 +62,8 @@
                         var chapTitle = $("<div>", { "class":"modules-title row", "data-target":"#" + chapter.ID + " .modules-content:first"});
                         var title_cPart = $("<div>", {"class":"col-md-11"});
                         var title_ePart = $("<div>", {"class":"col-md-1 text-right"});
-                        title_ePart.append($("<i>", { "class": "far fa-minus-square show fa-plus-square", "title": "Mở rộng", "onclick": "toggleCollapse(this, '" + chapter.ID + "');loadSubContent(this, '" + chapter.ID + "');" }));
-                        title_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right",  "onclick": "toggleCollapse(this, '" + chapter.ID + "');loadSubContent(this, '" + chapter.ID + "');"}))
+                        title_ePart.append($("<i>", { "class": "far fa-minus-square show fa-plus-square", "title": "Expand", "onclick": "toggleCollapse(this, '" + chapter.ID + "');loadSubContent(this, '" + chapter.ID + "');" }));
+                        title_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right", "onclick": "toggleCollapse(this, '" + chapter.ID + "');loadSubContent(this, '" + chapter.ID + "');"}))
                             .append($("<a>", {
                                 "class":"action-link",
                                 "text": chapter.Name,
@@ -179,9 +179,9 @@
                         if (item.IsView) {
                             lastjoin = moment(item.LastJoin).format('DD/MM/YYYY hh:mm A')
                             if (item.TemplateType == @BaseCustomerEntity.Database.LESSON_TEMPLATE.LECTURE) {
-                                historyInfo = $("<i>", { class: "font-weight-normal", style: "font-size: 80%", html: "Học lần cuối: " + lastjoin + "" });
+                                historyInfo = $("<i>", { class: "font-weight-normal", style: "font-size: 80%", html: "Last view: " + lastjoin + "" });
                             } else {
-                                historyInfo = $("<i>", {class:"font-weight-normal", style:"font-size: 80%", html: "Làm lần cuối: " + lastjoin + " <br/>Điểm lần " + item.Tried + ": <b class='" + (item.DoPoint > 50 ? "text-success":"text-danger") +  "'>" + item.DoPoint.toFixed(0) + "%</b>" });
+                                historyInfo = $("<i>", {class:"font-weight-normal", style:"font-size: 80%", html: "Last attempt (" + item.Tried + "): " + lastjoin + " <br/>Score " + ": <b class='" + (item.DoPoint > 50 ? "text-success":"text-danger") +  "'>" + item.DoPoint.toFixed(0) + "%</b>" });
                             }
                         }
 
@@ -214,7 +214,7 @@
     }
 
     function LockNotify() {
-        alert("Bài học đang bị khóa!");
+        alert("Lesson is locked!");
         return false;
     }
 

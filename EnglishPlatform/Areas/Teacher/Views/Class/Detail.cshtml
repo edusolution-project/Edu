@@ -3,6 +3,8 @@
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     ViewData["Title"] = currentClass.Name;
+    var subject = ViewBag.Subject as BaseCustomerEntity.Database.SubjectEntity;
+    var grade = ViewBag.Grade as BaseCustomerEntity.Database.GradeEntity;
 }
 
 <script>
@@ -24,50 +26,56 @@
             <div class="row">
                 <div class="col-md-10">
                     <div class="intro-wrapper content-block">
-                        <div class="block-title">
-                            <h2>@currentClass.Name</h2>
-
-                            @if (!String.IsNullOrEmpty(currentClass.Image))
-                            {
-                                <img src="@currentClass.Image" title="@currentClass.Name" class="courseImg" />
-                            }
-                            @if (!String.IsNullOrEmpty(currentClass.Syllabus))
-                            {
-                                <div class="block-title mt-3">
-                                    <h2>Đề cương môn học</h2>
+                        <div class="detail pb-3 row">
+                            <div class="text-left col-md-10">
+                                <div class="lession-label d-inline-block">Period: <b>@currentClass.StartDate.ToString("dd/MM/yyyy") - @currentClass.EndDate.ToString("dd/MM/yyyy")</b></div> -
+                                <div class="lession-label d-inline-block">
+                                    Status:
+                                    @if (currentClass.EndDate.Date > DateTime.Now.Date)
+                                    {
+                                        <b>Ongoing</b>
+                                    }
+                                    else
+                                    {
+                                        <b>Complete</b>
+                                    }
                                 </div>
-                                <div class="course-syllabus">
-                                    @Html.Raw(currentClass.Syllabus)
-                                </div>
-                            }
-                            @if (!String.IsNullOrEmpty(currentClass.Modules))
-                            {
-                                <div class="block-title mt-3">
-                                    <h2>Nội dung môn học</h2>
-                                </div>
-                                <div class="course-modules">
-                                    @Html.Raw(currentClass.Modules)
-                                </div>
-                            }
-                            @if (!String.IsNullOrEmpty(currentClass.LearningOutcomes))
-                            {
-                                <div class="block-title mt-3">
-                                    <h2>Mục tiêu đầu ra</h2>
-                                </div>
-                                <div class="course-outcomes">
-                                    @Html.Raw(currentClass.LearningOutcomes)
-                                </div>
-                            }
-                            @if (!String.IsNullOrEmpty(currentClass.References))
-                            {
-                                <div class="block-title mt-3">
-                                    <h2>Tài liệu tham khảo</h2>
-                                </div>
-                                <div class="course-references">
-                                    @Html.Raw(currentClass.References)
-                                </div>
-                            }
+                            </div>
                         </div>
+                        <div class="banner p-2 mb-3 row" style="background: #e60028;border-radius: 5px;color:#FFF;">
+                            <div class="banner-img col-sm-2 align-top" style="">
+                                <div>
+                                    <img id="imgCourseAvatar" src="@(string.IsNullOrEmpty(currentClass.Image) ? "/img/default.jpg":currentClass.Image)" style="width:auto; height:100px; color:#000; max-width:100%;" />
+                                </div>
+                            </div>
+                            <div class="banner__info col-sm-10 pl-2">
+                                <div class="lession-label">Code: <b>@currentClass.Code?.ToUpper()</b></div>
+                                <div class="lession-label">Subject: <b>@subject.Name</b></div>
+                                <div class="lession-label">Grade: <b>@grade.Name</b></div>
+                            </div>
+                        </div>
+                        @if (currentClass.Description != null)
+                        {
+                            <div class="row pb-3">
+                                <label class="form-label align-top" for="courseTarget"><b style="color:#e60028">Description</b></label>
+                                <div class="align-top">
+                                    <div for="dsp">
+                                        @Html.Raw(currentClass?.Description)
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (currentClass.LearningOutcomes != null)
+                        {
+                            <div class="row pb-3">
+                                <label class="form-label align-top" for="courseContent"><b style="color:#e60028">Learning Outcomes</b></label>
+                                <div class="align-top">
+                                    <div for="dsp">
+                                        @Html.Raw(currentClass?.LearningOutcomes)
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
 
                     <div class="syllabus-wrapper content-block">
@@ -76,17 +84,17 @@
                                 <tr>
                                     <th class="width:10%" class="text-center">
                                         <h3>
-                                            STT
+                                            Index
                                         </h3>
                                     </th>
                                     <th style="width:50%">
                                         <h3>
-                                            Tên chương
+                                            Chapter
                                         </h3>
                                     </th>
                                     <th style="width:40%">
                                         <h3>
-                                            Hoạt động
+                                            Activities
                                         </h3>
                                     </th>
                                 </tr>
@@ -97,16 +105,16 @@
 
                     <div class="assignment-wrapper content-block">
                         <div class="block-title">
-                            <h2>Hoạt động đánh giá</h2>
+                            <h2>Assignments</h2>
                         </div>
                         <table class="w-100 table-hover table-normal-title">
                             <thead>
                                 <tr style="font-weight:700">
                                     <th style="width:20%">
-                                        Ngày
+                                        Date
                                     </th>
                                     <th style="width:60%">
-                                        Nội dung
+                                        Description
                                     </th>
                                     <th style="width:20%" class="text-right"></th>
                                 </tr>
@@ -129,7 +137,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
+                    <h5 class="modal-title" id="modalTitle">Add Chapter</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -151,8 +159,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("UpdateChapterInfo","Class")','update' , LoadChapters)">Lưu</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("UpdateChapterInfo","Class")','update' , LoadChapters)">Save</button>
                 </div>
             </div>
         </div>

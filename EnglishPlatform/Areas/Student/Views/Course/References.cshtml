@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name + " - Tài liệu tham khảo";
+    ViewData["Title"] = currentClass.Name + " - References";
 }
 
 <script>
@@ -15,21 +15,21 @@
     </div>
     <div class="main-container">
         <div class="sub-sidebar">
-            @await Html.PartialAsync("_subSidebarTeacher")
+            @await Html.PartialAsync("_subSidebarStudent")
         </div>
         <div class="main-content">
             <div>
                 <table id="tblRef" class="table" width="100%" cellspacing="0">
                     <thead>
                         <tr class="text-center">
-                            <th class="text-center">STT</th>
-                            <th class="text-center">Tiêu đề</th>
+                            <th class="text-center">Index</th>
+                            <th class="text-center">Title</th>
                             @*<th class="text-left">Mô tả</th>*@
-                            <th class="text-center">Người gửi</th>
-                            <th class="text-center">Link liên kết</th>
-                            <th class="text-center">File đính kèm</th>
-                            <th class="text-center">Lượt xem</th>
-                            <th class="text-center">Lượt tải</th>
+                            <th class="text-center">Sender</th>
+                            <th class="text-center">Link</th>
+                            <th class="text-center">Attachment</th>
+                            <th class="text-center">Views</th>
+                            <th class="text-center">Downloads</th>
                         </tr>
                     </thead>
                     <tbody>

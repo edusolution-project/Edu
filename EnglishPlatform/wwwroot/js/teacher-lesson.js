@@ -97,7 +97,7 @@ var submitForm = function (event) {
 
 var Create = {
     removeLesson: function (id) {
-        var check = confirm("bạn muốn xóa nội dung này ?");
+        var check = confirm("Delete this object?");
         if (check) {
             var xhr = new XMLHttpRequest();
             var url = urlBase;
@@ -557,7 +557,7 @@ var render = {
         if (data.Title != null) {
             boxHeader.append($("<h5>", { "class": "title d-inline-block", "text": data.Title + time + point }));
         }
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Thu gọn", "onclick": "toggleCompact(this)" }));
+        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Collapse", "onclick": "toggleCompact(this)" }));
         var boxButton = $("<div>", { "class": "d-inline-block part-action-box" });
         boxButton.append($("<button>", { "class": "btn btn-primary btn-sm btn-edit", "text": "Sửa", "onclick": "lessonPartService.edit('" + data.ID + "')" }))
         boxButton.append($("<button>", { "class": "btn btn-danger btn-sm btn-close", "text": "Xóa", "onclick": "lessonPartService.remove('" + data.ID + "')" }));
@@ -1038,7 +1038,7 @@ var template = {
                     ],
                     "Show": [
                         {
-                            "DisplayName": "Tiêu đề",
+                            "DisplayName": "Title",
                             "Name": "Title",
                             "Value": (data != null && data.Title != null) ? data.Title : "",
                             "Type": "text",
@@ -1070,7 +1070,7 @@ var template = {
                     ],
                     "Show": [
                         {
-                            "DisplayName": "Tiêu đề",
+                            "DisplayName": "Title",
                             "Name": "Title",
                             "Value": (data != null && data.Title != null) ? data.Title : "",
                             "Type": "text",
@@ -1165,8 +1165,8 @@ var template = {
         var answer_template_holder = $('.answer_template');
         answer_template_holder.empty();
 
-        contentholder.append($("<label>", { "class": "title pt-2", "text": "Tiêu đề:" }));
-        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Nhập tiêu đề" }));
+        contentholder.append($("<label>", { "class": "title pt-2", "text": "Title:" }));
+        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Nhập Title" }));
         if (data != null && data.Title != null)
             contentholder.find("[name=Title]").val(data.Title);
 
@@ -1433,9 +1433,9 @@ function toggleCompact(obj) {
     var parent = $(obj).parent().parent();
     $(parent).toggleClass("compactView");
     if ($(parent).hasClass("compactView"))
-        $(obj).text("Mở rộng");
+        $(obj).text("Expand");
     else
-        $(obj).text("Thu gọn");
+        $(obj).text("Collapse");
 }
 
 var addNewQuestion = function (data = null) {

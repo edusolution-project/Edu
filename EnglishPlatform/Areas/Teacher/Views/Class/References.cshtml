@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name + " - Tài liệu tham khảo";
+    ViewData["Title"] = currentClass.Name + " - References";
     var myClasses = ViewBag.AllClass as List<BaseCustomerEntity.Database.ClassEntity>;
     var owner = ViewBag.User as string;
 
@@ -23,18 +23,18 @@
         <div class="main-content">
             <div class="row">
                 <div class="col-md-10">
-                    <div class="pt-3 pb-3 text-right"><button class="btn btn-primary" data-toggle="modal" data-target="#refModal" onclick="EditRef()">Thêm tài liệu mới</button></div>
+                    <div class="pt-3 pb-3 text-right"><button class="btn btn-primary" data-toggle="modal" data-target="#refModal" onclick="EditRef()">Add Reference</button></div>
                     <table id="tblRef" class="table" width="100%" cellspacing="0">
                         <thead>
                             <tr class="text-center">
-                                <th class="text-center">STT</th>
-                                <th class="text-center">Tiêu đề</th>
+                                <th class="text-center">Index</th>
+                                <th class="text-center">Title</th>
                                 @*<th class="text-left">Mô tả</th>*@
-                                <th class="text-center">Người gửi</th>
-                                <th class="text-center">Link liên kết</th>
-                                <th class="text-center">File đính kèm</th>
-                                <th class="text-center">Lượt xem</th>
-                                <th class="text-center">Lượt tải</th>
+                                <th class="text-center">Creator</th>
+                                <th class="text-center">Link</th>
+                                <th class="text-center">Attachment</th>
+                                <th class="text-center">View</th>
+                                <th class="text-center">Download</th>
                                 <th class="text-center"></th>
                             </tr>
                         </thead>
@@ -64,7 +64,7 @@
                     <div>
                         <input type="hidden" name="ID" id="refID" />
                         <div class="form-group">
-                            <label class="col-form-label">Tiêu đề:</label>
+                            <label class="col-form-label">Title:</label>
                             <input type="text" class="form-control" name="Title" id="refTitle" required>
                         </div>
                         <div class="form-group">
@@ -101,8 +101,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="UploadRef(); return false;">Lưu</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="UploadRef(); return false;">Save</button>
                 </div>
             </div>
         </div>
@@ -205,7 +205,7 @@
             var id = $('#refID').val();
             var title = $('#refTitle').val();
             if (title === '') {
-                alert('Chưa nhập tiêu đề');
+                alert('Chưa nhập Title');
                 $('#refTitle').focus();
             }
             var description = $('#refDescription').val();

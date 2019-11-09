@@ -1,7 +1,10 @@
 ﻿var urlBase = "/teacher/";
 
 var myEditor;
-
+var TEMPLATE_TYPE = {
+    EXAM: 2,
+    LESSON: 1
+}
 //lesson
 var urlLesson = {
     "List": "GetListLesson",
@@ -207,36 +210,37 @@ var chooseTemplate = function () {
     template.lessonPart(type);
 }
 
-
 var lessonService = {
     renderData: function (data) {
         $(containerLesson).html("");
         //var lessonBox = $("<div>", { "class": "lesson lesson-box p-fixed" });
-        var lessonBox = $("<div>", { "class": "lesson lesson-box" });
-        var lessonContainer = $("<div>", { "class": "lesson-container" });
+        var lessonBox = $("<div>", { "class": "lesson lesson-box h-100" });
+        var lessonContainer = $("<div>", { "class": "lesson-container h-100" });
         lessonBox.append(lessonContainer);
-        var lessonContent = $("<div>", { "class": "card shadow mb-4" });
-        lessonContainer.append(lessonContent);
+        //var lessonContent = $("<div>", { "class": "card h-100" });
+        var lessonContent = lessonContainer;
+        //lessonContainer.append(lessonContent);
         //header
-        var lessonHeader = $("<div>", { "class": "card-header" });
-        lessonContent.append(lessonHeader);
+        var lessonHeader = $('#lesson-header');
+        //lessonContent.append(lessonHeader);
 
         //header row
         var headerRow = $("<div>", { "class": "row" });
         lessonHeader.append(headerRow);
         //Body
-        var cardBody = $("<div>", { "class": "card-body" });
+        var cardBody = $("<div>", { "class": "card-body p-0 h-100", "style":"overflow-x:hidden", id:"body-exam" });
         lessonContent.append(cardBody);
         //row
-        var lessonRow = $("<div>", { "class": "row position-relative" });
-        cardBody.append(lessonRow);
+        //var lessonRow = $("<div>", { "class": "row position-relative m-0" });
+        //cardBody.append(lessonRow);
 
+        var lessonRow = cardBody;
 
-        var tabsleft = $("<div>", { "id": "menu-tab", "class": "col-12 position-absolute", "style": "display:none; top: 0; left:0" });
+        var tabsleft = $("<div>", { "id": "menu-tab", "class": "col-12 position-absolute", "style": "display:none; top: 0; left:0; border-radius: 0" });
         var lessontabs = $("<div>", { "class": "lesson-tabs" });
         var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
 
-        var title_wrapper = $("<div>", { "class": "lesson-header-title col-md-10 col-sm-12" });
+        var title_wrapper = $("<div>", { "class": "lesson-header-title col-md-9 col-sm-12" });
         var title = $("<h5>");
         var titleText = $("<span>", { "class": "title-text", "text": data.Title })
         title.append(titleText);
@@ -253,27 +257,27 @@ var lessonService = {
                 title.append(titlePoint);
             }
         }
-        var lessonButton = $("<div>", { "class": "lesson-button col-md-2 col-sm-12 text-right" });
+        var lessonButton = $("<div>", { "class": "lesson-button col-md-3 col-sm-12 text-right" });
         var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sort", "onclick": "lessonService.renderSort()" });
-        var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Edit", "data-toggle": "modal", "data-target": "#lessonModal", "onclick": "EditLesson('" + data.ID + "')" });
-        var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "Create.lessonPart('" + data.ID + "')" });
-        var close = $("<button>", { "class": "btn btn-primary btn-close", "text": "X", "onclick": "render.resetLesson()" });
-        var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Remove", "onclick": "lessonService.remove('" + data.ID + "')" });
+        var edit = $("<button>", { "class": "btn btn-primary btn-edit ml-1", "title": "Edit", "data-toggle": "modal", "data-target": "#lessonModal", "onclick": "EditLesson('" + data.ID + "')" });
+        var create = $("<button>", { "class": "btn btn-primary btn-add ml-1", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "Create.lessonPart('" + data.ID + "')" });
+        var close = $("<button>", { "class": "btn btn-primary btn-close ml-1", "text": "X", "onclick": "render.resetLesson()" });
+        //var remove = $("<button>", { "class": "btn btn-danger btn-remove ml-1", "title": "Remove", "onclick": "lessonService.remove('" + data.ID + "')" });
 
         var iconSort = $("<i>", { "class": "fas fa-sort" });
-        var iconEdit = $("<i>", { "class": "fas fa-edit" });
+        //var iconEdit = $("<i>", { "class": "fas fa-edit" });
         var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
         var iconTrash = $("<i>", { "class": "fas fa-trash" });
         lessonButton.append(iconSort);
 
         lessonButton.append(sort);
         sort.append(iconSort);
-        lessonButton.append(edit);
-        edit.append(iconEdit);
+        //lessonButton.append(edit);
+        //edit.append(iconEdit);
         lessonButton.append(create);
         create.append(iconCreate);
-        lessonButton.append(remove); //removeLesson
-        remove.append(iconTrash);
+        //lessonButton.append(remove); //removeLesson
+        //remove.append(iconTrash);
 
         headerRow.append(lessonButton);
 
@@ -284,29 +288,30 @@ var lessonService = {
 
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.ID });
 
-        var bodyright = $("<div>", { "class": "col-12" });
+        //var bodyright = $("<div>", { "class": "col-12 p-2 w-100", style:"overflow-x:hidden" });
 
-        var lessonFooter = $('<div>', { "class": "card-footer" })
-        var nav_bottom = $('<div>', { "class": "row" });
+        //var lessonFooter = $('<div>', { "class": "card-footer p-2" })
+        var lessonFooter = $('#lessonSummary');
+        var nav_bottom = $('<div>', { "class": "col-md-12 pl-0 pr-0", id:"nav-menu" });
 
-        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Prev", "onclick": "tab_goback()" });
+        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Prev", "onclick": "prevPart()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
-        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Next", "onclick": "tab_gonext()" });
+        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Next", "onclick": "nextPart()" });
         var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
         prevtab.append(iconprev);
         nexttab.append(iconnext);
 
-        nav_bottom.append($('<div>', { "class": "col-md-2 text-left" }).append(prevtab));
-        nav_bottom.append($('<div>', { "class": "col-md-8 text-center" }));
-        nav_bottom.append($('<div>', { "class": "col-md-2 text-right" }).append(nexttab));
+        nav_bottom.append($('<div>', { "class": "col-md-3 col-sm-2 text-left d-inline-block" }).append(prevtab));
+        nav_bottom.append($('<div>', { "class": "col-md-6 col-sm-8 text-center d-inline-block" }));
+        nav_bottom.append($('<div>', { "class": "col-md-3 col-sm-2 text-right d-inline-block" }).append(nexttab));
         lessonFooter.append(nav_bottom);
-        lessonContent.append(lessonFooter);
+        //lessonContent.append(lessonFooter);
 
 
         var tabscontent = $("<div>", { "id": "pills-tabContent", "class": "tab-content" });
         lessonBody.append(tabscontent);
 
-        lessonRow.append(bodyright);
+        //lessonRow.append(bodyright);
 
         // add lesson part
         var createLessonPart = $("<div>", { "class": "add-lesson-part" });
@@ -315,7 +320,8 @@ var lessonService = {
 
         var newLessonPart = $("<div>", { "class": "new-lesson-part", "id": data.ID + new Date().getDate() });
 
-        bodyright.append(lessonBody);
+        lessonRow.append(lessonBody);
+        //bodyright.append(lessonBody);
 
         //lessonContainer.append(createLessonPart);
         //lessonContainer.append(newLessonPart);
@@ -324,6 +330,7 @@ var lessonService = {
         //var lessonContainerBackground = $("<div>", { "class": "lesson-container-bg" });
         //containerLesson.append(lessonContainerBackground);
         containerLesson.append(lessonBox);
+        //containerLesson.find('.part-column').addClass('scrollbar-outer').scrollbar();
     },
     renderSort: function () {
         $("#pills-tab").toggleClass("sorting");
@@ -575,7 +582,6 @@ var render = {
 
 
         //tabs
-
         var lessonitem = null;
         if ($('li #pills-' + data.ID).length > 0) {
             lessonitem = $('li #pills-' + data.ID).parent().empty()
@@ -587,9 +593,6 @@ var render = {
 
         var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
         lessonitem.append(itemtitle);
-
-
-
 
         var tabsitem = null;
 
@@ -733,12 +736,70 @@ var render = {
             trigger: "hover"
         });
     },
+    partNew: function (data, index) {
+
+        var container = $("#" + data.ParentID).find(".tab-content");
+        var tabContainer = $("#menu-tab #pills-tab");
+
+        var lessonitem = null;
+        if ($('li #pills-' + data.ID).length > 0) {
+            lessonitem = $('li #pills-' + data.ID).parent().empty()
+        }
+        else {
+            lessonitem = $("<li>", { "class": "nav-item" });
+            tabContainer.append(lessonitem);
+        }
+
+        var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
+        lessonitem.append(itemtitle);
+
+        var active = "";
+        if (index != void 0 && index == 0) {
+            active = "show active";
+        }
+
+        var type = $('#LessonType').val();
+        var dspClass = 'fade ';
+        if (type == TEMPLATE_TYPE.LESSON)
+            dspClass = 'd-block ';
+
+        var html = '<div id="pills-part-' + data.ID + '" class="tab-pane ' + dspClass + active + '" role="tabpanel" aria-labelledby="pills-' + data.ID + '">';
+
+        html += '<div class="part-box ' + (type == TEMPLATE_TYPE.LESSON ? 'position-relative border-bottom ' : '') + data.Type + '" id="' + data.ID + '">';
+
+        switch (data.Type) {
+            case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data);
+                break;
+            case "QUIZ2": html += renderQUIZ2(data);//type == 2 ? renderQUIZ2(data) : renderQUIZ2_BG(data);
+                break;
+            case "QUIZ3": html += renderQUIZ3(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
+                break;
+            case "ESSAY": html += renderESSAY(data); //type == 2 ? renderESSAY(data) : renderESSAY_BG(data);
+                break;
+            case "VOCAB": html += renderVOCAB(data); //type == 2 ? renderVOCAB(data) : renderVOCAB_BG(data);
+                break;
+            case "DOC": html += renderDOC(data);
+                break;
+            case "IMG": html += renderIMG(data);
+                break;
+            case "AUDIO": html += renderAUDIO(data);
+                break;
+            case "VIDEO": html += renderVIDEO(data);
+                break;
+            default: html += renderTEXT(data); //text
+                break;
+        }
+        html += '</div></div>';
+        container.append(html);
+        container.find('.part-column').addClass('scrollbar-outer').scrollbar();
+        $('.lesson-container .card-body').addClass('scrollbar-outer').scrollbar();
+        //return html;
+    },
     questions: function (data, template) {
         //render question
         switch (template) {
             case "QUIZ2":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
-
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 boxHeader.append($("<div>", { "class": "quiz-text", "text": data.Content }));
@@ -974,8 +1035,239 @@ var render = {
     }
 };
 
+var renderTEXT = function (data) {
+    var title = "";
+    if (data.Title != null) {
+        var title = '<div class="part-box-header pl-3 pr-3"><h5 class="title">' + data.Title + '</h5></div>';
+    }
+    var html = "<div class='part-column'>" + title + '<div class="content-wrapper p-3">';
+    html += '<div class="doc-content">' + data.Description + '</div>';
+    html += '</div></div>';
+    return html;
+}
+
+var renderVIDEO = function (data) {
+    var title = '';
+    if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
+    var html = title + '<div class="media-wrapper">';
+    html += '<div class="media-holder VIDEO"><video controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the video tag</video></div>';
+    html += '</div>';
+    return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
+}
+
+var renderAUDIO = function (data) {
+    var title = '';
+    if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
+    var html = title + '<div class="media-wrapper">';
+    html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the audio tag</audio></div>';
+    html += '</div>';
+    return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
+}
+
+var renderIMG = function (data) {
+    var title = '';
+    if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
+    var html = title + '<div class="media-wrapper">';
+    html += '<div class="media-holder ' + data.Type + '"><img src="' + data.Media.Path + '" title="' + data.Title + '" class="img-fluid lazy"></div>';
+    html += '</div>';
+    return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
+}
+
+var renderDOC = function (data) {
+    var title = '';
+    if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
+    var html = title + '<div class="media-wrapper">';
+    html += '<div class="media-holder ' + data.Type + '"><embed class="mediaContainer scrollbar-outer" src="' + data.Media.Path + '" style="width: 100%; height: 800px; border:1px solid"></div>';
+    html += '</div>';
+    return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
+}
+
+var renderVOCAB = function (data) {
+    var title = '<div class="part-box-header col-md-2 d-inline-block part-column"><h5 class="title">' + data.Title + '</h5></div>';
+    var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
+    html += '<div class="media-holder ' + data.Type + '">Not Support</div>';
+    html += '</div>';
+    return html;
+}
+
+var renderQUIZ1 = function (data) {
+    var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
+    var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
+    if (data.Title != null)
+        html += '<h5 class="title">' + data.Title + '</h5 >';
+    if (data.Description != null)
+        html += '<div class="description">' + data.Description + '</div>';
+    html += renderMedia(data.Media) + toggleButton + '</div></div>';
+    html += '<div class="col-md-6 d-inline-block align-top h-100"><div class="quiz-wrapper part-column">';
+    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+        var item = data.Questions[i];
+        html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
+        html += '<div class="quiz-box-header"><h5 class="title">' + item.Content + '</h5>' + renderMedia(item.Media) + '</div>';
+        html += '<div class="answer-wrapper">';
+        for (var x = 0; item.Answers != null && x < item.Answers.length; x++) {
+            var answer = item.Answers[x];
+            html += '<fieldset class="answer-item d-inline mr-3" id="' + answer.ID + '">';
+            html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '" onclick="AnswerQuestion(this)">';
+            html += '<input id="' + answer.ID + '" type="radio" data-type="QUIZ1" value="' + answer.Content + '" class="input-checkbox answer-checkbox form-check-input" name="rd_' + item.ID + '">';
+            html += '<label class="answer-text form-check-label" for="' + answer.ID + '">' + answer.Content + '</label>';
+            html += '</div>';
+            html += renderMedia(answer.Media);
+            html += '</fieldset>';
+        }
+        html += '</div></div>';
+    }
+    html += '</div></div>';
+    return html;
+}
+
+var renderQUIZ2 = function (data) {
+    //writeLog("renderQUIZ2", data.Description);
+    var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
+    var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
+    if (data.Title != null)
+        html += '<h5 class="title">' + data.Title + '</h5 >';
+    if (data.Description != null)
+        html += '<div class="description">' + data.Description + '</div>';
+    html += renderMedia(data.Media) + toggleButton + '</div></div>';
+    html += '<div class="col-md-6 d-inline-block align-top h-100"><div class="quiz-wrapper part-column">';
+    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+        var item = data.Questions[i];
+        var itemContent = item.Content == null ? "Câu hỏi số " + (i + 1) + " : " : item.Content;
+        html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
+        html += '<div class="quiz-box-header"><h5 class="title">' + itemContent + '</h5>' + renderMedia(item.Media) + '</div>';
+        html += '<div class="answer-wrapper">';
+        html += '<fieldset class="answer-item" id="quiz2-' + item.ID + '">';
+        var content = "";
+        //for (var x = 0; item.Answers != null && x < item.Answers.length; x++) {
+        //    var answer = item.Answers[x];
+        //    content += content == "" ? answer.Content : " | " + answer.Content;
+        //}
+        html += '<input id="inputQZ2-' + item.ID + '" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="" data-type="QUIZ2" type="text" class="input-text answer-text form-control" placeholder="' + content + '" onfocusout="AnswerQuestion(this)" autocomplete="off">';
+        html += '</fieldset>';
+        html += '</div></div>';
+    }
+    html += '</div></div>';
+    return html;
+}
+
+var renderQUIZ3 = function (data) {
+    //writeLog("renderQUIZ3", data);
+    var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
+    var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
+    if (data.Title != null)
+        html += '<h5 class="title">' + data.Title + '</h5 >';
+    if (data.Description != null)
+        html += '<div class="description">' + data.Description + '</div>';
+    html += renderMedia(data.Media) + toggleButton + '</div></div>';
+    html += '<div class="col-md-6 d-inline-block align-top h-100 p-0">';
+    html += '<div class="col-lg-8 d-inline-block h-100 align-top p-0"><div class="quiz-wrapper align-top part-column">';
+    var answers = "";
+    var ansArr = [];
+    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+        var item = data.Questions[i];
+        var content = "";
+        if (item.Content != null)
+            content = item.Content.replace(/\n/g, "<br/>");
+        html += '<div class="quiz-item row m-0" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
+        html += '<div class="quiz-pane col-6 align-top"><div class="pane-item"><div class="quiz-text">' + content + '</div></div></div>';
+        html += '<div class="answer-pane col-6 ui-droppable align-top" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-type="' + data.Type + '"><div class="pane-item placeholder">Drop your answer here</div></div>';
+        html += '</div>';
+        for (var x = 0; item.Answers != null && x < item.Answers.length; x++) {
+            var answer = item.Answers[x];
+            var media = renderMedia(answer.Media);
+            _answer = "";
+            if (media == "") {
+                _answer = '<fieldset data-type="QUIZ3" class="answer-item ui-draggable ui-draggable-handle" id="' + answer.ID + '"><label class="answer-text">' + answer.Content + '</label></fieldset>';
+            }
+            else {
+                _answer = '<fieldset data-type="QUIZ3" class="answer-item ui-draggable ui-draggable-handle" id="' + answer.ID + '">' + media + '</fieldset>';
+            }
+            var index = Math.floor(Math.random() * ansArr.length);
+            ansArr.splice(index, 0, _answer);
+        }
+    }
+
+    if (ansArr.length > 0)
+        for (var i = 0; i < ansArr.length; i++)
+            answers += ansArr[i];
+
+    html += '</div></div>';
+    html += '<div class="col-lg-4 d-inline-block h-100 align-top p-0"><div class="answer-wrapper no-child ui-droppable part-column" data-part-id="' + data.ID + '">' + answers + '</div></div>';
+    html += '</div>';
+    return html;
+}
+
+var renderESSAY = function (data) {
+    //writeLog("renderESSAY", data);
+    var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
+    var html = '<div class="row h-100">';
+    html += '<div class="col-md-6 h-100">';
+    html += '<div class="part-box-header p-3 part-column" > ' + (data.Title == null ? '' : ('<h5 class="title"> ' + data.Title + '</h5 >')) +
+        toggleButton +
+        //'<div class="description">' + data.Description + '</div>' +
+        renderMedia(data.Media) + '</div>';
+    html += '</div>';
+    html += '<div class="col-md-6 h-100"><div class="part-column"><div class="quiz-wrapper p-3">';
+    html += '<div class="quiz-item" id="' + data.ID + '" data-part-id="' + data.ID + '"></div>';
+    html += '<div class="answer-wrapper">';
+    html += '<div class="answer-content"><textarea data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-type="ESSAY" id="essay-' + data.ID + '" class="form-control" row="3" placeholder="Câu trả lời" onfocusout="AnswerQuestion(this)"></textarea></div>';
+    html += '</div></div></div>';
+    html += '</div></div>';
+    return html;
+}
+
+var renderMedia = function (data) {
+    if (data == null || data == void 0 || data == "") return "";
+    var arr = data.Extension.split('/');
+    if (arr.includes("video")) {
+        return '<div class="media-holder "><video controls=""><source src="' + data.Path + '" type="' + data.Extension + '">Your browser does not support the video tag</video></div>';
+    }
+    if (arr.includes("audio")) {
+        return '<div class="media-holder "><audio controls=""><source src="' + data.Path + '" type="' + data.Extension + '">Your browser does not support the audio tag</audio></div>'
+    }
+    if (arr.includes("image")) {
+        return '<div class="media-holder "><img src="' + data.Path + '" class="img-fluid lazy" title="' + data.Name + '"></div>';
+    }
+    return "";
+}
+
+var prevPart = function () {
+    var panes = $('.tab-pane');
+    var index = panes.index($('.tab-pane.active'));
+    if (index > 0) {
+        goPartInx(index - 1);
+    }
+}
+
+var nextPart = function () {
+    var panes = $('.tab-pane');
+    var index = panes.index($('.tab-pane.active'));
+    if (index < panes.length - 1) {
+        goPartInx(index + 1);
+    }
+}
+
+var goPartInx = function (idx) {
+
+    var panes = $('.tab-pane');
+    $('.tab-pane.active').removeClass('show active');
+    $(panes[idx]).addClass('show active');
+    var type = $('#LessonType').val();
+    if (type == TEMPLATE_TYPE.LESSON) {
+        $('#lessonContainer .card-body').scrollTop($(panes[idx]).offset().top);
+        //console.log($(panes[idx]).offset().top);
+    }
+    else {
+        stopAllMedia();
+    }
+    var _totalPart = $('#lessonContainer .part-box').length;
+    
+    $('.prevtab').prop('disabled', idx == 0);
+    $('.nexttab').prop('disabled', idx == _totalPart - 1);
+}
+
 var load = {
-    lesson: function (id, classid) {
+    lesson: function (id) {
         if (id != $("#LessonID").val())
             document.location = urlLesson.Location + id;
         else {
@@ -987,12 +1279,12 @@ var load = {
                 dataType: "json",
                 success: function (data) {
                     render.lesson(data.Data);
-                    load.listPart(data.Data.ID, classid);
+                    load.listPart(data.Data.ID);
                 }
             });
         }
     },
-    listPart: function (lessonID, classID) {
+    listPart: function (lessonID) {
 
         var url = urlBase + "LessonPart/";
         $.ajax({
@@ -1003,8 +1295,15 @@ var load = {
             success: function (data) {
                 for (var i = 0; data.Data != null && i < data.Data.length; i++) {
                     var item = data.Data[i];
-                    render.part(item);
+                    render.partNew(item,i);
                 }
+                $("#lessonContainer").find('.part-box[id]').each(function () {
+                    var header = $(this).find('.part-box-header .title');
+                    var boxButton = $("<div>", { "class": "pb-1" });
+                    boxButton.append($("<button>", { "class": "btn btn-primary btn-sm btn-edit", "text": "Edit", "data-toggle": "modal", "data-target": "#partModal", "onclick": "lessonPartService.edit('" + $(this).attr('id') + "')" }))
+                    boxButton.append($("<button>", { "class": "btn btn-danger btn-sm btn-close", "text": "Remove", "onclick": "lessonPartService.remove('" + $(this).attr('id') + "')" }));
+                    header.before(boxButton);
+                });
             }
         });
     },

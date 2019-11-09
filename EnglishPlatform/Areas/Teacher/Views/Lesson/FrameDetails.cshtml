@@ -1,19 +1,27 @@
 ﻿@{
     ViewData["Title"] = ViewBag.Title;
-    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    Layout = "~/Views/Shared/_LayoutTeacher_frame.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
 }
+<style>
+    .right-content {
+        padding-bottom: 0;
+    }
 
+    .container {
+        width: 100%;
+        max-width: 100%;
+        border: none;
+        padding: 0;
+        height: 100%;
+        overflow: auto;
+    }
+</style>
 <!-- Page Heading -->
-<div class="container">
-    <div class="breadcumb" style="padding: 0 0 15px; font-weight:bold;">
-        <a href="@Url.Action("Detail","Class")/@Class.ID">@Class.Name</a> / @Data.Title
+<div class="container h-100 overflow-hidden">
+    <div id="lessonContainer" class="h-100">
     </div>
-
-    <div id="lessonContainer">
-    </div>
-
 </div>
 <input type="hidden" id="LessonID" value="@Data.ID" />
 <input type="hidden" id="ChapterID" value="@Data.ChapterID" />
@@ -25,7 +33,13 @@
     });
 </script>
 @section Scripts{
-    <script src="~/js/teacher-lesson.js"></script>
+    <script src="~/js/teacher-lesson-frame.js"></script>
+<style>
+    #pills-tab .nav-item{
+        max-height: 66px;
+        overflow:hidden;
+    }
+</style>
 }
 @section Modals{
     <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">

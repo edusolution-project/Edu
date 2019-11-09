@@ -46,72 +46,46 @@ var urlChapter = {
     "Location": "/ModChapters/Detail/"
 }
 
-var modal = $("#partModal");
+var modal = $("#lessonModal");
 var modalTitle = $("#modalTitle");
 var containerLesson = $("#lessonContainer");
 var userID = "";
 var clientID = "";
+var classID = $("#ClassID").val();
 
 
-var submitForm = function (event, modalId, callback) {
+var submitForm = function (event) {
     event.preventDefault();
     $('.btnSaveForm').hide();
+    var Form = window.modalForm;
 
-    var form = $(modalId).find('form');
-    var Form = form.length > 0 ? form[0] : window.partForm;
     var formdata = new FormData(Form);
 
     if ($('textarea[name="Description"]').length > 0) {
         formdata.delete("Description");
-
-        //formdata.append("Description", myEditor.getData())
-        formdata.append("Description", CKEDITOR.instances.editor.getData())
+        formdata.append("Description", myEditor.getData())
     }
-    var err = false;
-    var requires = $(Form).find(':required');
-    requires.each(function () {
-        if ($(this).val() == "" || $(this).val() == null) {
-            alert("Please fill your content");
-            $(this).focus();
-            $('.btnSaveForm').show();
-            err = true;
-            return false;
-        }
-    });
-    if (err) return false;
 
     var xhr = new XMLHttpRequest();
     var url = urlBase;
-    var actionUrl = url + $("#action").val()
-    if (form.length > 0)
-        actionUrl = form.attr('action');
-
-    xhr.open('POST', actionUrl);
+    xhr.open('POST', url + $("#action").val());
     xhr.send(formdata);
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {
             var data = JSON.parse(xhr.responseText);
             if (data.Error == null || data.Error == "") {
-                //switch (actionUrl) {
-                //case "Lesson/" + urlLesson.CreateOrUpdate:
-                //render.lesson(data.data);
-                //document.location = urlLesson.Location + data.Data.ID;
-                //document.location = document.location;
-                //    break;
-                //case "LessonPart/" + urlLessonPart.CreateOrUpdate:
-                //    var part = data.Data;
-                //   //render.part(part);
-                if (actionUrl === url + "LessonPart/" + urlLessonPart.CreateOrUpdate) {
-                    var part = data.Data;
-                    render.part(part);
+                switch ($("#action").val()) {
+                    case "Lesson/" + urlLesson.CreateOrUpdate:
+                        //render.lesson(data.data);
+                        //document.location = urlLesson.Location + data.Data.ID;
+                        document.location = document.location;
+                        break;
+                    case "CloneLessonPart/" + urlLessonPart.CreateOrUpdate:
+                        var part = data.Data;
+                        //render.part(part);
+                        load.lesson(data.Data.ParentID, classID);
                 }
-                else {
-                    if (callback == null)
-                        LoadLesson();
-                    else
-                        callback;
-                }
-                hideModal(modalId);
+                hideModal();
             }
             else {
                 alert(data.Error);
@@ -142,27 +116,30 @@ var Create = {
     lesson: function () {
         var modalForm = $(window.modalForm);
         showModal();
-        modalTitle.html("Choose Template");
+        modalTitle.html("Chọn Template");
         modalForm.html(template.Type('lesson'));
     },
     lessonPart: function (lessonID) {
-        var modalForm = window.partForm;
+        var modalForm = window.modalForm;
+        showModal();
+        modalTitle.html("Tạo nội dung mới ");
         $(modalForm).empty();
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": lessonID }));
-        $('#action').val("LessonPart/" + urlLessonPart.CreateOrUpdate);
-        var selectTemplate = $("<select>", { "class": "templatetype form-control", "onchange": "chooseTemplate()", "name": "Type", "required": "required" });
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassID", "value": classID }));
+        $('#action').val("CloneLessonPart/" + urlLessonPart.CreateOrUpdate);
+        var selectTemplate = $("<select>", { "class": "templatetype form-control", "onchange": "chooseTemplate()", "name": "Type" });
         $(modalForm).append(selectTemplate);
-        $(selectTemplate).append("<option value=''>--- Choose content type ---</option>")
-            .append("<option value='TEXT'>Text</option>")
-            .append("<option value='VIDEO'>Video</option>")
-            .append("<option value='AUDIO'>Audio</option>")
-            .append("<option value='IMG'>Image</option>")
-            .append("<option value='DOC'>Document (PDF, DOC)</option>")
-            .append("<option value='VOCAB'>Vocabulary</option>")
-            .append("<option value='QUIZ1'>Choose correct answer</option>")
-            .append("<option value='QUIZ2'>Fill the word</option>")
-            .append("<option value='QUIZ3'>Match answer</option>")
-            .append("<option value='ESSAY'>Essay</option>");
+        $(selectTemplate).append("<option value='0'>--- Chọn kiểu nội dung ---</option>")
+            .append("<option value='TEXT'>Nội dung văn bản</option>")
+            .append("<option value='VIDEO'>Nội dung video</option>")
+            .append("<option value='AUDIO'>Nội dung audio</option>")
+            .append("<option value='IMG'>Nội dung hình ảnh</option>")
+            .append("<option value='DOC'>Nội dung pdf</option>")
+            .append("<option value='VOCAB'>Nội dung từ vựng tiếng Anh</option>")
+            .append("<option value='QUIZ1'>Bài tập trắc nghiệm dạng chuẩn</option>")
+            .append("<option value='QUIZ2'>Bài tập nghiệm dạng điền từ</option>")
+            .append("<option value='QUIZ3'>Bài tập trắc nghiệm nối đáp án</option>")
+            .append("<option value='ESSAY'>Bài tập tự luận</option>");
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
         $(modalForm).append($("<div>", { "class": "question_template hide" }));
         $(modalForm).append($("<div>", { "class": "answer_template hide" }));
@@ -170,21 +147,21 @@ var Create = {
     answer: function (lessonPartID) {
         var modalForm = window.modalForm;
         showModal();
-        modalTitle.html("Add answer:");
+        modalTitle.html("Thêm câu trả lời :");
         var data = [
             {
-                "Name": "Add answer: ",
+                "Name": "Tạo câu trả lời : ",
                 "Hidden": null,
                 "Show": [
                     {
-                        "DisplayName": "Content",
+                        "DisplayName": "Nội dung",
                         "Name": "Content",
                         "Value": "",
                         "Type": "text",
                         "Length": "col-12"
                     },
                     {
-                        "DisplayName": "Correct Answer",
+                        "DisplayName": "Đây là đáp án đúng",
                         "Name": "IsAnswer",
                         "Value": "",
                         "Type": "checkbox",
@@ -207,75 +184,74 @@ var chooseTemplate = function () {
     template.lessonPart(type);
 }
 
-
 var lessonService = {
     renderData: function (data) {
         $(containerLesson).html("");
         //var lessonBox = $("<div>", { "class": "lesson lesson-box p-fixed" });
-        var lessonBox = $("<div>", { "class": "lesson lesson-box" });
-        var lessonContainer = $("<div>", { "class": "lesson-container" });
+        var lessonBox = $("<div>", { "class": "lesson lesson-box h-100" });
+        var lessonContainer = $("<div>", { "class": "lesson-container h-100" });
         lessonBox.append(lessonContainer);
-        var lessonContent = $("<div>", { "class": "card shadow mb-4" });
+        var lessonContent = $("<div>", { "class": "card h-100" });
         lessonContainer.append(lessonContent);
         //header
         var lessonHeader = $("<div>", { "class": "card-header" });
         lessonContent.append(lessonHeader);
 
         //header row
-        var headerRow = $("<div>", { "class": "row" });
+        var headerRow = $("<div>", { "class": "row m-0" });
         lessonHeader.append(headerRow);
         //Body
-        var cardBody = $("<div>", { "class": "card-body" });
+        var cardBody = $("<div>", { "class": "card-body h-100 p-1" });
         lessonContent.append(cardBody);
         //row
-        var lessonRow = $("<div>", { "class": "row position-relative" });
+        var lessonRow = $("<div>", { "class": "row h-100" });
         cardBody.append(lessonRow);
 
 
-        var tabsleft = $("<div>", { "id": "menu-tab", "class": "col-12 position-absolute", "style": "display:none; top: 0; left:0" });
+        var tabsleft = $("<div>", { "id": "menu-left", "class": "col-2 h-100 part-column" });
         var lessontabs = $("<div>", { "class": "lesson-tabs" });
         var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
 
-        var title_wrapper = $("<div>", { "class": "lesson-header-title col-md-10 col-sm-12" });
-        var title = $("<h5>");
+        var title = $("<div>", { "class": "lesson-header-title col-lg-6" });
         var titleText = $("<span>", { "class": "title-text", "text": data.Title })
         title.append(titleText);
-        title_wrapper.append(title);
-        headerRow.append(title_wrapper);
+
+        headerRow.append(title);
 
         if (data.TemplateType == 2) {
             if (data.Timer > 0) {
-                var titleTimer = $("<span>", { "class": "title-timer", "text": " - duration: " + data.Timer + "m" });
+                var titleTimer = $("<span>", { "class": "title-timer", "text": " - thời gian: " + data.Timer + "p" });
                 title.append(titleTimer);
             }
             if (data.Point > 0) {
-                var titlePoint = $("<span>", { "class": "title-point", "text": " (" + data.Point + "p)" });
+                var titlePoint = $("<span>", { "class": "title-point", "text": " (" + data.Point + "đ)" });
                 title.append(titlePoint);
             }
         }
-        var lessonButton = $("<div>", { "class": "lesson-button col-md-2 col-sm-12 text-right" });
-        var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sort", "onclick": "lessonService.renderSort()" });
-        var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Edit", "data-toggle": "modal", "data-target": "#lessonModal", "onclick": "EditLesson('" + data.ID + "')" });
-        var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "Create.lessonPart('" + data.ID + "')" });
+        var lessonButton = $("<div>", { "class": "lesson-button" });
+        var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sắp xếp", "onclick": "lessonService.renderSort()" });
+        var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Sửa", "onclick": "lessonService.renderEdit('" + data.ID + "')" });
+        var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Thêm nội dung", "onclick": "Create.lessonPart('" + data.ID + "')" });
         var close = $("<button>", { "class": "btn btn-primary btn-close", "text": "X", "onclick": "render.resetLesson()" });
-        var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Remove", "onclick": "lessonService.remove('" + data.ID + "')" });
+        var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Xóa", "onclick": "lessonService.remove('" + data.ID + "')" });
 
         var iconSort = $("<i>", { "class": "fas fa-sort" });
         var iconEdit = $("<i>", { "class": "fas fa-edit" });
         var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
         var iconTrash = $("<i>", { "class": "fas fa-trash" });
+
+        title.append(lessonButton);
         lessonButton.append(iconSort);
 
         lessonButton.append(sort);
         sort.append(iconSort);
-        lessonButton.append(edit);
+        //lessonButton.append(edit);
         edit.append(iconEdit);
         lessonButton.append(create);
         create.append(iconCreate);
-        lessonButton.append(remove); //removeLesson
+        //lessonHeader.append(close);
+        //lessonButton.append(remove); //removeLesson
         remove.append(iconTrash);
-
-        headerRow.append(lessonButton);
 
 
         lessonRow.append(tabsleft);
@@ -284,33 +260,26 @@ var lessonService = {
 
         var lessonBody = $("<div>", { "class": "lesson-body", "id": data.ID });
 
-        var bodyright = $("<div>", { "class": "col-12" });
-
-        var lessonFooter = $('<div>', { "class": "card-footer" })
-        var nav_bottom = $('<div>', { "class": "row" });
-
-        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Prev", "onclick": "tab_goback()" });
+        var bodyright = $("<div>", { "class": "col-10 h-100 part-column" });
+        var button = $("<div>", { "class": "text-right col-lg-6" });
+        headerRow.append(button);
+        var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Quay lại", "onclick": "tab_goback()" });
         var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
-        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Next", "onclick": "tab_gonext()" });
+        var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Tiếp tục", "onclick": "tab_gonext()" });
         var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
+        button.append(prevtab);
         prevtab.append(iconprev);
+        button.append(nexttab);
         nexttab.append(iconnext);
 
-        nav_bottom.append($('<div>', { "class": "col-md-2 text-left" }).append(prevtab));
-        nav_bottom.append($('<div>', { "class": "col-md-8 text-center" }));
-        nav_bottom.append($('<div>', { "class": "col-md-2 text-right" }).append(nexttab));
-        lessonFooter.append(nav_bottom);
-        lessonContent.append(lessonFooter);
-
-
-        var tabscontent = $("<div>", { "id": "pills-tabContent", "class": "tab-content" });
+        var tabscontent = $("<div>", { "id": "pills-tabContent", "class": "tab-content pl-2 pr-2" });
         lessonBody.append(tabscontent);
 
         lessonRow.append(bodyright);
 
         // add lesson part
         var createLessonPart = $("<div>", { "class": "add-lesson-part" });
-        var btn = $("<a>", { "class": "btn btn-sm btn-success", "text": "Add content", "href": "javascript:void(0)", "onclick": "Create.lessonPart('" + data.ID + "')" });
+        var btn = $("<a>", { "class": "btn btn-sm btn-success", "text": "Thêm nội dung", "href": "javascript:void(0)", "onclick": "Create.lessonPart('" + data.ID + "')" });
         //createLessonPart.append(btn);
 
         var newLessonPart = $("<div>", { "class": "new-lesson-part", "id": data.ID + new Date().getDate() });
@@ -324,11 +293,11 @@ var lessonService = {
         //var lessonContainerBackground = $("<div>", { "class": "lesson-container-bg" });
         //containerLesson.append(lessonContainerBackground);
         containerLesson.append(lessonBox);
+        $('.part-column').addClass('scrollbar-outer').scrollbar();
     },
     renderSort: function () {
         $("#pills-tab").toggleClass("sorting");
         if ($("#pills-tab").hasClass("sorting")) {
-            $("#menu-tab").show();
             $(".card-header .btn-sort").addClass("btn-warning");
             $("#pills-tab").sortable({
                 revert: "invalid",
@@ -343,8 +312,6 @@ var lessonService = {
             $("#pills-tab").disableSelection();
         }
         else {
-            $("#menu-tab").hide();
-
             $(".card-header .btn-sort").removeClass("btn-warning");
             $("#pills-tab").sortable("disable");
         }
@@ -352,7 +319,7 @@ var lessonService = {
     renderEdit: function (id) {
         var modalForm = $(window.modalForm);
         showModal();
-        modalTitle.html("Choose Template");
+        modalTitle.html("Chọn Template");
         modalForm.html(template.Type('lesson'));
         var url = urlBase + "Lesson/";
         $.ajax({
@@ -367,7 +334,7 @@ var lessonService = {
     },
     remove: function (id) {
         var CourseID = $("#CourseID").val();
-        var check = confirm("Remove this course?");
+        var check = confirm("bạn muốn xóa nội dung này ?");
         if (check) {
             $.ajax({
                 type: "POST",
@@ -430,7 +397,7 @@ var lessonService = {
     create: function () {
         var modalForm = $(window.modalForm);
         showModal();
-        modalTitle.html("Choose Template");
+        modalTitle.html("Chọn Template");
         modalForm.html(template.Type('lesson'));
     }
 }
@@ -440,7 +407,7 @@ var lessonPartService = {
         var modalForm = window.modalForm;
         showModal();
         $(modalForm).empty();
-        var url = urlBase + "LessonPart/";
+        var url = urlBase + "CloneLessonPart/";
         $.ajax({
             type: "POST",
             url: url + "GetDetail",
@@ -452,11 +419,10 @@ var lessonPartService = {
         });
     },
     edit: function (id) {
-        stopAllMedia();
-        var modalForm = window.partForm;
-        //showModal();
+        var modalForm = window.modalForm;
+        showModal();
         $(modalForm).empty();
-        var url = urlBase + "LessonPart/";
+        var url = urlBase + "CloneLessonPart/";
         $.ajax({
             type: "POST",
             url: url + "GetDetail",
@@ -471,7 +437,7 @@ var lessonPartService = {
         var url = urlBase;
         $.ajax({
             type: "POST",
-            url: urlBase + "LessonPart/" + urlLessonPart.ChangePos,
+            url: urlBase + "CloneLessonPart/" + urlLessonPart.ChangePos,
             data: {
                 "ID": id,
                 "pos": pos
@@ -482,12 +448,12 @@ var lessonPartService = {
         });
     },
     remove: function (id) {
-        var check = confirm("Remove this content?");
+        var check = confirm("bạn muốn xóa nội dung này ?");
         if (check) {
 
             $.ajax({
                 type: "POST",
-                url: urlBase + "LessonPart/" + urlLessonPart.Remove,
+                url: urlBase + "CloneLessonPart/" + urlLessonPart.Remove,
                 data: {
                     "ID": id
                 },
@@ -507,7 +473,7 @@ var lessonPartService = {
 
 var questionService = {
     remove: function (obj) {
-        if (confirm("Remove question?")) {
+        if (confirm("Xóa câu hỏi?")) {
             var id = $(obj).siblings("[name$='.ID']").val();
             var quizHolder = $(obj).parent();
             if (!$(obj).parent().hasClass("fieldQuestion"))
@@ -520,7 +486,7 @@ var questionService = {
 
 var answerService = {
     remove: function (obj) {
-        if (confirm("Remove answer?")) {
+        if (confirm("Xóa đáp án?")) {
             var id = $(obj).siblings("[name$='.ID']").val();
             if (id !== "")
                 $(obj).parent().parent().append($("<input>", { "type": "hidden", "name": "RemovedAnswers", "value": id }));
@@ -546,13 +512,14 @@ var render = {
         }
     },
     editPart: function (data) {
-        var modalForm = window.partForm;
-        modalTitle.html("Update");
+        var modalForm = window.modalForm;
+        modalTitle.html("Cập nhật nội dung");
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassID", "value": classID }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ID", "value": data.ID }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "Type", "value": data.Type }));
 
-        $('#action').val("LessonPart/" + urlLessonPart.CreateOrUpdate);
+        $('#action').val("CloneLessonPart/" + urlLessonPart.CreateOrUpdate);
 
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
         $(modalForm).append($("<div>", { "class": "question_template hide" }));
@@ -564,55 +531,37 @@ var render = {
         var time = "", point = "";
 
         if (data.Timer > 0) {
-            time = " (" + data.Timer + "m)";
+            time = " (" + data.Timer + "p)";
         }
         if (data.Point > 0) {
-            point = " (" + data.Point + "p)";
+            point = " (" + data.Point + "đ)";
         }
 
         var container = $("#" + data.ParentID).find(".tab-content");
-        var tabContainer = $("#menu-tab #pills-tab");
+        var tabContainer = $("#menu-left #pills-tab");
 
-
-        //tabs
-
-        var lessonitem = null;
-        if ($('li #pills-' + data.ID).length > 0) {
-            lessonitem = $('li #pills-' + data.ID).parent().empty()
-        }
-        else {
-            lessonitem = $("<li>", { "class": "nav-item" });
-            tabContainer.append(lessonitem);
-        }
-
+        //tabs         
+        var lessonitem = $("<li>", { "class": "nav-item" });
         var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
         lessonitem.append(itemtitle);
+        tabContainer.append(lessonitem);
 
-
-
-
-        var tabsitem = null;
-
-        if ($('#pills-part-' + data.ID).length > 0) {
-            //clear old-tab
-            tabsitem = $('#pills-part-' + data.ID).empty();
-        }
-        else
-            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane fade", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+        // tabs content
+        var tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane fade", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
 
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         tabsitem.append(itembox);
 
         var ItemRow = $("<div>", { "class": "row" });
 
-        var boxHeader = $("<div>", { "class": "part-box-header row" });
+        var boxHeader = $("<div>", { "class": "part-box-header" });
         if (data.Title != null) {
-            boxHeader.append($("<h5>", { "class": "title col-md-10", "text": data.Title + time + point }));
+            boxHeader.append($("<h5>", { "class": "title d-inline-block", "text": data.Title + time + point }));
         }
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Collapse", "onclick": "toggleCompact(this)" }));
-        var boxButton = $("<div>", { "class": "text-right col-md-2" });
-        boxButton.append($("<button>", { "class": "btn btn-primary btn-sm btn-edit", "text": "Edit", "data-toggle": "modal", "data-target": "#partModal", "onclick": "lessonPartService.edit('" + data.ID + "')" }))
-        boxButton.append($("<button>", { "class": "btn btn-danger btn-sm btn-close", "text": "Remove", "onclick": "lessonPartService.remove('" + data.ID + "')" }));
+        var boxButton = $("<div>", { "class": "d-inline-block part-action-box" });
+        boxButton.append($("<button>", { "class": "btn btn-primary btn-sm btn-edit", "text": "Sửa", "onclick": "lessonPartService.edit('" + data.ID + "')" }))
+        boxButton.append($("<button>", { "class": "btn btn-danger btn-sm btn-close", "text": "Xóa", "onclick": "lessonPartService.remove('" + data.ID + "')" }));
 
         itembox.append(boxHeader);
         boxHeader.append(boxButton);
@@ -717,11 +666,11 @@ var render = {
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itembox.append(itemBody);
                 render.mediaContent(data, itemBody, "");
-                totalQuiz = data.Questions.length;
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    render.questions(item, data.Type);
-                }
+                //totalQuiz = data.Questions.length;
+                //for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                //    var item = data.Questions[i];
+                //    render.questions(item, data.Type);
+                //}
                 break;
         }
 
@@ -729,19 +678,17 @@ var render = {
             itemtitle.addClass("active");
             tabsitem.addClass("show active");
         }
-        $('.btn').tooltip({
-            trigger: "hover"
-        });
     },
     questions: function (data, template) {
         //render question
         switch (template) {
             case "QUIZ2":
+                point = " (" + data.Point + "đ)";
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
-                boxHeader.append($("<div>", { "class": "quiz-text", "text": data.Content }));
+                boxHeader.append($("<div>", { "class": "quiz-text", "text": data.Content + point }));
                 render.mediaContent(data, boxHeader);
                 quizitem.append(boxHeader);
 
@@ -761,6 +708,7 @@ var render = {
                 }
                 break;
             case "QUIZ3":
+                point = " (" + data.Point + "đ)";
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -772,7 +720,7 @@ var render = {
 
                 var pane_item = $("<div>", { "class": "pane-item" });
                 if (data.Media == null) {
-                    pane_item.append($("<div>", { "class": "quiz-text", "text": data.Content }));
+                    pane_item.append($("<div>", { "class": "quiz-text", "text": data.Content + point }));
                 } else {
                     render.mediaContent(data, pane_item);
                 }
@@ -809,7 +757,7 @@ var render = {
                 var point = "";
 
                 if (data.Point > 0) {
-                    point = " (" + data.Point + "p)";
+                    point = " (" + data.Point + "đ)";
                 }
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
@@ -860,7 +808,7 @@ var render = {
             case "QUIZ3":
                 var placeholder = $("#" + data.ParentID).find(".answer-pane");
                 $(placeholder).removeClass("no-child");
-                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
 
                 if (data.Content != null)
@@ -924,7 +872,7 @@ var render = {
                 wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide" }));
                 break;
         }
-        wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddFile", "onclick": "chooseFile(this)", "value": "Choose file", "tabindex": -1 }));
+        wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddFile mt-2 mb-2", "onclick": "chooseFile(this)", "value": "Chọn file", "tabindex": -1 }));
         wrapper.append($("<input>", { "type": "button", "class": "btn btn-danger btnResetFile hide", "onclick": "resetMedia(this)", "value": "x", "tabindex": -1 }));
         if (data != null) {
             if (data.Name != null) $(wrapper).find("[name='" + prefix + "Media.Name']").val(data.Name);
@@ -994,11 +942,11 @@ var load = {
     },
     listPart: function (lessonID, classID) {
 
-        var url = urlBase + "LessonPart/";
+        var url = urlBase + "CloneLessonPart/";
         $.ajax({
             type: "POST",
             url: url + urlLessonPart.List,
-            data: { LessonID: lessonID },
+            data: { LessonID: lessonID, ClassID: classID },
             dataType: "json",
             success: function (data) {
                 for (var i = 0; data.Data != null && i < data.Data.length; i++) {
@@ -1072,7 +1020,7 @@ var template = {
         if (type == "lesson1") {
             return [
                 {
-                    "Name": "Update",
+                    "Name": "Tạo trang bài giảng",
                     "Hidden": [
                         {
                             "Name": "ID",
@@ -1104,7 +1052,7 @@ var template = {
         if (type == "lesson2") {
             return [
                 {
-                    "Name": "Update",
+                    "Name": "Tạo trang bài kiểm tra",
                     "Hidden": [
                         {
                             "Name": "ID",
@@ -1129,34 +1077,16 @@ var template = {
                             "Type": "text",
                             "Length": "col-12"
                         }, {
-                            "DisplayName": "Duration (minutes)",
+                            "DisplayName": "Thời gian làm bài (phút)",
                             "Name": "Timer",
                             "Value": (data != null && data.Timer != null) ? data.Timer : 0,
                             "Type": "number",
                             "Length": "col-6"
                         }, {
-                            "DisplayName": "Attempt Limit:",
-                            "Name": "Timer",
-                            "Value": (data != null && data.Limit != null) ? data.Limit : 0,
-                            "Type": "number",
-                            "Length": "col-6"
-                        }, {
-                            "DisplayName": "Point",
+                            "DisplayName": "Điểm",
                             "Name": "Point",
                             "Value": (data != null && data.Point != null) ? data.Point : 0,
                             "Type": "number",
-                            "Length": "col-6"
-                        }, {
-                            "DisplayName": "Multiple",
-                            "Name": "Multiple",
-                            "Value": (data != null && data.Multiple != null) ? data.Multiple : 0,
-                            "Type": "number",
-                            "Length": "col-6"
-                        }, {
-                            "DisplayName": "Exam type",
-                            "Name": "Etype",
-                            "Value": (data != null && data.Etype != null) ? data.Etype : 0,
-                            "Type": "select",
                             "Length": "col-6"
                         }
                     ]
@@ -1236,91 +1166,89 @@ var template = {
         var answer_template_holder = $('.answer_template');
         answer_template_holder.empty();
 
-        contentholder.append($("<label>", { "class": "title", "text": "Title:" }));
-        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Title", "required": "required" }));
+        contentholder.append($("<label>", { "class": "title pt-2", "text": "Title:" }));
+        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Nhập Title" }));
         if (data != null && data.Title != null)
             contentholder.find("[name=Title]").val(data.Title);
 
         switch (type) {
             case "TEXT"://Text
-                contentholder.append($("<label>", { "class": "title", "text": "Enter your content" }));
-                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Enter content" }));
+                contentholder.append($("<label>", { "class": "title", "text": "Nhập nội dung văn bản" }));
+                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung văn bản" }));
                 if (data != null && data.Description != null)
                     contentholder.find("[name=Description]").val(data.Description);
 
-                CKEDITOR.replace("editor");
-
-                //ClassicEditor
-                //    .create(document.querySelector('#editor'))
-                //    .then(newEditor => {
-                //        myEditor = newEditor;
-                //    })
-                //    .catch(error => {
-                //        console.error(error);
-                //    });
+                ClassicEditor
+                    .create(document.querySelector('#editor'))
+                    .then(newEditor => {
+                        myEditor = newEditor;
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
                 break;
             case "VIDEO":
-                contentholder.append($("<label>", { "class": "title", "text": "Choose video" }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file Video" }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "VIDEO", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 break;
             case "AUDIO":
-                contentholder.append($("<label>", { "class": "title", "text": "Choose audio" }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file Audio" }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "AUDIO", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 break;
             case "IMG":
-                contentholder.append($("<label>", { "class": "title", "text": "Choose image" }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file ảnh" }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "IMG", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 break;
             case "DOC":
-                contentholder.append($("<label>", { "class": "title", "text": "Choose document (pdf, doc)" }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file pdf" }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "DOC", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 break;
             case "QUIZ1"://Trắc nghiệm chuẩn
-                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
+                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion position-relative mt-3", "Order": 0 });
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "onclick": "questionService.remove(this)", "tabindex": -1 }));
-                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
+                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control mt-3", "placeholder": "Nội dung câu hỏi" }));
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(questionTemplate.find(".media_holder"), "Questions.");
                 questionTemplate.append($("<div>", { "class": "media_preview" }));
-                questionTemplate.append($("<label>", { "class": "input_label", "text": "Point" }));
-                questionTemplate.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1" }));
-                questionTemplate.append($("<label>", { "class": "part_label", "text": "Answer (tick if correct)" }));
+                questionTemplate.append($("<label>", { "class": "input_label", "text": "Điểm" }));
+                questionTemplate.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control ml-2 mr-2", "placeholder": "Điểm", "value": "1" }));
+                questionTemplate.append($("<label>", { "class": "part_label", "text": "Đáp án (click chọn nếu là đáp án đúng)" }));
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
-                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer", "value": "+", "onclick": "addNewAnswer(this)" }));
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer btn-primary", "value": "+", "onclick": "addNewAnswer(this)" }));
                 questionTemplate.append(answer_wrapper);
-                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explaination" }));
+                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Giải thích đáp án" }));
                 question_template_holder.append(questionTemplate);
 
                 var answerTemplate = $("<fieldset>", { "class": "answer-box" });
-                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "onclick": "answerService.remove(this)", "tabindex": -1 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ID" }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect" }));
                 answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "onclick": "toggleCorrectAnswer(this)" }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer" }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Đáp án" }));
+                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "onclick": "answerService.remove(this)", "tabindex": -1 }));
                 answerTemplate.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
                 answer_template_holder.append(answerTemplate);
 
-                contentholder.append($("<label>", { "class": "title", "text": "Choose media" }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media" }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion", "value": "Add question", "onclick": "addNewQuestion()" }));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Thêm câu hỏi", "onclick": "addNewQuestion()" }));
                 //Add First Question
                 if (data != null && data.Questions != null) {
                     for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -1338,18 +1266,18 @@ var template = {
                 quizWrapper.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 quizWrapper.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 quizWrapper.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "onclick": "questionService.remove(this)", "tabindex": -1 }));
-                quizWrapper.append($("<input>", { "name": "Questions.Content", "class": "input-text quiz-text", "placeholder": "Position (skip for media content)" }));
-                quizWrapper.append($("<label>", { "class": "input_label", "text": "Point" }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point", "placeholder": "Point", "value": "1" }));
+                quizWrapper.append($("<input>", { "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Vị trí điền/ Bỏ trống nếu chọn dạng media" }));
+                quizWrapper.append($("<label>", { "class": "input_label", "text": "Điểm" }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control ml-2 mr-2", "placeholder": "Điểm", "value": "1" }));
                 quizWrapper.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(quizWrapper.find(".media_holder"), "Questions.");
                 quizWrapper.append($("<div>", { "class": "media_preview" }));
                 questionTemplate.append(quizWrapper);
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
-                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer", "value": "+", "onclick": "addNewAnswer(this)" }));
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer btn-primary", "value": "+", "onclick": "addNewAnswer(this)" }));
                 questionTemplate.append(answer_wrapper);
-                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description", "placeholder": "Explanation" }));
+                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Giải thích đáp án" }));
                 question_template_holder.append(questionTemplate);
 
                 var answerTemplate = $("<fieldset>", { "class": "answer-box" });
@@ -1357,15 +1285,15 @@ var template = {
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ID" }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect", "value": true }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text", "placeholder": "Answer" }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Đáp án" }));
                 answer_template_holder.append(answerTemplate);
 
-                contentholder.append($("<label>", { "class": "title", "text": "Choose media" }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media" }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion", "value": "Add question", "onclick": "addNewQuestion()", "tabindex": -1 }));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Thêm câu hỏi", "onclick": "addNewQuestion()", "tabindex": -1 }));
 
                 //Add First Question
                 if (data != null && data.Questions != null) {
@@ -1378,23 +1306,23 @@ var template = {
                     addNewQuestion();
                 break;
             case "QUIZ3"://Trắc nghiệm match
-                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
+                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion pb-2", "Order": 0 });
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "onclick": "questionService.remove(this)", "tabindex": -1 }));
 
                 var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question", "tabindex": 0 }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Nội dung câu hỏi", "tabindex": 0 }));
                 quizWrapper.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(quizWrapper.find(".media_holder"), "Questions.");
                 quizWrapper.append($("<div>", { "class": "media_preview" }));
-                quizWrapper.append($("<label>", { "class": "input_label", "text": "Point" }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1", "tabindex": 0 }));
+                quizWrapper.append($("<label>", { "class": "input_label", "text": "Điểm" }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control ml-2 mr-2", "placeholder": "Điểm", "value": "1", "tabindex": 0 }));
                 questionTemplate.append(quizWrapper);
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
-                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer", "value": "+", "onclick": "addNewAnswer(this)", "tabindex": -1 }));
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer", "value": "Thêm câu trả lời", "onclick": "addNewAnswer(this)", "tabindex": -1 }));
                 questionTemplate.append(answer_wrapper);
                 question_template_holder.append(questionTemplate);
 
@@ -1404,20 +1332,20 @@ var template = {
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect", "value": true }));
                 answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "onclick": "toggleCorrectAnswer(this)", "checked": "checked", "tabindex": 0 }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer (tick if correct)", "tabindex": 0 }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Đáp án (click chọn nếu là đáp án đúng)", "tabindex": 0 }));
                 answerTemplate.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
                 answer_template_holder.append(answerTemplate);
 
-                contentholder.append($("<label>", { "class": "title", "text": "Choose media", "tabindex": -1 }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn file media", "tabindex": -1 }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 render.mediaAdd(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion", "value": "Add question", "onclick": "addNewQuestion()", "tabindex": -1 }));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Thêm câu hỏi", "onclick": "addNewQuestion()", "tabindex": -1 }));
 
-                //Add question
+                //Thêm câu hỏi
                 if (data != null && data.Questions != null) {
                     for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                         var quiz = data.Questions[i];
@@ -1428,49 +1356,24 @@ var template = {
                     addNewQuestion();
                 break;
             case "ESSAY"://Tự luận
-                contentholder.append($("<label>", { "class": "title", "text": "Enter title" }));
-                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Description" }));
-                if (data != null && data.description != null)
-                    contentholder.find("[name=Description]").val(data.description);
-                CKEDITOR.replace("editor");
-
-                //ClassicEditor
-                //    .create(document.querySelector('#editor'))
-                //    .then(newEditor => {
-                //        myEditor = newEditor;
-                //    })
-                //    .catch(error => {
-                //        console.error(error);
-                //    });
-
-                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
-                questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
-                questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
-                questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
-
-                var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question", "tabindex": 0 }));
-                quizWrapper.append($("<div>", { "class": "media_holder" }));
-                render.mediaAdd(quizWrapper.find(".media_holder"), "Questions.");
-                quizWrapper.append($("<div>", { "class": "media_preview" }));
-                quizWrapper.append($("<label>", { "class": "input_label", "text": "Point" }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1", "tabindex": 0 }));
-                questionTemplate.append(quizWrapper);
-
-                contentholder.append($("<label>", { "class": "title", "text": "Choose media", "tabindex": -1 }));
-                contentholder.append($("<div>", { "class": "media_holder" }));
-                render.mediaAdd(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
-                contentholder.append($("<div>", { "class": "media_preview" }));
-                contentholder.append($("<div>", { "class": "part_content " + type }));
-
-                if (data != null && data.Questions != null) {
-                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                        var quiz = data.Questions[i];
-                        addNewQuestion(quiz);
-                    }
+                contentholder.append($("<label>", { "class": "title", "text": "Nhập nội dung văn bản" }));
+                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung văn bản" }));
+                contentholder.append($("<label>", { "class": "title pt-2", "text": "Điểm:" }));
+                contentholder.append($("<input>", { "type": "number", "name": "Point", "class": "input-text form-control col-md-2", "placeholder": "Nhập điểm" }));
+                if (data != null) {
+                    if (data.Description != null)
+                        contentholder.find("[name=Description]").val(data.Description);
+                    if (data.Point != null)
+                        contentholder.find("[name=Point]").val(data.Point);
                 }
-                else
-                    addNewQuestion();
+                ClassicEditor
+                    .create(document.querySelector('#editor'))
+                    .then(newEditor => {
+                        myEditor = newEditor;
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
                 break;
             default:
                 alert("Not implement");
@@ -1501,7 +1404,7 @@ function changeMedia(obj) {
 }
 
 function resetMedia(obj) {
-    $(obj).siblings(".btnAddFile").val("Choose file");
+    $(obj).siblings(".btnAddFile").val("Chọn file");
     $(obj).siblings("input[type=file]").val('').attr("name", "");
     $(obj).siblings("[for=medianame]").val('');
     $(obj).siblings("[for=mediaorgname]").val('');
@@ -1537,12 +1440,12 @@ function toggleCompact(obj) {
 }
 
 var addNewQuestion = function (data = null) {
-    console.log(data);
+    //console.log(data);
     var container = $('.lesson_parts > .part_content');
     var template = $('.question_template > fieldset');
     var currentpos = $(container).find(".fieldQuestion").length;
     var clone = template.clone();
-    $(clone).find('.fieldset_title').text("Quiz " + (currentpos + 1));
+    $(clone).find('.fieldset_title').text("Câu hỏi " + (currentpos + 1));
     $(clone).attr("Order", currentpos);
     $(clone).find("[name='Questions.Order']").val(currentpos);
     if (data != null) {
@@ -1564,7 +1467,6 @@ var addNewQuestion = function (data = null) {
         $(this).attr("name", $(this).attr("name").replace("Questions.", "Questions[" + (currentpos) + "]."));
     });
     $(container).append(clone);
-    console.log(data);
     if (data != null && data.Answers != null) {
         for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
             var answer = data.Answers[i];
@@ -1587,7 +1489,6 @@ var addNewAnswer = function (obj, wrapper = null, data = null) {
     var clone = template.clone();
     var currentpos = $(container).find(".answer-box").length;
 
-    console.log(data);
     if (data != null) {
         if (data.ID != null)
             $(clone).find("[name='Questions.Answers.ID']").val(data.ID);
@@ -1624,9 +1525,10 @@ function toggleCorrectAnswer(obj) {
         $(obj).parent().toggleClass("selected");
 }
 
-var hideModal = function (modalId) {
-    if (modalId == null)
-        modal.modal('hide');
-    else
-        $(modalId).modal('hide');
+var showModal = function () {
+    modal.modal('show');
+};
+
+var hideModal = function () {
+    modal.modal('hide');
 };

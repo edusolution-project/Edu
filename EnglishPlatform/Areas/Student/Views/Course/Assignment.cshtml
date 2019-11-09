@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name + " - Bài đánh giá";
+    ViewData["Title"] = currentClass.Name + " - Assignments";
 }
 
 <script>
@@ -50,11 +50,11 @@
                 var oTitle = $("<div>", { "class":"modules-title row", "data-target":"#ongoing .modules-content:first"});
                 var otitle_cPart = $("<div>", {"class":"col-md-11"});
                 var otitle_ePart = $("<div>", {"class":"col-md-1 text-right"});
-                otitle_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, 'ongoing')" }));
+                otitle_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Collapse", "onclick": "toggleCollapse(this, 'ongoing')" }));
                 otitle_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right", "onclick": "toggleCollapse(this, 'ongoing')"}))
                     .append($("<a>", {
                         "class":"action-link",
-                        "text": "Danh sách bài thi",
+                        "text": "Upcoming Assignments",
                         "onclick": "toggleCollapse(this, 'ongoing')"
                         }));
                 oTitle.append(otitle_cPart).append(otitle_ePart);
@@ -65,11 +65,11 @@
                 var pTitle = $("<div>", { "class":"modules-title row", "data-target":"#past-assignment .modules-content:first"});
                 var title_cPart = $("<div>", {"class":"col-md-11"});
                 var title_ePart = $("<div>", {"class":"col-md-1 text-right"});
-                title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, 'past-assignment')" }));
+                title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Collapse", "onclick": "toggleCollapse(this, 'past-assignment')" }));
                 title_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right",  "onclick": "toggleCollapse(this, 'past-assignment')"}))
                             .append($("<a>", {
                                 "class":"action-link",
-                                "text": "Bài đã kết thúc",
+                                "text": "Past Assignments",
                                 "onclick": "toggleCollapse(this, 'past-assignment')"
                                 }));
                 pTitle.append(title_cPart).append(title_ePart);
@@ -109,8 +109,8 @@
 
                         var historyInfo = null;
                         if (item.IsView) {
-                            lastjoin = moment(item.LastJoin).format('DD/MM/YYYY hh:mm A')
-                            historyInfo = $("<i>", {class:"font-weight-normal", style:"font-size: 80%", html: "Làm lần cuối: " + lastjoin + " <br/>Điểm lần " + item.Tried + ": <b class='" + (item.DoPoint > 50 ? "text-success":"text-danger") +  "'>" + item.DoPoint.toFixed(0) + "%</b>" });
+                            lastjoin = moment(item.LastJoin).format('DD/MM/YYYY hh:mm A');
+                            historyInfo = $("<i>", {class:"font-weight-normal", style:"font-size: 80%", html: "Last attempt (item.Tried): " + lastjoin + " <br/>Score " +  + ": <b class='" + (item.DoPoint > 50 ? "text-success":"text-danger") +  "'>" + item.DoPoint.toFixed(0) + "%</b>" });
                         }
 
                         if(item.Description != null)

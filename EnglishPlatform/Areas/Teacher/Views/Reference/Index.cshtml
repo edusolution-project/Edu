@@ -20,7 +20,7 @@
                         <thead>
                             <tr class="text-center">
                                 <th class="text-center">STT</th>
-                                <th class="text-center">Tiêu đề</th>
+                                <th class="text-center">Title</th>
                                 @*<th class="text-left">Mô tả</th>*@
                                 <th class="text-center">Người gửi</th>
                                 <th class="text-center">Link liên kết</th>
@@ -52,7 +52,7 @@
                     <div>
                         <input type="hidden" name="ID" id="refID" />
                         <div class="form-group">
-                            <label class="col-form-label">Tiêu đề:</label>
+                            <label class="col-form-label">Title:</label>
                             <input type="text" class="form-control" name="Title" id="refTitle" required>
                         </div>
                         <div class="form-group">
@@ -89,8 +89,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="UploadRef(); return false;">Lưu</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="UploadRef(); return false;">Save</button>
                 </div>
             </div>
         </div>
@@ -193,7 +193,7 @@
             var id = $('#refID').val();
             var title = $('#refTitle').val();
             if (title === '') {
-                alert('Chưa nhập tiêu đề');
+                alert('Chưa nhập Title');
                 $('#refTitle').focus();
             }
             var description = $('#refDescription').val();

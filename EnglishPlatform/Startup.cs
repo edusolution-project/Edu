@@ -41,17 +41,20 @@ namespace EnglishPlatform
                     options.AccessDeniedPath = "/denied";
                     options.LoginPath = "/login";
                 });
-
+            services.Configure<DefaultConfigs>(Configuration.GetSection("DefaultConfigs"));
             services.AddLogs();
             services.AddTransient<IndefindCtrlService>();
             services.AddServiceBase();
             services.AddServiceHubBase();
             services.AddScoped<FileProcess>();
             services.AddSingleton<CalendarHelper>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             //services.AddMvc(options=> {
             //    options.Filters.Add<PermissionAttribute>();
             //}).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddSession();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddDistributedMemoryCache();
             services.AddSignalR();
         }
 
@@ -74,6 +77,7 @@ namespace EnglishPlatform
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();
+            app.UseSession();
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ChatHub>("/chatHub");
@@ -101,7 +105,7 @@ namespace EnglishPlatform
                    name: "default",
                    template: "{controller=home}/{action=index}/{id?}"
                  );
-                
+
             });
         }
     }

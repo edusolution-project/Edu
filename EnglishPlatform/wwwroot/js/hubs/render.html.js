@@ -119,11 +119,11 @@ var Render = (function () {
         orgContent.append($("<div>", { "class": "title_row row" })
             .append($("<div>", { "class": "item-feed-full__title col-md-10", "text": _title }))
             .append($("<div>", { "class": "col-md-2 text-right" })
-                .append($('<button>', { "data-id": _id, "class": "item-new-feed__reply btn-primary btn", "data-toggle": "modal", "data-target": "#new-feed__reply--popup", "data-original-title": "Trả lời", "title": "Trả lời", "text": "Gửi trả lời", "onclick": "initReply()" })
+                .append($('<button>', { "data-id": _id, "class": "item-new-feed__reply btn-primary btn", "data-toggle": "modal", "data-target": "#new-feed__reply--popup", "data-original-title": "Reply", "title": "Reply", "text": "Reply", "onclick": "initReply()" })
                     //.tooltip().append($("<i>", {"class":"fas fa-reply"}))
                 )
             ));
-        var buttonAnnouce = $('<button>', { "data-id": _id, "class": "btn feed_annouce" + (_type == 1 ? " active" : ""), "data-original-title": "Đánh dấu thông báo", "title": "Đánh dấu thông báo", "onclick": "toggleAnnouncement(this, '" + _id + "')" })
+        var buttonAnnouce = $('<button>', { "data-id": _id, "class": "btn feed_annouce" + (_type == 1 ? " active" : ""), "data-original-title": "Annouce", "title": "Annouce", "onclick": "toggleAnnouncement(this, '" + _id + "')" })
             .append($("<i>", { "class": "fas fa-bullhorn" }));
         orgContent.append($("<div>", { "class": "pb-2 pt-2 item-new-feed item-new-feed__reply", "style": "cursor: pointer", "id": _id })
             .append($("<div>", { "class": "row" })
@@ -145,7 +145,7 @@ var Render = (function () {
         const _unlike = item.UnLike;
         const _content = item.Content;
         const _time = new Date(item.TimePost);
-        const _sender = item.PosterName == null || void 0 || "" ? "Không xác định" : item.PosterName;
+        const _sender = item.PosterName == null || void 0 || "" ? "Undefined" : item.PosterName;
         //$(container).append()
         //container.innerHTML += "<div class='pb-2 pt-2 item-new-feed item-new-feed__reply' style='cursor: pointer;' id='" + item.ID + "'></div >";
         //var el = $('#' + item.ID);

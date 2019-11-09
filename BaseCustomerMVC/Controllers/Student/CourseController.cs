@@ -108,6 +108,7 @@ namespace BaseCustomerMVC.Controllers.Student
         public JsonResult GetList(DefaultModel model, string TeacherID)
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
@@ -154,6 +155,47 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(respone);
         }
 
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetListCompact(DefaultModel model, string TeacherID)
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return null;
+            }
+            else
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
+            }
+            if (!string.IsNullOrEmpty(model.SearchText))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
+            }
+            if (model.StartDate > DateTime.MinValue)
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
+            }
+            if (model.EndDate > DateTime.MinValue)
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
+            }
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)).Project(t => t.ID).ToList() : _service.GetAll().Project(t => t.ID).ToList();
+            model.TotalRecord = data.Count();
+            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+                ? data.ToList()
+                : data.Skip((model.PageIndex - 1) * model.PageSize).Take(model.PageSize).ToList();
+
+            var respone = new Dictionary<string, object>
+            {
+                { "Data", data },
+                { "Model", model }
+            };
+            return new JsonResult(respone);
+        }
 
         [System.Obsolete]
         [HttpPost]

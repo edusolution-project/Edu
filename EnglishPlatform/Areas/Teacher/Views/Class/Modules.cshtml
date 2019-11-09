@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name + " - Chương trình học";
+    ViewData["Title"] = currentClass.Name + " - Modules";
 }
 
 <script>
@@ -22,7 +22,7 @@
                 <div class="col-md-10">
                     <div class="modules-wrapper">
                         <div class="p-3">
-                            <i class="fas fa-circle-notch fa-spin"></i> Đang tải dữ liệu ...
+                            <i class="fas fa-circle-notch fa-spin"></i> Loading ...
                         </div>
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                         var chapTitle = $("<div>", { "class":"modules-title row", "data-target":"#" + chapter.ID + " .modules-content:first"});
                         var title_cPart = $("<div>", {"class":"col-md-11"});
                         var title_ePart = $("<div>", {"class":"col-md-1 text-right"});
-                        title_ePart.append($("<i>", { "class": "far fa-minus-square show fa-plus-square", "title": "Mở rộng", "onclick": "toggleCollapse(this, '" + chapter.ID + "');loadSubContent(this, '" + chapter.ID + "');" }));
+                        title_ePart.append($("<i>", { "class": "far fa-minus-square show fa-plus-square", "title": "Expand", "onclick": "toggleCollapse(this, '" + chapter.ID + "');loadSubContent(this, '" + chapter.ID + "');" }));
                         title_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right",  "onclick": "toggleCollapse(this, '" + chapter.ID + "');loadSubContent(this, '" + chapter.ID + "');"}))
                             .append($("<a>", {
                                 "class":"action-link",
@@ -105,11 +105,10 @@
                     }
                 }
 
-
                 if(window.location.hash != "")
                 {
                     var anchor = window.location.hash;
-                    $(anchor).find('.fa-minus-square').focus().click();
+                    $(anchor).find('.fa-minus-square:first').focus().click();
                     $(function() {
                         $('.left-col').scrollTop( $(anchor).offset().top );
                     });
@@ -160,7 +159,10 @@
                         itemData.append($("<a>", {
                                 "class":"action-link",
                                 "href": "@Url.Action("Detail", "Lesson")/" + item.ID + "/@currentClass.ID",
-                                "text": item.Title
+                                "text": item.Title,
+                                "onclick": "openLesson(this)",
+                                "data-toggle":'modal',
+                                "data-target":"#lessonModal"
                             }));
 
                         if(item.Description != null)
@@ -233,5 +235,28 @@
         LoadSchedule();
     });
 
+    function openLesson(obj) {
+        $("#lessonModal iframe").attr("src",$(obj).attr("href") + "?frameview=1")
+    }
     </script>
+}
+@section Modals {
+    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
+        <div class="modal-dialog modal-lg" style="max-width:95%; height: 90%; display: flex">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h5 class="modal-title" id="modalTitle">Edit Lesson</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-2">
+                    <iframe width="100%" height="100%" style="display: flex; border:none;" src=""></iframe>
+                </div>
+                <div class="modal-footer p-2">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

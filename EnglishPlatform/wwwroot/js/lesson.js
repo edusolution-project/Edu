@@ -321,7 +321,7 @@ var render = {
         if (data.Title != null) {
             boxHeader.append($("<h4>", { "class": "title", "text": data.Title + time + point }));
         }
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Thu gọn", "onclick": "toggleCompact(this)" }));
+        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Collapse", "onclick": "toggleCompact(this)" }));
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-edit", "text": "Sửa", "onclick": "edit.lessonPart('" + data.ID + "')" }))
         //boxHeader.append($("<a>", { "class": "btn btn-sm btn-close", "text": "Xóa", "onclick": "Create.removePart('" + data.ID + "')" }));
         itembox.append(boxHeader);

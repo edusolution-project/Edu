@@ -2,583 +2,196 @@
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseEntity;
-    var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>
-    ;
-    var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>
-        ;
-    var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.ChapterEntity>
-        ;
+    var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.ChapterEntity>;
     var user = ViewBag.User as string;
+    var subject = ViewBag.Subject as BaseCustomerEntity.Database.SubjectEntity;
+    var grade = ViewBag.Grade as BaseCustomerEntity.Database.GradeEntity;
 }
 
 <script>
     activeTab = "curriculum";
+    activeSub = "intro";
 </script>
 
 <div class="left-col">
     <div class="page-title">
-        <h1><a href="@Url.Action("Index","Curriculum")">Giáo trình</a> / @ViewData["Title"]</h1>
+        <h1><a href="@Url.Action("Index","Curriculum")">Curriculum</a> / @ViewData["Title"]</h1>
     </div>
     <div class="main-container">
+        <div class="sub-sidebar">
+            @await Html.PartialAsync("_subSidebarTeacher-Curriculum")
+        </div>
         <div class="main-content">
-            <div class="modules-wrapper">
-                Chưa có bài học...
+            <div class="detail pb-3 row">
+                <div class="text-left col-md-10">
+                    <div class="lession-label d-inline-block">Created Date: <b>@Data.Created.ToString("dd/MM/yyyy")</b></div> -
+                    <div class="lession-label d-inline-block">
+                        Status:
+                        @if (Data.IsActive)
+                        {
+                            <b>Active</b>
+                        }
+                        else
+                        {
+                            <b>Inactive</b>
+                        }
+                    </div>
+                    -
+                    <div class="lession-label d-inline-block">
+                        Usage status:
+                        @if (Data.IsUsed)
+                        {
+                            <b>Used</b>
+                        }
+                        else
+                        {
+                            <b>Unused</b>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-2 text-right">
+                    <button type="button" class="btn btn-success save-info float-right" for="dsp" onclick="toggleEdit(true)">Edit</button>
+                    <button type="button" class="btn btn-success save-info float-right" for="edit" style="display:none" onclick="toggleEdit(false)">Cancel</button>
+                </div>
+            </div>
+            <div class="banner p-2 mb-3 row" style="background: #e60028;border-radius: 5px;color:#FFF;">
+                <div class="banner-img col-sm-2 align-top" style="">
+                    <div>
+                        <img id="imgCourseAvatar" src="@(string.IsNullOrEmpty(Data.Image) ? "/img/default.jpg":Data.Image)" style="width:auto; height:100px; color:#000; max-width:100%;" />
+                        <input type="file" name="classAvatarEdit" class="d-none" id="inputCourseAvatar" onchange="displayMedia(this)" accept="image/*">
+                        <button for="edit" style="display:none;" type="button" class="btn btn-success save-info mt-2" onclick="chooseFile(this)">Choose Image</button>
+                    </div>
+                </div>
+                <div class="banner__info col-sm-10 pl-2">
+                    <div class="lession-label">Code: <b>@Data.Code?.ToUpper()</b></div>
+                    <div class="lession-label">Subject: <b>@subject.Name</b></div>
+                    <div class="lession-label">Grade: <b>@grade.Name</b></div>
+                </div>
+            </div>
+            <div class="row pb-3">
+                <label class="col-sm-2 form-label align-top" for="courseTarget"><b style="color:#e60028">Description</b></label>
+                <div class="col-sm-10 align-top">
+                    <div for="edit" style="display:none">
+                        <textarea name="courseContent" id="courseContent">@Data?.Description</textarea>
+                    </div>
+                    <div for="dsp">
+                        @Html.Raw(Data?.Description)
+                    </div>
+                </div>
+                <script>
+                    CKEDITOR.replace("courseContent",
+                        {
+                            extraPlugins: 'embed,autoembed,image2',
+                            embed_provider: '//ckeditor.iframe.ly/api/oembed?url={url}&callback={callback}',
+                            image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],
+                            image2_disableResizer: true
+                        }
+                    );
+                    //CKEDITOR.instances.courseTarget.setData($('#courseTarget').siblings('.d-none').html());
+                </script>
+            </div>
+            <div class="row pb-3">
+                <label class="col-sm-2 form-label align-top" for="courseContent"><b style="color:#e60028">Learning Outcomes</b></label>
+                <div class="col-sm-10 align-top">
+                    <div for="edit" style="display:none">
+                        <textarea name="courseTarget" id="courseTarget">@Data?.LearningOutcomes</textarea>
+                    </div>
+                    <div for="dsp">
+                        @Html.Raw(Data?.LearningOutcomes)
+                    </div>
+                </div>
+                <script>
+                    CKEDITOR.replace("courseTarget",
+                        {
+                            extraPlugins: 'embed,autoembed,image2',
+                            embed_provider: '//ckeditor.iframe.ly/api/oembed?url={url}&callback={callback}',
+                            image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],
+                            image2_disableResizer: true
+                        }
+                    );
+                    //CKEDITOR.instances.courseContent.setData($('#courseContent').siblings('.d-none').html());
+                </script>
+            </div>
+            <div for="edit" style="display:none">
+                <div class="banner__save">
+                    <button type="button" class="btn btn-success save-info float-right" onclick="SaveCurriculum('@Data.ID')">Save</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+@section Scripts{
+    <script>
+    var SaveCurriculum  = function() {
+        var courseContent = CKEDITOR.instances.courseContent.getData();   // Nội dung môn học
+        if (courseContent == "<p></p>") courseContent = "";
+        var courseTarget = CKEDITOR.instances.courseTarget.getData();     // Mục tiêu đầu ra
+        if (courseTarget == "<p></p>") courseTarget = "";
 
-@section Modals {
+        var fileuploads = $('#inputCourseAvatar');
+        var ufiles = fileuploads[0].files;
 
-    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Sửa thông tin</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="@Url.Action("CreateOrUpdate","Curriculum")" name="courseForm" enctype="multipart/form-data" method="post">
-                        <input type="hidden" name="ID" />
-                        <input type="hidden" name="CreateUser" value="@user" />
-                        <input type="hidden" name="IsActive" value="false" />
-                        <div class="form-group">
-                            <label class="col-form-label">Tên giáo trình:</label>
-                            <input type="text" class="form-control" name="Name" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Môn học:</label>
-                            <select name="SubjectID" class="form-control" onchange="ChangeGrade(this)">
-                                @{
-                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                    {
-                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                    }
-
-                                }
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Cấp độ:</label>
-                            <select Name="GradeID" class="form-control">
-                                @{
-                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                    {
-                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                    }
-
-                                }
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="message-text" class="col-form-label">Mô tả:</label>
-                            <textarea class="form-control" name="Description"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('courseForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Lưu lại</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="chapterModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="@Url.Action("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
-                        <input type="hidden" name="ID" />
-                        <input type="hidden" name="CourseID" value="@Data.ID" />
-                        <div class="form-group">
-                            <label class="col-form-label">Tên chương mục:</label>
-                            <input type="text" class="form-control" name="Name" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Chương mục cấp trên:</label>
-                            <select name="ParentID" class="form-control">
-                                <option value="0">------</option>
-                                @{
-                                    for (int i = 0; listChapter != null && i < listChapter.Count; i++)
-                                    {
-                                        <option value="@listChapter[i].ID">@listChapter[i].Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Mô tả:</label>
-                            <textarea class="form-control" name="Description" rows="3"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("CreateOrUpdateChapter","Curriculum")','update' , ReloadCourse)">Lưu</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Thêm chương mục</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="@Url.Action("CreateOrUpdate","Lesson")" name="lessonForm" enctype="multipart/form-data" method="post">
-                        <input type="hidden" name="ID" />
-                        <input type="hidden" name="CourseID" value="@Data.ID" />
-                        <input type="hidden" name="ChapterID" value="" />
-                        <div class="row">
-                            <div class="form-group col-md-12">
-                                <label class="col-form-label">Kiểu bài:</label>
-                                <select name="TemplateType" class="form-control" onchange="SelectTemplate()">
-                                    <option value="1">Bài giảng</option>
-                                    <option value="2">Bài tập</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-md-12">
-                                <label class="col-form-label">Tên bài:</label>
-                                <input type="text" class="form-control" name="Title" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Thời gian (phút):</label>
-                                <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required>
-                            </div>
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Số lượt làm bài:</label>
-                                <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Điểm:</label>
-                                <input type="text" class="form-control" name="Point" placeholder="0" required>
-                            </div>
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Hệ số:</label>
-                                <input type="text" class="form-control" name="Multiple" placeholder="> 0" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Kiểu bài kiểm tra:</label>
-                                <select name="Etype" class="form-control" required>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Bài luyện tập</option>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Bài kiểm tra tuần</option>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Bài tập lớn</option>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.EXPERIMENT">Báo cáo thí nghiệm</option>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.INTERSHIP">Báo cáo thực tập</option>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">Cuối kì</option>
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@Url.Action("CreateOrUpdate","Lesson")','update' , ReloadCourse)">Lưu</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="joinLessonModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Ghép nội dung</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="@Url.Action("CreateOrUpdate","Lesson")" name="joinLessonModal" enctype="multipart/form-data" method="post">
-                        <input type="hidden" name="ID" />
-                        <input type="hidden" name="ChapterID" value="" />
-                        <div class="form-group">
-                            <label class="col-form-label">Ghép bài:</label><br />
-                            <label name="rootItem"></label><br />
-                            <label class="col-form-label">với bài:</label>
-                            <select name="JoinLesson" class="form-control" required></select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@Url.Action("Join","Lesson")','join' , ReloadCourse)">Lưu</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-<style>
-    .nav-item {
-        position: relative;
-    }
-
-    .collapse-item {
-        position: relative;
-        display: block;
-    }
-</style>
-
-<script>
-
-    var chapters = [];
-    var lessons = [];
-    var wrapper = $('#course-detail ul');
-    var modulesBody = $('.modules-wrapper');
-
-    function LoadData() {
-        chapters = [];
-        lessons = [];
-
-        $.ajax({
-            type: "POST",
-            url: '@Url.Action("GetCourseDetail", "Curriculum")',
-            data: {ID: "@Data.ID"},
-            dataType:"json",
-            success: function (data) {
-                hideModal();
-                modulesBody.html("");
-
-                chapters = data.Data.Chapters;
-                lessons = data.Data.Lessons;
-
-                if (chapters.length > 0) {
-                    for (i = 0; i < chapters.length; ++i) {
-                        var chapter = chapters[i];
-                        var parent = modulesBody;
-
-                        if (chapter.ParentID == null) {
-                            chapter.ParentID = "0";
-                        }
-
-                        var chapContent = $("<div>", { "id": chapter.ID, "pid": chapter.ParentID, "class": "modules" });
-                        var chapTitle = $("<div>", { "class": "modules-title row item-row", "data-target": "#" + chapter.ID + " .modules-content:first"});
-                        var title_cPart = $("<div>", { "class": "col-md-10" });
-                        var title_ePart = $("<div>", { "class": "col-md-2 text-right row-action pr-0" })
-                        title_cPart.append($("<i>", { "class": "fa pr-1 fa-caret-down fa-caret-right", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }))
-                            .append($("<a>", {
-                                "class": "action-link",
-                                "name": "Name",
-                                "text": chapter.Name,
-                                "onclick": "toggleCollapse(this, '" + chapter.ID + "')"
-                            }));
-                        title_cPart.append($("<input>", { "type": "hidden", "name": "Description", "value": chapter.Description }));
-                        title_ePart.append($("<i>", { "class": "far fa-folder", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương mục", "onclick": "AddChapter('" + chapter.ID + "'); return false;" }));
-                        title_ePart.append($("<i>", { "class": "far fa-file", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài", "onclick": "AddLesson('" + chapter.ID + "');" }));
-                        //title_ePart.append($("<i>", { "class": "fas fa-sort", "title": "Sắp xếp", "onclick": "Sort('" + chapter.ID + "'); return false;" }));
-                        title_ePart.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Sửa", "pid": chapter.ParentID, "onclick": "EditChapter(this, '" + chapter.ID + "'); return false;" }));
-                        title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
-                        title_ePart.append($("<i>", { "class": "far fa-minus-square show fa-plus-square", "title": "Mở rộng", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }));
-
-                        chapTitle.append(title_cPart).append(title_ePart);
-                        chapContent.append(chapTitle);
-                        chapContent.append($("<div>", { "class": "modules-content collapse" }));
-
-                        if (chapter.ParentID === "0") {
-                            modulesBody.append(chapContent);
-                        }
-                        else {
-                            parent = modulesBody.find(".modules[id=" + chapter.ParentID + "] .modules-content:first");
-                            parent.append(chapContent);
-                        }
-                    }
+        if (window.FormData !== undefined) {
+            var data = new FormData();
+            if (ufiles.length > 0) {
+                for (var x = 0; x < ufiles.length; x++) {
+                    data.append(ufiles[x].name, ufiles[x]);
                 }
-                else {
-                    var chapContent = $("<div>", { "id": "0", "pid": "0", "class": "modules" });
-                    var chapTitle = $("<div>", { "class": "modules-title row item-row" });
-                    var title_cPart = $("<div>", { "class": "col-md-10" });
-                    var title_ePart = $("<div>", { "class": "col-md-2 text-right row-action d-block" })
-                    title_cPart.append("Thêm nội dung");
-                    title_ePart.append($("<i>", { "class": "fas fa-plus-square", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương mục", "onclick": "AddChapter('0'); return false;" }));
-                    chapTitle.append(title_cPart).append(title_ePart);
-                    chapContent.append(chapTitle);
-                    modulesBody.append(chapContent);
-                }
-
-                if (lessons.length > 0) {
-                    for (j = 0; j < lessons.length; j++) {
-                        var item = lessons[j];
-
-                        var rowData = $("<div>", {"class":"modules-content-item row item-row"});
-                        var leftPart = $("<div>", {"class":"col-md-10"});
-                        var rightPart = $("<div>", {"class":"col-md-2 text-right row-action"});
-                        leftPart.append($("<span>", {"class":"modules-content-item-icon" + (item.TemplateType === 2? (" assignment atype" + item.Etype):"")}));
-                        rightPart.append();
-                        var itemData = $("<div>", {"class":"modules-content-item-info"});
-                        itemData.append($("<a>", {
-                                "class":"action-link",
-                                "name": "Title",
-                                "href": "@Url.Action("Lesson", "Curriculum")/" + item.ID + "?CourseID=@Data.ID" ,
-                                "lid": item.ID,
-                                "text": item.Title
-                            }));
-
-
-                        if(item.Description != null)
-                        {
-                            itemData.append($("<span>", {"class":"description", "text": item.Description}));
-                        }
-
-                        leftPart.append(itemData);
-
-                        rightPart.append($("<i>", { "class": "far fa-edit", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Sửa", "onclick" : "return EditLesson(this,'" + item.ID + "'); return false;",
-                            "cid": item.ChapterID,
-                            "type": item.TemplateType,
-                            "point": item.Point,
-                            "timer": item.Timer,
-                            "etype": item.Etype,
-                            "mul": item.Multiple,
-                            "limit": item.Limit}));
-                        rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
-                        rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép nội dung", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
-
-
-
-                        rowData.append(leftPart).append(rightPart);
-
-                        if (item.ChapterID == null) {
-                            modulesBody.append(rowData);
-                        }
-                        else
-                        {
-                            parent = modulesBody.find(".modules[id=" + item.ChapterID +"] .modules-content:first");
-                            parent.append(rowData);
-                        }
-                    }
-                }
-                $('.row-action i').tooltip();
-            },
-            error: function() {
             }
-        });
-    };
 
-    function ChangeGrade(obj, wrapper) {
-        var subject = $(obj).val();
-        var grade = $(wrapper).val();
-        $(wrapper).find('option[for!=' + subject + ']').hide();
-        $(wrapper).find('option[for=' + subject + ']').show();
-        if ($(wrapper).find('option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {
-           $(wrapper).val($(wrapper).find('option[for=' + subject + ']:first').attr('value'));
-        }
-    }
+            data.append("ID", '@Data.ID');
+            data.append("Description",courseContent );          @* Nội dung môn học  *@
+            data.append("LearningOutcomes",courseTarget );  @* Mục tiêu đầu ra   *@
 
-    function EditCourse() {
-        var modal = $("#courseModal");
-        var modalTitle = modal.find("#modalTitle");
-        var ID = '@Data.ID';
-        modalTitle.text("Cập nhật nội dung");
-        var name = '@Data.Name';
-        modal.find("[name=Name]").val(name);
-        var subject = '@Data.SubjectID'
-        var grade = '@Data.GradeID'
-        var sbj = modal.find("[name=SubjectID]");
-        var grd = modal.find("[name=GradeID]");
-        sbj.val(subject);
-        ChangeGrade(sbj,grd);
-        $(grd).val(grade);
-        var description = '@Data.Description';
-        modal.find("[name=Description]").val(description);
-        modal.find("[name=ID]").val(ID);
-    }
-
-    function ReloadCourse(res)
-    {
-        if (res != null) {
-            var result = $.parseJSON(res);
-            if (result.Error != null) {
-                alert(result.Error);
-                return false;
-            }
-        }
-        document.location = document.location;
-    }
-
-    function DeleteCourse(ID)
-    {
-        if(confirm('Chắc chắn xóa?'))
-        {
-            ExcuteOnlyItem(ID, '@Url.Action("Remove", "Curriculum")', function(){
-                 document.location = '@Url.Action("Index", "Curriculum")';
+            $.ajax({
+                type: "POST",
+                url: '/Teacher/Curriculum/SaveInfo',
+                contentType: false,
+                processData: false,
+                data: data,
+                success: function (data) {
+                    if (data.Error == null) {
+                        alert('Curriculum info updated!');
+                        document.location = document.location;
+                    }
+                    else {
+                        alert('Error')
+                        console.log(data.Error);
+                    }
+                    //hideLoading();
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.log(thrownError);
+                    alert("Error");
+                    //hideLoading();
+                }
             });
         }
     }
 
-    function EditChapter(obj, ID) {
-        var modal = $("#chapterModal");
-        var modalTitle = modal.find("#modalTitle");
-        modalTitle.text("Cập nhật chương mục");
-        var name = $(obj).parent().parent().find("[name=Name]").text().trim();
-        var description = $(obj).parent().parent().find("[name=Description]").val().trim();
-        var parent = $(obj).attr("pid");
-        modal.find("[name=Name]").val(name);
-        modal.find("[name=Description]").val(description);
-        modal.find("[name=ParentID]").val(parent);
-        modal.find("[name=ID]").val(ID);
-    }
-
-    function AddChapter(parentchap) {
-        var modal = $("#chapterModal");
-        var modalTitle = modal.find("#modalTitle");
-        modalTitle.text("Tạo chương mục");
-        modal.find("[name=Name]").val("");
-        modal.find("[name=ID]").val("");
-        modal.find("[name=ParentID]").val(parentchap);
-    }
-
-    function DeleteChapter(ID)
-    {
-        if(confirm('Chắc chắn xóa?'))
-        {
-            ExcuteOnlyItem(ID, '@Url.Action("RemoveChapter", "Curriculum")', LoadData);
-        }
-    }
-
-    function AddLesson(ID)
-    {
-        var modal = $("#lessonModal");
-        var modalTitle = modal.find("#modalTitle");
-        modalTitle.text("Thêm bài");
-
-        modal.find("[name=Title]").val("");
-        modal.find("[name=ChapterID]").val(ID);
-        modal.find("[name=ID]").val("");
-        modal.find("[name=Point]").val("0");
-        modal.find("[name=Timer]").val("0");
-        SelectTemplate("1");
-        return false;
-    }
-
-    function EditLesson(obj, ID)
-    {
-        var modal = $("#lessonModal");
-        var modalTitle = modal.find("#modalTitle");
-        modalTitle.text("Cập nhật nội dung bài");
-        var title = $(obj).parent().parent().find("[name=Title]").text().trim();
-        var chapter = $(obj).attr("cid");
-        var type = $(obj).attr("type");
-        var point = $(obj).attr("point");
-        var timer = $(obj).attr("timer");
-        var limit = $(obj).attr("limit");
-        var multiple = $(obj).attr("mul");
-        var etype = $(obj).attr("etype");
-
-        modal.find("[name=Title]").val(title);
-        modal.find("[name=ChapterID]").val(chapter);
-        modal.find("[name=ID]").val(ID);
-        modal.find("[name=Point]").val(point);
-        modal.find("[name=Timer]").val(timer);
-        modal.find("[name=Limit]").val(limit);
-        modal.find("[name=Multiple]").val(multiple);
-        modal.find("[name=Etype]").val(etype);
-
-        SelectTemplate(type);
-        return false;
-    }
-
-    function JoinLesson(obj, ID) {
-        var modal = $("#joinLessonModal");
-        modal.find("[name=ID]").val(ID);
-        var currentItem =$(obj).parent().parent();
-
-        modal.find("[name=rootItem]").text($(currentItem).find("[name=Title]").text());
-        var lessonholder = modal.find("[name=JoinLesson]");
-        $(lessonholder).empty();
-        $(currentItem).siblings().each(function () {
-            var id = $(this).find("[lid]").attr("lid");
-            $(lessonholder).append($("<option>", {"value": id, "text": $(this).find("[name=Title]").text()}));
-        });
-
-        return false;
-    }
-
-    function DeleteLesson(ID)
-    {
-        if(confirm('Chắc chắn xóa?'))
-        {
-            ExcuteOnlyItem(ID, '@Url.Action("Remove", "Lesson")', LoadData);
-        }
-        return false;
-    }
-
-    function SelectTemplate(type)
-    {
-        var modal = $("#lessonModal");
-        if(type != null && type != "")
-            modal.find("[name=TemplateType]").val(type);
-        var template = modal.find("[name=TemplateType]").val();
-        switch(template)
-        {
-            case "1": //bài giảng
-                modal.find("[for=examOnly]").hide();
-                modal.find("[for=examOnly] input").prop("required", false);
-                break;
-            default:
-                modal.find("[for=examOnly]").show();
-                modal.find("[for=examOnly] input").prop("required", true);
-                break;
-        }
-    }
-
-    $(document).ready(function () {
-        LoadData();
-    });
-</script>
-
-<style>
-    #accordionSidebar .nav-item .nav-link #icon-submenu .fas {
-        top: 0;
-    }
-
-    .sidebar .nav-item .nav-link {
-        padding: 0.5rem 1rem;
-    }
-
-    .sidebar .nav-item .bg-white py-2 {
-        padding: 0;
-    }
-
-    .collapse-item {
-        position: relative;
-    }
-
-    #icon-submenu {
-        top: 7px;
-        right: 20px;
-    }
-
-        #icon-submenu .fas {
-            padding: 5px;
-            top: -1px;
-            position: relative;
-            margin: 0 3px;
+        var toggleEdit = function (state) {
+            if (state) {
+                $("[for=edit]").show();
+                $("[for=dsp]").hide();
+            }
+            else {
+                $("[for=edit]").hide();
+                $("[for=dsp]").show();
+            }
         }
 
-    .sidebar .nav-item .collapse .collapse-inner {
-        padding: 0;
-    }
-</style>
+        function displayMedia(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#imgCourseAvatar').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        function chooseFile(obj) {
+            $(obj).siblings("[type=file]").focus().click();
+        }
+    </script>
+}

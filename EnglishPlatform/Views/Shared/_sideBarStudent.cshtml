@@ -12,7 +12,7 @@
             <li class="sidebar-item profile">
                 <a class="nav-link p-0" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')">
                     <i></i>
-                    <span>Thông tin cá nhân</span>
+                    <span>Profile</span>
                 </a>
                 <div class="extra">
                     <div class="avatarHolder">
@@ -34,13 +34,13 @@
 
                         <form action="/logout" method="post">
                             <button type="submit" class="btn my-btn btn-logout">
-                                Đăng xuất
+                                Sign Out
                             </button>
                         </form>
                         <hr role="presentation">
                         <ul class="action-wrapper">
                             <li>
-                                <a href="#" class="btn my-btn action-link">Profile</a>
+                                <a href="@Url.Action("Profile","Home")" class="btn my-btn action-link">Profile</a>
                             </li>
                         </ul>
                     </div>
@@ -50,56 +50,62 @@
             <li class="sidebar-item dashboard">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
                     <i></i>
-                    <span>Bảng điều khiển</span>
+                    <span>Dashboard</span>
                 </a>
             </li>
 
-            <li class="sidebar-item course" 
-                @*data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')"*@ 
+            <li class="sidebar-item course"
+                @*data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')"*@
                 title="Course">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Course" )">
                     <i></i>
-                    <span>Danh sách môn học</span>
+                    <span>Course List</span>
                 </a>
 
 
                 @*<a class="nav-link p-0">
-                    <i></i>
-                    <span>Danh sách khóa học</span>
-                </a>
-                <div class="extra" id="sidebar-course-holder">
-                    <div>
-                        <h4>Lớp học</h4>
-                        <hr role="presentation">
-                        <ul class="action-wrapper">
-                        </ul>
-                        <hr role="presentation">
+                <i></i>
+                <span>Danh sách khóa học</span>
+            </a>
+            <div class="extra" id="sidebar-course-holder">
+                <div>
+                    <h4>Lớp học</h4>
+                    <hr role="presentation">
+                    <ul class="action-wrapper">
+                    </ul>
+                    <hr role="presentation">
 
-                        <a href="@Url.Action("Index","Course")" class="btn action-link">
-                            Xem tất cả các môn
-                        </a>
-                    </div>
-                </div>*@
+                    <a href="@Url.Action("Index","Course")" class="btn action-link">
+                        Xem tất cả các môn
+                    </a>
+                </div>
+            </div>*@
             </li>
 
             <li class="sidebar-item calendar">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )">
                     <i></i>
-                    <span>Lịch học</span>
+                    <span>Calendar</span>
                 </a>
             </li>
 
             <li class="sidebar-item comments">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )">
                     <i></i>
-                    <span>Trao đổi</span>
+                    <span>Discussion</span>
                 </a>
             </li>
 
             <li class="sidebar-item announcements">
                 <a class="nav-link p-0" href="@Url.Action("Index", "News" )">
                     <i></i>
-                    <span>Thông báo mới</span>
+                    <span>Announcement</span>
+                </a>
+            </li>
+            <li class="sidebar-item guide">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )">
+                    <i></i>
+                    <span>Reference</span>
                 </a>
             </li>
         </ul>
@@ -150,7 +156,7 @@
                 else {
                     body.append("<li>Không có lớp nào hoạt động</li>");
                 }
- 
+
             },
             error: function (err) {
                 console.log(err.responseText)

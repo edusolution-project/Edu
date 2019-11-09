@@ -83,6 +83,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (currentClass == null)
                 return RedirectToAction("Index");
             ViewBag.Class = currentClass;
+            ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
+            ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
             return View();
         }
 
@@ -246,6 +248,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "", string UserID = "")
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             TeacherEntity teacher = null;
             if (string.IsNullOrEmpty(UserID))
                 UserID = User.Claims.GetClaimByType("UserID").Value;

@@ -1,4 +1,6 @@
-﻿<!-- Sidebar -->
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<!-- Sidebar -->
 <nav class="sidebar collapse position-fixed col p-0 m-0">
 
     <div id="sidebar-content">
@@ -12,7 +14,7 @@
             <li class="sidebar-item profile">
                 <a class="nav-link p-0" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')">
                     <i></i>
-                    <span>Quản lý tài khoản</span>
+                    <span>Account</span>
                 </a>
                 <div class="extra">
                     <div class="avatarHolder">
@@ -27,20 +29,29 @@
                         }
 
                         <div aria-label="User profile picture" class="avatar">
-                            <div class="shortname">@shortname.ToUpper()</div>
+                            <div class="shortname position-relative">
+                                <img class="position-absolute" style="top:0; left: 0; bottom: 0; right:0; border-radius: 50%; opacity: 1; width:100%;"
+                                     src='@HttpContextAccessor.HttpContext.Session.GetString("userAvatar")'
+                                     id="siderBarPhotoTeacher" />
+                                @shortname.ToUpper()
+
+
+                            </div>
+
+
                         </div>
 
                         <h2 class="fullname">@User.Identity.Name</h2>
 
                         <form action="/logout" method="post">
                             <button type="submit" class="btn my-btn btn-logout">
-                                Đăng xuất
+                                Sign out
                             </button>
                         </form>
                         <hr role="presentation">
                         <ul class="action-wrapper">
                             <li>
-                                <a href="#" class="btn my-btn action-link">Profile</a>
+                                <a href="@Url.Action("Profile","Home")" class="btn my-btn action-link">Profile</a>
                             </li>
                         </ul>
                     </div>
@@ -50,20 +61,20 @@
             <li class="sidebar-item dashboard">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
                     <i></i>
-                    <span>Bảng điều khiển</span>
+                    <span>Dashboard</span>
                 </a>
             </li>
 
             <li class="sidebar-item curriculum">
                 <a class="nav-link p-0" href="@Url.Action("Index", "Curriculum" )">
                     <i></i>
-                    <span>Soạn bài giảng</span>
+                    <span>Curriculum</span>
                 </a>
             </li>
             <li class="sidebar-item course" title="Course">
                 <a class="nav-link p-0" href="@Url.Action("Index","Class")">
                     <i></i>
-                    <span>Quản lý lớp học</span>
+                    <span>Class Management</span>
                 </a>
             </li>
             @*<li class="sidebar-item course" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')" title="Course">
@@ -88,21 +99,21 @@
             <li class="sidebar-item calendar">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )">
                     <i></i>
-                    <span>Lịch làm việc</span>
+                    <span>Calendar</span>
                 </a>
             </li>
 
             <li class="sidebar-item comments">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )">
                     <i></i>
-                    <span>Thông báo</span>
+                    <span>Announcement</span>
                 </a>
             </li>
 
             <li class="sidebar-item guide">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )">
                     <i></i>
-                    <span>Bí kíp hay</span>
+                    <span>Reference</span>
                 </a>
             </li>
         </ul>

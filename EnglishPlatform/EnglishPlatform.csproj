@@ -22,11 +22,10 @@
     <Content Remove="Areas\Student\Views\Lesson\Exam.cshtml" />
     <Content Remove="Areas\Student\Views\Lesson\Lecture.cshtml" />
     <Content Remove="Areas\Teacher\Views\Class\Detail - Copy.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Lesson\Detail - Copy.cshtml" />
     <Content Remove="Areas\Teacher\Views\Lesson\Exam - Copy.cshtml" />
+    <Content Remove="Areas\Teacher\Views\Schedule\Schedule.cshtml" />
     <Content Remove="compilerconfig.json" />
     <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
-    <Content Remove="Views\Shared\_sideBarTeacher - Copy.cshtml" />
     <Content Remove="wwwroot\js\student-exam.js~RF16ce98a.TMP" />
   </ItemGroup>
 

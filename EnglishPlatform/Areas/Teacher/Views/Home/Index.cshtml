@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Bảng điều khiển - Ngày " + DateTime.Now.Day.ToString("D2") + " tháng " + DateTime.Now.Month.ToString("D2") + " năm " + DateTime.Now.Year.ToString("D2");
+    ViewData["Title"] = "Dashboard - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
 }
 <link href="~/css/calendar/core.css" rel="stylesheet" />
@@ -11,28 +11,28 @@
 </script>
 <div class="left-col">
     <div class="page-title row">
-        <h1 class="col-md-6 col-sm-12">Bảng điều khiển: @User.Identity.Name</h1>
+        <h1 class="col-md-6 col-sm-12">Dashboard: @User.Identity.Name</h1>
         <h2 class="col-md-6 text-right col-sm-12">
-            @Html.Raw("Ngày " + DateTime.Now.Day.ToString("D2") + " tháng " + DateTime.Now.Month.ToString("D2") + " năm " + DateTime.Now.Year.ToString("D2"))
+            @DateTime.Now.ToString("D")
         </h2>
     </div>
     <div class="row m-0">
         <div class="main-container  col-md-10">
             <div class="active-region">
                 <div class="block-title">
-                    <h2>Lớp đang hoạt động</h2>
+                    <h2>Ongoing</h2>
                 </div>
                 <table id="activeCourse" class="table" style="display:none" width="100%" cellspacing="0">
                     <thead>
                         <tr class="text-center">
-                            <th class="text-left">STT</th>
-                            <th class="text-left">Tên lớp</th>
-                            <th class="text-left">Môn học</th>
-                            <th class="text-left">Cấp độ</th>
-                            @*
+                            <th class="text-left">Index</th>
+                            <th class="text-left">Class</th>
+                            <th class="text-left">Subject</th>
+                            @*<th class="text-left">Cấp độ</th>
                                 <th>Giáo viên</th>*@
-                            <th class="text-center">Học viên đăng ký</th>
-                            <th class="text-center">Ngày kết thúc</th>
+                            <th class="text-center">Registered Students</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Due</th>
                             @*
                                 <th>Trạng thái</th>*@
                         </tr>
@@ -40,22 +40,22 @@
                     <tbody></tbody>
                 </table>
                 <div id="placeholderActive">
-                    <i class="fas fa-circle-notch fa-spin"></i> Đang tải dữ liệu ...
+                    <i class="fas fa-circle-notch fa-spin"></i> Loading ...
                 </div>
             </div>
             <div class="past-region" style="display: none">
                 <div class="block-title">
-                    <h2>Lớp đã kết thúc</h2>
+                    <h2>Past Classes</h2>
                 </div>
                 <table id="pastCourse" class="table" width="100%" cellspacing="0">
                     <thead>
                         <tr class="text-center">
-                            <th class="text-left">STT</th>
-                            <th class="text-left">Tên lớp</th>
-                            <th class="text-left">Môn học</th>
-                            <th class="text-center">Học viên đăng ký</th>
-                            <th class="text-center">Trạng thái</th>
-                            <th class="text-center">Ngày kết thúc</th>
+                            <th class="text-left">Index</th>
+                            <th class="text-left">Class</th>
+                            <th class="text-left">Subject</th>
+                            <th class="text-center">Registered Students</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Due</th>
                             @*
                                 <th>Trạng thái</th>*@
                         </tr>

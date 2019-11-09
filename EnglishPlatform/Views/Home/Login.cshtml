@@ -16,36 +16,36 @@
                     <div class="col-lg-6">
                         <div class="p-4">
                             <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Đăng nhập tài khoản!</h1>
+                                <h1 class="h4 text-gray-900 mb-4">Sign In</h1>
                             </div>
                             @using (Html.BeginForm("Login", "Home", FormMethod.Post, new { @name = "LoginForm" }))
                             {
                                 Html.AntiForgeryToken();
                                 <div class="form-group">
-                                    <input type="email" name="UserName" class="form-control form-control-user" placeholder="Tên tài khoản hoặc địa chỉ email" required>
+                                    <input type="email" name="UserName" class="form-control form-control-user" placeholder="Email" required>
                                 </div>
                                 <div class="form-group">
-                                    <input type="password" name="PassWord" class="form-control form-control-user" placeholder="Mật khẩu" required>
+                                    <input type="password" name="PassWord" class="form-control form-control-user" placeholder="Password" required>
                                 </div>
                                 <div class="input-group mb-3">
                                     <select class="custom-select" name="Type">
-                                        <option value="student" selected>Sinh Viên</option>
-                                        <option value="teacher">Giảng viên</option>
-                                        <option value="admin">Quản trị viên</option>
+                                        <option value="student" selected>Student</option>
+                                        <option value="teacher">Teacher</option>
+                                        <option value="admin">Administrator</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <div class="custom-control custom-checkbox small">
                                         <input type="checkbox" name="IsRemmember" class="custom-control-input" id="customCheck" value="0">
-                                        <label class="custom-control-label" for="customCheck" onclick="Remember()">Lưu tài khoản</label>
+                                        <label class="custom-control-label" for="customCheck" onclick="Remember()">Save account</label>
                                     </div>
                                 </div>
-                                <input type="button" class="btn btn-primary btn-user btn-block" onclick="submit(this)" value="Đăng nhập tài khoản">
+                                <input type="button" class="btn btn-primary btn-user btn-block" onclick="submit(this)" value="Sign In">
                                 <hr>
                             }
                             <div class="text-center">
-                                @Html.ActionLink("Thay đổi mật khẩu?", "forgotpassword", "home", null, new { @class = "small" })<br />
-                                @Html.ActionLink("Đăng ký mới?", "register", "home", null, new { @class = "small" })
+                                @Html.ActionLink("Forgot password?", "forgotpassword", "home", null, new { @class = "small" })<br />
+                                @Html.ActionLink("Register", "register", "home", null, new { @class = "small" })
                             </div>
                         </div>
                     </div>

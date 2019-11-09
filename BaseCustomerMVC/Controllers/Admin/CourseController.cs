@@ -207,8 +207,16 @@ namespace BaseCustomerMVC.Controllers.Admin
                             {"Error", "Mã môn học đã được sử dụng" }
                         });
                 }
+                var course = _courseService.GetItemByID(item.CourseID);
+                if (course == null || !course.IsActive)
+                    return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Giáo trình không khả dụng" }
+                        });
+                item.Description = course.Description;
+                item.LearningOutcomes = course.LearningOutcomes;
+                item.Image = course.Image;
                 _service.CreateOrUpdate(item);
-
 
                 //Create Class => Create Lesson Schedule & Clone all lesson
                 var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
@@ -226,6 +234,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                         });
                         CloneLesson(lesson, item);
                     }
+
+                _courseService.Collection.UpdateOneAsync(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -277,6 +287,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             CloneLesson(lesson, item);
                         }
                 }
+
                 oldData.Name = item.Name;
                 oldData.Code = item.Code;
                 oldData.StartDate = item.StartDate;
@@ -287,7 +298,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 _service.CreateOrUpdate(oldData);
 
-                _courseService.Collection.UpdateOneAsync<CourseEntity>(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
+                _courseService.Collection.UpdateOneAsync(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {

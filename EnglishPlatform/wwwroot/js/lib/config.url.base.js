@@ -1,2 +1,2 @@
-﻿const _urlListCourse = "/student/course/getlist";
+﻿const _urlListCourse = "/student/course/getlistcompact";
 const _urlListComment = "/student/discuss/GetListComment";

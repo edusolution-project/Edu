@@ -26,10 +26,10 @@ connection.onclose(function () {
 
 
 connection.on("JoinGroup", function (data) {
-    console.log(data);
+    //console.log(data);
 })
 connection.on("LeaveGroup", function (data) {
-    console.log(data);
+    //console.log(data);
 })
 connection.on("CommentNewFeed", function (data) {
     var item = JSON.parse(data);
@@ -40,5 +40,5 @@ connection.on("CommentNewFeed", function (data) {
         _render.CommentNew(item, document.getElementById("list-comment"));
 })
 connection.on("Offline", function (data) {
-    console.log(data);
+    //console.log(data);
 })

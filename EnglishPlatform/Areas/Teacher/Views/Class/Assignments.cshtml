@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name + " - Cấu trúc chương trình";
+    ViewData["Title"] = currentClass.Name + " - Assignments";
 }
 
 <script>
@@ -67,11 +67,11 @@
                 var oTitle = $("<div>", { "class":"modules-title row", "data-target":"#ongoing .modules-content:first"});
                 var otitle_cPart = $("<div>", {"class":"col-md-11"});
                 var otitle_ePart = $("<div>", {"class":"col-md-1 text-right"});
-                otitle_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, 'ongoing')" }));
+                otitle_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Collapse", "onclick": "toggleCollapse(this, 'ongoing')" }));
                 otitle_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right", "onclick": "toggleCollapse(this, 'ongoing')"}))
                     .append($("<a>", {
                         "class":"action-link",
-                        "text": "Danh sách bài đánh giá",
+                        "text": "Ongoing",
                         "onclick": "toggleCollapse(this, 'ongoing')"
                         }));
                 oTitle.append(otitle_cPart).append(otitle_ePart);
@@ -82,11 +82,11 @@
                 var pTitle = $("<div>", { "class":"modules-title row", "data-target":"#past-assignment .modules-content:first"});
                 var title_cPart = $("<div>", {"class":"col-md-11"});
                 var title_ePart = $("<div>", {"class":"col-md-1 text-right"});
-                title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, 'past-assignment')" }));
+                title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Collapse", "onclick": "toggleCollapse(this, 'past-assignment')" }));
                 title_cPart.append($("<i>", {"class":"fa pr-1 fa-caret-down fa-caret-right",  "onclick": "toggleCollapse(this, 'past-assignment')"}))
                             .append($("<a>", {
                                 "class":"action-link",
-                                "text": "Bài đã kết thúc",
+                                "text": "Past Assignments",
                                 "onclick": "toggleCollapse(this, 'past-assignment')"
                                 }));
                 pTitle.append(title_cPart).append(title_ePart);

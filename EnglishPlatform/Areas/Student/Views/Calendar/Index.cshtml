@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Các hoạt động đang diễn ra";
+    ViewData["Title"] = "My Events";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
 }
 
@@ -39,9 +39,9 @@
                     <div id="modalBody" class="modal-body">
                         <form action="#" name="scheduleForm">
                             <input type="hidden" class="form-control" name="id" value="">
-                            <label for="">Tiêu đề :</label>
+                            <label for="">Title :</label>
                             <div class="form-group">
-                                <input type="text" class="form-control" name="Title" placeholder="Tiêu đề">
+                                <input type="text" class="form-control" name="Title" placeholder="Title">
                             </div>
                             <div class="form-group">
                                 <label for="">StartDate :</label>
@@ -63,7 +63,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-success" onclick="submitEvent()" data-dismiss="modal">Thêm</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
