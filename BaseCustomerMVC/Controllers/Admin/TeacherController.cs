@@ -28,6 +28,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly IHostingEnvironment _env;
         private readonly MappingEntity<TeacherEntity, TeacherViewModel> _mapping;
 
+        private readonly TeacherHelper _teacherHelper;
+
         public TeacherController(TeacherService service
             , RoleService roleService
             , AccountService accountService
@@ -40,6 +42,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             _accountService = accountService;
             _subjectService = subjectService;
             _mapping = new MappingEntity<TeacherEntity, TeacherViewModel>();
+
+            _teacherHelper = new TeacherHelper(service, accountService);
         }
 
         public ActionResult Index(DefaultModel model)
@@ -383,80 +387,32 @@ namespace BaseCustomerMVC.Controllers.Admin
         [Obsolete]
         public JsonResult Publish(DefaultModel model)
         {
-            if (model.ArrID.Length <= 0)
-            {
+            if (string.IsNullOrEmpty(model.ArrID) || model.ArrID.Length <= 0)
                 return new JsonResult(null);
-            }
-            else
-            {
-                if (model.ArrID.Contains(","))
-                {
-                    var idArr = model.ArrID.Split(',');
-                    var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive != true);
-                    var update = Builders<TeacherEntity>.Update.Set("IsActive", true);
-                    var publish = _service.Collection.UpdateMany(filter, update);
 
-                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => idArr.Contains(o.UserID) && o.Type == "teacher" && o.IsActive != true);
-                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", true);
-                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
-
-                    return new JsonResult(publish);
-                }
-                else
-                {
-                    var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive != true);
-                    var update = Builders<TeacherEntity>.Update.Set("IsActive", true);
-                    var publish = _service.Collection.UpdateMany(filter, update);
-
-                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => model.ArrID == o.UserID && o.Type == "teacher" && o.IsActive != true);
-                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", true);
-                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
-
-                    return new JsonResult(publish);
-                }
-            }
+            ChangeStatus(model, true);
+            return new JsonResult("Publish OK");
         }
 
         [HttpPost]
         [Obsolete]
         public JsonResult UnPublish(DefaultModel model)
         {
-            if (model.ArrID.Length <= 0)
-            {
+            if (string.IsNullOrEmpty(model.ArrID) || model.ArrID.Length <= 0)
                 return new JsonResult(null);
-            }
-            else
-            {
-                if (model.ArrID.Contains(","))
-                {
-                    var idArr = model.ArrID.Split(',');
-                    var filter = Builders<TeacherEntity>.Filter.Where(o => idArr.Contains(o.ID) && o.IsActive == true);
-                    var update = Builders<TeacherEntity>.Update.Set("IsActive", false);
-                    var publish = _service.Collection.UpdateMany(filter, update);
 
-                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => idArr.Contains(o.UserID) && o.Type == "teacher" && o.IsActive == true);
-                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", false);
-                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
-
-
-                    return new JsonResult(publish);
-                }
-                else
-                {
-                    var filter = Builders<TeacherEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == true);
-                    var update = Builders<TeacherEntity>.Update.Set("IsActive", false);
-                    var publish = _service.Collection.UpdateMany(filter, update);
-
-                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => model.ArrID == o.UserID && o.Type == "teacher" && o.IsActive == true);
-                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", false);
-                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
-
-                    return new JsonResult(publish);
-                }
-
-
-            }
+            ChangeStatus(model, false);
+            return new JsonResult("UnPublish OK");
         }
+
+        private void ChangeStatus(DefaultModel model, bool status)
+        {
+            if (model.ArrID.Contains(","))
+                _teacherHelper.ChangeStatus(model.ArrID.Split(','), status);
+            else
+                _teacherHelper.ChangeStatus(model.ArrID, status);
+        }
+
 
         [Obsolete]
         private bool ExistEmail(string email)

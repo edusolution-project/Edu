@@ -16,5 +16,6 @@ namespace BaseCustomerMVC.Globals
             var data = new IndefindCtrlService().getByAdmin();
 
         }
+
     }
 }

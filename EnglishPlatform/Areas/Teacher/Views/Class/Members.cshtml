@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     ViewData["Title"] = currentClass.Name + " - Members List";
+    var hasManageRole = (bool)(ViewBag.Managable ?? false);
 }
 
 <script>
@@ -10,7 +11,6 @@
     modulesLink = "@Url.Action("Modules", "Course")/@currentClass.ID";
     activeSub = "people";
 </script>
-
 
 <div class="left-col">
     <div class="page-title">
@@ -23,6 +23,15 @@
         <div class="main-content">
             <div class="row">
                 <div class="col-md-10">
+                    @if (hasManageRole)
+                    {
+                        <div class="text-right pb-3">
+                            <button type="button" onclick="ShowAddStudent()" class="btn btn-primary" data-placement="top" title="Add Student" data-toggle="modal"
+                                    data-target="#addStudentModal" data-original-title="Add Student">
+                                <i class="fas fa-plus"></i> Add Student
+                            </button>
+                        </div>
+                    }
                     <table id="membersTable" class="table" width="100%" cellspacing="0">
                         <thead>
                             <tr class="text-center align-middle">
@@ -32,6 +41,10 @@
                                 <th class="text-center align-middle">Progress</th>
                                 <th class="text-center align-middle">Last seen</th>
                                 <th class="text-center align-middle">Result</th>
+                                @if (hasManageRole)
+                                {
+                                    <th class="text-center align-middle"></th>
+                                }
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -49,7 +62,7 @@
 @section Scripts {
     <script>
 
-        var membersBody = $('#membersTable tbody');
+    var membersBody = $('#membersTable tbody');
 
     function LoadMembers() {
         members = [];
@@ -61,52 +74,42 @@
             success: function (data) {
                 memberCounter = 1;
                 membersBody.html("");
-
-                //teacher = data.Data.Teacher;
-                //var date = moment(new Date(teacher.DateBorn)).format('DD/MM/YYYY');
-                //membersBody.append("<tr>" +
-                //                "<td>" + 1 + "</td>" +
-                //                "<td>" + teacher.FullName + "</td>" +
-                //                "<td>" + teacher.Email + "</td>" +
-                //                //"<td>" + (student.Phone == null ?"" : student.Phone)  + "</td>" +
-                //                "<td class='text-center'>---</td>" +
-                //                "<td class='text-center'>GV</td>" +
-                //                "<td class='text-center'>" + date + "</td>" +
-                //                "<td class='text-center'>---</td>" +
-                //                "<td class='text-center'>---</td>" +
-                //                "<td class='text-center'>---</td>" +
-                //            "</tr>"
-                //        );
-
-
-
                 members = data.Data.Students;
 
                 if (members.length > 0) {
                     for (j = 0; j < members.length; j++) {
-                        console.log(members[j]);
                         var student = members[j];
 
-                        var date = moment(new Date(student.DateBorn)).format('DD/MM/YYYY');
+                        //var date = moment(new Date(student.DateBorn)).format('DD/MM/YYYY');
                         var lastdate = moment(new Date(student.LastJoinDate)).format('DD/MM/YYYY');
 
-                        membersBody.append("<tr>" +
-                                "<td>" + (j + 2) + "</td>" +
-                                "<td>" + student.FullName + "</td>" +
-                                "<td>" + student.Email + "</td>" +
-                                //"<td>" + (student.Phone == null ?"" : student.Phone)  + "</td>" +
-                                //"<td class='text-center'>" + (student.Class == null ?"" : student.Class[0])  + "</td>" +
-                                //"<td class='text-center'>HV</td>" +
-                                //"<td class='text-center'>" + date + "</td>" +
-                                "<td>" +
-                                    "<div class=\"progress\">" +
-                                        "<div class=\"progress-bar bg-success\" role=\"progressbar\" style=\"width: 0%\" aria-valuenow=\"0\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div>" +
-                                    "</div>" +
-                                "</td>" +
-                                "<td class='text-center'>" + lastdate + "</td>" +
-                                "<td>---</td>" +
-                            "</tr>"
-                        );
+
+                        var row = $("<tr>", {id: "st" + student.ID});
+                        row.append($("<td>", { class:"text-center", text: j + 1 }));
+                        row.append($("<td>", { text: student.FullName }));
+                        row.append($("<td>", { text: student.Email }));
+                        var progress = $("<div>", { class: "progress" })
+                            .append($("<div>", {
+                                class: "progress-bar bg-success",
+                                role: "progressbar",
+                                style: "width: 0%",
+                                "aria-valuenow": "0",
+                                "aria-valuemin": "0",
+                                "aria-valuemax": "100"
+                            }))
+                        row.append($("<td>").append(progress));
+                        row.append($("<td>", { class: "text-center", text: lastdate }));
+                        row.append($("<td>", { text: "---" }));
+                        @if (hasManageRole)
+                        {
+                        @:var actionrow = $("<td>");
+                        @:var btnRemove = $("<button>", { class: "btn btn-remove text-danger panel-transparent", "data-placement": "top", "data-trigger":"hover", title: "Remove", onclick: "if(confirm('Confirm Remove?')){ showLoading(); RemoveStudent('" + student.ID + "', '@Url.Action("RemoveStudent","Class")')}" });
+                        @:btnRemove.append($("<i>", { class: "fas fa-trash" }));
+                        @:actionrow.append(btnRemove);
+                        @:row.append(actionrow);
+                        @:btnRemove.tooltip();
+                        }
+                        membersBody.append(row);
                     }
                 }
             },
@@ -119,5 +122,160 @@
     $(document).ready(function () {
         LoadMembers();
     });
+
+    function RemoveStudent(studentid) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("RemoveStudent", "Class")',
+            data: {
+                ID: "@currentClass.ID",
+                StudentID: studentid
+            },
+            dataType: "json",
+            success: function (data) {
+                hideLoading();
+                if (data.error != null) {
+                    alert(data.error);
+                }
+                else {
+                    membersBody.find('#st' + studentid).remove();
+                }
+            },
+            error: function () {
+                alert("Error");
+                hideLoading();
+            }
+        });
+    }
+
+        function ShowAddStudent() {
+            $('#studentID').val('');
+            $('#studentName').val('').focus().click();
+        }
+
+        function AddStudent() {
+            var studentid = $('#studentID').val();
+            if (studentid == '') {
+                alert('Please select student from list');
+                $('#studentName').focus().click();
+                return false;
+            }
+            $.ajax({
+            type: "POST",
+            url: '@Url.Action("AddStudent", "Class")',
+            data: {
+                ID: "@currentClass.ID",
+                StudentID: studentid
+            },
+            dataType: "json",
+            success: function (data) {
+                hideLoading();
+                if (data.error != null) {
+                    alert(data.error);
+                }
+                else {
+                    LoadMembers();
+                    hideModal();
+                }
+            },
+            error: function () {
+                alert("Error");
+                hideLoading();
+            }
+        });
+        }
+
+        var cache = {};
+
+        $("#studentName")
+            //.on( "keydown", function( event ) {
+            //    if ( event.keyCode === $.ui.keyCode.TAB &&
+            //        $(this).autocomplete("instance").menu.active ) {
+            //      event.preventDefault();
+            //    }
+            //})
+            .autocomplete({
+                source: '@Url.Action("SearchStudents","Class")',
+                source: function (request, response) {
+
+                    var term = request.term;
+                    if ( term in cache ) {
+                      response( cache[term] );
+                      return;
+                    }
+                    $.ajax({
+                        url: '@Url.Action("SearchStudents","Class")',
+                        data: {
+                            term: request.term
+                        },
+                        success: function (data) {
+                            cache[term] = data;
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+                focus: function (event, ui) {
+                    $("#studentName").val(ui.item.FullName);
+                    return false;
+                  },
+                select: function (event, ui) {
+                    //var terms = split( this.value );
+                    //  // remove the current input
+                    //  terms.pop();
+                    //  // add the selected item
+                    //terms.push(ui.item.label);
+                    //  // add placeholder to get the comma-and-space at the end
+                    //  terms.push( "" );
+                    ////this.value = terms.join(", ");
+                    //selected.push(ui.item.label);
+                    //this.value = selected.join(", ");
+                    //console.log(selected);
+                    //return false;
+                    $("#studentName").val(ui.item.FullName);
+                    $("#studentID").val(ui.item.ID);
+                    return false;
+                }
+            })
+            .autocomplete("instance")._renderItem = function (ul, item) {
+                return $("<li>")
+                    .append("<div>" + item.FullName + "<br>" + item.Email + "</div>")
+                    .appendTo(ul);
+                    };
+
     </script>
+}
+
+@section Modals{
+
+
+    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="addStudentModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add Student to Class</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="ID" />
+                    <div class="form-group">
+                        <label class="col-form-label">Find Student:</label>
+                        <input type="text" class="form-control" id="studentName" name="Name" placeholder="Please type to search">
+                        <input type="hidden" value="" id="studentID" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="AddStudent()">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .ui-front {
+            z-index: 9999
+        }
+    </style>
 }

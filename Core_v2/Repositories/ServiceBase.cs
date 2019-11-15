@@ -71,6 +71,7 @@ namespace Core_v2.Repositories
         }
         public T GetItemByID(string id)
         {
+            if (string.IsNullOrEmpty(id) || id == "0") return null;
             return _collection.Find(o => o.ID == id)?.SingleOrDefault();
         }
 
@@ -101,24 +102,23 @@ namespace Core_v2.Repositories
                 }
             }
         }
+
+        public T Save(T item)
+        {
+            if (item.ID == "0")
+                item.ID = null;
+            if (item.ID == null)
+                _collection.InsertOne(item);
+            else
+                _collection.ReplaceOne(t => t.ID == item.ID, item);
+            return item;
+        }
+
         public DeleteResult Remove(string ID)
         {
             if (string.IsNullOrEmpty(ID) || ID == "0")
-            {
                 return null;
-            }
-            else
-            {
-                var oldItem = _collection.Find(o => o.ID == ID).First();
-                if (oldItem != null)
-                {
-                    return _collection.DeleteOne(o => o.ID == ID);
-                }
-                else
-                {
-                    return null;
-                }
-            }
+            return _collection.DeleteOne(t => t.ID == ID);
         }
 
         public async Task RemoveAsync(string ID)

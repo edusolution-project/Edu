@@ -45,6 +45,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             string _teacherid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
             var account = _teacherService.GetItemByID(_teacherid);
             ViewBag.avatar = account.Avatar ?? "/img/defaultAvatar.png";
+            _session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
             return View(account);
         }
 

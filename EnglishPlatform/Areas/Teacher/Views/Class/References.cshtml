@@ -4,7 +4,6 @@
     ViewData["Title"] = currentClass.Name + " - References";
     var myClasses = ViewBag.AllClass as List<BaseCustomerEntity.Database.ClassEntity>;
     var owner = ViewBag.User as string;
-
 }
 
 <script>
@@ -55,7 +54,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Cập nhật tài liệu tham khảo</h5>
+                    <h5 class="modal-title" id="modalTitle">Update your reference</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -68,24 +67,24 @@
                             <input type="text" class="form-control" name="Title" id="refTitle" required>
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label">Mô tả:</label>
+                            <label class="col-form-label">Description:</label>
                             <textarea class="form-control" name="Description" id="refDescription" rows="3"></textarea>
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label">Link liên kết:</label>
+                            <label class="col-form-label">Link:</label>
                             <input type="text" class="form-control" name="Link" id="refLink">
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label">File đính kèm:</label>
+                            <label class="col-form-label">Attached Files:</label>
                             <button class="btn-secondary btn p-1" id="btnAttachment" onclick="ChooseFile(this); return false;">Chọn file</button>
                             <input type="file" class="d-none" name="attachment" id="refAttachment" onchange="DisplayFile(this)">
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label">Phạm vi chia sẻ:</label>
+                            <label class="col-form-label">Share:</label>
                             <select name="range" onchange="ChooseRange()" id="refRange" class="form-control d-inline w-25">
-                                <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Công khai</option>
-                                <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
-                                <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
+                                <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Public</option>
+                                <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Own Classes</option>
+                                <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Class</option>
                             </select>
                             <select name="target" id="refTarget" class="form-control d-none w-25">
                                 @*<option>--- Chọn lớp ---</option>*@
@@ -299,91 +298,6 @@
         function DisplayFile(obj) {
             $(obj).siblings('button').text($(obj)[0].files[0].name);
         }
-
-
-
-        //$(document).ready(function () {
-        //    CKEDITOR.replace("refDescription");
-        //});
-
-        //var selected = [];
-
-        //function split( val ) {
-        //    return val.split( /,\s*/ );
-        //}
-        //function extractTerm(term) {
-        //    return split(term).pop();
-        //}
-
-        //if (!RegExp.escape) {
-        //    RegExp.escape = function(value) {
-        //        return value.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&")
-        //    };
-        //}
-
-        //$("#tagname")
-        //    //.on( "keydown", function( event ) {
-        //    //    if ( event.keyCode === $.ui.keyCode.TAB &&
-        //    //        $(this).autocomplete("instance").menu.active ) {
-        //    //      event.preventDefault();
-        //    //    }
-        //    //})
-        //    .autocomplete({
-        //        //source: function( request, response ) {
-        //        //  // delegate back to autocomplete, but extract the last term
-        //        //  response( $.ui.autocomplete.filter(
-        //        //    allclass, extractLast( request.term ) ) );
-        //        //},
-        //        //source: class2,
-        //        source: function(request, response) {
-        //            var currentTerm = extractTerm(request.term);
-        //            var position = selected.indexOf(currentTerm);
-        //            if(position != -1) {
-        //                selected.splice(position, 1);
-        //            }
-        //            var regex = new RegExp(RegExp.escape(currentTerm), "i");
-        //            var recs = $.grep(allclass, function(obj) {
-        //              return regex.test(obj.Name)
-        //            });
-        //            response($.map(recs, function (item) {
-        //                  if(selected.indexOf(item.Name) === -1)
-        //                  return {
-        //                    label: item.Name,
-        //                    value: item.ID
-        //                    }
-        //                return null;
-        //            }));
-        //        },
-        //        minLength: 0,
-        //        focus: function (event, ui) {
-        //            $("#tagname").val(ui.item.label);
-        //            return false;
-        //          },
-        //        select: function (event, ui) {
-        //            //var terms = split( this.value );
-        //            //  // remove the current input
-        //            //  terms.pop();
-        //            //  // add the selected item
-        //            //terms.push(ui.item.label);
-        //            //  // add placeholder to get the comma-and-space at the end
-        //            //  terms.push( "" );
-        //            ////this.value = terms.join(", ");
-        //            //selected.push(ui.item.label);
-        //            //this.value = selected.join(", ");
-        //            //console.log(selected);
-        //            //return false;
-
-        //            $("#tagname").val(ui.item.label);
-        //            $("#tagvalue").val(ui.item.value);
-        //            return false;
-        //        }
-        //    })
-        //    .autocomplete("instance")._renderItem = function (ul, item) {
-        //        return $("<li>")
-        //            .append("<div>" + item.label + "<br>" + item.value + "</div>")
-        //            .appendTo(ul);
-        //            };
-
 
     </script>
 }

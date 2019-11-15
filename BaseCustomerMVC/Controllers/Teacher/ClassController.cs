@@ -18,6 +18,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
     public class ClassController : TeacherController
     {
         private readonly GradeService _gradeService;
+        private readonly AccountService _accountService;
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _service;
@@ -32,13 +33,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly IHostingEnvironment _env;
 
         private readonly FileProcess _fileProcess;
+        private readonly StudentHelper _studentHelper;
 
-        public ClassController(GradeService gradeservice
-           , SubjectService subjectService, TeacherService teacherService, ClassService service,
+
+        public ClassController(
+            AccountService accountService,
+            GradeService gradeservice, SubjectService subjectService, TeacherService teacherService, ClassService service,
             CourseService courseService, ChapterService chapterService, ChapterExtendService chapterExtendService, LessonService lessonService, LessonScheduleService lessonScheduleService,
             StudentService studentService, IHostingEnvironment evn,
             FileProcess fileProcess)
         {
+            _accountService = accountService;
             _gradeService = gradeservice;
             _subjectService = subjectService;
             _teacherService = teacherService;
@@ -53,6 +58,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
             _env = evn;
             _fileProcess = fileProcess;
+
+            _studentHelper = new StudentHelper(studentService, accountService);
         }
 
         public IActionResult Index(DefaultModel model)
@@ -62,17 +69,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var subject = new List<SubjectEntity>();
             var grade = new List<GradeEntity>();
-
             if (teacher != null && teacher.Subjects != null)
             {
                 subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
                 grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+
             }
+
             ViewBag.Grade = grade;
             ViewBag.Subject = subject;
 
             ViewBag.User = UserID;
             ViewBag.Model = model;
+            ViewBag.Managable = CheckPermission(PERMISSION.COURSE_EDIT);
             return View();
         }
 
@@ -153,6 +162,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (currentClass == null)
                 return RedirectToAction("Index");
             ViewBag.Class = currentClass;
+            ViewBag.Managable = CheckPermission(PERMISSION.MEMBER_COURSE_EDIT);
             return View();
         }
 
@@ -434,6 +444,43 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
+        public JsonResult RemoveStudent(string ID, string StudentID)
+        {
+            if (string.IsNullOrEmpty(ID))
+                return Json(new { Error = "Class not found" });
+            var currentClass = _service.GetItemByID(ID);
+            if (currentClass == null || !currentClass.IsActive)
+                return Json(new { error = "Class not found" });
+            _ = _service.RemoveStudent(ID, StudentID);
+            return Json(new { message = "Student Remove OK" });
+        }
+
+        public JsonResult AddStudent(string ID, string StudentID)
+        {
+            if (string.IsNullOrEmpty(ID))
+                return Json(new { Error = "Class not found" });
+            //var account = _accountService.GetItemByID(StudentID);
+            //if (account == null || account.Type != "student")
+            //    return Json(new { Error = "Student not found" });
+            var student = _studentService.GetItemByID(StudentID);
+            if (student == null)
+                return Json(new { Error = "Student not avaiable" });
+            if (_service.AddStudentToClass(ID, student.ID) > 0)
+            {
+                if (!student.IsActive)
+                {
+                    _studentHelper.ChangeStatus(student.ID, true);
+                }
+                return Json(new { data = student });
+            }
+            else
+                return Json(new { error = "Can't add student now" });
+        }
+
+        public JsonResult SearchStudents(string term)
+        {
+            return Json(_studentService.Search(term, 100));
+        }
 
         public JsonResult GetActiveList()
         {

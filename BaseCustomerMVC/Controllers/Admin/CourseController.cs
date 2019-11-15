@@ -231,6 +231,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             LessonID = lesson.ID,
                             //StartDate = item.StartDate,
                             //EndDate = item.EndDate
+                            IsActive = true
                         });
                         CloneLesson(lesson, item);
                     }
@@ -279,7 +280,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                             var schedule = new LessonScheduleEntity
                             {
                                 ClassID = item.ID,
-                                LessonID = lesson.ID
+                                LessonID = lesson.ID,
+                                IsActive = true
                             };
                             _lessonScheduleService.CreateOrUpdate(schedule);
                             //_calendarHelper.ConvertCalendarFromSchedule(schedule, "");

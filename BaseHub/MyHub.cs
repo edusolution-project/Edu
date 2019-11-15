@@ -18,7 +18,7 @@ namespace BaseHub
         private readonly ChatService _chatService;
         private readonly GroupService _groupService;
         private readonly ChatPrivateService _chatPrivateService;
-        public MyHub(ChatPrivateService chatPrivateService,NewFeedService newFeedService, CommentService commentService, ChatService chatService, GroupService groupService)
+        public MyHub(ChatPrivateService chatPrivateService, NewFeedService newFeedService, CommentService commentService, ChatService chatService, GroupService groupService)
         {
             _newFeedService = newFeedService;
             _commentService = commentService;
@@ -26,15 +26,15 @@ namespace BaseHub
             _groupService = groupService;
             _chatPrivateService = chatPrivateService;
         }
-        public  Task GoToClass(string className)
+        public Task GoToClass(string className)
         {
             try
             {
                 if (!_groups.GetGroupConnections(Context.ConnectionId).Contains(className))
                 {
-                     _groupService.AddMember(className, UserID);
+                    _groupService.AddMember(className, UserID);
                     _groups.Add(Context.ConnectionId, className);
-                     Groups.AddToGroupAsync(Context.ConnectionId, className);
+                    Groups.AddToGroupAsync(Context.ConnectionId, className);
                     string message = UserName + " đã vào lớp";
                     return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
                 }
@@ -51,7 +51,7 @@ namespace BaseHub
 
         public async Task OutOfTheClassroom(string className)
         {
-             _groups.Remove(Context.ConnectionId, className);
+            _groups.Remove(Context.ConnectionId, className);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, className);
             string message = UserName + " đã ra khỏi lớp";
             await Clients.Group(className).SendAsync("LeaveGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
@@ -106,7 +106,7 @@ namespace BaseHub
             message.Receiver = userId;
             _chatPrivateService.CreateOrUpdate(message);
             var receiver = _connections.GetConnections(userId);
-            return Clients.Users(receiver.ToList()).SendAsync("Receive", new { UserSend = UserName,Message = message,Time = DateTime.Now, Type = UserType });
+            return Clients.Users(receiver.ToList()).SendAsync("Receive", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
         }
 
         public override Task OnDisconnectedAsync(Exception exception)
@@ -156,13 +156,13 @@ namespace BaseHub
             var listGroup = _groups.GetGroupConnections(userid);
             if (listGroup != null || listGroup.Count() > 0)
             {
-                foreach(string item in listGroup.ToList())
+                foreach (string item in listGroup.ToList())
                 {
                     _groups.Remove(userid, item);
                     Groups.RemoveFromGroupAsync(userid, item);
                 }
             }
-            Clients.Groups(listGroup.ToList()).SendAsync("Offline",UserName + "Offline");
+            Clients.Groups(listGroup.ToList()).SendAsync("Offline", UserName + "Offline");
             return Task.CompletedTask;
         }
     }
@@ -180,6 +180,7 @@ namespace BaseHub
 
         public void Add(T key, string connectionId)
         {
+            if (key == null) return;
             lock (_connections)
             {
                 if (!_connections.TryGetValue(key, out HashSet<string> connections))

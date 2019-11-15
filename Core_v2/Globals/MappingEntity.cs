@@ -63,6 +63,7 @@ namespace Core_v2.Globals
             }
             return newItem;
         }
+
         public TN AutoOrtherType(T oldItem, TN newItem)
         {
             if (oldItem == null) return newItem;

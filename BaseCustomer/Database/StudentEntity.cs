@@ -37,6 +37,19 @@ namespace BaseCustomerEntity.Database
     {
         public StudentService(IConfiguration configuration) : base(configuration)
         {
+            var indexs = new List<CreateIndexModel<StudentEntity>>
+            {
+                new CreateIndexModel<StudentEntity>(
+                    new IndexKeysDefinitionBuilder<StudentEntity>()
+                    .Text(t => t.FullName).Text(t=> t.Email))
+            };
+
+            Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public List<StudentEntity> Search(string name, int limit = 0)
+        {
+            return Collection.Find(Builders<StudentEntity>.Filter.Text(name)).Limit(limit).ToList();
         }
     }
 }

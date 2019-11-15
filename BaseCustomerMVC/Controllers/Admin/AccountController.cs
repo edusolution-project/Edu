@@ -357,12 +357,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         [Obsolete]
         private bool ExistUserName(string UserName)
         {
-            var _currentData = _service.CreateQuery().Find(o => o.UserName == UserName);
-            if (_currentData.Count() > 0)
-            {
-                return true;
-            }
-            return false;
+            var _currentData = _service.GetAccountByEmail(UserName);
+            return _currentData != null;
         }
     }
 }

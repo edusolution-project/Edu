@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Login";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var error = ViewBag.MessageError as string;
 }
 
 <!-- Outer Row -->
@@ -21,6 +22,12 @@
                             @using (Html.BeginForm("Login", "Home", FormMethod.Post, new { @name = "LoginForm" }))
                             {
                                 Html.AntiForgeryToken();
+                                @if (!string.IsNullOrEmpty(error))
+                                {
+                                    <div class="form-group text-danger">
+                                        @Html.Raw(error)
+                                    </div>
+                                }
                                 <div class="form-group">
                                     <input type="email" name="UserName" class="form-control form-control-user" placeholder="Email" required>
                                 </div>

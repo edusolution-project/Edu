@@ -62,15 +62,27 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(o => o.Type == type && o.UserName == userName && (o.PassWord == pass || o.PassTemp == pass))?.SingleOrDefault();
         }
 
-        [Obsolete]
         public bool IsAvailable(string userName)
         {
-            return Collection.Count(o => o.UserName == userName) > 0;
+            return Collection.CountDocuments(o => o.UserName == userName) > 0;
         }
 
         public AccountEntity GetAccountByEmail(string email)
         {
             return Collection.Find(o => o.UserName == email)?.SingleOrDefault();
         }
+    }
+
+    public class PERMISSION
+    {
+        public const int
+            ACCOUNT_EDIT = 100,
+            SUBJECT_EDIT = 110,
+            GRADE_EDIT = 120,
+            COURSE_EDIT = 130,
+            MEMBER_COURSE_EDIT = 140,
+            CURRICULUM_EDIT = 150,
+            CURRICULUM_IMPORT = 151,
+            LESSON_EDIT = 160;
     }
 }

@@ -284,18 +284,24 @@
                         }
                         var created = $.datepicker.formatDate('dd/mm/yy', new Date(item.Created));
 
-                        body.append("<tr>" +
-                            "<td>" + (i + 1) + "</td>" +
-                            "<td class=\"Name\"><a href='@Url.Action("Detail","Curriculum")/" + item.ID + "'>" + item.Name + "</td>" +
-                            "<td class=\"Subject\" val=\"" + item.SubjectID + "\">" + item.SubjectName + "</td>" +
-                            "<td class=\"Grade\" val=\"" + item.GradeID + "\">" + item.GradeName + "</td>" +
-                            //"<td class=\"Description\">" + (item.Description == null ? "": item.Description) + "</td>" +
-                            //"<td>" + item.TeacherName + "</td>" +
-                            "<td class='text-center'>" + created + "</td>" + active +
-                            "<td class='text-center'><button type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#courseModal\"  onclick=\"EditCourse(this,'" + item.ID + "')\" data-placement=\"top\" title=\"Edit\"> <i class=\"fas fa-edit\"></i> </button>" +
-                            "<button type=\"button\" class=\"btn btn-remove btn-danger\" onclick=\"if(confirm('Chắc chắn xóa?')){ showLoading(); ExcuteOnlyItem('" + item.ID + "', '@Url.Action("Remove","Curriculum")', ReloadCourse)}\" data-placement=\"top\" title=\"Remove\"> <i class=\"fas fa-trash\"></i> </button></td>" +
-                            "</tr>"
+
+                        var row = $("<tr>");
+                        row.append($("<td>", { text: i + 1 }));
+                        row.append($("<td>", { class: "Name" })
+                            .append($("<a>", { href: "@Url.Action("Detail","Curriculum")/" + item.ID, text: item.Name })));
+                        row.append($("<td>", { class: "Subject", val: item.SubjectID, text: item.SubjectName }));
+                        row.append($("<td>", { class: "Grade", val: item.GradeID, text: item.GradeName }));
+                        row.append($("<td>", { class: "text-center", text: created }));
+                        row.append(active);
+                        var btnEdit = $("<button>", { class: "btn btn-primary", "data-toggle": "modal", "data-target": "#courseModal", "data-placement": "top", title: "Edit", onclick: "EditCourse(this,'" + item.ID + "')", });
+                        btnEdit.append($("<i>", { class: "fas fa-edit" }));
+                        var btnRemove = $("<button>", { class: "btn btn-remove btn-danger", "data-placement": "top", title: "Remove", onclick: "if(confirm('Chắc chắn xóa?')){ showLoading(); ExcuteOnlyItem('" + item.ID + "', '@Url.Action("Remove","Curriculum")', ReloadCourse)}" });
+                        btnRemove.append($("<i>", { class: "fas fa-trash" }));
+                        row.append($("<td>", { class: "text-center" })
+                            .append(btnEdit).append(btnRemove)
                         );
+
+                        body.append(row);
                     }
                     $('.btn').tooltip({trigger : 'hover'});
                 }

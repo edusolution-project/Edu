@@ -25,6 +25,12 @@
                                 @using (Html.BeginForm("Register", "Home", FormMethod.Post, new { @name = "LoginForm" }))
                                 {
                                     Html.AntiForgeryToken();
+                                    @if(ViewBag.MessageError != null)
+                                    {
+                                        <div class="text-danger text-center pb-3">
+                                            @ViewBag.MessageError
+                                        </div>
+                                    }
                                     <div class="form-group">
                                         <input type="email" name="UserName" class="form-control form-control-user" placeholder="Email" required>
                                     </div>
@@ -42,7 +48,7 @@
                                     </div>
 
                                     <input type="button" class="btn btn-primary btn-user btn-block" onclick="submit(this)" value="Register">
-                                    <hr>
+                                    <br>
                                 }
                             }
                             else

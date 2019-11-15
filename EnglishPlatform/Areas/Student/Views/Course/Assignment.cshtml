@@ -88,12 +88,18 @@
                         var period = "";
                         var itemStatus = null;
 
+                        var startdate = "---";
+                        if(moment(item.StartDate) > new Date(2018,1,1)) startdate = moment(item.StartDate).format('DD/MM/YYYY');
+                        var enddate = "---";
+                        if(moment(item.EndDate) > new Date(2018,1,1)) enddate = moment(item.EndDate).format('DD/MM/YYYY');
+
+
                         if (!item.IsActive) {
                             itemStatus = $("<i>", { class: "fas fa-lock", style: "top: 10px; right: 10px;" });
                             period = "---"
                         }
                         else {
-                            period = moment(item.StartDate).format('DD/MM/YYYY') + " - " + moment(item.EndDate).format('DD/MM/YYYY');
+                            period = startdate + " - " + enddate;
                         }
                             
 
@@ -110,7 +116,7 @@
                         var historyInfo = null;
                         if (item.IsView) {
                             lastjoin = moment(item.LastJoin).format('DD/MM/YYYY hh:mm A');
-                            historyInfo = $("<i>", {class:"font-weight-normal", style:"font-size: 80%", html: "Last attempt (item.Tried): " + lastjoin + " <br/>Score " +  + ": <b class='" + (item.DoPoint > 50 ? "text-success":"text-danger") +  "'>" + item.DoPoint.toFixed(0) + "%</b>" });
+                            historyInfo = $("<i>", {class:"font-weight-normal", style:"font-size: 80%", html: "Last attempt (" + item.Tried + "): " + lastjoin + " <br/>Score " + ": <b class='" + (item.DoPoint > 50 ? "text-success":"text-danger") +  "'>" + item.DoPoint.toFixed(0) + "%</b>" });
                         }
 
                         if(item.Description != null)
@@ -123,7 +129,7 @@
                             .append($("<div>", { class: "col-md-3" }).append(historyInfo))
                             .append($("<div>", {class: "col-md-1 text-center"}).append(itemStatus));
 
-                        if (moment(item.EndDate) > new Date())
+                        if (moment(item.EndDate) > new Date() || moment(item.EndDate) <= new Date(1900,1,1))
                             parent = bodyWrapper.find(".modules#ongoing .modules-content:first");
                         else
                             parent = bodyWrapper.find(".modules#past-assignment .modules-content:first");

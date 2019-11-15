@@ -106,8 +106,10 @@
                             active = "<button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger' onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\"> <div class='handle'></div> </button>";
                         }
 
-                        var startdate = moment(item.StartDate).format('DD/MM/YYYY');
-                        var enddate = moment(item.EndDate).format('DD/MM/YYYY');
+                        var startdate = "---";
+                        if(moment(item.StartDate) > new Date(2018,1,1)) startdate = moment(item.StartDate).format('DD/MM/YYYY');
+                        var enddate = "---";
+                        if(moment(item.EndDate) > new Date(2018,1,1)) enddate = moment(item.EndDate).format('DD/MM/YYYY');
 
                         var rowData = $("<div>", {"class":"modules-content-item row"});
                         var leftPart = $("<div>", {"class":"col-md-6"});
@@ -135,7 +137,7 @@
 
                         //rowData.append(itemData);
 
-                        if (moment(item.EndDate) > new Date())
+                        if (moment(item.EndDate) > new Date() && moment() || moment(item.EndDate) <= new Date(1900,1,1))
                             parent = bodyWrapper.find(".modules#ongoing .modules-content:first");
                         else
                             parent = bodyWrapper.find(".modules#past-assignment .modules-content:first");

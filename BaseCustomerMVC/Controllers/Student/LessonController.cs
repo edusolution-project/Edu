@@ -597,7 +597,9 @@ namespace BaseCustomerMVC.Controllers.Student
             var classSchedule = new ClassScheduleViewModel(course)
             {
 
-                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.Etype > 0).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID
+                           //&& o.Etype > 0
+                           ).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ID).FirstOrDefault()
                            let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassID == ID).SortByDescending(o => o.ID).FirstOrDefault()
                            select _schedulemapping.AutoOrtherType(r, new LessonScheduleViewModel()

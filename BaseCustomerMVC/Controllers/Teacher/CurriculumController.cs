@@ -209,7 +209,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #region Course
 
-        [Obsolete]
         [HttpPost]
         public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "")
         {
@@ -229,7 +228,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();
-            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
                 ? data
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
 
@@ -248,7 +247,48 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        [Obsolete]
+
+        [HttpPost]
+        public JsonResult GetActiveList(DefaultModel model, string SubjectID = "", string GradeID = "")
+        {
+            var filter = new List<FilterDefinition<CourseEntity>>();
+
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            if (!string.IsNullOrEmpty(SubjectID))
+            {
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+            }
+            if (!string.IsNullOrEmpty(GradeID))
+            {
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
+            }
+            filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
+            filter.Add(Builders<CourseEntity>.Filter.Where(o => o.IsActive));
+
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
+
+            model.TotalRecord = data.CountDocuments();
+
+            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
+                ? data
+                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", DataResponse.ToList().Select(o =>
+
+                    _courseViewMapping.AutoOrtherType(o, new CourseViewModel(){
+                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+                        SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
+                        TeacherName = _teacherService.GetItemByID(o.CreateUser)?.FullName
+                    })).ToList()
+                },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
         [HttpPost]
         public JsonResult GetModList(DefaultModel model, string SubjectID = "", string GradeID = "")
         {
@@ -266,8 +306,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             var data = filter.Count > 0 ? _modservice.Collection.Find(Builders<ModCourseEntity>.Filter.And(filter)) : _modservice.GetAll();
-            model.TotalRecord = data.Count();
-            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+            model.TotalRecord = data.CountDocuments();
+            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
                 ? data
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
 
@@ -321,7 +361,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        public JsonResult Remove(DefaultModel model)
+        public async Task<JsonResult> Remove(DefaultModel model)
         {
             try
             {
@@ -384,8 +424,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                     _lessonService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
                 }
-
-                _service.Remove(ID);
+                await _service.RemoveAsync(ID);
                 return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", "Remove OK" },
@@ -403,7 +442,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        [Obsolete]
         public JsonResult Publish(DefaultModel model)
         {
 
@@ -432,7 +470,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        [Obsolete]
         public JsonResult UnPublish(DefaultModel model)
         {
             if (model.ArrID.Length <= 0)
@@ -583,7 +620,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        public JsonResult RemoveChapter(DefaultModel model)
+        public async Task<JsonResult> RemoveChapter(DefaultModel model)
         {
             try
             {
@@ -605,8 +642,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {"Error", "Permisson Error" }
                             });
 
-                RemoveChapter(chapter.ID);
-
+                await RemoveChapter(chapter.ID);
                 return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", "Remove OK" },
@@ -623,14 +659,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private void RemoveChapter(string chapid)
+        private async Task RemoveChapter(string chapid)
         {
             _lessonService.CreateQuery().DeleteMany(o => o.ChapterID == chapid);
             var subchapters = _chapterService.CreateQuery().Find(o => o.ParentID == chapid).ToList();
             if (subchapters != null && subchapters.Count > 0)
                 foreach (var chapter in subchapters)
-                    RemoveChapter(chapter.ID);
-            _chapterService.Remove(chapid);
+                    await RemoveChapter(chapter.ID);
+            await _chapterService.RemoveAsync(chapid);
         }
 
         #endregion Chapter

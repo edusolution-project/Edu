@@ -73,5 +73,17 @@ namespace BaseCustomerEntity.Database
 
             Collection.Indexes.CreateManyAsync(indexs);
         }
+
+        public long RemoveStudent(string ID, string studentID)
+        {
+            return CreateQuery().UpdateManyAsync(t => t.ID.Equals(ID),
+                Builders<ClassEntity>.Update.Pull("Students", studentID)).Result.ModifiedCount;
+        }
+
+        public long AddStudentToClass(string ID, string studentID)
+        {
+            return CreateQuery().UpdateManyAsync(t => t.ID.Equals(ID),
+                Builders<ClassEntity>.Update.AddToSet("Students", studentID)).Result.ModifiedCount;
+        }
     }
 }

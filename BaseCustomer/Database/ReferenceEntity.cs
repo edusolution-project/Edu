@@ -41,7 +41,12 @@ namespace BaseCustomerEntity.Database
 
     public class REF_RANGE
     {
-        public const string ALL = "all", TEACHER = "teacher", CLASS = "class", STUDENT = "student", PRIVATE = "private", UNSET = "";
+        public const string 
+            ALL = "all", 
+            TEACHER = "teacher", 
+            CLASS = "class",
+            COURSE = "course",
+            STUDENT = "student", PRIVATE = "private", UNSET = "";
     }
 
     //public class Tag

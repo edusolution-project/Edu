@@ -164,8 +164,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (currentClass == null)
             {
                 return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
+                        {"Data" ,null },
+                        {"Error", model },
                         {"Msg","Không có thông tin lớp học" }
                     });
             }
@@ -183,7 +183,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var classSchedule = new ClassScheduleViewModel(course)
             {
-                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.Etype > 0).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID 
+                           //&& o.Etype > 0
+                           ).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
                            where schedule != null
                            select _mapping.AutoOrtherType(r, new LessonScheduleViewModel()

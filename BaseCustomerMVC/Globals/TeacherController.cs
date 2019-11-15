@@ -15,5 +15,10 @@ namespace BaseCustomerMVC.Globals
         public TeacherController()
         {
         }
+
+        public bool CheckPermission(int permision)
+        {
+            return true;
+        }
     }
 }

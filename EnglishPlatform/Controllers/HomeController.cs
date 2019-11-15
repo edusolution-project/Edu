@@ -54,19 +54,21 @@ namespace EnglishPlatform.Controllers
             return View();
         }
         [HttpPost]
+        [Obsolete]
         public IActionResult Register(string UserName, string Name, string PassWord, string Type)
         {
-            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
+            var _username = UserName.Trim().ToLower();
+            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
             {
-                ViewBag.MessageError = "Không thể bỏ trống các trường bắt buộc";
+                ViewBag.MessageError = "Please fill your information";
                 return View();
             }
             else
             {
                 string _sPass = Security.Encrypt(PassWord);
-                if (_accountService.IsAvailable(UserName))
+                if (_accountService.IsAvailable(_username))
                 {
-                    ViewBag.MessageError = "Tài khoản đã tồn tại";
+                    ViewBag.MessageError = "Account exist";
                     return View();
                 }
                 else
@@ -74,15 +76,13 @@ namespace EnglishPlatform.Controllers
                     var user = new AccountEntity()
                     {
                         PassWord = _sPass,
-                        UserName = UserName,
+                        UserName = _username,
                         Name = Name,
                         Type = Type,
                         IsActive = false,
                         CreateDate = DateTime.Now,
                         UserCreate = null,
                     };
-
-
                     switch (Type)
                     {
                         case "teacher":
@@ -222,7 +222,7 @@ namespace EnglishPlatform.Controllers
             //_log.Debug("login", new { UserName, PassWord, Type, IsRemmember });
             if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
             {
-                ViewBag.MessageError = "Không thể bỏ trống các trường bắt buộc";
+                ViewBag.MessageError = "Please fill your information";
                 return View();
             }
             else
@@ -231,14 +231,14 @@ namespace EnglishPlatform.Controllers
                 var user = _accountService.GetAccount(Type, UserName.ToLower(), _sPass);
                 if (user == null)
                 {
-                    ViewBag.MessageError = "Email không tồn tại";
+                    ViewBag.MessageError = "Account's infomation is not correct";
                     return View();
                 }
                 else
                 {
                     if (user.IsActive)
                     {
-                        TempData["success"] = "Xin chào " + user.UserName;
+                        TempData["success"] = "Hi " + user.UserName;
                         string _token = Guid.NewGuid().ToString();
                         var role = _roleService.GetItemByID(user.RoleID);
                         if (role != null)
@@ -300,13 +300,13 @@ namespace EnglishPlatform.Controllers
                         }
                         else
                         {
-                            ViewBag.MessageError = "Bạn không có quyền hạn vào quản trị viện";
+                            ViewBag.MessageError = "Can't signin now.";
                             return View();
                         }
                     }
                     else
                     {
-                        ViewBag.MessageError = "Tài khoản của bạn đã bị khóa";
+                        ViewBag.MessageError = "Account is locked.";
                         return View();
                     }
                 }

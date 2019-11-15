@@ -1,5 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
+@{
+    var avatar = HttpContextAccessor.HttpContext.Session.GetString("userAvatar");
+}
 <!-- Sidebar -->
 <nav class="sidebar collapse position-fixed col p-0 m-0">
 
@@ -12,8 +15,15 @@
             </li>
 
             <li class="sidebar-item profile">
-                <a class="nav-link p-0" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')">
-                    <i></i>
+                <a class="nav-link p-0 overflow-hidden" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')">
+                    <i>
+                        @if (!string.IsNullOrEmpty(avatar))
+                        {
+                            <img style="opacity: 1; width:100%;min-height:100%"
+                                 src='@avatar'
+                                 id="siderBarPhotoTeacher" />
+                        }
+                    </i>
                     <span>Account</span>
                 </a>
                 <div class="extra">
@@ -30,15 +40,14 @@
 
                         <div aria-label="User profile picture" class="avatar">
                             <div class="shortname position-relative">
-                                <img class="position-absolute" style="top:0; left: 0; bottom: 0; right:0; border-radius: 50%; opacity: 1; width:100%;"
-                                     src='@HttpContextAccessor.HttpContext.Session.GetString("userAvatar")'
-                                     id="siderBarPhotoTeacher" />
+                                @if (!string.IsNullOrEmpty(avatar))
+                                {
+                                    <img class="position-absolute" style="top:0; left: 0; bottom: 0; right:0; border-radius: 50%; opacity: 1; width:100%;min-height:100%"
+                                         src='@avatar'
+                                         id="siderBarPhotoTeacher" />
+                                }
                                 @shortname.ToUpper()
-
-
                             </div>
-
-
                         </div>
 
                         <h2 class="fullname">@User.Identity.Name</h2>

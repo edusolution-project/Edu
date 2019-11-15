@@ -24,15 +24,22 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly AccountService _accountService;
         private readonly IHostingEnvironment _env;
         private readonly MappingEntity<StudentEntity, StudentViewModel> _mapping;
+
+        private readonly StudentHelper _studentHelper;
+
         public StudentController(StudentService service
             , RoleService roleService
             , AccountService accountService
-            , IHostingEnvironment evn)
+            , StudentService studentService
+            , IHostingEnvironment evn
+            )
         {
             _env = evn;
             _service = service;
             _roleService = roleService;
             _accountService = accountService;
+
+            _studentHelper = new StudentHelper(studentService, accountService);
             _mapping = new MappingEntity<StudentEntity, StudentViewModel>();
         }
         // GET: Home
@@ -44,7 +51,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             return View();
         }
 
-        [Obsolete]
         [HttpPost]
         public JsonResult GetList(DefaultModel model)
         {
@@ -62,11 +68,12 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 filter.Add(Builders<StudentEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _service.GetAll();
-            model.TotalRecord = data.Count();
-            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+            var data = (filter.Count > 0 ? _service.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _service.GetAll())
+                .SortByDescending(t => t.ID);
+            model.TotalRecord = data.CountDocuments();
+            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
                 ? data.ToList()
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
 
             var students = from r in DataResponse
                            let account = _accountService.CreateQuery().Find(o => o.UserID == r.ID && o.Type == "student").FirstOrDefault()
@@ -349,87 +356,36 @@ namespace BaseCustomerMVC.Controllers.Admin
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
 
-
-
         [HttpPost]
         [Obsolete]
         public JsonResult Publish(DefaultModel model)
         {
-            if (model.ArrID.Length <= 0)
-            {
+            if (string.IsNullOrEmpty(model.ArrID) || model.ArrID.Length <= 0)
                 return new JsonResult(null);
-            }
-            else
-            {
-                if (model.ArrID.Contains(","))
-                {
-                    var idArr = model.ArrID.Split(',');
-                    var filter = Builders<StudentEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == false);
-                    var update = Builders<StudentEntity>.Update.Set("IsActive", true);
-                    var publish = _service.Collection.UpdateMany(filter, update);
 
-                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => idArr.Contains(o.UserID) && o.Type == "student" && o.IsActive != true);
-                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", true);
-                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
-
-                    return new JsonResult(publish);
-                }
-                else
-                {
-                    var filter = Builders<StudentEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == false);
-                    var update = Builders<StudentEntity>.Update.Set("IsActive", true);
-                    var publish = _service.Collection.UpdateMany(filter, update);
-
-                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => model.ArrID == o.UserID && o.Type == "student" && o.IsActive != true);
-                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", true);
-                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
-
-                    return new JsonResult(publish);
-                }
-
-
-            }
+            ChangeStatus(model, true);
+            return new JsonResult("Publish OK");
         }
 
         [HttpPost]
         [Obsolete]
         public JsonResult UnPublish(DefaultModel model)
         {
-            if (model.ArrID.Length <= 0)
-            {
+            if (string.IsNullOrEmpty(model.ArrID) || model.ArrID.Length <= 0)
                 return new JsonResult(null);
-            }
-            else
-            {
-                if (model.ArrID.Contains(","))
-                {
-                    var idArr = model.ArrID.Split(',');
-                    var filter = Builders<StudentEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == true);
-                    var update = Builders<StudentEntity>.Update.Set("IsActive", false);
-                    var publish = _service.Collection.UpdateMany(filter, update);
 
-                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => idArr.Contains(o.UserID) && o.Type == "student" && o.IsActive == true);
-                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", false);
-                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
-
-                    return new JsonResult(publish);
-                }
-                else
-                {
-                    var filter = Builders<StudentEntity>.Filter.Where(o => model.ArrID == o.ID && o.IsActive == true);
-                    var update = Builders<StudentEntity>.Update.Set("IsActive", false);
-                    var publish = _service.Collection.UpdateMany(filter, update);
-
-                    var filterAcc = Builders<AccountEntity>.Filter.Where(o => model.ArrID == o.UserID && o.Type == "student" && o.IsActive == true);
-                    var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", false);
-                    _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
-
-                    return new JsonResult(publish);
-                }
-
-
-            }
+            ChangeStatus(model, false);
+            return new JsonResult("UnPublish OK");
         }
+
+        private void ChangeStatus(DefaultModel model, bool status)
+        {
+            if (model.ArrID.Contains(","))
+                _studentHelper.ChangeStatus(model.ArrID.Split(','), status);
+            else
+                _studentHelper.ChangeStatus(model.ArrID, status);
+        }
+
 
         [Obsolete]
         private bool ExistEmail(string email)
@@ -441,6 +397,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             return false;
         }
+
         [Obsolete]
         private bool ExistStudentId(string studentId)
         {
