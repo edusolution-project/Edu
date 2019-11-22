@@ -82,7 +82,7 @@ function Submit(formName, url, actionName, fn) {
     $(form).find("input:disabled").removeAttr("disabled");
 
     var data = new FormData(form);
-    showLoading("Đang cập nhật ...");
+    showLoading("Sending data ...");
     Ajax(_url, _method, data, true)
         .then(function (res) {
             hideLoading();
@@ -291,7 +291,12 @@ function showLoading(message) {
         $("body").append($("<div>", { "class": "loadingState", "style": "background: black;position: fixed;top: 0;left: 0;right: 0;bottom: 0;opacity: 0.9;z-index: 9999;" }));
         if (message == null || message == "")
             message = "Đang xử lý...";
-        $("body > .loadingState").append($("<div>", { "text": message, "style": "padding:10px 50px; border-radius: 10px; background: #CCC; font-size:26px; position:absolute; left: calc(50% - 120px); top: 45%;" }));
+        $("body > .loadingState")
+            .append($("<div>", {
+                style: "padding:10px 30px; border-radius: 5px; background: #CCC; font-size:26px; position:absolute; left: calc(50% - 120px); top: 45%;"
+            })
+                .append($("<i>", { class: "fas fa-spinner fa-spin" })).append(" " + message)
+            );
     }
 }
 

@@ -37,7 +37,15 @@ namespace BaseCustomerEntity.Database
     {
         public GradeService(IConfiguration config) : base(config)
         {
+            var indexs = new List<CreateIndexModel<GradeEntity>>
+            {
+                //SubjectID_1
+                new CreateIndexModel<GradeEntity>(
+                    new IndexKeysDefinitionBuilder<GradeEntity>()
+                    .Ascending(t => t.SubjectID))
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
 
         public GradeEntity GetItemByCode(string code)
@@ -56,7 +64,6 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(o => o.IsActive && (string.IsNullOrEmpty(o.ParentID) || o.ParentID.Equals("0")) && (SubjectID == "0" || o.SubjectID == SubjectID)).ToList();
         }
-
 
         public long CountSubGradeByID(string id)
         {

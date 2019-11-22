@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using BaseCustomerMVC.Globals;
+using Microsoft.Extensions.Options;
 
 namespace EnglishPlatform.Controllers
 {
@@ -21,9 +22,15 @@ namespace EnglishPlatform.Controllers
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ILog _log;
+        private readonly ClassService _classService;
+        private readonly StudentHelper _studentHelper;
+        public DefaultConfigs _default { get; }
+
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
             , TeacherService teacherService
             , StudentService studentService
+            , ClassService classService
+            , IOptions<DefaultConfigs> defaultvalue
             , ILog log)
         {
             _accountService = accountService;
@@ -31,7 +38,10 @@ namespace EnglishPlatform.Controllers
             _logService = logService;
             _teacherService = teacherService;
             _studentService = studentService;
+            _classService = classService;
+            _studentHelper = new StudentHelper(studentService, accountService);
             _log = log;
+            _default = defaultvalue.Value;
         }
 
         public IActionResult Index()
@@ -53,8 +63,8 @@ namespace EnglishPlatform.Controllers
             HttpContext.Remove(Cookies.DefaultLogin);
             return View();
         }
+
         [HttpPost]
-        [Obsolete]
         public IActionResult Register(string UserName, string Name, string PassWord, string Type)
         {
             var _username = UserName.Trim().ToLower();
@@ -85,17 +95,19 @@ namespace EnglishPlatform.Controllers
                     };
                     switch (Type)
                     {
-                        case "teacher":
+                        case ACCOUNT_TYPE.TEACHER:
                             user.RoleID = _roleService.GetItemByCode("teacher").ID;
                             break;
                         default:
+                            user.IsActive = true;// active student
                             user.RoleID = _roleService.GetItemByCode("student").ID;
                             break;
                     }
                     _accountService.CreateQuery().InsertOne(user);
                     switch (Type)
                     {
-                        case "teacher":
+                        case ACCOUNT_TYPE.TEACHER:
+                            //create teacher
                             var teacher = new TeacherEntity()
                             {
                                 FullName = user.Name,
@@ -105,20 +117,29 @@ namespace EnglishPlatform.Controllers
                             };
                             _teacherService.CreateQuery().InsertOne(teacher);
                             user.UserID = teacher.ID;
-                            //create teacher
+                            //send email for teacher
                             break;
                         default:
+                            //create student
                             var student = new StudentEntity()
                             {
                                 FullName = user.Name,
                                 Email = user.UserName,
-                                IsActive = false,
+                                IsActive = true,// active student
                                 CreateDate = DateTime.Now
                             };
 
                             _studentService.CreateQuery().InsertOne(student);
                             user.UserID = student.ID;
-                            //create student
+                            //send email for student
+                            //add default class
+                            var testClassIDs = _default.defaultClassID;
+                            if (!string.IsNullOrEmpty(testClassIDs))
+                            {
+                                foreach (var id in testClassIDs.Split(';'))
+                                    if (!string.IsNullOrEmpty(id))
+                                        _classService.AddStudentToClass(id, student.ID);
+                            }
                             break;
                     }
                     var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
@@ -130,89 +151,15 @@ namespace EnglishPlatform.Controllers
         }
 
         [Route("/login")]
-        [System.Obsolete]
         public IActionResult Login()
         {
             long limit = 0;
-            long count = _accountService.CreateQuery().Count(_ => true);
+            long count = _accountService.CreateQuery().CountDocuments(_ => true);
             if (count <= limit)
             {
                 startPage();
             }
             return View();
-        }
-
-        private void startPage()
-        {
-            var superadminRole = new RoleEntity()
-            {
-                Name = "Super Admin",
-                Code = "superadmin",
-                Type = "admin",
-                CreateDate = DateTime.Now,
-                IsActive = true,
-                UserCreate = "longht"
-            };
-            var adminRole = new RoleEntity()
-            {
-                Name = "Admin",
-                Code = "admin",
-                Type = "admin",
-                CreateDate = DateTime.Now,
-                IsActive = true,
-                UserCreate = "longht"
-            };
-            var headteacherRole = new RoleEntity()
-            {
-                Name = "Trưởng bộ môn",
-                Code = "head-teacher",
-                Type = "teacher",
-                CreateDate = DateTime.Now,
-                IsActive = true,
-                UserCreate = "longht"
-            };
-            var teacherrole = new RoleEntity()
-            {
-                Name = "Giáo viên",
-                Code = "teacher",
-                Type = "teacher",
-                CreateDate = DateTime.Now,
-                IsActive = true,
-                UserCreate = "longht"
-            };
-            var studentRole = new RoleEntity()
-            {
-                Name = "Học viên",
-                Code = "student",
-                Type = "student",
-                CreateDate = DateTime.Now,
-                IsActive = true,
-                UserCreate = "longht"
-            };
-            _roleService.CreateQuery().InsertOne(headteacherRole);
-            _roleService.CreateQuery().InsertOne(studentRole);
-            _roleService.CreateQuery().InsertOne(teacherrole);
-            _roleService.CreateQuery().InsertOne(superadminRole);
-            _roleService.CreateQuery().InsertOne(adminRole);
-            var superadmin = new AccountEntity()
-            {
-                CreateDate = DateTime.Now,
-                IsActive = true,
-                Type = "admin",
-                UserName = "supperadmin@gmail.com",
-                PassTemp = Security.Encrypt("123"),
-                PassWord = Security.Encrypt("123"),
-                UserID = "0", // admin
-                RoleID = superadminRole.ID
-            };
-            _accountService.CreateQuery().InsertOne(superadmin);
-        }
-        [Route("/logout")]
-        public async Task<IActionResult> LogOut()
-        {
-            await HttpContext.SignOutAsync(Cookies.DefaultLogin);
-            HttpContext.Remove(Cookies.DefaultLogin);
-            return RedirectToAction("Login");
         }
 
         [HttpPost]
@@ -248,12 +195,12 @@ namespace EnglishPlatform.Controllers
                             string FullName, id;
                             switch (user.Type)
                             {
-                                case "teacher":
+                                case ACCOUNT_TYPE.TEACHER:
                                     var tc = _teacherService.GetItemByID(user.UserID);
                                     FullName = tc.FullName;
                                     id = tc.ID;
                                     break;
-                                case "student":
+                                case ACCOUNT_TYPE.STUDENT:
                                     var st = _studentService.GetItemByID(user.UserID);
                                     FullName = st.FullName;
                                     id = st.ID;
@@ -313,6 +260,78 @@ namespace EnglishPlatform.Controllers
             }
         }
 
+        private void startPage()
+        {
+            var superadminRole = new RoleEntity()
+            {
+                Name = "Super Admin",
+                Code = "superadmin",
+                Type = ACCOUNT_TYPE.ADMIN,
+                CreateDate = DateTime.Now,
+                IsActive = true,
+                UserCreate = "longht"
+            };
+            var adminRole = new RoleEntity()
+            {
+                Name = "Admin",
+                Code = "admin",
+                Type = ACCOUNT_TYPE.ADMIN,
+                CreateDate = DateTime.Now,
+                IsActive = true,
+                UserCreate = "longht"
+            };
+            var headteacherRole = new RoleEntity()
+            {
+                Name = "Trưởng bộ môn",
+                Code = "head-teacher",
+                Type = ACCOUNT_TYPE.TEACHER,
+                CreateDate = DateTime.Now,
+                IsActive = true,
+                UserCreate = "longht"
+            };
+            var teacherrole = new RoleEntity()
+            {
+                Name = "Giáo viên",
+                Code = "teacher",
+                Type = ACCOUNT_TYPE.TEACHER,
+                CreateDate = DateTime.Now,
+                IsActive = true,
+                UserCreate = "longht"
+            };
+            var studentRole = new RoleEntity()
+            {
+                Name = "Học viên",
+                Code = "student",
+                Type = ACCOUNT_TYPE.STUDENT,
+                CreateDate = DateTime.Now,
+                IsActive = true,
+                UserCreate = "longht"
+            };
+            _roleService.CreateQuery().InsertOne(headteacherRole);
+            _roleService.CreateQuery().InsertOne(studentRole);
+            _roleService.CreateQuery().InsertOne(teacherrole);
+            _roleService.CreateQuery().InsertOne(superadminRole);
+            _roleService.CreateQuery().InsertOne(adminRole);
+            var superadmin = new AccountEntity()
+            {
+                CreateDate = DateTime.Now,
+                IsActive = true,
+                Type = ACCOUNT_TYPE.ADMIN,
+                UserName = "supperadmin@gmail.com",
+                PassTemp = Security.Encrypt("123"),
+                PassWord = Security.Encrypt("123"),
+                UserID = "0", // admin
+                RoleID = superadminRole.ID
+            };
+            _accountService.CreateQuery().InsertOne(superadmin);
+        }
+        [Route("/logout")]
+        public async Task<IActionResult> LogOut()
+        {
+            await HttpContext.SignOutAsync(Cookies.DefaultLogin);
+            HttpContext.Remove(Cookies.DefaultLogin);
+            return RedirectToAction("Login");
+        }
 
         [Route("/forgot-password")]
         public IActionResult ForgotPassword()

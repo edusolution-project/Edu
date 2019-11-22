@@ -249,7 +249,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
         [HttpPost]
-        public JsonResult GetActiveList(DefaultModel model, string SubjectID = "", string GradeID = "")
+        public JsonResult GetActiveList(DefaultModel model, string SubjectID = "", string GradeID = "", bool cp = false)
         {
             var filter = new List<FilterDefinition<CourseEntity>>();
 
@@ -263,7 +263,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
-            filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
+
+            if (!(cp && CheckPermission(PERMISSION.COURSE_EDIT)))
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
             filter.Add(Builders<CourseEntity>.Filter.Where(o => o.IsActive));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();

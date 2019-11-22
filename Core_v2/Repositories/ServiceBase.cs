@@ -36,6 +36,7 @@ namespace Core_v2.Repositories
             _collection = _database.GetCollection<T>(tableName);
             _mapping = new MappingEntity<T, T>();
         }
+
         public ServiceBase(IConfiguration config, string dbName = "")
         {
             _config = config;

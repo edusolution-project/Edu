@@ -28,26 +28,29 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly StudentService _studentService;
         private readonly LessonService _lessonService;
 
-        private readonly LessonPartService _lessonPartService;
-        private readonly LessonPartAnswerService _lessonPartAnswerService;
-        private readonly LessonPartQuestionService _lessonPartQuestionService;
+        //private readonly LessonPartService _lessonPartService;
+        //private readonly LessonPartAnswerService _lessonPartAnswerService;
+        //private readonly LessonPartQuestionService _lessonPartQuestionService;
+
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
 
 
-        private readonly CloneLessonPartService _cloneLessonPartService;
-        private readonly CloneLessonPartAnswerService _cloneAnswerService;
-        private readonly CloneLessonPartQuestionService _cloneQuestionService;
+        //private readonly CloneLessonPartService _cloneLessonPartService;
+        //private readonly CloneLessonPartAnswerService _cloneAnswerService;
+        //private readonly CloneLessonPartQuestionService _cloneQuestionService;
 
-        private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
-        private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
-        private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
+        //private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
+        //private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
+        //private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
 
         private readonly FileProcess _fileProcess;
 
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly CalendarHelper _calendarHelper;
         private readonly IHostingEnvironment _env;
+
+        private readonly LessonHelper _lessonHelper;
 
         public CourseController(ClassService service,
             SubjectService subjectService,
@@ -82,20 +85,19 @@ namespace BaseCustomerMVC.Controllers.Admin
             _examService = examService;
             _examDetailService = examDetailService;
 
-            _lessonPartService = lessonPartService;
-            _lessonPartQuestionService = lessonPartQuestionService;
-            _lessonPartAnswerService = lessonPartAnswerService;
-
-            _cloneLessonPartService = cloneLessonPartService;
-            _cloneAnswerService = cloneLessonPartAnswerService;
-            _cloneQuestionService = cloneLessonPartQuestionService;
-
-            _lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
-            _lessonPartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
-            _lessonPartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
             _calendarHelper = calendarHelper;
 
             _fileProcess = fileProcess;
+
+            _lessonHelper = new LessonHelper(
+               lessonService,
+               lessonPartService,
+               lessonPartQuestionService,
+               lessonPartAnswerService,
+               cloneLessonPartService,
+               cloneLessonPartAnswerService,
+               cloneLessonPartQuestionService
+               );
 
             _env = evn;
         }
@@ -140,7 +142,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             model.TotalRecord = data.Count();
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+                : data.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
             var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse.Select(o=> new ClassViewModel(o){
@@ -233,7 +235,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             //EndDate = item.EndDate
                             IsActive = true
                         });
-                        CloneLesson(lesson, item);
+                        _lessonHelper.CloneLessonForClass(lesson, item);
                     }
 
                 _courseService.Collection.UpdateOneAsync(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
@@ -269,7 +271,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 {
                     //remove old schedule & cloned lesson part
                     _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == item.ID);
-                    RemoveClone(item.ID);
+                    _lessonHelper.RemoveClone(item.ID);
 
                     //Create Class => Create Lesson Schedule & Clone all lesson
                     var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
@@ -286,7 +288,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             _lessonScheduleService.CreateOrUpdate(schedule);
                             //_calendarHelper.ConvertCalendarFromSchedule(schedule, "");
 
-                            CloneLesson(lesson, item);
+                            _lessonHelper.CloneLessonForClass(lesson, item);
                         }
                 }
 
@@ -333,9 +335,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 {
                     //remove Schedule, Part, Question, Answer
                     _lessonScheduleService.CreateQuery().DeleteMany(o => ids.Contains(o.ClassID));
-                    _cloneLessonPartService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
-                    _cloneQuestionService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
-                    _cloneAnswerService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    _lessonHelper.RemoveClone(ids);
                     _examService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     _examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     var delete = _service.Collection.DeleteMany(o => ids.Contains(o.ID));
@@ -467,75 +467,5 @@ namespace BaseCustomerMVC.Controllers.Admin
             return new JsonResult(response);
         }
 
-
-        private void RemoveClone(string ClassID)
-        {
-            _cloneLessonPartService.Collection.DeleteMany(o => o.ClassID == ClassID);
-            _cloneQuestionService.Collection.DeleteMany(o => o.ClassID == ClassID);
-            _cloneAnswerService.Collection.DeleteMany(o => o.ClassID == ClassID);
-        }
-
-        //Clone Lesson
-        private void CloneLesson(LessonEntity lesson, ClassEntity @class)
-        {
-            var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
-            if (listLessonPart != null && listLessonPart.Count > 0)
-            {
-                if (_cloneLessonPartService.CreateQuery().CountDocuments(o => o.ParentID == lesson.ID && o.TeacherID == @class.TeacherID) == 0)
-                {
-                    foreach (var lessonpart in listLessonPart)
-                    {
-                        var clonepart = _lessonPartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity());
-                        clonepart.ID = null;
-                        clonepart.OriginID = lessonpart.ID;
-                        clonepart.TeacherID = @class.TeacherID;
-                        clonepart.ClassID = @class.ID;
-                        CloneLessonPart(clonepart);
-                    }
-                }
-            }
-        }
-
-        private void CloneLessonPart(CloneLessonPartEntity item)
-        {
-            _cloneLessonPartService.Collection.InsertOne(item);
-            var list = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
-            if (list != null)
-            {
-                foreach (var question in list)
-                {
-                    var cloneQuestion = _lessonPartQuestionMapping.AutoOrtherType(question, new CloneLessonPartQuestionEntity());
-                    cloneQuestion.OriginID = question.ID;
-                    cloneQuestion.ParentID = item.ID;
-                    cloneQuestion.ID = null;
-                    cloneQuestion.ClassID = item.ClassID;
-                    cloneQuestion.LessonID = item.ParentID;
-                    CloneLessonQuestion(cloneQuestion);
-                }
-            }
-        }
-
-        private void CloneLessonQuestion(CloneLessonPartQuestionEntity item)
-        {
-            _cloneQuestionService.Collection.InsertOne(item);
-            var list = _lessonPartAnswerService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
-            if (list != null)
-            {
-                foreach (var answer in list)
-                {
-                    var cloneAnswer = _lessonPartAnswerMapping.AutoOrtherType(answer, new CloneLessonPartAnswerEntity());
-                    cloneAnswer.OriginID = answer.ID;
-                    cloneAnswer.ParentID = item.ID;
-                    cloneAnswer.ID = null;
-                    cloneAnswer.ClassID = item.ClassID;
-                    CloneLessonAnswer(cloneAnswer);
-                }
-            }
-        }
-
-        private void CloneLessonAnswer(CloneLessonPartAnswerEntity item)
-        {
-            _cloneAnswerService.Collection.InsertOne(item);
-        }
     }
 }

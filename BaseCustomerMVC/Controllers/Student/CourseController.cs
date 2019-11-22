@@ -274,16 +274,16 @@ namespace BaseCustomerMVC.Controllers.Student
             var filter = new List<FilterDefinition<StudentEntity>>();
             filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
             var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
-            var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == currentClass.ID);
+            //var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == currentClass.ID);
             var studentsView = (from r in students.ToList()
-                                let learned = _learningHistoryService.CreateQuery().AsQueryable()
-                                .Where(t => t.StudentID == r.ID && t.ClassID == currentClass.ID)
-                                .GroupBy(t => new { t.StudentID, t.ClassID, t.LessonID }).Count()
+                                    //let learned = _learningHistoryService.CreateQuery().AsQueryable()
+                                    //.Where(t => t.StudentID == r.ID && t.ClassID == currentClass.ID)
+                                    //.GroupBy(t => new { t.StudentID, t.ClassID, t.LessonID }).Count()
                                 select _studentMapping.AutoOrtherType(r, new ClassMemberViewModel()
                                 {
                                     ClassName = currentClass.Name,
                                     ClassStatus = "Đang học",
-                                    Progress = (int)(totalLessons != 0 ? learned * 100 / totalLessons : 0),
+                                    Progress = _progressService.GetItemByClassID(currentClass.ID, r.ID),
                                 })).ToList();
 
             var response = new Dictionary<string, object>

@@ -73,6 +73,14 @@ namespace BaseCustomerEntity.Database
         }
     }
 
+    public class ACCOUNT_TYPE
+    {
+        public const string ADMIN = "admin",
+            TEACHER = "teacher",
+            STUDENT = "student";
+    }
+
+
     public class PERMISSION
     {
         public const int

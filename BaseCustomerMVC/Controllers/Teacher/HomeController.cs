@@ -5,7 +5,9 @@ using Core_v2.Globals;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 
 namespace BaseCustomerMVC.Controllers.Teacher
@@ -81,6 +83,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
             });
         }
 
+        [HttpPost]
+        public JsonResult GetListTeachers(string SubjectID)
+        {
+            var filter = new List<FilterDefinition<TeacherEntity>>();
+            if (!string.IsNullOrEmpty(SubjectID))
+            {
+                filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Subjects.Contains(SubjectID)));
+            }
+
+            var data = filter.Count > 0 ? _teacherService.CreateQuery().Find(Builders<TeacherEntity>.Filter.And(filter)) : _teacherService.GetAll();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", data.ToList()}
+            };
+            return new JsonResult(response);
+        }
 
         [HttpPost]
         public JsonResult ChangePassword(string oldpass, string newpass, string retypepass)

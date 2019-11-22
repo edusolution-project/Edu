@@ -76,7 +76,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
 
             var students = from r in DataResponse
-                           let account = _accountService.CreateQuery().Find(o => o.UserID == r.ID && o.Type == "student").FirstOrDefault()
+                           let account = _accountService.CreateQuery().Find(o => o.UserID == r.ID && o.Type == ACCOUNT_TYPE.STUDENT).FirstOrDefault()
                            where account != null
                            select _mapping.AutoOrtherType(r, new StudentViewModel()
                            {
@@ -99,7 +99,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var filter = Builders<StudentEntity>.Filter.Where(o => o.ID == id);
             var data = _service.Collection.Find(filter);
             var student = data == null || data.Count() <= 0 ? null : data.First();
-            var account = _accountService.CreateQuery().Find(o => o.UserID == student.ID && o.Type == "student").First();
+            var account = _accountService.CreateQuery().Find(o => o.UserID == student.ID && o.Type == ACCOUNT_TYPE.STUDENT).First();
             var response = new Dictionary<string, object>
             {
                 { "Data", _mapping.AutoOrtherType(student, new StudentViewModel()
@@ -133,7 +133,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                         PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                         UserCreate = item.UserCreate,
-                        Type = "student",
+                        Type = ACCOUNT_TYPE.STUDENT,
                         UserID = item.ID,
                         UserName = item.Email.ToLower().Trim(),
                         RoleID = _roleService.GetItemByCode("student").ID
@@ -248,7 +248,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                                     PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                                     UserCreate = item.UserCreate,
-                                    Type = "student",
+                                    Type = ACCOUNT_TYPE.STUDENT,
                                     UserID = item.ID,
                                     UserName = item.Email.ToLower().Trim(),
                                     RoleID = _roleService.GetItemByCode("student").ID

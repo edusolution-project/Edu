@@ -8,7 +8,7 @@
   transition: width 0.5s;
   transition-timing-function: ease; }
   .sidebar span {
-    margin-left: 50px;
+    margin-left: 53px;
     line-height: 42px;
     color: #48bde5; }
   .sidebar.collapse:not(.show) {
@@ -58,7 +58,14 @@
       filter: none; }
     .sidebar .sidebar-item .nav-link, .sidebar .sidebar-toggler-icon .nav-link {
       width: 100%;
-      height: 100%; }
+      height: 100%;
+      position: relative; }
+      .sidebar .sidebar-item .nav-link i, .sidebar .sidebar-toggler-icon .nav-link i {
+        top: 11px;
+        left: 14px;
+        font-size: 20px;
+        color: #48bde5;
+        position: absolute; }
     .sidebar .sidebar-item .extra, .sidebar .sidebar-toggler-icon .extra {
       display: none; }
   .sidebar .sidebar-toggler {

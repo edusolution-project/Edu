@@ -15,15 +15,15 @@
             </li>
 
             <li class="sidebar-item profile">
-                <a class="nav-link p-0 overflow-hidden" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')">
-                    <i>
-                        @if (!string.IsNullOrEmpty(avatar))
-                        {
-                            <img style="opacity: 1; width:100%;min-height:100%"
-                                 src='@avatar'
-                                 id="siderBarPhotoTeacher" />
-                        }
-                    </i>
+                <a class="nav-link p-0 overflow-hidden position-relative" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')" title="Profile">
+
+                    @if (!string.IsNullOrEmpty(avatar))
+                    {
+                        <img style="opacity: 1; width:100%;min-height:100%; max-width:50px;" class="position-absolute"
+                             src='@avatar'
+                             id="siderBarPhotoTeacher" />
+                    }
+
                     <span>Account</span>
                 </a>
                 <div class="extra">
@@ -68,59 +68,60 @@
             </li>
 
             <li class="sidebar-item dashboard">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )" title="Dashboard">
                     <i></i>
                     <span>Dashboard</span>
                 </a>
             </li>
 
             <li class="sidebar-item curriculum">
-                <a class="nav-link p-0" href="@Url.Action("Index", "Curriculum" )">
+                <a class="nav-link p-0" href="@Url.Action("Index", "Curriculum" )" title="Curriculum">
                     <i></i>
                     <span>Curriculum</span>
                 </a>
             </li>
-            <li class="sidebar-item course" title="Course">
-                <a class="nav-link p-0" href="@Url.Action("Index","Class")">
+            <li class="sidebar-item course">
+                <a class="nav-link p-0" href="@Url.Action("Index","Class")" title="Course">
                     <i></i>
                     <span>Class Management</span>
                 </a>
             </li>
-            @*<li class="sidebar-item course" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')" title="Course">
-                    <a class="nav-link p-0">
-                        <i></i>
-                        <span>Quản lý lớp học</span>
-                    </a>
-                    <div class="extra" id="sidebar-course-holder">
-                        <div>
-                            <h4>Lớp học</h4>
-                            <hr role="presentation">
-                            <ul class="action-wrapper"></ul>
-                            <hr role="presentation">
-
-                            <a href="@Url.Action("Index","Class")" class="btn action-link">
-                                Xem tất cả các lớp
-                            </a>
-                        </div>
-                    </div>
-                </li>*@
-
             <li class="sidebar-item calendar">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )" title="Calendar">
                     <i></i>
                     <span>Calendar</span>
                 </a>
             </li>
 
-            <li class="sidebar-item comments">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )">
-                    <i></i>
+            <li class="sidebar-item students" style="background-image:none">
+                <a class="nav-link p-0" href="@Url.Action("Index", "StudentManage" )" title="Student Management">
+                    <i class="fas fa-users"></i>
+                    <span>Student</span>
+                </a>
+            </li>
+            <li class="sidebar-item comments" style="background-image:none">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )" title="Discuss">
+                    <i class="fas fa-comments" aria-hidden="true"></i>
                     <span>Announcement</span>
                 </a>
             </li>
 
+            <li class="sidebar-item accounts" style="background-image:none">
+                <a class="nav-link p-0" href="#" title="Account Management">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Accounts</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item settings" style="background-image:none">
+                <a class="nav-link p-0" href="#" title="Settings">
+                    <i class="fas fa-cogs"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+
             <li class="sidebar-item guide">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )" title="Reference">
                     <i></i>
                     <span>Reference</span>
                 </a>
@@ -145,10 +146,12 @@
         $(".right-content").click(function () {
             closeExtra();
         });
-        getCourseList();
+        $('.sidebar-item a').tooltip();
+        //getCourseList();
+
     });
 
-    function getCourseList() {
+    @*function getCourseList() {
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetActiveList", "Class")',
@@ -179,7 +182,7 @@
                 console.log(err.responseText)
             }
         });
-    }
+    }*@
 
     function showExtra(tab) {
         if ($('#extra-sidebar.show').length == 0) {

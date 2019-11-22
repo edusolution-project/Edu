@@ -65,7 +65,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 filter.Add(Builders<AccountEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
 
-            filter.Add(Builders<AccountEntity>.Filter.Where(o => o.Type == "admin"));
+            filter.Add(Builders<AccountEntity>.Filter.Where(o => o.Type == ACCOUNT_TYPE.ADMIN));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<AccountEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();

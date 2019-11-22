@@ -13,7 +13,7 @@ namespace Core_v2.Globals
     {
         public string defaultAvatar { get; set; }
         public float avatar_max_size_mb { get; set; }
-
+        public string defaultClassID { get; set; }
     }
 
 }

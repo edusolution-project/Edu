@@ -52,6 +52,7 @@ namespace Admin_Customer.Controllers
             HttpContext.Remove(Cookies.DefaultLogin);
             return View();
         }
+
         [HttpPost]
         public IActionResult Register(string UserName, string Name, string PassWord, string Type)
         {
@@ -81,10 +82,9 @@ namespace Admin_Customer.Controllers
                         UserCreate = null,
                     };
 
-
                     switch (Type)
                     {
-                        case "teacher":
+                        case ACCOUNT_TYPE.TEACHER:
                             user.RoleID = _roleService.GetItemByCode("teacher").ID;
                             break;
                         default:
@@ -94,7 +94,7 @@ namespace Admin_Customer.Controllers
                     _accountService.CreateQuery().InsertOne(user);
                     switch (Type)
                     {
-                        case "teacher":
+                        case ACCOUNT_TYPE.TEACHER:
                             var teacher = new TeacherEntity()
                             {
                                 FullName = user.Name,
@@ -111,7 +111,7 @@ namespace Admin_Customer.Controllers
                             {
                                 FullName = user.Name,
                                 Email = user.UserName,
-                                IsActive = false,
+                                IsActive = false, //kich hoat luon cho student
                                 CreateDate = DateTime.Now
                             };
 
@@ -197,7 +197,7 @@ namespace Admin_Customer.Controllers
             {
                 CreateDate = DateTime.Now,
                 IsActive = true,
-                Type = "admin",
+                Type = ACCOUNT_TYPE.ADMIN,
                 UserName = "supperadmin@gmail.com",
                 PassTemp = Security.Encrypt("123"),
                 PassWord = Security.Encrypt("123"),

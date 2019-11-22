@@ -39,7 +39,7 @@
                                 <th class="text-center align-middle">Name</th>
                                 <th class="text-center align-middle">Email</th>
                                 <th class="text-center align-middle">Progress</th>
-                                <th class="text-center align-middle">Last seen</th>
+                                <th class="text-center align-middle">Last joined</th>
                                 <th class="text-center align-middle">Result</th>
                                 @if (hasManageRole)
                                 {
@@ -62,10 +62,11 @@
 @section Scripts {
     <script>
 
-    var membersBody = $('#membersTable tbody');
+        var membersBody = $('#membersTable tbody');
 
-    function LoadMembers() {
+        function LoadMembers() {
         members = [];
+        membersBody.html("");
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetListMember", "Class")',
@@ -73,33 +74,45 @@
             dataType:"json",
             success: function (data) {
                 memberCounter = 1;
-                membersBody.html("");
                 members = data.Data.Students;
-
                 if (members.length > 0) {
                     for (j = 0; j < members.length; j++) {
                         var student = members[j];
 
                         //var date = moment(new Date(student.DateBorn)).format('DD/MM/YYYY');
-                        var lastdate = moment(new Date(student.LastJoinDate)).format('DD/MM/YYYY');
+                        var lastdate = "---";
 
+                        var totalLesson = 1;
+                        var completeLesson = 0;
+                        var percent = 0;
+                        console.log(student.Progress);
+                        if (student.Progress != null) {
+                            lastdate = moment(new Date(student.Progress.LastDate)).format('DD/MM/YYYY');
+                            completeLesson = student.Progress.CompletedLessons.length;
+                            totalLesson = student.Progress.TotalLessons;
+                            percent = Math.ceil(completeLesson * 100 / totalLesson)
+                        }
 
                         var row = $("<tr>", {id: "st" + student.ID});
                         row.append($("<td>", { class:"text-center", text: j + 1 }));
                         row.append($("<td>", { text: student.FullName }));
                         row.append($("<td>", { text: student.Email }));
-                        var progress = $("<div>", { class: "progress" })
+                        var progress = $("<div>", { class: "progress position-relative" })
                             .append($("<div>", {
                                 class: "progress-bar bg-success",
                                 role: "progressbar",
-                                style: "width: 0%",
-                                "aria-valuenow": "0",
+                                style: "width: " + percent + "%",
+                                "aria-valuenow": completeLesson,
                                 "aria-valuemin": "0",
-                                "aria-valuemax": "100"
+                                "aria-valuemax": totalLesson
                             }))
+                            .append($("<small>", {
+                                class: "justify-content-center d-flex position-absolute w-100",
+                                text: percent + "%"
+                            }));
                         row.append($("<td>").append(progress));
                         row.append($("<td>", { class: "text-center", text: lastdate }));
-                        row.append($("<td>", { text: "---" }));
+                        row.append($("<td>", {class: "text-center", text: "---" }));
                         @if (hasManageRole)
                         {
                         @:var actionrow = $("<td>");
@@ -119,16 +132,16 @@
         });
     }
 
-    $(document).ready(function () {
+        $(document).ready(function () {
         LoadMembers();
     });
 
-    function RemoveStudent(studentid) {
+        function RemoveStudent(studentid) {
         $.ajax({
             type: "POST",
-            url: '@Url.Action("RemoveStudent", "Class")',
+            url: '@Url.Action("RemoveStudent", "StudentManage")',
             data: {
-                ID: "@currentClass.ID",
+                ClassID: "@currentClass.ID",
                 StudentID: studentid
             },
             dataType: "json",
@@ -162,9 +175,9 @@
             }
             $.ajax({
             type: "POST",
-            url: '@Url.Action("AddStudent", "Class")',
+            url: '@Url.Action("AddStudent", "StudentManage")',
             data: {
-                ID: "@currentClass.ID",
+                ClassID: "@currentClass.ID",
                 StudentID: studentid
             },
             dataType: "json",
@@ -188,14 +201,7 @@
         var cache = {};
 
         $("#studentName")
-            //.on( "keydown", function( event ) {
-            //    if ( event.keyCode === $.ui.keyCode.TAB &&
-            //        $(this).autocomplete("instance").menu.active ) {
-            //      event.preventDefault();
-            //    }
-            //})
             .autocomplete({
-                source: '@Url.Action("SearchStudents","Class")',
                 source: function (request, response) {
 
                     var term = request.term;
@@ -204,7 +210,7 @@
                       return;
                     }
                     $.ajax({
-                        url: '@Url.Action("SearchStudents","Class")',
+                        url: '@Url.Action("Search","StudentManage")',
                         data: {
                             term: request.term
                         },

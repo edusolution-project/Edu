@@ -85,7 +85,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var DataResponse =
 
                 from t in teachers.ToList()
-                let account = _accountService.CreateQuery().Find(o => o.UserID == t.ID && o.Type == "teacher").FirstOrDefault()
+                let account = _accountService.CreateQuery().Find(o => o.UserID == t.ID && o.Type == ACCOUNT_TYPE.TEACHER).FirstOrDefault()
                 where account != null
                 let role = roles.Find(r => r.ID == account.RoleID)
                 where role != null
@@ -119,7 +119,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             if (data != null)
             {
-                var account = _accountService.CreateQuery().Find(o => o.UserID == data.ID && o.Type == "teacher").First();
+                var account = _accountService.CreateQuery().Find(o => o.UserID == data.ID && o.Type == ACCOUNT_TYPE.TEACHER).First();
                 var role = roles.Find(r => r.ID == account.RoleID);
                 teacher = _mapping.AutoOrtherType(data, new TeacherViewModel()
                 {
@@ -171,7 +171,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                         PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                         UserCreate = item.UserCreate,
-                        Type = "teacher",
+                        Type = ACCOUNT_TYPE.TEACHER,
                         UserID = item.ID,
                         UserName = item.Email.ToLower().Trim(),
                         RoleID = RoleID
@@ -200,7 +200,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.Address = oldData.Address;
                 _service.CreateOrUpdate(item);
 
-                var oldAccount = _accountService.CreateQuery().Find(t => t.UserID == item.ID && t.Type == "teacher").SingleOrDefault();
+                var oldAccount = _accountService.CreateQuery().Find(t => t.UserID == item.ID && t.Type == ACCOUNT_TYPE.TEACHER).SingleOrDefault();
                 if (oldAccount == null) return new JsonResult(null);
                 oldAccount.RoleID = RoleID;
                 oldAccount.IsActive = item.IsActive;
@@ -301,7 +301,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                                     PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                                     UserCreate = item.UserCreate,
-                                    Type = "teacher",
+                                    Type = ACCOUNT_TYPE.TEACHER,
                                     UserID = item.ID,
                                     UserName = item.Email.ToLower().Trim(),
                                     RoleID = _roleService.GetItemByCode("teacher").ID

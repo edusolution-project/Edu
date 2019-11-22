@@ -177,6 +177,10 @@
                             @*<th>Giáo viên</th>*@
                             <th class="text-center">Registered Students</th>
                             <th class="text-center">Period</th>
+                            @if (hasManageRole)
+                            {
+                                <th class="text-center">Action</th>
+                            }
                             @*<th>Trạng thái</th>*@
                         </tr>
                     </thead>
@@ -196,6 +200,10 @@
                             <th class="text-left">Grade</th>
                             <th class="text-center">Registered Students</th>
                             <th class="text-center">Period</th>
+                            @if (hasManageRole)
+                            {
+                                <th class="text-center">Action</th>
+                            }
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -215,6 +223,7 @@
         function LoadCourse() {
             var course = $("select[name='CourseID']");
             var data = {
+                cp: true
             }
             $.ajax({
                 type: "POST",
@@ -237,8 +246,8 @@
             })
         }
 
-
         function LoadData() {
+        hideModal();
         var UserID = '@user';
         var searchText = $("#searchText").val();
         var subject = $("#SubjectID").val();
@@ -268,15 +277,29 @@
 
                             var count = past ? ++pastcounter : ++counter;
 
-                            var row =
-                                "<tr>" +
-                                "<td>" + count + "</td>" +
-                                "<td><a href='@Url.Action("Detail", "Class")/" + item.ID + "'>" + item.Name + "</td>" +
-                                "<td>" + item.SubjectName + "</td>" +
-                                "<td>" + item.GradeName + "</td>" +
-                                "<td class='text-center'>" + item.Students.length + "</td>" +
-                                "<td class='text-center'>" + startdate + " - " + enddate + "</td>" +
-                                "</tr>";
+                            var row = $("<tr>");
+                            row.append($("<td>", { text: count }));
+                            row.append($("<td>").append($("<a>", {
+                                href: "@Url.Action("Detail", "Class")/" + item.ID,
+                                text: item.Name
+                            })));
+                            row.append($("<td>", { text: item.SubjectName }));
+                            row.append($("<td>", { text: item.GradeName }));
+                            row.append($("<td>", { text: item.Students.length, class: "text-center" }));
+                            row.append($("<td>", { text: startdate + " - " + enddate, class: "text-center" }));
+                            @if (hasManageRole)
+                            {
+                                @:var editbtn = $("<button>", {
+                                @:onclick: "Edit('" + item.ID + "','@Url.Action("GetDetail", "Class")','@Url.Action("Create", "Class")',this)",
+                                @:type: 'button', class: 'btn text-primary', "data-placement": 'top', title: 'Edit', "data-toggle": 'modal', "data-target": '#modalCourse'
+                                @:}).append($("<i>", { class: "fas fa-edit" }));
+                                @:var removebtn = $("<button>", {
+                                @:onclick: "var result = confirm('Remove " + item.Name + "?'); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("Remove", "Class")',LoadData); else return;",
+                                @:type: 'button', class: 'btn text-danger', "data-placement": 'top', title: 'Remove',
+                                @:}).append($("<i>", {class: "fas fa-trash"}));
+                                @:row.append($("<td>", { class: "text-center" }).append(editbtn).append(removebtn));
+                            };
+
                             if (past) {
                                 $('.past-region').show();
                                 pastCourse.append(row);
@@ -455,7 +478,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "Course" )','create',LoadData)">Save</button>
+                        <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "Class" )','create',LoadData)">Save</button>
                     </div>
                 </div>
             }

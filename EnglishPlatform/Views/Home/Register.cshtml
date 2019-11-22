@@ -1,4 +1,5 @@
 ﻿@{
+
     ViewData["Title"] = "Login";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.AccountEntity;
@@ -25,7 +26,7 @@
                                 @using (Html.BeginForm("Register", "Home", FormMethod.Post, new { @name = "LoginForm" }))
                                 {
                                     Html.AntiForgeryToken();
-                                    @if(ViewBag.MessageError != null)
+                                    @if (ViewBag.MessageError != null)
                                     {
                                         <div class="text-danger text-center pb-3">
                                             @ViewBag.MessageError
@@ -54,7 +55,17 @@
                             else
                             {
                                 <div class="text-center">
-                                    <h1 class="h4 text-gray-900 mb-4">Register Successful!<br /> Please contact with administrator to active your account</h1>
+                                    <h1 class="h4 text-gray-900 mb-4">
+                                        Register Successful!<br />
+                                        @if (Data.Type == BaseCustomerEntity.Database.ACCOUNT_TYPE.STUDENT)
+                                        {
+                                            @:Login now to complete your first test!
+                                        }
+                                        else
+                                        {
+                                            @:Pleasecontact with administrator to active your account
+                                        }
+                                    </h1>
                                 </div>
                             }
                             <div class="text-center">

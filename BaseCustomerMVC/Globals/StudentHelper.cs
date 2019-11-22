@@ -29,7 +29,7 @@ namespace BaseCustomerMVC.Globals
                 var update = Builders<StudentEntity>.Update.Set("IsActive", status);
                 var publish = _studentService.Collection.UpdateManyAsync(filter, update);
 
-                var filterAcc = Builders<AccountEntity>.Filter.Where(o => o.UserID == id && o.Type == "student");
+                var filterAcc = Builders<AccountEntity>.Filter.Where(o => o.UserID == id && o.Type == ACCOUNT_TYPE.STUDENT);
                 var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", status);
                 _accountService.CreateQuery().UpdateManyAsync(filterAcc, updateAcc);
             }
@@ -45,7 +45,7 @@ namespace BaseCustomerMVC.Globals
             var update = Builders<StudentEntity>.Update.Set("IsActive", status);
             var publish = _studentService.Collection.UpdateMany(filter, update);
 
-            var filterAcc = Builders<AccountEntity>.Filter.Where(o => ids.Contains(o.UserID) && o.Type == "student");
+            var filterAcc = Builders<AccountEntity>.Filter.Where(o => ids.Contains(o.UserID) && o.Type == ACCOUNT_TYPE.STUDENT);
             var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", status);
             _accountService.CreateQuery().UpdateMany(filterAcc, updateAcc);
         }
