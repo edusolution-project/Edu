@@ -47,7 +47,7 @@
                 </div>
             </li>
 
-            <li class="sidebar-item dashboard"  title="Dashboard">
+            <li class="sidebar-item dashboard" title="Dashboard">
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
                     <i></i>
                     <span>Dashboard</span>
@@ -56,7 +56,7 @@
 
             <li class="sidebar-item course" title="My Courses">
                 @*data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')"*@
-                
+
                 <a class="nav-link p-0" href="@Url.Action("Index" , "Course" )">
                     <i></i>
                     <span>Course List</span>
@@ -188,6 +188,5 @@
         $('.sidebar-item.active').removeClass("active");
         $('.sidebar-item.' + tab).addClass("active");
     }
-
 
 </script>

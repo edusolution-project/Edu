@@ -31,12 +31,16 @@ namespace BaseCustomerEntity.Database
     public class LearningHistoryService : ServiceBase<LearningHistoryEntity>
     {
         private ClassProgressService _classProgressService;
+        private LessonProgressService _lessonProgressService;
         private ChapterProgressService _chapterProgressService;
 
-        public LearningHistoryService(IConfiguration config, ClassProgressService classProgressService, ChapterProgressService chapterProgressService) : base(config)
+        public LearningHistoryService(IConfiguration config, ClassProgressService classProgressService,
+            LessonProgressService lessonProgressService,
+            ChapterProgressService chapterProgressService) : base(config)
         {
             _classProgressService = classProgressService;
             _chapterProgressService = chapterProgressService;
+            _lessonProgressService = lessonProgressService;
 
             var indexs = new List<CreateIndexModel<LearningHistoryEntity>>
             {
@@ -90,7 +94,18 @@ namespace BaseCustomerEntity.Database
             }
             CreateOrUpdate(item);
             await _classProgressService.UpdateLastLearn(item);
+            await _lessonProgressService.UpdateLastLearn(item);
             await _chapterProgressService.UpdateLastLearn(item);
+        }
+
+        public long CountLessonLearnt(string StudentID, string LessonID)
+        {
+            return Collection.CountDocuments(t => t.StudentID == StudentID && t.LessonID == LessonID);
+        }
+
+        public DateTime GetFirstLearnt(string StudentID, string LessonID)
+        {
+            return Collection.Find(t => t.StudentID == StudentID && t.LessonID == LessonID).SortByDescending(t => t.ID).Project(t => t.Time).FirstOrDefault();
         }
     }
 }

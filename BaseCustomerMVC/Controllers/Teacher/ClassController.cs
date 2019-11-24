@@ -30,6 +30,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
+        private readonly ScoreStudentService _scoreStudentService;
+
+
         private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly IHostingEnvironment _env;
@@ -70,7 +73,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ExamService examService,
             ExamDetailService examDetailService,
 
-
+            ScoreStudentService scoreStudentService,
             LessonPartService lessonPartService,
             LessonPartQuestionService lessonPartQuestionService,
             LessonPartAnswerService lessonPartAnswerService,
@@ -108,6 +111,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //_lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
             //_lessonPartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
             //_lessonPartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
+
+            _scoreStudentService = scoreStudentService;
 
             _studentService = studentService;
             _mapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
@@ -231,6 +236,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
+        public IActionResult StudentDetail(string ClassID, string StudentID)
+        {
+            if (string.IsNullOrEmpty(ClassID))
+                return RedirectToAction("Index");
+            var currentClass = _service.GetItemByID(ClassID);
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            if (string.IsNullOrEmpty(StudentID))
+                return RedirectToAction("Member", "Class", new { ID = ClassID });
+            return View();
+        }
 
         //Class Detail Management
 
@@ -428,7 +444,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ClassName = currentClass.Name,
                 ClassStatus = "Đang học",
                 LastJoinDate = DateTime.Now,
-                Progress = _progressService.GetItemByClassID(currentClass.ID, t.ID)
+                Progress = _progressService.GetItemByClassID(currentClass.ID, t.ID),
+                Score = _scoreStudentService.GetScoreStudentByStudentIdAndClassId(currentClass.ID, t.ID)
             })).ToList();
 
             var response = new Dictionary<string, object>

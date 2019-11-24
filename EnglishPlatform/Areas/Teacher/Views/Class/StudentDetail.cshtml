@@ -1,0 +1,287 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    ViewData["Title"] = currentClass.Name + " - Members List";
+    var hasManageRole = (bool)(ViewBag.Managable ?? false);
+}
+
+<script>
+    activeTab = "course";
+    modulesLink = "@Url.Action("Modules", "Course")/@currentClass.ID";
+    activeSub = "people";
+</script>
+
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+        <div class="sub-sidebar">
+            @await Html.PartialAsync("_subSidebarTeacher")
+        </div>
+        <div class="main-content">
+            <div class="row">
+                <div class="col-md-10">
+                    @if (hasManageRole)
+                    {
+                        <div class="text-right pb-3">
+                            <button type="button" onclick="ShowAddStudent()" class="btn btn-primary" data-placement="top" title="Add Student" data-toggle="modal"
+                                    data-target="#addStudentModal" data-original-title="Add Student">
+                                <i class="fas fa-plus"></i> Add Student
+                            </button>
+                        </div>
+                    }
+                    <table id="membersTable" class="table" width="100%" cellspacing="0">
+                        <thead>
+                            <tr class="text-center align-middle">
+                                <th class="text-center align-middle">Index</th>
+                                <th class="text-center align-middle">Name</th>
+                                <th class="text-center align-middle">Email</th>
+                                <th class="text-center align-middle">Progress</th>
+                                <th class="text-center align-middle">Last joined</th>
+                                <th class="text-center align-middle">Result</th>
+                                @if (hasManageRole)
+                                {
+                                    <th class="text-center align-middle"></th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="col-md-2">
+                    @await Html.PartialAsync("MiniCalendar")
+                    @await Html.PartialAsync("Markbox")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        var membersBody = $('#membersTable tbody');
+
+        function LoadMembers() {
+        members = [];
+        membersBody.html("");
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetListMember", "Class")',
+            data: {ID: "@currentClass.ID"},
+            dataType:"json",
+            success: function (data) {
+                memberCounter = 1;
+                members = data.Data.Students;
+                if (members.length > 0) {
+                    for (j = 0; j < members.length; j++) {
+                        var student = members[j];
+
+                        //var date = moment(new Date(student.DateBorn)).format('DD/MM/YYYY');
+                        var lastdate = "---";
+
+                        var totalLesson = 1;
+                        var completeLesson = 0;
+                        var percent = 0;
+                        console.log(student.Progress);
+                        if (student.Progress != null) {
+                            lastdate = moment(new Date(student.Progress.LastDate)).format('DD/MM/YYYY');
+                            completeLesson = student.Progress.CompletedLessons.length;
+                            totalLesson = student.Progress.TotalLessons;
+                            percent = Math.ceil(completeLesson * 100 / totalLesson)
+                        }
+
+                        var row = $("<tr>", {id: "st" + student.ID});
+                        row.append($("<td>", { class:"text-center", text: j + 1 }));
+                        row.append($("<td>", { text: student.FullName }));
+                        row.append($("<td>", { text: student.Email }));
+                        var progress = $("<div>", { class: "progress position-relative" })
+                            .append($("<div>", {
+                                class: "progress-bar bg-success",
+                                role: "progressbar",
+                                style: "width: " + percent + "%",
+                                "aria-valuenow": completeLesson,
+                                "aria-valuemin": "0",
+                                "aria-valuemax": totalLesson
+                            }))
+                            .append($("<small>", {
+                                class: "justify-content-center d-flex position-absolute w-100",
+                                text: percent + "%"
+                            }));
+                        row.append($("<td>").append(progress));
+                        row.append($("<td>", { class: "text-center", text: lastdate }));
+                        row.append($("<td>", {class: "text-center", text: "---" }));
+                        @if (hasManageRole)
+                        {
+                        @:var actionrow = $("<td>");
+                        @:var btnRemove = $("<button>", { class: "btn btn-remove text-danger panel-transparent", "data-placement": "top", "data-trigger":"hover", title: "Remove", onclick: "if(confirm('Confirm Remove?')){ showLoading(); RemoveStudent('" + student.ID + "', '@Url.Action("RemoveStudent","Class")')}" });
+                        @:btnRemove.append($("<i>", { class: "fas fa-trash" }));
+                        @:actionrow.append(btnRemove);
+                        @:row.append(actionrow);
+                        @:btnRemove.tooltip();
+                        }
+                        membersBody.append(row);
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    }
+
+        $(document).ready(function () {
+        LoadMembers();
+    });
+
+        function RemoveStudent(studentid) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("RemoveStudent", "StudentManage")',
+            data: {
+                ClassID: "@currentClass.ID",
+                StudentID: studentid
+            },
+            dataType: "json",
+            success: function (data) {
+                hideLoading();
+                if (data.error != null) {
+                    alert(data.error);
+                }
+                else {
+                    membersBody.find('#st' + studentid).remove();
+                }
+            },
+            error: function () {
+                alert("Error");
+                hideLoading();
+            }
+        });
+    }
+
+        function ShowAddStudent() {
+            $('#studentID').val('');
+            $('#studentName').val('').focus().click();
+        }
+
+        function AddStudent() {
+            var studentid = $('#studentID').val();
+            if (studentid == '') {
+                alert('Please select student from list');
+                $('#studentName').focus().click();
+                return false;
+            }
+            $.ajax({
+            type: "POST",
+            url: '@Url.Action("AddStudent", "StudentManage")',
+            data: {
+                ClassID: "@currentClass.ID",
+                StudentID: studentid
+            },
+            dataType: "json",
+            success: function (data) {
+                hideLoading();
+                if (data.error != null) {
+                    alert(data.error);
+                }
+                else {
+                    LoadMembers();
+                    hideModal();
+                }
+            },
+            error: function () {
+                alert("Error");
+                hideLoading();
+            }
+        });
+        }
+
+        var cache = {};
+
+        $("#studentName")
+            .autocomplete({
+                source: function (request, response) {
+
+                    var term = request.term;
+                    if ( term in cache ) {
+                      response( cache[term] );
+                      return;
+                    }
+                    $.ajax({
+                        url: '@Url.Action("Search","StudentManage")',
+                        data: {
+                            term: request.term
+                        },
+                        success: function (data) {
+                            cache[term] = data;
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+                focus: function (event, ui) {
+                    $("#studentName").val(ui.item.FullName);
+                    return false;
+                  },
+                select: function (event, ui) {
+                    //var terms = split( this.value );
+                    //  // remove the current input
+                    //  terms.pop();
+                    //  // add the selected item
+                    //terms.push(ui.item.label);
+                    //  // add placeholder to get the comma-and-space at the end
+                    //  terms.push( "" );
+                    ////this.value = terms.join(", ");
+                    //selected.push(ui.item.label);
+                    //this.value = selected.join(", ");
+                    //console.log(selected);
+                    //return false;
+                    $("#studentName").val(ui.item.FullName);
+                    $("#studentID").val(ui.item.ID);
+                    return false;
+                }
+            })
+            .autocomplete("instance")._renderItem = function (ul, item) {
+                return $("<li>")
+                    .append("<div>" + item.FullName + "<br>" + item.Email + "</div>")
+                    .appendTo(ul);
+                    };
+
+    </script>
+}
+
+@section Modals{
+
+
+    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="addStudentModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add Student to Class</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="ID" />
+                    <div class="form-group">
+                        <label class="col-form-label">Find Student:</label>
+                        <input type="text" class="form-control" id="studentName" name="Name" placeholder="Please type to search">
+                        <input type="hidden" value="" id="studentID" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="AddStudent()">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .ui-front {
+            z-index: 9999
+        }
+    </style>
+}

@@ -55,6 +55,8 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<LearningHistoryService>();
             services.AddSingleton<ReferenceService>();
 
+            services.AddSingleton<ScoreStudentService>();
+
             services.AddSingleton<CalendarService>();
             services.AddSingleton<CalendarReportService>();
             services.AddSingleton<CalendarLogService>();

@@ -18,6 +18,7 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("LastJoin")]
         public DateTime LastJoin { get; set; } 
         [JsonProperty("Progress")]
-        public ClassProgressEntity Progress { get; set; } 
+        public ClassProgressEntity Progress { get; set; }
+        public ScoreStudentEntity Score { get; set; }
     }
 }
