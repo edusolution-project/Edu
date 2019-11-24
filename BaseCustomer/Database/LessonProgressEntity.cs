@@ -33,11 +33,8 @@ namespace BaseCustomerEntity.Database
     }
     public class LessonProgressService : ServiceBase<LessonProgressEntity>
     {
-        private LearningHistoryService _learningHistoryService;
-
-        public LessonProgressService(IConfiguration config, LearningHistoryService learningHistoryService) : base(config)
+        public LessonProgressService(IConfiguration config) : base(config)
         {
-            _learningHistoryService = learningHistoryService;
         }
 
         public async Task UpdateLastLearn(LearningHistoryEntity item)
@@ -50,9 +47,11 @@ namespace BaseCustomerEntity.Database
                     ClassID = item.ClassID,
                     LessonID = item.LessonID,
                     StudentID = item.StudentID,
-                    FirstDate = _learningHistoryService.GetFirstLearnt(item.StudentID, item.LessonID),
+                    //FirstDate = _learningHistoryService.GetFirstLearnt(item.StudentID, item.LessonID),
                     LastDate = DateTime.Now,
-                    TotalLearnt = _learningHistoryService.CountLessonLearnt(item.StudentID, item.LessonID)
+                    FirstDate = DateTime.Now,
+                    TotalLearnt = 1,
+                    //TotalLearnt = _learningHistoryService.CountLessonLearnt(item.StudentID, item.LessonID)
                 };
                 await Collection.InsertOneAsync(currentProgress);
             }

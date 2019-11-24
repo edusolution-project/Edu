@@ -30,6 +30,9 @@ namespace BaseCustomerEntity.Database
         public string UserCreate { get; set; }
         [JsonProperty("CreateDate")]
         public DateTime CreateDate { get; set; }
+        [JsonProperty("Phone")]
+        public string Phone { get; set; }
+
     }
     public class AccountService : ServiceBase<AccountEntity>
     {
