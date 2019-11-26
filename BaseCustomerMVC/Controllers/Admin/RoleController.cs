@@ -18,7 +18,7 @@ using System.Reflection;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Quản lý quyền", "Role", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý quyền", "Role", "admin")]
     public class RoleController : AdminController
     {
         private readonly IAccess _access;
@@ -55,7 +55,39 @@ namespace BaseCustomerMVC.Controllers.Admin
             ViewBag.StudentCtrl = _access.GetAccessByAttribue<Globals.StudentController>(assembly, "student");
 
             ViewBag.Data = _accessesService.Collection.Find(o => o.RoleID == id && o.IsActive == true)?.ToList();
+            ViewBag.RoleID = id;
+            return View();
+        }
+        [HttpPost]
+        public IActionResult Access(string id, List<AccessEntity> data)
+        {
+            if (string.IsNullOrEmpty(id)) return View("Index");
 
+            var assembly = GetAssembly();
+
+            ViewBag.AdminCtrl = _access.GetAccessByAttribue<Globals.AdminController>(assembly, "admin");
+            ViewBag.TeacherCtrl = _access.GetAccessByAttribue<Globals.TeacherController>(assembly, "teacher");
+            ViewBag.StudentCtrl = _access.GetAccessByAttribue<Globals.StudentController>(assembly, "student");
+
+            for(int i = 0; data != null && i < data.Count; i++)
+            {
+                var item = data[i];
+                var oldItem = _accessesService.Collection.Find(o => o.CtrlName == item.CtrlName && o.ActName == item.ActName && o.RoleID == id)?.SingleOrDefault();
+                if(oldItem != null)
+                {
+                    oldItem.IsActive = item.IsActive;
+                    _accessesService.Collection.ReplaceOne(x=>x.ID == oldItem.ID, oldItem);
+                }
+                else
+                {
+                    item.RoleID = id;
+                    item.CreateDate = DateTime.Now;
+                    item.UserCreate = User.FindFirst("UserID")?.Value;
+                    _accessesService.CreateOrUpdate(item);
+                }
+            }
+            ViewBag.Data = _accessesService.Collection.Find(o => o.RoleID == id && o.IsActive == true)?.ToList();
+            ViewBag.RoleID = id;
             return View();
         }
 

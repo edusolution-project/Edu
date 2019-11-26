@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
-    [BaseAccess.Attribule.AccessCtrl("Trao đổi")]
+    [BaseAccess.Attribule.AccessCtrl("Trao đổi", "student")]
     public class DiscussController : StudentController
     {
         private readonly ClassService _classService;

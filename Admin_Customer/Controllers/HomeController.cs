@@ -10,11 +10,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using BaseCustomerMVC.Globals;
+using BaseAccess.Interfaces;
 
 namespace Admin_Customer.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly AccessesService _accessesService;
+        private readonly IAuthenService _authenService;
         private readonly AccountService _accountService;
         private readonly RoleService _roleService;
         private readonly AccountLogService _logService;
@@ -24,8 +27,12 @@ namespace Admin_Customer.Controllers
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
             , TeacherService teacherService
             , StudentService studentService
+            , IAuthenService authenService
+            , AccessesService accessesService
             , ILog log)
         {
+            _accessesService = accessesService;
+            _authenService = authenService;
             _accountService = accountService;
             _roleService = roleService;
             _logService = logService;
@@ -42,7 +49,7 @@ namespace Admin_Customer.Controllers
             }
             else
             {
-                HttpContext.SignOutAsync(Cookies.DefaultLogin);
+                _authenService.SignOut(HttpContext,Cookies.DefaultLogin);
                 return RedirectToAction("Login");
             }
         }
@@ -53,6 +60,7 @@ namespace Admin_Customer.Controllers
             return View();
         }
         [HttpPost]
+        [Obsolete]
         public IActionResult Register(string UserName, string Name, string PassWord, string Type)
         {
             if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
@@ -261,7 +269,7 @@ namespace Admin_Customer.Controllers
                                     FullName = "admin"; id = "0";
                                     break;
                             }
-
+                            var listAccess = _accessesService.GetAccessByRole(role.ID);
                             var claims = new List<Claim>
                             {
                                 new Claim("UserID",id),
@@ -271,12 +279,15 @@ namespace Admin_Customer.Controllers
                                 new Claim("Type", user.Type),
                                 new Claim("RoleID", role.ID)
                             };
-                            var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
-                            _ = new AuthenticationProperties
+                            if (listAccess != null)
                             {
-                                IsPersistent = true,
-                                ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
-                            };
+                                for(int i = 0; i < listAccess.Count(); i++)
+                                {
+                                    var accItem = listAccess.ElementAt(i);
+                                    claims.Add(new BaseAccess.Permission($"{accItem.Type}{accItem.CtrlName}{accItem.ActName}"));
+                                }
+                            }
+                            var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
                             ClaimsPrincipal claim = new ClaimsPrincipal();
                             claim.AddIdentity(claimsIdentity);
 
@@ -289,12 +300,7 @@ namespace Admin_Customer.Controllers
                                 CreateDate = DateTime.Now
                             };
                             _logService.CreateQuery().InsertOne(login);
-                            await HttpContext.SignInAsync(Cookies.DefaultLogin, claim, new AuthenticationProperties()
-                            {
-                                ExpiresUtc = !IsRemmember ? DateTime.Now : DateTime.Now.AddMinutes(Cookies.ExpiresLogin),
-                                AllowRefresh = true,
-                                RedirectUri = user.Type
-                            });
+                            await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
                             return Redirect(user.Type);
                         }
                         else

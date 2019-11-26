@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace BaseCustomerEntity.Database
 {
@@ -29,7 +30,10 @@ namespace BaseCustomerEntity.Database
         {
 
         }
-
+        public IEnumerable<AccessEntity> GetAccessByRole(string RoleID)
+        {
+            return Collection?.Find(o => o.IsActive == true && o.RoleID == RoleID)?.ToEnumerable();
+        }
         public bool Save(AccessEntity item)
         {
             var oldItem = CreateQuery().Find(o => o.CtrlName == item.CtrlName && o.ActName == item.ActName && o.Type == item.Type)?.FirstOrDefault();

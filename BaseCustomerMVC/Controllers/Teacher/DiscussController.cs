@@ -4,7 +4,7 @@ using BaseCustomerEntity.Database;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
-    [BaseAccess.Attribule.AccessCtrl("Thảo luận")]
+    [BaseAccess.Attribule.AccessCtrl("Thảo luận", "teacher")]
     public class DiscussController : TeacherController
     {
         private readonly ClassService _classService;

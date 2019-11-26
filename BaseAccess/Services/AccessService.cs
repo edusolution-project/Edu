@@ -36,7 +36,7 @@ namespace BaseAccess.Services
             for (int i = 0; i < count; i++)
             {
                 var item = listController[i];
-                string module = item.Name.Replace("Controller", "");
+                string module = item.Name.Replace("Controller", "").ToLower();
                 var attribute = item.GetCustomAttribute<AccessCtrlAttribute>();
                 if (attribute == null)
                 {
@@ -49,7 +49,7 @@ namespace BaseAccess.Services
                 }
                 var actions = item.GetTypeInfo().DeclaredMethods?
                         .Where(o => o.IsPublic)
-                        .Select(o => o.Name);
+                        .Select(o => o.Name.ToLower());
 
                 if (actions != null)
                 {
@@ -79,7 +79,7 @@ namespace BaseAccess.Services
             for (int i = 0; i < count; i++)
             {
                 var item = listController[i];
-                string module = item.Name.Replace("Controller", "");
+                string module = item.Name.Replace("Controller", "").ToLower();
                 var attribute = new AccessModel()
                 {
                     Ctrl = module,
@@ -87,7 +87,7 @@ namespace BaseAccess.Services
                 };
                 var actions = item.GetTypeInfo().DeclaredMethods?
                         .Where(o => o.IsPublic)
-                        .Select(o => o.Name);
+                        .Select(o => o.Name.ToLower());
 
                 if (actions != null)
                 {

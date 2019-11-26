@@ -51,7 +51,6 @@ namespace Core_v2.Globals
             for (int i = 0; oldProps != null && i < oldProps.Count - 1; i++)
             {
                 var item = newProps[i];
-                var type = item.GetType();
                 if (newProps.Contains(item))
                 {
                     var value = item.GetValue(oldItem);

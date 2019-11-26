@@ -11,25 +11,16 @@ namespace BaseCustomerMVC.Globals
 {
     public class PermissionAttribute : ActionFilterAttribute
     {
-        private readonly PermissionService _permissionService;
-        private readonly RoleService _roleService;
-        private readonly AccountService _accountService;
         private readonly IConfiguration _configuration;
         public PermissionAttribute()
         {
             _configuration = StartUp.Configuration;
-            _permissionService = new PermissionService(_configuration);
-            _roleService = new RoleService(_configuration);
-            _accountService = new AccountService(_configuration);
         }
         private readonly string _roles;
         public PermissionAttribute(string Roles)
         {
             _roles = Roles;
             _configuration = StartUp.Configuration;
-            _permissionService = new PermissionService(_configuration);
-            _roleService = new RoleService(_configuration);
-            _accountService = new AccountService(_configuration);
         }
         /// <summary>
         /// -1 chưa login
@@ -40,7 +31,7 @@ namespace BaseCustomerMVC.Globals
         /// <param name="ctrlName"></param>
         /// <param name="actName"></param>
         /// <returns></returns>
-        private int CheckCtrlAndAct(Controller controller, string ctrlName, string actName)
+        private int CheckCtrlAndAct(Controller controller,string type, string ctrlName, string actName)
         {
 
             if (controller == null)
@@ -69,64 +60,34 @@ namespace BaseCustomerMVC.Globals
                 {
                     return -1;
                 }
-                var claimRole = user.Claims.GetClaimByType("RoleID");
+                
                 if (user.IsInRole("superadmin"))
                 {
                     return 1;
                 }
-                if (string.IsNullOrEmpty(_roles))
+                string _accessList = _configuration.GetSection("AccessListUser:" + ctrlName.ToLower()).Value;
+                if (!string.IsNullOrEmpty(_accessList))
                 {
-                    string _accessList = StartUp.Configuration.GetSection("AccessListUser:" + ctrlName.ToLower()).Value;
-                    if (!string.IsNullOrEmpty(_accessList))
+                    if (_accessList.Split(',').Contains(actName.ToLower()))
                     {
-                        if (_accessList.Split(',').Contains(actName.ToLower()))
-                        {
-                            return 1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    }
-                    //lấy roleid
-
-                    if (claimRole != null)
-                    {
-                        var access = _permissionService.GetPermission(claimRole.Value, ctrlName, actName);
-                        if (access == null) return 0;
-                        return access.IsActive ? 1 : 0;
+                        return 1;
                     }
                     else
                     {
                         return 0;
                     }
                 }
+                //lấy roleid
+                var claimRole = user.FindAll(o => o.Type == "Permission");
+                if (claimRole != null && claimRole.Count() > 0)
+                {
+                    var access = claimRole.Where(o=>o.Value==$"{type}{ctrlName}{actName}")?.FirstOrDefault();
+                    if (access == null) return 0;
+                    return  1;
+                }
                 else
                 {
-                    var role = _roleService.GetItemByID(claimRole.Value);
-                    if (role == null) return 0;
-                    if (_roles.Contains(','))
-                    {
-                        if (_roles.Split(',').Contains(role.Code))
-                        {
-                            return 1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    }
-                    else
-                    {
-                        if (_roles.Equals(role.Code))
-                        {
-                            return 1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    }
+                    return 0;
                 }
             }
         }
@@ -136,14 +97,14 @@ namespace BaseCustomerMVC.Globals
             string ctrlName = context.RouteData.Values["Controller"].ToString();
             string actName = context.RouteData.Values["Action"].ToString();
             string _area = context.RouteData.Values["Area"]?.ToString();
-            if (CheckCtrlAndAct(null, ctrlName, actName) > 0)
+            if (CheckCtrlAndAct(null,_area, ctrlName, actName) > 0)
             {
                 base.OnActionExecuting(context);
             }
             else
             {
                 Controller ctrl = (Controller)context.Controller;
-                int _number = CheckCtrlAndAct(ctrl, ctrlName, actName);
+                int _number = CheckCtrlAndAct(ctrl,_area, ctrlName, actName);
                 if (_number > 0)
                 {
                     base.OnActionExecuting(context);

@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
-    [BaseAccess.Attribule.AccessCtrl("Curriculum")]
+    [BaseAccess.Attribule.AccessCtrl("Curriculum", "teacher")]
     public class CurriculumController : TeacherController
     {
         private readonly CourseService _service;

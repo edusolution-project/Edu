@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [BaseAccess.Attribule.AccessCtrl("Dashboard", "Home", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Dashboard", "Home", "admin",false)]
     public class HomeController : AdminController
     {
         public HomeController()

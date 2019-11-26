@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
-    [BaseAccess.Attribule.AccessCtrl("Tin tức")]
+    [BaseAccess.Attribule.AccessCtrl("Tin tức", "teacher")]
     public class NewsController : TeacherController
     {
         public IActionResult Index()

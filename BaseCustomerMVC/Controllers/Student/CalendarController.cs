@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
-    [BaseAccess.Attribule.AccessCtrl("Lich học")]
+    [BaseAccess.Attribule.AccessCtrl("Lich học","student")]
     public class CalendarController : StudentController
     {
         private readonly CalendarService _calendarService;

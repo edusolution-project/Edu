@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
-    [BaseAccess.Attribule.AccessCtrl("Dashboard")]
+    [BaseAccess.Attribule.AccessCtrl("Dashboard", "teacher")]
     public class HomeController : TeacherController
     {
         public IActionResult Index()

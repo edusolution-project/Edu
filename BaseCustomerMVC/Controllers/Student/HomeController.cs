@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
-    [BaseAccess.Attribule.AccessCtrl("Dashboard")]
+    [BaseAccess.Attribule.AccessCtrl("Dashboard", "student")]
     public class HomeController : StudentController
     {
         private StudentService _studentService;

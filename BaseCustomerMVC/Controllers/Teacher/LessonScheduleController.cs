@@ -11,7 +11,7 @@ using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
-    [BaseAccess.Attribule.AccessCtrl("Lesson schedule")]
+    [BaseAccess.Attribule.AccessCtrl("Lesson schedule", "teacher")]
     public class LessonScheduleController : TeacherController
     {
         //private readonly GradeService _gradeService;

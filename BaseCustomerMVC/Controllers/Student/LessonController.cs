@@ -12,7 +12,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
-    [BaseAccess.Attribule.AccessCtrl("Bài học")]
+    [BaseAccess.Attribule.AccessCtrl("Bài học", "student")]
     public class LessonController : StudentController
     {
         // bài học hôm nay.

@@ -28,11 +28,6 @@ namespace BaseAccess.Attribule
             Type = type;
             IsShow = true;
         }
-        public AccessCtrlAttribute(string name)
-        {
-            Name = name;
-            IsShow = true;
-        }
 
         public string Name { get; set; }
         public string Module { get; set; }
