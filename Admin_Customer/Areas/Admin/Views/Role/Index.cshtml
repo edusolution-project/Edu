@@ -118,11 +118,12 @@
                         } else {
                             active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","role")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
+                        var url = '@Url.Action("Access","Role")';
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td>" + (i + 1) + "</td>" +
-                            "<td>" + item.Code +"</td>" +
-                            "<td>" + item.Name + "</td>" +
+                            "<td>" + item.Code + "</td>" +
+                            "<td><a href='" + url + "/" + item.ID + "'>" + item.Name + "</a></td>" +
                             "<td>" +  item.Type +"</td>"+active +
                             "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","role")','@Url.Action("create","role")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","role")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
