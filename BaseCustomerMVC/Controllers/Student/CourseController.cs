@@ -24,6 +24,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
+        private readonly LessonProgressService _lessonProgressService;
 
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
@@ -69,9 +70,11 @@ namespace BaseCustomerMVC.Controllers.Student
             , ExamService examService
             , ExamDetailService examDetailService
             , StudentService studentService
+            , LessonProgressService lessonProgressService
             , LearningHistoryService learningHistoryService
             )
         {
+            _lessonProgressService = lessonProgressService;
             _learningHistoryService = learningHistoryService;
             _chapterService = chapterService;
             _chapterExtendService = chapterExtendService;
@@ -97,6 +100,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _lessonPartAnswerService = lessonPartAnswerService;
             _studentMapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
+
+
 
             _lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
             _lessonPartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();

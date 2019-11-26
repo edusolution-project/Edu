@@ -54,17 +54,17 @@ namespace Admin_Customer.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(string UserName, string Name, string PassWord, string Type)
+        public IActionResult Register(AccountEntity entity)
         {
-            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
+            if (string.IsNullOrEmpty(entity.UserName) || string.IsNullOrEmpty(entity.PassWord))
             {
                 ViewBag.MessageError = "Không thể bỏ trống các trường bắt buộc";
                 return View();
             }
             else
             {
-                string _sPass = Security.Encrypt(PassWord);
-                if (_accountService.IsAvailable(UserName))
+                string _sPass = Security.Encrypt(entity.PassWord);
+                if (_accountService.IsAvailable(entity.UserName))
                 {
                     ViewBag.MessageError = "Tài khoản đã tồn tại";
                     return View();
@@ -74,15 +74,16 @@ namespace Admin_Customer.Controllers
                     var user = new AccountEntity()
                     {
                         PassWord = _sPass,
-                        UserName = UserName,
-                        Name = Name,
-                        Type = Type,
+                        UserName = entity.UserName,
+                        Name = entity.Name,
+                        Type = entity.Type,
+                        Phone = entity.Phone,
                         IsActive = false,
                         CreateDate = DateTime.Now,
                         UserCreate = null,
                     };
 
-                    switch (Type)
+                    switch (entity.Type)
                     {
                         case ACCOUNT_TYPE.TEACHER:
                             user.RoleID = _roleService.GetItemByCode("teacher").ID;
@@ -92,13 +93,14 @@ namespace Admin_Customer.Controllers
                             break;
                     }
                     _accountService.CreateQuery().InsertOne(user);
-                    switch (Type)
+                    switch (entity.Type)
                     {
                         case ACCOUNT_TYPE.TEACHER:
                             var teacher = new TeacherEntity()
                             {
                                 FullName = user.Name,
                                 Email = user.UserName,
+                                Phone = user.Phone,
                                 IsActive = false,
                                 CreateDate = DateTime.Now
                             };
@@ -111,6 +113,7 @@ namespace Admin_Customer.Controllers
                             {
                                 FullName = user.Name,
                                 Email = user.UserName,
+                                Phone = user.Phone,
                                 IsActive = false, //kich hoat luon cho student
                                 CreateDate = DateTime.Now
                             };
