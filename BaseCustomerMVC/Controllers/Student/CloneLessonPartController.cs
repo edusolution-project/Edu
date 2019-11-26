@@ -11,6 +11,7 @@ using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
+    [BaseAccess.Attribule.AccessCtrl("Lesson part")]
     public class CloneLessonPartController : StudentController
     {
         private readonly GradeService _gradeService;

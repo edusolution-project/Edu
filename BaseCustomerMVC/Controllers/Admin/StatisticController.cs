@@ -9,7 +9,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Trang thống kê", "StatisticController", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Trang thống kê", "Statistic", "admin")]
     public class StatisticController : AdminController
     {
         private readonly AccountService _accountService;

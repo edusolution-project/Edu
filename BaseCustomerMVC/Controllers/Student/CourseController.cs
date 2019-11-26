@@ -12,6 +12,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
+    [BaseAccess.Attribule.AccessCtrl("Khóa học")]
     public class CourseController : StudentController
     {
         private readonly ClassService _service;

@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Trang chủ", "Home", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Dashboard", "Home", "admin")]
     public class HomeController : AdminController
     {
         public HomeController()

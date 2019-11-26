@@ -10,6 +10,7 @@ using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
+    [BaseAccess.Attribule.AccessCtrl("Điểm")]
     public class ScoreController : TeacherController
     {
         private readonly ScoreService _scoreService;

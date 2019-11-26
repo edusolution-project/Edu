@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Trang Quản trị viên", "AccountManagement", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý tài khoản quản trị", "Account", "admin")]
     public class AccountController : AdminController
     {
         private readonly AccountService _service;

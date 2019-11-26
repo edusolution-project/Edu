@@ -11,6 +11,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
+    [BaseAccess.Attribule.AccessCtrl("Lịch sử học tập")]
     public class LearnHistoryController : StudentController
     {
         private readonly LearningHistoryService _service;

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Quản lý khóa học", "ClassManagement", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý khóa học", "Coures", "admin")]
     public class CourseController : AdminController
     {
         private readonly CourseService _courseService;

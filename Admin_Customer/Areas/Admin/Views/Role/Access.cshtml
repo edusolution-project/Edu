@@ -1,4 +1,18 @@
 ﻿@{
     ViewData["Title"] = "Quản lý phân quyền";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    var adminData = ViewBag.AdminCtrl as List<BaseAccess.Attribule.AccessCtrlAttribute>;
+    var teacherData = ViewBag.TeacherCtrl as List<BaseAccess.Attribule.AccessCtrlAttribute>;
+    var studentData = ViewBag.StudentCtrl as List<BaseAccess.Attribule.AccessCtrlAttribute>;
+    var data = ViewBag.Data as List<BaseCustomerEntity.Database.AccessEntity>;
 }
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">Quản lý phân quyền</div>
+        <div class="col-12">
+
+        </div>
+    </div>
+</div>

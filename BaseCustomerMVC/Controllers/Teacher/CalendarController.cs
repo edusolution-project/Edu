@@ -15,6 +15,7 @@ using OfficeOpenXml;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
+    [BaseAccess.Attribule.AccessCtrl("Lich học")]
     public class CalendarController : TeacherController
     {
         private readonly CalendarService _calendarService;

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
-    [IndefindCtrlAttribulte("Trang chủ", "Home", "teacher")]
+    [BaseAccess.Attribule.AccessCtrl("Dashboard")]
     public class HomeController : TeacherController
     {
         public IActionResult Index()

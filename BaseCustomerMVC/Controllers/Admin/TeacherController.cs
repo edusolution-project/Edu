@@ -2,7 +2,6 @@
 using BaseCustomerMVC.Globals;
 using BaseCustomerMVC.Models;
 using Core_v2.Globals;
-using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +11,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Quản lý giáo viên", "TeacherManagement", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý giáo viên", "Teacher", "admin")]
     public class TeacherController : AdminController
     {
         private readonly SubjectService _subjectService;

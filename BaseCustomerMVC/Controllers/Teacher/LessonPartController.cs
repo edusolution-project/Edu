@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
+    [BaseAccess.Attribule.AccessCtrl("Lesson Part")]
     public class LessonPartController : TeacherController
     {
         private readonly GradeService _gradeService;

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
+    [BaseAccess.Attribule.AccessCtrl("Clone Lesson part")]
     public class CloneLessonPartController : TeacherController
     {
         private readonly GradeService _gradeService;

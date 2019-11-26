@@ -12,6 +12,7 @@ using System.Security.Claims;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
+    [BaseAccess.Attribule.AccessCtrl("Lesson")]
     public class LessonController : TeacherController
     {
         private readonly GradeService _gradeService;

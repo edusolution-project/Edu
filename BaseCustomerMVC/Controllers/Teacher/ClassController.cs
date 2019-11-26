@@ -15,6 +15,7 @@ using OfficeOpenXml;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
+    [BaseAccess.Attribule.AccessCtrl("Lớp học")]
     public class ClassController : TeacherController
     {
         private readonly GradeService _gradeService;

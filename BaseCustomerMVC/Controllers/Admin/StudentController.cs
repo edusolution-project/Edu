@@ -16,7 +16,7 @@ using MongoDB.Bson;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Quản lý học viên", "StudentManager", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý học viên", "Student", "admin")]
     public class StudentController : AdminController
     {
         private readonly StudentService _service;

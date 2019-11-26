@@ -36,11 +36,16 @@ namespace BaseAccess.Services
             for (int i = 0; i < count; i++)
             {
                 var item = listController[i];
+                string module = item.Name.Replace("Controller", "");
                 var attribute = item.GetCustomAttribute<AccessCtrlAttribute>();
                 if (attribute == null)
                 {
-                    string module = item.Name.Replace("Controller", "");
                     attribute = new AccessCtrlAttribute(module, module, group);
+                }
+                else
+                {
+                    attribute.Module = module;
+                    attribute.Type = group;
                 }
                 var actions = item.GetTypeInfo().DeclaredMethods?
                         .Where(o => o.IsPublic)

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Linq;
 using MongoDB.Bson;
 using BaseAccess.Interfaces;
+using System.Reflection;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -46,6 +47,15 @@ namespace BaseCustomerMVC.Controllers.Admin
         public IActionResult Access(string id)
         {
             if (string.IsNullOrEmpty(id)) return View("Index");
+
+            var assembly = GetAssembly();
+
+            ViewBag.AdminCtrl = _access.GetAccessByAttribue<Globals.AdminController>(assembly, "admin");
+            ViewBag.TeacherCtrl = _access.GetAccessByAttribue<Globals.TeacherController>(assembly, "teacher");
+            ViewBag.StudentCtrl = _access.GetAccessByAttribue<Globals.StudentController>(assembly, "student");
+
+            ViewBag.Data = _accessesService.Collection.Find(o => o.RoleID == id && o.IsActive == true)?.ToList();
+
             return View();
         }
 
@@ -79,6 +89,12 @@ namespace BaseCustomerMVC.Controllers.Admin
             };
             return new JsonResult(response);
 
+        }
+
+
+        private Assembly GetAssembly()
+        {
+            return Assembly.GetExecutingAssembly();
         }
     }
 }

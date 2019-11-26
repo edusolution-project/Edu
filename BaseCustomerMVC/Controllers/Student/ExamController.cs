@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
+    [BaseAccess.Attribule.AccessCtrl("Bài tập")]
     public class ExamController : StudentController
     {
 
