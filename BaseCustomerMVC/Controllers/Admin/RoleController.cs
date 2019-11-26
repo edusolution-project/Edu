@@ -13,27 +13,39 @@ using Core_v2.Globals;
 using Microsoft.AspNetCore.Hosting;
 using System.Linq;
 using MongoDB.Bson;
+using BaseAccess.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
     [IndefindCtrlAttribulte("Quản lý quyền", "Role", "admin")]
     public class RoleController : AdminController
     {
+        private readonly IAccess _access;
+        private readonly AccessesService _accessesService;
         private readonly RoleService _service;
-        private readonly RoleService _roleService;
-        private readonly AccountService _accountService;
         private readonly IHostingEnvironment _env;
         public RoleController(RoleService service
+            , AccessesService accessesService
+            , IAccess access
             , IHostingEnvironment evn)
         {
             _env = evn;
             _service = service;
+            _access = access;
+            _accessesService = accessesService;
         }
         // GET: Home
 
         public ActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;
+            return View();
+        }
+
+
+        public IActionResult Access(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return View("Index");
             return View();
         }
 

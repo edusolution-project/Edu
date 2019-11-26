@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileManagerCore", "RoxyFile
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseEasyRealTime", "BaseEasyRealTime\BaseEasyRealTime.csproj", "{F3AAFC0F-9CC8-4AEB-B56B-64638A0CD1A9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseAccess", "BaseAccess\BaseAccess.csproj", "{9BDDE8A4-2C3C-410C-9646-4ACF8333CC79}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{F3AAFC0F-9CC8-4AEB-B56B-64638A0CD1A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3AAFC0F-9CC8-4AEB-B56B-64638A0CD1A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3AAFC0F-9CC8-4AEB-B56B-64638A0CD1A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BDDE8A4-2C3C-410C-9646-4ACF8333CC79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BDDE8A4-2C3C-410C-9646-4ACF8333CC79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BDDE8A4-2C3C-410C-9646-4ACF8333CC79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BDDE8A4-2C3C-410C-9646-4ACF8333CC79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +75,7 @@ Global
 		{861E6BE2-CE2D-4ABF-A7DD-DB81876EB7D3} = {41C3BDCD-A0B7-4EB7-A833-5BAB2B8EAC80}
 		{EE7809A3-361E-4A58-86EE-B29D844BEDCC} = {41C3BDCD-A0B7-4EB7-A833-5BAB2B8EAC80}
 		{F3AAFC0F-9CC8-4AEB-B56B-64638A0CD1A9} = {41C3BDCD-A0B7-4EB7-A833-5BAB2B8EAC80}
+		{9BDDE8A4-2C3C-410C-9646-4ACF8333CC79} = {41C3BDCD-A0B7-4EB7-A833-5BAB2B8EAC80}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {366F4E1B-3316-4A63-BDBD-AB06A9DB34E8}

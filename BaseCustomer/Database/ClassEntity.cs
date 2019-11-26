@@ -49,6 +49,9 @@ namespace BaseCustomerEntity.Database
         public string Image { get; set; }
         [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }
+
+        [JsonProperty("IsGroup")]
+        public bool? IsGroup { get; set; } = false;
     }
 
     public class ClassService : ServiceBase<ClassEntity>

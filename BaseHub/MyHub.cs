@@ -1,10 +1,8 @@
-﻿using BaseHub.Database;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BaseHub
@@ -13,18 +11,9 @@ namespace BaseHub
     {
         private readonly static ConnectionMapping<string> _connections = new ConnectionMapping<string>();
         private readonly static GroupMapping<string> _groups = new GroupMapping<string>();
-        private readonly NewFeedService _newFeedService;
-        private readonly CommentService _commentService;
-        private readonly ChatService _chatService;
-        private readonly GroupService _groupService;
-        private readonly ChatPrivateService _chatPrivateService;
-        public MyHub(ChatPrivateService chatPrivateService,NewFeedService newFeedService, CommentService commentService, ChatService chatService, GroupService groupService)
+        public MyHub()
         {
-            _newFeedService = newFeedService;
-            _commentService = commentService;
-            _chatService = chatService;
-            _groupService = groupService;
-            _chatPrivateService = chatPrivateService;
+            
         }
         public  Task GoToClass(string className)
         {
@@ -32,7 +21,6 @@ namespace BaseHub
             {
                 if (!_groups.GetGroupConnections(Context.ConnectionId).Contains(className))
                 {
-                     _groupService.AddMember(className, UserID);
                     _groups.Add(Context.ConnectionId, className);
                      Groups.AddToGroupAsync(Context.ConnectionId, className);
                     string message = UserName + " đã vào lớp";
@@ -55,56 +43,7 @@ namespace BaseHub
             string message = UserName + " đã ra khỏi lớp";
             await Clients.Group(className).SendAsync("LeaveGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
         }
-        /// <summary>
-        /// Chat trong group
-        /// </summary>
-        /// <param name="groupName"></param>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        private Task ChatToGroup(string groupName, ChatEntity item)
-        {
-            var group = _groupService.GetItemByName(groupName);
-            if (group == null)
-                return Task.CompletedTask;
-            item.GroupID = group.ID;
-            item.Sender = UserID;
-            item.Created = DateTime.Now;
-            _chatService.CreateOrUpdate(item);
-            return Clients.Group(groupName).SendAsync("ChatGroup", new { UserSend = UserName, Message = item, Time = DateTime.Now, Type = UserType });
-        }
-        /// <summary>
-        /// Chat trong new feed
-        /// </summary>
-        /// <param name="groupName"></param>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        public Task CommentToNewFeed(string groupName, CommentEntity message)
-        {
-            var group = _groupService.GetItemByName(groupName);
-            if (group == null)
-                return Task.CompletedTask;
-            message.Poster = UserID;
-            message.PosterName = UserName;
-            message.TimePost = DateTime.Now;
-            _commentService.CreateOrUpdate(message);
-            return Clients.Group(groupName).SendAsync("CommentNewFeed", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
-        }
-        /// <summary>
-        /// chat riêng
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        public Task ChatToUser(string userId, ChatPrivateEntity message)
-        {
-            message.Created = DateTime.Now;
-            message.Sender = UserID;
-            message.Receiver = userId;
-            _chatPrivateService.CreateOrUpdate(message);
-            var receiver = _connections.GetConnections(userId);
-            return Clients.Users(receiver.ToList()).SendAsync("Receive", new { UserSend = UserName,Message = message,Time = DateTime.Now, Type = UserType });
-        }
-
+        
         public override Task OnDisconnectedAsync(Exception exception)
         {
             // offline

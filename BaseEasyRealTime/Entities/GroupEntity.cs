@@ -52,7 +52,8 @@ namespace BaseEasyRealTime.Entities
                 MasterGroup = masterGroup,
                 Members = memembers,
                 Name = name,
-                Status = true
+                Status = true,
+                IsPrivateChat = false
             };
             Collection.InsertOne(item);
             return item;

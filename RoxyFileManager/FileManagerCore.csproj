@@ -5,17 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Views\RoxyFile\Index.cshtml" />
-    <None Remove="Views\RoxyFile\_RoxyLayout.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Views\RoxyFile\Index.cshtml">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="Views\RoxyFile\_RoxyLayout.cshtml">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
+    <Compile Remove="Views\**" />
+    <EmbeddedResource Remove="Views\**" />
+    <None Remove="Views\**" />
   </ItemGroup>
 
   <ItemGroup>

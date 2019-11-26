@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BaseAccess;
 using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
 using BaseHub;
-using BaseHub.Globals;
 using Core_v2.Globals;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,11 +36,10 @@ namespace Admin_Customer
                     options.AccessDeniedPath = "/denied";
                     options.LoginPath = "/login";
                 });
-
+            services.AddAccess();
             services.AddLogs();
             services.AddTransient<IndefindCtrlService>();
             services.AddServiceBase();
-            services.AddServiceHubBase();
             services.AddScoped<FileProcess>();
             services.AddSingleton<CalendarHelper>();
             //services.AddMvc(options=> {
