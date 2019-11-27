@@ -10,6 +10,7 @@
         <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700&amp;subset=latin-ext&amp;display=swap" rel="stylesheet">
 
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">*@
+    <link href="https://emoji-css.afeld.me/emoji.css" rel="stylesheet">
     <link href="~/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
 
     <!-- Custom styles for this template-->
@@ -19,7 +20,15 @@
     <link href="~/css/layout.min.css" rel="stylesheet" />
     <link href="~/css/jquery-ui.min.css" rel="stylesheet" />
     <link href="~/css/newsfeed.min.css" rel="stylesheet" />
+    <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
+    <script type="text/javascript">
 
+        const g_CurrentUser = {
+            email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
+            name :  "@User.Identity.Name",
+        }
+
+    </script>
     <script src="~/js/site.js"></script>
     <script type="text/javascript" src="~/vendor/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
@@ -37,6 +46,16 @@
     <script src="~/js/hubs/connection.js"></script>
 </head>
 <body>
+
+    @if (TempData["Message"] != null)
+    {
+        <script>
+            var alerMessage = new notification();
+            alerMessage.show({ type: "error", msg: '@TempData["Message"]' });
+            console.log(alerMessage);
+        </script>
+    }
+
     <script>
         var activeTab;
     </script>
@@ -79,6 +98,12 @@
     <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
     <!-- Custom scripts for all pages-->
     <script type="text/javascript" src="~/js/sb-admin-2.min.js"></script>
+    <script src="~/easy-real-time/js/easy-real-time.js"></script>
+    <div id="chat-box"></div>
+    <script>
+        var easyRealTime = new easyRealTime();
+        console.log(easyRealTime);
+    </script>
     @RenderSection("Script", false)
     @RenderSection("Scripts", false)
 </body>

@@ -20,6 +20,13 @@ namespace BaseEasyRealTime.Controllers
             _service = service;
             _groupService = groupService;
         }
+        /// <summary>
+        /// Tạo message chat 
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="state"> 1 => group , 0 => user </param>
+        /// <param name="receiver"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult Create(string content, int state, string receiver)
         {
@@ -28,7 +35,7 @@ namespace BaseEasyRealTime.Controllers
                 if (User != null && User.Identity.IsAuthenticated)
                 {
                     string sender = User.FindFirst(ClaimTypes.Email)?.Value;
-                    var groupName = _groupService.GetGroupName(sender, receiver);
+                    var groupName = state == 1 ? receiver : _groupService.GetGroupName(sender, receiver);
                     var files = _roxy.UploadNewFeed(User.Identity.Name, HttpContext);
                     List<FileManagerCore.Globals.MediaResponseModel> media = new List<FileManagerCore.Globals.MediaResponseModel>();
                     files?.TryGetValue("success", out media);
@@ -42,7 +49,7 @@ namespace BaseEasyRealTime.Controllers
                         Receivers = new HashSet<string>() { groupName },
                         Views = new HashSet<string>()
                     };
-
+                    _service.CreateOrUpdate(item);
                     return new JsonResult(new { code = 200, msg = "Đăng bài thành công", data = item });
                 }
                 else
@@ -93,7 +100,7 @@ namespace BaseEasyRealTime.Controllers
         [HttpGet]
         [Obsolete]
         
-        public JsonResult Get(string receiver,long pageIndex, long pageSize)
+        public JsonResult Get(string receiver,int state,long pageIndex, long pageSize)
         {
             try
             {
@@ -102,11 +109,12 @@ namespace BaseEasyRealTime.Controllers
                     string user = User.FindFirst(ClaimTypes.Email).Value;
                     if (!string.IsNullOrEmpty(receiver))
                     {
-                        var groupName = _groupService.GetGroupName(user, receiver);
-                        var listItem = _service.CreateQuery()?.Find(o => o.Receivers.First() == groupName)?
+                        var groupName = state == 1 ? receiver : _groupService.GetGroupName(user, receiver);
+                        var listItem = _service.CreateQuery()?.Find(o => o.Receivers.Contains(groupName))?
                             .SortByDescending(o => o.Created)?
                             .Skip((int)(pageSize * pageIndex))?
                             .Limit((int)pageSize)?
+                            .SortBy(o=>o.Created)?
                             .ToList();
                         return new JsonResult(new { code = listItem == null ? 404 : 200, msg = listItem == null ? "Không tìm thấy bài đăng" : "Đã tìm thấy bài viết", data = listItem });
                     }

@@ -1,4 +1,5 @@
 ﻿using BaseEasyRealTime.Entities;
+using FileManagerCore.Globals;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BaseEasyRealTime.Globals
@@ -12,6 +13,7 @@ namespace BaseEasyRealTime.Globals
         /// <returns></returns>
         public static IServiceCollection AddEasyRealTime(this IServiceCollection service)
         {
+            service.AddRoxyFileManger();
             service.AddSingleton<GroupService>();
             service.AddSingleton<MessageService>();
             service.AddSingleton<NewFeedService>();

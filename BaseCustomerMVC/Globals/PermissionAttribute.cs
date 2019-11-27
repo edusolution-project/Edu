@@ -118,10 +118,7 @@ namespace BaseCustomerMVC.Globals
                     }
                     else
                     {
-                        var type = ctrl.User.Claims.GetClaimByType("Type").Value;
-                        //context.Result = new LocalRedirectResult("/" + type + "/home/deny");
-                        context.Result = new JsonResult("Access deny");
-                        //new RedirectToRouteResult(new RouteValueDictionary(new { controller = "home", action = "login" }));
+                        ctrl.TempData["Message"] = "Bạn không có quyền truy cập vào trang web này";
                     }
                 }
             }

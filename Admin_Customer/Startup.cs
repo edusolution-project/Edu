@@ -1,6 +1,7 @@
 ﻿using BaseAccess;
 using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
+using BaseEasyRealTime.Globals;
 using BaseHub;
 using Core_v2.Globals;
 using Microsoft.AspNetCore.Builder;
@@ -36,6 +37,7 @@ namespace Admin_Customer
                     options.AccessDeniedPath = "/denied";
                     options.LoginPath = "/login";
                 });
+            services.AddEasyRealTime();
             services.AddAccess();
             services.AddLogs();
             services.AddTransient<IndefindCtrlService>();
