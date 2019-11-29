@@ -21,7 +21,7 @@
                     {
                         <img style="opacity: 1; width:100%;min-height:100%; max-width:50px;" class="position-absolute"
                              src='@avatar'
-                             id="siderBarPhotoTeacher" />
+                             id="leftMenuPhotoAcc" />
                     }
 
                     <span>Account</span>
@@ -44,7 +44,7 @@
                                 {
                                     <img class="position-absolute" style="top:0; left: 0; bottom: 0; right:0; border-radius: 50%; opacity: 1; width:100%;min-height:100%"
                                          src='@avatar'
-                                         id="siderBarPhotoTeacher" />
+                                         id="sidebarPhotoAcc" />
                                 }
                                 @shortname.ToUpper()
                             </div>
@@ -68,20 +68,20 @@
             </li>
 
             @*<li class="sidebar-item dashboard">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )" title="Dashboard">
-                    <i></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>*@
+                    <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )" title="Dashboard">
+                        <i></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>*@
 
             <li class="sidebar-item curriculum">
-                <a class="nav-link p-0" href="@Url.Action("Index", "Curriculum" )" title="Curriculum">
+                <a class="nav-link p-0" href="@Url.Action("Index", "Curriculum" )" title="Curriculum Management">
                     <i></i>
                     <span>Curriculum</span>
                 </a>
             </li>
             <li class="sidebar-item course">
-                <a class="nav-link p-0" href="@Url.Action("Index","Class")" title="Course">
+                <a class="nav-link p-0" href="@Url.Action("Index","Class")" title="Class Management">
                     <i></i>
                     <span>Class Management</span>
                 </a>
@@ -100,9 +100,15 @@
                 </a>
             </li>
             <li class="sidebar-item comments" style="background-image:none">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )" title="Discuss">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )" title="Discussion">
                     <i class="fas fa-comments" aria-hidden="true"></i>
                     <span>Announcement</span>
+                </a>
+            </li>
+            <li class="sidebar-item guide">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )" title="Reference">
+                    <i></i>
+                    <span>Reference</span>
                 </a>
             </li>
 
@@ -120,12 +126,7 @@
                 </a>
             </li>
 
-            <li class="sidebar-item guide">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )" title="Reference">
-                    <i></i>
-                    <span>Reference</span>
-                </a>
-            </li>
+
         </ul>
     </div>
     <div id="extra-sidebar" class="collapse">

@@ -1,4 +1,8 @@
-﻿<!-- Sidebar -->
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var avatar = HttpContextAccessor.HttpContext.Session.GetString("userAvatar");
+}
 <nav class="sidebar collapse position-fixed col p-0 m-0">
 
     <div id="sidebar-content">
@@ -10,9 +14,14 @@
             </li>
 
             <li class="sidebar-item profile" title="Profile">
-                <a class="nav-link p-0" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')">
-                    <i></i>
-                    <span>Profile</span>
+                <a class="nav-link p-0 overflow-hidden position-relative" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')" title="Profile">
+                    @if (!string.IsNullOrEmpty(avatar))
+                    {
+                        <img style="opacity: 1; width:100%;min-height:100%; max-width:50px;" class="position-absolute"
+                             src='@avatar'
+                             id="leftMenuPhotoAcc" />
+                    }
+                    <span>Account</span>
                 </a>
                 <div class="extra">
                     <div class="avatarHolder">
@@ -27,7 +36,15 @@
                         }
 
                         <div aria-label="User profile picture" class="avatar">
-                            <div class="shortname">@shortname</div>
+                            <div class="shortname position-relative">
+                                @if (!string.IsNullOrEmpty(avatar))
+                                {
+                                    <img class="position-absolute" style="top:0; left: 0; bottom: 0; right:0; border-radius: 50%; opacity: 1; width:100%;min-height:100%"
+                                         src='@avatar'
+                                         id="sidebarPhotoAcc" />
+                                }
+                                @shortname.ToUpper()
+                            </div>
                         </div>
 
                         <h2 class="fullname">@User.Identity.Name</h2>
@@ -47,12 +64,12 @@
                 </div>
             </li>
 
-            <li class="sidebar-item dashboard" title="Dashboard">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
-                    <i></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
+            @*<li class="sidebar-item dashboard" title="Dashboard">
+                    <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
+                        <i></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>*@
 
             <li class="sidebar-item course" title="My Courses">
                 @*data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('course')"*@
@@ -83,31 +100,31 @@
             </li>
 
             <li class="sidebar-item calendar" title="Calendar">
-                @*<a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )">*@
-                <a class="nav-link p-0">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )">
+                    @*<a class="nav-link p-0">*@
                     <i></i>
                     <span>Calendar</span>
                 </a>
             </li>
 
             <li class="sidebar-item comments" title="Discussion">
-                @*<a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )">*@
-                <a class="nav-link p-0">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )">
+                    @*<a class="nav-link p-0">*@
                     <i></i>
                     <span>Discussion</span>
                 </a>
             </li>
 
             <li class="sidebar-item announcements" title="Announcement">
-                @*<a class="nav-link p-0" href="@Url.Action("Index", "News" )">*@
-                <a class="nav-link p-0">
+                <a class="nav-link p-0" href="@Url.Action("Index", "News" )">
+                    @*<a class="nav-link p-0">*@
                     <i></i>
                     <span>Announcement</span>
                 </a>
             </li>
             <li class="sidebar-item guide" title="Reference">
-                @*<a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )">*@
-                <a class="nav-link p-0">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )">
+                    @*<a class="nav-link p-0">*@
                     <i></i>
                     <span>Reference</span>
                 </a>

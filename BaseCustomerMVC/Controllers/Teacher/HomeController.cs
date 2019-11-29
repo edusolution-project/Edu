@@ -144,7 +144,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             AccountEntity user = _accountService.GetAccountByEmail(te.Email);
 
-            if (Security.Encrypt(oldpass).Equals(user.PassWord))
+            if (Security.Encrypt(newpass).Equals(user.PassWord))
             {
                 return new JsonResult(
                 new Dictionary<string, object>

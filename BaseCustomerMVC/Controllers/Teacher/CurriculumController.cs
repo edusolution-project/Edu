@@ -248,10 +248,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
-            model.TotalRecord = data.Count();
-            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
-                ? data
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+
+            //var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
+            //    ? data
+            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+            var DataResponse = data;
 
             var response = new Dictionary<string, object>
             {
@@ -291,11 +292,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
 
-            model.TotalRecord = data.CountDocuments();
+            //model.TotalRecord = data.CountDocuments();
 
-            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
-                ? data
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+            //var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
+            //    ? data
+            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+            var DataResponse = data;
 
             var response = new Dictionary<string, object>
             {

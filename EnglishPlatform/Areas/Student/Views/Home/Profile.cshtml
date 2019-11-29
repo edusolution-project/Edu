@@ -1,8 +1,8 @@
 ﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@model BaseCustomerEntity.Database.TeacherEntity;
+@model BaseCustomerEntity.Database.StudentEntity ;
 
 @{
-    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     ViewData["Title"] = "Update Account Info";
 }
 
@@ -44,7 +44,7 @@
 
 
             <div class="col-md-8">
-                <form action="/teacher/Home/Profile" method="post">
+                <form action="/Student/Home/Profile" method="post">
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
@@ -135,7 +135,7 @@
 
         $.ajax(
             {
-                url: "/teacher/Home/UploadPhoto",
+                url: "/Student/Home/UploadPhoto",
                 data: formData,
                 processData: false,
                 contentType: false,
@@ -147,7 +147,7 @@
                         document.getElementById('msgUploadPhoto').innerHTML = data.StatusDesc;
                     } else {
                         console.log(data);
-                        $("#myphotoTeacher").attr('src', data.StatusDesc);
+                        $("#myAccount_photo").attr('src', data.StatusDesc);
                         $("#sidebarPhotoAcc").attr('src', data.StatusDesc);
                         $("#leftMenuPhotoAcc").attr('src', data.StatusDesc);
                         $("#msgUploadPhoto").style.display = 'none';
@@ -167,7 +167,7 @@
 
         $.ajax(
             {
-                url: "/teacher/Home/ChangePassword",
+                url: "/Student/Home/ChangePassword",
                 data: formData,
                 processData: false,
                 contentType: false,

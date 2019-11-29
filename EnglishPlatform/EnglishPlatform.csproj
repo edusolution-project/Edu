@@ -8,12 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Areas\Teacher\Controllers\**" />
     <Compile Remove="wwwroot\Files\**" />
     <Compile Remove="wwwroot\file\**" />
+    <Content Remove="Areas\Teacher\Controllers\**" />
     <Content Remove="wwwroot\Files\**" />
     <Content Remove="wwwroot\file\**" />
+    <EmbeddedResource Remove="Areas\Teacher\Controllers\**" />
     <EmbeddedResource Remove="wwwroot\Files\**" />
     <EmbeddedResource Remove="wwwroot\file\**" />
+    <None Remove="Areas\Teacher\Controllers\**" />
     <None Remove="wwwroot\Files\**" />
     <None Remove="wwwroot\file\**" />
   </ItemGroup>
