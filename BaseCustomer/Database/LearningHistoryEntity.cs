@@ -44,7 +44,6 @@ namespace BaseCustomerEntity.Database
 
             var indexs = new List<CreateIndexModel<LearningHistoryEntity>>
             {
-                //StudentID_1_ClassID_1_LessonID_1_ID_-1
                 new CreateIndexModel<LearningHistoryEntity>(
                     new IndexKeysDefinitionBuilder<LearningHistoryEntity>()
                     .Ascending(t => t.StudentID)
@@ -98,14 +97,53 @@ namespace BaseCustomerEntity.Database
             await _chapterProgressService.UpdateLastLearn(item);
         }
 
+        public List<LearningHistoryEntity> SearchHistory(LearningHistoryEntity item)
+        {
+            if (item == null) return null;
+            if (!string.IsNullOrEmpty(item.QuestionID))
+                return CreateQuery().Find(o => o.StudentID == item.StudentID
+                    && o.LessonPartID == item.LessonPartID
+                    && o.QuestionID == item.QuestionID).ToList();
+            else
+                return CreateQuery().Find(o => o.StudentID == item.StudentID
+                && o.ClassID == item.ClassID
+                && o.LessonID == item.LessonID).ToList();
+        }
+
+        public long CountHistory(LearningHistoryEntity item)
+        {
+            if (item == null) return 0;
+            if (!string.IsNullOrEmpty(item.QuestionID))
+                return CreateQuery().CountDocuments(o => o.StudentID == item.StudentID
+                    && o.LessonPartID == item.LessonPartID
+                    && o.QuestionID == item.QuestionID);
+            else
+                return CreateQuery().CountDocuments(o => o.StudentID == item.StudentID
+                && o.ClassID == item.ClassID
+                && o.LessonID == item.LessonID);
+        }
+
         public long CountLessonLearnt(string StudentID, string LessonID)
         {
-            return Collection.CountDocuments(t => t.StudentID == StudentID && t.LessonID == LessonID);
+            return CountHistory(new LearningHistoryEntity
+            {
+                StudentID = StudentID,
+                LessonID = LessonID
+            });
         }
 
         public DateTime GetFirstLearnt(string StudentID, string LessonID)
         {
             return Collection.Find(t => t.StudentID == StudentID && t.LessonID == LessonID).SortByDescending(t => t.ID).Project(t => t.Time).FirstOrDefault();
+        }
+
+        public Task RemoveClassHistory(string ClassID)
+        {
+            _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID);
+            _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
+            _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
+            _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
+            return Task.CompletedTask;
         }
     }
 }

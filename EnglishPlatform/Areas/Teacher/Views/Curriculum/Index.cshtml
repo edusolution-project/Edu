@@ -289,8 +289,9 @@
                         row.append($("<td>", { text: i + 1 }));
                         row.append($("<td>", { class: "Name" })
                             .append($("<a>", { href: "@Url.Action("Detail","Curriculum")/" + item.ID, text: item.Name })));
-                        row.append($("<td>", { class: "Subject", val: item.SubjectID, text: item.SubjectName }));
-                        row.append($("<td>", { class: "Grade", val: item.GradeID, text: item.GradeName }));
+                        row.append($("<td>", { class: "Subject", value: item.SubjectID, text: item.SubjectName }));
+                        row.append($("<td>", { class: "Grade", value: item.GradeID, text: item.GradeName }));
+                        console.log(2);
                         row.append($("<td>", { class: "text-center", text: created }));
                         row.append(active);
                         var btnEdit = $("<button>", { class: "btn btn-primary", "data-toggle": "modal", "data-target": "#courseModal", "data-placement": "top", title: "Edit", onclick: "EditCourse(this,'" + item.ID + "')", });
@@ -392,8 +393,8 @@
         modalTitle.text("Update Info");
         var name = $(obj).parent().siblings(".Name").text().trim();
         modal.find("[name=Name]").val(name);
-        var subject = $(obj).parent().siblings(".Subject").attr("val");
-        var grade = $(obj).parent().siblings(".Grade").attr("val");
+        var subject = $(obj).parent().siblings(".Subject").attr("value");
+        var grade = $(obj).parent().siblings(".Grade").attr("value");
         var sbj = modal.find("[name=SubjectID]");
         var grd = modal.find("[name=GradeID]");
         sbj.val(subject);

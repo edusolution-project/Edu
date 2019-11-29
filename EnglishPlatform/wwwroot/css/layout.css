@@ -20,6 +20,22 @@
 .box-link:hover {
   text-decoration: none; }
 
+.modules-icon {
+  width: 30px;
+  height: 30px;
+  margin: auto;
+  display: inline-block;
+  /*background-color: $base_blue;*/
+  border-radius: 100%;
+  vertical-align: middle;
+  background-image: url("images/course-icon.png");
+  background-position: -3px 0;
+  position: relative; }
+  .modules-icon.assignment {
+    background-position: -110px 0; }
+  .modules-icon.assignment {
+    background-position: -110px 0; }
+
 table.no-border thead tr, table.no-border thead th {
   border: none !important; }
 

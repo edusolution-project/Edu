@@ -23,6 +23,22 @@
         <div class="main-content">
             <div class="row">
                 <div class="col-md-10">
+                    <div class="detail pb-3 row">
+                        <div class="text-left col-md-10">
+                            <div class="lession-label d-inline-block">Period: <b>@currentClass.StartDate.ToString("dd/MM/yyyy") - @currentClass.EndDate.ToString("dd/MM/yyyy")</b></div> -
+                            <div class="lession-label d-inline-block">
+                                Status:
+                                @if (currentClass.EndDate.Date > DateTime.Now.Date)
+                                {
+                                    <b>Ongoing</b>
+                                }
+                                else
+                                {
+                                    <b>Complete</b>
+                                }
+                            </div>
+                        </div>
+                    </div>
                     @if (hasManageRole)
                     {
                         <div class="text-right pb-3">
@@ -85,7 +101,6 @@
                         var totalLesson = 1;
                         var completeLesson = 0;
                         var percent = 0;
-                        console.log(student.Progress);
                         if (student.Progress != null) {
                             lastdate = moment(new Date(student.Progress.LastDate)).format('DD/MM/YYYY');
                             completeLesson = student.Progress.CompletedLessons.length;
@@ -95,7 +110,7 @@
 
                         var row = $("<tr>", {id: "st" + student.ID});
                         row.append($("<td>", { class:"text-center", text: j + 1 }));
-                        row.append($("<td>", { text: student.FullName }));
+                        row.append($("<td>").append($("<a>", { text: student.FullName, href: "@Url.Action("StudentDetail", "Class")/" + student.ID + "/@currentClass.ID" })));
                         row.append($("<td>", { text: student.Email }));
                         var progress = $("<div>", { class: "progress position-relative" })
                             .append($("<div>", {

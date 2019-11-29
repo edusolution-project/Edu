@@ -21,6 +21,22 @@
             <div class="row">
                 <div class="col-md-10">
                     <div class="modules-wrapper">
+                        <div class="detail pb-3 row">
+                            <div class="text-left col-md-10">
+                                <div class="lession-label d-inline-block">Period: <b>@currentClass.StartDate.ToString("dd/MM/yyyy") - @currentClass.EndDate.ToString("dd/MM/yyyy")</b></div> -
+                                <div class="lession-label d-inline-block">
+                                    Status:
+                                    @if (currentClass.EndDate.Date > DateTime.Now.Date)
+                                    {
+                                        <b>Ongoing</b>
+                                    }
+                                    else
+                                    {
+                                        <b>Complete</b>
+                                    }
+                                </div>
+                            </div>
+                        </div>
                         <div class="p-3">
                             <i class="fas fa-circle-notch fa-spin"></i> Loading ...
                         </div>

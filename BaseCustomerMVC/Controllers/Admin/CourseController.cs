@@ -27,6 +27,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly LessonService _lessonService;
+        private readonly LearningHistoryService _learningHistoryService;
 
         //private readonly LessonPartService _lessonPartService;
         //private readonly LessonPartAnswerService _lessonPartAnswerService;
@@ -66,6 +67,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             LessonPartService lessonPartService,
             LessonPartQuestionService lessonPartQuestionService,
             LessonPartAnswerService lessonPartAnswerService,
+            LearningHistoryService learningHistoryService,
 
             CloneLessonPartService cloneLessonPartService,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
@@ -84,6 +86,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _lessonScheduleService = lessonScheduleService;
             _examService = examService;
             _examDetailService = examDetailService;
+            _learningHistoryService = learningHistoryService;
 
             _calendarHelper = calendarHelper;
 
@@ -269,9 +272,14 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 if (item.CourseID != oldData.CourseID)
                 {
-                    //remove old schedule & cloned lesson part
+                    //remove old schedule
                     _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == item.ID);
+                    //remove clone lesson part
                     _lessonHelper.RemoveClone(item.ID);
+                    //remove progress: learning history => class progress, chapter progress, lesson progress
+                    _learningHistoryService.RemoveClassHistory(item.ID);
+                    //resest exam
+                    _examService.RemoveClassExam(item.ID);
 
                     //Create Class => Create Lesson Schedule & Clone all lesson
                     var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
@@ -329,7 +337,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             else
             {
-
                 var ids = model.ArrID.Split(',');
                 if (ids.Length > 0)
                 {

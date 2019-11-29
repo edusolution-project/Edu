@@ -53,7 +53,7 @@ namespace BaseCustomerEntity.Database
         private CloneLessonPartService _cloneLessonPartService { get; set; }
         private CloneLessonPartQuestionService _cloneLessonPartQuestionService { get; set; }
         private CloneLessonPartAnswerService _cloneLessonPartAnswerService { get; set; }
-        private LessonService _lessonService { get; set; }
+        //private LessonService _lessonService { get; set; }
 
 
         public ExamService(IConfiguration configuration) : base(configuration)
@@ -75,7 +75,7 @@ namespace BaseCustomerEntity.Database
             _cloneLessonPartService = new CloneLessonPartService(configuration);
             _cloneLessonPartQuestionService = new CloneLessonPartQuestionService(configuration);
             _cloneLessonPartAnswerService = new CloneLessonPartAnswerService(configuration);
-            _lessonService = new LessonService(configuration);
+            //_lessonService = new LessonService(configuration);
         }
         /// <summary>
         /// ID Exam
@@ -101,7 +101,6 @@ namespace BaseCustomerEntity.Database
             CreateOrUpdate(exam);
             return Task.CompletedTask;
         }
-
         public ExamEntity Complete(ExamEntity exam, LessonEntity lesson, out double point)
         {
             exam.Status = true;
@@ -194,6 +193,13 @@ namespace BaseCustomerEntity.Database
 
             CreateOrUpdate(exam);
             return exam;
+        }
+
+        public Task RemoveClassExam(string ClassID)
+        {
+            Collection.DeleteManyAsync(t => t.ClassID == ClassID);
+            _examDetailService.Collection.DeleteManyAsync(t => t.ClassID == ClassID);
+            return Task.CompletedTask;
         }
     }
 }

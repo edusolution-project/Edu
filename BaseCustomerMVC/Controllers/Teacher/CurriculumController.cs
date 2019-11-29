@@ -183,6 +183,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
+        public IActionResult Assignments(string ID)
+        {
+            if (string.IsNullOrEmpty("ID"))
+                return RedirectToAction("Index");
+
+            var data = _service.GetItemByID(ID);
+            if (data == null)
+                return RedirectToAction("Index");
+
+            ViewBag.Data = data;
+            ViewBag.Title = data.Name;
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
+
+            ViewBag.Chapter = chapters;
+            ViewBag.User = UserID;
+            ViewBag.Course = data;
+
+            return View();
+        }
 
         public IActionResult Lesson(DefaultModel model, string CourseID, int frameview = 0)
         {

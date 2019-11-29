@@ -44,6 +44,11 @@ namespace BaseCustomerEntity.Database
                 //ClassID_1
                 new CreateIndexModel<ChapterProgressEntity>(
                     new IndexKeysDefinitionBuilder<ChapterProgressEntity>()
+                    .Ascending(t => t.ClassID)
+                    .Ascending(t => t.StudentID)
+                    .Ascending(t => t.ChapterID)),
+                new CreateIndexModel<ChapterProgressEntity>(
+                    new IndexKeysDefinitionBuilder<ChapterProgressEntity>()
                     .Ascending(t => t.StudentID)
                     .Ascending(t => t.ClassID)
                     .Ascending(t => t.ChapterID))
@@ -51,15 +56,15 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public ChapterProgressEntity GetItemByChapterID(string ChapterID, string StudentID)
+        public ChapterProgressEntity GetItemByChapterID(string ChapterID, string StudentID, string ClassID)
         {
-            return CreateQuery().Find(t => t.ChapterID == ChapterID && t.StudentID == StudentID).FirstOrDefault();
+            return CreateQuery().Find(t => t.ChapterID == ChapterID && t.StudentID == StudentID && t.ClassID == ClassID).FirstOrDefault();
         }
 
         public async Task UpdateLastLearn(LearningHistoryEntity item)
         {
             var currentChapter = _chapterService.GetItemByID(item.ChapterID);
-            var progress = GetItemByChapterID(item.ChapterID, item.StudentID);
+            var progress = GetItemByChapterID(item.ChapterID, item.StudentID, item.ClassID);
 
             if (currentChapter != null)
             {
@@ -71,6 +76,7 @@ namespace BaseCustomerEntity.Database
                         StudentID = item.StudentID,
                         CompletedLessons = new List<string>() { item.LessonID },
                         TotalLessons = (int)_lessonService.CreateQuery().CountDocuments(t => t.ChapterID == currentChapter.ID),
+                        ClassID = item.ClassID,
                         ChapterID = currentChapter.ID,
                         ParentID = currentChapter.ParentID,
                         LastDate = DateTime.Now,
@@ -103,14 +109,6 @@ namespace BaseCustomerEntity.Database
 
                     var r = await Collection.UpdateManyAsync(t => t.ChapterID == item.ChapterID && t.StudentID == item.StudentID,
                                 update.Combine(updates));
-
-
-                    if (progress.CompletedLessons.Count == progress.TotalLessons)
-                    {
-
-
-                    }
-
                 }
             }
         }

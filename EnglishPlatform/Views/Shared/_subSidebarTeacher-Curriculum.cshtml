@@ -6,7 +6,7 @@
     <ul id="section-tabs">
         <li class="section"><a href="@Url.Action("Detail","Curriculum")/@currentCourse.ID" title="Introduce" class="intro" tabindex="0">Intro</a></li>
         <li class="section"><a href="@Url.Action("Modules","Curriculum")/@currentCourse.ID" title="Modules" class="modules" tabindex="0">Modules</a></li>
-        <li class="section"><a href="#" title="Assignment" class="assignments" tabindex="0">Assignment</a></li>
+        <li class="section"><a href="@Url.Action("Assignments","Curriculum")/@currentCourse.ID" title="Assignment" class="assignments" tabindex="0">Assignment</a></li>
     </ul>
 </nav>
 

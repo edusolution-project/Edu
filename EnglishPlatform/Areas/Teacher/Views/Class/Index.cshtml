@@ -383,7 +383,11 @@
         });
 
         function ShowAddClass() {
-
+            $('#modalCourse input[type!=hidden]').val('');
+            $('#modalCourse input[name=ID]').remove();
+            $('#modalCourse select').each(function () {
+                $(this).val($(this).find("option:first").val());
+            });
         }
     </script>
 }

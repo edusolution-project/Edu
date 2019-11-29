@@ -31,7 +31,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
         private readonly ScoreStudentService _scoreStudentService;
-
+        private readonly LessonProgressService _lessonProgressService;
+        private readonly LearningHistoryService _learningHistoryService;
 
         private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
@@ -55,6 +56,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly FileProcess _fileProcess;
         private readonly StudentHelper _studentHelper;
         private readonly LessonHelper _lessonHelper;
+        private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
+        private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
 
 
         public ClassController(
@@ -72,17 +75,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonScheduleService lessonScheduleService,
             ExamService examService,
             ExamDetailService examDetailService,
+            LearningHistoryService learningHistoryService,
 
             ScoreStudentService scoreStudentService,
             LessonPartService lessonPartService,
             LessonPartQuestionService lessonPartQuestionService,
             LessonPartAnswerService lessonPartAnswerService,
+            LessonProgressService lessonProgressService,
 
             CloneLessonPartService cloneLessonPartService,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
 
             StudentService studentService, IHostingEnvironment evn,
+
             FileProcess fileProcess)
         {
             _accountService = accountService;
@@ -97,21 +103,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _chapterExtendService = chapterExtendService;
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
+            _lessonProgressService = lessonProgressService;
+
             _examService = examService;
             _examDetailService = examDetailService;
-
-            //_lessonPartService = lessonPartService;
-            //_lessonPartQuestionService = lessonPartQuestionService;
-            //_lessonPartAnswerService = lessonPartAnswerService;
-
-            //_cloneLessonPartService = cloneLessonPartService;
-            //_cloneAnswerService = cloneLessonPartAnswerService;
-            //_cloneQuestionService = cloneLessonPartQuestionService;
-
-            //_lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
-            //_lessonPartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
-            //_lessonPartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
-
+            _learningHistoryService = learningHistoryService;
             _scoreStudentService = scoreStudentService;
 
             _studentService = studentService;
@@ -130,6 +126,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 cloneLessonPartAnswerService,
                 cloneLessonPartQuestionService
                 );
+            _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
+            _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
         }
 
         public IActionResult Index(DefaultModel model)
@@ -236,17 +234,102 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public IActionResult StudentDetail(string ClassID, string StudentID)
+        public IActionResult StudentDetail(string ID, string ClassID)
         {
             if (string.IsNullOrEmpty(ClassID))
                 return RedirectToAction("Index");
             var currentClass = _service.GetItemByID(ClassID);
             if (currentClass == null)
                 return RedirectToAction("Index");
-            if (string.IsNullOrEmpty(StudentID))
+            ViewBag.Class = currentClass;
+
+            if (string.IsNullOrEmpty(ID))
                 return RedirectToAction("Member", "Class", new { ID = ClassID });
+
+            var student = _studentService.GetItemByID(ID);
+            if (student == null)
+                return RedirectToAction("Member", "Class", new { ID = ClassID });
+
+            ViewBag.Student = student;
+
             return View();
         }
+
+        public IActionResult StudentModules(string ID, string ClassID)
+        {
+            var currentClass = _service.GetItemByID(ClassID);
+            //var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (currentClass == null)
+                return null;
+            if (currentClass.Students.IndexOf(ID) < 0)
+                return null;
+            var student = _studentService.GetItemByID(ID);
+            if (student == null)
+                return null;
+
+            ViewBag.Class = currentClass;
+            string courseid = currentClass.CourseID;
+            var course = _courseService.GetItemByID(courseid);
+
+            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID
+                           //&& o.TemplateType == LESSON_TEMPLATE.LECTURE
+                           ).ToList()
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           where schedule != null
+                           let lessonProgress = _lessonProgressService.GetByClassID_StudentID_LessonID(currentClass.ID, student.ID, r.ID)
+                           ?? new LessonProgressEntity()
+                           //where lessonProgress != null
+                           select _moduleViewMapping.AutoOrtherType(r, new StudentModuleViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               LessonStartDate = schedule.StartDate,
+                               LessonEndDate = schedule.EndDate,
+                               IsActive = schedule.IsActive,
+                               LearningNumber = lessonProgress.TotalLearnt,
+                               LessonName = r.Title,
+                               TemplateType = r.TemplateType,
+                               LearningEndDate = lessonProgress.LastDate
+                           })).OrderBy(r => r.LessonStartDate).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+            ViewBag.Lessons = lessons;
+            return View();
+        }
+
+        public IActionResult StudentAssignment(string ID, string ClassID)
+        {
+            var currentClass = _service.GetItemByID(ClassID);
+            //var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (currentClass == null)
+                return null;
+            if (currentClass.Students.IndexOf(ID) < 0)
+                return null;
+            var student = _studentService.GetItemByID(ID);
+            if (student == null)
+                return null;
+
+            ViewBag.Class = currentClass;
+            string courseid = currentClass.CourseID;
+            var course = _courseService.GetItemByID(courseid);
+
+            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.TemplateType == LESSON_TEMPLATE.EXAM).ToList()
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           where schedule != null
+                           let exam = _examService.CreateQuery().Find(x => x.StudentID == student.ID && x.LessonID == r.ID && x.ClassID == currentClass.ID).SortByDescending(x => x.Created).FirstOrDefault()
+                           //where exam != null
+                           //let lastjoin = lessonProgress != null ? lessonProgress.LastDate : DateTime.MinValue
+                           select _assignmentViewMapping.AutoOrtherType(r, new StudentAssignmentViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               LessonStartDate = schedule.StartDate,
+                               LessonEndDate = schedule.EndDate,
+                               IsActive = schedule.IsActive,
+                               LearningNumber = exam == null ? 0 : exam.Number,
+                               LearningEndDate = exam == null ? DateTime.MinValue : exam.Updated,
+                               Result = exam == null ? 0 : exam.Point
+                           })).OrderBy(r => r.LessonStartDate).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+            ViewBag.Lessons = lessons;
+            return View();
+        }
+
 
         //Class Detail Management
 
@@ -699,9 +782,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (item.CourseID != oldData.CourseID)
                 {
-                    //remove old schedule & cloned lesson part
+                    //remove old schedule
                     _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == item.ID);
+                    //remove clone lesson part
                     _lessonHelper.RemoveClone(item.ID);
+                    //remove progress: learning history => class progress, chapter progress, lesson progress
+                    _learningHistoryService.RemoveClassHistory(item.ID);
+                    //resest exam
+                    _examService.RemoveClassExam(item.ID);
 
                     //Create Class => Create Lesson Schedule & Clone all lesson
                     var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();

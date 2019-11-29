@@ -135,21 +135,34 @@
                             var student = members[j];
 
                             //var date = moment(new Date(student.DateBorn)).format('DD/MM/YYYY');
-                            var lastdate = moment(new Date(student.LastJoinDate)).format('DD/MM/YYYY');
+                            var lastdate = "---";
 
+                            var totalLesson = 1;
+                            var completeLesson = 0;
+                            var percent = 0;
+                            if (student.Progress != null) {
+                                lastdate = moment(new Date(student.Progress.LastDate)).format('DD/MM/YYYY');
+                                completeLesson = student.Progress.CompletedLessons.length;
+                                totalLesson = student.Progress.TotalLessons;
+                                percent = Math.ceil(completeLesson * 100 / totalLesson)
+                            }
                             var row = $("<tr>", {id: "st" + student.ID});
                             row.append($("<td>", { class:"text-center", text: j + 1 }));
-                            row.append($("<td>", { text: student.FullName }));
+                            row.append($("<td>").append($("<a>", { text: student.FullName, href: "@Url.Action("StudentDetail", "Class")/" + student.ID + "/" + $("#ClassID").val() })));
                             row.append($("<td>", { text: student.Email }));
-                            var progress = $("<div>", { class: "progress" })
+                            var progress = $("<div>", { class: "progress position-relative" })
                                 .append($("<div>", {
                                     class: "progress-bar bg-success",
                                     role: "progressbar",
-                                    style: "width: 0%",
-                                    "aria-valuenow": "0",
+                                    style: "width: " + percent + "%",
+                                    "aria-valuenow": completeLesson,
                                     "aria-valuemin": "0",
-                                    "aria-valuemax": "100"
+                                    "aria-valuemax": totalLesson
                                 }))
+                                .append($("<small>", {
+                                    class: "justify-content-center d-flex position-absolute w-100",
+                                    text: percent + "%"
+                                }));
                             row.append($("<td>").append(progress));
                             row.append($("<td>", { class: "text-center", text: lastdate }));
                             row.append($("<td>", { text: "---" }));

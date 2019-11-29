@@ -50,6 +50,15 @@
     }
 }
 
+.modules-icon {
+    @include icon-style;
+
+    &.assignment {
+        background-position: -110px 0;
+    }
+}
+
+
 table {
     &.no-border {
         thead {
@@ -144,7 +153,6 @@ table {
                 margin-bottom: 0;
                 padding: .5rem 0;
             }
-
             /*h1 {
                 font-size: 1.2rem;
                 text-transform: none;

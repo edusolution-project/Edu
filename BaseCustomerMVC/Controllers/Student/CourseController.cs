@@ -225,7 +225,11 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 var respone = new Dictionary<string, object>
                 {
-                    { "Data", DataResponse.Select(
+                    { "Data",
+
+
+
+                        DataResponse.Select(
                         o=> _mapping.AutoOrtherType(o,new LessonScheduleViewModel(){
                                 IsActive = _lessonScheduleService.GetItemByID(ClassID) == null ? false: _lessonScheduleService.GetItemByID(ClassID).IsActive,
                                 StartDate = _lessonScheduleService.GetItemByID(ClassID) == null ?DateTime.MinValue :  _lessonScheduleService.GetItemByID(ClassID).StartDate,
@@ -318,17 +322,27 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
 
-            foreach (var _class in activeClasses)
-            {
-                var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == _class.ID);
-                var learned = _learningHistoryService.CreateQuery().Aggregate().Match(o => o.ClassID == _class.ID).Group(o => o.LessonID,
-                    o => new { x = o.Select(x => 1).First() }).ToList().Count();
-                responseData.Add(_activeMapping.AutoOrtherType(_class, new ClassActiveViewModel()
-                {
-                    Progress = (int)(totalLessons != 0 ? learned * 100 / totalLessons : 0),
-                    SubjectName = subjects.SingleOrDefault(s => s.ID == _class.SubjectID).Name
-                }));
-            }
+            responseData =
+                (from r in activeClasses.ToList()
+                 let progress = _progressService.GetItemByClassID(r.ID, UserID)
+                 select _activeMapping.AutoOrtherType(r, new ClassActiveViewModel()
+                 {
+                     Progress = progress == null ? 0 : (progress.TotalLessons != 0 ? progress.CompletedLessons.Count * 100 / progress.TotalLessons : 0),
+                     SubjectName = subjects.SingleOrDefault(s => s.ID == r.SubjectID).Name
+                 })).ToList();
+
+
+            //foreach (var _class in activeClasses)
+            //{
+            //    var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == _class.ID);
+            //    var learned = _learningHistoryService.CreateQuery().Aggregate().Match(o => o.ClassID == _class.ID && o.StudentID ).Group(o => o.LessonID,
+            //        o => new { x = o.Select(x => 1).First() }).ToList().Count();
+            //    responseData.Add(_activeMapping.AutoOrtherType(_class, new ClassActiveViewModel()
+            //    {
+            //        Progress = (int)(totalLessons != 0 ? learned * 100 / totalLessons : 0),
+            //        SubjectName = subjects.SingleOrDefault(s => s.ID == _class.SubjectID).Name
+            //    }));
+            //}
 
             var response = new Dictionary<string, object>
             {
@@ -422,7 +436,6 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-
         public IActionResult Discussions(DefaultModel model)
         {
             if (model == null) return null;
@@ -453,7 +466,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 foreach (var chapter in chapters)
                 {
                     var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
-                    var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, UserID);
+                    var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, UserID, currentClass.ID);
                     if (extend != null) chapter.Description = extend.Description;
                     var viewModel = new MappingEntity<ChapterEntity, ChapterProgressViewModel>().AutoOrtherType(chapter, new ChapterProgressViewModel());
                     if (progress != null)
@@ -482,6 +495,36 @@ namespace BaseCustomerMVC.Controllers.Student
             }
         }
 
+        public JsonResult FixProgress()
+        {
+            var lhs = _learningHistoryService.Collection.Find(t => true).ToList();
+            while (lhs.Count() > 0)
+            {
+                var lh = lhs.First();
+                var lp = _lessonProgressService.GetByClassID_StudentID_LessonID(lh.ClassID, lh.StudentID, lh.LessonID);
+                if (lp == null)
+                {
+                    lp = new LessonProgressEntity
+                    {
+                        ClassID = lh.ClassID,
+                        LessonID = lh.LessonID,
+                        StudentID = lh.StudentID,
+                        FirstDate = lhs.Where(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID).First().Time,
+                        LastDate = DateTime.Now,
+                        //TotalLearnt = 1,
+                        TotalLearnt = lhs.Count(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID)
+                    };
 
+                }
+                else
+                {
+                    lp.FirstDate = lhs.Where(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID).First().Time;
+                    lp.TotalLearnt = lhs.Count(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID);
+                }
+                _lessonProgressService.Save(lp);
+                lhs.RemoveAll(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID);
+            }
+            return Json("Fixed");
+        }
     }
 }
