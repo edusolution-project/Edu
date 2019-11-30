@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BaseAccess;
 using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
+using BaseEasyRealTime.Globals;
 using BaseHub;
 using BaseHub.Globals;
 using Core_v2.Globals;
@@ -41,6 +43,8 @@ namespace EnglishPlatform
                     options.AccessDeniedPath = "/denied";
                     options.LoginPath = "/login";
                 });
+            services.AddEasyRealTime();
+            services.AddAccess();
             services.Configure<DefaultConfigs>(Configuration.GetSection("DefaultConfigs"));
             services.AddLogs();
             services.AddTransient<IndefindCtrlService>();

@@ -81,6 +81,7 @@
     <None Include="Areas\Teacher\Views\Lesson\Exam.cshtml" />
     <None Include="Areas\Teacher\Views\News\Index.cshtml" />
     <None Include="compilerconfig.json" />
+    <None Include="wwwroot\easy-real-time\js\easy-real-time.js" />
     <None Include="wwwroot\js\lib\datetimepicker\jquery.datetimepicker.js" />
     <None Include="wwwroot\js\lib\datetimepicker\jquery.mousewheel.js" />
     <None Include="wwwroot\js\lib\datetimepicker\php-date-formatter.min.js" />
@@ -2244,7 +2245,9 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\BaseAccess\BaseAccess.csproj" />
     <ProjectReference Include="..\BaseCustomerMVC\BaseCustomerMVC.csproj" />
+    <ProjectReference Include="..\BaseEasyRealTime\BaseEasyRealTime.csproj" />
     <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
   </ItemGroup>
 
