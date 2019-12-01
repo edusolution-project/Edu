@@ -1,4 +1,5 @@
-﻿using BaseCustomerEntity.Database;
+﻿using BaseAccess.Attribule;
+using BaseCustomerEntity.Database;
 using Core_v2.Globals;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 
@@ -14,6 +16,40 @@ namespace BaseCustomerMVC.Globals
 {
     public static class StartUp
     {
+        const string _adminType = "admin";
+        const string _teacherType = "teacher";
+        const string _studentType = "student";
+        private static Assembly GetAssembly()
+        {
+            return Assembly.GetExecutingAssembly();
+        }
+        public static List<AccessCtrlAttribute> GetAccessCtrlsByAdmin()
+        {
+            return GetAccessCtrl<Globals.AdminController>(_adminType);
+        }
+        public static List<AccessCtrlAttribute> GetAccessCtrlsByTeacher()
+        {
+            return GetAccessCtrl<Globals.TeacherController>(_teacherType);
+        }
+        public static List<AccessCtrlAttribute> GetAccessCtrlsByStudent()
+        {
+            return GetAccessCtrl<Globals.StudentController>(_studentType);
+        }
+
+        private static List<AccessCtrlAttribute> GetAccessCtrl<T>(string type) {
+            
+            string cacheName = "menu_attrs_" + type;
+            BaseAccess.Interfaces.IAccess access = new BaseAccess.Services.AccessService();
+            var menuCache = CacheExtends.GetDataFromCache<List<AccessCtrlAttribute>>(cacheName);
+            if (menuCache == null)
+            {
+                var assembly = GetAssembly();
+                menuCache = access.GetAccessByAttribue<T>(assembly, _adminType);
+                CacheExtends.SetObjectFromCache(cacheName, 1440, menuCache);
+            }
+            return menuCache;
+        }
+
         public static Claim GetClaimByType(this IEnumerable<Claim> claims , string type)
         {
             try

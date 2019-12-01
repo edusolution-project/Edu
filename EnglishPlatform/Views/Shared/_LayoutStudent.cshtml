@@ -19,6 +19,17 @@
     <link href="~/css/layout.min.css" rel="stylesheet" />
     <link href="~/css/jquery-ui.min.css" rel="stylesheet" />
     <link href="~/css/newsfeed.min.css" rel="stylesheet" />
+
+    <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
+    <script type="text/javascript">
+
+        const g_CurrentUser = {
+            email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
+            name :  "@User.Identity.Name",
+        }
+
+    </script>
+
     <link href="~/css/jquery.scrollbar.css" rel="stylesheet" />
 
     <script src="~/js/site.js"></script>
@@ -34,8 +45,8 @@
     <script src="~/js/lib/notification/notification.js"></script>
     <script src="~/js/lib/xhr.js"></script>
     @*<script src="~/js/hubs/render.html.js"></script>
-    <script src="~/lib/signalr/signalr.js"></script>
-    <script src="~/js/hubs/connection.js"></script>*@
+        <script src="~/lib/signalr/signalr.js"></script>
+        <script src="~/js/hubs/connection.js"></script>*@
 
     <!-- Bootstrap core JavaScript-->
     <script type="text/javascript" src="~/js/popper.min.js"></script>
@@ -93,5 +104,10 @@
     @await Html.PartialAsync("_modalLogout")
     @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
+    <script src="~/easy-real-time/js/easy-real-time.js"></script>
+    <div id="chat-box"></div>
+    <script>
+        var easyRealTime = new easyRealTime();
+    </script>
 </body>
 </html>

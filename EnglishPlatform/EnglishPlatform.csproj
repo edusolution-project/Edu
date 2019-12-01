@@ -2251,4 +2251,12 @@
     <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Content Update="Areas\Admin\Views\Role\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

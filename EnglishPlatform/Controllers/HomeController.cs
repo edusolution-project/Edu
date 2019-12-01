@@ -10,40 +10,36 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using BaseCustomerMVC.Globals;
-using Microsoft.Extensions.Options;
+using BaseAccess.Interfaces;
 
-namespace EnglishPlatform.Controllers
+namespace Admin_Customer.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly AccessesService _accessesService;
+        private readonly IAuthenService _authenService;
         private readonly AccountService _accountService;
         private readonly RoleService _roleService;
         private readonly AccountLogService _logService;
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ILog _log;
-        private readonly ClassService _classService;
-        private readonly StudentHelper _studentHelper;
-        public DefaultConfigs _default { get; }
-
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
             , TeacherService teacherService
             , StudentService studentService
-            , ClassService classService
-            , IOptions<DefaultConfigs> defaultvalue
+            , IAuthenService authenService
+            , AccessesService accessesService
             , ILog log)
         {
+            _accessesService = accessesService;
+            _authenService = authenService;
             _accountService = accountService;
             _roleService = roleService;
             _logService = logService;
             _teacherService = teacherService;
             _studentService = studentService;
-            _classService = classService;
-            _studentHelper = new StudentHelper(studentService, accountService);
             _log = log;
-            _default = defaultvalue.Value;
         }
-
         public IActionResult Index()
         {
             var type = User.Claims.GetClaimByType("Type");
@@ -53,7 +49,7 @@ namespace EnglishPlatform.Controllers
             }
             else
             {
-                HttpContext.SignOutAsync(Cookies.DefaultLogin);
+                _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
                 return RedirectToAction("Login");
             }
         }
@@ -63,22 +59,21 @@ namespace EnglishPlatform.Controllers
             HttpContext.Remove(Cookies.DefaultLogin);
             return View();
         }
-
         [HttpPost]
+        [Obsolete]
         public IActionResult Register(string UserName, string Name, string PassWord, string Type)
         {
-            var _username = UserName.Trim().ToLower();
-            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
+            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
             {
-                ViewBag.MessageError = "Please fill your information";
+                ViewBag.MessageError = "Không thể bỏ trống các trường bắt buộc";
                 return View();
             }
             else
             {
                 string _sPass = Security.Encrypt(PassWord);
-                if (_accountService.IsAvailable(_username))
+                if (_accountService.IsAvailable(UserName))
                 {
-                    ViewBag.MessageError = "Account exist";
+                    ViewBag.MessageError = "Tài khoản đã tồn tại";
                     return View();
                 }
                 else
@@ -86,28 +81,28 @@ namespace EnglishPlatform.Controllers
                     var user = new AccountEntity()
                     {
                         PassWord = _sPass,
-                        UserName = _username,
+                        UserName = UserName,
                         Name = Name,
                         Type = Type,
                         IsActive = false,
                         CreateDate = DateTime.Now,
                         UserCreate = null,
                     };
+
+
                     switch (Type)
                     {
-                        case ACCOUNT_TYPE.TEACHER:
+                        case "teacher":
                             user.RoleID = _roleService.GetItemByCode("teacher").ID;
                             break;
                         default:
-                            user.IsActive = true;// active student
                             user.RoleID = _roleService.GetItemByCode("student").ID;
                             break;
                     }
                     _accountService.CreateQuery().InsertOne(user);
                     switch (Type)
                     {
-                        case ACCOUNT_TYPE.TEACHER:
-                            //create teacher
+                        case "teacher":
                             var teacher = new TeacherEntity()
                             {
                                 FullName = user.Name,
@@ -117,29 +112,20 @@ namespace EnglishPlatform.Controllers
                             };
                             _teacherService.CreateQuery().InsertOne(teacher);
                             user.UserID = teacher.ID;
-                            //send email for teacher
+                            //create teacher
                             break;
                         default:
-                            //create student
                             var student = new StudentEntity()
                             {
                                 FullName = user.Name,
                                 Email = user.UserName,
-                                IsActive = true,// active student
+                                IsActive = false,
                                 CreateDate = DateTime.Now
                             };
 
                             _studentService.CreateQuery().InsertOne(student);
                             user.UserID = student.ID;
-                            //send email for student
-                            //add default class
-                            var testClassIDs = _default.defaultClassID;
-                            if (!string.IsNullOrEmpty(testClassIDs))
-                            {
-                                foreach (var id in testClassIDs.Split(';'))
-                                    if (!string.IsNullOrEmpty(id))
-                                        _classService.AddStudentToClass(id, student.ID);
-                            }
+                            //create student
                             break;
                     }
                     var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
@@ -151,113 +137,16 @@ namespace EnglishPlatform.Controllers
         }
 
         [Route("/login")]
+        [System.Obsolete]
         public IActionResult Login()
         {
             long limit = 0;
-            long count = _accountService.CreateQuery().CountDocuments(_ => true);
+            long count = _accountService.CreateQuery().Count(_ => true);
             if (count <= limit)
             {
                 startPage();
             }
             return View();
-        }
-
-        [HttpPost]
-        [Route("/login")]
-        public async Task<IActionResult> Login(string UserName, string PassWord, string Type, bool IsRemmember)
-        {
-            //_log.Debug("login", new { UserName, PassWord, Type, IsRemmember });
-            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
-            {
-                ViewBag.MessageError = "Please fill your information";
-                return View();
-            }
-            else
-            {
-                string _sPass = Security.Encrypt(PassWord);
-                var user = _accountService.GetAccount(Type, UserName.ToLower(), _sPass);
-                if (user == null)
-                {
-                    ViewBag.MessageError = "Account's infomation is not correct";
-                    return View();
-                }
-                else
-                {
-                    if (user.IsActive)
-                    {
-                        TempData["success"] = "Hi " + user.UserName;
-                        string _token = Guid.NewGuid().ToString();
-                        var role = _roleService.GetItemByID(user.RoleID);
-                        if (role != null)
-                        {
-                            HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
-                            //_ilogs.WriteLogsInfo(_token);
-                            string FullName, id;
-                            switch (user.Type)
-                            {
-                                case ACCOUNT_TYPE.TEACHER:
-                                    var tc = _teacherService.GetItemByID(user.UserID);
-                                    FullName = tc.FullName;
-                                    id = tc.ID;
-                                    break;
-                                case ACCOUNT_TYPE.STUDENT:
-                                    var st = _studentService.GetItemByID(user.UserID);
-                                    FullName = st.FullName;
-                                    id = st.ID;
-                                    break;
-                                default:
-                                    FullName = "admin"; id = "0";
-                                    break;
-                            }
-
-                            var claims = new List<Claim>
-                            {
-                                new Claim("UserID",id),
-                                new Claim(ClaimTypes.Email, user.UserName),
-                                new Claim(ClaimTypes.Name, FullName),
-                                new Claim(ClaimTypes.Role, role.Code),
-                                new Claim("Type", user.Type),
-                                new Claim("RoleID", role.ID)
-                            };
-                            var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
-                            _ = new AuthenticationProperties
-                            {
-                                IsPersistent = true,
-                                ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
-                            };
-                            ClaimsPrincipal claim = new ClaimsPrincipal();
-                            claim.AddIdentity(claimsIdentity);
-
-                            AccountLogEntity login = new AccountLogEntity()
-                            {
-                                IP = HttpContext.Connection.RemoteIpAddress.ToString(),
-                                AccountID = user.ID,
-                                Token = _token,
-                                IsRemember = IsRemmember,
-                                CreateDate = DateTime.Now
-                            };
-                            _logService.CreateQuery().InsertOne(login);
-                            await HttpContext.SignInAsync(Cookies.DefaultLogin, claim, new AuthenticationProperties()
-                            {
-                                ExpiresUtc = !IsRemmember ? DateTime.Now : DateTime.Now.AddMinutes(Cookies.ExpiresLogin),
-                                AllowRefresh = true,
-                                RedirectUri = user.Type
-                            });
-                            return Redirect(user.Type);
-                        }
-                        else
-                        {
-                            ViewBag.MessageError = "Can't signin now.";
-                            return View();
-                        }
-                    }
-                    else
-                    {
-                        ViewBag.MessageError = "Account is locked.";
-                        return View();
-                    }
-                }
-            }
         }
 
         private void startPage()
@@ -266,7 +155,7 @@ namespace EnglishPlatform.Controllers
             {
                 Name = "Super Admin",
                 Code = "superadmin",
-                Type = ACCOUNT_TYPE.ADMIN,
+                Type = "admin",
                 CreateDate = DateTime.Now,
                 IsActive = true,
                 UserCreate = "longht"
@@ -275,7 +164,7 @@ namespace EnglishPlatform.Controllers
             {
                 Name = "Admin",
                 Code = "admin",
-                Type = ACCOUNT_TYPE.ADMIN,
+                Type = "admin",
                 CreateDate = DateTime.Now,
                 IsActive = true,
                 UserCreate = "longht"
@@ -284,7 +173,7 @@ namespace EnglishPlatform.Controllers
             {
                 Name = "Trưởng bộ môn",
                 Code = "head-teacher",
-                Type = ACCOUNT_TYPE.TEACHER,
+                Type = "teacher",
                 CreateDate = DateTime.Now,
                 IsActive = true,
                 UserCreate = "longht"
@@ -293,7 +182,7 @@ namespace EnglishPlatform.Controllers
             {
                 Name = "Giáo viên",
                 Code = "teacher",
-                Type = ACCOUNT_TYPE.TEACHER,
+                Type = "teacher",
                 CreateDate = DateTime.Now,
                 IsActive = true,
                 UserCreate = "longht"
@@ -302,7 +191,7 @@ namespace EnglishPlatform.Controllers
             {
                 Name = "Học viên",
                 Code = "student",
-                Type = ACCOUNT_TYPE.STUDENT,
+                Type = "student",
                 CreateDate = DateTime.Now,
                 IsActive = true,
                 UserCreate = "longht"
@@ -316,7 +205,7 @@ namespace EnglishPlatform.Controllers
             {
                 CreateDate = DateTime.Now,
                 IsActive = true,
-                Type = ACCOUNT_TYPE.ADMIN,
+                Type = "admin",
                 UserName = "supperadmin@gmail.com",
                 PassTemp = Security.Encrypt("123"),
                 PassWord = Security.Encrypt("123"),
@@ -333,12 +222,108 @@ namespace EnglishPlatform.Controllers
             return RedirectToAction("Login");
         }
 
+        [HttpPost]
+        [Route("/login")]
+        public async Task<IActionResult> Login(string UserName, string PassWord, string Type, bool IsRemmember)
+        {
+            //_log.Debug("login", new { UserName, PassWord, Type, IsRemmember });
+            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
+            {
+                ViewBag.MessageError = "Không thể bỏ trống các trường bắt buộc";
+                return View();
+            }
+            else
+            {
+                string _sPass = Security.Encrypt(PassWord);
+                var user = _accountService.GetAccount(Type, UserName.ToLower(), _sPass);
+                if (user == null)
+                {
+                    ViewBag.MessageError = "Email không tồn tại";
+                    return View();
+                }
+                else
+                {
+                    if (user.IsActive)
+                    {
+                        TempData["success"] = "Xin chào " + user.UserName;
+                        string _token = Guid.NewGuid().ToString();
+                        var role = _roleService.GetItemByID(user.RoleID);
+                        if (role != null)
+                        {
+                            HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
+                            //_ilogs.WriteLogsInfo(_token);
+                            string FullName, id;
+                            switch (user.Type)
+                            {
+                                case "teacher":
+                                    var tc = _teacherService.GetItemByID(user.UserID);
+                                    FullName = tc.FullName;
+                                    id = tc.ID;
+                                    break;
+                                case "student":
+                                    var st = _studentService.GetItemByID(user.UserID);
+                                    FullName = st.FullName;
+                                    id = st.ID;
+                                    break;
+                                default:
+                                    FullName = "admin"; id = "0";
+                                    break;
+                            }
+                            var listAccess = _accessesService.GetAccessByRole(role.ID);
+                            var claims = new List<Claim>
+                            {
+                                new Claim("UserID",id),
+                                new Claim(ClaimTypes.Email, user.UserName),
+                                new Claim(ClaimTypes.Name, FullName),
+                                new Claim(ClaimTypes.Role, role.Code),
+                                new Claim("Type", user.Type),
+                                new Claim("RoleID", role.ID)
+                            };
+                            if (listAccess != null)
+                            {
+                                for (int i = 0; i < listAccess.Count(); i++)
+                                {
+                                    var accItem = listAccess.ElementAt(i);
+                                    claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}*{accItem.ActName}"));
+                                }
+                            }
+                            var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
+                            ClaimsPrincipal claim = new ClaimsPrincipal();
+                            claim.AddIdentity(claimsIdentity);
+
+                            AccountLogEntity login = new AccountLogEntity()
+                            {
+                                IP = HttpContext.Connection.RemoteIpAddress.ToString(),
+                                AccountID = user.ID,
+                                Token = _token,
+                                IsRemember = IsRemmember,
+                                CreateDate = DateTime.Now
+                            };
+                            _logService.CreateQuery().InsertOne(login);
+                            await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
+                            return Redirect(user.Type);
+                        }
+                        else
+                        {
+                            ViewBag.MessageError = "Bạn không có quyền hạn vào quản trị viện";
+                            return View();
+                        }
+                    }
+                    else
+                    {
+                        ViewBag.MessageError = "Tài khoản của bạn đã bị khóa";
+                        return View();
+                    }
+                }
+            }
+        }
+
+
         [Route("/forgot-password")]
         public IActionResult ForgotPassword()
         {
             return View();
         }
-
         [HttpPost]
         [Route("/forgot-password")]
         [ValidateAntiForgeryToken]

@@ -13,27 +13,81 @@ using Core_v2.Globals;
 using Microsoft.AspNetCore.Hosting;
 using System.Linq;
 using MongoDB.Bson;
+using BaseAccess.Interfaces;
+using System.Reflection;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Quản lý quyền", "Role", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý quyền", "Role", "admin")]
     public class RoleController : AdminController
     {
+        private readonly IAccess _access;
+        private readonly AccessesService _accessesService;
         private readonly RoleService _service;
-        private readonly RoleService _roleService;
-        private readonly AccountService _accountService;
         private readonly IHostingEnvironment _env;
         public RoleController(RoleService service
+            , AccessesService accessesService
+            , IAccess access
             , IHostingEnvironment evn)
         {
             _env = evn;
             _service = service;
+            _access = access;
+            _accessesService = accessesService;
         }
         // GET: Home
 
         public ActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;
+            return View();
+        }
+
+
+        public IActionResult Detail(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return View("Index");
+
+            var assembly = GetAssembly();
+
+            ViewBag.AdminCtrl = _access.GetAccessByAttribue<Globals.AdminController>(assembly, "admin");
+            ViewBag.TeacherCtrl = _access.GetAccessByAttribue<Globals.TeacherController>(assembly, "teacher");
+            ViewBag.StudentCtrl = _access.GetAccessByAttribue<Globals.StudentController>(assembly, "student");
+
+            ViewBag.Data = _accessesService.Collection.Find(o => o.RoleID == id && o.IsActive == true)?.ToList();
+            ViewBag.RoleID = id;
+            return View();
+        }
+        [HttpPost]
+        public IActionResult Detail(string id, List<AccessEntity> data)
+        {
+            if (string.IsNullOrEmpty(id)) return View("Index");
+
+            var assembly = GetAssembly();
+
+            ViewBag.AdminCtrl = _access.GetAccessByAttribue<Globals.AdminController>(assembly, "admin");
+            ViewBag.TeacherCtrl = _access.GetAccessByAttribue<Globals.TeacherController>(assembly, "teacher");
+            ViewBag.StudentCtrl = _access.GetAccessByAttribue<Globals.StudentController>(assembly, "student");
+
+            for (int i = 0; data != null && i < data.Count; i++)
+            {
+                var item = data[i];
+                var oldItem = _accessesService.Collection.Find(o => o.CtrlName == item.CtrlName && o.ActName == item.ActName && o.RoleID == id)?.SingleOrDefault();
+                if (oldItem != null)
+                {
+                    oldItem.IsActive = item.IsActive;
+                    _accessesService.Collection.ReplaceOne(x => x.ID == oldItem.ID, oldItem);
+                }
+                else
+                {
+                    item.RoleID = id;
+                    item.CreateDate = DateTime.Now;
+                    item.UserCreate = User.FindFirst("UserID")?.Value;
+                    _accessesService.CreateOrUpdate(item);
+                }
+            }
+            ViewBag.Data = _accessesService.Collection.Find(o => o.RoleID == id && o.IsActive == true)?.ToList();
+            ViewBag.RoleID = id;
             return View();
         }
 
@@ -67,6 +121,12 @@ namespace BaseCustomerMVC.Controllers.Admin
             };
             return new JsonResult(response);
 
+        }
+
+
+        private Assembly GetAssembly()
+        {
+            return Assembly.GetExecutingAssembly();
         }
     }
 }
