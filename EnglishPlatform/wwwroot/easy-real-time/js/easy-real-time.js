@@ -155,6 +155,7 @@ var easyRealTime = (function () {
                 formData.append("state", state);
                 formData.append("content", content);
                 sendMessage(formData, group);
+                formChat.querySelector('input#content-message').value = "";
             }
 
         }
@@ -219,6 +220,9 @@ var easyRealTime = (function () {
                     obj["sender"] = dataJson.data.sender;
                     obj["receiver"] = group;
                     connection.invoke("SendToGroup", obj, group);
+
+
+
                 } else {
                     console.log("lỗi")
                 }

@@ -34,15 +34,6 @@ namespace BaseCustomerEntity.Database
         {
             return Collection?.Find(o => o.IsActive == true && o.RoleID == RoleID)?.ToEnumerable();
         }
-        public bool Save(AccessEntity item)
-        {
-            var oldItem = CreateQuery().Find(o => o.CtrlName == item.CtrlName && o.ActName == item.ActName && o.Type == item.Type)?.FirstOrDefault();
-            if(oldItem != null)
-            {
-
-            }
-
-            return true;
-        }
+        
     }
 }

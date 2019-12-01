@@ -118,7 +118,8 @@ namespace BaseCustomerMVC.Globals
                                 FullName = "admin"; id = "0";
                                 break;
                         }
-
+                        var _accessesService = new AccessesService(configuration);
+                        var listAccess = _accessesService.GetAccessByRole(user.RoleID);
                         var claims = new List<Claim>
                         {
                             new Claim("UserID", id),
@@ -129,15 +130,16 @@ namespace BaseCustomerMVC.Globals
                             new Claim("Code", irole.Code),
                             new Claim("RoleID", irole.ID.ToString())
                         };
-                        var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
-                        _ = new AuthenticationProperties
+                        if (listAccess != null && listAccess.Count() > 0)
                         {
-                            IsPersistent = true,
-                            ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
-                        };
-                        ClaimsPrincipal claim = new ClaimsPrincipal();
-                        claim.AddIdentity(claimsIdentity);
-
+                            for (int i = 0; i < listAccess.Count(); i++)
+                            {
+                                var accItem = listAccess.ElementAt(i);
+                                claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}*{accItem.ActName}"));
+                            }
+                        }
+                        var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
+                        ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
                         CacheExtends.SetObjectFromCache(token, Cookies.ExpiresLogin, claim);
 
                         return claim;

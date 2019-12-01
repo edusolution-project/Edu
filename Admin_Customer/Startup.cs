@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BaseCustomerEntity.Globals;
+﻿using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
 using BaseHub;
-using BaseHub.Globals;
 using Core_v2.Globals;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,7 +39,6 @@ namespace Admin_Customer
             services.AddLogs();
             services.AddTransient<IndefindCtrlService>();
             services.AddServiceBase();
-            services.AddServiceHubBase();
             services.AddScoped<FileProcess>();
             services.AddSingleton<CalendarHelper>();
             //services.AddMvc(options=> {

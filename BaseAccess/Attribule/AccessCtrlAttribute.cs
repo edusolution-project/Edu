@@ -6,9 +6,18 @@ namespace BaseAccess.Attribule
 {
     public class AccessCtrlAttribute : Attribute
     {
-        public AccessCtrlAttribute(string name, string module, string type,string icon, bool isShow) : this(name, module, type, icon)
+        public AccessCtrlAttribute(string name, string module, string type,string icon,int order, bool isShow) : this(name, module, type, icon, order)
         {
             IsShow = isShow;
+        }
+        public AccessCtrlAttribute(string name, string module, string type, string icon, int order)
+        {
+            Name = name;
+            Module = module;
+            Type = type;
+            Icon = icon;
+            Order = order;
+            IsShow = true;
         }
         public AccessCtrlAttribute(string name, string module, string type ,string icon)
         {
@@ -36,6 +45,7 @@ namespace BaseAccess.Attribule
             Type = type;
             IsShow = true;
         }
+        public int Order { get; set; } = 999;
         public string Icon { get; set; } = "fas fa-fw fa-tachometer-alt";
         public string Name { get; set; }
         public string Module { get; set; }

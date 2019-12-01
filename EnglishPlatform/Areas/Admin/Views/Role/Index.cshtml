@@ -4,6 +4,7 @@
     var listData = ViewBag.Data as List<BaseCustomerEntity.Database.RoleEntity>;
 }
 
+@TempData["Error_Permision"]
 <!-- Begin Page Content -->
 <div class="container-fluid">
     @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
@@ -98,7 +99,7 @@
 </div>
 <script>
     function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
-       
+
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "role")',

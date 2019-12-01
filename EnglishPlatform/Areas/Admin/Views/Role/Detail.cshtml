@@ -83,11 +83,11 @@
                                                         continue;
                                                     }
                                                 }
-                                                bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName)) != null,
-                                                    iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName)) != null,
-                                                    iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName)) != null,
-                                                    iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName)) != null,
-                                                    iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName)) != null;
+                                                bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName) && o.Type == "admin") != null,
+                                                    iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName)&& o.Type == "admin") != null,
+                                                    iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName)&& o.Type == "admin") != null,
+                                                    iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName)&& o.Type == "admin") != null,
+                                                    iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName)&& o.Type == "admin") != null;
                                                 <tr>
                                                     <td>@(i + 1)</td>
                                                     <td><input type="checkbox" data-control="@item.Module" value="@duyet" name="ArrDuyet" disabled="@isDuyet" checked="@iscDuyet" /></td>
@@ -172,11 +172,11 @@
                                                         continue;
                                                     }
                                                 }
-                                                bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName)) != null,
-                                                    iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName)) != null,
-                                                    iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName)) != null,
-                                                    iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName)) != null,
-                                                    iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName)) != null;
+                                                bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName)&& o.Type == "teacher") != null,
+                                                    iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName)&& o.Type == "teacher") != null,
+                                                    iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName)&& o.Type == "teacher") != null,
+                                                    iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName)&& o.Type == "teacher") != null,
+                                                    iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName)&& o.Type == "teacher") != null;
                                                 <tr>
                                                     <td>@(i + 1)</td>
                                                     <td><input type="checkbox" data-control="@item.Module" value="@duyet" name="ArrDuyet" disabled="@isDuyet" checked="@iscDuyet" /></td>
@@ -261,11 +261,11 @@
                                                         continue;
                                                     }
                                                 }
-                                                bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName)) != null,
-                                                    iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName)) != null,
-                                                    iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName)) != null,
-                                                    iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName)) != null,
-                                                    iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName)) != null;
+                                                bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName)&&o.Type == "student") != null,
+                                                    iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName)&&o.Type == "student") != null,
+                                                    iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName)&&o.Type == "student") != null,
+                                                    iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName)&&o.Type == "student") != null,
+                                                    iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName)&&o.Type == "student") != null;
                                                 <tr>
                                                     <td>@(i + 1)</td>
                                                     <td><input type="checkbox" data-control="@item.Module" value="@duyet" name="ArrDuyet" disabled="@isDuyet" checked="@iscDuyet" /></td>

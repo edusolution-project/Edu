@@ -72,7 +72,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             for (int i = 0; data != null && i < data.Count; i++)
             {
                 var item = data[i];
-                var oldItem = _accessesService.Collection.Find(o => o.CtrlName == item.CtrlName && o.ActName == item.ActName && o.RoleID == id)?.SingleOrDefault();
+                var oldItem = _accessesService.Collection.Find(o => o.CtrlName == item.CtrlName && o.ActName == item.ActName && o.RoleID == id && o.Type == item.Type)?.SingleOrDefault();
                 if (oldItem != null)
                 {
                     oldItem.IsActive = item.IsActive;

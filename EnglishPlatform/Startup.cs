@@ -7,7 +7,6 @@ using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
 using BaseEasyRealTime.Globals;
 using BaseHub;
-using BaseHub.Globals;
 using Core_v2.Globals;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -49,7 +48,6 @@ namespace EnglishPlatform
             services.AddLogs();
             services.AddTransient<IndefindCtrlService>();
             services.AddServiceBase();
-            services.AddServiceHubBase();
             services.AddScoped<FileProcess>();
             services.AddSingleton<CalendarHelper>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -75,13 +73,15 @@ namespace EnglishPlatform
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseCookiePolicy();
+            app.UseSession();
+            app.UseAuthentication();
             app.GetConfiguration(Configuration);
             app.UseAuthention(Configuration);
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseCookiePolicy();
-            app.UseAuthentication();
-            app.UseSession();
+           
+            
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ChatHub>("/chatHub");
