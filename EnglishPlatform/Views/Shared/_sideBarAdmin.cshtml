@@ -19,15 +19,19 @@
         <hr class="sidebar-divider my-0">
         @{
             var menuList = AdminMenus != null && AdminMenus.Count > 0
-                ? AdminMenus.Select(o => new { o.Module, o.Name,o.Icon })?.ToHashSet()
+                ? AdminMenus.Select(o => new { o.Module, o.Name, o.Icon })?.ToHashSet()
                 : null;
             for (int i = 0; i < menuList.Count; i++)
             {
                 var item = menuList.ElementAt(i);
+                string active =
+                    ViewContext.RouteData.Values["Area"].ToString().ToLower()=="admin" &&
+                    ViewContext.RouteData.Values["Controller"].ToString().ToLower() == item.Module 
+                    ? "active" : "";
                 if (User.IsInRole("superadmin"))
                 {
-                    <li class="nav-item active">
-                        <a class="nav-link" href="@Url.Action("Index",item.Module)">
+                    <li class="nav-item @active">
+                        <a class="nav-link" href="@Url.Action("Index",item.Module,new { area = "admin" })">
                             <i class="@item.Icon"></i>
                             <span>@item.Name</span>
                         </a>
@@ -40,8 +44,100 @@
                     var role = Permission.Where(z => z[0] == "admin" && z[1] == item.Module);
                     if (role != null && role.Count() > 0)
                     {
-                        <li class="nav-item active">
-                            <a class="nav-link" href="@Url.Action("Index",item.Module)">
+                        <li class="nav-item @active">
+                            <a class="nav-link" href="@Url.Action("Index",item.Module,new { area = "admin" })">
+                                <i class="@item.Icon"></i>
+                                <span>@item.Name</span>
+                            </a>
+                        </li>
+                        <!-- Divider -->
+                        <hr class="sidebar-divider">
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+            }
+        }
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
+        @{
+            var tmenuList = TeacherMenus != null && TeacherMenus.Count > 0
+                ? TeacherMenus.Select(o => new { o.Module, o.Name, o.Icon })?.ToHashSet()
+                : null;
+            for (int i = 0; i < tmenuList.Count; i++)
+            {
+                var item = tmenuList.ElementAt(i);
+                string active =
+                    ViewContext.RouteData.Values["Area"].ToString().ToLower()=="teacher" &&
+                    ViewContext.RouteData.Values["Controller"].ToString().ToLower() == item.Module 
+                    ? "active" : "";
+                if (User.IsInRole("superadmin"))
+                {
+                    <li class="nav-item @active">
+                        <a class="nav-link" href="@Url.Action("Index",item.Module,new { area = "teacher" })">
+                            <i class="@item.Icon"></i>
+                            <span>@item.Name</span>
+                        </a>
+                    </li>
+                    <!-- Divider -->
+                    <hr class="sidebar-divider">
+                }
+                else
+                {
+                    var role = Permission.Where(z => z[0] == "teacher" && z[1] == item.Module);
+                    if (role != null && role.Count() > 0)
+                    {
+                        <li class="nav-item @active">
+                            <a class="nav-link" href="@Url.Action("Index",item.Module,new { area = "teacher" })">
+                                <i class="@item.Icon"></i>
+                                <span>@item.Name</span>
+                            </a>
+                        </li>
+                        <!-- Divider -->
+                        <hr class="sidebar-divider">
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+            }
+        }
+        <hr class="sidebar-divider my-0">
+        @{
+            var smenuList = StudentMenus != null && StudentMenus.Count > 0
+                ? StudentMenus.Select(o => new { o.Module, o.Name, o.Icon })?.ToHashSet()
+                : null;
+            for (int i = 0; i < smenuList.Count; i++)
+            {
+                
+                var item = smenuList.ElementAt(i);
+                string active =
+                    ViewContext.RouteData.Values["Area"].ToString().ToLower()=="student" &&
+                    ViewContext.RouteData.Values["Controller"].ToString().ToLower() == item.Module 
+                    ? "active" : "";
+                if (User.IsInRole("superadmin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @active" href="@Url.Action("Index",item.Module,new { area = "student" })">
+                            <i class="@item.Icon"></i>
+                            <span>@item.Name</span>
+                        </a>
+                    </li>
+                    <!-- Divider -->
+                    <hr class="sidebar-divider">
+                }
+                else
+                {
+                    var role = Permission.Where(z => z[0] == "student" && z[1] == item.Module);
+                    if (role != null && role.Count() > 0)
+                    {
+                        <li class="nav-item @active">
+                            <a class="nav-link" href="@Url.Action("Index",item.Module,new { area = "student" })">
                                 <i class="@item.Icon"></i>
                                 <span>@item.Name</span>
                             </a>
