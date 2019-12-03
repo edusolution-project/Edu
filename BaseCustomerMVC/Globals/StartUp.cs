@@ -135,7 +135,8 @@ namespace BaseCustomerMVC.Globals
                             for (int i = 0; i < listAccess.Count(); i++)
                             {
                                 var accItem = listAccess.ElementAt(i);
-                                claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}*{accItem.ActName}"));
+                                if (accItem.Type == "admin") claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}*{accItem.ActName}"));
+                                else claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}"));
                             }
                         }
                         var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
