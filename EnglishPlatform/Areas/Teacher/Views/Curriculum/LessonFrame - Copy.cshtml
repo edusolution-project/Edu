@@ -28,28 +28,6 @@
 
 </div>
 <script>
-    //localStorage.clear();
-    var config = {
-        id: "exam-student",
-        mod: "preview",
-        url: {
-            load: '@Url.Action("GetLesson", "Lesson")',
-            current: '@Url.Action("GetCurrentExam", "Exam")',
-            start: '@Url.Action("Create", "Exam")',
-            answer: '@Url.Action("CreateDetail", "Exam")',
-            removeans: '@Url.Action("RemoveDetail", "Exam")',
-            end: '@Url.Action("CompleteExam", "Exam")',
-            review: '@Url.Action("Review","Lesson")'
-
-        },
-        type: @Data.TemplateType,
-        lesson_id: '@Data.ID',
-        class_id: '@Data.ID',
-        chap_id: '@Data.ChapterID'
-    }
-    var widget = new ExamStudent.onReady(config);
-</script>
-<script>
 
     function LoadLesson() {
         load.lesson($("#LessonID").val(), $("#CourseID").val());

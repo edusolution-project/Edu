@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
+    [BaseAccess.Attribule.AccessCtrl("Bài giảng chung", "teacher")]
     public class CurriculumController : TeacherController
     {
         private readonly CourseService _service;
@@ -205,6 +206,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
+        [BaseAccess.Attribule.AccessCtrl("Bài giảng chung", "teacher")]
         public IActionResult Lesson(DefaultModel model, string CourseID, int frameview = 0)
         {
             //if (!User.IsInRole("head-teacher"))

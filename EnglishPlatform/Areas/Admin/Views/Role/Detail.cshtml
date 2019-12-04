@@ -5,288 +5,288 @@
     var adminData = ViewBag.AdminCtrl as List<BaseAccess.Attribule.AccessCtrlAttribute>;
     var teacherData = ViewBag.TeacherCtrl as List<BaseAccess.Attribule.AccessCtrlAttribute>;
     var studentData = ViewBag.StudentCtrl as List<BaseAccess.Attribule.AccessCtrlAttribute>;
-    var data = ViewBag.Data as List<BaseCustomerEntity.Database.AccessEntity>; 
+    var data = ViewBag.Data as List<BaseCustomerEntity.Database.AccessEntity>;
     var roleID = ViewBag.RoleID as string;
 }
 <style>
-    input:disabled{
-        display:none;
+    input:disabled {
+        display: none;
     }
 </style>
-    <div class="container-fluid">
-        <div class="card shadow mb-4">
-            <div class="accordion" id="accordionExample">
-                <div class="card">
-                    <div class="card-header" id="headingOne">
-                        <h2 class="mb-0">
-                            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#admin-power" aria-expanded="true" aria-controls="collapseOne">
-                                Quyền quản trị viên
-                            </button>
-                            <button type="button" class="float-right btn btn-success" id="admin-submit">Save</button>
-                        </h2>
-                    </div>
-                    <div id="admin-power" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-active table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th> <input type="checkbox" name="AllDuyet" onclick="checkAll('ArrDuyet','admin-power',this)" value="" />Duyệt</th>
-                                            <th> <input type="checkbox" name="AllXoa" value="" onclick="checkAll('ArrXoa','admin-power',this)"/>Xóa</th>
-                                            <th> <input type="checkbox" name="AllSua" value="" onclick="checkAll('ArrSua','admin-power',this)"/>Sửa</th>
-                                            <th><input type="checkbox" name="AllThem" value="" onclick="checkAll('ArrThem','admin-power',this)"/>Thêm (Import) </th>
-                                            <th><input type="checkbox" name="AllXem" value="" onclick="checkAll('ArrXem','admin-power',this)"/>Xem (Export) </th>
-                                            <th>Chức năng</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @{
-                                            var listItem = adminData;
-                                            for (int i = 0; listItem != null && i < listItem.Count; i++)
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="accordion" id="accordionExample">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#admin-power" aria-expanded="true" aria-controls="collapseOne">
+                            Quyền quản trị viên
+                        </button>
+                        <button type="button" class="float-right btn btn-success" id="admin-submit">Save</button>
+                    </h2>
+                </div>
+                <div id="admin-power" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-active table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th> <input type="checkbox" name="AllDuyet" onclick="checkAll('ArrDuyet','admin-power',this)" value="" />Duyệt</th>
+                                        <th> <input type="checkbox" name="AllXoa" value="" onclick="checkAll('ArrXoa','admin-power',this)" />Xóa</th>
+                                        <th> <input type="checkbox" name="AllSua" value="" onclick="checkAll('ArrSua','admin-power',this)" />Sửa</th>
+                                        <th><input type="checkbox" name="AllThem" value="" onclick="checkAll('ArrThem','admin-power',this)" />Thêm (Import) </th>
+                                        <th><input type="checkbox" name="AllXem" value="" onclick="checkAll('ArrXem','admin-power',this)" />Xem (Export) </th>
+                                        <th>Chức năng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var listItem = adminData;
+                                        for (int i = 0; listItem != null && i < listItem.Count; i++)
+                                        {
+                                            var item = listItem[i];
+                                            if (item.IsShow == false) { continue; }
+                                            string duyet = "", xoa = "", sua = "", them = "", xem = "";
+                                            bool isDuyet = true, isXoa = true, isSua = true, isThem = true, isXem = true;
+                                            @for (int x = 0; item.Acts != null && x < item.Acts.Count; x++)
                                             {
-                                                var item = listItem[i];
-                                                if (item.IsShow == false) { continue; }
-                                                string duyet = "", xoa = "", sua = "", them = "", xem = "";
-                                                bool isDuyet = true, isXoa = true, isSua = true, isThem = true, isXem = true;
-                                                @for (int x = 0; item.Acts != null && x < item.Acts.Count; x++)
+                                                var actItem = item.Acts.ElementAtOrDefault(x);
+                                                if (actItem.Contains("publish"))
                                                 {
-                                                    var actItem = item.Acts.ElementAtOrDefault(x);
-                                                    if (actItem.Contains("publish"))
-                                                    {
-                                                        duyet += duyet == "" ? $"{actItem}" : $",{actItem}";
-                                                        isDuyet = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("get") || actItem.StartsWith("index") || actItem.StartsWith("detail") || actItem.StartsWith("export"))
-                                                    {
-                                                        xem += xem == "" ? $"{actItem}" : $",{actItem}";
-                                                        isXem = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("remove") || actItem.StartsWith("del"))
-                                                    {
-                                                        xoa += xoa == "" ? $"{actItem}" : $",{actItem}";
-                                                        isXoa = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("add") || actItem.StartsWith("create") || actItem.StartsWith("import"))
-                                                    {
-                                                        them += them == "" ? $"{actItem}" : $",{actItem}";
-                                                        isThem = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("edit")||actItem.StartsWith("update"))
-                                                    {
-                                                        sua += sua == "" ? $"{actItem}" : $",{actItem}";
-                                                        isSua = false;
-                                                        continue;
-                                                    }
+                                                    duyet += duyet == "" ? $"{actItem}" : $",{actItem}";
+                                                    isDuyet = false;
+                                                    continue;
                                                 }
-                                                bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName) && o.Type == "admin") != null,
-                                                    iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName)&& o.Type == "admin") != null,
-                                                    iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName)&& o.Type == "admin") != null,
-                                                    iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName)&& o.Type == "admin") != null,
-                                                    iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName)&& o.Type == "admin") != null;
-                                                <tr>
-                                                    <td>@(i + 1)</td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@duyet" name="ArrDuyet" disabled="@isDuyet" checked="@iscDuyet" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@xoa" name="ArrXoa" disabled="@isXoa" checked="@iscXoa" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@sua" name="ArrSua" disabled="@isSua" checked="@iscSua" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@them" name="ArrThem" disabled="@isThem" checked="@iscThem" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@xem" name="ArrXem" disabled="@isXem" checked="@iscXem" /></td>
-                                                    <td>@item.Name</td>
-                                                </tr>
+                                                if (actItem.StartsWith("get") || actItem.StartsWith("index") || actItem.StartsWith("detail") || actItem.StartsWith("export"))
+                                                {
+                                                    xem += xem == "" ? $"{actItem}" : $",{actItem}";
+                                                    isXem = false;
+                                                    continue;
+                                                }
+                                                if (actItem.StartsWith("remove") || actItem.StartsWith("del"))
+                                                {
+                                                    xoa += xoa == "" ? $"{actItem}" : $",{actItem}";
+                                                    isXoa = false;
+                                                    continue;
+                                                }
+                                                if (actItem.StartsWith("add") || actItem.StartsWith("create") || actItem.StartsWith("import"))
+                                                {
+                                                    them += them == "" ? $"{actItem}" : $",{actItem}";
+                                                    isThem = false;
+                                                    continue;
+                                                }
+                                                if (actItem.StartsWith("edit") || actItem.StartsWith("update"))
+                                                {
+                                                    sua += sua == "" ? $"{actItem}" : $",{actItem}";
+                                                    isSua = false;
+                                                    continue;
+                                                }
                                             }
+                                            bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName) && o.Type == "admin") != null,
+                                                iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName) && o.Type == "admin") != null,
+                                                iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName) && o.Type == "admin") != null,
+                                                iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName) && o.Type == "admin") != null,
+                                                iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName) && o.Type == "admin") != null;
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@duyet" name="ArrDuyet" disabled="@isDuyet" checked="@iscDuyet" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@xoa" name="ArrXoa" disabled="@isXoa" checked="@iscXoa" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@sua" name="ArrSua" disabled="@isSua" checked="@iscSua" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@them" name="ArrThem" disabled="@isThem" checked="@iscThem" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@xem" name="ArrXem" disabled="@isXem" checked="@iscXem" /></td>
+                                                <td>@item.Name</td>
+                                            </tr>
                                         }
-                                    </tbody>
-                                </table>
-                            </div>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header" id="headingTwo">
-                        <h2 class="mb-0">
-                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#teacher-power" aria-expanded="false" aria-controls="collapseTwo">
-                                Quyền trang giáo viên
-                            </button>
-                            <button type="button" class="float-right btn btn-success" id="teacher-submit">Save</button>
-                        </h2>
-                    </div>
-                    <div id="teacher-power" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-active table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th> <input type="checkbox" name="AllDuyet" onclick="checkAll('ArrDuyet','teacher-power',this)" value="" />Duyệt</th>
-                                            <th> <input type="checkbox" name="AllXoa" value="" onclick="checkAll('ArrXoa','teacher-power',this)" />Xóa</th>
-                                            <th> <input type="checkbox" name="AllSua" value="" onclick="checkAll('ArrSua','teacher-power',this)" />Sửa</th>
-                                            <th><input type="checkbox" name="AllThem" value="" onclick="checkAll('ArrThem','teacher-power',this)" />Thêm (Import) </th>
-                                            <th><input type="checkbox" name="AllXem" value="" onclick="checkAll('ArrXem','teacher-power',this)" />Xem (Export) </th>
-                                            <th>Chức năng</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @{
-                                            var listItem1 = teacherData;
-                                            for (int i = 0; listItem1 != null && i < listItem1.Count; i++)
+            </div>
+            <div class="card">
+                <div class="card-header" id="headingTwo">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#teacher-power" aria-expanded="false" aria-controls="collapseTwo">
+                            Quyền trang giáo viên
+                        </button>
+                        <button type="button" class="float-right btn btn-success" id="teacher-submit">Save</button>
+                    </h2>
+                </div>
+                <div id="teacher-power" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-active table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th> <input type="checkbox" name="AllDuyet" onclick="checkAll('ArrDuyet','teacher-power',this)" value="" />Duyệt</th>
+                                        <th> <input type="checkbox" name="AllXoa" value="" onclick="checkAll('ArrXoa','teacher-power',this)" />Xóa</th>
+                                        <th> <input type="checkbox" name="AllSua" value="" onclick="checkAll('ArrSua','teacher-power',this)" />Sửa</th>
+                                        <th><input type="checkbox" name="AllThem" value="" onclick="checkAll('ArrThem','teacher-power',this)" />Thêm (Import) </th>
+                                        <th><input type="checkbox" name="AllXem" value="" onclick="checkAll('ArrXem','teacher-power',this)" />Xem (Export) </th>
+                                        <th>Chức năng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var listItem1 = teacherData;
+                                        for (int i = 0; listItem1 != null && i < listItem1.Count; i++)
+                                        {
+                                            var item = listItem1[i];
+                                            //if (item.IsShow == false) { continue; }
+                                            string duyet = "", xoa = "", sua = "", them = "", xem = "";
+                                            bool isDuyet = true, isXoa = true, isSua = true, isThem = true, isXem = true;
+                                            @for (int x = 0; item.Acts != null && x < item.Acts.Count; x++)
                                             {
-                                                var item = listItem1[i];
-                                                //if (item.IsShow == false) { continue; }
-                                                string duyet = "", xoa = "", sua = "", them = "", xem = "";
-                                                bool isDuyet = true, isXoa = true, isSua = true, isThem = true, isXem = true;
-                                                @for (int x = 0; item.Acts != null && x < item.Acts.Count; x++)
+                                                var actItem = item.Acts.ElementAtOrDefault(x);
+                                                if (actItem.Contains("publish"))
                                                 {
-                                                    var actItem = item.Acts.ElementAtOrDefault(x);
-                                                    if (actItem.Contains("publish"))
-                                                    {
-                                                        duyet += duyet == "" ? $"{actItem}" : $",{actItem}";
-                                                        isDuyet = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("get") || actItem.StartsWith("index") || actItem.StartsWith("detail") || actItem.StartsWith("export"))
-                                                    {
-                                                        xem += xem == "" ? $"{actItem}" : $",{actItem}";
-                                                        isXem = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("remove") || actItem.StartsWith("del"))
-                                                    {
-                                                        xoa += xoa == "" ? $"{actItem}" : $",{actItem}";
-                                                        isXoa = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("add") || actItem.StartsWith("create") || actItem.StartsWith("import"))
-                                                    {
-                                                        them += them == "" ? $"{actItem}" : $",{actItem}";
-                                                        isThem = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("edit")||actItem.StartsWith("update"))
-                                                    {
-                                                        sua += sua == "" ? $"{actItem}" : $",{actItem}";
-                                                        isSua = false;
-                                                        continue;
-                                                    }
+                                                    duyet += duyet == "" ? $"{actItem}" : $",{actItem}";
+                                                    isDuyet = false;
+                                                    continue;
                                                 }
-                                                bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName)&& o.Type == "teacher") != null,
-                                                    iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName)&& o.Type == "teacher") != null,
-                                                    iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName)&& o.Type == "teacher") != null,
-                                                    iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName)&& o.Type == "teacher") != null,
-                                                    iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName)&& o.Type == "teacher") != null;
-                                                <tr>
-                                                    <td>@(i + 1)</td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@duyet" name="ArrDuyet" disabled="@isDuyet" checked="@iscDuyet" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@xoa" name="ArrXoa" disabled="@isXoa" checked="@iscXoa" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@sua" name="ArrSua" disabled="@isSua" checked="@iscSua" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@them" name="ArrThem" disabled="@isThem" checked="@iscThem" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@xem" name="ArrXem" disabled="@isXem" checked="@iscXem" /></td>
-                                                    <td>@item.Name</td>
-                                                </tr>
+                                                if (actItem.StartsWith("get") || actItem.StartsWith("index") || actItem.StartsWith("detail") || actItem.StartsWith("export") || actItem.StartsWith("modules") || actItem.StartsWith("lesson"))
+                                                {
+                                                    xem += xem == "" ? $"{actItem}" : $",{actItem}";
+                                                    isXem = false;
+                                                    continue;
+                                                }
+                                                if (actItem.StartsWith("remove") || actItem.StartsWith("del"))
+                                                {
+                                                    xoa += xoa == "" ? $"{actItem}" : $",{actItem}";
+                                                    isXoa = false;
+                                                    continue;
+                                                }
+                                                if (actItem.StartsWith("add") || actItem.StartsWith("create") || actItem.StartsWith("clone") || actItem.StartsWith("import"))
+                                                {
+                                                    them += them == "" ? $"{actItem}" : $",{actItem}";
+                                                    isThem = false;
+                                                    continue;
+                                                }
+                                                if (actItem.StartsWith("edit") || actItem.StartsWith("update") || actItem.StartsWith("change"))
+                                                {
+                                                    sua += sua == "" ? $"{actItem}" : $",{actItem}";
+                                                    isSua = false;
+                                                    continue;
+                                                }
                                             }
+                                            bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName) && o.Type == "teacher") != null,
+                                                iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName) && o.Type == "teacher") != null,
+                                                iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName) && o.Type == "teacher") != null,
+                                                iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName) && o.Type == "teacher") != null,
+                                                iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName) && o.Type == "teacher") != null;
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@duyet" name="ArrDuyet" disabled="@isDuyet" checked="@iscDuyet" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@xoa" name="ArrXoa" disabled="@isXoa" checked="@iscXoa" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@sua" name="ArrSua" disabled="@isSua" checked="@iscSua" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@them" name="ArrThem" disabled="@isThem" checked="@iscThem" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@xem" name="ArrXem" disabled="@isXem" checked="@iscXem" /></td>
+                                                <td>@item.Name</td>
+                                            </tr>
                                         }
-                                    </tbody>
-                                </table>
-                            </div>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header" id="headingThree">
-                        <h2 class="mb-0">
-                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#student-power" aria-expanded="false" aria-controls="collapseThree">
-                                Quyền trang học viên
-                            </button>
-                            <button type="button" class="float-right btn btn-success" id="student-submit">Save</button>
-                        </h2>
-                    </div>
-                    <div id="student-power" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-active table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th> <input type="checkbox" name="AllDuyet" onclick="checkAll('ArrDuyet','student-power',this)" value="" />Duyệt</th>
-                                            <th> <input type="checkbox" name="AllXoa" value="" onclick="checkAll('ArrXoa','student-power',this)" />Xóa</th>
-                                            <th> <input type="checkbox" name="AllSua" value="" onclick="checkAll('ArrSua','student-power',this)" />Sửa</th>
-                                            <th><input type="checkbox" name="AllThem" value="" onclick="checkAll('ArrThem','student-power',this)" />Thêm (Import) </th>
-                                            <th><input type="checkbox" name="AllXem" value="" onclick="checkAll('ArrXem','student-power',this)" />Xem (Export) </th>
-                                            <th>Chức năng</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @{
-                                            var listItem2 = studentData;
-                                            for (int i = 0; listItem2 != null && i < listItem2.Count; i++)
+            </div>
+            <div class="card">
+                <div class="card-header" id="headingThree">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#student-power" aria-expanded="false" aria-controls="collapseThree">
+                            Quyền trang học viên
+                        </button>
+                        <button type="button" class="float-right btn btn-success" id="student-submit">Save</button>
+                    </h2>
+                </div>
+                <div id="student-power" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-active table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th> <input type="checkbox" name="AllDuyet" onclick="checkAll('ArrDuyet','student-power',this)" value="" />Duyệt</th>
+                                        <th> <input type="checkbox" name="AllXoa" value="" onclick="checkAll('ArrXoa','student-power',this)" />Xóa</th>
+                                        <th> <input type="checkbox" name="AllSua" value="" onclick="checkAll('ArrSua','student-power',this)" />Sửa</th>
+                                        <th><input type="checkbox" name="AllThem" value="" onclick="checkAll('ArrThem','student-power',this)" />Thêm (Import) </th>
+                                        <th><input type="checkbox" name="AllXem" value="" onclick="checkAll('ArrXem','student-power',this)" />Xem (Export) </th>
+                                        <th>Chức năng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var listItem2 = studentData;
+                                        for (int i = 0; listItem2 != null && i < listItem2.Count; i++)
+                                        {
+                                            var item = listItem2[i];
+                                            //if (item.IsShow == false) { continue; }
+                                            string duyet = "", xoa = "", sua = "", them = "", xem = "";
+                                            bool isDuyet = true, isXoa = true, isSua = true, isThem = true, isXem = true;
+                                            @for (int x = 0; item.Acts != null && x < item.Acts.Count; x++)
                                             {
-                                                var item = listItem2[i];
-                                                //if (item.IsShow == false) { continue; }
-                                                string duyet = "", xoa = "", sua = "", them = "", xem = "";
-                                                bool isDuyet = true, isXoa = true, isSua = true, isThem = true, isXem = true;
-                                                @for (int x = 0; item.Acts != null && x < item.Acts.Count; x++)
+                                                var actItem = item.Acts.ElementAtOrDefault(x);
+                                                if (actItem.Contains("publish"))
                                                 {
-                                                    var actItem = item.Acts.ElementAtOrDefault(x);
-                                                    if (actItem.Contains("publish"))
-                                                    {
-                                                        duyet += duyet == "" ? $"{actItem}" : $",{actItem}";
-                                                        isDuyet = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("get") || actItem.StartsWith("index") || actItem.StartsWith("detail") || actItem.StartsWith("export"))
-                                                    {
-                                                        xem += xem == "" ? $"{actItem}" : $",{actItem}";
-                                                        isXem = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("remove") || actItem.StartsWith("del"))
-                                                    {
-                                                        xoa += xoa == "" ? $"{actItem}" : $",{actItem}";
-                                                        isXoa = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("add") || actItem.StartsWith("create") || actItem.StartsWith("import"))
-                                                    {
-                                                        them += them == "" ? $"{actItem}" : $",{actItem}";
-                                                        isThem = false;
-                                                        continue;
-                                                    }
-                                                    if (actItem.StartsWith("edit")||actItem.StartsWith("update"))
-                                                    {
-                                                        sua += sua == "" ? $"{actItem}" : $",{actItem}";
-                                                        isSua = false;
-                                                        continue;
-                                                    }
+                                                    duyet += duyet == "" ? $"{actItem}" : $",{actItem}";
+                                                    isDuyet = false;
+                                                    continue;
                                                 }
-                                                bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName)&&o.Type == "student") != null,
-                                                    iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName)&&o.Type == "student") != null,
-                                                    iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName)&&o.Type == "student") != null,
-                                                    iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName)&&o.Type == "student") != null,
-                                                    iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName)&&o.Type == "student") != null;
-                                                <tr>
-                                                    <td>@(i + 1)</td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@duyet" name="ArrDuyet" disabled="@isDuyet" checked="@iscDuyet" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@xoa" name="ArrXoa" disabled="@isXoa" checked="@iscXoa" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@sua" name="ArrSua" disabled="@isSua" checked="@iscSua" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@them" name="ArrThem" disabled="@isThem" checked="@iscThem" /></td>
-                                                    <td><input type="checkbox" data-control="@item.Module" value="@xem" name="ArrXem" disabled="@isXem" checked="@iscXem" /></td>
-                                                    <td>@item.Name</td>
-                                                </tr>
+                                                if (actItem.StartsWith("get") || actItem.StartsWith("index") || actItem.StartsWith("detail") || actItem.StartsWith("export"))
+                                                {
+                                                    xem += xem == "" ? $"{actItem}" : $",{actItem}";
+                                                    isXem = false;
+                                                    continue;
+                                                }
+                                                if (actItem.StartsWith("remove") || actItem.StartsWith("del"))
+                                                {
+                                                    xoa += xoa == "" ? $"{actItem}" : $",{actItem}";
+                                                    isXoa = false;
+                                                    continue;
+                                                }
+                                                if (actItem.StartsWith("add") || actItem.StartsWith("create") || actItem.StartsWith("import"))
+                                                {
+                                                    them += them == "" ? $"{actItem}" : $",{actItem}";
+                                                    isThem = false;
+                                                    continue;
+                                                }
+                                                if (actItem.StartsWith("edit") || actItem.StartsWith("update"))
+                                                {
+                                                    sua += sua == "" ? $"{actItem}" : $",{actItem}";
+                                                    isSua = false;
+                                                    continue;
+                                                }
                                             }
+                                            bool iscDuyet = data != null && !string.IsNullOrEmpty(duyet) && data.Find(o => o.CtrlName == item.Module && duyet.Contains(o.ActName) && o.Type == "student") != null,
+                                                iscXoa = data != null && !string.IsNullOrEmpty(xoa) && data.Find(o => o.CtrlName == item.Module && xoa.Contains(o.ActName) && o.Type == "student") != null,
+                                                iscSua = data != null && !string.IsNullOrEmpty(sua) && data.Find(o => o.CtrlName == item.Module && sua.Contains(o.ActName) && o.Type == "student") != null,
+                                                iscThem = data != null && !string.IsNullOrEmpty(them) && data.Find(o => o.CtrlName == item.Module && them.Contains(o.ActName) && o.Type == "student") != null,
+                                                iscXem = data != null && !string.IsNullOrEmpty(xem) && data.Find(o => o.CtrlName == item.Module && xem.Contains(o.ActName) && o.Type == "student") != null;
+                                            <tr>
+                                                <td>@(i + 1)</td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@duyet" name="ArrDuyet" disabled="@isDuyet" checked="@iscDuyet" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@xoa" name="ArrXoa" disabled="@isXoa" checked="@iscXoa" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@sua" name="ArrSua" disabled="@isSua" checked="@iscSua" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@them" name="ArrThem" disabled="@isThem" checked="@iscThem" /></td>
+                                                <td><input type="checkbox" data-control="@item.Module" value="@xem" name="ArrXem" disabled="@isXem" checked="@iscXem" /></td>
+                                                <td>@item.Name</td>
+                                            </tr>
                                         }
-                                    </tbody>
-                                </table>
-                            </div>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-@section Scripts{ 
+</div>
+@section Scripts{
     <script>
         var adminPower = document.getElementById("admin-power");
         var teacherPower = document.getElementById("teacher-power");
@@ -302,7 +302,7 @@
 
         $("#admin-submit").click(function () {
             var type = "admin";
-            
+
             var listDuyet = adminPower.querySelectorAll("input[name='ArrDuyet']");
             var listXoa = adminPower.querySelectorAll("input[name='ArrXoa']");
             var listSua = adminPower.querySelectorAll("input[name='ArrSua']");
@@ -349,7 +349,7 @@
 
         $("#teacher-submit").click(function () {
             var type = "teacher";
-            
+
             var listDuyet = teacherPower.querySelectorAll("input[name='ArrDuyet']");
             var listXoa = teacherPower.querySelectorAll("input[name='ArrXoa']");
             var listSua = teacherPower.querySelectorAll("input[name='ArrSua']");
@@ -395,7 +395,7 @@
          });
         $("#student-submit").click(function () {
             var type = "student";
-            
+
             var listDuyet = studentPower.querySelectorAll("input[name='ArrDuyet']");
             var listXoa = studentPower.querySelectorAll("input[name='ArrXoa']");
             var listSua = studentPower.querySelectorAll("input[name='ArrSua']");
