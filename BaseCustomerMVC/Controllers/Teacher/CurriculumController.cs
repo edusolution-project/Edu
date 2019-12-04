@@ -221,7 +221,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (Data == null)
                 return RedirectToAction("Index");
 
-
             ViewBag.Course = currentCourse;
             ViewBag.Data = Data;
             if (frameview == 1)

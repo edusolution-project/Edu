@@ -27,42 +27,37 @@
     </div>
 
 </div>
+<script src="~/js/content-render.js"></script>
 <script>
     //localStorage.clear();
     var config = {
         id: "exam-student",
         mod: "preview",
         url: {
-            load: '@Url.Action("GetLesson", "Lesson")',
-            current: '@Url.Action("GetCurrentExam", "Exam")',
-            start: '@Url.Action("Create", "Exam")',
-            answer: '@Url.Action("CreateDetail", "Exam")',
-            removeans: '@Url.Action("RemoveDetail", "Exam")',
-            end: '@Url.Action("CompleteExam", "Exam")',
-            review: '@Url.Action("Review","Lesson")'
-
+            load: '@Url.Action("GetDetailsLesson", "Lesson")',
+            load_part = '@Url.Action("GetList", "LessonPart")'
         },
         type: @Data.TemplateType,
         lesson_id: '@Data.ID',
         class_id: '@Data.ID',
         chap_id: '@Data.ChapterID'
     }
-    var widget = new ExamStudent.onReady(config);
+    var widget = new Lesson.onReady(config);
 </script>
 <script>
 
-    function LoadLesson() {
-        load.lesson($("#LessonID").val(), $("#CourseID").val());
-    }
+    //function LoadLesson() {
+    //    load.lesson($("#LessonID").val(), $("#CourseID").val());
+    //}
 
-    function RefreshPage() {
-        document.location = document.location;
-    }
+    //function RefreshPage() {
+    //    document.location = document.location;
+    //}
 
 
-    $(document).ready(function () {
-        LoadLesson();
-    });
+    //$(document).ready(function () {
+    //    LoadLesson();
+    //});
 
     function SelectTemplate(type) {
         var modal = $("#lessonModal");
@@ -115,7 +110,9 @@
 
 </script>
 @section Scripts{
-    <script src="~/js/curriculum-lesson-frame.js"></script>
+    @*<script src="~/js/curriculum-lesson-frame.js"></script>*@
+
+    
 
     <style>
         .right-content .left-col {

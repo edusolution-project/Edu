@@ -1,11 +1,11 @@
 ﻿
 var Debug = true;
 
-const mod = {
-    PREVIEW = "preview",
-    EDIT = "edit",
-    EXAM = "exam",
-    REVIEW = "review"
+var mod = {
+    PREVIEW: "preview",
+    EDIT: "edit",
+    EXAM: "exam",
+    REVIEW: "review"
 }
 
 var writeLog = function (name, msg) {
@@ -28,6 +28,7 @@ var Lesson = (function () {
         url: {
             load: "", //all: load lesson data
             save: "", //edit: save lesson data
+            load_part: "",//all: load lesson part data
             save_part: "",//edit: save part,
             move_part: "",//edit: change part position,
             current: "", //exam: load current exam state
@@ -53,9 +54,9 @@ var Lesson = (function () {
     var onReady = function (yourConfig) {
         config = groupConfig(yourConfig);
         writeLog(this.__proto__.constructor.name, config);
-        switch (config.TemplateType) {
+        switch (config.mod) {
             case mod.PREVIEW:
-                renderPreview()
+                renderPreview();
                 break;
             case mod.EDIT:
                 renderEdit();
@@ -123,38 +124,73 @@ var Lesson = (function () {
         document.location = document.location.href.replace('#', '');
     }
 
+    //Preview
+    var renderPreview = function () {
+        //Prepare data
+        var data = _data;
+        if (isNull(data))
+        {
+            data = loadLesssonData({ ID: config.lesson_id });
+            if (!isNull(data)) {
+                _data = data;
+                _data.Part = loadLessonParts({ LessonID: config.lesson_id });
+            }
+        }
+        console.log(_data);
+        //Render Content
+        renderContent();
+    }
+
+    //Lesson
+    var loadLesssonData = function (param) {
+        var formData = new FormData();
+        if (param != null)
+            Object.keys(param).forEach(e => formData.append(e, param[e]));
+        Ajax(config.url.load, formData, "POST", true).then(function (res) {
+            return res;
+        });
+    }
+
+    //LessonPart
+    var loadLessonParts = function (param) {
+        var formData = new FormData();
+        if (param != null)
+            Object.keys(param).forEach(e => formData.append(e, param[e]));
+        Ajax(config.url.load_part, formData, "POST", true).then(function (res) {
+            return res;
+        });
+    }
 
     //Exam
     var renderExam = function () {
         var data = _data;
         if (isNull(data)) data = getCurrentExamState(); // get current exam state
         if (isNull(data)) {
-            var formData = new FormData();
-            formData.append("LessonID", config.lesson_id);
-            formData.append("ClassID", config.class_id);
-            Ajax(config.url.load, formData, "POST", true).then(function (res) {
-                if (isNull(res)) {
-                    var resData = JSON.parse(res);
-                    if (resData.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
-                        var exam = resData.Exam;
-                        if (exam == null || exam.Status == true) {
-                            removeLocalData("CurrentExam");
-                            if (exam != null) resData.Exam.ID = null;
-                            renderLesson(resData);
-                        }
-                        else {
-                            setLocalData("CurrentExam", resData.Exam.ID);
-                            renderLesson(resData);
-                            renderBoDem();
-                            $("#counter").html(resData.Timer);
-                            countdown();
-                            $('.quizNumber').removeClass("d-none");
-                        }
-                    }
-
-                    startDragDrop();
-                }
+            res = loadLesssonData({
+                "LessonID": config.lesson_id,
+                "ClassID": config.class_id
             });
+
+            if (isNull(res)) {
+                var resData = JSON.parse(res);
+                if (resData.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
+                    var exam = resData.Exam;
+                    if (exam == null || exam.Status == true) {
+                        removeLocalData("CurrentExam");
+                        if (exam != null) resData.Exam.ID = null;
+                        renderLesson(resData);
+                    }
+                    else {
+                        setLocalData("CurrentExam", resData.Exam.ID);
+                        renderLesson(resData);
+                        renderBoDem();
+                        $("#counter").html(resData.Timer);
+                        countdown();
+                        $('.quizNumber').removeClass("d-none");
+                    }
+                }
+                startDragDrop();
+            }
         } else {
             renderLesson(data);
             if (data.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
@@ -285,8 +321,8 @@ var Lesson = (function () {
         return !isNull(getLocalData("CurrentExam"));
     }
     //render bài tập
-    var rednerLessonPart = function (data, index, type) {
-        writeLog("rednerLessonPart", data);
+    var renderSinglePart = function (data, index, type) {
+        writeLog("renderSinglePart", data);
         var active = "";
         if (index != void 0 && index == 0) {
             active = "show active";
@@ -598,7 +634,7 @@ var Lesson = (function () {
             var item = data.Parts[i];
             var icon = arrIcon[item.Type];
             if (icon == void 0) icon = arrIcon["TEXT"];
-            tabList += rednerLessonPart(item, i, data.TemplateType);
+            tabList += renderSinglePart(item, i, data.TemplateType);
             var title = item.Title == void 0 || item.Title == null || item.Title == "null" ? "" : item.Title;
             if (i == 0) {
                 nav += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link active" data-toggle="pill" data-target="#pills-part-' + item.ID + '" onclick="tab_set_active(this)">' + (i + 1).toString() + " - " + icon + '' + title + '</a></li>';

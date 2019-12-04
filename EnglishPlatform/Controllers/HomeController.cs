@@ -11,8 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using BaseCustomerMVC.Globals;
 using BaseAccess.Interfaces;
+using Microsoft.Extensions.Options;
 
-namespace Admin_Customer.Controllers
+namespace EnglishPlatform.Controllers
 {
     public class HomeController : Controller
     {
@@ -24,11 +25,17 @@ namespace Admin_Customer.Controllers
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ILog _log;
+        private readonly ClassService _classService;
+        private readonly StudentHelper _studentHelper;
+        public DefaultConfigs _default { get; }
+
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
             , TeacherService teacherService
             , StudentService studentService
             , IAuthenService authenService
             , AccessesService accessesService
+            , ClassService classService
+            , IOptions<DefaultConfigs> defaultvalue
             , ILog log)
         {
             _accessesService = accessesService;
@@ -38,8 +45,12 @@ namespace Admin_Customer.Controllers
             _logService = logService;
             _teacherService = teacherService;
             _studentService = studentService;
+            _classService = classService;
+            _studentHelper = new StudentHelper(studentService, accountService);
             _log = log;
+            _default = defaultvalue.Value;
         }
+
         public IActionResult Index()
         {
             var type = User.Claims.GetClaimByType("Type");
@@ -50,6 +61,7 @@ namespace Admin_Customer.Controllers
             else
             {
                 _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
+                HttpContext.SignOutAsync(Cookies.DefaultLogin);
                 return RedirectToAction("Login");
             }
         }
@@ -59,21 +71,22 @@ namespace Admin_Customer.Controllers
             HttpContext.Remove(Cookies.DefaultLogin);
             return View();
         }
+
         [HttpPost]
-        [Obsolete]
         public IActionResult Register(string UserName, string Name, string PassWord, string Type)
         {
-            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
+            var _username = UserName.Trim().ToLower();
+            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
             {
-                ViewBag.MessageError = "Không thể bỏ trống các trường bắt buộc";
+                ViewBag.MessageError = "Please fill your information";
                 return View();
             }
             else
             {
                 string _sPass = Security.Encrypt(PassWord);
-                if (_accountService.IsAvailable(UserName))
+                if (_accountService.IsAvailable(_username))
                 {
-                    ViewBag.MessageError = "Tài khoản đã tồn tại";
+                    ViewBag.MessageError = "Account exist";
                     return View();
                 }
                 else
@@ -81,28 +94,28 @@ namespace Admin_Customer.Controllers
                     var user = new AccountEntity()
                     {
                         PassWord = _sPass,
-                        UserName = UserName,
+                        UserName = _username,
                         Name = Name,
                         Type = Type,
                         IsActive = false,
                         CreateDate = DateTime.Now,
                         UserCreate = null,
                     };
-
-
                     switch (Type)
                     {
-                        case "teacher":
+                        case ACCOUNT_TYPE.TEACHER:
                             user.RoleID = _roleService.GetItemByCode("teacher").ID;
                             break;
                         default:
+                            user.IsActive = true;// active student
                             user.RoleID = _roleService.GetItemByCode("student").ID;
                             break;
                     }
                     _accountService.CreateQuery().InsertOne(user);
                     switch (Type)
                     {
-                        case "teacher":
+                        case ACCOUNT_TYPE.TEACHER:
+                            //create teacher
                             var teacher = new TeacherEntity()
                             {
                                 FullName = user.Name,
@@ -112,20 +125,29 @@ namespace Admin_Customer.Controllers
                             };
                             _teacherService.CreateQuery().InsertOne(teacher);
                             user.UserID = teacher.ID;
-                            //create teacher
+                            //send email for teacher
                             break;
                         default:
+                            //create student
                             var student = new StudentEntity()
                             {
                                 FullName = user.Name,
                                 Email = user.UserName,
-                                IsActive = false,
+                                IsActive = true,// active student
                                 CreateDate = DateTime.Now
                             };
 
                             _studentService.CreateQuery().InsertOne(student);
                             user.UserID = student.ID;
-                            //create student
+                            //send email for student
+                            //add default class
+                            var testClassIDs = _default.defaultClassID;
+                            if (!string.IsNullOrEmpty(testClassIDs))
+                            {
+                                foreach (var id in testClassIDs.Split(';'))
+                                    if (!string.IsNullOrEmpty(id))
+                                        _classService.AddStudentToClass(id, student.ID);
+                            }
                             break;
                     }
                     var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
@@ -137,24 +159,15 @@ namespace Admin_Customer.Controllers
         }
 
         [Route("/login")]
-        [System.Obsolete]
         public IActionResult Login()
         {
             long limit = 0;
-            long count = _accountService.CreateQuery().Count(_ => true);
+            long count = _accountService.CreateQuery().CountDocuments(_ => true);
             if (count <= limit)
             {
                 startPage();
             }
             return View();
-        }
-
-       
-        [Route("/logout")]
-        public async Task<IActionResult> LogOut()
-        {
-            await _authenService.SignOut(HttpContext,Cookies.DefaultLogin);
-            return RedirectToAction("Login");
         }
 
         [HttpPost]
@@ -164,7 +177,7 @@ namespace Admin_Customer.Controllers
             //_log.Debug("login", new { UserName, PassWord, Type, IsRemmember });
             if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
             {
-                ViewBag.MessageError = "Không thể bỏ trống các trường bắt buộc";
+                ViewBag.MessageError = "Please fill your information";
                 return View();
             }
             else
@@ -173,14 +186,14 @@ namespace Admin_Customer.Controllers
                 var user = _accountService.GetAccount(Type, UserName.ToLower(), _sPass);
                 if (user == null)
                 {
-                    ViewBag.MessageError = "Email không tồn tại";
+                    ViewBag.MessageError = "Account's infomation is not correct";
                     return View();
                 }
                 else
                 {
                     if (user.IsActive)
                     {
-                        TempData["success"] = "Xin chào " + user.UserName;
+                        TempData["success"] = "Hi " + user.UserName;
                         string _token = Guid.NewGuid().ToString();
                         var role = _roleService.GetItemByID(user.RoleID);
                         if (role != null)
@@ -190,12 +203,12 @@ namespace Admin_Customer.Controllers
                             string FullName, id;
                             switch (user.Type)
                             {
-                                case "teacher":
+                                case ACCOUNT_TYPE.TEACHER:
                                     var tc = _teacherService.GetItemByID(user.UserID);
                                     FullName = tc.FullName;
                                     id = tc.ID;
                                     break;
-                                case "student":
+                                case ACCOUNT_TYPE.STUDENT:
                                     var st = _studentService.GetItemByID(user.UserID);
                                     FullName = st.FullName;
                                     id = st.ID;
@@ -205,6 +218,7 @@ namespace Admin_Customer.Controllers
                                     break;
                             }
                             var listAccess = _accessesService.GetAccessByRole(role.ID);
+                            
                             var claims = new List<Claim>
                             {
                                 new Claim("UserID",id),
@@ -225,7 +239,13 @@ namespace Admin_Customer.Controllers
                                 }
                             }
                             var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
+                            _ = new AuthenticationProperties
+                            {
+                                IsPersistent = true,
+                                ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
+                            };
                             ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
+                            claim.AddIdentity(claimsIdentity);
 
                             AccountLogEntity login = new AccountLogEntity()
                             {
@@ -237,43 +257,36 @@ namespace Admin_Customer.Controllers
                             };
                             _logService.CreateQuery().InsertOne(login);
                             await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
+                            //await HttpContext.SignInAsync(Cookies.DefaultLogin, claim, new AuthenticationProperties()
+                            //{
+                            //    ExpiresUtc = !IsRemmember ? DateTime.Now : DateTime.Now.AddMinutes(Cookies.ExpiresLogin),
+                            //    AllowRefresh = true,
+                            //    RedirectUri = user.Type
+                            //});
                             return Redirect(user.Type);
                         }
                         else
                         {
-                            ViewBag.MessageError = "Bạn không có quyền hạn vào quản trị viện";
+                            ViewBag.MessageError = "Can't signin now.";
                             return View();
                         }
                     }
                     else
                     {
-                        ViewBag.MessageError = "Tài khoản của bạn đã bị khóa";
+                        ViewBag.MessageError = "Account is locked.";
                         return View();
                     }
                 }
             }
         }
 
-
-        [Route("/forgot-password")]
-        public IActionResult ForgotPassword()
-        {
-            return View();
-        }
-        [HttpPost]
-        [Route("/forgot-password")]
-        [ValidateAntiForgeryToken]
-        public IActionResult ForgotPassword(string Email)
-        {
-            return View();
-        }
         private void startPage()
         {
             var superadminRole = new RoleEntity()
             {
                 Name = "Super Admin",
                 Code = "superadmin",
-                Type = "admin",
+                Type = ACCOUNT_TYPE.ADMIN,
                 CreateDate = DateTime.Now,
                 IsActive = true,
                 UserCreate = "longht"
@@ -282,7 +295,7 @@ namespace Admin_Customer.Controllers
             {
                 Name = "Admin",
                 Code = "admin",
-                Type = "admin",
+                Type = ACCOUNT_TYPE.ADMIN,
                 CreateDate = DateTime.Now,
                 IsActive = true,
                 UserCreate = "longht"
@@ -291,7 +304,7 @@ namespace Admin_Customer.Controllers
             {
                 Name = "Trưởng bộ môn",
                 Code = "head-teacher",
-                Type = "teacher",
+                Type = ACCOUNT_TYPE.TEACHER,
                 CreateDate = DateTime.Now,
                 IsActive = true,
                 UserCreate = "longht"
@@ -300,7 +313,7 @@ namespace Admin_Customer.Controllers
             {
                 Name = "Giáo viên",
                 Code = "teacher",
-                Type = "teacher",
+                Type = ACCOUNT_TYPE.TEACHER,
                 CreateDate = DateTime.Now,
                 IsActive = true,
                 UserCreate = "longht"
@@ -309,7 +322,7 @@ namespace Admin_Customer.Controllers
             {
                 Name = "Học viên",
                 Code = "student",
-                Type = "student",
+                Type = ACCOUNT_TYPE.STUDENT,
                 CreateDate = DateTime.Now,
                 IsActive = true,
                 UserCreate = "longht"
@@ -323,7 +336,7 @@ namespace Admin_Customer.Controllers
             {
                 CreateDate = DateTime.Now,
                 IsActive = true,
-                Type = "admin",
+                Type = ACCOUNT_TYPE.ADMIN,
                 UserName = "supperadmin@gmail.com",
                 PassTemp = Security.Encrypt("123"),
                 PassWord = Security.Encrypt("123"),
@@ -331,6 +344,28 @@ namespace Admin_Customer.Controllers
                 RoleID = superadminRole.ID
             };
             _accountService.CreateQuery().InsertOne(superadmin);
+        }
+
+        [Route("/logout")]
+        public async Task<IActionResult> LogOut()
+        {
+            await HttpContext.SignOutAsync(Cookies.DefaultLogin);
+            HttpContext.Remove(Cookies.DefaultLogin);
+            return RedirectToAction("Login");
+        }
+
+        [Route("/forgot-password")]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Route("/forgot-password")]
+        [ValidateAntiForgeryToken]
+        public IActionResult ForgotPassword(string Email)
+        {
+            return View();
         }
     }
 }
