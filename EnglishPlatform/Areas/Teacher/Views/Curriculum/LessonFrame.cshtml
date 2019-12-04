@@ -23,7 +23,7 @@
     <input type="hidden" id="ChapterID" value="@Data.ChapterID" />
     <input type="hidden" id="CourseID" value="@Data.CourseID" />
 
-    <div id="lessonSummary" class="shadow">
+    <div id="lessonHolder" class="shadow">
     </div>
 
 </div>
@@ -31,11 +31,11 @@
 <script>
     //localStorage.clear();
     var config = {
-        id: "exam-student",
+        container: "lessonHolder",
         mod: "preview",
         url: {
             load: '@Url.Action("GetDetailsLesson", "Lesson")',
-            load_part = '@Url.Action("GetList", "LessonPart")'
+            load_part: '@Url.Action("GetList", "LessonPart")'
         },
         type: @Data.TemplateType,
         lesson_id: '@Data.ID',

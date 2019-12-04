@@ -8,6 +8,11 @@ var mod = {
     REVIEW: "review"
 }
 
+var TEMPLATE_TYPE = {
+    EXAM: 2,
+    LESSON: 1
+}
+
 var writeLog = function (name, msg) {
     if (Debug) {
         console.log(name, msg);
@@ -23,7 +28,7 @@ var Lesson = (function () {
     var exam_timeout = null;
 
     var config = {
-        id: "",
+        container: "",
         mod: "",//preview, edit, exam, review
         url: {
             load: "", //all: load lesson data
@@ -87,7 +92,7 @@ var Lesson = (function () {
     //function
 
     var isNull = function (data) {
-        return data == null || data == void 0 || data == "" || data != typeof (void 0);
+        return data == null || data == void 0 || data == "" || data == typeof (void 0);
     }
 
     var countdown = function () {
@@ -127,39 +132,97 @@ var Lesson = (function () {
     //Preview
     var renderPreview = function () {
         //Prepare data
-        var data = _data;
-        if (isNull(data))
-        {
-            data = loadLesssonData({ ID: config.lesson_id });
-            if (!isNull(data)) {
-                _data = data;
-                _data.Part = loadLessonParts({ LessonID: config.lesson_id });
-            }
+        if (isNull(_data)) {
+            loadLesssonData({ ID: config.lesson_id }, renderLessonData);            
         }
-        console.log(_data);
-        //Render Content
-        renderContent();
+        else
+            //Render Content
+            renderLessonData();
     }
 
     //Lesson
-    var loadLesssonData = function (param) {
+    var loadLesssonData = function (param, callback) {
         var formData = new FormData();
         if (param != null)
             Object.keys(param).forEach(e => formData.append(e, param[e]));
         Ajax(config.url.load, formData, "POST", true).then(function (res) {
-            return res;
+            if (!isNull(res)) {
+                _data = JSON.parse(res).Data;
+                loadLessonParts({ LessonID: config.lesson_id }, callback);
+            }
         });
     }
 
     //LessonPart
-    var loadLessonParts = function (param) {
+    var loadLessonParts = function (param, callback) {
         var formData = new FormData();
         if (param != null)
             Object.keys(param).forEach(e => formData.append(e, param[e]));
         Ajax(config.url.load_part, formData, "POST", true).then(function (res) {
-            return res;
+            _data.Part = JSON.parse(res).Data;
+            callback();
         });
     }
+
+
+    //render content
+    var renderLessonData = function () {
+        if (isNull(_data)) {
+            throw "No data";
+        }
+
+        var data = _data;
+
+        var container = $('#' + config.container);
+
+        var lessonBox = $("<div>", { "class": "lesson lesson-box" });
+        container.append(lessonBox);
+
+        var lessonContainer = $("<div>", { "class": "lesson-container" });
+        lessonBox.append(lessonContainer);
+        var lessonContent = $("<div>", { "class": "card shadow mb-4" });
+        lessonContainer.append(lessonContent);
+        //header
+        var lessonHeader = $("<div>", { "class": "card-header" });
+        lessonContent.append(lessonHeader);
+
+        //header row
+        var headerRow = $("<div>", { "class": "row" });
+        lessonHeader.append(headerRow);
+        //Body
+        var cardBody = $("<div>", { "class": "card-body" });
+        lessonContent.append(cardBody);
+        //row
+        var lessonPartHolder = $("<div>", { "class": "row position-relative" });
+        cardBody.append(lessonPartHolder);
+
+
+        var title_wrapper = $("<div>", { "class": "lesson-header-title col-md-9 col-sm-12" });
+        var title = $("<h5>");
+        var titleText = $("<span>", { "class": "title-text", "text": data.Title })
+        title.append(titleText);
+        title_wrapper.append(title);
+        headerRow.append(title_wrapper);
+
+        if (data.TemplateType == TEMPLATE_TYPE.EXAM) {
+            if (data.Timer > 0) {
+                var titleTimer = $("<span>", { "class": "title-timer", "text": " - duration: " + data.Timer + "m" });
+                title.append(titleTimer);
+            }
+            if (data.Point > 0) {
+                var titlePoint = $("<span>", { "class": "title-point", "text": " (" + data.Point + "p)" });
+                title.append(titlePoint);
+            }
+        }
+
+        //render layout with 2 columns
+
+    }
+
+
+
+
+
 
     //Exam
     var renderExam = function () {
@@ -250,8 +313,8 @@ var Lesson = (function () {
 
     var renderLesson = function (data) {
         writeLog("renderLesson", data);
-        var container = document.getElementById(config.id);
-        if (container == null) throw "Element id " + config.id + " not exist - create now";
+        var container = document.getElementById(config.container);
+        if (container == null) throw "Element id " + config.container + " not exist - create now";
         if (data.Data.TemplateType == TEMPLATE_TYPE.LESSON) {
             // bài giảng
             writeLog("bài giảng", data);

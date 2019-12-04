@@ -268,10 +268,9 @@ var lessonService = {
         //var iconEdit = $("<i>", { "class": "fas fa-edit" });
         var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
         var iconTrash = $("<i>", { "class": "fas fa-trash" });
-        lessonButton.append(iconSort);
-
-        lessonButton.append(sort);
         sort.append(iconSort);
+        lessonButton.append(sort);
+        
         //lessonButton.append(edit);
         //edit.append(iconEdit);
         lessonButton.append(create);
