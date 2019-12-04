@@ -147,7 +147,7 @@
                                                     isDuyet = false;
                                                     continue;
                                                 }
-                                                if (actItem.StartsWith("get") || actItem.StartsWith("index") || actItem.StartsWith("detail") || actItem.StartsWith("export") || actItem.StartsWith("modules") || actItem.StartsWith("lesson"))
+                                                if (actItem.StartsWith("get") || actItem.StartsWith("index") || actItem.StartsWith("detail") || actItem.StartsWith("export"))
                                                 {
                                                     xem += xem == "" ? $"{actItem}" : $",{actItem}";
                                                     isXem = false;
@@ -159,13 +159,13 @@
                                                     isXoa = false;
                                                     continue;
                                                 }
-                                                if (actItem.StartsWith("add") || actItem.StartsWith("create") || actItem.StartsWith("clone") || actItem.StartsWith("import"))
+                                                if (actItem.StartsWith("add") || actItem.StartsWith("create") || actItem.StartsWith("import"))
                                                 {
                                                     them += them == "" ? $"{actItem}" : $",{actItem}";
                                                     isThem = false;
                                                     continue;
                                                 }
-                                                if (actItem.StartsWith("edit") || actItem.StartsWith("update") || actItem.StartsWith("change"))
+                                                if (actItem.StartsWith("edit") || actItem.StartsWith("update"))
                                                 {
                                                     sua += sua == "" ? $"{actItem}" : $",{actItem}";
                                                     isSua = false;

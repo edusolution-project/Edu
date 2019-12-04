@@ -1,5 +1,6 @@
 ﻿
 var Debug = true;
+
 const mod = {
     PREVIEW = "preview",
     EDIT = "edit",
@@ -15,7 +16,7 @@ var writeLog = function (name, msg) {
 
 var Lesson = (function () {
 
-    var data = null;
+    var _data = null;
 
     var mixtype = false;
 
@@ -54,21 +55,42 @@ var Lesson = (function () {
         writeLog(this.__proto__.constructor.name, config);
         switch (config.TemplateType) {
             case mod.PREVIEW:
+                renderPreview()
                 break;
             case mod.EDIT:
+                renderEdit();
                 break;
             case mod.EXAM:
                 renderExam();
                 break;
             case mod.REVIEW:
+                renderReview();
                 break;
         }
     }
 
+    //local storage function
+    var setLocalData = function (key, data) {
+        var enData = b64EncodeUnicode(JSON.stringify(data));
+        localStorage.setItem(config.lesson_id + "_" + key, enData);
+    }
+
+    var getLocalData = function (key) {
+        return localStorage.getItem(config.lesson_id + "_" + key);
+    }
+
+    var removeLocalData = function (key) {
+        return localStorage.removeItem(config.lesson_id + "_" + key);
+    }
 
     //function
-    function countdown() {
-        clearTimeout(lessontimeout);
+
+    var isNull = function (data) {
+        return data == null || data == void 0 || data == "" || data != typeof (void 0);
+    }
+
+    var countdown = function () {
+        clearTimeout(exam_timeout);
         var time = $(".time-counter").text().trim();
         if (time == "" || time == null) return;
         var minutes = parseInt(time.split(":")[0]);
@@ -82,18 +104,18 @@ var Lesson = (function () {
                 second = 59;
             }
             else {
-                ExamComplete(true);
+                CompleteExam(true);
                 return;
             }
         }
         var text = (minutes < 10 ? ("0" + minutes) : minutes) + ":" + (second < 10 ? ("0" + second) : second);
         $(".time-counter").text(text);
-        lessontimeout = setTimeout(function () {
+        exam_timeout = setTimeout(function () {
             countdown();
         }, 1000);
     }
 
-    function stopcountdown() {
+    var stopCountdown = function () {
         clearTimeout(exam_timeout);
     }
 
@@ -102,24 +124,26 @@ var Lesson = (function () {
     }
 
 
+    //Exam
     var renderExam = function () {
-        var data = getCurrentExamState(); // get current exam state
-        if (data == null || data == {} || data == "" || data == "{}" || data == void 0) {
+        var data = _data;
+        if (isNull(data)) data = getCurrentExamState(); // get current exam state
+        if (isNull(data)) {
             var formData = new FormData();
             formData.append("LessonID", config.lesson_id);
             formData.append("ClassID", config.class_id);
             Ajax(config.url.load, formData, "POST", true).then(function (res) {
-                if (res != "Access Deny" && res != "null" && res != null && res.message != "res is not defined" && res != void 0) {
+                if (isNull(res)) {
                     var resData = JSON.parse(res);
-                    if (resData.Data.TemplateType != 1) {
+                    if (resData.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
                         var exam = resData.Exam;
                         if (exam == null || exam.Status == true) {
-                            localStorage.removeItem("CurrentExam");
+                            removeLocalData("CurrentExam");
                             if (exam != null) resData.Exam.ID = null;
                             renderLesson(resData);
                         }
                         else {
-                            localStorage.setItem("CurrentExam", resData.Exam.ID);
+                            setLocalData("CurrentExam", resData.Exam.ID);
                             renderLesson(resData);
                             renderBoDem();
                             $("#counter").html(resData.Timer);
@@ -133,10 +157,10 @@ var Lesson = (function () {
             });
         } else {
             renderLesson(data);
-            if (data.Data.TemplateType != 1) {
+            if (data.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
                 renderBoDem();
-                $("#counter").html(localStorage.getItem("Timer"));
-                var currentExam = localStorage.getItem("CurrentExam");
+                $("#counter").html(getLocalData("Timer"));
+                var currentExam = getLocalData("CurrentExam");
                 if (currentExam != null) {
                     countdown();
                     $('.quizNumber').removeClass("d-none");
@@ -146,22 +170,7 @@ var Lesson = (function () {
         }
     }
 
-
-
-    var setCurrentData = function (data) {
-        var enData = b64EncodeUnicode(JSON.stringify(data))
-        localStorage.setItem(config.lesson_id + "_" + config.class_id, enData);
-    }
-
-    var setLocalData = function (key, data) {
-        var enData = b64EncodeUnicode(JSON.stringify(data));
-        localStorage.setItem(config.lesson_id + "_" + key, enData);
-    }
-
-
-
     var getCurrentExamState = function () {
-
         //load lastest exam state from server
         var dataform = new FormData();
         dataform.append("ClassID", config.class_id);
@@ -178,8 +187,8 @@ var Lesson = (function () {
                 var timer = moment(current) - moment(start);
                 if (moment(timer).minutes() >= data.Timer)//Timeout
                 {
-                    localStorage.setItem("Timer", "00:00");
-                    ExamComplete(true);
+                    setLocalData("Timer", "00:00");
+                    CompleteExam(true);
                 }
                 else {
                     var _sec = 59 - moment(timer).second();
@@ -187,7 +196,7 @@ var Lesson = (function () {
                     var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
                     setLocalData("Timer", timer);
                     setLocalData("CurrentExam", data.ID);
-                    $("#counter").html(localStorage.getItem("Timer"));
+                    $("#counter").html(getLocalData("Timer"));
                     countdown();
                 }
 
@@ -198,7 +207,8 @@ var Lesson = (function () {
         if (enData == null || enData == {} || enData == "" || enData == "{}" || enData == void 0) {
             return null;
         } else {
-            return JSON.parse(enData);
+            _data = JSON.parse(enData);
+            return _data;
         }
     }
 
@@ -206,7 +216,7 @@ var Lesson = (function () {
         writeLog("renderLesson", data);
         var container = document.getElementById(config.id);
         if (container == null) throw "Element id " + config.id + " not exist - create now";
-        if (data.Data.TemplateType == 1) {
+        if (data.Data.TemplateType == TEMPLATE_TYPE.LESSON) {
             // bài giảng
             writeLog("bài giảng", data);
             container.innerHTML = '<div class="" id="lessonContainer"></div>';
@@ -220,7 +230,7 @@ var Lesson = (function () {
             // bài thi
             writeLog("bài tập", data);
             var counter = data.Data.Timer >= 10 ? data.Data.Timer + ":00" : "0" + data.Data.Timer + ":00";
-            if (localStorage.getItem("Timer") == null) localStorage.setItem("Timer", counter);
+            if (getLocalData("Timer") == null) setLocalData("Timer", counter);
             container.innerHTML = '<div class="" id="lessonContainer"></div>';
             var lessonContainer = container.querySelector("#lessonContainer");
             lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-4">' + data.Data.Title + '</div><div class="text-center col-lg-4">Thời gian làm bài <span id="counter" class="time-counter">' + counter + '</span></div></div></div><div id="body-exam" class="card-body"></div></div></div></div>';
@@ -257,7 +267,7 @@ var Lesson = (function () {
                 : (lastExamResult + '<div class="text-center pt-5 pb-5 col-md-12">' + doButton + '</div>');
             bodyExam.innerHTML = '<div class="row">' + content + '</div>';
             if (checkExam) {
-                document.querySelector("input[name='ExamID']").value = localStorage.getItem("CurrentExam");
+                document.querySelector("input[name='ExamID']").value = getLocalData("CurrentExam");
             }
         }
         if ($('textarea[data-type=ESSAY]').length > 0) {
@@ -267,11 +277,12 @@ var Lesson = (function () {
         }
 
     }
+
     /// tồn tại exam cũ thì return true;
     var checkExam = function () {
         //var exam = document.getElementById("ExamID");
         //if (exam == null || exam.value == void 0 || exam.value == null || exam.value == "") return false;
-        return localStorage.getItem("CurrentExam") != null && localStorage.getItem("CurrentExam") != void 0 && localStorage.getItem("CurrentExam") != "" && localStorage.getItem("CurrentExam") != typeof (void 0);
+        return !isNull(getLocalData("CurrentExam"));
     }
     //render bài tập
     var rednerLessonPart = function (data, index, type) {
@@ -599,7 +610,7 @@ var Lesson = (function () {
         nav += '</ul></div>';
         nav += '<div class="col-md-1 text-right d-inline-block"><button class="nexttab btn btn-success" data-toggle="tooltip" title="Phần sau" onclick="tab_gonext()"><i class="fas fa-arrow-right"></i></button></div>'; //right button
 
-        nav_bottom += '<div class="col-md-4 text-center d-inline-block"><button class="btn btn-success pl-5 pr-5" onclick="ExamComplete()">Nộp bài</button></div>';
+        nav_bottom += '<div class="col-md-4 text-center d-inline-block"><button class="btn btn-success pl-5 pr-5" onclick="CompleteExam()">Nộp bài</button></div>';
         nav_bottom += '<div class="col-md-4 text-right d-inline-block"><button class="nexttab btn btn-success" onclick="tab_gonext()"><i class="fas fa-arrow-right"></i></button></div>';
         nav_bottom += '</div>';
         nav += '</div>';
@@ -773,14 +784,14 @@ var Lesson = (function () {
         }
     }
 
-    var ExamComplete = function (isOvertime) {
+    var CompleteExam = function (isOvertime) {
         if (isOvertime || confirm("Có phải bạn muốn nộp bài")) {
             var exam = document.querySelector("input[name='ExamID']");
             var dataform = new FormData();
             dataform.append("ExamID", exam.value);
             Ajax(config.url.end, dataform, "POST", true)
                 .then(function (res) {
-                    stopcountdown();
+                    stopCountdown();
                     var data = JSON.parse(res);
                     notification("success", "Nộp bài thành công", 3000);
                     //$(".lesson-container").empty();
@@ -1000,7 +1011,7 @@ var Lesson = (function () {
         html += '<div class="overlay-content card-body">';
         html += '<div class="input-group mb-3 quiz-wrapper">';
         html += answerList;
-        html += '<div style="display:none" id="btn-completed" class="d-flex justify-content-center pt-5 pb-5"><button class="btn btn-primary" onclick="ExamComplete()" data-original-title="" title=""> Nộp bài </button></div>';
+        html += '<div style="display:none" id="btn-completed" class="d-flex justify-content-center pt-5 pb-5"><button class="btn btn-primary" onclick="CompleteExam()" data-original-title="" title=""> Nộp bài </button></div>';
         html += '</div>'
         html += '</div>';
         html += '</div>';
@@ -1027,7 +1038,7 @@ var Lesson = (function () {
     ExamStudent.Notification = notification;
     window.BeginExam = beginExam;
     window.AnswerQuestion = AnswerQuestion;
-    window.ExamComplete = ExamComplete;
+    window.CompleteExam = CompleteExam;
     window.Redo = resetLesson;
     window.GoBack = goBack;
 
