@@ -21,6 +21,17 @@
     <link href="~/css/jquery-ui.min.css" rel="stylesheet" />
     <link href="~/css/newsfeed.min.css" rel="stylesheet" />
 
+    <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
+    <script type="text/javascript">
+
+        const g_CurrentUser = {
+            email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
+            name: "@User.Identity.Name",
+            type:'@User.FindFirst("Type")?.Value'
+        }
+
+    </script>
+
     <script type="text/javascript" src="~/vendor/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="~/js/custom.js"></script>
@@ -77,6 +88,10 @@
     @await Html.PartialAsync("_modalLogout")
     @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
-
+    <script src="~/easy-real-time/js/easy-real-time.js"></script>
+    <div id="chat-box"></div>
+    <script>
+        var easyRealTime = new easyRealTime();
+    </script>
 </body>
 </html>

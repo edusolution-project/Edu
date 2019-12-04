@@ -29,99 +29,6 @@
         </div>
     </div>
 
-</div>
-
-@section Scripts{
-    <script src="~/js/hubs/newfeed.base.js"></script>
-    <script>
-
-        var urlCfg = { post: "@Url.Action("PostNewFeed", "Discuss")", load: "@Url.Action("GetListNewFeed", "Discuss")" };
-
-        function LoadData() {
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("GetList", "Class")',
-                data: {},
-                dataType:"json",
-                success: function (data) {
-                    var listGroup = data.Data;
-                    //$("#groupClass").append($("<option>", {"value":"", "text": "---"}));
-                    for (var i = 0; listGroup != null && i < listGroup.length; i++) {
-                        const item = listGroup[i];
-                        //$("#list-group").append("<div data-type='group' data-id=" + item.ID + " onclick='onloadMessage(this)'>" + item.Name + "</div>");
-                        $("#groupClass").append($("<option>", {"value":item.ID, "text": item.Name}));
-                        connection.invoke("GoToClass", item.ID);
-                    }
-                    onloadMessage();
-                },
-                error: function (err) {
-                    console.log(err.responseText)
-                }
-            });
-        };
-
-        $(document).ready(function () {
-            LoadData();
-        })
-
-        onloadMessage = function()
-        {
-            $('#item-feed-full').empty();
-            $('#list-comment').empty();
-            var newFeed = new Newfeed({
-                url: urlCfg,
-                group_id: $('#groupClass').val()
-            });
-            $('#commentModal [name=GroupID]').val($('#groupClass').val());
-            $('#new-feed__reply--popup [name=GroupID]').val($('#groupClass').val());
-            newFeed.load(0, 5);
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            var newFeed = new Newfeed({url: urlCfg, group_id: $('#groupClass').val()});
-            CKEDITOR.replace('editorComment');
-            CKEDITOR.replace('editorReply');
-            document.getElementById("btn-new-feed").addEventListener("click", function () {
-                var datax = CKEDITOR.instances.editorComment.getData();
-                var form = window.PostNewFeed;
-                form.querySelector('#editorComment').value = datax;
-
-                var data = new FormData(form);
-                newFeed._config.group_id = $('#classGroup').val();
-                newFeed.post(data);
-            });
-            document.getElementById("btn-new-feed-reply").addEventListener("click", function () {
-                var datax = CKEDITOR.instances.editorReply.getData();
-                var form = window.CommentFeed;
-                form.querySelector('#editorReply').value = datax;
-                form.querySelector('input[name="ParentID"]').value = form.querySelector('input[name="ParentID"]').value;
-                var data = new FormData(form);
-                newFeed.post(data);
-            });
-        });
-
-    function callback(data) {
-        hideModal();
-    }
-
-    function toggleAnnouncement(obj, _id) {
-        var type = 1;//anouncement
-        if ($(obj).hasClass("active")) {
-            type = 0;//normal
-        }
-
-        $(obj).toggleClass("active");
-    }
-
-    function initReply() {
-        CKEDITOR.instances.editorReply.setData('');
-    }
-    </script>
-
-}
-
-@section Modals{
-
     <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -182,5 +89,94 @@
             </div>
         </div>
     </div>
+
+</div>
+
+@section Scripts{
+    <script src="~/js/hubs/newfeed.base.js"></script>
+    <script>
+
+        var urlCfg = { post: "@Url.Action("PostNewFeed", "Discuss")", load: "@Url.Action("GetListNewFeed", "Discuss")" };
+
+        function LoadData() {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetList", "Class")',
+                data: {},
+                dataType:"json",
+                success: function (data) {
+                    var listGroup = data.Data;
+                    //$("#groupClass").append($("<option>", {"value":"", "text": "---"}));
+                    for (var i = 0; listGroup != null && i < listGroup.length; i++) {
+                        const item = listGroup[i];
+                        //$("#list-group").append("<div data-type='group' data-id=" + item.ID + " onclick='onloadMessage(this)'>" + item.Name + "</div>");
+                        $("#groupClass").append($("<option>", {"value":item.ID, "text": item.Name}));
+                        connection.invoke("GoToClass", item.ID);
+                    }
+                    onloadMessage();
+                },
+                error: function (err) {
+                    console.log(err.responseText)
+                }
+            });
+        };
+
+        $(document).ready(function () {
+            LoadData();
+        })
+
+        onloadMessage = function()
+        {
+            $('#item-feed-full').empty();
+            $('#list-comment').empty();
+            var newFeed = new Newfeed({
+                url: urlCfg,
+                group_id: $('#groupClass').val()
+            });
+            $('#commentModal [name=GroupID]').val($('#groupClass').val());
+            $('#new-feed__reply--popup [name=GroupID]').val($('#groupClass').val());
+            newFeed.load(0, 5);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var newFeed = new Newfeed({url: urlCfg, group_id: $('#groupClass').val()});            
+            CKEDITOR.replace('editorComment');
+            CKEDITOR.replace('editorReply');
+            document.getElementById("btn-new-feed").addEventListener("click", function () {
+                var datax = CKEDITOR.instances.editorComment.getData();
+                var form = window.PostNewFeed;
+                form.querySelector('#editorComment').value = datax;
+
+                var data = new FormData(form);
+                newFeed._config.group_id = $('#classGroup').val();
+                newFeed.post(data);
+            });
+            document.getElementById("btn-new-feed-reply").addEventListener("click", function () {
+                var datax = CKEDITOR.instances.editorReply.getData();
+                var form = window.CommentFeed;
+                form.querySelector('#editorReply').value = datax;
+                form.querySelector('input[name="ParentID"]').value = form.querySelector('input[name="ParentID"]').value;
+                var data = new FormData(form);
+                newFeed.post(data);
+            });
+        });
+
+    function callback(data) {
+        hideModal();
+    }
+
+    function toggleAnnouncement(obj, _id) {
+        var type = 1;//anouncement
+        if ($(obj).hasClass("active")) {
+            type = 0;//normal
+        }
+
+        $(obj).toggleClass("active");
+    }
+
+    function initReply() {
+        CKEDITOR.instances.editorReply.setData('');
+    }
+    </script>
 
 }

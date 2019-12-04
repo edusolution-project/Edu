@@ -67,6 +67,7 @@ namespace BaseCustomerMVC.Globals
                 }
                 var claimRole = user.FindAll(o => o.Type == "Permission");
                 string _accessList = _configuration.GetSection("AccessListUser:" + ctrlName.ToLower()).Value;
+                string accStr = type == "admin" ? $"{type}*{ctrlName}*{actName}" : $"{type}*{ctrlName}";
                 if (!string.IsNullOrEmpty(_accessList))
                 {
                     if (_accessList.Split(',').Contains(actName.ToLower()))
@@ -78,7 +79,7 @@ namespace BaseCustomerMVC.Globals
                         
                         if (claimRole != null && claimRole.Count() > 0)
                         {
-                            var access = claimRole.Where(o => o.Value == $"{type}*{ctrlName}*{actName}")?.FirstOrDefault();
+                            var access = claimRole.Where(o => o.Value == accStr)?.FirstOrDefault();
                             if (access == null) return 0;
                             return 1;
                         }
@@ -91,7 +92,7 @@ namespace BaseCustomerMVC.Globals
                 //lấy roleid
                 if (claimRole != null && claimRole.Count() > 0)
                 {
-                    var access = claimRole.Where(o => o.Value == $"{type}*{ctrlName}*{actName}")?.FirstOrDefault();
+                    var access = claimRole.Where(o => o.Value == accStr)?.FirstOrDefault();
                     if (access == null) return 0;
                     return 1;
                 }
