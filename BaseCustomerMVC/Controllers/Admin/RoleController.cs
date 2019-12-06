@@ -18,7 +18,7 @@ using System.Reflection;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [BaseAccess.Attribule.AccessCtrl("Quản lý quyền", "Role", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý quyền", "admin", 4)]
     public class RoleController : AdminController
     {
         private readonly IAccess _access;

@@ -18,7 +18,7 @@ using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Quản lý giáo viên", "TeacherManagement", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý giáo viên", "admin", 2)]
     public class TeacherController : AdminController
     {
         private readonly SubjectService _subjectService;

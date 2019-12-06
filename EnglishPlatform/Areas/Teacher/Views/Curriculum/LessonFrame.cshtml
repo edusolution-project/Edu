@@ -10,11 +10,9 @@
 </script>
 
 <div class="left-col p-0 h-100">
-    <div id="lesson-header" class="card-header p-2">
-
-    </div>
-    <div class="main-container">
+    <div class="main-container" style="top:0; bottom: 0">
         <div id="lessonContainer" class="h-100">
+
         </div>
         <input type="hidden" id="action" value="" />
     </div>
@@ -23,15 +21,32 @@
     <input type="hidden" id="ChapterID" value="@Data.ChapterID" />
     <input type="hidden" id="CourseID" value="@Data.CourseID" />
 
-    <div id="lessonHolder" class="shadow">
-    </div>
+    <style>
+        .main-column {
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            height: 100%;
+            padding: 0 12px;
+        }
+
+        #part-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: #FFF;
+            z-index: 999;
+            padding: 7px;
+            border: solid 1px #999;            
+        }
+    </style>
 
 </div>
 <script src="~/js/content-render.js"></script>
 <script>
-    //localStorage.clear();
     var config = {
-        container: "lessonHolder",
+        container: "lessonContainer",
         mod: "preview",
         url: {
             load: '@Url.Action("GetDetailsLesson", "Lesson")',
@@ -112,7 +127,7 @@
 @section Scripts{
     @*<script src="~/js/curriculum-lesson-frame.js"></script>*@
 
-    
+
 
     <style>
         .right-content .left-col {
@@ -138,16 +153,23 @@
                 height: auto;
             }
 
+            .tab-pane{
+                padding-bottom: 10px;
+                border-bottom: dashed 1px #CCC;
+                margin-bottom: 10px;
+            }
+
         .description img {
             max-width: 100%;
         }
 
         .part-box {
-            position: absolute;
-            top: 0;
+            /*position: relative;*/
+            /*top: 0;
             left: 0;
             bottom: 0;
-            right: 0;
+            right: 0;*/
+            /*width: 100%;*/
             overflow: hidden;
         }
 

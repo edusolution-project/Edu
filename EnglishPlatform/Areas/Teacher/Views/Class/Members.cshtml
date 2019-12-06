@@ -54,6 +54,7 @@
                                 <th class="text-center align-middle">Index</th>
                                 <th class="text-center align-middle">Name</th>
                                 <th class="text-center align-middle">Email</th>
+                                <th class="text-center align-middle">Phone</th>
                                 <th class="text-center align-middle">Progress</th>
                                 <th class="text-center align-middle">Last joined</th>
                                 <th class="text-center align-middle">Result</th>
@@ -112,6 +113,7 @@
                         row.append($("<td>", { class:"text-center", text: j + 1 }));
                         row.append($("<td>").append($("<a>", { text: student.FullName, href: "@Url.Action("StudentDetail", "Class")/" + student.ID + "/@currentClass.ID" })));
                         row.append($("<td>", { text: student.Email }));
+                        row.append($("<td>", { text: student.Phone }));
                         var progress = $("<div>", { class: "progress position-relative" })
                             .append($("<div>", {
                                 class: "progress-bar bg-success",

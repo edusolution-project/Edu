@@ -32,6 +32,8 @@
 
     </script>
 
+
+
     <script type="text/javascript" src="~/vendor/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="~/js/custom.js"></script>
@@ -41,6 +43,10 @@
     <script type="text/javascript" src="~/js/popper.min.js"></script>
     <script type="text/javascript" src="~/vendor/bootstrap/js/bootstrap.js"></script>
     <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
+
+    <script src="~/js/jquery.scrollbar.min.js"></script>
+    <link href="~/css/jquery.scrollbar.css" rel="stylesheet" />
+
     <script src="~/js/site.js"></script>
     <script src="~/js/moment.min.js"></script>
     <script src="~/js/lib/teacher.config.url.base.js"></script>
@@ -88,10 +94,10 @@
     @await Html.PartialAsync("_modalLogout")
     @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
-    <script src="~/easy-real-time/js/easy-real-time.js"></script>
+    @*<script src="~/easy-real-time/js/easy-real-time.js"></script>
     <div id="chat-box"></div>
     <script>
         var easyRealTime = new easyRealTime();
-    </script>
+    </script>*@
 </body>
 </html>

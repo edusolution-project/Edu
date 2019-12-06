@@ -212,10 +212,10 @@ var lessonService = {
     renderData: function (data) {
         $(containerLesson).html("");
         //var lessonBox = $("<div>", { "class": "lesson lesson-box p-fixed" });
-        var lessonBox = $("<div>", { "class": "lesson lesson-box" });
-        var lessonContainer = $("<div>", { "class": "lesson-container" });
+        var lessonBox = $("<div>", { "class": "lesson lesson-box h-100" });
+        var lessonContainer = $("<div>", { "class": "lesson-container h-100" });
         lessonBox.append(lessonContainer);
-        var lessonContent = $("<div>", { "class": "card shadow mb-4" });
+        var lessonContent = $("<div>", { "class": "card h-100" });
         lessonContainer.append(lessonContent);
         //header
         var lessonHeader = $("<div>", { "class": "card-header" });
@@ -225,10 +225,10 @@ var lessonService = {
         var headerRow = $("<div>", { "class": "row" });
         lessonHeader.append(headerRow);
         //Body
-        var cardBody = $("<div>", { "class": "card-body" });
+        var cardBody = $("<div>", { "class": "card-body h-100 overflow-hidden" });
         lessonContent.append(cardBody);
         //row
-        var lessonRow = $("<div>", { "class": "row position-relative" });
+        var lessonRow = $("<div>", { "class": "row position-relative w-100" });
         cardBody.append(lessonRow);
 
 
@@ -286,7 +286,7 @@ var lessonService = {
 
         var bodyright = $("<div>", { "class": "col-12" });
 
-        var lessonFooter = $('<div>', { "class": "card-footer" })
+        var lessonFooter = $('<div>', { "class": "card-footer position:absolute", style: "bottom: 0; left: 0; right: 0" })
         var nav_bottom = $('<div>', { "class": "row" });
 
         var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Prev", "onclick": "tab_goback()" });
@@ -308,21 +308,8 @@ var lessonService = {
 
         lessonRow.append(bodyright);
 
-        // add lesson part
-        var createLessonPart = $("<div>", { "class": "add-lesson-part" });
-        var btn = $("<a>", { "class": "btn btn-sm btn-success", "text": "Add content", "href": "javascript:void(0)", "onclick": "Create.lessonPart('" + data.ID + "')" });
-        //createLessonPart.append(btn);
-
-        var newLessonPart = $("<div>", { "class": "new-lesson-part", "id": data.ID + new Date().getDate() });
-
         bodyright.append(lessonBody);
-
-        //lessonContainer.append(createLessonPart);
-        //lessonContainer.append(newLessonPart);
         lessonBox.append(lessonContainer);
-
-        //var lessonContainerBackground = $("<div>", { "class": "lesson-container-bg" });
-        //containerLesson.append(lessonContainerBackground);
         containerLesson.append(lessonBox);
     },
     renderSort: function () {

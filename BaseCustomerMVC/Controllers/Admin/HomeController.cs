@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Trang chủ", "Home", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Trang chủ", "admin", false)]
     public class HomeController : AdminController
     {
         public HomeController()
@@ -21,7 +21,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             return View();
         }
-        
+
         [HttpPost]
         public ActionResult Add(string SearchText)
         {

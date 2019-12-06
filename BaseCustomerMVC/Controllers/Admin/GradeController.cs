@@ -16,7 +16,7 @@ using MongoDB.Bson;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [IndefindCtrlAttribulte("Quản lý cấp độ", "Grade", "admin")]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý cấp độ", "admin", 7)]
     public class GradeController : AdminController
     {
         private readonly GradeService _service;
