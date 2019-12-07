@@ -14,8 +14,8 @@ var TEMPLATE_TYPE = {
 }
 
 var UIMode = {
-    LEFT: 1,
-    RIGHT: 2,
+    LECTURE_ONLY: 1,
+    EXAM_ONLY: 2,
     BOTH: 3
 }
 
@@ -81,6 +81,11 @@ var Lesson = (function () {
         }
     }
 
+    var reloadData = function () {
+        _data = null;
+        onReady(config);
+    }
+
     //local storage function
     var setLocalData = function (key, data) {
         var enData = b64EncodeUnicode(JSON.stringify(data));
@@ -135,20 +140,7 @@ var Lesson = (function () {
         document.location = document.location.href.replace('#', '');
     }
 
-    //Preview
-    var renderPreview = function () {
-        renderStandardLayout();
-        //Prepare data
-        if (isNull(_data)) {
-            loadLesssonData({ ID: config.lesson_id }, renderLessonData);
-        }
-        else {
-            //Render Content
-            renderLessonData();
-        }
-    }
-
-    //Lesson
+    //Load Data
     var loadLesssonData = function (param, callback) {
         var formData = new FormData();
         if (param != null)
@@ -161,7 +153,6 @@ var Lesson = (function () {
         });
     }
 
-    //LessonPart
     var loadLessonParts = function (param, callback) {
         var formData = new FormData();
         if (param != null)
@@ -172,11 +163,11 @@ var Lesson = (function () {
         });
     }
 
-
     //render content
 
     var renderStandardLayout = function () {
         var container = $('#' + config.container);
+        container.empty();
 
         var lessonBox = $("<div>", { "class": "lesson lesson-box h-100" });
         container.append(lessonBox);
@@ -250,9 +241,9 @@ var Lesson = (function () {
                 }
 
                 var lessonButton = $("<div>", { "class": "lesson-button col-md-3 col-sm-12 text-right" });
-                var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sort", "onclick": "lessonService.renderSort()" });
+                var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sort", "onclick": "SortLessonPart()" });
                 var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Edit", "data-toggle": "modal", "data-target": "#lessonModal", "onclick": "EditLesson('" + data.ID + "')" });
-                var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "Create.lessonPart('" + data.ID + "')" });
+                var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "')" });
                 //var close = $("<button>", { "class": "btn btn-primary btn-close", "text": "X", "onclick": "render.resetLesson()" });
                 var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Remove", "onclick": "lessonService.remove('" + data.ID + "')" });
 
@@ -270,14 +261,29 @@ var Lesson = (function () {
                 create.append(iconCreate);
                 lessonButton.append(remove); //removeLesson
                 remove.append(iconTrash);
-
                 headerRow.append(lessonButton);
 
                 break;
             case mod.EXAM:
+                //no header
                 break;
             case mod.REVIEW:
+                //no header
                 break;
+        }
+
+        for (var i = 0; data.Part != null && i < data.Part.length; i++) {
+            var item = data.Part[i];
+            switch (item.Type) {
+                case "QUIZ1":
+                case "QUIZ2":
+                case "QUIZ3":
+                case "ESSAY":
+                    switchUIMode(UIMode.EXAM_ONLY);
+                    break;
+                default:
+                    switchUIMode(UIMode.LECTURE_ONLY);
+            }
         }
 
         //body
@@ -291,17 +297,21 @@ var Lesson = (function () {
                 lessontabs.append(tabs);
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
-                    renderDataPart(item);
-                    switch (item.Type) {
-                        case "QUIZ1":
-                        case "QUIZ2":
-                        case "QUIZ3":
-                        case "ESSAY":
-                            switchUIMode(UIMode.RIGHT);
-                            break;
-                        default:
-                            switchUIMode(UIMode.LEFT);
-                    }
+                    renderPreviewPart(item);
+                }
+                if (_UImode == UIMode.EXAM_ONLY) {
+                    $('#rightCol .tab-pane').each(function () {
+                        var media = null;
+                        if ($(this).find(".QUIZ3").length > 0)
+                            $(this).addClass("h-100");
+                        else
+                            media = $(this).find(".quiz-wrapper > .media-holder");
+
+                        $(this).addClass("m-0");
+                        $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
+                            .empty().append($(this).find('.part-box-header')).append(media)
+                            .appendTo('#leftCol')
+                    })
                 }
                 break;
             case mod.EXAM:
@@ -313,8 +323,7 @@ var Lesson = (function () {
         //footer: navigation
         switch (config.mod) {
             case mod.PREVIEW:
-
-                if (_UImode != UIMode.BOTH) {
+                if (_UImode == UIMode.EXAM_ONLY) {
                     var nav_bottom = $('<div>', { "class": "row" });
 
                     var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Prev", "onclick": "tab_goback()" });
@@ -329,6 +338,9 @@ var Lesson = (function () {
                     nav_bottom.append($('<div>', { "class": "col-md-2 text-right" }).append(nexttab));
 
                     lessonFooter.show().append(nav_bottom);
+                }
+                else {
+                    lessonFooter.hide();
                 }
                 break;
             case mod.EXAM:
@@ -350,201 +362,19 @@ var Lesson = (function () {
         else
             _UImode = UIMode.BOTH;
         switch (_UImode) {
-            case UIMode.LEFT:
-                leftCol.removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-12").show();
-                rightCol.hide();
+            case UIMode.LECTURE_ONLY:
+                leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-12").show();//scrollwrapper
+                rightCol.parent().hide();
                 break;
-            case UIMode.RIGHT:
-                leftCol.hide();
-                rightCol.removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-12").show();
+            case UIMode.EXAM_ONLY:
+                leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
+                rightCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
                 break;
             case UIMode.BOTH:
-                leftCol.removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
-                rightCol.removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
+                leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
+                rightCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
                 break;
         }
-    }
-
-    var renderDataPart = function (data) {
-        var mainContainer = $('#' + config.container);
-        var leftCol = mainContainer.find('#leftCol');
-        var rightCol = mainContainer.find('#rightCol');
-
-        var time = "", point = "";
-
-        if (data.Timer > 0) {
-            time = " (" + data.Timer + "m)";
-        }
-        if (data.Point > 0) {
-            point = " (" + data.Point + "p)";
-        }
-
-        var container = $(leftCol);
-        if (data.Type.toString().startsWith("QUIZ") || data.Type == "ESSAY")
-            container = $(rightCol);
-        var listPartContainer = $("#part-menu #pills-tab");
-
-
-        //tabs
-        var lessonitem = null;
-        if ($('li #pills-' + data.ID).length > 0) {
-            lessonitem = $('li #pills-' + data.ID).parent().empty()
-        }
-        else {
-            lessonitem = $("<li>", { "class": "nav-item" });
-            listPartContainer.append(lessonitem);
-        }
-
-        var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
-        lessonitem.append(itemtitle);
-
-        var tabsitem = null;
-
-        if ($('#pills-part-' + data.ID).length > 0) {
-            //clear old-tab
-            tabsitem = $('#pills-part-' + data.ID).empty();
-        }
-        else
-            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
-
-        var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
-        tabsitem.append(itembox);
-
-        var ItemRow = $("<div>", { "class": "row" });
-
-        var boxHeader = $("<div>", { "class": "part-box-header row" });
-        if (data.Title != null) {
-            boxHeader.append($("<h5>", { "class": "title col-md-10", "text": data.Title + time + point }));
-        }
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Collapse", "onclick": "toggleCompact(this)" }));
-
-        var iconEdit = $("<i>", { "class": "fas fa-edit" });
-        var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
-        var iconTrash = $("<i>", { "class": "fas fa-trash" });
-
-        var boxButton = $("<div>", { "class": "text-right col-md-2" });
-        boxButton.append($("<button>", { "class": "btn btn-primary btn-sm mr-1", "title": "Edit", "data-toggle": "modal", "data-target": "#partModal", "onclick": "lessonPartService.edit('" + data.ID + "')" }).append(iconEdit))
-        boxButton.append($("<button>", { "class": "btn btn-danger btn-sm", "title": "Remove", "onclick": "lessonPartService.remove('" + data.ID + "')" }).append(iconTrash));
-
-        itembox.append(boxHeader);
-        boxHeader.append(boxButton);
-        //itembox.append(ItemRow);
-        switch (data.Type) {
-            case "TEXT":
-                var itemBody = $("<div>", { "class": "content-wrapper" });
-                if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
-                }
-                itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                break;
-            case "IMG":
-                var itemBody = $("<div>", { "class": "media-wrapper" });
-                renderMediaContent(data, itemBody, "IMG");
-                if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                break;
-            case "AUDIO":
-                var itemBody = $("<div>", { "class": "media-wrapper" });
-                renderMediaContent(data, itemBody, "AUDIO");
-                if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                break;
-            case "VIDEO":
-                var itemBody = $("<div>", { "class": "media-wrapper" });
-                renderMediaContent(data, itemBody, "VIDEO");
-                if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                break;
-            case "DOC":
-                var itemBody = $("<div>", { "class": "media-wrapper" });
-                renderMediaContent(data, itemBody, "DOC");
-                if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
-                itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                break;
-            case "QUIZ1":
-            case "QUIZ2":
-                var itemBody = $("<div>", { "class": "quiz-wrapper" });
-                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                itembox.append(itemBody);
-                renderMediaContent(data, itemBody, "");
-                container.append(tabsitem);
-                //Render Content
-
-                //Render Question
-                totalQuiz = data.Questions.length;
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    renderQuestionView(item, data.Type);
-                }
-                break;
-            case "QUIZ3":
-                var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
-                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                renderMediaContent(data, ItemRow, "");
-                ItemRow.append(itemBody);
-                ItemRow.find(".media-holder").addClass("col-12");
-                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-4" });
-                ItemRow.append(answers_box);
-                $(answers_box).droppable({
-                    tolerance: "intersect",
-                    accept: ".answer-item",
-                    activeClass: "hasAnswer",
-                    hoverClass: "answerHover",
-                    drop: function (event, ui) {
-                        var prevHolder = ui.helper.data('parent');
-                        $(prevHolder).find(".placeholder").show();
-                        $(this).append($(ui.draggable));
-                    }
-                });
-                container.append(tabsitem);
-                //Render Question
-                totalQuiz = data.Questions.length;
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    renderQuestionView(item, data.Type);
-                }
-                break;
-            case "ESSAY":
-                var itemBody = $("<div>", { "class": "content-wrapper" });
-                if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
-                }
-                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                var itemBody = $("<div>", { "class": "quiz-wrapper" });
-                itembox.append(itemBody);
-                renderMediaContent(data, itemBody, "");
-                totalQuiz = data.Questions.length;
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    renderQuestionView(item, data.Type);
-                }
-                break;
-        }
-
-        if (listPartContainer.find(".nav-item").length == 1) {
-            itemtitle.addClass("active");
-            tabsitem.addClass("show active");
-        }
-        $('.btn').tooltip({
-            trigger: "hover"
-        });
-
     }
 
     var renderMediaContent = function (data, wrapper, type = "") {
@@ -580,15 +410,226 @@ var Lesson = (function () {
         }
     }
 
-    var renderQuestionView = function (data, template) {
+
+    //Preview
+    var renderPreview = function () {
+        renderStandardLayout();
+        //Prepare data
+        if (isNull(_data)) {
+            loadLesssonData({ ID: config.lesson_id }, renderLessonData);
+        }
+        else {
+            //Render Content
+            renderLessonData();
+        }
+    }
+
+    var renderPreviewPart = function (data) {
+        var mainContainer = $('#' + config.container);
+        var leftCol = mainContainer.find('#leftCol');
+        var rightCol = mainContainer.find('#rightCol');
+
+        var time = "", point = "";
+
+        if (data.Timer > 0) {
+            time = " (" + data.Timer + "m)";
+        }
+        if (data.Point > 0) {
+            point = " (" + data.Point + "p)";
+        }
+
+        var container = $(leftCol);
+        if (data.Type.toString().startsWith("QUIZ") || data.Type == "ESSAY")
+            container = $(rightCol);
+        var listPartContainer = $("#part-menu #pills-tab");
+
+        //tabs
+        var lessonitem = null;
+        if ($('li #pills-' + data.ID).length > 0) {
+            lessonitem = $('li #pills-' + data.ID).parent().empty()
+        }
+        else {
+            lessonitem = $("<li>", { "class": "nav-item" });
+            listPartContainer.append(lessonitem);
+        }
+
+        var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
+        lessonitem.append(itemtitle);
+
+        var tabsitem = null;
+
+        if ($('#pills-part-' + data.ID).length > 0) {
+            //clear old-tab
+            tabsitem = $('#pills-part-' + data.ID).empty();
+        }
+        else
+            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+
+        var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
+        tabsitem.append(itembox);
+
+        var ItemRow = $("<div>", { "class": "row " + (_UImode == UIMode.EXAM_ONLY ? " Q3_absrow" : "") });
+
+        var boxHeader = $("<div>", { "class": "part-box-header row" });
+        if (data.Title != null) {
+            boxHeader.append($("<h5>", { "class": "title col-md-10", "text": data.Title + time + point }));
+        }
+        else
+            boxHeader.append($("<div>", { "class": "col-md-10" }));
+        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Collapse", "onclick": "toggleCompact(this)" }));
+
+        var iconEdit = $("<i>", { "class": "fas fa-edit" });
+        var iconTrash = $("<i>", { "class": "fas fa-trash" });
+
+        var boxButton = $("<div>", { "class": "text-right col-md-2" });
+        boxButton.append($("<button>", { "class": "btn btn-primary btn-sm mr-1", "title": "Edit", "data-toggle": "modal", "data-target": "#partModal", "onclick": "EditPart('" + data.ID + "')" }).append(iconEdit))
+        boxButton.append($("<button>", { "class": "btn btn-danger btn-sm", "title": "Remove", "onclick": "RemovePart('" + data.ID + "')" }).append(iconTrash));
+
+        itembox.append(boxHeader);
+        boxHeader.append(boxButton);
+        //itembox.append(ItemRow);
+        switch (data.Type) {
+            case "TEXT":
+                var itemBody = $("<div>", { "class": "content-wrapper" });
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
+                }
+                itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "IMG":
+                var itemBody = $("<div>", { "class": "media-wrapper" });
+                render.mediaContent(data, itemBody, "IMG");
+                if (data.Description != null)
+                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
+                itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "AUDIO":
+                var itemBody = $("<div>", { "class": "media-wrapper" });
+                render.mediaContent(data, itemBody, "AUDIO");
+                if (data.Description != null)
+                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
+                itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "VIDEO":
+                var itemBody = $("<div>", { "class": "media-wrapper" });
+                render.mediaContent(data, itemBody, "VIDEO");
+                if (data.Description != null)
+                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
+                itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "DOC":
+                var itemBody = $("<div>", { "class": "media-wrapper" });
+                render.mediaContent(data, itemBody, "DOC");
+                if (data.Description != null)
+                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
+                itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "QUIZ1":
+            case "QUIZ2":
+                var itemBody = $("<div>", { "class": "quiz-wrapper" });
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                itembox.append(itemBody);
+                render.mediaContent(data, itemBody, "");
+                container.append(tabsitem);
+                //Render Content
+
+                //Render Question
+                totalQuiz = data.Questions.length;
+                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                    var item = data.Questions[i];
+                    renderPreviewQuestion(item, data.Type);
+                }
+                break;
+            case "QUIZ3":
+                itembox.append(ItemRow);
+                var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                render.mediaContent(data, ItemRow, "");
+                console.log(ItemRow);
+                ItemRow.append(itemBody);
+                ItemRow.find(".media-holder").addClass("col-12");
+                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-4", "data-part-id": data.ID });
+                ItemRow.append(answers_box);
+                $(answers_box).droppable({
+                    tolerance: "intersect",
+                    accept: ".answer-item",
+                    activeClass: "hasAnswer",
+                    hoverClass: "answerHover",
+                    drop: function (event, ui) {
+                        var prevHolder = ui.helper.data('parent');
+                        $(prevHolder).find(".placeholder").show();
+                        $(this).append($(ui.draggable));
+                    }
+                });
+                console.log(itemBody);
+                //console.log(tabsitem);
+                //console.log(container);
+                container.append(tabsitem);
+                //Render Question
+                totalQuiz = data.Questions.length;
+                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                    var item = data.Questions[i];
+                    renderPreviewQuestion(item, data.Type);
+                }
+                break;
+            case "ESSAY":
+                var itemBody = $("<div>", { "class": "content-wrapper" });
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
+                }
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                var itemBody = $("<div>", { "class": "quiz-wrapper" });
+                itembox.append(itemBody);
+
+                render.mediaContent(data, itemBody, "");
+                totalQuiz = data.Questions.length;
+                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                    var item = data.Questions[i];
+                    renderPreviewQuestion(item, data.Type);
+                }
+                break;
+        }
+
+        if (listPartContainer.find(".nav-item").length == 1) {
+            itemtitle.addClass("active");
+            tabsitem.addClass("show active");
+        }
+        $('.btn').tooltip({
+            trigger: "hover"
+        });
+
+        $('.Q3_absrow .quiz-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
+        $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
+
+        startDragDrop();
+    }
+
+    var renderPreviewQuestion = function (data, template) {
         //render question
+        var point = "";
+
+        if (data.Point > 0) {
+            point = " (" + data.Point + "p)";
+        }
         switch (template) {
             case "QUIZ2":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
-                boxHeader.append($("<div>", { "class": "quiz-text", "text": data.Content }));
-                renderMediaContent(data, boxHeader);
+                boxHeader.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
+                render.mediaContent(data, boxHeader);
                 quizitem.append(boxHeader);
 
                 container.append(quizitem);
@@ -597,30 +638,36 @@ var Lesson = (function () {
                 quizitem.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description });
+                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description) });
                     quizitem.append(extend);
                 }
 
                 for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
                     var item = data.Answers[i];
-                    renderAnswerView(item, template);
+                    renderPreviewAnswer(item, template);
                 }
                 break;
             case "QUIZ3":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
-
-                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
+                //console.log(container);
+                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
 
                 var quiz_part = $("<div>", { "class": "quiz-pane col-6" });
-                var answer_part = $("<div>", { "class": "answer-pane no-child col-6" });
+                var answer_part = $("<div>", {
+                    "class": "answer-pane no-child col-6",
+                    "data-question-id": data.ID,
+                    "data-part-id": data.ParentID,
+                    "data-lesson-id": config.lesson_id,
+                    "data-type": template
+                });
                 quizitem.append(quiz_part);
                 quizitem.append(answer_part);
 
                 var pane_item = $("<div>", { "class": "pane-item" });
                 if (data.Media == null) {
-                    pane_item.append($("<div>", { "class": "quiz-text", "text": data.Content }));
+                    pane_item.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point}));
                 } else {
-                    renderMediaContent(data, pane_item);
+                    render.mediaContent(data, pane_item);
                 }
 
                 quiz_part.append(pane_item);
@@ -648,25 +695,21 @@ var Lesson = (function () {
 
                 for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
                     var item = data.Answers[i];
-                    renderAnswerView(item, template);
+                    renderPreviewAnswer(item, template);
                 }
                 break;
             default:
-                var point = "";
 
-                if (data.Point > 0) {
-                    point = " (" + data.Point + "p)";
-                }
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var itembox = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
-                    boxHeader.append($("<h5>", { "class": "title", "text": data.Content + point }));
+                    boxHeader.append($("<h5>", { "class": "title", "html": breakLine(data.Content) + point }));
                 else
                     boxHeader.append($("<h5>", { "class": "title", "text": point }));
 
-                renderMediaContent(data, boxHeader);
+                render.mediaContent(data, boxHeader);
 
                 itembox.append(boxHeader);
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
@@ -674,7 +717,7 @@ var Lesson = (function () {
                 itembox.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": data.Description });
+                    var extend = $("<div>", { "class": "quiz-extend", "text": breakLine(data.Description) });
                     itembox.append(extend);
                 }
 
@@ -683,15 +726,15 @@ var Lesson = (function () {
                 //Render Answer
                 for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
                     var item = data.Answers[i];
-                    renderAnswerView(item, template);
+                    renderPreviewAnswer(item, template);
                 }
                 break;
         }
     }
 
-    var renderAnswerView = function (data, template) {
+    var renderPreviewAnswer = function (data, template) {
         var container = $("#" + data.ParentID + " .answer-wrapper");
-        var answer = $("<fieldset>", { "class": "answer-item" });
+        var answer = $("<fieldset>", { "class": "answer-item", id: data.ID });
         switch (template) {
             case "QUIZ2":
 
@@ -714,24 +757,25 @@ var Lesson = (function () {
                     answer.append($("<input>", { "type": "hidden", "value": data.Content }));
 
                 if (data.Media != null) {
-                    renderMediaContent(data, answer);
+                    render.mediaContent(data, answer);
                 }
                 else
-                    answer.append($("<label>", { "class": "answer-text", "text": data.Content }));
+                    answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
 
-                answer.draggable({
-                    cursor: "move",
-                    helper: 'clone',
-                    revert: "true",
-                    scroll: true,
-                    start: function (event, ui) {
-                        ui.helper.data('parent', $(this).parent());
-                    },
-                    stop: function (event, ui) {
-                        //var prevParent = ui.helper.data('parent');
-                        //$(prevParent).find(".placeholder").show();
-                    }
-                });
+                //answer.draggable({
+                //    cursor: "move",
+                //    helper: 'clone',
+                //    revert: "true",
+                //    scroll: true,
+                //    start: function (event, ui) {
+                //        ui.helper.data('parent', $(this).parent());
+                //        alert(1);        
+                //    },
+                //    stop: function (event, ui) {
+                //        //var prevParent = ui.helper.data('parent');
+                //        //$(prevParent).find(".placeholder").show();
+                //    }
+                //});
 
                 container.append(answer);
                 break;
@@ -741,13 +785,196 @@ var Lesson = (function () {
                 form.append($("<input>", { "type": "hidden" }));
                 form.append($("<input>", { "id": data.ID, "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
-                    form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "text": data.Content }));
-                renderMediaContent(data, answer);
+                    form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "html": breakLine(data.Content) }));
+                render.mediaContent(data, answer);
                 container.append(answer);
                 break;
         }
 
     }
+
+    var startDragDrop = function () {
+        $(".answer-item").draggable({
+            cursor: "move",
+            helper: 'clone',
+            revert: "true",
+            scroll: true,
+            start: function (event, ui) {
+                var _parent = $(this).parent();
+                if (_parent.hasClass('answer-wrapper')) {
+                    _parent.addClass('dragging');
+                    $('.quiz-wrapper').addClass('dragtarget');
+                }
+                else {
+                    $('.answer-wrapper').addClass('droptarget');
+                    $('.quiz-wrapper').addClass('dragging');
+                }
+            },
+            stop: function (event, ui) {
+                $('.quiz-wrapper').removeClass('dragging').removeClass('droptarget');
+                $('.answer-wrapper').removeClass('dragging').removeClass('droptarget');
+            }
+        });
+        $('.answer-pane.ui-droppable').droppable({
+            tolerance: "intersect",
+            accept: ".answer-item",
+            activeClass: "hasAnswer",
+            hoverClass: "answerHover",
+            drop: function (event, ui) {
+                var item = $(ui.draggable);
+                var prevHolder = $(ui.helper).parent();
+                prevHolder.remove($(ui.helper));
+                var quiz = prevHolder.data("questionId");
+                console.log(quiz);
+                if ($(prevHolder).attr("data-question-id") == $(this).attr("data-question-id"))
+                    return false;
+
+                var part = $(prevHolder).attr("data-part-id");
+
+                if ($(this).find(".answer-item").length > 0) {//remove all answer to box
+                    $("#" + part + " .answer-wrapper").append($(this).find(".answer-item"));
+                }
+
+                $(this).append(item);
+
+                if ($(prevHolder).find(".answer-item").length == 1) {
+                    if ($(prevHolder).find(".placeholder").length > 0)
+                        $(prevHolder).find(".placeholder").show();
+                    else
+                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                }
+
+
+                if (config.mod == mod.EXAM) {
+                    var quiz = prevHolder.data("questionId");
+                    if (quiz != null) { delAnswerForStudentNoRender(quiz); }
+                    AnswerQuestion(this);
+                }
+
+                $(this).find(".placeholder").hide();
+            }
+        });
+        $(".answer-wrapper.no-child[data-part-id]").droppable({
+            tolerance: "intersect",
+            accept: ".answer-item",
+            activeClass: "hasAnswer",
+            hoverClass: "answerHover",
+            drop: function (event, ui) {
+                $(this).find(".placeholder").hide();
+                var prevHolder = $(ui.helper).parent();
+
+                if (config.mod == mod.EXAM) {
+                    var quiz = prevHolder.data("questionId");
+                    if (quiz != null) { delAnswerForStudent(quiz); }
+                }
+                prevHolder.remove($(ui.helper));
+
+                $(this).append($(ui.draggable));
+
+                if ($(prevHolder).find(".answer-item").length == 1) {
+                    if ($(prevHolder).find(".placeholder").length > 0)
+                        $(prevHolder).find(".placeholder").show();
+                    else
+                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                }
+
+                //AnswerQuestion(this);
+            }
+        });
+    }
+
+    var breakLine = function (data){
+        if (data == null)
+            return "";
+        return data.replace(/\n/g, "<br/>");
+    }
+
+
+    //Edit
+
+    var renderEditLesson = function (ID) {
+        var modal = $('#lessonModal');
+        $.ajax({
+            type: "POST",
+            url: config.url.load,
+            data: { ID: ID },
+            dataType: "json",
+            success: function (data) {
+                if (data.Data != null) {
+                    var item = data.Data;
+                    SelectTemplate(item.TemplateType);
+                    //template.lesson(data.Data.TemplateType, data.Data);
+                    modal.find("[name=Title]").val(item.Title);
+                    modal.find("[name=ChapterID]").val(item.ChapterID);
+                    modal.find("[name=ID]").val(item.ID);
+                    modal.find("[name=Point]").val(item.Point);
+                    modal.find("[name=Timer]").val(item.Timer);
+                    modal.find("[name=Limit]").val(item.Limit);
+                    modal.find("[name=Multiple]").val(item.Multiple);
+                    modal.find("[name=Etype]").val(item.Etype);
+                }
+                else {
+                    alert("Error")
+                }
+            }
+        });
+
+        return false;
+    }
+
+    var renderEditPart = function (data) {
+        var modalForm = window.partForm;
+        $('#partModal #modalTitle').html("Update");
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ID", "value": data.ID }));
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "Type", "value": data.Type }));
+
+        $('#action').val(url.save_part);
+
+        $(modalForm).append($("<div>", { "class": "lesson_parts" }));
+        $(modalForm).append($("<div>", { "class": "question_template hide" }));
+        $(modalForm).append($("<div>", { "class": "answer_template hide" }));
+        renderPartTemplate(data.Type, data);
+
+    }
+
+    var addPart = function (lessonID) {
+        var modalForm = window.partForm;
+        $(modalForm).empty();
+        $('#partModal #modalTitle').html("Add Content");
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": lessonID }));
+        $('#action').val(url.save_part);
+        var selectTemplate = $("<select>", { "class": "templatetype form-control", "onchange": "chooseTemplate()", "name": "Type", "required": "required" });
+        $(modalForm).append(selectTemplate);
+        $(selectTemplate).append("<option value=''>--- Choose content type ---</option>")
+            .append("<option value='TEXT'>Text</option>")
+            .append("<option value='VIDEO'>Video</option>")
+            .append("<option value='AUDIO'>Audio</option>")
+            .append("<option value='IMG'>Image</option>")
+            .append("<option value='DOC'>Document (PDF, DOC)</option>")
+            .append("<option value='VOCAB'>Vocabulary</option>")
+            .append("<option value='QUIZ1'>QUIZ: Choose correct answer</option>")
+            .append("<option value='QUIZ2'>QUIZ: Fill the word</option>")
+            .append("<option value='QUIZ3'>QUIZ: Match answer</option>")
+            .append("<option value='ESSAY'>QUIZ: Essay</option>");
+        $(modalForm).append($("<div>", { "class": "lesson_parts" }));
+        $(modalForm).append($("<div>", { "class": "question_template hide" }));
+        $(modalForm).append($("<div>", { "class": "answer_template hide" }));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //Exam
     var renderExam = function () {
@@ -908,6 +1135,7 @@ var Lesson = (function () {
         //if (exam == null || exam.value == void 0 || exam.value == null || exam.value == "") return false;
         return !isNull(getLocalData("CurrentExam"));
     }
+
     //render bài tập
     var renderSinglePart = function (data, index, type) {
         writeLog("renderSinglePart", data);
@@ -1519,80 +1747,6 @@ var Lesson = (function () {
         }
     }
 
-    var startDragDrop = function () {
-        $(".answer-item").draggable({
-            cursor: "move",
-            helper: 'clone',
-            revert: "true",
-            scroll: true,
-            start: function (event, ui) {
-
-            },
-            stop: function (event, ui) {
-
-            }
-        });
-        $('.answer-pane.ui-droppable').droppable({
-            tolerance: "intersect",
-            accept: ".answer-item",
-            activeClass: "hasAnswer",
-            hoverClass: "answerHover",
-            drop: function (event, ui) {
-                var item = $(ui.draggable);
-                var prevHolder = $(ui.helper).parent();
-                prevHolder.remove($(ui.helper));
-                var quiz = prevHolder.data("questionId");
-
-                if ($(prevHolder).attr("data-question-id") == $(this).attr("data-question-id"))
-                    return false;
-
-                var part = $(prevHolder).attr("data-part-id");
-
-                if ($(this).find(".answer-item").length > 0) {//remove all answer to box
-                    $("#" + part + " .answer-wrapper").append($(this).find(".answer-item"));
-                }
-
-                $(this).append(item);
-
-                if ($(prevHolder).find(".answer-item").length == 1) {
-                    if ($(prevHolder).find(".placeholder").length > 0)
-                        $(prevHolder).find(".placeholder").show();
-                    else
-                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
-                }
-
-                var quiz = prevHolder.data("questionId");
-                if (quiz != null) { delAnswerForStudentNoRender(quiz); }
-                $(this).find(".placeholder").hide();
-                //item.data("parent", questionID);
-                AnswerQuestion(this);
-            }
-        });
-        $(".answer-wrapper.no-child").droppable({
-            tolerance: "intersect",
-            accept: ".answer-item",
-            activeClass: "hasAnswer",
-            hoverClass: "answerHover",
-            drop: function (event, ui) {
-                $(this).find(".placeholder").hide();
-                var prevHolder = $(ui.helper).parent();
-                var quiz = prevHolder.data("questionId");
-                if (quiz != null) { delAnswerForStudent(quiz); }
-                prevHolder.remove($(ui.helper));
-
-                $(this).append($(ui.draggable));
-
-                if ($(prevHolder).find(".answer-item").length == 1) {
-                    if ($(prevHolder).find(".placeholder").length > 0)
-                        $(prevHolder).find(".placeholder").show();
-                    else
-                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời tại đây" }));
-                }
-
-                //AnswerQuestion(this);
-            }
-        });
-    }
 
     var renderBoDem = function () {
         var listQuiz = document.querySelectorAll(".quiz-item");
@@ -1655,17 +1809,320 @@ var Lesson = (function () {
         startDragDrop();
     }
 
-    window.ExamStudent = {} || ExamStudent;
+    window.LessonInstance = {} || Lesson;
 
-    ExamStudent.onReady = onReady;
-    ExamStudent.Version = version;
-    ExamStudent.Notification = notification;
+    LessonInstance.onReady = onReady;
+    LessonInstance.Version = version;
+    LessonInstance.Notification = notification;
     window.BeginExam = beginExam;
     window.AnswerQuestion = AnswerQuestion;
     window.CompleteExam = CompleteExam;
     window.Redo = resetLesson;
     window.GoBack = goBack;
 
-    return ExamStudent;
+    window.EditLesson = renderEditLesson;
+    window.
+
+    window.AddPart = addPart;
+    window.ReloadData = reloadData;
+    return LessonInstance;
 }());
 
+
+function chooseFile(obj) {
+    $(obj).siblings("input[type=file]").focus().click();
+}
+
+function changeMedia(obj) {
+    $(obj).uniqueId();
+    $(obj).attr("name", $(obj).attr("id"));
+    var file = $(obj)[0].files[0];
+    $(obj).siblings("[for=medianame]").val($(obj).attr("id"));
+    $(obj).siblings(".btnAddFile").val(file.name);
+    $(obj).siblings("[for=mediaorgname]").val(file.name);
+    $(obj).siblings("[for=mediaext]").val(file.type);
+    $(obj).siblings("[for=mediapath]").val("");//clear path
+    $(obj).siblings(".media_preview").remove();
+    $(obj).siblings(".btnResetFile").show();
+}
+
+function resetMedia(obj) {
+    $(obj).siblings(".btnAddFile").val("Choose file");
+    $(obj).siblings("input[type=file]").val('').attr("name", "");
+    $(obj).siblings("[for=medianame]").val('');
+    $(obj).siblings("[for=mediaorgname]").val('');
+    $(obj).siblings("[for=mediaext]").val('');
+    $(obj).siblings("[for=mediapath]").val('');
+    $(obj).parent().siblings(".media_preview").remove();
+    $(obj).hide();
+}
+
+function answerQuestion(obj, quizid) {
+    $('.quiz-item#' + quizid + " .quiz-extend").show();
+    markQuestion(quizid);
+}
+
+function markQuestion(quizid) {
+    if ($("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "].completed").length === 1) {
+    } else {
+        $("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "]").addClass("completed");
+        var completed = parseInt($(".quizNumber .completed").text()) + 1;
+        $(".quizNumber .completed").text(completed);
+        if (completed == totalQuiz)
+            $(".quizNumber .completed").addClass("finish");
+    }
+}
+
+function toggleCompact(obj) {
+    var parent = $(obj).parent().parent();
+    $(parent).toggleClass("compactView");
+    if ($(parent).hasClass("compactView"))
+        $(obj).text("Expand");
+    else
+        $(obj).text("Collapse");
+}
+
+var addNewQuestion = function (data = null) {
+    console.log(data);
+    var container = $('.lesson_parts > .part_content');
+    var template = $('.question_template > fieldset');
+    var currentpos = $(container).find(".fieldQuestion").length;
+    var clone = template.clone();
+    $(clone).find('.fieldset_title').text("Quiz " + (currentpos + 1));
+    $(clone).attr("Order", currentpos);
+    $(clone).find("[name='Questions.Order']").val(currentpos);
+    if (data != null) {
+        if (data.ID != null)
+            $(clone).find("[name='Questions.ID']").val(data.ID);
+        if (data.Point != null)
+            $(clone).find("[name='Questions.Point']").val(data.Point);
+        if (data.Content != null)
+            $(clone).find("[name='Questions.Content']").val(data.Content);
+        if (data.Description != null)
+            $(clone).find("[name='Questions.Description']").val(data.Description);
+        if (data.Media != null) {
+            render.mediaAdd(clone.find(".media_holder"), "Questions.", "", data.Media);
+            render.mediaContent(data, clone.find(".media_preview:first"), "");
+        }
+    }
+
+    $(clone).find("[name^='Questions.']").each(function () {
+        $(this).attr("name", $(this).attr("name").replace("Questions.", "Questions[" + (currentpos) + "]."));
+    });
+    $(container).append(clone);
+    console.log(data);
+    if (data != null && data.Answers != null) {
+        for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
+            var answer = data.Answers[i];
+            addNewAnswer(null, clone, answer);
+        }
+    }
+    else
+        clone.find(".btnAddAnswer").click();//add new answer
+}
+
+var addNewAnswer = function (obj, wrapper = null, data = null) {
+    var question;
+    if (obj != null) {
+        question = $(obj).parent().parent();
+    } else
+        question = wrapper;
+    var question_pos = $(question).attr("Order");
+    var container = $(question).find('.answer-wrapper');
+    var template = $('.answer_template > .answer-box');
+    var clone = template.clone();
+    var currentpos = $(container).find(".answer-box").length;
+
+    console.log(data);
+    if (data != null) {
+        if (data.ID != null)
+            $(clone).find("[name='Questions.Answers.ID']").val(data.ID);
+        if (data.ParentID != null)
+            $(clone).find("[name='Questions.Answers.ParentID']").val(data.ParentID);
+        if (data.Content != null)
+            $(clone).find("[name='Questions.Answers.Content']").val(data.Content);
+        if (data.IsCorrect != null) {
+            $(clone).find("[name='Questions.Answers.IsCorrect']").val(data.IsCorrect);
+            $(clone).find(".answer-checkbox").prop("checked", data.IsCorrect);
+            if (data.IsCorrect)
+                $(clone).find(".answer-checkbox").parent().addClass("selected");
+        }
+        if (data.Media != null) {
+            render.mediaAdd(clone.find(".media_holder"), "Questions.Answers.", "", data.Media);
+            render.mediaContent(data, clone.find(".media_preview:first"), "");
+        }
+    }
+
+    $(clone).find("[name^='Questions.Answers.']").each(function () {
+        $(this).attr("name", $(this).attr("name").replace("Questions.Answers.", "Questions[" + (question_pos) + "].Answers[" + currentpos + "]."));
+    });
+    if (obj != null)
+        $(obj).before(clone);
+    else
+        $(wrapper).find(".btnAddAnswer").before(clone);
+}
+
+function toggleCorrectAnswer(obj) {
+
+    var isChecked = $(obj).prop('checked');
+    $(obj).prev().val(isChecked);
+    if ($(obj).parent().hasClass("selected") != isChecked)
+        $(obj).parent().toggleClass("selected");
+}
+
+var hideModal = function (modalId) {
+    if (modalId != null)
+        $(modalId).modal('hide');
+    else
+        $(".modal").modal('hide');
+};
+
+var submitForm = function (event, modalId, callback) {
+    event.preventDefault();
+    $('.btnSaveForm').hide();
+
+    var form = $(modalId).find('form');
+    var Form = form.length > 0 ? form[0] : window.partForm;
+    var formdata = new FormData(Form);
+
+    if ($('textarea[name="Description"]').length > 0) {
+        formdata.delete("Description");
+
+        //formdata.append("Description", myEditor.getData())
+        formdata.append("Description", CKEDITOR.instances.editor.getData())
+    }
+    var err = false;
+    var requires = $(Form).find(':required');
+    requires.each(function () {
+        if ($(this).val() == "" || $(this).val() == null) {
+            alert("Please fill your content");
+            $(this).focus();
+            $('.btnSaveForm').show();
+            err = true;
+            return false;
+        }
+    });
+    if (err) return false;
+
+    var xhr = new XMLHttpRequest();
+
+    var actionUrl = $("#action").val()
+    if (form.length > 0)
+        actionUrl = form.attr('action');
+
+    xhr.open('POST', actionUrl);
+    xhr.send(formdata);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            var data = JSON.parse(xhr.responseText);
+            if (data.Error == null || data.Error == "") {
+                //switch (actionUrl) {
+                //case "Lesson/" + urlLesson.CreateOrUpdate:
+                //render.lesson(data.data);
+                //document.location = urlLesson.Location + data.Data.ID;
+                //document.location = document.location;
+                //    break;
+                //case "LessonPart/" + urlLessonPart.CreateOrUpdate:
+                //    var part = data.Data;
+                //   //render.part(part);
+                if (callback == "addPart") {
+                    var part = data.Data;
+                    window.AddPart(part);
+                }
+                else {
+                    if (callback == null)
+                        window.ReloadData();
+                    else
+                        callback;
+                }
+                hideModal(modalId);
+            }
+            else {
+                alert(data.Error);
+            }
+        }
+        $('.btnSaveForm').show();
+    }
+}
+
+var SortLessonPart = function () {
+    $("#pills-tab").toggleClass("sorting");
+    if ($("#pills-tab").hasClass("sorting")) {
+        $("#part-menu").show();
+        $(".card-header .btn-sort").addClass("btn-warning");
+        $("#pills-tab").sortable({
+            revert: "invalid",
+            update: function (event, ui) {
+                var id = $(ui.item).find('a').attr("id").replace("pills-", "");
+                var ar = $(this).find("li");
+                var index = $(ar).index(ui.item);
+                ChangePartPosition(id, index);
+            }
+        });
+        $("#pills-tab").sortable("enable");
+        $("#pills-tab").disableSelection();
+    }
+    else {
+        $("#part-menu").hide();
+        $(".card-header .btn-sort").removeClass("btn-warning");
+        $("#pills-tab").sortable("disable");
+        window.ReloadData();
+    }
+}
+
+var questionService = {
+    remove: function (obj) {
+        if (confirm("Remove question?")) {
+            var id = $(obj).siblings("[name$='.ID']").val();
+            var quizHolder = $(obj).parent();
+            if (!$(obj).parent().hasClass("fieldQuestion"))
+                quizHolder = $(obj).parent().parent();
+            quizHolder.parent().append($("<input>", { "type": "hidden", "name": "RemovedQuestions", "value": id }));
+            quizHolder.remove();
+        }
+    }
+}
+
+var answerService = {
+    remove: function (obj) {
+        if (confirm("Remove answer?")) {
+            var id = $(obj).siblings("[name$='.ID']").val();
+            if (id !== "")
+                $(obj).parent().parent().append($("<input>", { "type": "hidden", "name": "RemovedAnswers", "value": id }));
+            $(obj).parent().remove();
+        }
+    }
+}
+
+function tab_gonext() {
+    stopAllMedia();
+
+    var panes = $('.tab-pane');
+    var quizpanes = $('.tab-pane-quiz');
+    var index = panes.index($('.tab-pane.active'));
+
+    if (index < panes.length - 1) {
+        $(panes[index]).removeClass('show active');
+        $(panes[index + 1]).addClass('show active');
+
+        $(quizpanes[index]).removeClass('show active');
+        $(quizpanes[index + 1]).addClass('show active');
+    }
+};
+
+function tab_goback() {
+
+    stopAllMedia();
+
+    var panes = $('.tab-pane');
+    var quizpanes = $('.tab-pane-quiz');
+    var index = panes.index($('.tab-pane.active'));
+
+    if (index > 0) {
+        $(panes[index]).removeClass('show active');
+        $(panes[index - 1]).addClass('show active');
+
+        $(quizpanes[index]).removeClass('show active');
+        $(quizpanes[index - 1]).addClass('show active');
+    }
+};

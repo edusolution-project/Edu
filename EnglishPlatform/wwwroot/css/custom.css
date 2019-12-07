@@ -452,6 +452,7 @@ video, audio {
     display: inline-block;
     text-align: center;
     padding: 0 6px;
+    vertical-align: top;
 }
 
     .QUIZ3 .answer-pane .pane-item {
@@ -552,6 +553,12 @@ video, audio {
     border: solid 1px #333;
 }
 
+.fieldQuestion {
+    margin: 20px 0 10px;
+    border: dashed 1px #CCC;
+    position: relative;
+    padding: 20px 10px 10px;
+}
 
 .lesson-modal .lesson_parts .part_content .fieldQuestion .fieldset_title,
 .lesson-modal .lesson_parts .part_content .fieldQuestion .quiz-remove,
@@ -560,6 +567,7 @@ video, audio {
     position: absolute;
     top: -15px;
     background: #fff;
+    border-radius: 20px;
 }
 
 .lesson-modal .lesson_parts .part_content .fieldQuestion .answer-remove {

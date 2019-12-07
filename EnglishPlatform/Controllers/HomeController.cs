@@ -73,7 +73,7 @@ namespace EnglishPlatform.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(string UserName, string Name, string PassWord, string Type)
+        public IActionResult Register(string UserName, string Name, string Phone, string PassWord, string Type)
         {
             var _username = UserName.Trim().ToLower();
             if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
@@ -96,6 +96,7 @@ namespace EnglishPlatform.Controllers
                         PassWord = _sPass,
                         UserName = _username,
                         Name = Name,
+                        Phone = Phone,
                         Type = Type,
                         IsActive = false,
                         CreateDate = DateTime.Now,
@@ -120,6 +121,7 @@ namespace EnglishPlatform.Controllers
                             {
                                 FullName = user.Name,
                                 Email = user.UserName,
+                                Phone = user.Phone,
                                 IsActive = false,
                                 CreateDate = DateTime.Now
                             };
@@ -133,6 +135,7 @@ namespace EnglishPlatform.Controllers
                             {
                                 FullName = user.Name,
                                 Email = user.UserName,
+                                Phone = user.Phone,
                                 IsActive = true,// active student
                                 CreateDate = DateTime.Now
                             };

@@ -39,8 +39,8 @@
                                 <th class='text-center'>Mã học viên</th>
                                 <th class='text-center'>Họ tên</th>
                                 <th class='text-center'>Email</th>
-                                <th class='text-center'>Ngày sinh</th>
-                                <th class='text-center'>Lớp</th>
+                                <th class='text-center'>Phone</th>
+                                <th class='text-center'>Ngày sinh</th>                                
                                 <th class='text-center'>Trạng thái</th>
                                 <th class='text-center'>Thao tác</th>
                             </tr>
@@ -195,7 +195,7 @@
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "student")',
-            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
+            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, pageSize: 500},
             dataType:"json",
             success: function (data) {
                 hideModal();
@@ -219,8 +219,10 @@
                             "<td class='text-center'>" + (item.StudentId == null? "":item.StudentId) +"</td>" +
                             "<td>" + item.FullName + "</td>" +
                             "<td>" + item.Email + "</td>" +
+                            "<td>" + item.Phone + "</td>" +
                             "<td class='text-center'>" + date + "</td>" +
-                            "<td class='text-center'>" + (item.Class == null?"":item.Class) + "</td>" +active +
+                            //"<td class='text-center'>" + (item.Class == null ? "" : item.Class) + "</td>"
+                            + active +
                             "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"ChangePass('" + item.AccountID + "')\")\" type='button' data-placement='top' title='Đổi mật khẩu' class='btn btn-primary' data-toggle='modal' data-target='#passModal'> <i class='fas fa-key'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
