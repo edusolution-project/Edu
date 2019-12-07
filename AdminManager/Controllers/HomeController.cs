@@ -12,6 +12,7 @@ namespace AdminManager.Controllers
     {
         public IActionResult Index()
         {
+            ViewBag.Data = HttpContext.Request.Headers["SigoutNow"].ToString();
             return View();
         }
 
