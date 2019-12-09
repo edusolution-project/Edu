@@ -1,76 +1,141 @@
-﻿@{
-    ViewData["Title"] = "Login";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    var error = ViewBag.MessageError as string;
-}
-
-<!-- Outer Row -->
-<div class="row justify-content-center">
-
-    <div class="col-xl-10 col-lg-12 col-md-9">
-
-        <div class="card o-hidden border-0 shadow-lg my-5">
-            <div class="card-body p-0">
-                <!-- Nested Row within Card Body -->
-                <div class="row">
-                    <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-                    <div class="col-lg-6">
-                        <div class="p-4">
-                            <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Sign In</h1>
-                            </div>
-                            @using (Html.BeginForm("Login", "Home", FormMethod.Post, new { @name = "LoginForm" }))
-                            {
-                                Html.AntiForgeryToken();
-                                @if (!string.IsNullOrEmpty(error))
-                                {
-                                    <div class="form-group text-danger">
-                                        @Html.Raw(error)
-                                    </div>
-                                }
-                                <div class="form-group">
-                                    <input type="email" name="UserName" class="form-control form-control-user" placeholder="Email" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="password" name="PassWord" class="form-control form-control-user" placeholder="Password" required>
-                                </div>
-                                <div class="input-group mb-3">
-                                    <select class="custom-select" name="Type">
-                                        <option value="student" selected>Student</option>
-                                        <option value="teacher">Teacher</option>
-                                        <option value="admin">Administrator</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <div class="custom-control custom-checkbox small">
-                                        <input type="checkbox" name="IsRemmember" class="custom-control-input" id="customCheck" value="0">
-                                        <label class="custom-control-label" for="customCheck" onclick="Remember()">Save account</label>
-                                    </div>
-                                </div>
-                                <input type="button" class="btn btn-primary btn-user btn-block" onclick="submit(this)" value="Sign In">
-                                <hr>
-                            }
-                            <div class="text-center">
-                                @Html.ActionLink("Forgot password?", "forgotpassword", "home", null, new { @class = "small" })<br />
-                                @Html.ActionLink("Register", "register", "home", null, new { @class = "small" })
-                            </div>
-                        </div>
-                    </div>
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>EDUCOO</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Be+Vietnam&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/stylesheet.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+</head>
+<body>
+    <main id="main">
+        <section id="login_frame">
+            <div class="header-top">
+                <div class="inner">
+                    <a href="/" title="educoo" class="logo"><img src="/images/Logo.png" alt="educoo" /></a>
                 </div>
             </div>
-        </div>
-    </div>
-
-</div>
+            <div class="box" id="box_login">
+                <div class="card-header">
+                    <h3 v-if="signin">Đăng nhập với tài khoản</h3>
+                    <h3 v-if="forgot"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button> Quên mật khẩu</h3>
+                    <h3 v-if="signup"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button>Đăng ký</h3>
+                    <div class="note" v-if="signin">Chưa có tài khoản? <a href="javascript:;" title="Đăng ký ngay!" v-on:click="changeState()">Đăng ký ngay!</a> </div>
+                    <div class="note" v-if="forgot">Vui lòng nhập địa chỉ Email để đặt lại mật khẩu mới.</div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/login" id="sign_form">
+                        <div class="form-group">
+                            <label for="email">Địa chỉ email</label>
+                            <input type="text" v-model="email" class="form-control" placeholder="Nhập email" id="email">
+                        </div>
+                        <div class="form-group" v-if="signup">
+                            <label for="name">Họ và tên</label>
+                            <input type="text" name="Name" class="form-control" placeholder="Nhập họ tên" id="name">
+                        </div>
+                        <div class="form-group" v-if="signup">
+                            <label for="msisdn">Số điện thoại</label>
+                            <input type="text" name="Phone" class="form-control" placeholder="Nhập số điện thoại" id="msisdn">
+                        </div>
+                        <div class="form-group" v-if="!forgot">
+                            <label for="password">Mật khẩu</label>
+                            <input type="password" v-model="password" class="form-control" placeholder="Nhập mật khẩu" id="password">
+                        </div>
+                        <div class="form-group" v-if="!forgot">
+                            <label for="username">Tài khoản đăng nhập</label>
+                            <select class="form-control" v-model="username" id="username">
+                                <option value="student" selected>Student</option>
+                                <option value="teacher">Teacher</option>
+                                <option value="admin">Administrator</option>
+                            </select>
+                        </div>
+                        <div class="center">
+                            <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signin" :disabled="disable" v-on:click="signIn()">Đăng nhập</button>
+                            <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="forgot" :disabled="disable">Đặt lại mật khẩu</button>
+                            <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signup" :disabled="disable">Đăng ký</button>
+                            <a href="javascript:;" title="Quên mật khẩu?" class="forgot-link" v-if="signin" v-on:click="changeState(2)">Quên mật khẩu?</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
 <script>
-    var Remember = function () {
-        var customCheck = document.getElementById("customCheck");
-        customCheck.value = !customCheck.checked;
-    }
-    var submit = function (t) {
-        var form = t.parrent;
-
-        form.submit();
-    }
+    new Vue({
+        el: "#main",
+		mounted(){
+		},
+        data: {
+            email : '',
+            password : '',
+            username : '',
+            name : '',
+            msisdn : '',
+            disable : false,
+            signup : false,
+            signin :true,
+            forgot : false
+        },
+        methods: {
+            changeState(s=1){
+                let _that = this
+                _that.disable = false
+                switch (s) {
+                    case 1:
+                        _that.signup = true
+                        _that.signin = false
+                        _that.forgot = false
+                        _that.action = "@Url.Action("ForgotAPI","Home")";
+                        break;
+                    case 2:
+                        _that.signup = false
+                        _that.signin = false
+                        _that.forgot = true
+                        _that.action = "@Url.Action("RegisterAPI","Home")";
+                        break;
+                    default:
+                        _that.signup = false
+                        _that.signin = true
+                        _that.forgot = false
+                        _that.action = "@Url.Action("LoginAPI","Home")";
+                        break;
+                }
+            },
+            signIn(){
+                let _that = this
+                _that.disable = true
+                let _form = new FormData()
+                _form.append('UserName',_that.email)
+                _form.append('PassWord',_that.password)
+                _form.append('Type',_that.username)
+                
+                axios.post(_that.action,_form)
+                    .then(response => {
+                        console.log(response.data)
+                        if(response.data.StatusCode){
+                            window.location.href= response.data.Location
+                        }else{
+                            alert(response.data.StatusCode)
+                            _that.disable = false
+                        }
+                     }).catch(e=>{
+                                alert(e.response.data.StatusCode)
+                                _that.disable = false
+                        })
+            },
+            signUp(){
+                let _that = this
+                _that.disable = true
+            },
+            renewPass(){
+                let _that = this
+                _that.disable = true
+            }
+        }
+    });
 </script>
-

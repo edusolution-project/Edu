@@ -12,6 +12,7 @@ using MongoDB.Driver;
 using BaseCustomerMVC.Globals;
 using BaseAccess.Interfaces;
 using Microsoft.Extensions.Options;
+using BaseCustomerMVC.Models;
 
 namespace EnglishPlatform.Controllers
 {
@@ -73,7 +74,7 @@ namespace EnglishPlatform.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(string UserName, string Name, string Phone, string PassWord, string Type)
+        public IActionResult RegisterAPI(string UserName, string Name, string Phone, string PassWord, string Type)
         {
             var _username = UserName.Trim().ToLower();
             if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
@@ -174,14 +175,17 @@ namespace EnglishPlatform.Controllers
         }
 
         [HttpPost]
-        [Route("/login")]
-        public async Task<IActionResult> Login(string UserName, string PassWord, string Type, bool IsRemmember)
+        public async Task<JsonResult> LoginAPI(string UserName, string PassWord, string Type, bool IsRemmember)
         {
+            //var x = HttpContext.Request;
             //_log.Debug("login", new { UserName, PassWord, Type, IsRemmember });
             if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
             {
-                ViewBag.MessageError = "Please fill your information";
-                return View();
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Please fill your information",
+                });
             }
             else
             {
@@ -189,8 +193,11 @@ namespace EnglishPlatform.Controllers
                 var user = _accountService.GetAccount(Type, UserName.ToLower(), _sPass);
                 if (user == null)
                 {
-                    ViewBag.MessageError = "Account's infomation is not correct";
-                    return View();
+                    return Json(new ReturnJsonModel
+                    {
+                        StatusCode = ReturnStatus.ERROR,
+                        StatusDesc = "Account's infomation is not correct"
+                    });
                 }
                 else
                 {
@@ -221,7 +228,7 @@ namespace EnglishPlatform.Controllers
                                     break;
                             }
                             var listAccess = _accessesService.GetAccessByRole(role.ID);
-                            
+
                             var claims = new List<Claim>
                             {
                                 new Claim("UserID",id),
@@ -266,18 +273,29 @@ namespace EnglishPlatform.Controllers
                             //    AllowRefresh = true,
                             //    RedirectUri = user.Type
                             //});
-                            return Redirect(user.Type);
+                            return Json(new ReturnJsonModel
+                            {
+                                StatusCode = ReturnStatus.SUCCESS,
+                                StatusDesc = "OK",
+                                Location = "/" + user.Type
+                            });
                         }
                         else
                         {
-                            ViewBag.MessageError = "Can't signin now.";
-                            return View();
+                            return Json(new ReturnJsonModel
+                            {
+                                StatusCode = ReturnStatus.ERROR,
+                                StatusDesc = "Can't signin now."
+                            });
                         }
                     }
                     else
                     {
-                        ViewBag.MessageError = "Account is locked.";
-                        return View();
+                        return Json(new ReturnJsonModel
+                        {
+                            StatusCode = ReturnStatus.ERROR,
+                            StatusDesc = "Account is locked"
+                        });
                     }
                 }
             }

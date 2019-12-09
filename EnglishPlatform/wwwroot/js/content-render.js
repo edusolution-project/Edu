@@ -39,9 +39,11 @@ var Lesson = (function () {
         url: {
             load: "", //all: load lesson data
             save: "", //edit: save lesson data
-            load_part: "",//all: load lesson part data
+            list_part: "",//all: get all part
+            load_part: "",//all: load lesson part detail
             save_part: "",//edit: save part,
-            move_part: "",//edit: change part position,
+            move_part: "",//change: change part position,
+            del_part: "",
             current: "", //exam: load current exam state
             start: "", //exam: start exam
             answer: "", //exam: set answer for question
@@ -157,7 +159,7 @@ var Lesson = (function () {
         var formData = new FormData();
         if (param != null)
             Object.keys(param).forEach(e => formData.append(e, param[e]));
-        Ajax(config.url.load_part, formData, "POST", true).then(function (res) {
+        Ajax(config.url.list_part, formData, "POST", true).then(function (res) {
             _data.Part = JSON.parse(res).Data;
             callback();
         });
@@ -241,11 +243,11 @@ var Lesson = (function () {
                 }
 
                 var lessonButton = $("<div>", { "class": "lesson-button col-md-3 col-sm-12 text-right" });
-                var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sort", "onclick": "SortLessonPart()" });
+                var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sort", "onclick": "SortPart()" });
                 var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Edit", "data-toggle": "modal", "data-target": "#lessonModal", "onclick": "EditLesson('" + data.ID + "')" });
                 var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "')" });
                 //var close = $("<button>", { "class": "btn btn-primary btn-close", "text": "X", "onclick": "render.resetLesson()" });
-                var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Remove", "onclick": "lessonService.remove('" + data.ID + "')" });
+                var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Remove" });//.bind("click", "lessonService.remove('" + data.ID + "')");
 
                 var iconSort = $("<i>", { "class": "fas fa-sort" });
                 var iconEdit = $("<i>", { "class": "fas fa-edit" });
@@ -377,39 +379,6 @@ var Lesson = (function () {
         }
     }
 
-    var renderMediaContent = function (data, wrapper, type = "") {
-
-        if (data.Media != null) {
-            var mediaHolder = $("<div>", { "class": "media-holder " + type });
-            switch (type) {
-                case "IMG":
-                    mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path }));
-                    break;
-                case "VIDEO":
-                    mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
-                    break;
-                case "AUDIO":
-                    mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
-                    break;
-                case "DOC":
-                    mediaHolder.append($("<embed>", { "src": data.Media.Path + "#view=FitH", "width": "100%", "height": "800px" }));
-                    break;
-                default:
-                    if (data.Media.Extension != null)
-                        if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path }));
-                        else if (data.Media.Extension.indexOf("video") >= 0)
-                            mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
-                        else if (data.Media.Extension.indexOf("audio") >= 0)
-                            mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
-                        else
-                            mediaHolder.append($("<embed>", { "src": data.Media.Path + "#view=FitH" }));
-                    break;
-            }
-            wrapper.append(mediaHolder);
-        }
-    }
-
 
     //Preview
     var renderPreview = function () {
@@ -492,7 +461,7 @@ var Lesson = (function () {
             case "TEXT":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "doc-content" }).html(breakLine(data.Description)));
                 }
                 itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
                 itembox.append(itemBody);
@@ -500,36 +469,36 @@ var Lesson = (function () {
                 break;
             case "IMG":
                 var itemBody = $("<div>", { "class": "media-wrapper" });
-                render.mediaContent(data, itemBody, "IMG");
+                renderMediaContent(data, itemBody, "IMG");
                 if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
+                    wrapper.append($("<div>", { "class": "description", "html": breakLine(data.Description) }));
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
             case "AUDIO":
                 var itemBody = $("<div>", { "class": "media-wrapper" });
-                render.mediaContent(data, itemBody, "AUDIO");
+                renderMediaContent(data, itemBody, "AUDIO");
                 if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
+                    wrapper.append($("<div>", { "class": "description", "html": breakLine(data.Description) }));
                 itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
             case "VIDEO":
                 var itemBody = $("<div>", { "class": "media-wrapper" });
-                render.mediaContent(data, itemBody, "VIDEO");
+                renderMediaContent(data, itemBody, "VIDEO");
                 if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
+                    wrapper.append($("<div>", { "class": "description", "html": breakLine(data.Description) }));
                 itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
             case "DOC":
                 var itemBody = $("<div>", { "class": "media-wrapper" });
-                render.mediaContent(data, itemBody, "DOC");
+                renderMediaContent(data, itemBody, "DOC");
                 if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "text": data.Description }));
+                    wrapper.append($("<div>", { "class": "description", "html": breakLine(data.Description) }));
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
@@ -539,7 +508,7 @@ var Lesson = (function () {
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
-                render.mediaContent(data, itemBody, "");
+                renderMediaContent(data, itemBody, "");
                 container.append(tabsitem);
                 //Render Content
 
@@ -554,7 +523,7 @@ var Lesson = (function () {
                 itembox.append(ItemRow);
                 var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                render.mediaContent(data, ItemRow, "");
+                renderMediaContent(data, ItemRow, "");
                 console.log(ItemRow);
                 ItemRow.append(itemBody);
                 ItemRow.find(".media-holder").addClass("col-12");
@@ -593,7 +562,7 @@ var Lesson = (function () {
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itembox.append(itemBody);
 
-                render.mediaContent(data, itemBody, "");
+                renderMediaContent(data, itemBody, "");
                 totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
@@ -629,7 +598,7 @@ var Lesson = (function () {
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 boxHeader.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
-                render.mediaContent(data, boxHeader);
+                renderMediaContent(data, boxHeader);
                 quizitem.append(boxHeader);
 
                 container.append(quizitem);
@@ -665,9 +634,9 @@ var Lesson = (function () {
 
                 var pane_item = $("<div>", { "class": "pane-item" });
                 if (data.Media == null) {
-                    pane_item.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point}));
+                    pane_item.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
                 } else {
-                    render.mediaContent(data, pane_item);
+                    renderMediaContent(data, pane_item);
                 }
 
                 quiz_part.append(pane_item);
@@ -709,7 +678,7 @@ var Lesson = (function () {
                 else
                     boxHeader.append($("<h5>", { "class": "title", "text": point }));
 
-                render.mediaContent(data, boxHeader);
+                renderMediaContent(data, boxHeader);
 
                 itembox.append(boxHeader);
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
@@ -757,7 +726,7 @@ var Lesson = (function () {
                     answer.append($("<input>", { "type": "hidden", "value": data.Content }));
 
                 if (data.Media != null) {
-                    render.mediaContent(data, answer);
+                    renderMediaContent(data, answer);
                 }
                 else
                     answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
@@ -786,11 +755,44 @@ var Lesson = (function () {
                 form.append($("<input>", { "id": data.ID, "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
                     form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "html": breakLine(data.Content) }));
-                render.mediaContent(data, answer);
+                renderMediaContent(data, answer);
                 container.append(answer);
                 break;
         }
 
+    }
+
+    var renderMediaContent = function (data, wrapper, type = "") {
+
+        if (data.Media != null) {
+            var mediaHolder = $("<div>", { "class": "media-holder " + type });
+            switch (type) {
+                case "IMG":
+                    mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path }));
+                    break;
+                case "VIDEO":
+                    mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                    break;
+                case "AUDIO":
+                    mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                    break;
+                case "DOC":
+                    mediaHolder.append($("<embed>", { "src": data.Media.Path + "#view=FitH", "width": "100%", "height": "800px" }));
+                    break;
+                default:
+                    if (data.Media.Extension != null)
+                        if (data.Media.Extension.indexOf("image") >= 0)
+                            mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path }));
+                        else if (data.Media.Extension.indexOf("video") >= 0)
+                            mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                        else if (data.Media.Extension.indexOf("audio") >= 0)
+                            mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                        else
+                            mediaHolder.append($("<embed>", { "src": data.Media.Path + "#view=FitH" }));
+                    break;
+            }
+            wrapper.append(mediaHolder);
+        }
     }
 
     var startDragDrop = function () {
@@ -883,7 +885,7 @@ var Lesson = (function () {
         });
     }
 
-    var breakLine = function (data){
+    var breakLine = function (data) {
         if (data == null)
             return "";
         return data.replace(/\n/g, "<br/>");
@@ -892,7 +894,26 @@ var Lesson = (function () {
 
     //Edit
 
-    var renderEditLesson = function (ID) {
+    function modalSelectTemplate(type) {
+        var modal = $("#lessonModal");
+        if (type != null && type != "")
+            modal.find("[name=TemplateType]").val(type);
+        var template = modal.find("[name=TemplateType]").val();
+        switch (template) {
+            case "1": //bài giảng
+                modal.find("[for=examOnly]").hide();
+                modal.find("[for=examOnly] input").prop("required", false);
+                modal.find("[for=examOnly] select").prop("required", false);
+                break;
+            default:
+                modal.find("[for=examOnly]").show();
+                modal.find("[for=examOnly] input").prop("required", true);
+                modal.find("[for=examOnly] select").prop("required", true);
+                break;
+        }
+    }
+
+    var modalEditLesson = function (ID) {
         var modal = $('#lessonModal');
         $.ajax({
             type: "POST",
@@ -922,29 +943,30 @@ var Lesson = (function () {
         return false;
     }
 
-    var renderEditPart = function (data) {
+    var modalEditPart = function (id) {
+        stopAllMedia();
         var modalForm = window.partForm;
-        $('#partModal #modalTitle').html("Update");
-        $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
-        $(modalForm).append($("<input>", { "type": "hidden", "name": "ID", "value": data.ID }));
-        $(modalForm).append($("<input>", { "type": "hidden", "name": "Type", "value": data.Type }));
-
-        $('#action').val(url.save_part);
-
-        $(modalForm).append($("<div>", { "class": "lesson_parts" }));
-        $(modalForm).append($("<div>", { "class": "question_template hide" }));
-        $(modalForm).append($("<div>", { "class": "answer_template hide" }));
-        renderPartTemplate(data.Type, data);
-
+        $('#action').val(config.url.save_part);
+        //showModal();
+        $(modalForm).empty();
+        $.ajax({
+            type: "POST",
+            url: config.url.load_part,
+            data: { ID: id },
+            dataType: "json",
+            success: function (data) {
+                renderEditPart(data.Data);
+            }
+        });
     }
 
-    var addPart = function (lessonID) {
+    var modalAddPart = function (lessonID) {
         var modalForm = window.partForm;
         $(modalForm).empty();
         $('#partModal #modalTitle').html("Add Content");
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": lessonID }));
-        $('#action').val(url.save_part);
-        var selectTemplate = $("<select>", { "class": "templatetype form-control", "onchange": "chooseTemplate()", "name": "Type", "required": "required" });
+        $('#action').val(config.url.save_part);
+        var selectTemplate = $("<select>", { "class": "templatetype form-control", "name": "Type", "required": "required" }).bind("change", chooseTemplate);
         $(modalForm).append(selectTemplate);
         $(selectTemplate).append("<option value=''>--- Choose content type ---</option>")
             .append("<option value='TEXT'>Text</option>")
@@ -962,13 +984,461 @@ var Lesson = (function () {
         $(modalForm).append($("<div>", { "class": "answer_template hide" }));
     }
 
+    var renderEditPart = function (data) {
+        var modalForm = window.partForm;
+        $('#partModal #modalTitle').html("Update");
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ID", "value": data.ID }));
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "Type", "value": data.Type }));
 
+        $('#action').val(config.url.save_part);
 
+        $(modalForm).append($("<div>", { "class": "lesson_parts" }));
+        $(modalForm).append($("<div>", { "class": "question_template hide" }));
+        $(modalForm).append($("<div>", { "class": "answer_template hide" }));
+        renderPartTemplate(data.Type, data);
+    }
 
+    var removePart = function (id) {
+        var check = confirm("Remove this content?");
+        if (check) {
 
+            $.ajax({
+                type: "POST",
+                url: config.url.RemovePart,
+                data: {
+                    "ID": id
+                },
+                success: function (data) {
+                    if (data.Error == null) {
+                        document.location = document.location;
+                    }
+                    else {
+                        alert(data.Error);
+                    }
+                }
+            });
+        }
+    }
 
+    var sortPart = function () {
+        $("#pills-tab").toggleClass("sorting");
+        if ($("#pills-tab").hasClass("sorting")) {
+            $("#part-menu").show();
+            $(".card-header .btn-sort").addClass("btn-warning");
+            $("#pills-tab").sortable({
+                revert: "invalid",
+                update: function (event, ui) {
+                    var id = $(ui.item).find('a').attr("id").replace("pills-", "");
+                    var ar = $(this).find("li");
+                    var index = $(ar).index(ui.item);
+                    ChangePartPosition(id, index);
+                }
+            });
+            $("#pills-tab").sortable("enable");
+            $("#pills-tab").disableSelection();
+        }
+        else {
+            $("#part-menu").hide();
+            $(".card-header .btn-sort").removeClass("btn-warning");
+            $("#pills-tab").sortable("disable");
+            window.ReloadData();
+        }
+    }
 
+    var chooseTemplate = function () {
+        var type = $('.templatetype').val();
+        renderPartTemplate(type);
+    }
 
+    var renderPartTemplate = function (type, data = null) {
+        var contentholder = $('.lesson_parts');
+        contentholder.empty();
+        var question_template_holder = $('.question_template');
+        question_template_holder.empty();
+        var answer_template_holder = $('.answer_template');
+        answer_template_holder.empty();
+
+        contentholder.append($("<label>", { "class": "title", "text": "Title:" }));
+        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Title", "required": "required" }));
+        if (data != null && data.Title != null)
+            contentholder.find("[name=Title]").val(data.Title);
+
+        switch (type) {
+            case "TEXT"://Text
+                contentholder.append($("<label>", { "class": "title", "text": "Enter your content" }));
+                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Enter content" }));
+                if (data != null && data.Description != null)
+                    contentholder.find("[name=Description]").val(data.Description);
+
+                CKEDITOR.replace("editor");
+
+                //ClassicEditor
+                //    .create(document.querySelector('#editor'))
+                //    .then(newEditor => {
+                //        myEditor = newEditor;
+                //    })
+                //    .catch(error => {
+                //        console.error(error);
+                //    });
+                break;
+            case "VIDEO":
+                contentholder.append($("<label>", { "class": "title", "text": "Choose video" }));
+                contentholder.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(contentholder.find(".media_holder"), "", "VIDEO", data != null ? data.Media : null);
+                contentholder.append($("<div>", { "class": "media_preview" }));
+                break;
+            case "AUDIO":
+                contentholder.append($("<label>", { "class": "title", "text": "Choose audio" }));
+                contentholder.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(contentholder.find(".media_holder"), "", "AUDIO", data != null ? data.Media : null);
+                contentholder.append($("<div>", { "class": "media_preview" }));
+                break;
+            case "IMG":
+                contentholder.append($("<label>", { "class": "title", "text": "Choose image" }));
+                contentholder.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(contentholder.find(".media_holder"), "", "IMG", data != null ? data.Media : null);
+                contentholder.append($("<div>", { "class": "media_preview" }));
+                break;
+            case "DOC":
+                contentholder.append($("<label>", { "class": "title", "text": "Choose document (pdf, doc)" }));
+                contentholder.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(contentholder.find(".media_holder"), "", "DOC", data != null ? data.Media : null);
+                contentholder.append($("<div>", { "class": "media_preview" }));
+                break;
+            case "QUIZ1"://Trắc nghiệm chuẩn
+                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
+                questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
+                questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
+                questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
+                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1 }).bind("click", removeQuestion));
+                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
+                questionTemplate.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(questionTemplate.find(".media_holder"), "Questions.");
+                questionTemplate.append($("<div>", { "class": "media_preview" }));
+                questionTemplate.append(
+                    $("<div>", { class: "mt-1" }).append($("<label>", { "class": "input_label mr-1", "text": "Point" }))
+                        .append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1" })));
+                questionTemplate.append($("<div>", { class: "mt-1" }).append($("<label>", { "class": "part_label", "text": "Answer (tick if correct)" })));
+
+                var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer", "value": "+" }).bind("click", addNewAnswer));
+                questionTemplate.append(answer_wrapper);
+                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explaination" }));
+                question_template_holder.append(questionTemplate);
+
+                var answerTemplate = $("<fieldset>", { "class": "answer-box" });
+                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "tabindex": -1 }).bind("click", removeAnswer));
+                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ID" }));
+                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
+                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect" }));
+                answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox" }).bind("click", toggleCorrectAnswer));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer" }));
+                answerTemplate.append($("<div>", { "class": "media_holder mt-1" }));
+                renderAddMedia(answerTemplate.find(".media_holder"), "Questions.Answers.");
+                answerTemplate.append($("<div>", { "class": "media_preview" }));
+                answer_template_holder.append(answerTemplate);
+                contentholder.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
+                contentholder.append($("<div>", { "class": "media_preview" }));
+                contentholder.append($("<div>", { "class": "part_content " + type }));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion", "value": "Add question" }).bind("click", addNewQuestion));
+                //Add First Question
+                if (data != null && data.Questions != null) {
+                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                        var quiz = data.Questions[i];
+                        addNewQuestion(quiz);
+                    }
+                }
+                else
+                    addNewQuestion();
+                break;
+            case "QUIZ2"://Trắc nghiệm dạng điền từ
+                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
+                var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
+                quizWrapper.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
+                quizWrapper.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
+                quizWrapper.append($("<label>", { "class": "fieldset_title", "text": "" }));
+                quizWrapper.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1 }).bind("click", removeQuestion));
+                quizWrapper.append($("<input>", { "name": "Questions.Content", "class": "input-text quiz-text", "placeholder": "Position (skip for media content)" }));
+                quizWrapper.append($("<label>", { "class": "input_label", "text": "Point" }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point", "placeholder": "Point", "value": "1" }));
+                quizWrapper.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
+                quizWrapper.append($("<div>", { "class": "media_preview" }));
+                questionTemplate.append(quizWrapper);
+
+                var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer", "value": "+", "onclick": "addNewAnswer(this)" }));
+                questionTemplate.append(answer_wrapper);
+                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description", "placeholder": "Explanation" }));
+                question_template_holder.append(questionTemplate);
+
+                var answerTemplate = $("<fieldset>", { "class": "answer-box" });
+                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "tabindex": -1 }).bind("click", removeAnswer));
+                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ID" }));
+                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
+                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect", "value": true }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text", "placeholder": "Answer" }));
+                answer_template_holder.append(answerTemplate);
+
+                contentholder.append($("<label>", { "class": "title", "text": "Choose media" }));
+                contentholder.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
+                contentholder.append($("<div>", { "class": "media_preview" }));
+                contentholder.append($("<div>", { "class": "part_content " + type }));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion", "value": "Add question", "tabindex": -1 }).bind("click", addNewQuestion));
+
+                //Add First Question
+                if (data != null && data.Questions != null) {
+                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                        var quiz = data.Questions[i];
+                        addNewQuestion(quiz);
+                    }
+                }
+                else
+                    addNewQuestion();
+                break;
+            case "QUIZ3"://Trắc nghiệm match
+                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
+                questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
+                questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
+                questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
+                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1 }).bind("click", removeQuestion));
+
+                var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question", "tabindex": 0 }));
+                quizWrapper.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
+                quizWrapper.append($("<div>", { "class": "media_preview" }));
+                quizWrapper.append($("<label>", { "class": "input_label", "text": "Point" }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1", "tabindex": 0 }));
+                questionTemplate.append(quizWrapper);
+
+                var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer", "value": "+", "tabindex": -1 }).bind("click", addNewAnswer));
+                questionTemplate.append(answer_wrapper);
+                question_template_holder.append(questionTemplate);
+
+                var answerTemplate = $("<fieldset>", { "class": "answer-box selected" });
+                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "tabindex": -1 }).bind("click", removeAnswer));
+                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ID" }));
+                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
+                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect", "value": true }));
+                answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "checked": "checked", "tabindex": 0 }).bind("click", toggleCorrectAnswer));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer (tick if correct)", "tabindex": 0 }));
+                answerTemplate.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(answerTemplate.find(".media_holder"), "Questions.Answers.");
+                answerTemplate.append($("<div>", { "class": "media_preview" }));
+                answer_template_holder.append(answerTemplate);
+
+                contentholder.append($("<label>", { "class": "title", "text": "Choose media", "tabindex": -1 }));
+                contentholder.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
+                contentholder.append($("<div>", { "class": "media_preview" }));
+                contentholder.append($("<div>", { "class": "part_content " + type }));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion", "value": "Add question", "onclick": "addNewQuestion()", "tabindex": -1 }));
+
+                //Add question
+                if (data != null && data.Questions != null) {
+                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                        var quiz = data.Questions[i];
+                        addNewQuestion(quiz);
+                    }
+                }
+                else
+                    addNewQuestion();
+                break;
+            case "ESSAY"://Tự luận
+                contentholder.append($("<label>", { "class": "title", "text": "Enter title" }));
+                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Description" }));
+                if (data != null && data.description != null)
+                    contentholder.find("[name=Description]").val(data.description);
+                CKEDITOR.replace("editor");
+
+                //ClassicEditor
+                //    .create(document.querySelector('#editor'))
+                //    .then(newEditor => {
+                //        myEditor = newEditor;
+                //    })
+                //    .catch(error => {
+                //        console.error(error);
+                //    });
+
+                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
+                questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
+                questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
+                questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
+
+                var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question", "tabindex": 0 }));
+                quizWrapper.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
+                quizWrapper.append($("<div>", { "class": "media_preview" }));
+                quizWrapper.append($("<label>", { "class": "input_label", "text": "Point" }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1", "tabindex": 0 }));
+                questionTemplate.append(quizWrapper);
+
+                contentholder.append($("<label>", { "class": "title", "text": "Choose media", "tabindex": -1 }));
+                contentholder.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
+                contentholder.append($("<div>", { "class": "media_preview" }));
+                contentholder.append($("<div>", { "class": "part_content " + type }));
+
+                if (data != null && data.Questions != null) {
+                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                        var quiz = data.Questions[i];
+                        addNewQuestion(quiz);
+                    }
+                }
+                else
+                    addNewQuestion();
+                break;
+            default:
+                alert("Not implement");
+                break;
+        }
+
+        if (data != null && data.Media != null)
+            renderMediaContent(data, contentholder.find(".media_preview:first"), type);
+        //debugger;
+    }
+
+    var addNewQuestion = function (data = null) {
+        var container = $('.lesson_parts > .part_content');
+        var template = $('.question_template > fieldset');
+        var currentpos = $(container).find(".fieldQuestion").length;
+        var clone = template.clone();
+        $(clone).find('.fieldset_title').text("Quiz " + (currentpos + 1));
+        $(clone).attr("Order", currentpos);
+        $(clone).find("[name='Questions.Order']").val(currentpos);
+        if (data != null) {
+            if (data.ID != null)
+                $(clone).find("[name='Questions.ID']").val(data.ID);
+            if (data.Point != null)
+                $(clone).find("[name='Questions.Point']").val(data.Point);
+            if (data.Content != null)
+                $(clone).find("[name='Questions.Content']").val(data.Content);
+            if (data.Description != null)
+                $(clone).find("[name='Questions.Description']").val(data.Description);
+            if (data.Media != null) {
+                renderAddMedia(clone.find(".media_holder"), "Questions.", "", data.Media);
+                renderMediaContent(data, clone.find(".media_preview:first"), "");
+            }
+        }
+
+        $(clone).find("[name^='Questions.']").each(function () {
+            $(this).attr("name", $(this).attr("name").replace("Questions.", "Questions[" + (currentpos) + "]."));
+        });
+        $(container).append(clone);
+        if (data != null && data.Answers != null) {
+            for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
+                var answer = data.Answers[i];
+                addNewAnswer(null, clone, answer);
+            }
+        }
+        else
+            clone.find(".btnAddAnswer").click();//add new answer
+    }
+
+    var addNewAnswer = function (obj, wrapper = null, data = null) {
+        var question;
+        if (obj != null) {
+            question = $(obj).parent().parent();
+        } else
+            question = wrapper;
+        var question_pos = $(question).attr("Order");
+        var container = $(question).find('.answer-wrapper');
+        var template = $('.answer_template > .answer-box');
+        var clone = template.clone();
+        var currentpos = $(container).find(".answer-box").length;
+
+        if (data != null) {
+            if (data.ID != null)
+                $(clone).find("[name='Questions.Answers.ID']").val(data.ID);
+            if (data.ParentID != null)
+                $(clone).find("[name='Questions.Answers.ParentID']").val(data.ParentID);
+            if (data.Content != null)
+                $(clone).find("[name='Questions.Answers.Content']").val(data.Content);
+            if (data.IsCorrect != null) {
+                $(clone).find("[name='Questions.Answers.IsCorrect']").val(data.IsCorrect);
+                $(clone).find(".answer-checkbox").prop("checked", data.IsCorrect);
+                if (data.IsCorrect)
+                    $(clone).find(".answer-checkbox").parent().addClass("selected");
+            }
+            if (data.Media != null) {
+                renderAddMedia(clone.find(".media_holder"), "Questions.Answers.", "", data.Media);
+                renderMediaContent(data, clone.find(".media_preview:first"), "");
+            }
+        }
+
+        $(clone).find("[name^='Questions.Answers.']").each(function () {
+            $(this).attr("name", $(this).attr("name").replace("Questions.Answers.", "Questions[" + (question_pos) + "].Answers[" + currentpos + "]."));
+        });
+        if (obj != null)
+            $(obj).before(clone);
+        else
+            $(wrapper).find(".btnAddAnswer").before(clone);
+    }
+
+    var removeQuestion = function (obj) {
+        if (confirm("Remove question?")) {
+            var id = $(obj).siblings("[name$='.ID']").val();
+            var quizHolder = $(obj).parent();
+            if (!$(obj).parent().hasClass("fieldQuestion"))
+                quizHolder = $(obj).parent().parent();
+            quizHolder.parent().append($("<input>", { "type": "hidden", "name": "RemovedQuestions", "value": id }));
+            quizHolder.remove();
+        }
+    }
+
+    var removeAnswer = function (obj) {
+        if (confirm("Remove answer?")) {
+            var id = $(obj).siblings("[name$='.ID']").val();
+            if (id !== "")
+                $(obj).parent().parent().append($("<input>", { "type": "hidden", "name": "RemovedAnswers", "value": id }));
+            $(obj).parent().remove();
+        }
+    }
+
+    var renderAddMedia = function (wrapper, prefix, type = "", data = null) {
+        wrapper.empty();
+        wrapper.append($("<input>", { "type": "hidden", "name": prefix + "Media.Name", "for": "medianame" }));
+        wrapper.append($("<input>", { "type": "hidden", "name": prefix + "Media.OriginalName", "for": "mediaorgname" }));
+        wrapper.append($("<input>", { "type": "hidden", "name": prefix + "Media.Extension", "for": "mediaext" }));
+        wrapper.append($("<input>", { "type": "hidden", "name": prefix + "Media.Path", "for": "mediapath" }));
+        switch (type) {
+            case "IMG":
+                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": "image/*" }));
+                break;
+            case "VIDEO":
+                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": "video/*" }));
+                break;
+            case "AUDIO":
+                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": "audio/*" }));
+                break;
+            case "DOC":
+                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": ".pdf" }));
+                break;
+            default:
+                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide" }));
+                break;
+        }
+        wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddFile", "onclick": "chooseFile(this)", "value": "Choose file", "tabindex": -1 }));
+        wrapper.append($("<input>", { "type": "button", "class": "btn btn-danger btnResetFile hide", "onclick": "resetMedia(this)", "value": "x", "tabindex": -1 }));
+        if (data != null) {
+            if (data.Name != null) $(wrapper).find("[name='" + prefix + "Media.Name']").val(data.Name);
+            if (data.OriginalName != null) {
+                $(wrapper).find("[name='" + prefix + "Media.OriginalName']").val(data.OriginalName);
+                $(wrapper).find(".btnAddFile").val(data.OriginalName);
+                $(wrapper).find(".btnResetFile").removeClass("hide");
+            }
+            if (data.Extension != null) $(wrapper).find("[name='" + prefix + "Media.Extension']").val(data.Extension);
+            if (data.Path != null) {
+                $(wrapper).find("[name='" + prefix + "Media.Path']").val(data.Path);
+            }
+        }
+    }
 
 
 
@@ -1820,10 +2290,20 @@ var Lesson = (function () {
     window.Redo = resetLesson;
     window.GoBack = goBack;
 
-    window.EditLesson = renderEditLesson;
-    window.
+    window.EditLesson = modalEditLesson;
+    window.EditPart = modalEditPart;
+    window.AddPart = modalAddPart;
+    window.SelectTemplate = modalSelectTemplate;
 
-    window.AddPart = addPart;
+    window.RemovePart = removePart;
+    window.SortPart = sortPart;
+
+    window.RemoveQuestion = removeQuestion;
+    window.RemoveAnswer = removeAnswer;
+
+
+
+
     window.ReloadData = reloadData;
     return LessonInstance;
 }());
@@ -1880,86 +2360,6 @@ function toggleCompact(obj) {
         $(obj).text("Expand");
     else
         $(obj).text("Collapse");
-}
-
-var addNewQuestion = function (data = null) {
-    console.log(data);
-    var container = $('.lesson_parts > .part_content');
-    var template = $('.question_template > fieldset');
-    var currentpos = $(container).find(".fieldQuestion").length;
-    var clone = template.clone();
-    $(clone).find('.fieldset_title').text("Quiz " + (currentpos + 1));
-    $(clone).attr("Order", currentpos);
-    $(clone).find("[name='Questions.Order']").val(currentpos);
-    if (data != null) {
-        if (data.ID != null)
-            $(clone).find("[name='Questions.ID']").val(data.ID);
-        if (data.Point != null)
-            $(clone).find("[name='Questions.Point']").val(data.Point);
-        if (data.Content != null)
-            $(clone).find("[name='Questions.Content']").val(data.Content);
-        if (data.Description != null)
-            $(clone).find("[name='Questions.Description']").val(data.Description);
-        if (data.Media != null) {
-            render.mediaAdd(clone.find(".media_holder"), "Questions.", "", data.Media);
-            render.mediaContent(data, clone.find(".media_preview:first"), "");
-        }
-    }
-
-    $(clone).find("[name^='Questions.']").each(function () {
-        $(this).attr("name", $(this).attr("name").replace("Questions.", "Questions[" + (currentpos) + "]."));
-    });
-    $(container).append(clone);
-    console.log(data);
-    if (data != null && data.Answers != null) {
-        for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-            var answer = data.Answers[i];
-            addNewAnswer(null, clone, answer);
-        }
-    }
-    else
-        clone.find(".btnAddAnswer").click();//add new answer
-}
-
-var addNewAnswer = function (obj, wrapper = null, data = null) {
-    var question;
-    if (obj != null) {
-        question = $(obj).parent().parent();
-    } else
-        question = wrapper;
-    var question_pos = $(question).attr("Order");
-    var container = $(question).find('.answer-wrapper');
-    var template = $('.answer_template > .answer-box');
-    var clone = template.clone();
-    var currentpos = $(container).find(".answer-box").length;
-
-    console.log(data);
-    if (data != null) {
-        if (data.ID != null)
-            $(clone).find("[name='Questions.Answers.ID']").val(data.ID);
-        if (data.ParentID != null)
-            $(clone).find("[name='Questions.Answers.ParentID']").val(data.ParentID);
-        if (data.Content != null)
-            $(clone).find("[name='Questions.Answers.Content']").val(data.Content);
-        if (data.IsCorrect != null) {
-            $(clone).find("[name='Questions.Answers.IsCorrect']").val(data.IsCorrect);
-            $(clone).find(".answer-checkbox").prop("checked", data.IsCorrect);
-            if (data.IsCorrect)
-                $(clone).find(".answer-checkbox").parent().addClass("selected");
-        }
-        if (data.Media != null) {
-            render.mediaAdd(clone.find(".media_holder"), "Questions.Answers.", "", data.Media);
-            render.mediaContent(data, clone.find(".media_preview:first"), "");
-        }
-    }
-
-    $(clone).find("[name^='Questions.Answers.']").each(function () {
-        $(this).attr("name", $(this).attr("name").replace("Questions.Answers.", "Questions[" + (question_pos) + "].Answers[" + currentpos + "]."));
-    });
-    if (obj != null)
-        $(obj).before(clone);
-    else
-        $(wrapper).find(".btnAddAnswer").before(clone);
 }
 
 function toggleCorrectAnswer(obj) {
@@ -2045,54 +2445,7 @@ var submitForm = function (event, modalId, callback) {
     }
 }
 
-var SortLessonPart = function () {
-    $("#pills-tab").toggleClass("sorting");
-    if ($("#pills-tab").hasClass("sorting")) {
-        $("#part-menu").show();
-        $(".card-header .btn-sort").addClass("btn-warning");
-        $("#pills-tab").sortable({
-            revert: "invalid",
-            update: function (event, ui) {
-                var id = $(ui.item).find('a').attr("id").replace("pills-", "");
-                var ar = $(this).find("li");
-                var index = $(ar).index(ui.item);
-                ChangePartPosition(id, index);
-            }
-        });
-        $("#pills-tab").sortable("enable");
-        $("#pills-tab").disableSelection();
-    }
-    else {
-        $("#part-menu").hide();
-        $(".card-header .btn-sort").removeClass("btn-warning");
-        $("#pills-tab").sortable("disable");
-        window.ReloadData();
-    }
-}
 
-var questionService = {
-    remove: function (obj) {
-        if (confirm("Remove question?")) {
-            var id = $(obj).siblings("[name$='.ID']").val();
-            var quizHolder = $(obj).parent();
-            if (!$(obj).parent().hasClass("fieldQuestion"))
-                quizHolder = $(obj).parent().parent();
-            quizHolder.parent().append($("<input>", { "type": "hidden", "name": "RemovedQuestions", "value": id }));
-            quizHolder.remove();
-        }
-    }
-}
-
-var answerService = {
-    remove: function (obj) {
-        if (confirm("Remove answer?")) {
-            var id = $(obj).siblings("[name$='.ID']").val();
-            if (id !== "")
-                $(obj).parent().parent().append($("<input>", { "type": "hidden", "name": "RemovedAnswers", "value": id }));
-            $(obj).parent().remove();
-        }
-    }
-}
 
 function tab_gonext() {
     stopAllMedia();

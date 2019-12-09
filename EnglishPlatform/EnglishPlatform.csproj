@@ -82,6 +82,9 @@
     <None Include="Areas\Teacher\Views\News\Index.cshtml" />
     <None Include="compilerconfig.json" />
     <None Include="wwwroot\easy-real-time\js\easy-real-time.js" />
+    <None Include="wwwroot\fonts\feather.svg" />
+    <None Include="wwwroot\fonts\icofont.svg" />
+    <None Include="wwwroot\fonts\themify.svg" />
     <None Include="wwwroot\js\lib\datetimepicker\jquery.datetimepicker.js" />
     <None Include="wwwroot\js\lib\datetimepicker\jquery.mousewheel.js" />
     <None Include="wwwroot\js\lib\datetimepicker\php-date-formatter.min.js" />

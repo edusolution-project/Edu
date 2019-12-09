@@ -12,6 +12,9 @@ namespace BaseCustomerMVC.Models
 
         [JsonProperty("StatusDesc")]
         public string StatusDesc { get; set; } // Thông báo trả về
+
+        [JsonProperty("Location")]
+        public string Location { get; set; }
     }
 
     public class ReturnStatus
