@@ -22,47 +22,6 @@
     <input type="hidden" id="CourseID" value="@Data.CourseID" />
 
     <style>
-        .main-column {
-            overflow-x: hidden !important;
-            overflow-y: auto !important;
-            height: 100%;
-            padding: 0 12px;
-        }
-
-        #part-menu {
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background: #FFF;
-            z-index: 999;
-            padding: 7px;
-            border: solid 1px #999;
-        }
-
-        .tab-pane,
-        .tab-pane-quiz {
-            padding-bottom: 10px;
-            border-bottom: dashed 1px #CCC;
-            margin-bottom: 10px;
-            overflow: hidden;
-        }
-
-            .tab-pane.show,
-            .tab-pane-quiz.show {
-                display: block;
-            }
-
-        .Q3_absrow {
-            position: absolute;
-            top: 60px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            overflow: hidden;
-            margin: 0;
-        }
     </style>
 
 </div>
@@ -70,261 +29,30 @@
 @section Scripts{
     <script src="~/js/content-render.js?20191207"></script>
     <script>
-        var config = {
-            container: "lessonContainer",
-            mod: "preview",
-            url: {
-                load: '@Url.Action("GetDetailsLesson", "Lesson")',
-                list_part: '@Url.Action("GetList", "LessonPart")',
-                load_part: '@Url.Action("GetDetail", "LessonPart")',
-                save_part: '@Url.Action("CreateOrUpdate","LessonPart")',
-                del_part: '@Url.Action("Remove","LessonPart")'
-            },
-            type: @Data.TemplateType,
-            lesson_id: '@Data.ID',
-            class_id: '@Data.ID',
-            chap_id: '@Data.ChapterID'
-        }
-        var widget = new Lesson.onReady(config);
-
+    var config = {
+        container: "lessonContainer",
+        mod: "preview",
+        url: {
+            load: '@Url.Action("GetDetailsLesson", "Lesson")',
+            list_part: '@Url.Action("GetList", "LessonPart")',
+            load_part: '@Url.Action("GetDetail", "LessonPart")',
+            save_part: '@Url.Action("CreateOrUpdate", "LessonPart")',
+            del_part: '@Url.Action("Remove", "LessonPart")',
+            move_part: '@Url.Action("ChangePosition", "LessonPart")'
+        },
+        type: @Data.TemplateType,
+        lesson_id: '@Data.ID',
+        class_id: '@Data.ID',
+        chap_id: '@Data.ChapterID'
+    }
+    var widget = new Lesson.onReady(config);
     </script>
-
-    <style>
-
-        .right-content .left-col {
-            padding: 0 12px;
-            position: absolute;
-            width: 100%;
-        }
-
-            .right-content .left-col .page-title {
-                padding: 12px;
-            }
-
-            .right-content .left-col .main-container {
-                position: absolute;
-                padding: 0;
-                top: 56px;
-                bottom: 44px;
-                right: 0;
-                left: 0;
-                overflow-x: hidden;
-                overflow-y: auto;
-                z-index: 1000;
-                height: auto;
-            }
-
-        .description img {
-            max-width: 100%;
-        }
-
-        .part-box {
-            /*position: relative;*/
-            /*top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;*/
-            /*width: 100%;*/
-            overflow: hidden;
-        }
-
-            .part-box .scroll-wrapper {
-                /*overflow-x: hidden !important;*/
-                /*overflow-y: auto !important;*/
-                height: 100%;
-                /*padding: 0 12px;*/
-            }
-
-                .part-box .scroll-wrapper p {
-                    margin: 0.25rem 0;
-                }
-
-            .part-box .scroll-wrapper {
-                font-size: 1rem;
-            }
-
-                .part-box .scroll-wrapper .dragging {
-                    overflow: visible !important;
-                    /*overflow-y: auto !important;*/
-                }
-
-                .part-box .scroll-wrapper .droptarget {
-                    z-index: -1;
-                    /*overflow-y: auto !important;*/
-                }
-
-        #lessonSummary {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #004085;
-            max-height: 44px;
-            /*transition: ease 0.5s;*/
-            z-index: 1001;
-        }
-
-            #lessonSummary.expand {
-                max-height: 200px;
-                opacity: 0.85;
-            }
-
-            #lessonSummary .btn {
-                line-height: 1;
-                padding: .255rem .75rem;
-            }
-
-            #lessonSummary #quizNavigator {
-                display: none;
-            }
-
-            #lessonSummary.expand #quizNavigator {
-                display: block;
-            }
-
-        .rounded-quiz {
-            width: 28px;
-            height: 28px;
-        }
-
-            .rounded-quiz.completed {
-                background-color: #28a745 !important;
-            }
-
-        .QUIZ1 .answer-item, .QUIZ2 .answer-item {
-            max-width: 30%;
-            padding-right: 10px;
-            display: inline-block;
-        }
-
-
-
-
-        #nav-menu {
-            z-index: 2;
-            padding: 8px;
-        }
-
-            #nav-menu.bd-top {
-                border-top: dashed 1px #CCC;
-            }
-
-            #nav-menu.bd-bottom {
-                border-bottom: dashed 1px #CCC;
-            }
-
-
-            #nav-menu .lesson-tab {
-                height: 42px;
-            }
-
-        #pills-tab {
-            width: 100%;
-            overflow: hidden;
-            background: #DDD;
-            border: solid 1px #999;
-            z-index: 1021;
-            border-radius: 10px;
-        }
-
-            #pills-tab.compact {
-                height: 42px;
-                background: #DDD;
-            }
-
-            #pills-tab .nav-item {
-                width: 100%;
-            }
-
-                #pills-tab .nav-item .nav-link {
-                    padding: 3px 10px;
-                    cursor: pointer;
-                }
-
-        .tab-content > .tab-pane.show {
-            display: block;
-        }
-
-        /*************** SIMPLE OUTER SCROLLBAR ***************/
-
-        .scrollbar-outer > .scroll-element,
-        .scrollbar-outer > .scroll-element div {
-            border: none;
-            margin: 0;
-            padding: 0;
-            position: absolute;
-            z-index: 10;
-        }
-
-        .scrollbar-outer > .scroll-element {
-            background-color: #ffffff;
-        }
-
-            .scrollbar-outer > .scroll-element div {
-                display: block;
-                height: 100%;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-
-            .scrollbar-outer > .scroll-element.scroll-x {
-                bottom: 0;
-                height: 12px;
-                left: 0;
-                width: 100%;
-            }
-
-            .scrollbar-outer > .scroll-element.scroll-y {
-                height: 100%;
-                right: 0;
-                top: 0;
-                width: 12px;
-            }
-
-            .scrollbar-outer > .scroll-element.scroll-x .scroll-element_outer {
-                height: 8px;
-                top: 2px;
-            }
-
-            .scrollbar-outer > .scroll-element.scroll-y .scroll-element_outer {
-                left: 2px;
-                width: 8px;
-            }
-
-            .scrollbar-outer > .scroll-element .scroll-element_outer {
-                overflow: hidden;
-            }
-
-            .scrollbar-outer > .scroll-element .scroll-element_track {
-                background-color: #eeeeee;
-            }
-
-            .scrollbar-outer > .scroll-element .scroll-element_outer,
-            .scrollbar-outer > .scroll-element .scroll-element_track,
-            .scrollbar-outer > .scroll-element .scroll-bar {
-                -webkit-border-radius: 8px;
-                -moz-border-radius: 8px;
-                border-radius: 8px;
-            }
-
-            .scrollbar-outer > .scroll-element .scroll-bar {
-                background-color: #d9d9d9;
-            }
-
-                .scrollbar-outer > .scroll-element .scroll-bar:hover {
-                    background-color: #c2c2c2;
-                }
-
-            .scrollbar-outer > .scroll-element.scroll-draggable .scroll-bar {
-                background-color: #919191;
-            }
-    </style>
+    <link href="~/css/detailui.css" rel="stylesheet" />
 }
 
 @section Modals{
 
-    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
+    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal" data-backdrop="static">
         <div class="modal-dialog modal-xl lesson-modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -386,7 +114,7 @@
         </div>
     </div>
 
-    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="partModal">
+    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="partModal" data-backdrop="static">
         <div class="modal-dialog modal-xl lesson-modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">

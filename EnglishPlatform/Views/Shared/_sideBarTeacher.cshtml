@@ -147,43 +147,11 @@
         $(".right-content").click(function () {
             closeExtra();
         });
-        $('.sidebar-item a').tooltip();
-        //getCourseList();
+        $('.sidebar-item a').tooltip({
+            trigger: 'hover'
+        });
 
     });
-
-    @*function getCourseList() {
-        $.ajax({
-            type: "POST",
-            url: '@Url.Action("GetActiveList", "Class")',
-            data: {},
-            dataType:"json",
-            success: function (data) {
-                var body = $('#sidebar-course-holder .action-wrapper');
-                body.html("");
-                if (data.Data.length > 0) {
-                    for (i = 0; i < data.Data.length; ++i) {
-                        item = data.Data[i];
-                        body.append(
-                            "<li >" +
-                            "<a href='@Url.Action("Detail","Class")/" + item.ID + "' class='action-link'><h5 class='title'>" +
-                                item.Name +
-                            "</h5><h6 class='description'>" +
-                                item.SubjectName +
-                            "</h6></a>" +
-                            "</li>");
-                    }
-                }
-                else {
-                    body.append("<li>Không có lớp nào hoạt động</li>");
-                }
-
-            },
-            error: function (err) {
-                console.log(err.responseText)
-            }
-        });
-    }*@
 
     function showExtra(tab) {
         if ($('#extra-sidebar.show').length == 0) {

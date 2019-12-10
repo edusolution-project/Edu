@@ -100,33 +100,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }));
 
                 }
-                else //TODO: TEMPORARY USE - REMOVE LATER
-                {
-                    //Clone from lesson part - Temporary
-                    var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
-                    if (listLessonPart != null && listLessonPart.Count > 0)
-                    {
-                        foreach (var lessonpart in listLessonPart)
-                        {
-                            var clonepart = _lessonpartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity());
-                            clonepart.ID = null;
-                            clonepart.OriginID = lessonpart.ID;
-                            clonepart.TeacherID = currentClass.TeacherID;
-                            clonepart.ClassID = currentClass.ID;
-                            CloneLessonPart(clonepart);
-                        }
+                //else //TODO: TEMPORARY USE - REMOVE LATER
+                //{
+                //    //Clone from lesson part - Temporary
+                //    var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                //    if (listLessonPart != null && listLessonPart.Count > 0)
+                //    {
+                //        foreach (var lessonpart in listLessonPart)
+                //        {
+                //            var clonepart = _lessonpartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity());
+                //            clonepart.ID = null;
+                //            clonepart.OriginID = lessonpart.ID;
+                //            clonepart.TeacherID = currentClass.TeacherID;
+                //            clonepart.ClassID = currentClass.ID;
+                //            CloneLessonPart(clonepart);
+                //        }
 
-                        listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.ClassID == currentClass.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                //        listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.ClassID == currentClass.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
 
-                        data.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
-                        {
-                            Questions = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new CloneQuestionViewModel(q)
-                            {
-                                Answers = _cloneAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
-                            }).ToList()
-                        }));
-                    }
-                }
+                //        data.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
+                //        {
+                //            Questions = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new CloneQuestionViewModel(q)
+                //            {
+                //                Answers = _cloneAnswerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
+                //            }).ToList()
+                //        }));
+                //    }
+                //}
             }
 
             var response = new Dictionary<string, object>
@@ -455,6 +455,64 @@ namespace BaseCustomerMVC.Controllers.Teacher
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        [HttpPost]
+        public JsonResult ChangePosition(string ID, int pos, string ClassID)
+        {
+            var item = _service.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+            if (item == null) return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        {"Error", "Data not found" }
+                    });
+
+            var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID
+            ).SingleOrDefault();
+
+            if (parentLesson != null)
+            {
+                var parts = _service.CreateQuery().Find(o => o.ParentID == parentLesson.ID && o.ClassID == ClassID).SortBy(o => o.Order).ThenBy(o => o.ID).ToList();
+                var ids = parts.Select(o => o.ID).ToList();
+
+                var oldPos = ids.IndexOf(ID);
+                if (oldPos == pos)
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        {"Error", "Nothing change" }
+                    });
+
+                item.Order = pos;
+                var filter = Builders<CloneLessonPartEntity>.Filter.Where(o => o.ID == item.ID);
+                var update = Builders<CloneLessonPartEntity>.Update.Set("Order", pos);
+                var publish = _service.Collection.UpdateMany(filter, update);
+                int entry = -1;
+                foreach (var part in parts)
+                {
+                    if (part.ID == item.ID) continue;
+                    if (entry == pos - 1)
+                        entry++;
+                    entry++;
+                    part.Order = entry;
+                    var filterX = Builders<CloneLessonPartEntity>.Filter.Where(o => o.ID == part.ID);
+                    var updateX = Builders<CloneLessonPartEntity>.Update.Set("Order", part.Order);
+                    var publishX = _service.Collection.UpdateMany(filterX, updateX);
+                }
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", publish },
+                        {"Error", null }
+                    });
+            }
+            else
+            {
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        {"Error", "Not found" }
+                    });
             }
         }
 

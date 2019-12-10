@@ -67,100 +67,6 @@ namespace EnglishPlatform.Controllers
             }
         }
 
-        public IActionResult Register()
-        {
-            HttpContext.Remove(Cookies.DefaultLogin);
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult RegisterAPI(string UserName, string Name, string Phone, string PassWord, string Type)
-        {
-            var _username = UserName.Trim().ToLower();
-            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
-            {
-                ViewBag.MessageError = "Please fill your information";
-                return View();
-            }
-            else
-            {
-                string _sPass = Security.Encrypt(PassWord);
-                if (_accountService.IsAvailable(_username))
-                {
-                    ViewBag.MessageError = "Account exist";
-                    return View();
-                }
-                else
-                {
-                    var user = new AccountEntity()
-                    {
-                        PassWord = _sPass,
-                        UserName = _username,
-                        Name = Name,
-                        Phone = Phone,
-                        Type = Type,
-                        IsActive = false,
-                        CreateDate = DateTime.Now,
-                        UserCreate = null,
-                    };
-                    switch (Type)
-                    {
-                        case ACCOUNT_TYPE.TEACHER:
-                            user.RoleID = _roleService.GetItemByCode("teacher").ID;
-                            break;
-                        default:
-                            user.IsActive = true;// active student
-                            user.RoleID = _roleService.GetItemByCode("student").ID;
-                            break;
-                    }
-                    _accountService.CreateQuery().InsertOne(user);
-                    switch (Type)
-                    {
-                        case ACCOUNT_TYPE.TEACHER:
-                            //create teacher
-                            var teacher = new TeacherEntity()
-                            {
-                                FullName = user.Name,
-                                Email = user.UserName,
-                                Phone = user.Phone,
-                                IsActive = false,
-                                CreateDate = DateTime.Now
-                            };
-                            _teacherService.CreateQuery().InsertOne(teacher);
-                            user.UserID = teacher.ID;
-                            //send email for teacher
-                            break;
-                        default:
-                            //create student
-                            var student = new StudentEntity()
-                            {
-                                FullName = user.Name,
-                                Email = user.UserName,
-                                Phone = user.Phone,
-                                IsActive = true,// active student
-                                CreateDate = DateTime.Now
-                            };
-
-                            _studentService.CreateQuery().InsertOne(student);
-                            user.UserID = student.ID;
-                            //send email for student
-                            //add default class
-                            var testClassIDs = _default.defaultClassID;
-                            if (!string.IsNullOrEmpty(testClassIDs))
-                            {
-                                foreach (var id in testClassIDs.Split(';'))
-                                    if (!string.IsNullOrEmpty(id))
-                                        _classService.AddStudentToClass(id, student.ID);
-                            }
-                            break;
-                    }
-                    var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
-                    _accountService.CreateQuery().ReplaceOne(filter, user);
-                    ViewBag.Data = user;
-                    return View();
-                }
-            }
-        }
 
         [Route("/login")]
         public IActionResult Login()
@@ -300,6 +206,106 @@ namespace EnglishPlatform.Controllers
                 }
             }
         }
+
+        public async Task<JsonResult> RegisterAPI(string UserName, string Name, string Phone, string PassWord, string Type)
+        {
+            var _username = UserName.Trim().ToLower();
+            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
+            {
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Please fill your information",
+                });
+            }
+            else
+            {
+                string _sPass = Security.Encrypt(PassWord);
+                if (_accountService.IsAvailable(_username))
+                {
+                    return Json(new ReturnJsonModel
+                    {
+                        StatusCode = ReturnStatus.ERROR,
+                        StatusDesc = "Account exist",
+                    });
+                }
+                else
+                {
+                    var user = new AccountEntity()
+                    {
+                        PassWord = _sPass,
+                        UserName = _username,
+                        Name = Name,
+                        Phone = Phone,
+                        Type = Type,
+                        IsActive = false,
+                        CreateDate = DateTime.Now,
+                        UserCreate = null,
+                    };
+                    switch (Type)
+                    {
+                        case ACCOUNT_TYPE.TEACHER:
+                            user.RoleID = _roleService.GetItemByCode("teacher").ID;
+                            break;
+                        default:
+                            user.IsActive = true;// active student
+                            user.RoleID = _roleService.GetItemByCode("student").ID;
+                            break;
+                    }
+                    _accountService.CreateQuery().InsertOne(user);
+                    switch (Type)
+                    {
+                        case ACCOUNT_TYPE.TEACHER:
+                            //create teacher
+                            var teacher = new TeacherEntity()
+                            {
+                                FullName = user.Name,
+                                Email = user.UserName,
+                                Phone = user.Phone,
+                                IsActive = false,
+                                CreateDate = DateTime.Now
+                            };
+                            _teacherService.CreateQuery().InsertOne(teacher);
+                            user.UserID = teacher.ID;
+                            //send email for teacher
+                            break;
+                        default:
+                            //create student
+                            var student = new StudentEntity()
+                            {
+                                FullName = user.Name,
+                                Email = user.UserName,
+                                Phone = user.Phone,
+                                IsActive = true,// active student
+                                CreateDate = DateTime.Now
+                            };
+
+                            _studentService.CreateQuery().InsertOne(student);
+                            user.UserID = student.ID;
+                            //send email for student
+                            //add default class
+                            var testClassIDs = _default.defaultClassID;
+                            if (!string.IsNullOrEmpty(testClassIDs))
+                            {
+                                foreach (var id in testClassIDs.Split(';'))
+                                    if (!string.IsNullOrEmpty(id))
+                                        _classService.AddStudentToClass(id, student.ID);
+                            }
+                            break;
+                    }
+                    var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
+                    _accountService.CreateQuery().ReplaceOne(filter, user);
+                    ViewBag.Data = user;
+                    return Json(new ReturnJsonModel
+                    {
+                        StatusCode = ReturnStatus.SUCCESS,
+                        StatusDesc = "Account created successfully, login now to begin your first test!",
+                        Location = "/Login"
+                    });
+                }
+            }
+        }
+
 
         private void startPage()
         {

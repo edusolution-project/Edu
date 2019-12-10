@@ -27,35 +27,35 @@
                     <div class="note" v-if="forgot">Vui lòng nhập địa chỉ Email để đặt lại mật khẩu mới.</div>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="/login" id="sign_form">
+                    <form method="POST" action="/" id="sign_form">
                         <div class="form-group">
                             <label for="email">Địa chỉ email</label>
-                            <input type="text" v-model="email" class="form-control" placeholder="Nhập email" id="email">
+                            <input type="text" name="UserName" class="form-control" placeholder="Nhập email" id="email" v-model="email">
                         </div>
                         <div class="form-group" v-if="signup">
                             <label for="name">Họ và tên</label>
-                            <input type="text" name="Name" class="form-control" placeholder="Nhập họ tên" id="name">
+                            <input type="text" name="Name" class="form-control" placeholder="Nhập họ tên" id="name" v-model="name">
                         </div>
                         <div class="form-group" v-if="signup">
-                            <label for="msisdn">Số điện thoại</label>
-                            <input type="text" name="Phone" class="form-control" placeholder="Nhập số điện thoại" id="msisdn">
+                            <label for="phone">Số điện thoại</label>
+                            <input type="text" name="Phone" class="form-control" placeholder="Nhập số điện thoại" id="phone" v-model="phone">
                         </div>
                         <div class="form-group" v-if="!forgot">
                             <label for="password">Mật khẩu</label>
-                            <input type="password" v-model="password" class="form-control" placeholder="Nhập mật khẩu" id="password">
+                            <input type="password" name="PassWord" class="form-control" placeholder="Nhập mật khẩu" id="password" v-model="password">
                         </div>
                         <div class="form-group" v-if="!forgot">
-                            <label for="username">Tài khoản đăng nhập</label>
-                            <select class="form-control" v-model="username" id="username">
+                            <label for="usertype">Tài khoản đăng nhập</label>
+                            <select class="form-control" name="Type" id="usertype" v-model="usertype">
                                 <option value="student" selected>Student</option>
                                 <option value="teacher">Teacher</option>
-                                <option value="admin">Administrator</option>
+                                <option v-if="signin" value="admin">Administrator</option>
                             </select>
                         </div>
                         <div class="center">
                             <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signin" :disabled="disable" v-on:click="signIn()">Đăng nhập</button>
-                            <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="forgot" :disabled="disable">Đặt lại mật khẩu</button>
-                            <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signup" :disabled="disable">Đăng ký</button>
+                            <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="forgot" :disabled="disable" v-on:click="renewPass()">Đặt lại mật khẩu</button>
+                            <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signup" :disabled="disable" v-on:click="signUp()">Đăng ký</button>
                             <a href="javascript:;" title="Quên mật khẩu?" class="forgot-link" v-if="signin" v-on:click="changeState(2)">Quên mật khẩu?</a>
                         </div>
                     </form>
@@ -73,13 +73,14 @@
         data: {
             email : '',
             password : '',
-            username : '',
+            usertype : 'student',
             name : '',
-            msisdn : '',
+            phone : '',
             disable : false,
             signup : false,
             signin :true,
-            forgot : false
+            forgot: false,
+            action: '@Url.Action("LoginAPI","Home")'
         },
         methods: {
             changeState(s=1){
@@ -90,51 +91,89 @@
                         _that.signup = true
                         _that.signin = false
                         _that.forgot = false
-                        _that.action = "@Url.Action("ForgotAPI","Home")";
+                        _that.action = '@Url.Action("RegisterAPI","Home")'
                         break;
                     case 2:
                         _that.signup = false
                         _that.signin = false
                         _that.forgot = true
-                        _that.action = "@Url.Action("RegisterAPI","Home")";
+                        _that.action = '@Url.Action("ForgotAPI","Home")'
                         break;
                     default:
                         _that.signup = false
                         _that.signin = true
                         _that.forgot = false
-                        _that.action = "@Url.Action("LoginAPI","Home")";
+                        _that.action = '@Url.Action("LoginAPI","Home")'
                         break;
                 }
             },
-            signIn(){
+            signIn() {
                 let _that = this
                 _that.disable = true
                 let _form = new FormData()
                 _form.append('UserName',_that.email)
                 _form.append('PassWord',_that.password)
-                _form.append('Type',_that.username)
-                
-                axios.post(_that.action,_form)
+                _form.append('Type', _that.usertype)
+                console.log(_form);
+
+                axios.post(_that.action, _form)
                     .then(response => {
-                        console.log(response.data)
+                        //console.log(response.data)
                         if(response.data.StatusCode){
                             window.location.href= response.data.Location
                         }else{
-                            alert(response.data.StatusCode)
+                            alert(response.data.StatusDesc)
                             _that.disable = false
                         }
                      }).catch(e=>{
-                                alert(e.response.data.StatusCode)
+                                alert(e.response.data.StatusDesc)
                                 _that.disable = false
                         })
             },
-            signUp(){
+            signUp() {
                 let _that = this
+                console.log(_that.action);
                 _that.disable = true
+                let _form = new FormData()
+                _form.append('UserName', _that.email)
+                _form.append('Name',_that.name)
+                _form.append('PassWord',_that.password)
+                _form.append('Type', _that.usertype)
+                _form.append('Phone',_that.phone)
+
+                axios.post(_that.action,_form)
+                    .then(response => {
+                        //console.log(response.data)
+                        if (response.data.StatusCode) {
+                            alert(response.data.StatusDesc)
+                            window.location.href= response.data.Location
+                        }else{
+                            alert(response.data.StatusDesc)
+                            _that.disable = false
+                        }
+                     }).catch(e=>{
+                                alert(e.response.data.StatusDesc)
+                                _that.disable = false
+                        })
             },
             renewPass(){
                 let _that = this
                 _that.disable = true
+                let _form = new FormData()
+                _form.append('UserName', _that.email)
+
+                axios.post(_that.action, _form)
+                    .then(response => {
+                        if(response.data.StatusCode){
+                            window.location.href= response.data.Location
+                        }else{
+                            alert(response.data.StatusDesc)
+                            _that.disable = false
+                        }
+                     }).catch(e=>{
+                                alert(e.response.data.StatusDesc)
+                                _that.disable = false
+                        })
             }
         }
     });

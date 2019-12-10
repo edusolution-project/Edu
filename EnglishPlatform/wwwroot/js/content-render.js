@@ -3,6 +3,8 @@ var Debug = true;
 
 var mod = {
     PREVIEW: "preview",
+    TEACHERVIEW: "teacherview",
+    TEACHEREDIT: "teacheredit",
     EDIT: "edit",
     EXAM: "exam",
     REVIEW: "review"
@@ -14,9 +16,9 @@ var TEMPLATE_TYPE = {
 }
 
 var UIMode = {
-    LECTURE_ONLY: 1,
-    EXAM_ONLY: 2,
-    BOTH: 3
+    LECTURE_ONLY: "lecture",
+    EXAM_ONLY: "exam",
+    BOTH: "both"
 }
 
 var writeLog = function (name, msg) {
@@ -26,6 +28,8 @@ var writeLog = function (name, msg) {
 }
 
 var Lesson = (function () {
+
+    var _totalPart = 0;
 
     var _data = null;
 
@@ -71,8 +75,8 @@ var Lesson = (function () {
             case mod.PREVIEW:
                 renderPreview();
                 break;
-            case mod.EDIT:
-                renderEdit();
+            case mod.TEACHEREDIT:
+                renderPreview();
                 break;
             case mod.EXAM:
                 renderExam();
@@ -80,11 +84,15 @@ var Lesson = (function () {
             case mod.REVIEW:
                 renderReview();
                 break;
+            default:
+                renderPreview();
+                break;
         }
     }
 
     var reloadData = function () {
         _data = null;
+        _UImode = null;//reset UIMode
         onReady(config);
     }
 
@@ -150,7 +158,16 @@ var Lesson = (function () {
         Ajax(config.url.load, formData, "POST", true).then(function (res) {
             if (!isNull(res)) {
                 _data = JSON.parse(res).Data;
-                loadLessonParts({ LessonID: config.lesson_id }, callback);
+                switch (config.mod) {
+                    case mod.PREVIEW: //curriculum view
+                    case mod.TEACHERVIEW:
+                    case mod.TEACHEREDIT:
+                        loadLessonParts({ LessonID: config.lesson_id, ClassID: config.class_id }, callback);
+                        break;
+                    default:
+                        callback;
+                        break;
+                }
             }
         });
     }
@@ -171,7 +188,7 @@ var Lesson = (function () {
         var container = $('#' + config.container);
         container.empty();
 
-        var lessonBox = $("<div>", { "class": "lesson lesson-box h-100" });
+        var lessonBox = $("<div>", { "class": "lesson lesson-box h-100 mod_" + config.mod });
         container.append(lessonBox);
 
         var lessonContainer = $("<div>", { "class": "lesson-container h-100" });
@@ -217,7 +234,6 @@ var Lesson = (function () {
         var lessonHeader = mainContainer.find('.card-header');
         var lessonBody = mainContainer.find('.card-body');
         var lessonFooter = mainContainer.find('.card-footer');
-
         //header
         switch (config.mod) {
             case mod.PREVIEW:
@@ -247,7 +263,7 @@ var Lesson = (function () {
                 var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Edit", "data-toggle": "modal", "data-target": "#lessonModal", "onclick": "EditLesson('" + data.ID + "')" });
                 var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "')" });
                 //var close = $("<button>", { "class": "btn btn-primary btn-close", "text": "X", "onclick": "render.resetLesson()" });
-                var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Remove" });//.bind("click", "lessonService.remove('" + data.ID + "')");
+                var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Remove" });
 
                 var iconSort = $("<i>", { "class": "fas fa-sort" });
                 var iconEdit = $("<i>", { "class": "fas fa-edit" });
@@ -264,7 +280,75 @@ var Lesson = (function () {
                 lessonButton.append(remove); //removeLesson
                 remove.append(iconTrash);
                 headerRow.append(lessonButton);
+                break;
+            case mod.TEACHERVIEW:
+                var headerRow = $("<div>", { "class": "row" });
+                lessonHeader.show().append(headerRow);
 
+                var title_wrapper = $("<div>", { "class": "lesson-header-title col-md-9 col-sm-12" });
+                var title = $("<h5>");
+                var titleText = $("<span>", { "class": "title-text", "text": data.Title })
+                title.append(titleText);
+                title_wrapper.append(title);
+                headerRow.append(title_wrapper);
+
+                if (data.TemplateType == TEMPLATE_TYPE.EXAM) {
+                    if (data.Timer > 0) {
+                        var titleTimer = $("<span>", { "class": "title-timer", "text": " - duration: " + data.Timer + "m" });
+                        title.append(titleTimer);
+                    }
+                    if (data.Point > 0) {
+                        var titlePoint = $("<span>", { "class": "title-point", "text": " (" + data.Point + "p)" });
+                        title.append(titlePoint);
+                    }
+                }
+
+                var lessonButton = $("<div>", { "class": "lesson-button col-md-3 col-sm-12 text-right" });
+                var toggleMode = $("<button>", { "class": "btn btn-primary btn-add", "title": "Switch mode", "onclick": "SwitchMode('" + mod.TEACHEREDIT + "')", "text": "Switch to edit mode" });
+                var iconToggle = $("<i>", { "class": "fas fa-edit ml-2" });
+
+                lessonButton.append(toggleMode);
+                toggleMode.append(iconToggle);
+                headerRow.append(lessonButton);
+                break;
+            case mod.TEACHEREDIT:
+                var headerRow = $("<div>", { "class": "row" });
+                lessonHeader.show().append(headerRow);
+
+                var title_wrapper = $("<div>", { "class": "lesson-header-title col-md-9 col-sm-12" });
+                var title = $("<h5>");
+                var titleText = $("<span>", { "class": "title-text", "text": data.Title })
+                title.append(titleText);
+                title_wrapper.append(title);
+                headerRow.append(title_wrapper);
+
+                if (data.TemplateType == TEMPLATE_TYPE.EXAM) {
+                    if (data.Timer > 0) {
+                        var titleTimer = $("<span>", { "class": "title-timer", "text": " - duration: " + data.Timer + "m" });
+                        title.append(titleTimer);
+                    }
+                    if (data.Point > 0) {
+                        var titlePoint = $("<span>", { "class": "title-point", "text": " (" + data.Point + "p)" });
+                        title.append(titlePoint);
+                    }
+                }
+
+                var lessonButton = $("<div>", { "class": "lesson-button col-md-3 col-sm-12 text-right" });
+                var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sort", "onclick": "SortPart()" });
+                var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "')" });
+                var toggleMode = $("<button>", { "class": "btn btn-primary btn-add", "title": "Switch mode", "onclick": "SwitchMode('" + mod.TEACHERVIEW + "')", "text": "Switch to view mode" });
+
+                var iconSort = $("<i>", { "class": "fas fa-sort" });
+                var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
+                var iconToggle = $("<i>", { "class": "fas fa-eye ml-2" });
+
+                lessonButton.append(toggleMode);
+                toggleMode.append(iconToggle);
+                lessonButton.append(sort);
+                sort.append(iconSort);
+                lessonButton.append(create);
+                create.append(iconCreate);
+                headerRow.append(lessonButton);
                 break;
             case mod.EXAM:
                 //no header
@@ -275,6 +359,7 @@ var Lesson = (function () {
         }
 
         for (var i = 0; data.Part != null && i < data.Part.length; i++) {
+
             var item = data.Part[i];
             switch (item.Type) {
                 case "QUIZ1":
@@ -288,9 +373,13 @@ var Lesson = (function () {
             }
         }
 
+        $('.mod_' + config.mod).addClass("uimod_" + _UImode);
+
         //body
         switch (config.mod) {
             case mod.PREVIEW:
+            case mod.TEACHERVIEW:
+            case mod.TEACHEREDIT:
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
@@ -304,14 +393,18 @@ var Lesson = (function () {
                 if (_UImode == UIMode.EXAM_ONLY) {
                     $('#rightCol .tab-pane').each(function () {
                         var media = null;
-                        if ($(this).find(".QUIZ3").length > 0)
+                        var html = null;
+                        if ($(this).find(".QUIZ3").length > 0) {
                             $(this).addClass("h-100");
-                        else
+                            media = $(this).find(".Q3_absrow > .media-holder:first");
+                        }
+                        else {
                             media = $(this).find(".quiz-wrapper > .media-holder");
-
+                        }
+                        html = $(this).find(".part-description");
                         $(this).addClass("m-0");
                         $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
-                            .empty().append($(this).find('.part-box-header')).append(media)
+                            .empty().append($(this).find('.part-box-header')).append(media).append(html)
                             .appendTo('#leftCol')
                     })
                 }
@@ -325,15 +418,24 @@ var Lesson = (function () {
         //footer: navigation
         switch (config.mod) {
             case mod.PREVIEW:
+            case mod.TEACHERVIEW:
+            case mod.TEACHEREDIT:
                 if (_UImode == UIMode.EXAM_ONLY) {
                     var nav_bottom = $('<div>', { "class": "row" });
 
-                    var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Prev", "onclick": "tab_goback()" });
+                    var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Prev", "onclick": "PrevPart()" });
                     var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
-                    var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Next", "onclick": "tab_gonext()" });
+                    var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Next", "onclick": "NextPart()" });
                     var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
                     prevtab.append(iconprev);
                     nexttab.append(iconnext);
+
+                    _totalPart = data.Part.length;
+                    prevtab.prop("disabled", true);
+
+                    if (_totalPart <= 1)
+                        nexttab.prop("disabled", true);
+
 
                     nav_bottom.append($('<div>', { "class": "col-md-2 text-left" }).append(prevtab));
                     nav_bottom.append($('<div>', { "class": "col-md-8 text-center" }));
@@ -369,8 +471,8 @@ var Lesson = (function () {
                 rightCol.parent().hide();
                 break;
             case UIMode.EXAM_ONLY:
-                leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
-                rightCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
+                leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-4").show();
+                rightCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-8").show();
                 break;
             case UIMode.BOTH:
                 leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
@@ -379,8 +481,12 @@ var Lesson = (function () {
         }
     }
 
+    var switchMode = function (mode) {
+        config.mod = mode;
+        reloadData();
+    }
 
-    //Preview
+    //Preview: view + edit
     var renderPreview = function () {
         renderStandardLayout();
         //Prepare data
@@ -440,28 +546,33 @@ var Lesson = (function () {
         var ItemRow = $("<div>", { "class": "row " + (_UImode == UIMode.EXAM_ONLY ? " Q3_absrow" : "") });
 
         var boxHeader = $("<div>", { "class": "part-box-header row" });
-        if (data.Title != null) {
-            boxHeader.append($("<h5>", { "class": "title col-md-10", "text": data.Title + time + point }));
+
+        switch (config.mod) {
+            case mod.PREVIEW:
+            case mod.TEACHEREDIT:
+                boxHeader.append($("<h5>", { "class": "title col-md-10", "text": (data.Title == null? "": data.Title)  + time + point }));
+
+                var iconEdit = $("<i>", { "class": "fas fa-edit" });
+                var iconTrash = $("<i>", { "class": "fas fa-trash" });
+
+                var boxButton = $("<div>", { "class": "text-right col-md-2" });
+                boxButton.append($("<button>", { "class": "btn btn-primary btn-sm mr-1 ml-1", "title": "Edit", "data-toggle": "modal", "data-target": "#partModal", "onclick": "EditPart('" + data.ID + "')" }).append(iconEdit))
+                boxButton.append($("<button>", { "class": "btn btn-danger btn-sm mr-1 ml-1", "title": "Remove", "onclick": "RemovePart('" + data.ID + "')" }).append(iconTrash));
+                boxHeader.append(boxButton);
+                break;
+            default:
+                boxHeader.append($("<h5>", { "class": "title col-md-12", "text": (data.Title == null ? "" : data.Title) + time + point }));
+                break;
         }
-        else
-            boxHeader.append($("<div>", { "class": "col-md-10" }));
-        //boxHeader.append($("<a>", { "class": "btn btn-sm btn-view", "text": "Collapse", "onclick": "toggleCompact(this)" }));
-
-        var iconEdit = $("<i>", { "class": "fas fa-edit" });
-        var iconTrash = $("<i>", { "class": "fas fa-trash" });
-
-        var boxButton = $("<div>", { "class": "text-right col-md-2" });
-        boxButton.append($("<button>", { "class": "btn btn-primary btn-sm mr-1", "title": "Edit", "data-toggle": "modal", "data-target": "#partModal", "onclick": "EditPart('" + data.ID + "')" }).append(iconEdit))
-        boxButton.append($("<button>", { "class": "btn btn-danger btn-sm", "title": "Remove", "onclick": "RemovePart('" + data.ID + "')" }).append(iconTrash));
 
         itembox.append(boxHeader);
-        boxHeader.append(boxButton);
+
         //itembox.append(ItemRow);
         switch (data.Type) {
             case "TEXT":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "doc-content" }).html(breakLine(data.Description)));
+                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
                 }
                 itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
                 itembox.append(itemBody);
@@ -469,36 +580,37 @@ var Lesson = (function () {
                 break;
             case "IMG":
                 var itemBody = $("<div>", { "class": "media-wrapper" });
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                }
                 renderMediaContent(data, itemBody, "IMG");
-                if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "html": breakLine(data.Description) }));
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
             case "AUDIO":
                 var itemBody = $("<div>", { "class": "media-wrapper" });
-                renderMediaContent(data, itemBody, "AUDIO");
                 if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "html": breakLine(data.Description) }));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                renderMediaContent(data, itemBody, "AUDIO");
                 itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
             case "VIDEO":
                 var itemBody = $("<div>", { "class": "media-wrapper" });
-                renderMediaContent(data, itemBody, "VIDEO");
                 if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "html": breakLine(data.Description) }));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                renderMediaContent(data, itemBody, "VIDEO");
                 itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
             case "DOC":
                 var itemBody = $("<div>", { "class": "media-wrapper" });
-                renderMediaContent(data, itemBody, "DOC");
                 if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "description", "html": breakLine(data.Description) }));
+                    wrapper.append($("<div>", { "class": "part-description" }).html(data.Description));
+                renderMediaContent(data, itemBody, "DOC");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
@@ -510,8 +622,10 @@ var Lesson = (function () {
                 itembox.append(itemBody);
                 renderMediaContent(data, itemBody, "");
                 container.append(tabsitem);
-                //Render Content
-
+                //Render Description
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                }
                 //Render Question
                 totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -526,6 +640,9 @@ var Lesson = (function () {
                 renderMediaContent(data, ItemRow, "");
                 console.log(ItemRow);
                 ItemRow.append(itemBody);
+                if (data.Description != null) {
+                    ItemRow.append($("<div>", { "class": "part-description" }).html(data.Description));
+                }
                 ItemRow.find(".media-holder").addClass("col-12");
                 var answers_box = $("<div>", { "class": "answer-wrapper no-child col-4", "data-part-id": data.ID });
                 ItemRow.append(answers_box);
@@ -554,7 +671,7 @@ var Lesson = (function () {
             case "ESSAY":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
                 }
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
@@ -575,9 +692,9 @@ var Lesson = (function () {
             itemtitle.addClass("active");
             tabsitem.addClass("show active");
         }
-        $('.btn').tooltip({
-            trigger: "hover"
-        });
+        //$('.btn[title]').tooltip({
+        //    trigger: 'hover'
+        //});
 
         $('.Q3_absrow .quiz-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
         $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
@@ -607,7 +724,7 @@ var Lesson = (function () {
                 quizitem.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description) });
+                    var extend = $("<div>", { "class": "quiz-extend d-block", "html": breakLine(data.Description) });
                     quizitem.append(extend);
                 }
 
@@ -631,6 +748,10 @@ var Lesson = (function () {
                 });
                 quizitem.append(quiz_part);
                 quizitem.append(answer_part);
+                if (data.Description !== "") {
+                    var extend = $("<div>", { "class": "quiz-extend show", "html": breakLine(data.Description) });
+                    quizitem.append(extend);
+                }
 
                 var pane_item = $("<div>", { "class": "pane-item" });
                 if (data.Media == null) {
@@ -668,7 +789,6 @@ var Lesson = (function () {
                 }
                 break;
             default:
-
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var itembox = $("<div>", { "class": "quiz-item", "id": data.ID });
@@ -686,7 +806,7 @@ var Lesson = (function () {
                 itembox.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend", "text": breakLine(data.Description) });
+                    var extend = $("<div>", { "class": "quiz-extend show", "html": breakLine(data.Description) });
                     itembox.append(extend);
                 }
 
@@ -965,6 +1085,7 @@ var Lesson = (function () {
         $(modalForm).empty();
         $('#partModal #modalTitle').html("Add Content");
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": lessonID }));
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassID", "value": config.class_id }));
         $('#action').val(config.url.save_part);
         var selectTemplate = $("<select>", { "class": "templatetype form-control", "name": "Type", "required": "required" }).bind("change", chooseTemplate);
         $(modalForm).append(selectTemplate);
@@ -988,9 +1109,9 @@ var Lesson = (function () {
         var modalForm = window.partForm;
         $('#partModal #modalTitle').html("Update");
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassID", "value": config.class_id }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ID", "value": data.ID }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "Type", "value": data.Type }));
-
         $('#action').val(config.url.save_part);
 
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
@@ -1005,7 +1126,7 @@ var Lesson = (function () {
 
             $.ajax({
                 type: "POST",
-                url: config.url.RemovePart,
+                url: config.url.del_part,
                 data: {
                     "ID": id
                 },
@@ -1021,6 +1142,22 @@ var Lesson = (function () {
         }
     }
 
+    var changePartPos = function (id, pos) {
+        $.ajax({
+            type: "POST",
+            url: config.url.move_part,
+            data: {
+                "ID": id,
+                "pos": pos,
+                "ClassID": config.class_id
+            },
+            success: function (data) {
+                console.log(data.message);
+            }
+        });
+    }
+
+
     var sortPart = function () {
         $("#pills-tab").toggleClass("sorting");
         if ($("#pills-tab").hasClass("sorting")) {
@@ -1032,7 +1169,7 @@ var Lesson = (function () {
                     var id = $(ui.item).find('a').attr("id").replace("pills-", "");
                     var ar = $(this).find("li");
                     var index = $(ar).index(ui.item);
-                    ChangePartPosition(id, index);
+                    changePartPos(id, index);
                 }
             });
             $("#pills-tab").sortable("enable");
@@ -1064,23 +1201,16 @@ var Lesson = (function () {
         if (data != null && data.Title != null)
             contentholder.find("[name=Title]").val(data.Title);
 
+        contentholder.append(
+            $("<div>", { class: "mb-2" }).append(
+                $("<textarea>", { "id": "editor", "rows": "5", "name": "Description", "class": "input-text form-control", "placeholder": "Enter content" }))
+        );
+        if (data != null && data.Description != null)
+            contentholder.find("[name=Description]").val(data.Description);
         switch (type) {
             case "TEXT"://Text
                 contentholder.append($("<label>", { "class": "title", "text": "Enter your content" }));
-                contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Enter content" }));
-                if (data != null && data.Description != null)
-                    contentholder.find("[name=Description]").val(data.Description);
-
-                CKEDITOR.replace("editor");
-
-                //ClassicEditor
-                //    .create(document.querySelector('#editor'))
-                //    .then(newEditor => {
-                //        myEditor = newEditor;
-                //    })
-                //    .catch(error => {
-                //        console.error(error);
-                //    });
+                contentholder.append($('#editor'));
                 break;
             case "VIDEO":
                 contentholder.append($("<label>", { "class": "title", "text": "Choose video" }));
@@ -1111,8 +1241,9 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
-                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1 }).bind("click", removeQuestion));
+                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)" }));
                 questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
+
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(questionTemplate.find(".media_holder"), "Questions.");
                 questionTemplate.append($("<div>", { "class": "media_preview" }));
@@ -1122,27 +1253,28 @@ var Lesson = (function () {
                 questionTemplate.append($("<div>", { class: "mt-1" }).append($("<label>", { "class": "part_label", "text": "Answer (tick if correct)" })));
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
-                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer", "value": "+" }).bind("click", addNewAnswer));
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer ml-3", "value": "+", "onclick": "AddNewAnswer(this)" }));
                 questionTemplate.append(answer_wrapper);
                 questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explaination" }));
                 question_template_holder.append(questionTemplate);
 
-                var answerTemplate = $("<fieldset>", { "class": "answer-box" });
-                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "tabindex": -1 }).bind("click", removeAnswer));
+                var answerTemplate = $("<fieldset>", { "class": "answer-box m-1" });
+                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "tabindex": -1, "onclick": "RemoveAnswer(this)" }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ID" }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect" }));
-                answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox" }).bind("click", toggleCorrectAnswer));
+                answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "onclick": "ToggleCorrectAnswer(this)" }));
                 answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer" }));
                 answerTemplate.append($("<div>", { "class": "media_holder mt-1" }));
                 renderAddMedia(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
                 answer_template_holder.append(answerTemplate);
+
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion", "value": "Add question" }).bind("click", addNewQuestion));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Add question", "onclick": "AddNewQuestion(this)" }));
                 //Add First Question
                 if (data != null && data.Questions != null) {
                     for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -1159,35 +1291,34 @@ var Lesson = (function () {
                 quizWrapper.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
                 quizWrapper.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 quizWrapper.append($("<label>", { "class": "fieldset_title", "text": "" }));
-                quizWrapper.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1 }).bind("click", removeQuestion));
-                quizWrapper.append($("<input>", { "name": "Questions.Content", "class": "input-text quiz-text", "placeholder": "Position (skip for media content)" }));
-                quizWrapper.append($("<label>", { "class": "input_label", "text": "Point" }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point", "placeholder": "Point", "value": "1" }));
+                quizWrapper.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)" }));
+                quizWrapper.append($("<input>", { "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Position (skip for media content)" }));
+                quizWrapper.append($("<label>", { "class": "input_label mr-1", "text": "Point" }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1" }));
                 quizWrapper.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
                 quizWrapper.append($("<div>", { "class": "media_preview" }));
                 questionTemplate.append(quizWrapper);
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
-                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btnAddAnswer", "value": "+", "onclick": "addNewAnswer(this)" }));
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer ml-3", "value": "+", "onclick": "AddNewAnswer(this)" }));
                 questionTemplate.append(answer_wrapper);
-                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description", "placeholder": "Explanation" }));
+                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explanation" }));
                 question_template_holder.append(questionTemplate);
 
-                var answerTemplate = $("<fieldset>", { "class": "answer-box" });
-                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "tabindex": -1 }).bind("click", removeAnswer));
+                var answerTemplate = $("<fieldset>", { "class": "answer-box m-1" });
+                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "tabindex": -1, "onclick": "RemoveAnswer(this)" }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ID" }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect", "value": true }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text", "placeholder": "Answer" }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer" }));
                 answer_template_holder.append(answerTemplate);
 
-                contentholder.append($("<label>", { "class": "title", "text": "Choose media" }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion", "value": "Add question", "tabindex": -1 }).bind("click", addNewQuestion));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion bnt-primary", "value": "Add question", "tabindex": -1, "onclick": "AddNewQuestion(this)" }));
 
                 //Add First Question
                 if (data != null && data.Questions != null) {
@@ -1204,10 +1335,10 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
-                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1 }).bind("click", removeQuestion));
+                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)" }));
 
                 var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question", "tabindex": 0 }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control input-sm", "placeholder": "Question", "tabindex": 0 }));
                 quizWrapper.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
                 quizWrapper.append($("<div>", { "class": "media_preview" }));
@@ -1216,28 +1347,27 @@ var Lesson = (function () {
                 questionTemplate.append(quizWrapper);
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
-                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer", "value": "+", "tabindex": -1 }).bind("click", addNewAnswer));
+                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer ml-3", "value": "+", "tabindex": -1, "onclick": "AddNewAnswer(this)" }));
                 questionTemplate.append(answer_wrapper);
                 question_template_holder.append(questionTemplate);
 
-                var answerTemplate = $("<fieldset>", { "class": "answer-box selected" });
-                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "tabindex": -1 }).bind("click", removeAnswer));
+                var answerTemplate = $("<fieldset>", { "class": "answer-box m-1 selected" });
+                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "tabindex": -1, "onclick": "RemoveAnswer(this)" }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ID" }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect", "value": true }));
-                answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "checked": "checked", "tabindex": 0 }).bind("click", toggleCorrectAnswer));
+                answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "checked": "checked", "tabindex": 0, "onclick": "ToggleCorrectAnswer(this)" }));
                 answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer (tick if correct)", "tabindex": 0 }));
                 answerTemplate.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
                 answer_template_holder.append(answerTemplate);
 
-                contentholder.append($("<label>", { "class": "title", "text": "Choose media", "tabindex": -1 }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion", "value": "Add question", "onclick": "addNewQuestion()", "tabindex": -1 }));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Add question", "onclick": "AddNewQuestion(this)", "tabindex": -1 }));
 
                 //Add question
                 if (data != null && data.Questions != null) {
@@ -1254,7 +1384,7 @@ var Lesson = (function () {
                 contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Description" }));
                 if (data != null && data.description != null)
                     contentholder.find("[name=Description]").val(data.description);
-                CKEDITOR.replace("editor");
+                //CKEDITOR.replace("editor");
 
                 //ClassicEditor
                 //    .create(document.querySelector('#editor'))
@@ -1279,7 +1409,6 @@ var Lesson = (function () {
                 quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1", "tabindex": 0 }));
                 questionTemplate.append(quizWrapper);
 
-                contentholder.append($("<label>", { "class": "title", "text": "Choose media", "tabindex": -1 }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
@@ -1298,7 +1427,7 @@ var Lesson = (function () {
                 alert("Not implement");
                 break;
         }
-
+        CKEDITOR.replace("editor");
         if (data != null && data.Media != null)
             renderMediaContent(data, contentholder.find(".media_preview:first"), type);
         //debugger;
@@ -1424,8 +1553,8 @@ var Lesson = (function () {
                 wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide" }));
                 break;
         }
-        wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddFile", "onclick": "chooseFile(this)", "value": "Choose file", "tabindex": -1 }));
-        wrapper.append($("<input>", { "type": "button", "class": "btn btn-danger btnResetFile hide", "onclick": "resetMedia(this)", "value": "x", "tabindex": -1 }));
+        wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddFile m-1 btn-sm", "style": "max-width:80%", "onclick": "chooseFile(this)", "value": "Choose media", "tabindex": -1 }));
+        wrapper.append($("<input>", { "type": "button", "class": "btn btn-danger btnResetFile btn-sm hide m-1", "onclick": "resetMedia(this)", "value": "x", "tabindex": -1 }));
         if (data != null) {
             if (data.Name != null) $(wrapper).find("[name='" + prefix + "Media.Name']").val(data.Name);
             if (data.OriginalName != null) {
@@ -1440,11 +1569,54 @@ var Lesson = (function () {
         }
     }
 
+    var toggleCorrectAnswer = function (obj) {
+        var isChecked = $(obj).prop('checked');
+        $(obj).prev().val(isChecked);
+        if ($(obj).parent().hasClass("selected") != isChecked)
+            $(obj).parent().toggleClass("selected");
+    }
 
 
+    //Navigation
+    var prevPart = function () {
+        var panes = $('.tab-pane');
+        var index = panes.index($('.tab-pane.active'));
+        if (index > 0) {
+            goPartInx(index - 1);
+        }
+    }
 
+    var nextPart = function () {
+        var panes = $('.tab-pane');
+        var index = panes.index($('.tab-pane.active'));
+        if (index < panes.length - 1) {
+            goPartInx(index + 1);
+        }
+    }
 
+    var goQuiz = function (quizid) {
+        var _quiz = $('#' + quizid);
+        var _partid = _quiz.attr('data-part-id');
+        var _part = $('#pills-part-' + _partid);
+        if (_part.hasClass('active')) {
+            return false;
+        }
+        var panes = $('.tab-pane');
+        var index = panes.index(_part);
+        goPartInx(index);
+    }
 
+    var goPartInx = function (idx) {
+        stopAllMedia();
+        var panes = $('.tab-pane');
+        var quizpanes = $('.tab-pane-quiz');
+        $('.tab-pane.show.active').removeClass('show active');
+        $('.tab-pane-quiz.show.active').removeClass('show active');
+        $(panes[idx]).addClass('show active');
+        $(quizpanes[idx]).addClass('show active');
+        $('.prevtab').prop('disabled', idx == 0);
+        $('.nexttab').prop('disabled', idx == _totalPart - 1);
+    }
 
     //Exam
     var renderExam = function () {
@@ -1913,8 +2085,8 @@ var Lesson = (function () {
         var tabList = '<div id="pills-tabContent" class="tab-content">';
         var nav = '<div id="nav-menu" class="col-md-12 mb-3 pb-3 bd-bottom">';
         var nav_bottom = '<div id="nav-menu" class="col-md-12 mt-3 pt-3 bd-top">';
-        nav += '<div class="col-md-1 text-left d-inline-block"><button class="prevtab btn btn-success" data-toggle="tooltip" title="Phần trước" onclick="tab_goback()"><i class="fas fa-arrow-left"></i></button></div>'; //left button
-        nav_bottom += '<div class="col-md-4 text-left d-inline-block"><button class="prevtab btn btn-success" onclick="tab_goback()"><i class="fas fa-arrow-left"></i></button></div>';
+        nav += '<div class="col-md-1 text-left d-inline-block"><button class="prevtab btn btn-success" data-toggle="tooltip" title="Phần trước" onclick="PrevPart()"><i class="fas fa-arrow-left"></i></button></div>'; //left button
+        nav_bottom += '<div class="col-md-4 text-left d-inline-block"><button class="prevtab btn btn-success" onclick="PrevPart()"><i class="fas fa-arrow-left"></i></button></div>';
         nav += '<div class="lesson-tabs col-md-10 d-inline-block"><ul id="pills-tab" class="nav nav-pills compact" onclick="toggle_tab_compact()">';
         for (var i = 0; i < data.Parts.length; i++) {
             var item = data.Parts[i];
@@ -1930,10 +2102,10 @@ var Lesson = (function () {
             }
         }
         nav += '</ul></div>';
-        nav += '<div class="col-md-1 text-right d-inline-block"><button class="nexttab btn btn-success" data-toggle="tooltip" title="Phần sau" onclick="tab_gonext()"><i class="fas fa-arrow-right"></i></button></div>'; //right button
+        nav += '<div class="col-md-1 text-right d-inline-block"><button class="nexttab btn btn-success" data-toggle="tooltip" title="Phần sau" onclick="NextPart()"><i class="fas fa-arrow-right"></i></button></div>'; //right button
 
         nav_bottom += '<div class="col-md-4 text-center d-inline-block"><button class="btn btn-success pl-5 pr-5" onclick="CompleteExam()">Nộp bài</button></div>';
-        nav_bottom += '<div class="col-md-4 text-right d-inline-block"><button class="nexttab btn btn-success" onclick="tab_gonext()"><i class="fas fa-arrow-right"></i></button></div>';
+        nav_bottom += '<div class="col-md-4 text-right d-inline-block"><button class="nexttab btn btn-success" onclick="NextPart()"><i class="fas fa-arrow-right"></i></button></div>';
         nav_bottom += '</div>';
         nav += '</div>';
         tabList += '</div>';
@@ -2299,15 +2471,20 @@ var Lesson = (function () {
     window.SortPart = sortPart;
 
     window.RemoveQuestion = removeQuestion;
+    window.AddNewQuestion = addNewQuestion;
+
     window.RemoveAnswer = removeAnswer;
-
-
-
+    window.AddNewAnswer = addNewAnswer;
+    window.ToggleCorrectAnswer = toggleCorrectAnswer;
 
     window.ReloadData = reloadData;
+
+    window.NextPart = nextPart;
+    window.PrevPart = prevPart;
+
+    window.SwitchMode = switchMode;
     return LessonInstance;
 }());
-
 
 function chooseFile(obj) {
     $(obj).siblings("input[type=file]").focus().click();
@@ -2327,7 +2504,7 @@ function changeMedia(obj) {
 }
 
 function resetMedia(obj) {
-    $(obj).siblings(".btnAddFile").val("Choose file");
+    $(obj).siblings(".btnAddFile").val("Choose media");
     $(obj).siblings("input[type=file]").val('').attr("name", "");
     $(obj).siblings("[for=medianame]").val('');
     $(obj).siblings("[for=mediaorgname]").val('');
@@ -2360,14 +2537,6 @@ function toggleCompact(obj) {
         $(obj).text("Expand");
     else
         $(obj).text("Collapse");
-}
-
-function toggleCorrectAnswer(obj) {
-
-    var isChecked = $(obj).prop('checked');
-    $(obj).prev().val(isChecked);
-    if ($(obj).parent().hasClass("selected") != isChecked)
-        $(obj).parent().toggleClass("selected");
 }
 
 var hideModal = function (modalId) {
@@ -2445,37 +2614,3 @@ var submitForm = function (event, modalId, callback) {
     }
 }
 
-
-
-function tab_gonext() {
-    stopAllMedia();
-
-    var panes = $('.tab-pane');
-    var quizpanes = $('.tab-pane-quiz');
-    var index = panes.index($('.tab-pane.active'));
-
-    if (index < panes.length - 1) {
-        $(panes[index]).removeClass('show active');
-        $(panes[index + 1]).addClass('show active');
-
-        $(quizpanes[index]).removeClass('show active');
-        $(quizpanes[index + 1]).addClass('show active');
-    }
-};
-
-function tab_goback() {
-
-    stopAllMedia();
-
-    var panes = $('.tab-pane');
-    var quizpanes = $('.tab-pane-quiz');
-    var index = panes.index($('.tab-pane.active'));
-
-    if (index > 0) {
-        $(panes[index]).removeClass('show active');
-        $(panes[index - 1]).addClass('show active');
-
-        $(quizpanes[index]).removeClass('show active');
-        $(quizpanes[index - 1]).addClass('show active');
-    }
-};

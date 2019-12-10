@@ -4,42 +4,60 @@
     var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
 }
-
-<!-- Page Heading -->
-<div class="container">
-    <div class="breadcumb" style="padding: 0 0 15px; font-weight:bold;">
-        <a href="@Url.Action("Detail","Class")/@Class.ID">@Class.Name</a> / @Data.Title
-    </div>
-
-    <div id="lessonContainer">
-    </div>
-
-</div>
-<input type="hidden" id="LessonID" value="@Data.ID" />
-<input type="hidden" id="ChapterID" value="@Data.ChapterID" />
-<input type="hidden" id="CourseID" value="@Data.CourseID" />
-<input type="hidden" id="ClassID" value="@Class.ID" />
 <script>
-    $(document).ready(function () {
-        load.lesson($("#LessonID").val(), $("#ClassID").val());
-    });
+    activeTab = "course";
 </script>
-@section Scripts{
-    <script src="~/js/teacher-lesson.js"></script>
-}
-@section Modals{
-    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonModal">
+<div class="left-col">
+    <div class="page-title">
+        <h1><a href="@Url.Action("Modules","Class")/@Class.ID">@Class.Name</a> / @Data.Title</h1>
+    </div>
+    <div class="main-container">
+        <div id="lessonContainer" class="h-100">
+        </div>
         <input type="hidden" id="action" value="" />
+    </div>
+    <input type="hidden" id="LessonID" value="@Data.ID" />
+    <input type="hidden" id="ChapterID" value="@Data.ChapterID" />
+    <input type="hidden" id="CourseID" value="@Data.CourseID" />
+</div>
+
+@section Scripts{
+    <script src="~/js/content-render.js?20191207"></script>
+    <script>
+    var config = {
+        container: "lessonContainer",
+        mod: mod.TEACHERVIEW,
+        url: {
+            load: '@Url.Action("GetDetailsLesson", "Lesson")',
+            list_part: '@Url.Action("GetList", "CloneLessonPart")',
+            load_part: '@Url.Action("GetDetail", "CloneLessonPart")',
+            save_part: '@Url.Action("CreateOrUpdate", "CloneLessonPart")',
+            del_part: '@Url.Action("Remove", "CloneLessonPart")',
+            move_part: '@Url.Action("ChangePosition","CloneLessonPart")'
+        },
+        type: @Data.TemplateType,
+        lesson_id: '@Data.ID',
+        class_id: '@Class.ID',
+        chap_id: '@Data.ChapterID'
+    }
+    var widget = new Lesson.onReady(config);
+    </script>
+    <link href="~/css/detailui.css" rel="stylesheet" />
+}
+
+@section Modals{
+
+    <div class="modal fade" role="dialog" aria-hidden="true" id="partModal" data-backdrop="static">
         <div class="modal-dialog modal-xl lesson-modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Modal title</h5>
+                    <h5 class="modal-title" id="modalTitle">Add new part</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="#" id="modal-body" name="modalForm" enctype="multipart/form-data"></form>
+                    <form action="#" id="modal-body" name="partForm" enctype="multipart/form-data"></form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Close</button>
@@ -49,3 +67,4 @@
         </div>
     </div>
 }
+

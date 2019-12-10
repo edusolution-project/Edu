@@ -23,6 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\HomeController - Copy.cs" />
+    <Compile Remove="Controllers\HomeController_2.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Areas\Student\Views\Lesson\Exam.cshtml" />
     <Content Remove="Areas\Student\Views\Lesson\Lecture.cshtml" />
     <Content Remove="Areas\Teacher\Views\Class\Detail - Copy.cshtml" />
@@ -30,7 +35,6 @@
     <Content Remove="Areas\Teacher\Views\Schedule\Schedule.cshtml" />
     <Content Remove="compilerconfig.json" />
     <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
-    <Content Remove="wwwroot\js\student-exam.js~RF16ce98a.TMP" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,7 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <_ContentIncludedByDefault Remove="wwwroot\css\newsfeed.min.css" />
     <_ContentIncludedByDefault Remove="wwwroot\scss\sb-admin-2.css" />
   </ItemGroup>
 
@@ -77,19 +80,61 @@
     <None Include="Areas\Teacher\Views\Curriculum\Lesson.cshtml" />
     <None Include="Areas\Teacher\Views\Discuss\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Home\Index.cshtml" />
-    <None Include="Areas\Teacher\Views\Lesson\Detail.cshtml" />
+    <None Include="Areas\Teacher\Views\Lesson\Detail_0.cshtml" />
     <None Include="Areas\Teacher\Views\Lesson\Exam.cshtml" />
     <None Include="Areas\Teacher\Views\News\Index.cshtml" />
     <None Include="compilerconfig.json" />
+    <None Include="wwwroot\css\layout - Copy.scss" />
+    <None Include="wwwroot\css\layout.scss" />
+    <None Include="wwwroot\css\newsfeed.scss" />
+    <None Include="wwwroot\css\stylesheet.less" />
+    <None Include="wwwroot\css\uivar.scss" />
+    <None Include="wwwroot\css\_sidebar.scss" />
     <None Include="wwwroot\easy-real-time\js\easy-real-time.js" />
     <None Include="wwwroot\fonts\feather.svg" />
     <None Include="wwwroot\fonts\icofont.svg" />
     <None Include="wwwroot\fonts\themify.svg" />
+    <None Include="wwwroot\js\content-render.js" />
+    <None Include="wwwroot\js\curriculum-lesson-frame.js" />
+    <None Include="wwwroot\js\curriculum-lesson.js" />
+    <None Include="wwwroot\js\custom.js" />
+    <None Include="wwwroot\js\demo\datatables-demo.js" />
+    <None Include="wwwroot\js\fullcalendar.min.js" />
+    <None Include="wwwroot\js\hub-student.js" />
+    <None Include="wwwroot\js\hubs\connection.js" />
+    <None Include="wwwroot\js\hubs\newfeed.base.js" />
+    <None Include="wwwroot\js\hubs\render.html.js" />
+    <None Include="wwwroot\js\jquery-ui-timepicker-addon.js" />
+    <None Include="wwwroot\js\jquery-ui.min.js" />
+    <None Include="wwwroot\js\jquery.min.js" />
+    <None Include="wwwroot\js\jquery.scrollbar.js" />
+    <None Include="wwwroot\js\jquery.scrollbar.min.js" />
+    <None Include="wwwroot\js\lesson.js" />
+    <None Include="wwwroot\js\lib\ckeditor.js" />
+    <None Include="wwwroot\js\lib\config.js" />
+    <None Include="wwwroot\js\lib\config.url.base.js" />
     <None Include="wwwroot\js\lib\datetimepicker\jquery.datetimepicker.js" />
     <None Include="wwwroot\js\lib\datetimepicker\jquery.mousewheel.js" />
     <None Include="wwwroot\js\lib\datetimepicker\php-date-formatter.min.js" />
+    <None Include="wwwroot\js\lib\notification\notification.js" />
+    <None Include="wwwroot\js\lib\notification\notification.scss" />
+    <None Include="wwwroot\js\lib\schedule-mini.js" />
+    <None Include="wwwroot\js\lib\schedule.js" />
+    <None Include="wwwroot\js\lib\schedule.js.map" />
+    <None Include="wwwroot\js\lib\Security\base64.js" />
+    <None Include="wwwroot\js\lib\teacher.config.url.base.js" />
+    <None Include="wwwroot\js\lib\xhr.js" />
+    <None Include="wwwroot\js\masonry.pkgd.min.js" />
+    <None Include="wwwroot\js\moment-with-locales.min.js" />
+    <None Include="wwwroot\js\moment.js" />
+    <None Include="wwwroot\js\moment.min.js" />
     <None Include="wwwroot\js\plugins\ck4\adapters\jquery.js" />
+    <None Include="wwwroot\js\plugins\ck4\build-config.js" />
+    <None Include="wwwroot\js\plugins\ck4\CHANGES.md" />
+    <None Include="wwwroot\js\plugins\ck4\ckeditor.js" />
+    <None Include="wwwroot\js\plugins\ck4\config.js" />
     <None Include="wwwroot\js\plugins\ck4\lang\en.js" />
+    <None Include="wwwroot\js\plugins\ck4\LICENSE.md" />
     <None Include="wwwroot\js\plugins\ck4\plugins\a11yhelp\dialogs\a11yhelp.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\a11yhelp\dialogs\lang\af.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\a11yhelp\dialogs\lang\ar.js" />
@@ -448,6 +493,7 @@
     <None Include="wwwroot\js\plugins\ck4\plugins\youtube\lang\vi.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\youtube\lang\zh.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\youtube\plugin.js" />
+    <None Include="wwwroot\js\plugins\ck4\README.md" />
     <None Include="wwwroot\js\plugins\ck4\samples\img\logo.svg" />
     <None Include="wwwroot\js\plugins\ck4\samples\js\sample.js" />
     <None Include="wwwroot\js\plugins\ck4\samples\js\sf.js" />
@@ -469,7 +515,11 @@
     <None Include="wwwroot\js\plugins\ck4\samples\toolbarconfigurator\lib\codemirror\LICENSE" />
     <None Include="wwwroot\js\plugins\ck4\samples\toolbarconfigurator\lib\codemirror\show-hint.js" />
     <None Include="wwwroot\js\plugins\ck4\skins\moono-lisa\readme.md" />
+    <None Include="wwwroot\js\plugins\ck4\styles.js" />
     <None Include="wwwroot\js\plugins\ck4\vendor\promise.js" />
+    <None Include="wwwroot\js\plugins\ckeditor.js" />
+    <None Include="wwwroot\js\plugins\jquery.lazy.min.js" />
+    <None Include="wwwroot\js\plugins\jquery.lazy.plugins.min.js" />
     <None Include="wwwroot\js\plugins\translations\ar.js" />
     <None Include="wwwroot\js\plugins\translations\ast.js" />
     <None Include="wwwroot\js\plugins\translations\az.js" />
@@ -524,6 +574,18 @@
     <None Include="wwwroot\js\plugins\translations\vi.js" />
     <None Include="wwwroot\js\plugins\translations\zh-cn.js" />
     <None Include="wwwroot\js\plugins\translations\zh.js" />
+    <None Include="wwwroot\js\popper.min.js" />
+    <None Include="wwwroot\js\sb-admin-2.min.js" />
+    <None Include="wwwroot\js\script.js" />
+    <None Include="wwwroot\js\site.js" />
+    <None Include="wwwroot\js\student-exam-new - Copy.js" />
+    <None Include="wwwroot\js\student-exam-new.js" />
+    <None Include="wwwroot\js\student-exam-review.js" />
+    <None Include="wwwroot\js\student-exam-v2.js" />
+    <None Include="wwwroot\js\student-exam.js" />
+    <None Include="wwwroot\js\teacher-exam.js" />
+    <None Include="wwwroot\js\teacher-lesson-frame.js" />
+    <None Include="wwwroot\js\teacher-lesson.js" />
     <None Include="wwwroot\scss\navs\_global.scss" />
     <None Include="wwwroot\scss\navs\_sidebar.scss" />
     <None Include="wwwroot\scss\navs\_topbar.scss" />
