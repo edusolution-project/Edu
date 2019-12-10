@@ -23,7 +23,7 @@ namespace BaseHub
                 {
                     _groups.Add(Context.ConnectionId, className);
                     Groups.AddToGroupAsync(Context.ConnectionId, className);
-                    string message = UserName + " đã vào lớp";
+                    string message = UserName + " đã vào lớp có tên là : "+className;
                     return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
                 }
                 else

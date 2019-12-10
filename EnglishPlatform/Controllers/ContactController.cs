@@ -57,12 +57,12 @@ namespace Admin_Customer.Controllers
                     {
                         curentID = currentUser.ID;
                     }
-                    var listItem = _classService.Collection.Find(o => o.IsActive == true && (o.Students.Contains(curentID) || o.TeacherID == curentID) && (o.IsGroup == false || o.IsGroup == null)).ToList();
+                    var listItem = _classService.Collection.Find(o => o.IsActive == true && (o.Students.Contains(curentID) || o.TeacherID == curentID)).ToList();
                     HashSet<object> listTeacher = new HashSet<object>();
                     for (var i = 0; listItem != null && i < listItem.Count; i++)
                     {
                         var item = listItem[i];
-                        var teacher = _teacherService.GetItemByID(item.ID);
+                        var teacher = _teacherService.GetItemByID(item.TeacherID);
                         if (teacher == null) teacher = new TeacherEntity() { Email = "longthaihoang94@gmail.com", FullName = "Hoàng Thái Long" };
                         listTeacher.Add(new { name=teacher.FullName, email = teacher.Email });
                         var Name = item.Name;

@@ -78,7 +78,7 @@ connection.on("ReceiveGroup", function (data) {
                                     </div>
                                     <div class="extends-post">
                                     <a href="javascript:void(0)" onclick="openChat('${item.ID}')">
-                                        0 trả lời <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <span id="number-comment-${item.ID}">0</span> trả lời <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path fill-rule="evenodd" clip-rule="evenodd" d="M3.98419 0.46476L7.16617 3.64674C7.36144 3.842 7.36144 4.15859 7.16617 4.35385L3.98419 7.53583C3.78893 7.73109 3.47235 7.73109 3.27709 7.53583C3.08183 7.34057 3.08183 7.02398 3.27709 6.82872L5.60551 4.50029L1.18762 4.50029C0.91148 4.50029 0.687622 4.27644 0.687622 4.00029C0.687622 3.72415 0.91148 3.50029 1.18762 3.50029L5.60551 3.50029L3.27709 1.17187C3.08183 0.976605 3.08183 0.660022 3.27709 0.46476C3.47235 0.269498 3.78893 0.269498 3.98419 0.46476Z" fill="#D03239" />
                                         </svg>
                                     </a>
