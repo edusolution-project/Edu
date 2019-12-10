@@ -20,7 +20,7 @@ namespace BaseEasyRealTime.Controllers
             _service = service;
         }
         [HttpPost]
-        public JsonResult Create(string title,string content,int state, HashSet<string> receivers)
+        public JsonResult Create(string content,int state,HashSet<string> receivers)
         {
             try
             {
@@ -33,14 +33,14 @@ namespace BaseEasyRealTime.Controllers
                     {
                         State = state,
                         Content = content,
-                        Title = title,
+                        Name = User.Identity.Name,
                         Medias = media,
                         Created = DateTime.Now,
                         Sender = User.FindFirst(ClaimTypes.Email)?.Value,
                         Receivers = receivers,
                         Views = new HashSet<string>()
                     };
-
+                    _service.CreateOrUpdate(item);
                     return new JsonResult(new { code = 200 , msg = "Đăng bài thành công" , data = item });
                 }
                 else

@@ -19,6 +19,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly FileProcess _fileProcess;
         private readonly AccountService _accountService;
         private readonly ISession _session;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public DefaultConfigs _default { get; }
 
         public HomeController(FileProcess fileProcess, AccountService accountService,
@@ -29,7 +30,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _studentService = studentService;
             _accountService = accountService;
             _fileProcess = fileProcess;
-            _session = httpContextAccessor.HttpContext.Session;
+            _httpContextAccessor = httpContextAccessor;
+            _session = _httpContextAccessor.HttpContext.Session;
             _default = defaultvalue.Value;
         }
 
@@ -38,7 +40,8 @@ namespace BaseCustomerMVC.Controllers.Student
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
             ViewBag.Student = student;
-            _session.SetString("userAvatar", student.Avatar ?? _default.defaultAvatar);
+            var avatar = student != null && !string.IsNullOrEmpty(student.Avatar) ? student.Avatar : _default.defaultAvatar;
+            HttpContext.Session.SetString("userAvatar", avatar);
             return View();
         }
 

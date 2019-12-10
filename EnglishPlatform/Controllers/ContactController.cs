@@ -39,7 +39,25 @@ namespace Admin_Customer.Controllers
                 {
                     var type = User.FindFirst("Type")?.Value;
                     var user = User.FindFirst(ClaimTypes.Email)?.Value;
-                    var listItem = _classService.Collection.Find(o => o.IsActive == true && (o.IsGroup == false || o.IsGroup == null)).ToList();
+                    var curentID = "";
+                    var currentUser = _studentService.Collection.Find(o => o.Email == user)?.SingleOrDefault();
+                    if(currentUser ==null)
+                    {
+                        var currentTeacher = _teacherService.Collection.Find(o => o.Email == user)?.SingleOrDefault();
+                        if(currentTeacher == null)
+                        {
+
+                        }
+                        else
+                        {
+                            curentID = currentTeacher.ID;
+                        }
+                    }
+                    else
+                    {
+                        curentID = currentUser.ID;
+                    }
+                    var listItem = _classService.Collection.Find(o => o.IsActive == true && (o.Students.Contains(curentID) || o.TeacherID == curentID) && (o.IsGroup == false || o.IsGroup == null)).ToList();
                     HashSet<object> listTeacher = new HashSet<object>();
                     for (var i = 0; listItem != null && i < listItem.Count; i++)
                     {
@@ -55,7 +73,7 @@ namespace Admin_Customer.Controllers
                             members = students.Select(o => o.Email).ToHashSet();
                             members.Add(teacher.Email);
                         }
-                        var isGroup = CreateGroup(Name, members, teacher.Email);
+                        var isGroup = CreateGroup(Name, item.ID, members, teacher.Email);
                         if (isGroup)
                         {
                             item.IsGroup = true;
@@ -83,12 +101,12 @@ namespace Admin_Customer.Controllers
             }
         }
 
-        private bool CreateGroup(string Name, HashSet<string> members, string master)
+        private bool CreateGroup(string Name,string classID, HashSet<string> members, string master)
         {
-            var item = _groupService.Collection.Find(o => o.Name == Name.ConvertUnicodeToCode("-", true) && o.Members.Count == members.Count && o.IsPrivateChat == false && o.MasterGroup.Contains(master))?.ToList();
+            var item = _groupService.Collection.Find(o => o.Name == classID && o.Members.Count == members.Count && o.IsPrivateChat == false && o.MasterGroup.Contains(master))?.ToList();
             if(item == null || item.Count == 0)
             {
-                _groupService.Create(Name, Name.ConvertUnicodeToCode("-",true),master,members,new HashSet<string> { master });
+                _groupService.Create(Name, classID, master,members,new HashSet<string> { master });
                 return true;
             }
             return false;

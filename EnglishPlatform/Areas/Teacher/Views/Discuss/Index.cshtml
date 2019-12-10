@@ -8,7 +8,10 @@
     var activeTab = "comments";
 </script>
 
-<div class="left-col">
+
+
+
+@*<div class="left-col">
     <div class="page-title row">
         <h1 class="col-md-10">@ViewData["Title"]</h1>
         <div class="col-md-2 text-right p-0">
@@ -58,7 +61,7 @@
             </div>
         </div>
     </div>
-    <!-- Modal -->
+     Modal 
     <div class="modal fade" id="new-feed__reply--popup" tabindex="-1" role="dialog" aria-labelledby="replyModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -72,10 +75,10 @@
                     <form name="CommentFeed" method="post">
                         <input type="hidden" name="GroupID" value="" />
                         <input type="hidden" name="ParentID" value="" />
-                        @*<div class="form-group">
+                        <div class="form-group">
                                 <label>Title :</label>
                                 <input type="text" class="form-control" name="Title" placeholder="Title">
-                            </div>*@
+                            </div>
                         <div class="form-group">
                             <label>Nội dung :</label>
                             <input type="hidden" name="Content" id="editorReply">
@@ -179,4 +182,4 @@
     }
     </script>
 
-}
+}*@

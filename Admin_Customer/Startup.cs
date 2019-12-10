@@ -35,7 +35,8 @@ namespace Admin_Customer
                     options.AccessDeniedPath = "/denied";
                     options.LoginPath = "/login";
                 });
-
+            services.AddSession();
+            services.AddSingleton<IHttpContextAccessor,HttpContextAccessor>();
             services.AddLogs();
             services.AddTransient<IndefindCtrlService>();
             services.AddServiceBase();
@@ -61,6 +62,7 @@ namespace Admin_Customer
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseSession();
             app.GetConfiguration(Configuration);
             app.UseAuthention(Configuration);
             app.UseHttpsRedirection();

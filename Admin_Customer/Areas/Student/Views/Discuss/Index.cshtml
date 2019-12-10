@@ -8,6 +8,39 @@
     var activeTab = "comments";
 </script>
 
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="box-search">
+                <select class="group-list float-left" id="choosen-group">
+                    <option value="">------ Chọn khóa học -------</option>
+                    @for(int i = 0; classList != null && i < classList.Count; i++)
+                    {
+                        var item = classList[i];
+                        <option value="@item.ID">@item.Name</option>
+                    }
+                </select>
+                <div class="float-right form-group">
+                    <a href="javascript:void(0)" class="icon icon-search" id="input-search-content">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.29631 2.66666C4.73944 2.66666 2.66669 4.73941 2.66669 7.29628C2.66669 9.85316 4.73944 11.9259 7.29631 11.9259C8.53631 11.9259 9.66244 11.4384 10.4935 10.6446C10.5157 10.6171 10.5396 10.5905 10.5652 10.565C10.5907 10.5394 10.6173 10.5156 10.6448 10.4934C11.4385 9.66229 11.9259 8.53621 11.9259 7.29628C11.9259 4.73941 9.85319 2.66666 7.29631 2.66666ZM12.638 11.2236C13.4476 10.1244 13.9259 8.76619 13.9259 7.29628C13.9259 3.63484 10.9578 0.666656 7.29631 0.666656C3.63487 0.666656 0.666687 3.63484 0.666687 7.29628C0.666687 10.9577 3.63487 13.9259 7.29631 13.9259C8.7663 13.9259 10.1245 13.4475 11.2238 12.6379L13.6263 15.0403C14.0168 15.4308 14.65 15.4308 15.0405 15.0403C15.431 14.6498 15.431 14.0166 15.0405 13.6261L12.638 11.2236Z" fill="#7CC6F1" />
+                        </svg>
+                    </a>
+                    <input class="input-search" value="" placeholder="Tìm kiếm"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="list">
+
+            </div>
+        </div>
+        <div class="col-4"></div>
+    </div>
+</div>
+
+
+
 <div class="left-col">
     <div class="page-title row">
         <h1 class="col-md-11">@ViewData["Title"]</h1>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AdminManager.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
@@ -25,8 +26,9 @@ namespace AdminManager.Controllers
             return View();
         }
         [Route("/dang-ky")]
-        public IActionResult Register()
+        public IActionResult Register(CustomerEntity item)
         {
+            ViewBag.Data = item;
             return View();
         }
     }

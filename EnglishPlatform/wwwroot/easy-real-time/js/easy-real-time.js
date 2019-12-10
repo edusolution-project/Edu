@@ -106,6 +106,7 @@ var easyRealTime = (function () {
                     loadMessage(this);
                 });
                 connection.invoke("GoToClass", `chat-${item.name}`);
+                connection.invoke("GoToClass", `newfeed-${item.name}`);
             }
 
         } else {
