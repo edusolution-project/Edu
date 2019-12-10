@@ -31,13 +31,14 @@ namespace BaseEasyRealTime.Controllers
                     files?.TryGetValue("success", out media);
                     var item = new CommentEntity()
                     {
+                        Name = User.Identity.Name,
                         ParentID = parentID,
                         Content = content,
                         Medias = media,
                         Created = DateTime.Now,
                         Sender = User.FindFirst(ClaimTypes.Email)?.Value
                     };
-
+                    _service.CreateOrUpdate(item);
                     return new JsonResult(new { code = 200 , msg = "Đăng bài thành công" , data = item });
                 }
                 else
@@ -80,20 +81,48 @@ namespace BaseEasyRealTime.Controllers
         }
         [HttpGet]
         [Obsolete]
-        public JsonResult Get(string parentID,bool IsReply, long pageIndex, long pageSize)
+        public JsonResult Get(string parentID,bool IsReply)
         {
             try
             {
                 if (User != null && User.Identity.IsAuthenticated)
                 {
-                    if (string.IsNullOrEmpty(parentID))
+                    if (!string.IsNullOrEmpty(parentID))
                     {
-                        var listItem = _service.CreateQuery().Find(_=>_.ParentID == parentID && _.IsReply == IsReply)?.Skip((int)(pageSize*pageIndex))?.Limit((int)pageSize)?.ToList();
+                        var listItem = _service.CreateQuery().Find(_=>_.ParentID == parentID && _.IsReply == IsReply)?.ToList();
                         return new JsonResult(new { code = listItem == null ? 404 : 200, msg = listItem == null ? "Không tìm thấy bài đăng" : "Đã tìm thấy bài viết", data = listItem });
                     }
                     else
                     {
                         return new JsonResult(new { code = 404, msg = "Chưa có comment nào"});
+                    }
+                }
+                else
+                {
+                    return new JsonResult(new { code = 201, msg = "Bạn không có quyền xem bài viết này !!! " });
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { code = 500, msg = ex.Message, data = ex });
+            }
+        }
+        [HttpGet]
+        [Obsolete]
+        public JsonResult GetCount(string newFeedId)
+        {
+            try
+            {
+                if (User != null && User.Identity.IsAuthenticated)
+                {
+                    if (!string.IsNullOrEmpty(newFeedId))
+                    {
+                        var listItem = _service.CreateQuery().Count(o=>o.ParentID == newFeedId);
+                        return new JsonResult(new { code = listItem == 0 ? 404 : 200, msg = listItem == 0 ? "Không tìm thấy bài đăng" : "Đã tìm thấy bài viết", data = listItem });
+                    }
+                    else
+                    {
+                        return new JsonResult(new { code = 404, msg = "Chưa có comment nào" });
                     }
                 }
                 else

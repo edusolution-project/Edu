@@ -1,0 +1,13 @@
+﻿
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@ViewBag.Data.Name</h1>
+
+@using(Html.BeginForm("Register","Accounts",FormMethod.Post,new { }))
+{
+    <input name="Name" value="longht"/>
+    <input type="submit" value="submit"/>
+}

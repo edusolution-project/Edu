@@ -23,7 +23,7 @@ namespace Core_v2.Repositories
             if (string.IsNullOrEmpty(dbName))
             {
                 _connectionName = _config.GetSection("dbName:Default").Value;
-                _dbname = _config.GetSection("dbName:Default").Value;
+                _dbname = string.IsNullOrEmpty(Startup.keyOver) ? _config.GetSection("dbName:Default").Value : Startup.keyOver;
             }
             else
             {
@@ -41,7 +41,7 @@ namespace Core_v2.Repositories
         {
             _config = config;
             string _dbname = "";
-            if (string.IsNullOrEmpty(dbName)) _dbname = _config.GetSection("dbName:Default").Value;
+            if (string.IsNullOrEmpty(dbName)) { _dbname = string.IsNullOrEmpty(Startup.keyOver) ? _config.GetSection("dbName:Default").Value : Startup.keyOver; }
             else _dbname = _config.GetSection("dbName:" + dbName).Value;
             _tableName = typeof(T).Name.ToLower().Replace("entity", string.Empty).Replace("model", string.Empty);
             _client = new MongoClient(_config.GetConnectionString(_dbname));

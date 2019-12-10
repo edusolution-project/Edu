@@ -7,6 +7,7 @@ namespace BaseEasyRealTime.Entities
 {
     public class CommentEntity : EntityBase
     {
+        public string Name { get; set; }
         public string Sender { get; set; }
         public string Content { get; set; }
         public List<FileManagerCore.Globals.MediaResponseModel> Medias { get; set; } = new List<FileManagerCore.Globals.MediaResponseModel>();

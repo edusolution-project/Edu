@@ -1,0 +1,50 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Login</h1>
+
+@using (Html.BeginForm("login", "accounts", FormMethod.Post, new { @class = "form-control", @name = "myform" , @id="my-form-login"}))
+{
+    <input data-name="UserName" value="" placeholder="Teen ddang nhap" class="form-control" />
+    <input data-name="Password" value="" placeholder="Mat khau" type="password" class="form-control" />
+    <button class="btn btn-success" type="button" id="login-btn">Login</button>
+}
+
+<script type="text/javascript">
+    var makeRequest = function (url, method) {
+		// Create the XHR request
+		var request = new XMLHttpRequest();
+
+		// Return it as a Promise
+		return new Promise(function (resolve, reject) {
+
+			// Setup our listener to process compeleted requests
+			request.onreadystatechange = function () {
+
+				// Only run if the request is complete
+				if (request.readyState !== 4) return;
+
+				// Process the response
+				if (request.status >= 200 && request.status < 300) {
+					// If successful
+					resolve(request);
+				} else {
+					// If failed
+					reject({
+						status: request.status,
+						statusText: request.statusText
+					});
+				}
+
+			};
+
+		});
+    };
+    var form = document.getElementById("my-form-login");
+    makeRequest(form.action, "POST").then(function (data) {
+        console.log(data);
+    })
+</script>
