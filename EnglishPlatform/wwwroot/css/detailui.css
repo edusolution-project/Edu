@@ -70,7 +70,7 @@ p {
         position: absolute;
         padding: 0;
         top: 56px;
-        bottom: 44px;
+        bottom: 0;
         right: 0;
         left: 0;
         overflow-x: hidden;
@@ -78,6 +78,10 @@ p {
         z-index: 1000;
         height: auto;
     }
+
+footer {
+    display: none;
+}
 
 .description img {
     max-width: 100%;

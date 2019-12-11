@@ -240,7 +240,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             var lessonpart = item.ToEntity();
-            _service.CreateOrUpdate(lessonpart);
+            //_service.CreateOrUpdate(lessonpart);
+            if (lessonpart.ID != null)
+            {
+                _service.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
+            }
+            else
+            {
+                _service.CreateQuery().InsertOne(lessonpart);
+            }
             item.ID = lessonpart.ID;
 
             if (RemovedQuestions != null & RemovedQuestions.Count > 0)
@@ -317,7 +325,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         quiz.LessonID = item.ParentID;
                     }
 
-                    _cloneQuestionService.CreateOrUpdate(quiz);
+                    //_cloneQuestionService.CreateOrUpdate(quiz);
+                    if (quiz.ID != null)
+                    {
+                        _cloneQuestionService.CreateQuery().ReplaceOne(t => t.ID == quiz.ID, quiz);
+                    }
+                    else
+                    {
+                        _cloneQuestionService.CreateQuery().InsertOne(quiz);
+                    }
                     questionVM.ID = quiz.ID;
 
                     if (questionVM.Answers != null && questionVM.Answers.Count > 0)
@@ -377,7 +393,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 answer.Updated = DateTime.Now;
                                 answer.ClassID = item.ClassID;
                             }
-                            _cloneAnswerService.CreateOrUpdate(answer);
+                            //_cloneAnswerService.CreateOrUpdate(answer);
+                            if (answer.ID != null)
+                            {
+                                _cloneAnswerService.CreateQuery().ReplaceOne(t => t.ID == answer.ID, answer);
+                            }
+                            else
+                            {
+                                _cloneAnswerService.CreateQuery().InsertOne(answer);
+                            }
                         }
                     }
                 }

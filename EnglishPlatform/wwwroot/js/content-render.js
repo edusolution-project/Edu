@@ -475,8 +475,8 @@ var Lesson = (function () {
                 rightCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-8").show();
                 break;
             case UIMode.BOTH:
-                leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
-                rightCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
+                leftCol.parent().removeClass("col-md-4").removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
+                rightCol.parent().removeClass("col-md-6").removeClass("col-md-8").removeClass("col-md-12").addClass("col-md-6").show();
                 break;
         }
     }
@@ -550,7 +550,7 @@ var Lesson = (function () {
         switch (config.mod) {
             case mod.PREVIEW:
             case mod.TEACHEREDIT:
-                boxHeader.append($("<h5>", { "class": "title col-md-10", "text": (data.Title == null? "": data.Title)  + time + point }));
+                boxHeader.append($("<h5>", { "class": "title col-md-10", "text": (data.Title == null ? "" : data.Title) + time + point }));
 
                 var iconEdit = $("<i>", { "class": "fas fa-edit" });
                 var iconTrash = $("<i>", { "class": "fas fa-trash" });
@@ -885,7 +885,7 @@ var Lesson = (function () {
     var renderMediaContent = function (data, wrapper, type = "") {
 
         if (data.Media != null) {
-            var mediaHolder = $("<div>", { "class": "media-holder " + type });
+            var mediaHolder = $("<div>", { "class": "media-holder mt-2 mb-2 " + type });
             switch (type) {
                 case "IMG":
                     mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path }));
@@ -1156,7 +1156,6 @@ var Lesson = (function () {
             }
         });
     }
-
 
     var sortPart = function () {
         $("#pills-tab").toggleClass("sorting");
