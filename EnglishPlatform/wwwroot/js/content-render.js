@@ -39,8 +39,9 @@ var Lesson = (function () {
 
     var config = {
         container: "",
-        mod: "",//preview, edit, exam, review
+        mod: "",
         url: {
+            //Teacher
             load: "", //all: load lesson data
             save: "", //edit: save lesson data
             list_part: "",//all: get all part
@@ -48,14 +49,17 @@ var Lesson = (function () {
             save_part: "",//edit: save part,
             move_part: "",//change: change part position,
             del_part: "",
+            //Student
             current: "", //exam: load current exam state
             start: "", //exam: start exam
             answer: "", //exam: set answer for question
             removeans: "", //exam: unset answer for question
-            end: "" //exam: complete lesson
+            end: "", //exam: complete lesson
+            review: "" //review: review result
         },
         lesson_id: "",
-        class_id: ""
+        class_id: "",
+        exam_id: ""
     }
 
     // icon show on lesson parts list
@@ -227,6 +231,8 @@ var Lesson = (function () {
             throw "No data";
         }
 
+        console.log(_data);
+
         var data = _data;
 
         var mainContainer = $('#' + config.container);
@@ -234,6 +240,9 @@ var Lesson = (function () {
         var lessonHeader = mainContainer.find('.card-header');
         var lessonBody = mainContainer.find('.card-body');
         var lessonFooter = mainContainer.find('.card-footer');
+
+        _totalPart = data.Part.length;
+
         //header
         switch (config.mod) {
             case mod.PREVIEW:
@@ -271,8 +280,15 @@ var Lesson = (function () {
                 var iconTrash = $("<i>", { "class": "fas fa-trash" });
                 lessonButton.append(iconSort);
 
+
                 lessonButton.append(sort);
                 sort.append(iconSort);
+
+
+                if (!(_totalPart > 0)) {
+                    $(sort).prop("disabled", true);
+                }
+
                 lessonButton.append(edit);
                 edit.append(iconEdit);
                 lessonButton.append(create);
@@ -297,7 +313,7 @@ var Lesson = (function () {
                         var titleTimer = $("<span>", { "class": "title-timer", "text": " - duration: " + data.Timer + "m" });
                         title.append(titleTimer);
                     }
-                    if (data.Point > 0) {
+                    if (data.Point > 1) {
                         var titlePoint = $("<span>", { "class": "title-point", "text": " (" + data.Point + "p)" });
                         title.append(titlePoint);
                     }
@@ -341,6 +357,10 @@ var Lesson = (function () {
                 var iconSort = $("<i>", { "class": "fas fa-sort" });
                 var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
                 var iconToggle = $("<i>", { "class": "fas fa-eye ml-2" });
+
+                if (!(_totalPart > 1)) {
+                    $(sort).prop("disabled", true);
+                }
 
                 lessonButton.append(toggleMode);
                 toggleMode.append(iconToggle);
@@ -430,16 +450,23 @@ var Lesson = (function () {
                     prevtab.append(iconprev);
                     nexttab.append(iconnext);
 
-                    _totalPart = data.Part.length;
+
                     prevtab.prop("disabled", true);
 
                     if (_totalPart <= 1)
                         nexttab.prop("disabled", true);
 
 
-                    nav_bottom.append($('<div>', { "class": "col-md-2 text-left" }).append(prevtab));
-                    nav_bottom.append($('<div>', { "class": "col-md-8 text-center" }));
-                    nav_bottom.append($('<div>', { "class": "col-md-2 text-right" }).append(nexttab));
+                    var _footerLeft = $('<div>', { "class": "col-md-2 text-left" });
+                    _footerLeft.append(prevtab);
+                    var _footerRight = $('<div>', { "class": "col-md-2 text-right" });
+                    _footerRight.append(nexttab);
+                    var _footerCenter = $('<div>', { "class": "col-md-8 text-center" });
+                    _footerCenter.append($("<button>", { "class": "btn btn-primary", "title": "Toggle Explanation", "text": "Toggle Explanation", "onclick": "ToggleExplanation(this)" }));
+
+                    nav_bottom.append(_footerLeft);
+                    nav_bottom.append(_footerCenter);
+                    nav_bottom.append(_footerRight);
 
                     lessonFooter.show().append(nav_bottom);
                 }
@@ -475,8 +502,8 @@ var Lesson = (function () {
                 rightCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-8").show();
                 break;
             case UIMode.BOTH:
-                leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
-                rightCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
+                leftCol.parent().removeClass("col-md-6").removeClass("col-md-4").removeClass("col-md-12").addClass("col-md-6").show();
+                rightCol.parent().removeClass("col-md-6").removeClass("col-md-8").removeClass("col-md-12").addClass("col-md-6").show();
                 break;
         }
     }
@@ -550,7 +577,7 @@ var Lesson = (function () {
         switch (config.mod) {
             case mod.PREVIEW:
             case mod.TEACHEREDIT:
-                boxHeader.append($("<h5>", { "class": "title col-md-10", "text": (data.Title == null? "": data.Title)  + time + point }));
+                boxHeader.append($("<h5>", { "class": "title col-md-10", "text": (data.Title == null ? "" : data.Title) + time + point }));
 
                 var iconEdit = $("<i>", { "class": "fas fa-edit" });
                 var iconTrash = $("<i>", { "class": "fas fa-trash" });
@@ -724,7 +751,7 @@ var Lesson = (function () {
                 quizitem.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend d-block", "html": breakLine(data.Description) });
+                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description) });
                     quizitem.append(extend);
                 }
 
@@ -749,7 +776,7 @@ var Lesson = (function () {
                 quizitem.append(quiz_part);
                 quizitem.append(answer_part);
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend show", "html": breakLine(data.Description) });
+                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description) });
                     quizitem.append(extend);
                 }
 
@@ -806,7 +833,7 @@ var Lesson = (function () {
                 itembox.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend show", "html": breakLine(data.Description) });
+                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description) });
                     itembox.append(extend);
                 }
 
@@ -1011,6 +1038,14 @@ var Lesson = (function () {
         return data.replace(/\n/g, "<br/>");
     }
 
+    var toggleExplanation = function (obj) {
+        $(obj).toggleClass("btn-warning");
+        if ($(obj).hasClass("btn-warning")) {
+            $(".quiz-extend:not(.show)").addClass("show");
+        } else {
+            $(".quiz-extend").removeClass("show");
+        }
+    }
 
     //Edit
 
@@ -1157,7 +1192,6 @@ var Lesson = (function () {
         });
     }
 
-
     var sortPart = function () {
         $("#pills-tab").toggleClass("sorting");
         if ($("#pills-tab").hasClass("sorting")) {
@@ -1255,7 +1289,7 @@ var Lesson = (function () {
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
                 answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer ml-3", "value": "+", "onclick": "AddNewAnswer(this)" }));
                 questionTemplate.append(answer_wrapper);
-                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explaination" }));
+                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explanation" }));
                 question_template_holder.append(questionTemplate);
 
                 var answerTemplate = $("<fieldset>", { "class": "answer-box m-1" });
@@ -1622,13 +1656,15 @@ var Lesson = (function () {
     var renderExam = function () {
         var data = _data;
         if (isNull(data)) data = getCurrentExamState(); // get current exam state
+        console.log(data);
         if (isNull(data)) {
             res = loadLesssonData({
                 "LessonID": config.lesson_id,
                 "ClassID": config.class_id
-            });
+            }, renderLessonData);
 
-            if (isNull(res)) {
+            if (!isNull(res)) {
+
                 var resData = JSON.parse(res);
                 if (resData.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
                     var exam = resData.Exam;
@@ -1695,7 +1731,7 @@ var Lesson = (function () {
 
             }
         });
-        var data = localStorage.getItem(config.lesson_id + "_" + config.class_id);
+        var data = getLocalData(config.lesson_id + "_" + config.class_id);
         var enData = b64DecodeUnicode(data);
         if (enData == null || enData == {} || enData == "" || enData == "{}" || enData == void 0) {
             return null;
@@ -2389,7 +2425,6 @@ var Lesson = (function () {
         }
     }
 
-
     var renderBoDem = function () {
         var listQuiz = document.querySelectorAll(".quiz-item");
         var count = 0;
@@ -2476,6 +2511,7 @@ var Lesson = (function () {
     window.RemoveAnswer = removeAnswer;
     window.AddNewAnswer = addNewAnswer;
     window.ToggleCorrectAnswer = toggleCorrectAnswer;
+    window.ToggleExplanation = toggleExplanation;
 
     window.ReloadData = reloadData;
 
@@ -2528,15 +2564,6 @@ function markQuestion(quizid) {
         if (completed == totalQuiz)
             $(".quizNumber .completed").addClass("finish");
     }
-}
-
-function toggleCompact(obj) {
-    var parent = $(obj).parent().parent();
-    $(parent).toggleClass("compactView");
-    if ($(parent).hasClass("compactView"))
-        $(obj).text("Expand");
-    else
-        $(obj).text("Collapse");
 }
 
 var hideModal = function (modalId) {

@@ -163,6 +163,78 @@ namespace BaseCustomerMVC.Controllers.Student
 
         [Obsolete]
         [HttpPost]
+        public JsonResult GetActiveList(DateTime today)
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return null;
+            }
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
+            //filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate <= today && o.EndDate >= today));
+
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            //model.TotalRecord = data.Count();
+            //var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+            //    ? data.ToList()
+            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+
+
+            var std = (from o in data.ToList()
+                       let progress = _progressService.GetItemByClassID(o.ID, userId)
+                       let percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                       select new
+                       {
+                           id = o.ID,
+                           courseID = o.CourseID,
+                           courseName = o.Name,
+                           subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
+                           endDate = o.EndDate,
+                           percent,
+                           score = "---"
+                       }).ToList();
+            return Json(new { Data = std });
+        }
+
+        public JsonResult GetFinishList(DateTime today)
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return null;
+            }
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate > today));
+
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            //model.TotalRecord = data.Count();
+            //var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+            //    ? data.ToList()
+            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+
+
+            var std = (from o in data.ToList()
+                       let progress = _progressService.GetItemByClassID(o.ID, userId)
+                       let per = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                       select new
+                       {
+                           id = o.ID,
+                           courseID = o.CourseID,
+                           title = o.Name,
+                           endDate = o.EndDate,
+                           per,
+                           score = "---"
+                       }).ToList();
+            return Json(new { Data = std });
+        }
+
+
+        [Obsolete]
+        [HttpPost]
         public JsonResult GetListCompact(DefaultModel model, string TeacherID)
         {
             var filter = new List<FilterDefinition<ClassEntity>>();

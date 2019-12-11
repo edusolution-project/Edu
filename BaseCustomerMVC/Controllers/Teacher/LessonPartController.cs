@@ -9,6 +9,7 @@ using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace BaseCustomerMVC.Controllers.Teacher
 {
     public class LessonPartController : TeacherController
@@ -153,226 +154,235 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             //try
             //{
-                var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID).SingleOrDefault();
-                if (parentLesson != null)//Chỉ add/edit được part trong lesson do mình tạo
+            var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID).SingleOrDefault();
+            if (parentLesson != null)//Chỉ add/edit được part trong lesson do mình tạo
+            {
+                if (item.Media != null && item.Media.Name == null) item.Media = null;//validate Media
+                var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
+                if (item.ID == "0" || item.ID == null) //create
                 {
-                    if (item.Media != null && item.Media.Name == null) item.Media = null;//valid Media
-                    var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
-                    if (item.ID == "0" || item.ID == null) //create
-                    {
-                        item.Created = DateTime.Now;
-                        var maxItem = _lessonPartService.CreateQuery()
-                            .Find(o => o.ParentID == item.ParentID)
-                            .SortByDescending(o => o.Order).FirstOrDefault();
-                        item.Order = maxItem != null ? maxItem.Order + 1 : 0;
-                        item.Updated = DateTime.Now;
+                    item.Created = DateTime.Now;
+                    var maxItem = _lessonPartService.CreateQuery()
+                        .Find(o => o.ParentID == item.ParentID)
+                        .SortByDescending(o => o.Order).FirstOrDefault();
+                    item.Order = maxItem != null ? maxItem.Order + 1 : 0;
+                    item.Updated = DateTime.Now;
 
-                        if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || files == null || !files.Any(f => f.Name == item.Media.Name))
+                    if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || files == null || !files.Any(f => f.Name == item.Media.Name))
+                    {
+                        item.Media = null;
+                    }
+                    else
+                    {
+                        var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                        if (file != null)
                         {
-                            item.Media = null;
-                        }
-                        else
-                        {
-                            var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
-                            if (file != null)
-                            {
-                                item.Media.Created = DateTime.Now;
-                                item.Media.Size = file.Length;
-                                item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
-                            }
+                            item.Media.Created = DateTime.Now;
+                            item.Media.Size = file.Length;
+                            item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
                         }
                     }
-                    else // Update
-                    {
-                        var olditem = _lessonPartService.GetItemByID(item.ID);
-                        if (olditem == null)
-                            return new JsonResult(new Dictionary<string, object>
+                }
+                else // Update
+                {
+                    var olditem = _lessonPartService.GetItemByID(item.ID);
+                    if (olditem == null)
+                        return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
                                 {"Error", "Item Not Found" }
                             });
 
-                        if ((olditem.Media != null && item.Media != null && olditem.Media.Path != item.Media.Path)
-                            || (olditem.Media == null && item.Media != null))//Media change
-                        {
-                            if (files == null || !files.Any(f => f.Name == item.Media.Name))
-                                return new JsonResult(new Dictionary<string, object>
+                    if ((olditem.Media != null && item.Media != null && olditem.Media.Path != item.Media.Path)
+                        || (olditem.Media == null && item.Media != null))//Media change
+                    {
+                        if (files == null || !files.Any(f => f.Name == item.Media.Name))
+                            return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
                                 {"Error", "Upload Fails" }
                             });
 
-                            var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();//update media
-                            item.Media.Created = DateTime.Now;
-                            item.Media.Size = file.Length;
-                            item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
-                        }
-
-                        item.Updated = DateTime.Now;
-                        item.Created = olditem.Created;
-                        item.Order = olditem.Order;
+                        var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();//update media
+                        item.Media.Created = DateTime.Now;
+                        item.Media.Size = file.Length;
+                        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
                     }
 
-                    var lessonpart = item.ToEntity();
-                    _lessonPartService.CreateOrUpdate(lessonpart);
-                    item.ID = lessonpart.ID;
+                    item.Updated = DateTime.Now;
+                    item.Created = olditem.Created;
+                    item.Order = olditem.Order;
+                }
 
-                    if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+                var lessonpart = item.ToEntity();
+                _lessonPartService.CreateOrUpdate(lessonpart);
+                item.ID = lessonpart.ID;
+
+                if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+                {
+                    _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
+
+                    foreach (var quizID in RemovedQuestions)
                     {
-                        _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
-
-                        foreach (var quizID in RemovedQuestions)
-                        {
-                            _answerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
-                        }
+                        _answerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
                     }
+                }
 
-                    if (RemovedAnswers != null & RemovedAnswers.Count > 0)
-                        _answerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
+                if (RemovedAnswers != null & RemovedAnswers.Count > 0)
+                    _answerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
 
-                    if (item.Questions != null && item.Questions.Count > 0)
+                if (item.Questions != null && item.Questions.Count > 0)
+                {
+                    foreach (var questionVM in item.Questions)
                     {
-                        foreach (var questionVM in item.Questions)
+                        questionVM.ParentID = item.ID;
+                        var quiz = questionVM.ToEntity();
+
+                        if (questionVM.Media != null && questionVM.Media.Name == null) questionVM.Media = null;
+
+                        if (questionVM.ID == "0" || questionVM.ID == null || _questionService.GetItemByID(quiz.ID) == null)
                         {
-                            questionVM.ParentID = item.ID;
-                            var quiz = questionVM.ToEntity();
+                            var maxItem = _questionService.CreateQuery()
+                                .Find(o => o.ParentID == lessonpart.ID)
+                                .SortByDescending(o => o.Order).FirstOrDefault();
+                            quiz.Order = maxItem != null ? maxItem.Order + 1 : 0;
+                            quiz.Created = DateTime.Now;
+                            quiz.Updated = DateTime.Now;
 
-                            if (questionVM.Media != null && questionVM.Media.Name == null) questionVM.Media = null;
-
-                            if (questionVM.ID == "0" || questionVM.ID == null || _questionService.GetItemByID(quiz.ID) == null)
+                            if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || !files.Any(f => f.Name == quiz.Media.Name))
+                                quiz.Media = null;
+                            else
                             {
-                                var maxItem = _questionService.CreateQuery()
-                                    .Find(o => o.ParentID == lessonpart.ID)
-                                    .SortByDescending(o => o.Order).FirstOrDefault();
-                                quiz.Order = maxItem != null ? maxItem.Order + 1 : 0;
-                                quiz.Created = DateTime.Now;
-                                quiz.Updated = DateTime.Now;
+                                var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
+                                if (file != null)
+                                {
+                                    quiz.Media.Created = DateTime.Now;
+                                    quiz.Media.Size = file.Length;
+                                    quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var oldquiz = _questionService.GetItemByID(quiz.ID);
+                            if ((oldquiz.Media != null && quiz.Media != null && oldquiz.Media.Path != quiz.Media.Path)
+                                || (oldquiz.Media == null && quiz.Media != null))//Media change
+                            {
 
-                                if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || !files.Any(f => f.Name == quiz.Media.Name))
+                                if (oldquiz.Media != null && !string.IsNullOrEmpty(oldquiz.Media.Path))//Delete old file
+                                    _fileProcess.DeleteFile(oldquiz.Media.Path);
+
+                                if (files == null || !files.Any(f => f.Name == quiz.Media.Name))
                                     quiz.Media = null;
                                 else
                                 {
-                                    var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
-                                    if (file != null)
-                                    {
-                                        quiz.Media.Created = DateTime.Now;
-                                        quiz.Media.Size = file.Length;
-                                        quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
-                                    }
+
+                                    var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();//update media
+                                    quiz.Media.Created = DateTime.Now;
+                                    quiz.Media.Size = file.Length;
+                                    quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
                                 }
                             }
-                            else
+
+                            quiz.Order = oldquiz.Order;
+                            quiz.Created = oldquiz.Created;
+                            quiz.Updated = DateTime.Now;
+                        }
+                        if (quiz.ID != null)
+                            _questionService.CreateQuery().ReplaceOne(o => o.ID == quiz.ID, quiz);
+                        else
+                            _questionService.CreateQuery().InsertOne(quiz);
+
+
+                        //CreateOrUpdate(quiz);
+                        questionVM.ID = quiz.ID;
+
+                        if (questionVM.Answers != null && questionVM.Answers.Count > 0)
+                        {
+                            foreach (var answer in questionVM.Answers)
                             {
-                                var oldquiz = _questionService.GetItemByID(quiz.ID);
-                                if ((oldquiz.Media != null && quiz.Media != null && oldquiz.Media.Path != quiz.Media.Path)
-                                    || (oldquiz.Media == null && quiz.Media != null))//Media change
+
+                                answer.ParentID = questionVM.ID;
+                                if (answer.Media != null && answer.Media.Name == null) answer.Media = null;
+
+                                if (answer.ID == "0" || answer.ID == null || _answerService.GetItemByID(answer.ID) == null)
                                 {
+                                    var maxItem = _answerService.CreateQuery().Find(o => o.ParentID == quiz.ID).SortByDescending(o => o.Order).FirstOrDefault();
+                                    answer.Order = maxItem != null ? maxItem.Order + 1 : 0;
+                                    answer.Created = DateTime.Now;
+                                    answer.Updated = DateTime.Now;
 
-                                    if (oldquiz.Media != null && !string.IsNullOrEmpty(oldquiz.Media.Path))//Delete old file
-                                        _fileProcess.DeleteFile(oldquiz.Media.Path);
-
-                                    if (files == null || !files.Any(f => f.Name == quiz.Media.Name))
-                                        quiz.Media = null;
+                                    if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || !files.Any(f => f.Name == answer.Media.Name))
+                                        answer.Media = null;
                                     else
                                     {
-
-                                        var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();//update media
-                                        quiz.Media.Created = DateTime.Now;
-                                        quiz.Media.Size = file.Length;
-                                        quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                                        var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
+                                        if (file != null)
+                                        {
+                                            answer.Media.Created = DateTime.Now;
+                                            answer.Media.Size = file.Length;
+                                            answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                        }
                                     }
                                 }
-
-                                quiz.Order = oldquiz.Order;
-                                quiz.Created = oldquiz.Created;
-                                quiz.Updated = DateTime.Now;
-                            }
-
-                            _questionService.CreateOrUpdate(quiz);
-                            questionVM.ID = quiz.ID;
-
-                            if (questionVM.Answers != null && questionVM.Answers.Count > 0)
-                            {
-                                foreach (var answer in questionVM.Answers)
+                                else
                                 {
-
-                                    answer.ParentID = questionVM.ID;
-                                    if (answer.Media != null && answer.Media.Name == null) answer.Media = null;
-
-                                    if (answer.ID == "0" || answer.ID == null || _answerService.GetItemByID(answer.ID) == null)
+                                    var oldanswer = _answerService.GetItemByID(answer.ID);
+                                    if ((oldanswer.Media != null && answer.Media != null && oldanswer.Media.Path != answer.Media.Path)
+                                || (oldanswer.Media == null && answer.Media != null))//Media change
                                     {
-                                        var maxItem = _answerService.CreateQuery().Find(o => o.ParentID == quiz.ID).SortByDescending(o => o.Order).FirstOrDefault();
-                                        answer.Order = maxItem != null ? maxItem.Order + 1 : 0;
-                                        answer.Created = DateTime.Now;
-                                        answer.Updated = DateTime.Now;
+                                        if (oldanswer.Media != null && !string.IsNullOrEmpty(oldanswer.Media.Path))//Delete old file
+                                            _fileProcess.DeleteFile(oldanswer.Media.Path);
 
-                                        if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || !files.Any(f => f.Name == answer.Media.Name))
+                                        if (files == null || !files.Any(f => f.Name == answer.Media.Name))
                                             answer.Media = null;
                                         else
                                         {
-                                            var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
-                                            if (file != null)
-                                            {
-                                                answer.Media.Created = DateTime.Now;
-                                                answer.Media.Size = file.Length;
-                                                answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
-                                            }
+
+                                            var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();//update media
+                                            answer.Media.Created = DateTime.Now;
+                                            answer.Media.Size = file.Length;
+                                            answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
                                         }
                                     }
-                                    else
-                                    {
-                                        var oldanswer = _answerService.GetItemByID(answer.ID);
-                                        if ((oldanswer.Media != null && answer.Media != null && oldanswer.Media.Path != answer.Media.Path)
-                                    || (oldanswer.Media == null && answer.Media != null))//Media change
-                                        {
-                                            if (oldanswer.Media != null && !string.IsNullOrEmpty(oldanswer.Media.Path))//Delete old file
-                                                _fileProcess.DeleteFile(oldanswer.Media.Path);
-
-                                            if (files == null || !files.Any(f => f.Name == answer.Media.Name))
-                                                answer.Media = null;
-                                            else
-                                            {
-
-                                                var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();//update media
-                                                answer.Media.Created = DateTime.Now;
-                                                answer.Media.Size = file.Length;
-                                                answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
-                                            }
-                                        }
-                                        //else // No Media
-                                        //{
-                                        //    quiz.Media = null;
-                                        //}
-                                        answer.Order = oldanswer.Order;
-                                        answer.Created = oldanswer.Created;
-                                        answer.Updated = DateTime.Now;
-                                    }
-                                    _answerService.CreateOrUpdate(answer);
+                                    //else // No Media
+                                    //{
+                                    //    quiz.Media = null;
+                                    //}
+                                    answer.Order = oldanswer.Order;
+                                    answer.Created = oldanswer.Created;
+                                    answer.Updated = DateTime.Now;
                                 }
+                                //_answerService.CreateOrUpdate(answer);
+                                if (answer.ID != null)
+                                    _answerService.CreateQuery().ReplaceOne(o => o.ID == answer.ID, answer);
+                                else
+                                    _answerService.CreateQuery().InsertOne(answer);
                             }
                         }
                     }
+                }
 
-                    IDictionary<string, object> valuePairs = new Dictionary<string, object>
+                IDictionary<string, object> valuePairs = new Dictionary<string, object>
                         {
                             { "Data", item },
                             //{ "LessonPartExtends", files }
                         };
 
-                    return new JsonResult(new Dictionary<string, object>
+                return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", item },
                                 {"Error", null }
                             });
-                }
-                else
-                {
-                    return new JsonResult(new Dictionary<string, object>
+            }
+            else
+            {
+                return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
                                 {"Error", "Parent Item Not found" }
                             });
-                }
+            }
 
 
             //}

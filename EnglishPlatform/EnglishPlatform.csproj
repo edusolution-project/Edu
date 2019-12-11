@@ -34,7 +34,6 @@
     <Content Remove="Areas\Teacher\Views\Lesson\Exam - Copy.cshtml" />
     <Content Remove="Areas\Teacher\Views\Schedule\Schedule.cshtml" />
     <Content Remove="compilerconfig.json" />
-    <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -80,8 +79,6 @@
     <None Include="Areas\Teacher\Views\Curriculum\Lesson.cshtml" />
     <None Include="Areas\Teacher\Views\Discuss\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Home\Index.cshtml" />
-    <None Include="Areas\Teacher\Views\Lesson\Detail_0.cshtml" />
-    <None Include="Areas\Teacher\Views\Lesson\Exam.cshtml" />
     <None Include="Areas\Teacher\Views\News\Index.cshtml" />
     <None Include="compilerconfig.json" />
     <None Include="wwwroot\css\layout - Copy.scss" />
