@@ -221,8 +221,7 @@
                     <div class="list">
                         <div id="list-book-mard"></div>
                         <div id="list-news-record"></div>
-                        <div id="list-news-old" class="list-new-feeds">
-
+                        <div id="list-news-old-@id" class="list-new-feeds">
                         </div>
                         <div id="form-post">
                             <textarea rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
@@ -423,7 +422,7 @@
                                     </div>
                                 </div>`;
                                 loadCountComment(item.ID);
-                                $("#list-news-old").append(html);
+                                $("#list-news-old-" + item.receivers[0]).append(html);
                             }
                         }
                     }
