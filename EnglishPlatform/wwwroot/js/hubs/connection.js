@@ -50,10 +50,9 @@ connection.on("ReceiveGroup", function (data) {
         var realData = data.message.obj.data;
         var item = realData;
         if (data.message.type == "newfeed") {
-            var news = document.getElementById("list-news-old");
+            var news = document.getElementById("list-news-old-"+item.receivers[0]);
             var old = document.getElementById(realData.ID);
             if (old == null) {
-                
                 var html = `<div class="item-feed" id="${item.ID}">
                                     <div class="user-info-post">
                                         <div class="row">
