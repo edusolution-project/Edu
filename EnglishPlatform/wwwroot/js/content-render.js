@@ -6,8 +6,9 @@ var mod = {
     TEACHERVIEW: "teacherview",
     TEACHEREDIT: "teacheredit",
     EDIT: "edit",
-    EXAM: "exam",
-    REVIEW: "review"
+    STUDENT_EXAM: "studentexam",
+    STUDENT_LECTURE: "studentlecture",
+    STUDENT_REVIEW: "studentreview"
 }
 
 var TEMPLATE_TYPE = {
@@ -19,12 +20,6 @@ var UIMode = {
     LECTURE_ONLY: "lecture",
     EXAM_ONLY: "exam",
     BOTH: "both"
-}
-
-var writeLog = function (name, msg) {
-    if (Debug) {
-        console.log(name, msg);
-    }
 }
 
 var Lesson = (function () {
@@ -39,8 +34,9 @@ var Lesson = (function () {
 
     var config = {
         container: "",
-        mod: "",//preview, edit, exam, review
+        mod: "",
         url: {
+            //Teacher
             load: "", //all: load lesson data
             save: "", //edit: save lesson data
             list_part: "",//all: get all part
@@ -48,14 +44,17 @@ var Lesson = (function () {
             save_part: "",//edit: save part,
             move_part: "",//change: change part position,
             del_part: "",
+            //Student
             current: "", //exam: load current exam state
             start: "", //exam: start exam
             answer: "", //exam: set answer for question
             removeans: "", //exam: unset answer for question
-            end: "" //exam: complete lesson
+            end: "", //exam: complete lesson
+            review: "" //review: review result
         },
         lesson_id: "",
-        class_id: ""
+        class_id: "",
+        exam_id: ""
     }
 
     // icon show on lesson parts list
@@ -70,21 +69,20 @@ var Lesson = (function () {
 
     var onReady = function (yourConfig) {
         config = groupConfig(yourConfig);
-        writeLog(this.__proto__.constructor.name, config);
+
         switch (config.mod) {
             case mod.PREVIEW:
-                renderPreview();
-                break;
             case mod.TEACHEREDIT:
+            case mod.TEACHERVIEW:
+                renderStandardLayout();
                 renderPreview();
                 break;
-            case mod.EXAM:
+            case mod.STUDENT_EXAM:
+
                 renderExam();
                 break;
-            case mod.REVIEW:
-                renderReview();
-                break;
             default:
+                renderStandardLayout();
                 renderPreview();
                 break;
         }
@@ -103,7 +101,9 @@ var Lesson = (function () {
     }
 
     var getLocalData = function (key) {
-        return localStorage.getItem(config.lesson_id + "_" + key);
+        var data = localStorage.getItem(config.lesson_id + "_" + key)
+        if (data == null) return null;
+        return JSON.parse(b64DecodeUnicode(data));
     }
 
     var removeLocalData = function (key) {
@@ -165,11 +165,11 @@ var Lesson = (function () {
                         loadLessonParts({ LessonID: config.lesson_id, ClassID: config.class_id }, callback);
                         break;
                     default:
-                        callback;
+                        callback();
                         break;
                 }
             }
-        });
+        })
     }
 
     var loadLessonParts = function (param, callback) {
@@ -222,7 +222,6 @@ var Lesson = (function () {
     }
 
     var renderLessonData = function () {
-
         if (isNull(_data)) {
             throw "No data";
         }
@@ -234,6 +233,8 @@ var Lesson = (function () {
         var lessonHeader = mainContainer.find('.card-header');
         var lessonBody = mainContainer.find('.card-body');
         var lessonFooter = mainContainer.find('.card-footer');
+
+        _totalPart = data.Part.length;
         //header
         switch (config.mod) {
             case mod.PREVIEW:
@@ -271,8 +272,15 @@ var Lesson = (function () {
                 var iconTrash = $("<i>", { "class": "fas fa-trash" });
                 lessonButton.append(iconSort);
 
+
                 lessonButton.append(sort);
                 sort.append(iconSort);
+
+
+                if (!(_totalPart > 0)) {
+                    $(sort).prop("disabled", true);
+                }
+
                 lessonButton.append(edit);
                 edit.append(iconEdit);
                 lessonButton.append(create);
@@ -297,7 +305,7 @@ var Lesson = (function () {
                         var titleTimer = $("<span>", { "class": "title-timer", "text": " - duration: " + data.Timer + "m" });
                         title.append(titleTimer);
                     }
-                    if (data.Point > 0) {
+                    if (data.Point > 1) {
                         var titlePoint = $("<span>", { "class": "title-point", "text": " (" + data.Point + "p)" });
                         title.append(titlePoint);
                     }
@@ -342,6 +350,10 @@ var Lesson = (function () {
                 var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
                 var iconToggle = $("<i>", { "class": "fas fa-eye ml-2" });
 
+                if (!(_totalPart > 1)) {
+                    $(sort).prop("disabled", true);
+                }
+
                 lessonButton.append(toggleMode);
                 toggleMode.append(iconToggle);
                 lessonButton.append(sort);
@@ -350,7 +362,7 @@ var Lesson = (function () {
                 create.append(iconCreate);
                 headerRow.append(lessonButton);
                 break;
-            case mod.EXAM:
+            case mod.STUDENT_EXAM:
                 //no header
                 break;
             case mod.REVIEW:
@@ -409,7 +421,35 @@ var Lesson = (function () {
                     })
                 }
                 break;
-            case mod.EXAM:
+            case mod.STUDENT_EXAM:
+                var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
+                lessonBody.append(partMenu);
+                var lessontabs = $("<div>", { "class": "lesson-tabs" });
+                partMenu.append(lessontabs);
+                var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
+                lessontabs.append(tabs);
+                for (var i = 0; data.Part != null && i < data.Part.length; i++) {
+                    var item = data.Part[i];
+                    renderExamPart(item);
+                }
+                if (_UImode == UIMode.EXAM_ONLY) {
+                    $('#rightCol .tab-pane').each(function () {
+                        var media = null;
+                        var html = null;
+                        if ($(this).find(".QUIZ3").length > 0) {
+                            $(this).addClass("h-100");
+                            media = $(this).find(".Q3_absrow > .media-holder:first");
+                        }
+                        else {
+                            media = $(this).find(".quiz-wrapper > .media-holder");
+                        }
+                        html = $(this).find(".part-description");
+                        $(this).addClass("m-0");
+                        $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
+                            .empty().append($(this).find('.part-box-header')).append(media).append(html)
+                            .appendTo('#leftCol')
+                    })
+                }
                 break;
             case mod.REVIEW:
                 break;
@@ -423,23 +463,30 @@ var Lesson = (function () {
                 if (_UImode == UIMode.EXAM_ONLY) {
                     var nav_bottom = $('<div>', { "class": "row" });
 
-                    var prevtab = $("<button>", { "class": "prevtab btn btn-success mr-2", "title": "Prev", "onclick": "PrevPart()" });
+                    var prevtab = $("<button>", { "class": "prevtab btn btn-primary mr-2", "title": "Prev", "onclick": "PrevPart()" });
                     var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
-                    var nexttab = $("<button>", { "class": "nexttab btn btn-success", "title": "Next", "onclick": "NextPart()" });
+                    var nexttab = $("<button>", { "class": "nexttab btn btn-primary", "title": "Next", "onclick": "NextPart()" });
                     var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
                     prevtab.append(iconprev);
                     nexttab.append(iconnext);
 
-                    _totalPart = data.Part.length;
+
                     prevtab.prop("disabled", true);
 
                     if (_totalPart <= 1)
                         nexttab.prop("disabled", true);
 
 
-                    nav_bottom.append($('<div>', { "class": "col-md-2 text-left" }).append(prevtab));
-                    nav_bottom.append($('<div>', { "class": "col-md-8 text-center" }));
-                    nav_bottom.append($('<div>', { "class": "col-md-2 text-right" }).append(nexttab));
+                    var _footerLeft = $('<div>', { "class": "col-md-2 text-left" });
+                    _footerLeft.append(prevtab);
+                    var _footerRight = $('<div>', { "class": "col-md-2 text-right" });
+                    _footerRight.append(nexttab);
+                    var _footerCenter = $('<div>', { "class": "col-md-8 text-center" });
+                    _footerCenter.append($("<button>", { "class": "btn btn-primary", "title": "Toggle Explanation", "text": "Toggle Explanation", "onclick": "ToggleExplanation(this)" }));
+
+                    nav_bottom.append(_footerLeft);
+                    nav_bottom.append(_footerCenter);
+                    nav_bottom.append(_footerRight);
 
                     lessonFooter.show().append(nav_bottom);
                 }
@@ -447,7 +494,47 @@ var Lesson = (function () {
                     lessonFooter.hide();
                 }
                 break;
-            case mod.EXAM:
+            case mod.STUDENT_EXAM:
+                //if (_UImode == UIMode.EXAM_ONLY) {
+                var nav_bottom = $('<div>', { "class": "row" });
+
+                var prevtab = $("<button>", { "class": "prevtab btn btn-primary mr-2", "title": "Prev", "onclick": "PrevPart()" });
+                var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
+                var nexttab = $("<button>", { "class": "nexttab btn btn-primary", "title": "Next", "onclick": "NextPart()" });
+                var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
+                prevtab.append(iconprev);
+                nexttab.append(iconnext);
+
+
+                prevtab.prop("disabled", true);
+
+                if (_totalPart <= 1)
+                    nexttab.prop("disabled", true);
+
+                var _footerLeft = $('<div>', { "class": "col-md-2 text-left" });
+                _footerLeft.append(prevtab);
+                var _footerRight = $('<div>', { "class": "col-md-2 text-right" });
+                _footerRight.append(nexttab);
+                var _footerCenter = $('<div>', { "class": "col-md-8 text-center" });
+
+                nav_bottom.append(_footerLeft);
+                nav_bottom.append(_footerCenter);
+                nav_bottom.append(_footerRight);
+                lessonFooter.show().append(nav_bottom);
+                lessonFooter.append($('<div>', { id: 'quizIdx_holder' }));
+
+
+                var quiz_counter = $('<div>', { id: 'quiz-counter-holder', class: "d-inline-block text-white font-weight-bold align-middle pl-3" });
+                $(_footerLeft).append(quiz_counter);
+
+                var complete_btn = $('<button>', { class: "btn btn-primary pl-3 pr-3", onclick: "CompleteExam()", text: "Submit" });
+                var timer = $('<div>', { id: 'bottom-counter', class: "d-inline-block time-counter text-primary font-weight-bold align-middle pr-3" });
+                _footerCenter.append(timer).append(complete_btn);
+
+                renderQuizCounter();
+                $(".time-counter").html(getLocalData("Timer"));
+                countdown();
+                //}
                 break;
             case mod.REVIEW:
                 break;
@@ -475,7 +562,7 @@ var Lesson = (function () {
                 rightCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-8").show();
                 break;
             case UIMode.BOTH:
-                leftCol.parent().removeClass("col-md-4").removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-6").show();
+                leftCol.parent().removeClass("col-md-6").removeClass("col-md-4").removeClass("col-md-12").addClass("col-md-6").show();
                 rightCol.parent().removeClass("col-md-6").removeClass("col-md-8").removeClass("col-md-12").addClass("col-md-6").show();
                 break;
         }
@@ -488,7 +575,6 @@ var Lesson = (function () {
 
     //Preview: view + edit
     var renderPreview = function () {
-        renderStandardLayout();
         //Prepare data
         if (isNull(_data)) {
             loadLesssonData({ ID: config.lesson_id }, renderLessonData);
@@ -712,7 +798,7 @@ var Lesson = (function () {
         switch (template) {
             case "QUIZ2":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
-                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID });
+                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": item.ParentID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 boxHeader.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
                 renderMediaContent(data, boxHeader);
@@ -724,7 +810,7 @@ var Lesson = (function () {
                 quizitem.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend d-block", "html": breakLine(data.Description) });
+                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description) });
                     quizitem.append(extend);
                 }
 
@@ -749,7 +835,7 @@ var Lesson = (function () {
                 quizitem.append(quiz_part);
                 quizitem.append(answer_part);
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend show", "html": breakLine(data.Description) });
+                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description) });
                     quizitem.append(extend);
                 }
 
@@ -791,7 +877,7 @@ var Lesson = (function () {
             default:
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
-                var itembox = $("<div>", { "class": "quiz-item", "id": data.ID });
+                var itembox = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": item.ParentID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
                     boxHeader.append($("<h5>", { "class": "title", "html": breakLine(data.Content) + point }));
@@ -806,7 +892,7 @@ var Lesson = (function () {
                 itembox.append(answer_wrapper);
 
                 if (data.Description !== "") {
-                    var extend = $("<div>", { "class": "quiz-extend show", "html": breakLine(data.Description) });
+                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description) });
                     itembox.append(extend);
                 }
 
@@ -850,29 +936,13 @@ var Lesson = (function () {
                 }
                 else
                     answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
-
-                //answer.draggable({
-                //    cursor: "move",
-                //    helper: 'clone',
-                //    revert: "true",
-                //    scroll: true,
-                //    start: function (event, ui) {
-                //        ui.helper.data('parent', $(this).parent());
-                //        alert(1);        
-                //    },
-                //    stop: function (event, ui) {
-                //        //var prevParent = ui.helper.data('parent');
-                //        //$(prevParent).find(".placeholder").show();
-                //    }
-                //});
-
                 container.append(answer);
                 break;
             default:
                 var form = $("<div>", { "class": "form-check" });
                 answer.append(form);
                 form.append($("<input>", { "type": "hidden" }));
-                form.append($("<input>", { "id": data.ID, "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "onclick": "answerQuestion(this,'" + data.ParentID + "')", "name": "rd_" + data.ParentID }));
+                form.append($("<input>", { "id": data.ID, "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "name": "rd_" + data.ParentID }));
                 if (data.Content != null)
                     form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "html": breakLine(data.Content) }));
                 renderMediaContent(data, answer);
@@ -967,7 +1037,7 @@ var Lesson = (function () {
                 }
 
 
-                if (config.mod == mod.EXAM) {
+                if (config.mod == mod.STUDENT_EXAM) {
                     var quiz = prevHolder.data("questionId");
                     if (quiz != null) { delAnswerForStudentNoRender(quiz); }
                     AnswerQuestion(this);
@@ -985,7 +1055,7 @@ var Lesson = (function () {
                 $(this).find(".placeholder").hide();
                 var prevHolder = $(ui.helper).parent();
 
-                if (config.mod == mod.EXAM) {
+                if (config.mod == mod.STUDENT_EXAM) {
                     var quiz = prevHolder.data("questionId");
                     if (quiz != null) { delAnswerForStudent(quiz); }
                 }
@@ -1011,6 +1081,14 @@ var Lesson = (function () {
         return data.replace(/\n/g, "<br/>");
     }
 
+    var toggleExplanation = function (obj) {
+        $(obj).toggleClass("btn-warning");
+        if ($(obj).hasClass("btn-warning")) {
+            $(".quiz-extend:not(.show)").addClass("show");
+        } else {
+            $(".quiz-extend").removeClass("show");
+        }
+    }
 
     //Edit
 
@@ -1254,7 +1332,7 @@ var Lesson = (function () {
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
                 answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer ml-3", "value": "+", "onclick": "AddNewAnswer(this)" }));
                 questionTemplate.append(answer_wrapper);
-                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explaination" }));
+                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explanation" }));
                 question_template_holder.append(questionTemplate);
 
                 var answerTemplate = $("<fieldset>", { "class": "answer-box m-1" });
@@ -1595,8 +1673,9 @@ var Lesson = (function () {
 
     var goQuiz = function (quizid) {
         var _quiz = $('#' + quizid);
+        console.log(quizid);
         var _partid = _quiz.attr('data-part-id');
-        var _part = $('#pills-part-' + _partid);
+        var _part = $('.tab-pane#pills-part-' + _partid);
         if (_part.hasClass('active')) {
             return false;
         }
@@ -1617,169 +1696,781 @@ var Lesson = (function () {
         $('.nexttab').prop('disabled', idx == _totalPart - 1);
     }
 
-    //Exam
-    var renderExam = function () {
-        var data = _data;
-        if (isNull(data)) data = getCurrentExamState(); // get current exam state
-        if (isNull(data)) {
-            res = loadLesssonData({
-                "LessonID": config.lesson_id,
-                "ClassID": config.class_id
-            });
-
-            if (isNull(res)) {
-                var resData = JSON.parse(res);
-                if (resData.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
-                    var exam = resData.Exam;
-                    if (exam == null || exam.Status == true) {
-                        removeLocalData("CurrentExam");
-                        if (exam != null) resData.Exam.ID = null;
-                        renderLesson(resData);
-                    }
-                    else {
-                        setLocalData("CurrentExam", resData.Exam.ID);
-                        renderLesson(resData);
-                        renderBoDem();
-                        $("#counter").html(resData.Timer);
-                        countdown();
-                        $('.quizNumber').removeClass("d-none");
-                    }
-                }
-                startDragDrop();
-            }
-        } else {
-            renderLesson(data);
-            if (data.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
-                renderBoDem();
-                $("#counter").html(getLocalData("Timer"));
-                var currentExam = getLocalData("CurrentExam");
-                if (currentExam != null) {
-                    countdown();
-                    $('.quizNumber').removeClass("d-none");
-                }
-            }
-            startDragDrop();
-        }
+    var toggleNav = function (obj) {
+        $('#quizIdx_holder').toggle();
+        $(obj).toggleClass('btn-warning');
     }
 
-    var getCurrentExamState = function () {
+    //Exam
+    var renderExam = function () {
         //load lastest exam state from server
         var dataform = new FormData();
         dataform.append("ClassID", config.class_id);
         dataform.append("LessonID", config.lesson_id);
+        if ($('#' + config.container).find("#ExamID").length == 0)
+            $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID" }));
+        if (!checkExam()) {
+            localStorage.clear();
+        }
+        //get lastest exam data from server
         Ajax(config.url.current, dataform, "POST", true).then(function (res) {
             //if no data is found => new attempt => clear all local storage
-            if (res == null || res == "null") { localStorage.clear(); return null; }
-            else { //
+            if (res == null || res == "null") {
+                localStorage.clear();
+                console.log("New Fresh Exam");
+                renderNewExam();
+            }
+            else {
+                //
                 var data = JSON.parse(res);
-                document.querySelector("input[name='ExamID']").value = data.ID;
-                //TODO: currentTimer here;
-                var current = data.CurrentDoTime;
-                var start = data.Created;
-                var timer = moment(current) - moment(start);
-                if (moment(timer).minutes() >= data.Timer)//Timeout
+                if (isNull(getLocalData("CurrentExam"))) //display last result & render new exam
                 {
-                    setLocalData("Timer", "00:00");
-                    CompleteExam(true);
+                    //console.log(data);
+                    localStorage.clear();
+                    console.log("New Exam");
+                    renderNewExam(data);
                 }
                 else {
-                    var _sec = 59 - moment(timer).second();
-                    var _minutes = data.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
-                    var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
-                    setLocalData("Timer", timer);
-                    setLocalData("CurrentExam", data.ID);
-                    $("#counter").html(getLocalData("Timer"));
-                    countdown();
+                    if (getLocalData("CurrentExam") != data.ID) //unmatched id => complete exam
+                    {
+                        localStorage.clear();
+                        setLocalData("Timer", "00:00");
+                        CompleteExam(true);
+                        console.log("Complete Exam")
+                    }
+                    else {
+                        console.log("Continue Exam")
+                        $("input[name='ExamID']").value = data.ID;
+                        var current = data.CurrentDoTime;
+                        var start = data.Created;
+                        var timer = moment(current) - moment(start);
+                        if (moment(timer).minutes() >= data.Timer)//Timeout
+                        {
+                            setLocalData("Timer", "00:00");
+                            CompleteExam(true);
+                        }
+                        else {
+                            setLocalData("CurrentExam", data.ID);
+                            //render Exam
+                            var _sec = 59 - moment(timer).second();
+                            var _minutes = data.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
+                            var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
+                            setLocalData("Timer", timer);
+                            renderExamDetail();
+                            countdown();
+                        }
+                    }
                 }
-
             }
         });
-        var data = localStorage.getItem(config.lesson_id + "_" + config.class_id);
-        var enData = b64DecodeUnicode(data);
-        if (enData == null || enData == {} || enData == "" || enData == "{}" || enData == void 0) {
-            return null;
-        } else {
-            _data = JSON.parse(enData);
-            return _data;
-        }
     }
 
-    var renderLesson = function (data) {
-        writeLog("renderLesson", data);
-        var container = document.getElementById(config.container);
-        if (container == null) throw "Element id " + config.container + " not exist - create now";
-        if (data.Data.TemplateType == TEMPLATE_TYPE.LESSON) {
-            // bài giảng
-            writeLog("bài giảng", data);
-            container.innerHTML = '<div class="" id="lessonContainer"></div>';
-            var lessonContainer = container.querySelector("#lessonContainer");
-            lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-8">' + data.Data.Title + '</div>' + tab + '</div></div><div id="body-exam" class="card-body"></div></div></div></div>';
-            var bodyExam = lessonContainer.querySelector("#body-exam");
-            var content = renderContent(data.Data);
-            bodyExam.innerHTML = '<div class="row">' + content + '</div>';
+    var renderNewExam = function (data, limit) {
+        var wrapper = $("<div>", { "class": "m-3 col-md-12 text-center" });
+        $('#' + config.container).append($(wrapper));
+        if (isNull(data)) {
+            var doButton = $('<div>', {
+                "class": "btn btn-primary m-3",
+                "onclick": "BeginExam(this)",
+                "style": "cursor: pointer",
+                "text": "Begin Exam"
+            });
+            var backButton = $('<div>', {
+                "class": "btn btn-primary m-3",
+                "onclick": "GoBack()",
+                "style": "cursor: pointer",
+                "text": "Back to List"
+            });
+            wrapper.append(doButton);
+            wrapper.append(backButton);
         }
         else {
-            // bài thi
-            writeLog("bài tập", data);
-            var counter = data.Data.Timer >= 10 ? data.Data.Timer + ":00" : "0" + data.Data.Timer + ":00";
-            if (getLocalData("Timer") == null) setLocalData("Timer", counter);
-            container.innerHTML = '<div class="" id="lessonContainer"></div>';
-            var lessonContainer = container.querySelector("#lessonContainer");
-            lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-4">' + data.Data.Title + '</div><div class="text-center col-lg-4">Thời gian làm bài <span id="counter" class="time-counter">' + counter + '</span></div></div></div><div id="body-exam" class="card-body"></div></div></div></div>';
+            var lastExam = data;
 
-            var bodyExam = lessonContainer.querySelector("#body-exam");
-            var lastExam = data.Exam;
-            var lastExamResult = "";
-            var doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Bắt đầu làm bài</div>';
-            var tryleft = 0;
+            var tried = lastExam.Number;
+            var doable = true;
+            var lastpoint = (lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0);
 
-            var limit = data.Data.Limit;
+            var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm:ss A");
+            lastExamResult =
+                $("<div>", { id: "last-result", class: "text-center" })
+                    .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Last Attempt (" + tried + " tried) finished at " + lastdate }))
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Last Score: " + lastpoint.toFixed(0) + "%" })).html();
+            wrapper.append(lastExamResult);
 
-            if (lastExam != null && lastExam.Status == true) {
-                var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm:ss A");
-                lastExamResult = "<div id='last-result' class='col-md-12 text-center'>Bài kiểm tra đã hoàn thành lúc " + lastdate + "</div>";
-
-                var tried = lastExam.Number;
+            tryleft = limit - tried;
+            var doButton = null;
+            var backButton = $('<div>', {
+                "class": "btn btn-primary m-3",
+                "onclick": "GoBack()",
+                "style": "cursor: pointer",
+                "text": "Back to List"
+            });
+            var reviewButton = $('<div>', {
+                "class": "btn btn-primary m-3",
+                "onclick": 'Review(\'' + lastExam.ID + '\')',
+                "style": "cursor: pointer",
+                "text": "Review answer"
+            });
+            if (limit > 0) {
                 tryleft = limit - tried;
-
-                if (limit > 0) {
-                    tryleft = limit - tried;
-                    if (tryleft > 0) {
-                        doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Bạn còn <b>' + tryleft + '</b> lần làm lại. Thực hiện lại bài?</div>';
-                    }
-                    else
-                        doButton = '<div class="btn btn-danger">Bạn đã hết lượt làm bài</div>';
+                if (tryleft > 0) {
+                    var doButton = $('<div>', {
+                        "class": "btn btn-primary m-3",
+                        "onclick": "BeginExam(this)",
+                        "style": "cursor: pointer",
+                        "text": 'You have <b>' + tryleft + '</b> tries left. Retry?'
+                    });
                 }
                 else {
-                    doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Thực hiện lại bài</div>';
+                    doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Attempt limit reached</div></div>';
+                    doable = false;
                 }
             }
-            var content = checkExam()
-                ? renderContent(data.Data)
-                : (lastExamResult + '<div class="text-center pt-5 pb-5 col-md-12">' + doButton + '</div>');
-            bodyExam.innerHTML = '<div class="row">' + content + '</div>';
-            if (checkExam) {
-                document.querySelector("input[name='ExamID']").value = getLocalData("CurrentExam");
+            else {
+                var doButton = $('<div>', {
+                    "class": "btn btn-primary m-3",
+                    "onclick": "Redo(this)",
+                    "style": "cursor: pointer",
+                    "text": 'Do it again'
+                });
             }
+            wrapper.append(doButton)
+                .append(reviewButton)
+                .append(backButton);
         }
-        if ($('textarea[data-type=ESSAY]').length > 0) {
-            $(document).ready(function () {
-                CKEDITOR.replace($('textarea[data-type=ESSAY]').attr('id'));
+    }
+
+    var startExam = function () {
+        console.log("Create Exam");
+
+        var dataform = new FormData();
+        dataform.append("LessonID", config.lesson_id);
+        dataform.append("ClassID", config.class_id);
+        Ajax(config.url.start, dataform, "POST", false)
+            .then(function (res) {
+                var data = JSON.parse(res);
+                if (data.Error == null) {
+                    notification("success", "Start", 3000);
+                    $("input[name='ExamID']").value = data.Data.ID;
+                    setLocalData("CurrentExam", data.Data.ID);
+                    renderExamDetail();
+
+                    //console.log(data);
+                    if (data.Data.Timer > 0) {
+                        var _minutes = data.Data.Timer;
+                        console.log(_minutes);
+                        var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
+                        setLocalData("Timer", timer);
+                        console.log($(".time-counter"));
+
+                    }
+
+                } else {
+                    notification("error", data.Error, 3000);
+                }
+            })
+            .catch(function (err) {
+                notification("error", err, 3000);
             });
+    }
+
+    var renderExamDetail = function () {
+        renderStandardLayout();
+        $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", value: getLocalData("CurrentExam") }));
+        loadLesssonData({
+            "LessonID": config.lesson_id,
+            "ClassID": config.class_id
+        }, renderLessonData);
+        //    if (!isNull(res)) {
+
+        //        var resData = JSON.parse(res);
+        //        if (resData.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
+        //            var exam = resData.Exam;
+        //            if (exam == null || exam.Status == true) {
+        //                removeLocalData("CurrentExam");
+        //                if (exam != null) resData.Exam.ID = null;
+        //                renderLesson(resData);
+        //            }
+        //            else {
+        //                setLocalData("CurrentExam", resData.Exam.ID);
+        //                renderLesson(resData);
+        //                renderBoDem();
+        //                $("#counter").html(resData.Timer);
+        //                countdown();
+        //                $('.quizNumber').removeClass("d-none");
+        //            }
+        //        }
+        //        startDragDrop();
+        //    }
+        //} else {
+        //    renderLesson(data);
+        //    if (data.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
+        //        renderBoDem();
+        //        $("#counter").html(getLocalData("Timer"));
+        //        var currentExam = getLocalData("CurrentExam");
+        //        if (currentExam != null) {
+        //            countdown();
+        //            $('.quizNumber').removeClass("d-none");
+        //        }
+        //    }
+        //    startDragDrop();
+    }
+
+    var renderExamPart = function (data) {
+        var mainContainer = $('#' + config.container);
+        var leftCol = mainContainer.find('#leftCol');
+        var rightCol = mainContainer.find('#rightCol');
+
+        var time = "", point = "";
+
+        if (data.Timer > 0) {
+            time = " (" + data.Timer + "m)";
+        }
+        if (data.Point > 0) {
+            point = " (" + data.Point + "p)";
+        }
+
+        var container = $(leftCol);
+        if (data.Type.toString().startsWith("QUIZ") || data.Type == "ESSAY")
+            container = $(rightCol);
+        var listPartContainer = $("#part-menu #pills-tab");
+
+        //tabs
+        var lessonitem = null;
+        if ($('li #pills-' + data.ID).length > 0) {
+            lessonitem = $('li #pills-' + data.ID).parent().empty()
+        }
+        else {
+            lessonitem = $("<li>", { "class": "nav-item" });
+            listPartContainer.append(lessonitem);
+        }
+
+        var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
+        lessonitem.append(itemtitle);
+
+        var tabsitem = null;
+
+        if ($('#pills-part-' + data.ID).length > 0) {
+            //clear old-tab
+            tabsitem = $('#pills-part-' + data.ID).empty();
+        }
+        else
+            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+
+        var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
+        tabsitem.append(itembox);
+
+        var ItemRow = $("<div>", { "class": "row " + (_UImode == UIMode.EXAM_ONLY ? " Q3_absrow" : "") });
+
+        var boxHeader = $("<div>", { "class": "part-box-header row" });
+
+        boxHeader.append($("<h5>", { "class": "title col-md-12", "text": (data.Title == null ? "" : data.Title) + time + point }));
+
+        itembox.append(boxHeader);
+
+        //itembox.append(ItemRow);
+        switch (data.Type) {
+            case "TEXT":
+                var itemBody = $("<div>", { "class": "content-wrapper" });
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
+                }
+                itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "IMG":
+                var itemBody = $("<div>", { "class": "media-wrapper" });
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                }
+                renderMediaContent(data, itemBody, "IMG");
+                itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "AUDIO":
+                var itemBody = $("<div>", { "class": "media-wrapper" });
+                if (data.Description != null)
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                renderMediaContent(data, itemBody, "AUDIO");
+                itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "VIDEO":
+                var itemBody = $("<div>", { "class": "media-wrapper" });
+                if (data.Description != null)
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                renderMediaContent(data, itemBody, "VIDEO");
+                itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "DOC":
+                var itemBody = $("<div>", { "class": "media-wrapper" });
+                if (data.Description != null)
+                    wrapper.append($("<div>", { "class": "part-description" }).html(data.Description));
+                renderMediaContent(data, itemBody, "DOC");
+                itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "QUIZ1":
+            case "QUIZ2":
+                var itemBody = $("<div>", { "class": "quiz-wrapper" });
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                itembox.append(itemBody);
+                renderMediaContent(data, itemBody, "");
+                container.append(tabsitem);
+                //Render Description
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                }
+                //Render Question
+                totalQuiz = data.Questions.length;
+                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                    var item = data.Questions[i];
+                    renderExamQuestion(item, data.Type);
+                }
+                break;
+            case "QUIZ3":
+                itembox.append(ItemRow);
+                var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                renderMediaContent(data, ItemRow, "");
+                console.log(ItemRow);
+                ItemRow.append(itemBody);
+                if (data.Description != null) {
+                    ItemRow.append($("<div>", { "class": "part-description" }).html(data.Description));
+                }
+                ItemRow.find(".media-holder").addClass("col-12");
+                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-4", "data-part-id": data.ID });
+                ItemRow.append(answers_box);
+                $(answers_box).droppable({
+                    tolerance: "intersect",
+                    accept: ".answer-item",
+                    activeClass: "hasAnswer",
+                    hoverClass: "answerHover",
+                    drop: function (event, ui) {
+                        var prevHolder = ui.helper.data('parent');
+                        $(prevHolder).find(".placeholder").show();
+                        $(this).append($(ui.draggable));
+                    }
+                });
+                console.log(itemBody);
+                //console.log(tabsitem);
+                //console.log(container);
+                container.append(tabsitem);
+                //Render Question
+                totalQuiz = data.Questions.length;
+                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                    var item = data.Questions[i];
+                    renderExamQuestion(item, data.Type);
+                }
+                break;
+            case "ESSAY":
+                var itemBody = $("<div>", { "class": "content-wrapper" });
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                }
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                var itemBody = $("<div>", { "class": "quiz-wrapper" });
+                itembox.append(itemBody);
+
+                renderMediaContent(data, itemBody, "");
+                totalQuiz = data.Questions.length;
+                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                    var item = data.Questions[i];
+                    renderExamQuestion(item, data.Type);
+                }
+                break;
+        }
+
+        if (listPartContainer.find(".nav-item").length == 1) {
+            itemtitle.addClass("active");
+            tabsitem.addClass("show active");
+        }
+        //$('.btn[title]').tooltip({
+        //    trigger: 'hover'
+        //});
+
+        $('.Q3_absrow .quiz-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
+        $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
+
+        startDragDrop();
+    }
+
+    var renderExamQuestion = function (data, template) {
+        //render question
+        var point = "";
+        if (data.Point > 0) {
+            point = " (" + data.Point + "p)";
+        }
+        switch (template) {
+            case "QUIZ2":
+                var container = $("#" + data.ParentID + " .quiz-wrapper");
+                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
+                var boxHeader = $("<div>", { "class": "quiz-box-header" });
+                boxHeader.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
+                renderMediaContent(data, boxHeader);
+                quizitem.append(boxHeader);
+
+                container.append(quizitem);
+                var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
+
+                quizitem.append(answer_wrapper);
+
+                if (data.Description !== "") {
+                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description) });
+                    quizitem.append(extend);
+                }
+                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                    var item = data.CloneAnswers[i];
+                    renderExamAnswer(item, data.ParentID, template);
+                }
+                break;
+            case "QUIZ3":
+                var container = $("#" + data.ParentID + " .quiz-wrapper");
+                console.log(container);
+                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
+
+                var quiz_part = $("<div>", { "class": "quiz-pane col-6" });
+                var answer_part = $("<div>", {
+                    "class": "answer-pane no-child col-6",
+                    "data-question-id": data.ID,
+                    "data-part-id": data.ParentID,
+                    "data-lesson-id": config.lesson_id,
+                    "data-type": template
+                });
+                quizitem.append(quiz_part);
+                quizitem.append(answer_part);
+                var pane_item = $("<div>", { "class": "pane-item" });
+                if (data.Media == null) {
+                    pane_item.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
+                } else {
+                    renderMediaContent(data, pane_item);
+                }
+
+                quiz_part.append(pane_item);
+                container.append(quizitem);
+
+                $(answer_part).droppable({
+                    tolerance: "intersect",
+                    accept: ".answer-item",
+                    activeClass: "hasAnswer",
+                    hoverClass: "answerHover",
+                    drop: function (event, ui) {
+                        $(this).find(".placeholder").hide();
+                        var prevHolder = ui.helper.data('parent');
+
+                        if ($(this).find(".answer-item").length > 0) {//remove all answer to box
+                            //$(container).siblings(".answer-wrapper").append($(this).find(".answer-item"));
+                            $(prevHolder).append($(this).find(".answer-item"));
+                        }
+                        else {
+                            $(prevHolder).find(".placeholder").show();
+                        };
+                        $(this).append($(ui.draggable));
+                    }
+                });
+
+                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                    var item = data.CloneAnswers[i];
+                    renderExamAnswer(item, data.ParentID, template);
+                }
+                break;
+            default:
+                var container = $("#" + data.ParentID + " .quiz-wrapper");
+
+                var itembox = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
+                var boxHeader = $("<div>", { "class": "quiz-box-header" });
+                if (data.Content != null)
+                    boxHeader.append($("<h5>", { "class": "title", "html": breakLine(data.Content) + point }));
+                else
+                    boxHeader.append($("<h5>", { "class": "title", "text": point }));
+
+                renderMediaContent(data, boxHeader);
+
+                itembox.append(boxHeader);
+                var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
+
+                itembox.append(answer_wrapper);
+
+                container.append(itembox);
+
+                //Render Answer
+                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                    var item = data.CloneAnswers[i];
+                    renderExamAnswer(item, data.ParentID, template);
+                }
+                break;
+        }
+    }
+
+    var renderExamAnswer = function (data, partid, template) {
+        var container = $("#" + data.ParentID + " .answer-wrapper");
+        var answer = $("<fieldset>", { "class": "answer-item", id: data.ID });
+        switch (template) {
+            case "QUIZ2":
+                if ($(container).find(".answer-item").length == 0) {
+                    answer.append($("<input>", {
+                        "type": "text",
+                        "class": "input-text answer-text form-control",
+                        "onfocusout": "AnswerQuestion(this)",
+                        "id": "inputQZ2-" + data.ParentID,
+                        "data-id": data.ID,
+                        "data-part-id": partid,
+                        "data-lesson-id": config.lesson_id,
+                        "data-question-id": data.ParentID,
+                        "data-type": template,
+                    }).attr("autocomplte", "off"));
+
+                    container.append(answer);
+                }
+                break;
+            case "QUIZ3":
+                var placeholder = $("#" + data.ParentID).find(".answer-pane");
+                $(placeholder).removeClass("no-child");
+                placeholder.empty().append($("<div>", {
+                    "class": "pane-item placeholder",
+                    "text": "Drop your answer here",
+                    "data-part-id": partid,
+                    "data-lesson-id": config.lesson_id,
+                    "data-question-id": data.ParentID,
+                    "data-type": template,
+                }));
+                container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
+
+                if (data.Content != null)
+                    answer.append($("<input>", { "type": "hidden", "value": data.Content }));
+
+                if (data.Media != null) {
+                    renderMediaContent(data, answer);
+                }
+                else
+                    answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
+                container.append(answer);
+                break;
+            default:
+                var form = $("<div>", { "class": "form-check" });
+                answer.append(form);
+                form.append($("<input>", { "type": "hidden" }));
+                form.append($("<input>", {
+                    "id": data.ID, "type": "radio",
+                    "class": "input-checkbox answer-checkbox form-check-input",
+                    "onclick": "AnswerQuestion(this)",
+                    "data-part-id": partid,
+                    "data-lesson-id": config.lesson_id,
+                    "data-question-id": data.ParentID,
+                    "data-id": data.ID,
+                    "data-type": template,
+                    "data-value": data.Content,
+                    "name": "rd_" + data.ParentID
+                }));
+                if (data.Content != null)
+                    form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "html": breakLine(data.Content) }));
+                renderMediaContent(data, answer);
+                container.append(answer);
+                break;
         }
 
     }
+
+    var completeExam = function (isOvertime) {
+        if (isOvertime || true) {
+            var exam = document.querySelector("input[name='ExamID']");
+            var dataform = new FormData();
+            dataform.append("ExamID", exam.value);
+            Ajax(config.url.end, dataform, "POST", true)
+                .then(function (res) {
+                    stopCountdown();
+                    var data = JSON.parse(res);
+                    if (isOvertime)
+                        notification("success", "Timeout! Exam Submited", 3000);
+                    else
+                        notification("success", "Submit successfully", 3000);
+                    localStorage.clear();
+                    renderCompleteExam(data);
+
+                })
+                .catch(function (err) {
+                    console.log(err);
+                });
+        }
+    }
+
+    var renderCompleteExam = function (data) {
+
+        var wrapper = $("<div>", { "class": "m-3 col-md-12 text-center" });
+        $('#' + config.container).empty().append($(wrapper));
+        if (isNull(data)) {
+            var doButton = $('<div>', {
+                "class": "btn btn-primary m-3",
+                "onclick": "BeginExam(this)",
+                "style": "cursor: pointer",
+                "text": "Begin Exam"
+            });
+            var backButton = $('<div>', {
+                "class": "btn btn-primary m-3",
+                "onclick": "GoBack()",
+                "style": "cursor: pointer",
+                "text": "Back to List"
+            });
+            wrapper.append(doButton);
+            wrapper.append(backButton);
+        }
+        else {
+            var lastExam = data;
+
+            var lastpoint = (lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0);
+
+            var limit = lastExam.limit;
+            var tried = lastExam.number;
+
+            lastExamResult =
+                $("<div>", { id: "last-result", class: "text-center" })
+                    .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Congratulation! You have complete your " + tried + " attempts!" }))
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Your score: " + lastpoint.toFixed(0) + "%" }));
+
+            wrapper.append(lastExamResult);
+            //console.log(data);
+
+            tryleft = limit - tried;
+
+            var backButton = $('<div>', {
+                "class": "btn btn-primary m-3",
+                "onclick": "GoBack()",
+                "style": "cursor: pointer",
+                "text": "Back to List"
+            });
+            var reviewButton = $('<div>', {
+                "class": "btn btn-primary m-3",
+                "onclick": 'Review(\'' + lastExam.id + '\')',
+                "style": "cursor: pointer",
+                "text": "Review answer"
+            });
+            if (limit > 0) {
+                tryleft = limit - tried;
+                if (tryleft > 0) {
+                    var doButton = $('<div>', {
+                        "class": "btn btn-primary m-3",
+                        "onclick": "BeginExam(this)",
+                        "style": "cursor: pointer",
+                        "text": 'You have <b>' + tryleft + '</b> tries left. Retry?'
+                    });
+                }
+                else {
+                    doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Attempt limit reached</div></div>';
+                    doable = false;
+                }
+            }
+            else {
+                var doButton = $('<div>', {
+                    "class": "btn btn-primary m-3",
+                    "onclick": "Redo(this)",
+                    "style": "cursor: pointer",
+                    "text": 'Do it again'
+                });
+            }
+            wrapper.append(doButton)
+                .append(reviewButton)
+                .append(backButton);
+        }
+    }
+
+    var goBack = function () {
+        document.location = "/student/Course/Modules/" + config.class_id;
+    }
+
+    var redoExam = function (_this) {
+        console.log("Redo Exam");
+        localStorage.clear();
+        startExam();
+    }
+
+    var review = function (examid) {
+        document.location = config.url.review + '/' + examid;
+    }
+
+    //var renderLesson = function (data) {
+    //    //writeLog("renderLesson", data);
+    //    var container = document.getElementById(config.container);
+    //    if (container == null) throw "Element id " + config.container + " not exist - create now";
+
+    //    if (data.Data.TemplateType == TEMPLATE_TYPE.LESSON) {
+    //        // bài giảng
+    //        //writeLog("bài giảng", data);
+    //        container.innerHTML = '<div class="" id="lessonContainer"></div>';
+    //        var lessonContainer = container.querySelector("#lessonContainer");
+    //        lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-8">' + data.Data.Title + '</div>' + tab + '</div></div><div id="body-exam" class="card-body"></div></div></div></div>';
+    //        var bodyExam = lessonContainer.querySelector("#body-exam");
+    //        var content = renderContent(data.Data);
+    //        bodyExam.innerHTML = '<div class="row">' + content + '</div>';
+    //    }
+    //    else {
+    //        // bài thi
+    //        //writeLog("bài tập", data);
+    //        var counter = data.Data.Timer >= 10 ? data.Data.Timer + ":00" : "0" + data.Data.Timer + ":00";
+    //        if (getLocalData("Timer") == null) setLocalData("Timer", counter);
+    //        container.innerHTML = '<div class="" id="lessonContainer"></div>';
+    //        var lessonContainer = container.querySelector("#lessonContainer");
+    //        lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-4">' + data.Data.Title + '</div><div class="text-center col-lg-4">Thời gian làm bài <span id="counter" class="time-counter">' + counter + '</span></div></div></div><div id="body-exam" class="card-body"></div></div></div></div>';
+
+    //        var bodyExam = lessonContainer.querySelector("#body-exam");
+    //        var lastExam = data.Exam;
+    //        var lastExamResult = "";
+    //        var doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Bắt đầu làm bài</div>';
+    //        var tryleft = 0;
+
+    //        var limit = data.Data.Limit;
+
+    //        if (lastExam != null && lastExam.Status == true) {
+    //            var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm:ss A");
+    //            lastExamResult = "<div id='last-result' class='col-md-12 text-center'>Bài kiểm tra đã hoàn thành lúc " + lastdate + "</div>";
+
+    //            var tried = lastExam.Number;
+    //            tryleft = limit - tried;
+
+    //            if (limit > 0) {
+    //                tryleft = limit - tried;
+    //                if (tryleft > 0) {
+    //                    doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Bạn còn <b>' + tryleft + '</b> lần làm lại. Thực hiện lại bài?</div>';
+    //                }
+    //                else
+    //                    doButton = '<div class="btn btn-danger">Bạn đã hết lượt làm bài</div>';
+    //            }
+    //            else {
+    //                doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Thực hiện lại bài</div>';
+    //            }
+    //        }
+    //        var content = checkExam()
+    //            ? renderContent(data.Data)
+    //            : (lastExamResult + '<div class="text-center pt-5 pb-5 col-md-12">' + doButton + '</div>');
+    //        bodyExam.innerHTML = '<div class="row">' + content + '</div>';
+    //        if (checkExam) {
+    //            document.querySelector("input[name='ExamID']").value = getLocalData("CurrentExam");
+    //        }
+    //    }
+    //    if ($('textarea[data-type=ESSAY]').length > 0) {
+    //        $(document).ready(function () {
+    //            CKEDITOR.replace($('textarea[data-type=ESSAY]').attr('id'));
+    //        });
+    //    }
+
+    //}
 
     /// tồn tại exam cũ thì return true;
     var checkExam = function () {
-        //var exam = document.getElementById("ExamID");
-        //if (exam == null || exam.value == void 0 || exam.value == null || exam.value == "") return false;
         return !isNull(getLocalData("CurrentExam"));
     }
 
     //render bài tập
     var renderSinglePart = function (data, index, type) {
-        writeLog("renderSinglePart", data);
+        //writeLog("renderSinglePart", data);
         var active = "";
         if (index != void 0 && index == 0) {
             active = "show active";
@@ -1863,7 +2554,7 @@ var Lesson = (function () {
     }
 
     var renderQUIZ1 = function (data) {
-        writeLog("renderQUIZ1", data);
+        //writeLog("renderQUIZ1", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-info" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="part-box-header col-md-6 d-inline-block sticky-top"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + toggleButton + '</div>';
         html += '<div class="quiz-wrapper col-md-6 d-inline-block align-top">';
@@ -1889,7 +2580,7 @@ var Lesson = (function () {
     }
 
     var renderQUIZ2 = function (data) {
-        writeLog("renderQUIZ2", data);
+        //writeLog("renderQUIZ2", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-info" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="part-box-header col-md-6 d-inline-block sticky-top"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + toggleButton + '</div>';
         html += '<div class="quiz-wrapper col-md-6 d-inline-block align-top">';
@@ -1914,7 +2605,7 @@ var Lesson = (function () {
     }
 
     var renderQUIZ3 = function (data) {
-        writeLog("renderQUIZ3", data);
+        //writeLog("renderQUIZ3", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-info" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="part-box-header col-md-6 d-inline-block sticky-top"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + toggleButton + '</div>';
         html += '<div class="col-md-6 d-inline-block align-top">';
@@ -1946,7 +2637,7 @@ var Lesson = (function () {
     }
 
     var renderESSAY = function (data) {
-        writeLog("renderESSAY", data);
+        //writeLog("renderESSAY", data);
         var html = '<div class="part-box-header">' + (data.Title == null ? '' : ('<h5 class="title">' + data.Title + '</h5>')) + '<div class="description">' + data.Description + '</div>' + renderMedia(data.Media) + '</div>';
         html += '<div class="quiz-wrapper">';
         html += '<div class="quiz-item" id="' + data.ID + '" data-part-id="' + data.ID + '"></div>';
@@ -1956,114 +2647,6 @@ var Lesson = (function () {
         html += '</div>';
         return html;
     }
-
-    /// bg
-    var renderVOCAB_BG = function (data) {
-        //if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
-        var title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper">';
-        html += '<div class="media-holder ' + data.Type + '">Not Support</div>';
-        html += '</div>';
-        return html;
-    }
-
-    var renderQUIZ1_BG = function (data) {
-        //if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
-        var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
-        html += '<div class="quiz-wrapper">';
-        for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-            var item = data.Questions[i];
-            html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
-            html += '<div class="quiz-box-header"><h5 class="title"> - ' + item.Content + ' (' + item.Point + 'đ)</h5>' + renderMedia(item.Media) + '</div>';
-            html += '<div class="answer-wrapper">';
-            for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
-                var answer = item.CloneAnswers[x];
-                html += '<fieldset class="answer-item" id="' + answer.ID + '">';
-                html += '<div class="form-check">';
-                html += '<input id="' + answer.ID + '" type="radio" data-type="QUIZ1" value="' + answer.Content + '" class="input-checkbox answer-checkbox form-check-input" onclick="AnswerQuestion(this)" name="rd_' + item.ID + '">';
-                html += '<label class="answer-text form-check-label" for="' + answer.ID + '">' + answer.Content + '</label>';
-                html += '</div>';
-                html += renderMedia(answer.Media);
-                html += '</fieldset>';
-            }
-            html += '</div></div>';
-        }
-        html += '</div>';
-        return html;
-    }
-
-    var renderQUIZ2_BG = function (data) {
-        //if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
-        var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
-        html += '<div class="quiz-wrapper">';
-        for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-            var item = data.Questions[i];
-            var itemContent = item.Content == null ? "Câu hỏi số " + (i + 1) + " : " : item.Content;
-            html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
-            html += '<div class="quiz-box-header"><h5 class="title"> - ' + itemContent + ' (' + item.Point + 'đ)</h5>' + renderMedia(item.Media) + '</div>';
-            html += '<div class="answer-wrapper">';
-            html += '<fieldset class="answer-item" id="quiz2-' + item.ID + '">';
-            var content = "";
-            for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
-                var answer = item.CloneAnswers[x];
-                content += content == "" ? answer.Content : " | " + answer.Content;
-            }
-            html += '<input id="inputQZ2-' + item.ID + '" data-type="QUIZ2" type="text" class="input-text answer-text form-control" placeholder="' + content + '" onfocusout="AnswerQuestion(this)" autocomplete="off">';
-            html += '</fieldset>';
-            html += '</div></div>';
-        }
-        html += '</div>';
-        return html;
-    }
-
-    var renderQUIZ3_BG = function (data) {
-        if (checkExam()) {
-            var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5></div>';
-            html += '<div class="row">';
-            html += '<div class="quiz-wrapper col-lg-8">' + renderMedia(data.Media);
-            var answers = "";
-            for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                var item = data.Questions[i];
-                var content = item.Content == null || item.Content == "null" || item.Content == void 0 ? "___" : item.Content;
-                html += '<div class="quiz-item row" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
-                html += '<div class="quiz-pane col-6"><div class="pane-item"><div class="quiz-text">' + content + '</div></div></div>';
-                html += '<div class="answer-pane col-6 ui-droppable" data-id="' + item.ID + '"><div class="pane-item placeholder">Thả câu trả lời tại đây</div></div>';
-                html += '</div>';
-                for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
-                    var answer = item.CloneAnswers[x];
-                    var media = renderMedia(answer.Media);
-                    if (media == "") {
-                        answers += '<fieldset data-type="QUIZ3" class="answer-item" id="' + answer.ID + '"><label class="answer-text">' + answer.Content + '</label></fieldset>';
-                    }
-                    else {
-                        answers += '<fieldset data-type="QUIZ3" class="answer-item" id="' + answer.ID + '">' + media + '</fieldset>';
-                    }
-
-                }
-            }
-            html += '</div>';
-            html += '<div class="answer-wrapper no-child col-lg-4 ui-droppable">' + answers + '</div>';
-            html += '</div>';
-            return html;
-        }
-        else {
-            return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
-        }
-
-    }
-
-    var renderESSAY_BG = function (data) {
-        if (!checkExam()) return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài</div></div>';
-        var html = '<div class="part-box-header"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + '</div>';
-        html += '<div class="quiz-wrapper">';
-        html += '<div class="quiz-item" id="' + data.ID + '" data-part-id="' + data.ID + '"></div>';
-        html += '<div class="answer-wrapper">';
-        html += '<div class="answer-content"><textarea data-type="ESSAY" id="essay-' + data.ID + '" class="form-control" row="3" placeholder="Câu trả lời tự luận" onfocusout="AnswerQuestion(this)"></textarea></div>';
-        html += '</div>';
-        html += '</div>';
-        return html;
-    }
-    ///end bg
 
     var renderMedia = function (data) {
         if (data == null || data == void 0 || data == "") return "";
@@ -2113,34 +2696,31 @@ var Lesson = (function () {
         return html;
     }
 
-    var beginExam = function (_this) {
-        var dataform = new FormData();
-        dataform.append("LessonID", config.lesson_id);
-        dataform.append("ClassID", config.class_id);
-        Ajax(config.url.start, dataform, "POST", false)
-            .then(function (res) {
-                var data = JSON.parse(res);
-                if (data.Error == null) {
-                    notification("success", "Bắt đầu làm bài", 3000);
-                    document.querySelector("input[name='ExamID']").value = data.Data.ID;
-                    // chưa viết hàm khác kịp (chỉ load những phần chưa load);????
-                    localStorage.setItem("CurrentExam", data.Data.ID);
-                    renderExam();
-                    renderBoDem();
-                    countdown();
-                    $('.quizNumber').removeClass("d-none");
-                } else {
-                    notification("error", data.Error, 3000);
-                }
-            })
-            .catch(function (err) {
-                notification("error", err, 3000);
-            })
-    }
+    //var beginExam = function (_this) {
+    //    var dataform = new FormData();
+    //    dataform.append("LessonID", config.lesson_id);
+    //    dataform.append("ClassID", config.class_id);
+    //    Ajax(config.url.start, dataform, "POST", false)
+    //        .then(function (res) {
+    //            var data = JSON.parse(res);
+    //            if (data.Error == null) {
+    //                notification("success", "Bắt đầu làm bài", 3000);
+    //                document.querySelector("input[name='ExamID']").value = data.Data.ID;
+    //                // chưa viết hàm khác kịp (chỉ load những phần chưa load);????
+    //                localStorage.setItem("CurrentExam", data.Data.ID);
+    //                renderExam();
+    //                renderBoDem();
+    //                countdown();
+    //                $('.quizNumber').removeClass("d-none");
+    //            } else {
+    //                notification("error", data.Error, 3000);
+    //            }
+    //        })
+    //        .catch(function (err) {
+    //            notification("error", err, 3000);
+    //        })
+    //}
 
-    var goBack = function () {
-        document.location = "/student/Course/Modules/" + config.class_id;
-    }
 
     var version = function () {
         return "1.0.0";
@@ -2156,10 +2736,10 @@ var Lesson = (function () {
 
     /// Ajax.then var data = JSON.parse(res);
     var Ajax = function (url, data, method, async) {
-        writeLog(url, data);
+        //writeLog(url, data);
         var request = new XMLHttpRequest();
         return new Promise(function (resolve, reject) {
-            // Setup our listener to process compeleted requests
+            // Setup our listener to process completed requests
             request.onreadystatechange = function () {
                 if (request.readyState == 4) {
                     // Process the response
@@ -2197,14 +2777,12 @@ var Lesson = (function () {
         });
     }
 
-
-
-
-
-
     var AnswerQuestion = function (_this) {
+        if (config.mod != mod.STUDENT_EXAM)
+            return;
         // dataset trên item
         var dataset = _this.dataset;
+        //console.log(dataset);
         //loại câu hỏi
         var type = dataset.type;
 
@@ -2255,7 +2833,7 @@ var Lesson = (function () {
         }
         var dataform = new FormData();
         if (type != "ESSAY") {
-            dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
+            dataform.append("ExamID", $("input[name=ExamID]").val());
             dataform.append("LessonPartID", partID);
             dataform.append("AnswerID", answerID);
             dataform.append("QuestionID", questionId);
@@ -2271,43 +2849,14 @@ var Lesson = (function () {
                 notification("error", err, 3000);
             });
         if (value == "") {
+            console.log(2);
             delAnswerForStudent(questionId);
         } else {
             saveAnswerForStudent(questionId, answerID, value, type);
         }
     }
 
-    var CompleteExam = function (isOvertime) {
-        if (isOvertime || confirm("Có phải bạn muốn nộp bài")) {
-            var exam = document.querySelector("input[name='ExamID']");
-            var dataform = new FormData();
-            dataform.append("ExamID", exam.value);
-            Ajax(config.url.end, dataform, "POST", true)
-                .then(function (res) {
-                    stopCountdown();
-                    var data = JSON.parse(res);
-                    notification("success", "Nộp bài thành công", 3000);
-                    //$(".lesson-container").empty();
-                    $('#body-exam').hide();
-                    $("#quizNavigator").addClass('d-none');
-                    $("#finish").remove();
-                    $(".quizNumber").remove();
-                    $('#lessonContainer').removeClass('col-md-10');
-                    $(".lesson-container").append('<div class="card show mb-4"></div>');
-                    $(".card:first").append('<div class="card-body d-flex justify-content-center"><h3>Bạn đã hoàn thành bài thi</h3></div>');
-                    $(".card:first").append('<div class="card-body d-flex justify-content-center"><h3>Điểm trắc nghiệm: ' + (data.maxPoint == 0 ? 0 : (data.point * 100 / data.maxPoint)).toFixed(0) + '%</h3></div>');
-                    $(".card:first").append('<div class="content card-body d-flex justify-content-center"></div>');
 
-                    $(".content").append('<a href="#" onclick="window.Redo()" class="mr-2"> Làm lại bài </a>');
-                    $(".content").append('<a href="#" onclick="" class="mr-2"> Kiểm tra đáp án </a>');
-                    $(".content").append('<a href="#" onclick="window.GoBack()" class="mr-2"> Quay về trang bài học </a>');
-
-                })
-                .catch(function (err) {
-                    console.log(err);
-                });
-        }
-    }
 
     var delAnswerForStudent = function (quizID) {
         localStorage.removeItem(config.lesson_id + config.class_id + quizID);
@@ -2316,7 +2865,7 @@ var Lesson = (function () {
         dataform.append("QuestionID", quizID);
         Ajax(config.url.removeans, dataform, "POST", false)
             .then(function (res) {
-                renderBoDem();
+                renderQuizCounter();
                 var xxx = document.getElementById("quizNav" + quizID);
                 if (xxx != null) {
                     xxx.classList.remove("completed");
@@ -2327,35 +2876,107 @@ var Lesson = (function () {
             });
     }
 
-    var delAnswerForStudentNoRender = function (quizID) {
-        localStorage.removeItem(config.lesson_id + config.class_id + quizID);
-        var dataform = new FormData();
-        dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
-        dataform.append("QuestionID", quizID);
-        Ajax(config.url.removeans, dataform, "POST", false)
-            .then(function (res) {
-                renderBoDem();
-                var xxx = document.getElementById("quizNav" + quizID);
-                if (xxx != null) {
-                    xxx.classList.remove("completed");
-                }
-            })
-            .catch(function (err) {
-                notification("error", err, 3000);
-            });
-    }
+    //var delAnswerForStudentNoRender = function (quizID) {
+    //    localStorage.removeItem(config.lesson_id + config.class_id + quizID);
+    //    var dataform = new FormData();
+    //    dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
+    //    dataform.append("QuestionID", quizID);
+    //    Ajax(config.url.removeans, dataform, "POST", false)
+    //        .then(function (res) {
+    //            renderBoDem();
+    //            var xxx = document.getElementById("quizNav" + quizID);
+    //            if (xxx != null) {
+    //                xxx.classList.remove("completed");
+    //            }
+    //        })
+    //        .catch(function (err) {
+    //            notification("error", err, 3000);
+    //        });
+    //}
 
     var saveAnswerForStudent = function (quizID, answerID, answerValue, type) {
         if (quizID == void 0) return;
         var value = quizID + "~~" + answerID + "~~" + answerValue + "~~" + type;
-        localStorage.setItem(config.lesson_id + config.class_id + quizID, value);
-        renderBoDem();
+        setLocalData(quizID, value);
+        renderQuizCounter();
         //startDragDrop();
         var xxx = document.getElementById("quizNav" + quizID);
         if (xxx != null) {
             xxx.classList.add("completed");
         }
     }
+
+    var renderQuizCounter = function () {
+        var listQuiz = document.querySelectorAll(".quiz-item");
+        var count = 0;
+        var answerList = '';
+        //writeLog("renderQuizCounter", listQuiz);
+        for (var i = 0; listQuiz != null && i < listQuiz.length; i++) {
+            var item = listQuiz[i];
+            var answer = getLocalData(item.id);
+            var completed = "";
+            if (answer != null && answer != void 0 && answer != "") {
+                count++;
+                completed = "completed";
+                rendAgain(answer);
+            }
+            answerList += '<button class="btn bg-secondary text-white rounded-quiz ' + completed + '" type="button" id="quizNav' + item.id + '" name="quizNav' + item.id + '" onclick="window.GoQuiz(\'' + item.id + '\')">' + (i + 1) + '</button>';
+        }
+
+        var quiz_number_holder = $("#quiz-counter-holder");
+        var quiz_number_counter = $('#quiz_number_counter');
+        if (quiz_number_counter.length > 0) {
+            quiz_number_counter.find(".completed").text(count);
+            quiz_number_counter.find(".total").text(listQuiz.length);
+        } else {
+            quiz_number_holder.append($("<button>", {
+                id: "quiz_number_counter",
+                class: "quizNumber btn btn-primary font-weight-bold"
+                //,
+                //onclick: "toggleNav()"
+            })
+                .append($("<span>", {
+                    class: "completed",
+                    text: count
+                })).append(" / ")
+                .append($("<span>", {
+                    class: "total",
+                    text: listQuiz.length
+                }))
+            ).append($('<button>', { class: "quizNumber btn btn-primary ml-2 btn-warning", onclick: "ToggleNav(this)", tooltips: "Toggle Scoreboard" })
+                .append($("<i>", { class: "fa fa-bars" })));
+        }
+        //var html = '<div id="quizNavigator" class="overlay">';
+        //html += '<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>';
+        //html += '<div class="overlay-content card-body">';
+        //html += '<div class="input-group mb-3 quiz-wrapper">';
+        //html += answerList;
+        //html += '<div style="display:none" id="btn-completed" class="d-flex justify-content-center pt-5 pb-5"><button class="btn btn-primary" onclick="ExamComplete()" data-original-title="" title=""> Nộp bài </button></div>';
+        //html += '</div>'
+        //html += '</div>';
+        //html += '</div>';
+
+        var quizNavigator = $('#quizNavigator');
+        if (quizNavigator.length == 0) {
+            quizNavigator = $('<div>', { id: "quizNavigator", class: "p-2" });
+            quizNavigator.append($('<div>', { class: "input-group quiz-wrapper" }).append(answerList));
+            $('#quizIdx_holder').append(quizNavigator);
+        }
+        if (quizNavigator != null) {
+            if (listQuiz != null && count >= listQuiz.length) {
+                //console.log(count, listQuiz.length);
+                var btn = document.getElementById("btn-completed");
+                if (btn != null) btn.style.display = "block";
+            } else {
+                var btn = document.getElementById("btn-completed");
+                if (btn != null) btn.style.display = "none!important";
+            }
+        } else {
+            document.body.innerHTML += html;
+        }
+        startDragDrop();
+    }
+
 
     var rendAgain = function (value) {
         var arr = value.split('~~');
@@ -2365,20 +2986,23 @@ var Lesson = (function () {
         var type = arr[3];
         switch (type) {
             case "QUIZ1":
-                var answer = document.getElementById(answerID);
-                answer.querySelector("input[type='radio']").setAttribute("checked", "");
+                var answer = $('#' + answerID);
+                $(answer).find("input[type='radio']").attr("checked", "");
                 break;
             case "QUIZ2":
-                var quiz = document.getElementById("inputQZ2-" + quizID);
-                quiz.setAttribute("value", answerValue);
+                var quiz = $('#inputQZ2-' + quizID);
+                console.log(answerValue);
+                console.log(quizID);
+                $(quiz).val(answerValue);
                 break;
             case "QUIZ3":
-                var quiz = document.getElementById(quizID);
-                var content = quiz.querySelector('[data-question-id="' + quizID + '"]');
-                var answer = document.getElementById(answerID);
-                var abc = answer.outerHTML;
-                answer.remove();
-                content.innerHTML = abc;
+                var quiz = $('#' + quizID);
+                var content = $(quiz).find('[data-question-id="' + quizID + '"]');
+                var answer = $('#' + answerID);
+                //var html = $(answer).outerHTML;
+                //answer.remove();
+                //content.innerHTML = html;
+                content.append(answer);
                 break;
             case "ESSAY":
                 var quiz = document.getElementById("essay-" + quizID);
@@ -2388,22 +3012,21 @@ var Lesson = (function () {
         }
     }
 
-
     var renderBoDem = function () {
         var listQuiz = document.querySelectorAll(".quiz-item");
         var count = 0;
         var answerList = '';
-        writeLog("renderBoDem", listQuiz);
+        //writeLog("renderBoDem", listQuiz);
         for (var i = 0; listQuiz != null && i < listQuiz.length; i++) {
             var item = listQuiz[i];
             var answer = localStorage.getItem(config.lesson_id + config.class_id + item.id);
-            var compeleted = "";
+            var completed = "";
             if (answer != null && answer != void 0 && answer != "") {
                 count++;
-                compeleted = "completed";
+                completed = "completed";
                 rendAgain(answer);
             }
-            answerList += '<button class="btn btn-outline-secondary rounded-quiz ' + compeleted + '" type="button" id="quizNav' + item.id + '" name="quizNav' + item.id + '" onclick="goNav(\'' + item.id + '\')">' + (i + 1) + '</button>';
+            answerList += '<button class="btn btn-outline-secondary rounded-quiz ' + completed + '" type="button" id="quizNav' + item.id + '" name="quizNav' + item.id + '" onclick="goNav(\'' + item.id + '\')">' + (i + 1) + '</button>';
         }
         var quiz_number_counter = $("#quiz_number_counter");
         if (quiz_number_counter.length > 0) {
@@ -2455,11 +3078,12 @@ var Lesson = (function () {
     LessonInstance.onReady = onReady;
     LessonInstance.Version = version;
     LessonInstance.Notification = notification;
-    window.BeginExam = beginExam;
+    window.BeginExam = startExam;
     window.AnswerQuestion = AnswerQuestion;
-    window.CompleteExam = CompleteExam;
-    window.Redo = resetLesson;
+    window.CompleteExam = completeExam;
+    window.Redo = redoExam;
     window.GoBack = goBack;
+    window.GoQuiz = goQuiz;
 
     window.EditLesson = modalEditLesson;
     window.EditPart = modalEditPart;
@@ -2475,8 +3099,10 @@ var Lesson = (function () {
     window.RemoveAnswer = removeAnswer;
     window.AddNewAnswer = addNewAnswer;
     window.ToggleCorrectAnswer = toggleCorrectAnswer;
-
+    window.ToggleExplanation = toggleExplanation;
+    window.ToggleNav = toggleNav;
     window.ReloadData = reloadData;
+    window.Review = review;
 
     window.NextPart = nextPart;
     window.PrevPart = prevPart;
@@ -2513,30 +3139,7 @@ function resetMedia(obj) {
     $(obj).hide();
 }
 
-function answerQuestion(obj, quizid) {
-    $('.quiz-item#' + quizid + " .quiz-extend").show();
-    markQuestion(quizid);
-}
 
-function markQuestion(quizid) {
-    if ($("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "].completed").length === 1) {
-    } else {
-        $("#quizNavigator .quiz-wrapper [name=quizNav" + quizid + "]").addClass("completed");
-        var completed = parseInt($(".quizNumber .completed").text()) + 1;
-        $(".quizNumber .completed").text(completed);
-        if (completed == totalQuiz)
-            $(".quizNumber .completed").addClass("finish");
-    }
-}
-
-function toggleCompact(obj) {
-    var parent = $(obj).parent().parent();
-    $(parent).toggleClass("compactView");
-    if ($(parent).hasClass("compactView"))
-        $(obj).text("Expand");
-    else
-        $(obj).text("Collapse");
-}
 
 var hideModal = function (modalId) {
     if (modalId != null)

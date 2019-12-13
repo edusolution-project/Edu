@@ -31,6 +31,11 @@ button,input,a{
         outline: none;
     }
 }
+a{
+    &:hover,&:focus{
+        text-decoration: none;
+    }
+}
 @media (min-width: 1200px) {
   .container {
     width: 1120px;
@@ -83,6 +88,9 @@ button,input,a{
 }
 .padding-b25{
     padding-bottom: 25px;
+}
+.padding-b20{
+    padding-bottom: 20px;
 }
 .padding-20{
     padding: 20px
@@ -326,6 +334,26 @@ button,input,a{
     width: 12px;
     height: 14px;
 }
+.ic-headphone{
+    background-image: url(../images/headphone.png);
+    width: 56px;
+    height: 56px;
+}
+.ic-readbook{
+    background-image: url(../images/read-book.png);
+    width: 56px;
+    height: 56px;
+}
+.ic-edit{
+    background-image: url(../images/edit.png);
+    width: 56px;
+    height: 56px;
+}
+.ic-microphone{
+    background-image: url(../images/microphone.png);
+    width: 56px;
+    height: 56px;
+}
 .adv{
 
 }
@@ -340,9 +368,43 @@ button,input,a{
             color: @red;
             text-transform: uppercase;
         }
+        a{
+            display: inline-block;
+            color: #13A6FB;
+            margin-right: 5px;
+        }
+        .end-break{
+            color: @red;
+            display: inline-block;
+            font-weight: 600
+        }
     }
     .search-box{
         width: 270px;
+    }
+    .progress{
+        width: 150px;
+        height: 8px;
+        border-radius: 10px;
+        margin-top: 12px;
+        &~span{
+            margin-left: 10px;
+            line-height: 30px;
+            color: #13A6FB
+        }
+    }
+    .bad{
+        .progress-bar{
+            background-color: #839AA6
+        }
+        .progress{
+            &~span{
+                color: #839AA6
+            }
+        }
+    }
+    .progress-bar{
+        background-color: #13A6FB
     }
 }
 .search-box{
@@ -374,7 +436,7 @@ button,input,a{
         padding: 20px 20px 0 20px;
     }
 }
-.list-lession{
+.list-lesson{
     li{
         display: flex;
         list-style: none;
@@ -685,12 +747,13 @@ button,input,a{
             border-top: 1px solid #D0DFE8;
             padding-top: 10px;
             .c-right{
-                display: flex;
+                width: 100%;
                 white-space: nowrap;
-                align-items: center;
+                text-align: right;
                 margin-left: 15px;
                 .ic-subtag{
                     margin-left: 7px;
+                    margin-bottom: -2px;
                 }
             }
         }
@@ -711,7 +774,11 @@ button,input,a{
         padding: 3px 8px;
         font-weight: 600;
         text-align: center;
-        min-width: 95px;
+        width: 95px;
+        white-space: nowrap;
+        &:hover,&:focus{
+            text-decoration: none;
+        }
     }
     &:nth-child(4n+1){
         .btn-learn{
@@ -736,9 +803,130 @@ button,input,a{
 }
 .paging-view{
     font-size: 13px;
+    width: 100%;
     select{
         padding: 5px 15px;
         border: 1px solid #D0DFE8;
         border-radius: 4px;
+    }
+}
+.page-control{
+    width: 100%;
+    text-align: right;
+    .inner{
+        width: 150px;
+        display: flex;
+        float: right;
+        justify-content: end;
+        white-space: nowrap;
+        button,input{
+            background: none;
+            border: none;
+            padding: 3px 7px;
+            text-align: center;
+        }
+        button{
+            color: #AFBBBA
+        }
+        input{
+            width: 35px;
+            color: @red;
+            font-weight: 600
+        }
+    }
+}
+.time-line{
+    margin-bottom: 0;
+    li{
+        display: inline-block;
+        color: #839AA6;
+        font-size: 12px;
+        white-space: nowrap;
+        margin-left: 10px;
+        line-height: 32px;
+        i{
+            margin-right: 5px;
+        }
+        &:first-child{
+            i{
+                color: #13A6FB
+            }
+        }
+        &:last-child{
+            i{
+                color: #D03239
+            }
+        }
+    }
+}
+.practice-item{
+    position: relative;
+    &~.practice-item{
+        &::before{
+            content: '';
+            position: absolute;
+            border-left: 1px solid #D0DFE8;
+            height: 36px;
+            top: 20px
+        }
+    }
+    .inner{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 20px;
+        span,a{
+            display: block;
+        }
+        .title{
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 20px;
+            text-transform: uppercase;
+            padding: 15px 0
+        }
+        .btn-learn{
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 16px;
+            border-radius: 15px;
+            color: @white;
+            padding: 3px 10px 6px 10px;
+            width: 92px;
+            text-align: center;
+        }
+    }
+    &:nth-child(4n+1){
+        span,.title{
+            color: #00BBD4
+        }
+        .btn-learn{
+            background: #00BBD4
+        }
+    }
+    &:nth-child(4n+2){
+        span,.title{
+            color: #00D9A5
+        }
+        .btn-learn{
+            background: #00D9A5
+        }
+    }
+    &:nth-child(4n+3){
+        span,.title{
+            color: #F7971E
+        }
+        .btn-learn{
+            background: #F7971E
+        }
+    }
+    &:nth-child(4n+4){
+        span,.title{
+            color: #B70058
+        }
+        .btn-learn{
+            background: #B70058
+        }
     }
 }

@@ -299,7 +299,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var lessonview = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
             {
-                Parts = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
                 {
                     Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
                         .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
@@ -381,10 +381,10 @@ namespace BaseCustomerMVC.Controllers.Student
             var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
             var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
             var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
-
+            
             var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
             {
-                Parts = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
                 {
                     Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
                         .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
