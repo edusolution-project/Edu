@@ -48,6 +48,7 @@
     bottom: 0;
     overflow: hidden;
     margin: 0;
+    z-index: 0;
 }
 
 p {
@@ -114,13 +115,11 @@ footer {
 
         .part-box .scroll-wrapper .dragging {
             overflow: visible !important;
-            /*overflow-y: auto !important;*/
         }
 
-        .part-box .scroll-wrapper .droptarget {
-            z-index: -1;
-            /*overflow-y: auto !important;*/
-        }
+    .part-box .droptarget {
+        z-index: -1 !important;
+    }
 
 #lessonSummary {
     position: absolute;

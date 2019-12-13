@@ -209,7 +209,9 @@ namespace BaseCustomerMVC.Controllers.Student
         public JsonResult GetCurrentExam(string ClassID, string LessonID)
         {
             var userID = User.Claims.GetClaimByType("UserID").Value;
-            var x = _examService.CreateQuery().Find(o => o.ClassID == ClassID && o.LessonID == LessonID && o.Status == false && o.StudentID == userID).FirstOrDefault();
+            var x = _examService.CreateQuery().Find(o => o.ClassID == ClassID && o.LessonID == LessonID &&
+            //o.Status == false && 
+            o.StudentID == userID).FirstOrDefault();
             if (x != null)
                 x.CurrentDoTime = DateTime.Now;
             return new JsonResult(x);

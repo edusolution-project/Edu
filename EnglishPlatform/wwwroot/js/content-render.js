@@ -97,17 +97,17 @@ var Lesson = (function () {
     //local storage function
     var setLocalData = function (key, data) {
         var enData = b64EncodeUnicode(JSON.stringify(data));
-        localStorage.setItem(config.lesson_id + "_" + key, enData);
+        localStorage.setItem(config.lesson_id + "_" + config.class_id + "_" + key, enData);
     }
 
     var getLocalData = function (key) {
-        var data = localStorage.getItem(config.lesson_id + "_" + key)
+        var data = localStorage.getItem(config.lesson_id + "_" + config.class_id + "_" + key)
         if (data == null) return null;
         return JSON.parse(b64DecodeUnicode(data));
     }
 
     var removeLocalData = function (key) {
-        return localStorage.removeItem(config.lesson_id + "_" + key);
+        return localStorage.removeItem(config.lesson_id + "_" + config.class_id + "_" + key);
     }
 
     //function
@@ -798,7 +798,7 @@ var Lesson = (function () {
         switch (template) {
             case "QUIZ2":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
-                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": item.ParentID });
+                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 boxHeader.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
                 renderMediaContent(data, boxHeader);
@@ -877,7 +877,7 @@ var Lesson = (function () {
             default:
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
-                var itembox = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": item.ParentID });
+                var itembox = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
                     boxHeader.append($("<h5>", { "class": "title", "html": breakLine(data.Content) + point }));
@@ -1017,12 +1017,13 @@ var Lesson = (function () {
                 var prevHolder = $(ui.helper).parent();
                 prevHolder.remove($(ui.helper));
                 var quiz = prevHolder.data("questionId");
-                console.log(quiz);
+
                 if ($(prevHolder).attr("data-question-id") == $(this).attr("data-question-id"))
                     return false;
 
                 var part = $(prevHolder).attr("data-part-id");
-
+                console.log(part);
+                console.log($("#" + part + " .answer-wrapper"));
                 if ($(this).find(".answer-item").length > 0) {//remove all answer to box
                     $("#" + part + " .answer-wrapper").append($(this).find(".answer-item"));
                 }
@@ -1030,16 +1031,21 @@ var Lesson = (function () {
                 $(this).append(item);
 
                 if ($(prevHolder).find(".answer-item").length == 1) {
-                    if ($(prevHolder).find(".placeholder").length > 0)
-                        $(prevHolder).find(".placeholder").show();
-                    else
-                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
-                }
 
+                    if ($(prevHolder).find(".placeholder").length > 0) {
+                        $(prevHolder).find(".placeholder").show();
+                    }
+                    else {
+                        $(prevHolder).append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                    }
+                }
 
                 if (config.mod == mod.STUDENT_EXAM) {
                     var quiz = prevHolder.data("questionId");
-                    if (quiz != null) { delAnswerForStudentNoRender(quiz); }
+                    if (quiz != null) {
+                        delAnswerForStudentNoRender(quiz);
+                    }
+
                     AnswerQuestion(this);
                 }
 
@@ -2040,7 +2046,6 @@ var Lesson = (function () {
                 var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 renderMediaContent(data, ItemRow, "");
-                console.log(ItemRow);
                 ItemRow.append(itemBody);
                 if (data.Description != null) {
                     ItemRow.append($("<div>", { "class": "part-description" }).html(data.Description));
@@ -2059,9 +2064,6 @@ var Lesson = (function () {
                         $(this).append($(ui.draggable));
                     }
                 });
-                console.log(itemBody);
-                //console.log(tabsitem);
-                //console.log(container);
                 container.append(tabsitem);
                 //Render Question
                 totalQuiz = data.Questions.length;
@@ -2135,7 +2137,6 @@ var Lesson = (function () {
                 break;
             case "QUIZ3":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
-                console.log(container);
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
 
                 var quiz_part = $("<div>", { "class": "quiz-pane col-6" });
@@ -2228,7 +2229,6 @@ var Lesson = (function () {
                         "data-question-id": data.ParentID,
                         "data-type": template,
                     }).attr("autocomplte", "off"));
-
                     container.append(answer);
                 }
                 break;
@@ -2237,12 +2237,9 @@ var Lesson = (function () {
                 $(placeholder).removeClass("no-child");
                 placeholder.empty().append($("<div>", {
                     "class": "pane-item placeholder",
-                    "text": "Drop your answer here",
-                    "data-part-id": partid,
-                    "data-lesson-id": config.lesson_id,
-                    "data-question-id": data.ParentID,
-                    "data-type": template,
+                    "text": "Drop your answer here"
                 }));
+
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
 
                 if (data.Content != null)
@@ -2664,7 +2661,7 @@ var Lesson = (function () {
     }
 
     var renderContent = function (data) {
-        var tabList = '<div id="pills-tabContent" class="tab-content">';
+        var tabList = '<div id="pills-tabContent" class="tab-content position-relative" style="z-index:0">';
         var nav = '<div id="nav-menu" class="col-md-12 mb-3 pb-3 bd-bottom">';
         var nav_bottom = '<div id="nav-menu" class="col-md-12 mt-3 pt-3 bd-top">';
         nav += '<div class="col-md-1 text-left d-inline-block"><button class="prevtab btn btn-success" data-toggle="tooltip" title="Phần trước" onclick="PrevPart()"><i class="fas fa-arrow-left"></i></button></div>'; //left button
@@ -2849,7 +2846,6 @@ var Lesson = (function () {
                 notification("error", err, 3000);
             });
         if (value == "") {
-            console.log(2);
             delAnswerForStudent(questionId);
         } else {
             saveAnswerForStudent(questionId, answerID, value, type);
@@ -2859,12 +2855,14 @@ var Lesson = (function () {
 
 
     var delAnswerForStudent = function (quizID) {
-        localStorage.removeItem(config.lesson_id + config.class_id + quizID);
+        removeLocalData(quizID);
+
         var dataform = new FormData();
         dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
         dataform.append("QuestionID", quizID);
         Ajax(config.url.removeans, dataform, "POST", false)
             .then(function (res) {
+
                 renderQuizCounter();
                 var xxx = document.getElementById("quizNav" + quizID);
                 if (xxx != null) {
@@ -2876,23 +2874,22 @@ var Lesson = (function () {
             });
     }
 
-    //var delAnswerForStudentNoRender = function (quizID) {
-    //    localStorage.removeItem(config.lesson_id + config.class_id + quizID);
-    //    var dataform = new FormData();
-    //    dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
-    //    dataform.append("QuestionID", quizID);
-    //    Ajax(config.url.removeans, dataform, "POST", false)
-    //        .then(function (res) {
-    //            renderBoDem();
-    //            var xxx = document.getElementById("quizNav" + quizID);
-    //            if (xxx != null) {
-    //                xxx.classList.remove("completed");
-    //            }
-    //        })
-    //        .catch(function (err) {
-    //            notification("error", err, 3000);
-    //        });
-    //}
+    var delAnswerForStudentNoRender = function (quizID) {
+        removeLocalData(quizID);
+        var dataform = new FormData();
+        dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
+        dataform.append("QuestionID", quizID);
+        Ajax(config.url.removeans, dataform, "POST", false)
+            .then(function (res) {
+                var xxx = document.getElementById("quizNav" + quizID);
+                if (xxx != null) {
+                    xxx.classList.remove("completed");
+                }
+            })
+            .catch(function (err) {
+                notification("error", err, 3000);
+            });
+    }
 
     var saveAnswerForStudent = function (quizID, answerID, answerValue, type) {
         if (quizID == void 0) return;
@@ -2907,6 +2904,7 @@ var Lesson = (function () {
     }
 
     var renderQuizCounter = function () {
+        console.log("render");
         var listQuiz = document.querySelectorAll(".quiz-item");
         var count = 0;
         var answerList = '';
@@ -2914,8 +2912,10 @@ var Lesson = (function () {
         for (var i = 0; listQuiz != null && i < listQuiz.length; i++) {
             var item = listQuiz[i];
             var answer = getLocalData(item.id);
+            console.log(item.id);
             var completed = "";
             if (answer != null && answer != void 0 && answer != "") {
+                //console.log(answer);
                 count++;
                 completed = "completed";
                 rendAgain(answer);
@@ -2979,6 +2979,7 @@ var Lesson = (function () {
 
 
     var rendAgain = function (value) {
+        console.log(value);
         var arr = value.split('~~');
         var quizID = arr[0];
         var answerID = arr[1];
@@ -2996,13 +2997,12 @@ var Lesson = (function () {
                 $(quiz).val(answerValue);
                 break;
             case "QUIZ3":
-                var quiz = $('#' + quizID);
-                var content = $(quiz).find('[data-question-id="' + quizID + '"]');
-                var answer = $('#' + answerID);
-                //var html = $(answer).outerHTML;
-                //answer.remove();
-                //content.innerHTML = html;
-                content.append(answer);
+                var quiz = document.getElementById(quizID);
+                var content = quiz.querySelector('[data-question-id="' + quizID + '"]');
+                var answer = document.getElementById(answerID);
+                var abc = answer.outerHTML;
+                answer.remove();
+                content.innerHTML = abc;
                 break;
             case "ESSAY":
                 var quiz = document.getElementById("essay-" + quizID);
@@ -3010,67 +3010,6 @@ var Lesson = (function () {
                 break;
             default: return;
         }
-    }
-
-    var renderBoDem = function () {
-        var listQuiz = document.querySelectorAll(".quiz-item");
-        var count = 0;
-        var answerList = '';
-        //writeLog("renderBoDem", listQuiz);
-        for (var i = 0; listQuiz != null && i < listQuiz.length; i++) {
-            var item = listQuiz[i];
-            var answer = localStorage.getItem(config.lesson_id + config.class_id + item.id);
-            var completed = "";
-            if (answer != null && answer != void 0 && answer != "") {
-                count++;
-                completed = "completed";
-                rendAgain(answer);
-            }
-            answerList += '<button class="btn btn-outline-secondary rounded-quiz ' + completed + '" type="button" id="quizNav' + item.id + '" name="quizNav' + item.id + '" onclick="goNav(\'' + item.id + '\')">' + (i + 1) + '</button>';
-        }
-        var quiz_number_counter = $("#quiz_number_counter");
-        if (quiz_number_counter.length > 0) {
-            quiz_number_counter.find(".completed").text(count);
-            quiz_number_counter.find(".total").text(listQuiz.length);
-        } else {
-            $("#lessonContainer").append($("<span>", {
-                id: "quiz_number_counter",
-                style: "top: 30%",
-                class: "number quizNumber d-none",
-                onclick: "openNav()"
-            })
-                .append($("<span>", {
-                    class: "completed",
-                    text: count
-                })).append(" / ")
-                .append($("<span>", {
-                    class: "total",
-                    text: listQuiz.length
-                })));
-        }
-        var html = '<div id="quizNavigator" class="overlay">';
-        html += '<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>';
-        html += '<div class="overlay-content card-body">';
-        html += '<div class="input-group mb-3 quiz-wrapper">';
-        html += answerList;
-        html += '<div style="display:none" id="btn-completed" class="d-flex justify-content-center pt-5 pb-5"><button class="btn btn-primary" onclick="CompleteExam()" data-original-title="" title=""> Nộp bài </button></div>';
-        html += '</div>'
-        html += '</div>';
-        html += '</div>';
-        var quizNavigator = document.getElementById("quizNavigator");
-        if (quizNavigator != null) {
-            if (listQuiz != null && count >= listQuiz.length) {
-                console.log(count, listQuiz.length);
-                var btn = document.getElementById("btn-completed");
-                if (btn != null) btn.style.display = "block";
-            } else {
-                var btn = document.getElementById("btn-completed");
-                if (btn != null) btn.style.display = "none!important";
-            }
-        } else {
-            document.body.innerHTML += html;
-        }
-        startDragDrop();
     }
 
     window.LessonInstance = {} || Lesson;
@@ -3138,8 +3077,6 @@ function resetMedia(obj) {
     $(obj).parent().siblings(".media_preview").remove();
     $(obj).hide();
 }
-
-
 
 var hideModal = function (modalId) {
     if (modalId != null)
