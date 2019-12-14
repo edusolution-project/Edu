@@ -496,7 +496,7 @@
         }
         //string title,string content,int state,HashSet<string> receivers
         var createNewFeed = function (msg) {
-            if (msg == "") return;
+            if (msg.trim() == "") return;
             $.ajax({
                 url: "@Url.Action("CREATE","NewFeed")",
                 type: "POST",
@@ -514,7 +514,7 @@
             });
         }
         var createComment = function (content, id) {
-            if (content == "") return;
+            if (content.trim() == "") return;
             $.ajax({
                 url: "@Url.Action("CREATE","Comment")",
                 type: "POST",
