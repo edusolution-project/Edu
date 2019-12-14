@@ -1,8 +1,9 @@
-﻿@{
+﻿@using BaseCustomerMVC.Controllers.Student
+@{
     ViewData["Title"] = "Discussion";
-    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
-    var classList = ViewBag.Data as List<BaseCustomerEntity.Database.ClassEntity>;
-    var listStudent = ViewBag.Students as List<BaseCustomerMVC.Controllers.Student.MemberInfo>;
+    Layout = "~/Views/Shared/_layoutTeacher.cshtml";
+    var classList = ViewBag.Data as List<ClassInfo>;
+    var listStudent = ViewBag.Students as List<MemberInfo>;
     var teacher = ViewBag.Teacher as BaseCustomerMVC.Controllers.Student.MemberInfo;
     string id = ViewBag.ID as string;
     int State = 0;
@@ -10,7 +11,7 @@
     int numberStudent = listStudent == null ? 0 : listStudent.Count;
     int numberTeacher = teacher == null ? 0 : 1;
     int total = numberStudent + numberTeacher;
-    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var currentClass = ViewBag.Class as ClassInfo;
 }
 <script>
     var activeTab = "comments";
@@ -102,15 +103,16 @@
     .list-new-feeds, .body-comment {
         padding: 10px;
         max-height: 80%;
-        height: 60vh;
+        height: calc(100vh - 190px);
         overflow: auto;
         overflow-x: hidden;
     }
 
     .body-comment {
-        height: 54.5vh;
+        min-height: calc(100vh - 245px);
         border-left: 1px solid #ccc;
         border-right: 1px solid #ccc;
+        background:#fff;
     }
 
     .inf-group .img-group {
@@ -222,10 +224,16 @@
                         <div id="list-book-mard"></div>
                         <div id="list-news-record"></div>
                         <div id="list-news-old-@id" class="list-new-feeds">
+
                         </div>
-                        <div id="form-post">
-                            <textarea rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
-                        </div>
+                        @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+                            {
+                                <div id="form-post">
+                                    <textarea rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
+                                </div>
+                            }
+                        }
+
                     </div>
                 </div>
                 <div class="col-4">
@@ -241,9 +249,14 @@
                                 </button>
                             </div>
                             <div class="body-comment"></div>
-                            <div class="form-comment" id="form-comment">
-                                <textarea rows="3" style="border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
-                            </div>
+                            @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+                                {
+                                    <div class="form-comment" id="form-comment">
+                                        <textarea rows="3" style="border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
+                                    </div>
+                                }
+                            }
+
                         </div>
                     </div>
                     <div class="box-info-contact">
@@ -304,7 +317,7 @@
         $("#choosen-group").on("change", function () {
             var value = $(this).val();
             if (value == null || value == "") {
-                window.location.href = '@Url.Action("Index","Discuss",new { @area = "student"})';
+                window.location.href = '@Url.Action("Index", "Discuss", new { @area = "student" })';
             } else {
                 var url = window.location.pathname;
                 var search = window.location.search;
@@ -344,7 +357,7 @@
         $("#input-search-content").on("click", function () {
             var value = $("#search-text").val();
             if (value == null || value == "") {
-                window.location.href = '@Url.Action("Index","Discuss",new { @area = "student"})';
+                window.location.href = '@Url.Action("Index", "Discuss", new { @area = "student" })';
             } else {
                 var url = window.location.pathname;
                 var search = window.location.search;
@@ -387,7 +400,7 @@
         });
         var loadData = function (pageIndex) {
             $.ajax({
-                url: "@Url.Action("GET","NewFeed")/?id=&receivers=@id&State=@State&pagesize=10&pageindex="+pageIndex,
+                url: "@Url.Action("GET", "NewFeed")/?id=&receivers=@id&State=@State&pagesize=10&pageindex="+pageIndex,
                 type: "GET",
                 success: function (data) {
                     if (data.code == 200) {
@@ -422,7 +435,8 @@
                                     </div>
                                 </div>`;
                                 loadCountComment(item.ID);
-                                $("#list-news-old-" + item.receivers[0]).append(html);
+                                var strId = item.receivers[0] == null || item.receivers[0] == "" || item.receivers[0] == void 0 ? "" : item.receivers[0];
+                                $("#list-news-old-"+strId).append(html);
                             }
                         }
                     }
@@ -436,7 +450,7 @@
         }
         var loadCountComment = function (id) {
              $.ajax({
-                url: "@Url.Action("GetCount","Comment")?newFeedId="+id,
+                url: "@Url.Action("GetCount", "Comment")?newFeedId="+id,
                 type: "GET",
                  success: function (data) {
                     var str = `<a href="javascript:void(0)" onclick="openChat('${id}')">
@@ -462,7 +476,7 @@
             ojChat.querySelector("input[name='ParentID']").value = id;
             ojChat.querySelector(".body-comment").innerHTML = "";
             $.ajax({
-                url: "@Url.Action("Get","Comment")?parentID=" + id+"&IsReply=false",
+                url: "@Url.Action("Get", "Comment")?parentID=" + id+"&IsReply=false",
                 type: "GET",
                 success: function (data) {
                     if (data.code == 200) {
@@ -498,7 +512,7 @@
         var createNewFeed = function (msg) {
             if (msg.trim() == "") return;
             $.ajax({
-                url: "@Url.Action("CREATE","NewFeed")",
+                url: "@Url.Action("CREATE", "NewFeed")",
                 type: "POST",
                 data: {
                     title: "",
@@ -508,7 +522,13 @@
                 },
                 success: function (data) {
                     if (connection != void 0) {
-                        connection.invoke("SendToGroup", { type: "newfeed", obj: data }, 'newfeed-' + data.data.receivers[0]);
+                        var item = data.data;
+                        var strId = item.receivers[0] == null || item.receivers[0] == "" || item.receivers[0] == void 0 ? "" : item.receivers[0];
+                        if (strId == "") {
+                            connection.invoke("SendToGroup", { type: "newfeed", obj: data }, 'Online');
+                        } else {
+                            connection.invoke("SendToGroup", { type: "newfeed", obj: data }, 'newfeed-' + strId);
+                        }
                     }
                 }
             });
@@ -516,14 +536,18 @@
         var createComment = function (content, id) {
             if (content.trim() == "") return;
             $.ajax({
-                url: "@Url.Action("CREATE","Comment")",
+                url: "@Url.Action("CREATE", "Comment")",
                 type: "POST",
                 data: {
                     content: content,
                     parentID:id
                 },
                 success: function (data) {
-                    connection.invoke("SendToGroup", { type: "comment", obj: data }, 'newfeed-@ViewBag.ID');
+                    if ('@ViewBag.ID' == "" || '@ViewBag.ID' == null || '@ViewBag.ID' == void 0) {
+                        connection.invoke("SendToGroup", { type: "comment", obj: data }, 'Online');
+                    } else {
+                        connection.invoke("SendToGroup", { type: "comment", obj: data }, 'newfeed-@ViewBag.ID');
+                    }
                 }
             })
         }
@@ -532,17 +556,25 @@
             ojChat.querySelector("input[name='ParentID']").value = "";
             ojChat.classList.remove("open");
         });
-        $("#form-comment>textarea").on("keypress", function (e) {
-            if (e.which == 13) {
-                createComment($(this).val(), document.getElementById("comment-box-new-feed").querySelector("input[name='ParentID']").value);
-                $(this).val("");
-            }
-        })
-        $("#form-post>textarea").on("keypress", function (e) {
-            if (e.which == 13) {
-                createNewFeed($(this).val());
-                $(this).val("");
-            }
-        })
+
+
     </script>
+    @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+        {
+            <script>
+                $("#form-comment>textarea").on("keypress", function (e) {
+                    if (e.which == 13) {
+                        createComment($(this).val(), document.getElementById("comment-box-new-feed").querySelector("input[name='ParentID']").value);
+                        $(this).val("");
+                    }
+                })
+                $("#form-post>textarea").on("keypress", function (e) {
+                    if (e.which == 13) {
+                        createNewFeed($(this).val());
+                        $(this).val("");
+                    }
+                })
+            </script>
+        }
+    }
 }

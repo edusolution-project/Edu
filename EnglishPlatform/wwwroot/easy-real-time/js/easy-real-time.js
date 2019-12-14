@@ -46,6 +46,15 @@ var easyRealTime = (function () {
                 createChatBox();
                 createNewFeedBox();
                 listGroup = data.data.group;
+
+                if (listGroup != null && listGroup != void 0 || listGroup != {}) {
+                    for (var i = 0; i < listGroup.length; i++) {
+                        var item = listGroup[i];
+                        connection.invoke("GoToClass", `chat-${item.name}`);
+                        connection.invoke("GoToClass", `newfeed-${item.name}`);
+                    }
+                }
+
                 teacherList = data.data.teacher;
                 listFriend = data.data.friend;
                 if (newFeed != null) {
@@ -105,8 +114,6 @@ var easyRealTime = (function () {
                 li.addEventListener('click', function () {
                     loadMessage(this);
                 });
-                connection.invoke("GoToClass", `chat-${item.name}`);
-                connection.invoke("GoToClass", `newfeed-${item.name}`);
             }
 
         } else {

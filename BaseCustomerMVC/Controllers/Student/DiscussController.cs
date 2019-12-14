@@ -3,6 +3,7 @@ using BaseCustomerMVC.Globals;
 using BaseEasyRealTime.Entities;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using System;
 using System.Linq;
 
 namespace BaseCustomerMVC.Controllers.Student
@@ -22,7 +23,14 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public IActionResult Index(string id,string searchText)
         {
-            ViewBag.Data = _classService.Collection.Find(o => o.Students.Contains(User.Claims.GetClaimByType("UserID").Value)).ToList();
+            var listClass = _classService.Collection.Find(o => o.Students.Contains(User.Claims.GetClaimByType("UserID").Value)).ToList();
+            var listActive = listClass.Select(o => new ClassInfo()
+            {
+                ID = o.ID,
+                IsAllow = o.EndDate >= DateTime.Now && o.StartDate <= DateTime.Now,
+                Name = o.Name
+            })?.OrderBy(o=>o.IsAllow)?.ToList();
+            ViewBag.Data = listActive;
             ViewBag.SearchText = searchText;
             ViewBag.ID = id;
             if (!string.IsNullOrEmpty(id))
@@ -30,7 +38,11 @@ namespace BaseCustomerMVC.Controllers.Student
                 var currentClass = _classService.GetItemByID(id);
                 if(currentClass != null)
                 {
-                    ViewBag.Class = currentClass;
+                    ViewBag.Class = new ClassInfo() {
+                        ID = currentClass.ID,
+                        Name = currentClass.Name,
+                        IsAllow = currentClass.StartDate <= DateTime.Now && currentClass.EndDate >= DateTime.Now
+                    };
                     var listAccount = currentClass.Students;
                     var teacherID = currentClass.TeacherID;
                     ViewBag.Students = _studentService.Collection.Find(o => listAccount.Contains(o.ID))?.ToList()?
@@ -53,5 +65,11 @@ namespace BaseCustomerMVC.Controllers.Student
     {
         public string Name { get; set; }
         public string Email { get; set; }
+    }
+    public class ClassInfo
+    {
+        public string ID { get; set; }
+        public string Name { get; set; }
+        public bool IsAllow { get; set; }
     }
 }

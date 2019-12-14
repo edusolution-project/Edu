@@ -4,6 +4,8 @@ using BaseCustomerEntity.Database;
 using Core_v2.Globals;
 using MongoDB.Driver;
 using System.Linq;
+using System;
+using BaseCustomerMVC.Controllers.Student;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -23,7 +25,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult Index(string id, string searchText)
         {
             var teacher = _teacherService.Collection.Find(o => o.Email == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value)?.SingleOrDefault();
-            ViewBag.Data = _classService.Collection.Find(o => o.TeacherID == teacher.ID).ToList();
+            var listClass = _classService.Collection.Find(o => o.Students.Contains(User.Claims.GetClaimByType("UserID").Value)).ToList();
+            var listActive = listClass.Select(o => new ClassInfo()
+            {
+                ID = o.ID,
+                IsAllow = o.EndDate >= DateTime.Now && o.StartDate <= DateTime.Now,
+                Name = o.Name
+            })?.OrderBy(o => o.IsAllow)?.ToList();
+            ViewBag.Data = listActive;
             ViewBag.SearchText = searchText;
             ViewBag.ID = id;
             if (!string.IsNullOrEmpty(id))
@@ -31,7 +40,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var currentClass = _classService.GetItemByID(id);
                 if (currentClass != null)
                 {
-                    ViewBag.Class = currentClass;
+                    ViewBag.Class = new ClassInfo()
+                    {
+                        ID = currentClass.ID,
+                        Name = currentClass.Name,
+                        IsAllow = currentClass.StartDate <= DateTime.Now && currentClass.EndDate >= DateTime.Now
+                    };
                     var listAccount = currentClass.Students;
                     var teacherID = currentClass.TeacherID;
                     ViewBag.Students = _studentService.Collection.Find(o => listAccount.Contains(o.ID))?.ToList()?
@@ -47,11 +61,5 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.ClassID = id;
             return View();
         }
-    }
-
-    public class MemberInfo
-    {
-        public string Name { get; set; }
-        public string Email { get; set; }
     }
 }

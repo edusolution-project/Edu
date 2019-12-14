@@ -57,7 +57,7 @@ namespace Admin_Customer.Controllers
                     {
                         curentID = currentUser.ID;
                     }
-                    var listItem = _classService.Collection.Find(o => o.IsActive == true && (o.Students.Contains(curentID) || o.TeacherID == curentID)).ToList();
+                    var listItem = _classService.Collection.Find(o => o.IsActive == true && (o.Students.Contains(curentID) || o.TeacherID == curentID) && o.EndDate >= DateTime.Now && o.StartDate <= DateTime.Now).ToList();
                     HashSet<object> listTeacher = new HashSet<object>();
                     for (var i = 0; listItem != null && i < listItem.Count; i++)
                     {
