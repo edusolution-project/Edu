@@ -53,6 +53,7 @@ var easyRealTime = (function () {
                 if (listGroup != null && listGroup != void 0 || listGroup != {}) {
                     for (var i = 0; i < listGroup.length; i++) {
                         var item = listGroup[i];
+
                         connection.invoke("GoToClass", `chat-${item.name}`);
                         connection.invoke("GoToClass", `newfeed-${item.name}`);
                     }
