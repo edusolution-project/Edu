@@ -20,6 +20,7 @@ const _render = new Render();
 var onstart = function () {
     connection.start().then(function () {
         connection.invoke("GoToClass", "Online");
+        var easyRealTime = new easyRealTime();
     }).catch(function (err) {
         console.log(err)
     })
