@@ -31,7 +31,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ID = o.ID,
                 IsAllow = o.EndDate >= DateTime.Now && o.StartDate <= DateTime.Now,
                 Name = o.Name
-            })?.OrderBy(o => o.IsAllow)?.ToList();
+            })?.OrderByDescending(o => o.IsAllow)?.ToList();
             ViewBag.Data = listActive;
             ViewBag.SearchText = searchText;
             ViewBag.ID = id;
