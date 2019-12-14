@@ -17,10 +17,11 @@ const connection = new signalR.HubConnectionBuilder().withUrl("/hub")
     .build();
 const _ajax = new MyAjax();
 const _render = new Render();
+var _easyRealTime = new easyRealTime();
 var onstart = function () {
     connection.start().then(function () {
         connection.invoke("GoToClass", "Online");
-        var easyRealTime = new easyRealTime();
+        _easyRealTime.loadGoToClass();
     }).catch(function (err) {
         console.log(err)
     })
