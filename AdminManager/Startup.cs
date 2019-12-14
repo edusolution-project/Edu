@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Core_v2.Globals;
+using MaketingExtends;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -45,7 +46,7 @@ namespace AdminManager
                 options.AccessDeniedPath = "/denied";
                 options.LoginPath = "/login";
             });
-            
+            services.AddEmailSettings(Configuration);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 

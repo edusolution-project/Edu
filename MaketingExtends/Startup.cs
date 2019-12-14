@@ -11,6 +11,7 @@ namespace MaketingExtends
         public static void AddEmailSettings(this IServiceCollection services, IConfiguration Configuration)
         {
             services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
+            services.AddSingleton<IEmail, Email>();
         }
     }
 }

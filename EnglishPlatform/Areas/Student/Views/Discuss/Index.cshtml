@@ -90,12 +90,12 @@
     .list-new-feeds,.body-comment{
         padding: 10px;
         max-height: 80%;
-        height: 60vh;
+        height: calc(100vh - 190px);
         overflow: auto;
         overflow-x: hidden;
     }
     .body-comment{
-         height: 54.5vh;
+        min-height: calc(100vh - 245px);
         border-left: 1px solid #ccc;
         border-right: 1px solid #ccc;
     }
@@ -473,7 +473,7 @@
         }
         //string title,string content,int state,HashSet<string> receivers
         var createNewFeed = function (msg) {
-            if (msg == "") return;
+            if (msg.trim() == "") return;
             $.ajax({
                 url: "@Url.Action("CREATE","NewFeed")",
                 type: "POST",
@@ -491,7 +491,7 @@
             });
         }
         var createComment = function (content, id) {
-            if (content == "") return;
+            if (content.trim() == "") return;
             $.ajax({
                 url: "@Url.Action("CREATE","Comment")",
                 type: "POST",

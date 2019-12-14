@@ -5,13 +5,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using AdminManager.Models;
+using MaketingExtends;
 
 namespace AdminManager.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IEmail _email;
+        public HomeController(IEmail email)
+        {
+            _email = email;
+        }
         public IActionResult Index()
         {
+            _email.SendEmailAsync("longthaihoang94@gmail.com", "Email tesst", "how do you do !!");
             ViewBag.Data = HttpContext.Request.Headers["SigoutNow"].ToString();
             return View();
         }
