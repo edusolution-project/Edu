@@ -32,6 +32,7 @@ var easyRealTime = (function () {
     var chatBox, newFeed;
     function easyRealTime(options) {
         this.config = defaultOptions;
+        this.loadGoToClass = loadGoToClass;
         // đồng bô option
         extendOptions(options);
         chatBox = document.getElementById(defaultOptions.id.chatBox);
@@ -304,6 +305,6 @@ var easyRealTime = (function () {
         }
 
     }
-    easyRealTime.loadGoToClass = loadGoToClass;
+    
     return easyRealTime;
 }());
