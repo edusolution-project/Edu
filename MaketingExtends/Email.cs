@@ -21,9 +21,13 @@ namespace MaketingExtends
         {
             try
             {
-                using (var smtpClient = new SmtpClient())
+                using (var smtpClient = new SmtpClient(_emailSettings.MailServer))
                 {
-                     await smtpClient.SendMailAsync(new MailMessage(_emailSettings.Sender,email,subject,message));
+                    smtpClient.EnableSsl = true;
+                    smtpClient.Port = _emailSettings.MailPort;
+                    smtpClient.Host = _emailSettings.MailServer;
+                    smtpClient.Credentials = new System.Net.NetworkCredential(_emailSettings.Sender, _emailSettings.Password);
+                    await smtpClient.SendMailAsync(new MailMessage(_emailSettings.Sender,email,subject,message));
                 }
             }
             catch (Exception ex)

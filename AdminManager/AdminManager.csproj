@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core_v2\Core_v2.csproj" />
+    <ProjectReference Include="..\MaketingExtends\MaketingExtends.csproj" />
   </ItemGroup>
 
 </Project>
