@@ -36,6 +36,8 @@ var easyRealTime = (function () {
         extendOptions(options);
         chatBox = document.getElementById(defaultOptions.id.chatBox);
         newFeed = document.getElementById(defaultOptions.id.newFeed);
+    }
+    var loadGoToClass = function () {
         loadDataInfo().then(function (res) {
             var data = {};
             if (res != null && res != "") {
@@ -302,5 +304,6 @@ var easyRealTime = (function () {
         }
 
     }
+    easyRealTime.loadGoToClass = loadGoToClass;
     return easyRealTime;
 }());
