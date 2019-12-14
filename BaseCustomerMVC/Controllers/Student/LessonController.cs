@@ -266,27 +266,27 @@ namespace BaseCustomerMVC.Controllers.Student
             var UserID = User.Claims.GetClaimByType("UserID").Value;
 
             if (string.IsNullOrEmpty(model.ID))
-                return RedirectToAction("Index", "Class");
+                return RedirectToAction("Index", "Course");
 
             var exam = _examService.GetItemByID(model.ID);
             if (exam == null)
-                return RedirectToAction("Index", "Class");
+                return RedirectToAction("Index", "Course");
 
             if (!exam.Status)
-                return RedirectToAction("Index", "Class");
+                return RedirectToAction("Index", "Course");
 
             if (exam.StudentID != UserID && exam.TeacherID != UserID)
-                return RedirectToAction("Index", "Class");
+                return RedirectToAction("Index", "Course");
 
             var lesson = _lessonService.GetItemByID(exam.LessonID);
             if (lesson == null)
-                return RedirectToAction("Index", "Class");
+                return RedirectToAction("Index", "Course");
 
             var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
 
             var currentClass = _classService.GetItemByID(exam.ClassID);
             if (currentClass == null)
-                return RedirectToAction("Index", "Class");
+                return RedirectToAction("Index", "Course");
 
             var chapter = _chapterService.GetItemByID(lesson.ChapterID);
 
@@ -381,7 +381,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
             var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
             var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
-            
+
             var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
             {
                 Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
@@ -431,7 +431,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
             }
         }
-
+       
         [Obsolete]
         [HttpPost]
         public JsonResult GetSchedules(DefaultModel model)
@@ -492,7 +492,6 @@ namespace BaseCustomerMVC.Controllers.Student
             };
             return new JsonResult(response);
         }
-
 
         [Obsolete]
         [HttpPost]

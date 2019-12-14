@@ -80,6 +80,19 @@ p {
         height: auto;
     }
 
+.card-body {
+    padding-bottom: 56px;
+}
+
+.card-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    background: #CCC;
+}
+
 footer {
     display: none;
 }
