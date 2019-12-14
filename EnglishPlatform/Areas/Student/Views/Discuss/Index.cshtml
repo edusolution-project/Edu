@@ -1,9 +1,9 @@
-﻿
+﻿@using BaseCustomerMVC.Controllers.Student
 @{
     ViewData["Title"] = "Discussion";
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
-    var classList = ViewBag.Data as List<BaseCustomerEntity.Database.ClassEntity>;
-    var listStudent = ViewBag.Students as List<BaseCustomerMVC.Controllers.Student.MemberInfo>;
+    var classList = ViewBag.Data as List<ClassInfo>;
+    var listStudent = ViewBag.Students as List<MemberInfo>;
     var teacher = ViewBag.Teacher as BaseCustomerMVC.Controllers.Student.MemberInfo;
     string id = ViewBag.ID as string;
     int State = 0;
@@ -11,8 +11,8 @@
     int numberStudent = listStudent == null ? 0 : listStudent.Count;
     int numberTeacher = teacher == null ? 0 : 1;
     int total = numberStudent + numberTeacher;
-    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    }
+    var currentClass = ViewBag.Class as ClassInfo;
+}
 <script>
     var activeTab = "comments";
 </script>
@@ -22,6 +22,7 @@
         max-height: 100%;
         overflow: auto;
     }
+
     .box-search {
         width: 100%;
         display: block;
@@ -31,25 +32,28 @@
         padding-bottom: 10px;
         border-bottom: 1px solid #7cc6f1;
     }
-    .box-search > select {
-        border-radius: 5px;
-        padding: 5px 10px;
-        font-size: 0.85em;
-        border-color: #7cc6f1;
-    }
+
+        .box-search > select {
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.85em;
+            border-color: #7cc6f1;
+        }
 
     .form-group-search {
         position: relative;
     }
-    .form-group-search .icon-search {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 10px;
-        width: 30px;
-        height: 28px;
-        margin: auto;
-    }
+
+        .form-group-search .icon-search {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 10px;
+            width: 30px;
+            height: 28px;
+            margin: auto;
+        }
+
     .input-search {
         width: 100%;
         border-radius: 5px;
@@ -58,72 +62,87 @@
         box-shadow: none;
         border: 1px solid #7cc6f1;
     }
-    .user-info-post{
-        padding:10px 0;
+
+    .user-info-post {
+        padding: 10px 0;
     }
-    .info-user .avatar-user, .info-user .name{
-        display:inline-block;
-        font-weight:600;
+
+    .info-user .avatar-user, .info-user .name {
+        display: inline-block;
+        font-weight: 600;
     }
-    .info-user .name{
-        padding-left:5px;
+
+    .info-user .name {
+        padding-left: 5px;
     }
-    .user-info-post .text-time{
-        color:#ccc;
+
+    .user-info-post .text-time {
+        color: #ccc;
     }
+
     .item-feed {
         margin-bottom: 10px;
     }
-    .item-feed .content-post {
-        padding-left: 30px;
-        text-align: justify;
-    }
+
+        .item-feed .content-post {
+            padding-left: 30px;
+            text-align: justify;
+        }
+
         .item-feed .extends-post > a {
             color: #D03239;
             padding: 5px;
             padding-left: 30px;
             font-size: 0.85em;
         }
-    .item-feed .extends-post > a:hover,.item-feed .extends-post > a:active{
-        text-decoration:none;
-    }
-    .list-new-feeds,.body-comment{
+
+            .item-feed .extends-post > a:hover, .item-feed .extends-post > a:active {
+                text-decoration: none;
+            }
+
+    .list-new-feeds, .body-comment {
         padding: 10px;
         max-height: 80%;
         height: calc(100vh - 190px);
         overflow: auto;
         overflow-x: hidden;
     }
-    .body-comment{
+
+    .body-comment {
         min-height: calc(100vh - 245px);
         border-left: 1px solid #ccc;
         border-right: 1px solid #ccc;
     }
+
     .inf-group .img-group {
         position: relative;
         padding-bottom: 35%;
         border-bottom: 1px solid #ccc;
     }
-    .inf-group .img-group >img{
-        position:absolute;
-        width:100%;
-        height:auto;
-        top:0;
-        left:0;
-        right:0;
-        bottom:0;
-        margin:auto;
-    }
+
+        .inf-group .img-group > img {
+            position: absolute;
+            width: 100%;
+            height: auto;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+        }
+
     .inf-group .name {
         color: #D03239;
         font-weight: 600;
         font-size: 1.25em;
         padding: 10px 5px;
     }
-    .inf-group .number-member>svg {
+
+    .inf-group .number-member > svg {
         margin-top: -3px;
         position: relative;
     }
+
     .inf-group .number-member {
         font-size: 1em;
         display: block;
@@ -132,36 +151,41 @@
         width: 95%;
         margin: auto;
     }
-    .list-member>.info-user {
+
+    .list-member > .info-user {
         padding: 15px;
     }
+
     #comment-box-new-feed {
-        display:none;
+        display: none;
         top: 10px;
         left: 0;
         right: 0;
         bottom: 0;
         border-radius: 2px;
     }
-    #comment-box-new-feed.open {
-        display: block;
-        height: 68vh;
-        z-index: 3;
-        background: #fff;
-    }
-    #comment-box-new-feed>.header {
-        padding: 10px;
-        background: #7cc6f1;
-        position: relative;
-    }
-    #comment-box-new-feed>.header>.btn-close {
-        border: 0;
-        box-shadow: none;
-        background: transparent;
-        position: absolute;
-        right: 5px;
-        top: 6px;
-    }
+
+        #comment-box-new-feed.open {
+            display: block;
+            height: 68vh;
+            z-index: 3;
+            background: #fff;
+        }
+
+        #comment-box-new-feed > .header {
+            padding: 10px;
+            background: #7cc6f1;
+            position: relative;
+        }
+
+            #comment-box-new-feed > .header > .btn-close {
+                border: 0;
+                box-shadow: none;
+                background: transparent;
+                position: absolute;
+                right: 5px;
+                top: 6px;
+            }
 </style>
 <div class="container-fluid">
     <div class="row">
@@ -199,18 +223,24 @@
                         <div id="list-book-mard"></div>
                         <div id="list-news-record"></div>
                         <div id="list-news-old-@id" class="list-new-feeds">
-                            
+
                         </div>
-                        <div id="form-post">
-                            <textarea rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
-                        </div>
+                        @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+                            {
+                                <div id="form-post">
+                                    <textarea rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
+                                </div>
+                            }
+                        }
+
                     </div>
                 </div>
                 <div class="col-4">
                     <div class="position-relative w-100">
                         <div id="comment-box-new-feed" class="position-absolute">
-                            <input type="hidden" value="" name="ParentID"/>
-                            <div class="header">Chủ đề thảo luận 
+                            <input type="hidden" value="" name="ParentID" />
+                            <div class="header">
+                                Chủ đề thảo luận
                                 <button class="btn-close">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd" clip-rule="evenodd" d="M1.04791 1.57179C0.540802 2.07896 0.540803 2.90125 1.04791 3.40842L5.63841 7.99951L1.04695 12.5916C0.539849 13.0987 0.53985 13.921 1.04696 14.4282L1.57164 14.9529C2.07874 15.4601 2.90092 15.4601 3.40803 14.9529L7.99949 10.3609L12.5909 14.9529C13.098 15.4601 13.9202 15.4601 14.4273 14.9529L14.952 14.4282C15.4591 13.921 15.4591 13.0987 14.952 12.5916L10.3606 7.99951L14.9511 3.40842C15.4582 2.90124 15.4582 2.07896 14.9511 1.57179L14.4264 1.04704C13.9193 0.539864 13.0971 0.539864 12.59 1.04704L7.99949 5.63813L3.40898 1.04703C2.90188 0.539864 2.0797 0.539864 1.57259 1.04704L1.04791 1.57179Z" fill="#4E6774" />
@@ -218,9 +248,14 @@
                                 </button>
                             </div>
                             <div class="body-comment"></div>
-                            <div class="form-comment" id="form-comment">
-                                <textarea rows="3" style="border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
-                            </div>
+                            @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+                                {
+                                    <div class="form-comment" id="form-comment">
+                                        <textarea rows="3" style="border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
+                                    </div>
+                                }
+                            }
+
                         </div>
                     </div>
                     <div class="box-info-contact">
@@ -281,7 +316,7 @@
         $("#choosen-group").on("change", function () {
             var value = $(this).val();
             if (value == null || value == "") {
-                window.location.href = '@Url.Action("Index","Discuss",new { @area = "student"})';
+                window.location.href = '@Url.Action("Index", "Discuss", new { @area = "student" })';
             } else {
                 var url = window.location.pathname;
                 var search = window.location.search;
@@ -321,7 +356,7 @@
         $("#input-search-content").on("click", function () {
             var value = $("#search-text").val();
             if (value == null || value == "") {
-                window.location.href = '@Url.Action("Index","Discuss",new { @area = "student"})';
+                window.location.href = '@Url.Action("Index", "Discuss", new { @area = "student" })';
             } else {
                 var url = window.location.pathname;
                 var search = window.location.search;
@@ -364,7 +399,7 @@
         });
         var loadData = function (pageIndex) {
             $.ajax({
-                url: "@Url.Action("GET","NewFeed")/?id=&receivers=@id&State=@State&pagesize=10&pageindex="+pageIndex,
+                url: "@Url.Action("GET", "NewFeed")/?id=&receivers=@id&State=@State&pagesize=10&pageindex="+pageIndex,
                 type: "GET",
                 success: function (data) {
                     if (data.code == 200) {
@@ -395,11 +430,12 @@
                                         ${item.content}
                                     </div>
                                     <div class="extends-post">
-                                    
+
                                     </div>
                                 </div>`;
                                 loadCountComment(item.ID);
-                                $("#list-news-old-"+item.receivers[0]).append(html);
+                                var strId = item.receivers[0] == null || item.receivers[0] == "" || item.receivers[0] == void 0 ? "" : item.receivers[0];
+                                $("#list-news-old-"+strId).append(html);
                             }
                         }
                     }
@@ -413,7 +449,7 @@
         }
         var loadCountComment = function (id) {
              $.ajax({
-                url: "@Url.Action("GetCount","Comment")?newFeedId="+id,
+                url: "@Url.Action("GetCount", "Comment")?newFeedId="+id,
                 type: "GET",
                  success: function (data) {
                     var str = `<a href="javascript:void(0)" onclick="openChat('${id}')">
@@ -427,8 +463,8 @@
                                             <path fill-rule="evenodd" clip-rule="evenodd" d="M3.98419 0.46476L7.16617 3.64674C7.36144 3.842 7.36144 4.15859 7.16617 4.35385L3.98419 7.53583C3.78893 7.73109 3.47235 7.73109 3.27709 7.53583C3.08183 7.34057 3.08183 7.02398 3.27709 6.82872L5.60551 4.50029L1.18762 4.50029C0.91148 4.50029 0.687622 4.27644 0.687622 4.00029C0.687622 3.72415 0.91148 3.50029 1.18762 3.50029L5.60551 3.50029L3.27709 1.17187C3.08183 0.976605 3.08183 0.660022 3.27709 0.46476C3.47235 0.269498 3.78893 0.269498 3.98419 0.46476Z" fill="#D03239" />
                                         </svg>
                                     </a>`;
-                       
-                    } 
+
+                    }
                      $("#" + id + " .extends-post").html(str);
                 }
             });
@@ -439,7 +475,7 @@
             ojChat.querySelector("input[name='ParentID']").value = id;
             ojChat.querySelector(".body-comment").innerHTML = "";
             $.ajax({
-                url: "@Url.Action("Get","Comment")?parentID=" + id+"&IsReply=false",
+                url: "@Url.Action("Get", "Comment")?parentID=" + id+"&IsReply=false",
                 type: "GET",
                 success: function (data) {
                     if (data.code == 200) {
@@ -475,7 +511,7 @@
         var createNewFeed = function (msg) {
             if (msg.trim() == "") return;
             $.ajax({
-                url: "@Url.Action("CREATE","NewFeed")",
+                url: "@Url.Action("CREATE", "NewFeed")",
                 type: "POST",
                 data: {
                     title: "",
@@ -485,7 +521,14 @@
                 },
                 success: function (data) {
                     if (connection != void 0) {
-                        connection.invoke("SendToGroup", { type: "newfeed", obj: data }, 'newfeed-' + data.data.receivers[0]);
+                        var item = data.data;
+                        var strId = item.receivers[0] == null || item.receivers[0] == "" || item.receivers[0] == void 0 ? "" : item.receivers[0];
+                        if (strId == "") {
+                            connection.invoke("SendToGroup", { type: "newfeed", obj: data }, 'Online');
+                        } else {
+                            connection.invoke("SendToGroup", { type: "newfeed", obj: data }, 'newfeed-' + strId);
+                        }
+                        
                     }
                 }
             });
@@ -493,14 +536,19 @@
         var createComment = function (content, id) {
             if (content.trim() == "") return;
             $.ajax({
-                url: "@Url.Action("CREATE","Comment")",
+                url: "@Url.Action("CREATE", "Comment")",
                 type: "POST",
                 data: {
                     content: content,
                     parentID:id
                 },
                 success: function (data) {
-                    connection.invoke("SendToGroup", { type: "comment", obj: data }, 'newfeed-@ViewBag.ID');
+                    if ('@ViewBag.ID' == "" || '@ViewBag.ID' == null || '@ViewBag.ID' == void 0) {
+                        connection.invoke("SendToGroup", { type: "comment", obj: data }, 'Online');
+                    } else {
+                        connection.invoke("SendToGroup", { type: "comment", obj: data }, 'newfeed-@ViewBag.ID');
+                    }
+                    
                 }
             })
         }
@@ -509,17 +557,25 @@
             ojChat.querySelector("input[name='ParentID']").value = "";
             ojChat.classList.remove("open");
         });
-        $("#form-comment>textarea").on("keypress", function (e) {
-            if (e.which == 13) {
-                createComment($(this).val(), document.getElementById("comment-box-new-feed").querySelector("input[name='ParentID']").value);
-                $(this).val("");
-            }
-        })
-        $("#form-post>textarea").on("keypress", function (e) {
-            if (e.which == 13) {
-                createNewFeed($(this).val());
-                $(this).val("");
-            }
-        })
+
+        
     </script>
+    @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+        {
+            <script>
+                $("#form-comment>textarea").on("keypress", function (e) {
+                    if (e.which == 13) {
+                        createComment($(this).val(), document.getElementById("comment-box-new-feed").querySelector("input[name='ParentID']").value);
+                        $(this).val("");
+                    }
+                })
+                $("#form-post>textarea").on("keypress", function (e) {
+                    if (e.which == 13) {
+                        createNewFeed($(this).val());
+                        $(this).val("");
+                    }
+                })
+            </script>
+        }
+    }
 }

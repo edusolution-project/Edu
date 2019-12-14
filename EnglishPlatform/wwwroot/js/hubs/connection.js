@@ -19,7 +19,7 @@ const _ajax = new MyAjax();
 const _render = new Render();
 var onstart = function () {
     connection.start().then(function () {
-
+        connection.invoke("GoToClass", "Online");
     }).catch(function (err) {
         console.log(err)
     })
@@ -42,7 +42,7 @@ connection.on("CommentNewFeed", function (data) {
    
 })
 connection.on("Offline", function (data) {
-    console.log(data);
+    
 })
 
 connection.on("ReceiveGroup", function (data) {
@@ -50,7 +50,11 @@ connection.on("ReceiveGroup", function (data) {
         var realData = data.message.obj.data;
         var item = realData;
         if (data.message.type == "newfeed") {
-            var news = document.getElementById("list-news-old-"+item.receivers[0]);
+            var strId = item.receivers[0];
+            if (item.receivers[0] == null || item.receivers[0] == void 0 || item.receivers[0] == "") {
+                strId = "";
+            }
+            var news = document.getElementById("list-news-old-" + strId);
             var old = document.getElementById(realData.ID);
             if (old == null) {
                 var html = `<div class="item-feed" id="${item.ID}">
