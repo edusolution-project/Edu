@@ -1,7 +1,7 @@
 ﻿@using BaseCustomerMVC.Controllers.Student
 @{
     ViewData["Title"] = "Discussion";
-    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+    Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var classList = ViewBag.Data as List<ClassInfo>;
     var listStudent = ViewBag.Students as List<MemberInfo>;
     var teacher = ViewBag.Teacher as BaseCustomerMVC.Controllers.Student.MemberInfo;
@@ -112,6 +112,7 @@
         min-height: calc(100vh - 245px);
         border-left: 1px solid #ccc;
         border-right: 1px solid #ccc;
+        background:#ccc;
     }
 
     .inf-group .img-group {
@@ -187,97 +188,111 @@
                 top: 6px;
             }
 </style>
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="row">
-                <div class="col-12">
-                    <div class="box-search">
-                        <select class="group-list float-left" id="choosen-group">
-                            <option value="">------ Chọn khóa học -------</option>
-                            @for (int i = 0; classList != null && i < classList.Count; i++)
-                            {
-                                var item = classList[i];
-                                if (item.ID == ViewBag.ID)
+<div id="dashboard_content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="box-search">
+                            <select class="group-list float-left" id="choosen-group">
+                                <option value="">------ Chọn khóa học -------</option>
+                                @for (int i = 0; classList != null && i < classList.Count; i++)
                                 {
-                                    <option selected value="@item.ID">@item.Name</option>
+                                    var item = classList[i];
+                                    if (item.ID == ViewBag.ID)
+                                    {
+                                        <option selected value="@item.ID">@item.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.ID">@item.Name</option>
+                                    }
                                 }
-                                else
-                                {
-                                    <option value="@item.ID">@item.Name</option>
-                                }
-                            }
-                        </select>
-                        <div class="float-right form-group-search">
-                            <a href="javascript:void(0)" class="icon-search" id="input-search-content">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M7.29631 2.66666C4.73944 2.66666 2.66669 4.73941 2.66669 7.29628C2.66669 9.85316 4.73944 11.9259 7.29631 11.9259C8.53631 11.9259 9.66244 11.4384 10.4935 10.6446C10.5157 10.6171 10.5396 10.5905 10.5652 10.565C10.5907 10.5394 10.6173 10.5156 10.6448 10.4934C11.4385 9.66229 11.9259 8.53621 11.9259 7.29628C11.9259 4.73941 9.85319 2.66666 7.29631 2.66666ZM12.638 11.2236C13.4476 10.1244 13.9259 8.76619 13.9259 7.29628C13.9259 3.63484 10.9578 0.666656 7.29631 0.666656C3.63487 0.666656 0.666687 3.63484 0.666687 7.29628C0.666687 10.9577 3.63487 13.9259 7.29631 13.9259C8.7663 13.9259 10.1245 13.4475 11.2238 12.6379L13.6263 15.0403C14.0168 15.4308 14.65 15.4308 15.0405 15.0403C15.431 14.6498 15.431 14.0166 15.0405 13.6261L12.638 11.2236Z" fill="#7CC6F1" />
-                                </svg>
-                            </a>
-                            <input id="search-text" class="input-search" value="" placeholder="Tìm kiếm" />
-                        </div>
-                    </div>
-                </div>
-                <div class="col-8">
-                    <div class="list">
-                        <div id="list-book-mard"></div>
-                        <div id="list-news-record"></div>
-                        <div id="list-news-old-@id" class="list-new-feeds">
-
-                        </div>
-                        @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
-                            {
-                                <div id="form-post">
-                                    <textarea rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
-                                </div>
-                            }
-                        }
-
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="position-relative w-100">
-                        <div id="comment-box-new-feed" class="position-absolute">
-                            <input type="hidden" value="" name="ParentID" />
-                            <div class="header">
-                                Chủ đề thảo luận
-                                <button class="btn-close">
+                            </select>
+                            <div class="float-right form-group-search">
+                                <a href="javascript:void(0)" class="icon-search" id="input-search-content">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M1.04791 1.57179C0.540802 2.07896 0.540803 2.90125 1.04791 3.40842L5.63841 7.99951L1.04695 12.5916C0.539849 13.0987 0.53985 13.921 1.04696 14.4282L1.57164 14.9529C2.07874 15.4601 2.90092 15.4601 3.40803 14.9529L7.99949 10.3609L12.5909 14.9529C13.098 15.4601 13.9202 15.4601 14.4273 14.9529L14.952 14.4282C15.4591 13.921 15.4591 13.0987 14.952 12.5916L10.3606 7.99951L14.9511 3.40842C15.4582 2.90124 15.4582 2.07896 14.9511 1.57179L14.4264 1.04704C13.9193 0.539864 13.0971 0.539864 12.59 1.04704L7.99949 5.63813L3.40898 1.04703C2.90188 0.539864 2.0797 0.539864 1.57259 1.04704L1.04791 1.57179Z" fill="#4E6774" />
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M7.29631 2.66666C4.73944 2.66666 2.66669 4.73941 2.66669 7.29628C2.66669 9.85316 4.73944 11.9259 7.29631 11.9259C8.53631 11.9259 9.66244 11.4384 10.4935 10.6446C10.5157 10.6171 10.5396 10.5905 10.5652 10.565C10.5907 10.5394 10.6173 10.5156 10.6448 10.4934C11.4385 9.66229 11.9259 8.53621 11.9259 7.29628C11.9259 4.73941 9.85319 2.66666 7.29631 2.66666ZM12.638 11.2236C13.4476 10.1244 13.9259 8.76619 13.9259 7.29628C13.9259 3.63484 10.9578 0.666656 7.29631 0.666656C3.63487 0.666656 0.666687 3.63484 0.666687 7.29628C0.666687 10.9577 3.63487 13.9259 7.29631 13.9259C8.7663 13.9259 10.1245 13.4475 11.2238 12.6379L13.6263 15.0403C14.0168 15.4308 14.65 15.4308 15.0405 15.0403C15.431 14.6498 15.431 14.0166 15.0405 13.6261L12.638 11.2236Z" fill="#7CC6F1" />
                                     </svg>
-                                </button>
+                                </a>
+                                <input id="search-text" class="input-search" value="" placeholder="Tìm kiếm" />
                             </div>
-                            <div class="body-comment"></div>
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div class="list">
+                            <div id="list-book-mard"></div>
+                            <div id="list-news-record"></div>
+                            <div id="list-news-old-@id" class="list-new-feeds">
+
+                            </div>
                             @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
                                 {
-                                    <div class="form-comment" id="form-comment">
-                                        <textarea rows="3" style="border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
+                                    <div id="form-post">
+                                        <textarea rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
                                     </div>
                                 }
                             }
 
                         </div>
                     </div>
-                    <div class="box-info-contact">
-                        <div class="inf-group">
-                            <div class="img-group"></div>
-                            <div class="name" id="GroupName">@currentClass?.Name</div>
-                            <span class="number-member">
-                                <svg width="10" height="14" viewBox="0 0 10 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M5.00031 7.02866C3.53863 7.02866 2.3536 5.60029 2.3536 3.83829C2.3536 2.07626 2.74266 0.647888 5.00031 0.647888C7.25796 0.647888 7.64709 2.07626 7.64709 3.83829C7.64709 5.60029 6.46206 7.02866 5.00031 7.02866Z" fill="#839AA6" />
-                                    <path d="M9.99948 11.9003C9.99993 11.792 10.0004 11.8698 9.99948 11.9003V11.9003Z" fill="#839AA6" />
-                                    <path d="M0.00134277 11.9838C-7.21334e-05 11.9545 0.000858726 11.78 0.00134277 11.9838V11.9838Z" fill="#839AA6" />
-                                    <path d="M0.00732803 11.771C0.0563459 8.7016 0.460285 7.82698 3.55135 7.27335C3.55135 7.27335 3.98647 7.82359 5.00063 7.82359C6.0148 7.82359 6.44999 7.27335 6.44999 7.27335C9.50732 7.82094 9.93583 8.68259 9.99217 11.6713C9.99679 11.9154 9.99893 11.9282 9.99976 11.8999C9.99957 11.953 9.99934 12.0511 9.99934 12.2224C9.99934 12.2224 9.26343 13.6946 5.00063 13.6946C0.737905 13.6946 0.00191879 12.2224 0.00191879 12.2224C0.00191879 12.1123 0.00184345 12.0359 0.00173092 11.9838C0.00255775 12.0013 0.00421047 11.9674 0.00732803 11.771Z" fill="#839AA6" />
-                                </svg> @total thành viên
-                            </span>
-                        </div>
-                        <div class="list-member">
-                            @{
-                                if (numberStudent > 0)
-                                {
-                                    for (int i = 0; i < numberStudent; i++)
+                    <div class="col-4">
+                        <div class="position-relative w-100">
+                            <div id="comment-box-new-feed" class="position-absolute">
+                                <input type="hidden" value="" name="ParentID" />
+                                <div class="header">
+                                    Chủ đề thảo luận
+                                    <button class="btn-close">
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M1.04791 1.57179C0.540802 2.07896 0.540803 2.90125 1.04791 3.40842L5.63841 7.99951L1.04695 12.5916C0.539849 13.0987 0.53985 13.921 1.04696 14.4282L1.57164 14.9529C2.07874 15.4601 2.90092 15.4601 3.40803 14.9529L7.99949 10.3609L12.5909 14.9529C13.098 15.4601 13.9202 15.4601 14.4273 14.9529L14.952 14.4282C15.4591 13.921 15.4591 13.0987 14.952 12.5916L10.3606 7.99951L14.9511 3.40842C15.4582 2.90124 15.4582 2.07896 14.9511 1.57179L14.4264 1.04704C13.9193 0.539864 13.0971 0.539864 12.59 1.04704L7.99949 5.63813L3.40898 1.04703C2.90188 0.539864 2.0797 0.539864 1.57259 1.04704L1.04791 1.57179Z" fill="#4E6774" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="body-comment"></div>
+                                @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
                                     {
-                                        var itemStudent = listStudent[i];
+                                        <div class="form-comment" id="form-comment">
+                                            <textarea rows="3" style="border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
+                                        </div>
+                                    }
+                                }
+
+                            </div>
+                        </div>
+                        <div class="box-info-contact">
+                            <div class="inf-group">
+                                <div class="img-group"></div>
+                                <div class="name" id="GroupName">@currentClass?.Name</div>
+                                <span class="number-member">
+                                    <svg width="10" height="14" viewBox="0 0 10 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5.00031 7.02866C3.53863 7.02866 2.3536 5.60029 2.3536 3.83829C2.3536 2.07626 2.74266 0.647888 5.00031 0.647888C7.25796 0.647888 7.64709 2.07626 7.64709 3.83829C7.64709 5.60029 6.46206 7.02866 5.00031 7.02866Z" fill="#839AA6" />
+                                        <path d="M9.99948 11.9003C9.99993 11.792 10.0004 11.8698 9.99948 11.9003V11.9003Z" fill="#839AA6" />
+                                        <path d="M0.00134277 11.9838C-7.21334e-05 11.9545 0.000858726 11.78 0.00134277 11.9838V11.9838Z" fill="#839AA6" />
+                                        <path d="M0.00732803 11.771C0.0563459 8.7016 0.460285 7.82698 3.55135 7.27335C3.55135 7.27335 3.98647 7.82359 5.00063 7.82359C6.0148 7.82359 6.44999 7.27335 6.44999 7.27335C9.50732 7.82094 9.93583 8.68259 9.99217 11.6713C9.99679 11.9154 9.99893 11.9282 9.99976 11.8999C9.99957 11.953 9.99934 12.0511 9.99934 12.2224C9.99934 12.2224 9.26343 13.6946 5.00063 13.6946C0.737905 13.6946 0.00191879 12.2224 0.00191879 12.2224C0.00191879 12.1123 0.00184345 12.0359 0.00173092 11.9838C0.00255775 12.0013 0.00421047 11.9674 0.00732803 11.771Z" fill="#839AA6" />
+                                    </svg> @total thành viên
+                                </span>
+                            </div>
+                            <div class="list-member">
+                                @{
+                                    if (numberStudent > 0)
+                                    {
+                                        for (int i = 0; i < numberStudent; i++)
+                                        {
+                                            var itemStudent = listStudent[i];
+                                            <div class="info-user">
+                                                <div class="avatar-user">
+                                                    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                                                        <path d='M24 12C24 18.6275 18.6275 24 12 24C5.3725 24 0 18.6275 0 12C0 5.3725 5.3725 0 12 0C18.6275 0 24 5.3725 24 12Z' fill='#7CC6F1' />
+                                                        <path d='M14.7283 11.6221C15.8306 10.7919 16.5447 9.47278 16.5447 7.98981C16.5447 5.48401 14.506 3.44531 12 3.44531C9.4942 3.44531 7.45551 5.48401 7.45551 7.98981C7.45551 9.47278 8.16943 10.7919 9.27173 11.6221C6.32043 12.7299 4.21417 15.5804 4.21417 18.9141H5.62042C5.62042 15.3962 8.48236 12.5345 12.0002 12.5345C15.5178 12.5345 18.3798 15.3962 18.3798 18.9141H19.786C19.7858 15.5804 17.6797 12.7299 14.7283 11.6221ZM8.86176 7.98981C8.86176 6.25928 10.2695 4.85156 12 4.85156C13.7305 4.85156 15.1382 6.25928 15.1382 7.98981C15.1382 9.72034 13.7305 11.1282 12 11.1282C10.2695 11.1282 8.86176 9.72034 8.86176 7.98981Z' fill='white' />
+                                                    </svg>
+                                                </div>
+                                                <div data-email="@itemStudent.Email" class="name">@itemStudent.Name</div>
+                                            </div>
+                                        }
+                                    }
+                                    if (teacher != null)
+                                    {
                                         <div class="info-user">
                                             <div class="avatar-user">
                                                 <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -285,24 +300,12 @@
                                                     <path d='M14.7283 11.6221C15.8306 10.7919 16.5447 9.47278 16.5447 7.98981C16.5447 5.48401 14.506 3.44531 12 3.44531C9.4942 3.44531 7.45551 5.48401 7.45551 7.98981C7.45551 9.47278 8.16943 10.7919 9.27173 11.6221C6.32043 12.7299 4.21417 15.5804 4.21417 18.9141H5.62042C5.62042 15.3962 8.48236 12.5345 12.0002 12.5345C15.5178 12.5345 18.3798 15.3962 18.3798 18.9141H19.786C19.7858 15.5804 17.6797 12.7299 14.7283 11.6221ZM8.86176 7.98981C8.86176 6.25928 10.2695 4.85156 12 4.85156C13.7305 4.85156 15.1382 6.25928 15.1382 7.98981C15.1382 9.72034 13.7305 11.1282 12 11.1282C10.2695 11.1282 8.86176 9.72034 8.86176 7.98981Z' fill='white' />
                                                 </svg>
                                             </div>
-                                            <div data-email="@itemStudent.Email" class="name">@itemStudent.Name</div>
+                                            <div data-email="@teacher.Email" class="name">@teacher.Name</div>
                                         </div>
                                     }
                                 }
-                                if (teacher != null)
-                                {
-                                    <div class="info-user">
-                                        <div class="avatar-user">
-                                            <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-                                                <path d='M24 12C24 18.6275 18.6275 24 12 24C5.3725 24 0 18.6275 0 12C0 5.3725 5.3725 0 12 0C18.6275 0 24 5.3725 24 12Z' fill='#7CC6F1' />
-                                                <path d='M14.7283 11.6221C15.8306 10.7919 16.5447 9.47278 16.5447 7.98981C16.5447 5.48401 14.506 3.44531 12 3.44531C9.4942 3.44531 7.45551 5.48401 7.45551 7.98981C7.45551 9.47278 8.16943 10.7919 9.27173 11.6221C6.32043 12.7299 4.21417 15.5804 4.21417 18.9141H5.62042C5.62042 15.3962 8.48236 12.5345 12.0002 12.5345C15.5178 12.5345 18.3798 15.3962 18.3798 18.9141H19.786C19.7858 15.5804 17.6797 12.7299 14.7283 11.6221ZM8.86176 7.98981C8.86176 6.25928 10.2695 4.85156 12 4.85156C13.7305 4.85156 15.1382 6.25928 15.1382 7.98981C15.1382 9.72034 13.7305 11.1282 12 11.1282C10.2695 11.1282 8.86176 9.72034 8.86176 7.98981Z' fill='white' />
-                                            </svg>
-                                        </div>
-                                        <div data-email="@teacher.Email" class="name">@teacher.Name</div>
-                                    </div>
-                                }
-                            }
 
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -6,14 +6,24 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>@ViewBag.Title</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <environment include="Development">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+              asp-fallback-href="~/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+    </environment>
     <link href="https://fonts.googleapis.com/css?family=Be+Vietnam&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/fonts.css">
     <link rel="stylesheet" href="/css/stylesheet.min.css">
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
     <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
-
+    <script src="~/js/jquery.min.js"></script>
+    <script src="~/js/lib/config.url.base.js"></script>
+    <script src="~/js/lib/notification/notification.js"></script>
+    <script src="~/js/lib/xhr.js"></script>
+    <script src="~/js/hubs/render.html.js"></script>
+    <script src="~/lib/signalr/signalr.js"></script>
+    <script src="~/js/hubs/connection.js"></script>
     <script type="text/javascript">
 
         const g_CurrentUser = {
@@ -149,7 +159,10 @@
     @await Html.PartialAsync("_modalLogout")
     @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
-
+    <script src="~/easy-real-time/js/easy-real-time.js"></script>
+    <script>
+        var easyRealTime = new easyRealTime();
+    </script>
 </body>
 </html>
 
