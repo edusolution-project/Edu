@@ -7,7 +7,7 @@ var MyAjax = (function () {
     MyAjax.prototype.proccess = function (method, url, data, async) {
         var request = this._request;
         var notification = this._noti;
-        
+
         return new Promise(function (resolve, reject) {
             request.onreadystatechange = function () {
                 if (request.readyState == 4) {
@@ -32,7 +32,7 @@ var MyAjax = (function () {
                         notification.show({
                             type: "error",
                             msg: _msg,
-                            timeout:5000
+                            timeout: 5000
                         });
                         // If failed
                         reject({
@@ -47,7 +47,7 @@ var MyAjax = (function () {
             // Send the request
             try {
                 request.send(data);
-            } catch{
+            } catch (err) {
                 request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
                 request.send(data);
             }

@@ -2,199 +2,305 @@
 @model BaseCustomerEntity.Database.StudentEntity ;
 
 @{
-    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+    Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     ViewData["Title"] = "Update Account Info";
 }
 
 
 <script>
-    activeTab = "profile";
+    //activeTab = "profile";
+    setActiveMenu("profile");
 </script>
 
-<div class="left-col">
-    <div class="page-title row">
-        <h1 class="col-md-10">@ViewData["Title"]</h1>
-    </div>
-    <div class="main-container">
-        <div class="row pt-2">
-            <form action="/teacher/Home/UploadPhoto" method="post" enctype="multipart/form-data" asp-antiforgery="true" id="formUpload">
-                <div class="col-md-2">
-                    <div class="row">
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <img class="img-responsive" src="@ViewBag.avatar" id="myAccount_photo" width="128" height="128" />
-                                <input name="files" id="files" type="file" accept="image/*"
-                                       multiple="false" style="display:none"
-                                       onchange="uploadFiles('files')" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <div class="form-group">
-                                    <div class="alert alert-danger" role="alert" id="msgUploadPhoto" style="display:none">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
-
-            <div class="col-md-8">
-                <form action="/Student/Home/Profile" method="post">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="FullName">Họ tên</label>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <input asp-for="FullName" class="form-control" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="Phone">Điện thoại</label>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <input asp-for="Phone" class="form-control" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="Email">Email</label>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <input asp-for="Email" readonly="true" class="form-control" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <button type="button" class="btn btn-primary" data-placement="top" onclick="refreshData()"
-                                        title="Change Password" data-toggle="modal" data-target="#changePassModal">
-                                    Change password
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <input type="button" class="btn btn-primary btn-user btn-block" onclick="submit(this)" value="Save">
-                            </div>
-                        </div>
-                    </div>
-                    @if (ViewBag.Visible != null)
-                    {
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                </div>
-                            </div>
-                            <div class="col-md-5">
-                                <div class="alert alert-success" role="alert">
-                                    @ViewBag.Description
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </form>
+<section class="module" id="dashboard_content">
+    <div class="card-header">
+        <div class="flex border-b padding-b25">
+            <h2 class="title" v-if="isInfo">Thông tin cá nhân</h2>
+            <h2 class="title" v-if="isPass"><a href="javascript:;" title="Quay lại" v-on:click="changeState()"><i class="ti-arrow-left"></i></a>Đổi mật khẩu</h2>
+            <div class="c-right">
+                <a href="javascript:;" title="logout" class="btn-logout" v-on:click="logout()">Log out <i class="ic ic-exit"></i></a>
             </div>
         </div>
     </div>
-</div>
+    <div class="card-body">
+        <div class="box">
+            <div class="flex">
+                <div id="avatar_box" v-if="isInfo">
+                    <img v-on:error="errorImgUrl()" :src="profile.avatar" alt="" v-if="profile.avatar" />
+                    <label for="in_avatar">Đổi hình đại diện</label>
+                    <input type="file" :ref="`avatar`" v-on:change="previewThumb()" id="in_avatar">
+                </div>
+                <div class="box" id="profile_detail">
+                    <div class="form-group" v-if="isInfo">
+                        <label for="name">Họ và tên</label>
+                        <input type="text" v-model="profile.FullName" class="form-control" placeholder="Họ tên" id="name">
+                    </div>
+                    <div class="form-group" v-if="isInfo">
+                        <label for="msisdn">Số điện thoại</label>
+                        <input type="text" v-model="profile.Phone" class="form-control" placeholder="Số điện thoại" id="msisdn">
+                    </div>
+                    <div class="form-group" v-if="isInfo">
+                        <label for="email">Địa chỉ email</label>
+                        <input type="text" v-model="profile.Email" class="form-control" placeholder="Email" id="email">
+                    </div>
+                    <div class="form-group" v-if="isInfo">
+                        <label for="password">Mật khẩu</label>
+                        <div class="relative">
+                            <input :type="pass_type" v-model="password" class="form-control" placeholder="Mật khẩu" id="password">
+                            <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                        </div>
+                    </div>
+                    <!--  -->
+                    <div class="form-group" v-if="isPass">
+                        <label for="password_old">Mật khẩu cũ*</label>
+                        <div class="relative">
+                            <input :type="pass_type" v-model="password_old" class="form-control" placeholder="Mật khẩu" id="password_old">
+                            <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                        </div>
+                    </div>
+                    <div class="form-group" v-if="isPass">
+                        <label for="password_new">Mật khẩu mới*</label>
+                        <div class="relative">
+                            <input :type="pass_type" v-model="password_new" class="form-control" placeholder="Mật khẩu" id="password_new">
+                            <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                        </div>
+                    </div>
+                    <div class="form-group" v-if="isPass">
+                        <label for="password_confirm">Nhập lại mật khẩu mới</label>
+                        <div class="relative">
+                            <input :type="pass_type" v-model="password_confirm" class="form-control" placeholder="Mật khẩu" id="password_confirm">
+                            <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                        </div>
+                    </div>
+                    <div class="margin-t20">
+                        <button class="btn btn-save" v-on:click="updateProfile()" v-if="isInfo">Lưu thay đổi</button>
+                        <button class="btn btn-save" v-on:click="updatePassword()" v-if="isPass">Lưu thay đổi</button>
+                        <a href="javascript:;" title="Đổi mật khẩu" class="link" v-if="isInfo" v-on:click="changeState(1)">Đổi mật khẩu <i class="ti-arrow-right"></i></a>
+                        @*<a href="javascript:;" title="Đổi mật khẩu" class="link" v-if="isPass">Quên mật khẩu <i class="ti-arrow-right"></i></a>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-<script type="text/javascript">
-    $("#myAccount_photo").click(function () {
-        $("#files").click();
-    });
+@section Scripts{
 
-    function submitForm(formId) {
-        document.getElementById(formId).submit();
-    }
-
-    function uploadFiles(inputId) {
-        var input = document.getElementById(inputId);
-        var files = input.files[0];
-        var formData = new FormData();
-        formData.append("fileUpload", files);
-
-        $.ajax(
-            {
-                url: "/Student/Home/UploadPhoto",
-                data: formData,
-                processData: false,
-                contentType: false,
-                type: "POST",
-                success: function (data) {
-                    console.log(data);
-                    if (data.StatusCode === '0') {
-                        document.getElementById('msgUploadPhoto').style.display = 'block';
-                        document.getElementById('msgUploadPhoto').innerHTML = data.StatusDesc;
+    <script>
+        new Vue({
+            el: "#main",
+            mounted() {
+                this.getProfile()
+            },
+            data: {
+                isInfo: true,
+                isPass: false,
+                list_news: [
+                    {
+                        title: 'Đã đến lúc HLV Park',
+                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                        thumbnail: '/pictures/news1.png'
+                    },
+                    {
+                        title: 'HLV Park: Có khi p',
+                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                        thumbnail: '/pictures/news2.png'
+                    },
+                    {
+                        title: 'Tiến Dũng và Văn Toả',
+                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                        thumbnail: '/pictures/news3.png'
+                    }
+                ],
+                profile: {
+                    FullName: 'Nguyễn Văn A',
+                    Phone: '0989666999',
+                    Email: 'test@gmail.com',
+                    Avatar: '/images/no-avatar.png'
+                },
+                avatar: {
+                    src: '/images/no-avatar.png',
+                    file: null,
+                    height: 150,
+                    width: 150
+                },
+                password: '',
+                password_old: '',
+                password_new: '',
+                password_confirm: '',
+                view: 10,
+                page: 1,
+                pass_type: 'password',
+            },
+            watch: {
+            },
+            methods: {
+                changeState(s = 0) {
+                    let _that = this
+                    switch (s) {
+                        case 1:
+                            _that.isPass = true
+                            _that.isInfo = false
+                            break;
+                        default:
+                            _that.isPass = false
+                            _that.isInfo = true
+                            break;
+                    }
+                    console.log(s);
+                },
+                getProfile() {
+                     let _url = '@Url.Action("GetProfile","Home")'
+                     axios.get(_url)
+                         .then(response =>{
+                             console.log(response.data);
+                             if(response.data.StatusCode){
+                                 this.profile = response.data.Data
+                                 this.avatar.src = this.profile.Avatar
+                                this.avatar.file = this.profile.Avatar
+                             }
+                         }).catch(e =>{})
+                    //this.avatar.src = this.profile.avatar
+                    //this.avatar.file = this.profile.avatar
+                },
+                updateProfile() {
+                     let _url = '@Url.Action("SaveProfile","Home")'
+                    let _form = new FormData()
+                    _form.append("FullName", this.profile.FullName);
+                    _form.append("Phone", this.profile.Phone);
+                     if(this.avatar.file){
+                         _form.append('Avatar', this.avatar.file)
+                     }
+                     axios.post(_url,_form)
+                         .them(response =>{
+                    
+                         }).catch(e=>{})
+                },
+                updatePassword() {
+                    // let _url = 'apiUpdatePassword'
+                    // axios.post(_url)
+                    //     .them(response =>{
+                    //
+                    //     }).catch(e=>{})
+                },
+                errorImgUrl() {
+                    this.avatar.src = null;
+                    this.avatar.file = null;
+                    this.$forceUpdate();
+                },
+                previewThumb() {
+                    if (event.target.files[0]['type'] === 'image/jpeg' ||
+                        event.target.files[0]['type'] === 'image/png' ||
+                        event.target.files[0]['type'] === 'image/gif') {
                     } else {
+                        return
+                    }
+                    this.avatar.src = URL.createObjectURL(event.target.files[0])
+                    this.avatar.file = event.target.files[0]
+                    var src = URL.createObjectURL(event.target.files[0])
+                    setTimeout(function () {
+                        var imgTesting = new Image();
+                        imgTesting.src = src;
+                        setTimeout(function () {
+                            img.height = imgTesting.height;
+                            img.width = imgTesting.width;
+                        }, 1000);
+                    }, 1000);
+                },
+                logout() {
+                    window.location.href = '/logout'
+                },
+                showPass(t = 1) {
+                    if (t) {
+                        this.pass_type = 'text'
+                    } else {
+                        this.pass_type = 'password'
+                    }
+                },
+            }
+        });
+    </script>
+
+
+}
+
+@*<script type="text/javascript">
+        $("#myAccount_photo").click(function () {
+            $("#files").click();
+        });
+
+        function submitForm(formId) {
+            document.getElementById(formId).submit();
+        }
+
+        function uploadFiles(inputId) {
+            var input = document.getElementById(inputId);
+            var files = input.files[0];
+            var formData = new FormData();
+            formData.append("fileUpload", files);
+
+            $.ajax(
+                {
+                    url: "/Student/Home/UploadPhoto",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    type: "POST",
+                    success: function (data) {
                         console.log(data);
-                        $("#myAccount_photo").attr('src', data.StatusDesc);
-                        $("#sidebarPhotoAcc").attr('src', data.StatusDesc);
-                        $("#leftMenuPhotoAcc").attr('src', data.StatusDesc);
-                        $("#msgUploadPhoto").style.display = 'none';
-                    }
+                        if (data.StatusCode === '0') {
+                            document.getElementById('msgUploadPhoto').style.display = 'block';
+                            document.getElementById('msgUploadPhoto').innerHTML = data.StatusDesc;
+                        } else {
+                            console.log(data);
+                            $("#myAccount_photo").attr('src', data.StatusDesc);
+                            $("#sidebarPhotoAcc").attr('src', data.StatusDesc);
+                            $("#leftMenuPhotoAcc").attr('src', data.StatusDesc);
+                            $("#msgUploadPhoto").style.display = 'none';
+                        }
 
-                }
-            }
-        );
-    }
-
-    function changePass(inputId) {
-        var oldpass = document.getElementById('oldpass');
-        var formData = new FormData();
-        formData.append("oldpass", document.getElementById('oldpass').value);
-        formData.append("newpass", document.getElementById('newpass').value);
-        formData.append("retypepass", document.getElementById('retypepass').value);
-
-        $.ajax(
-            {
-                url: "/Student/Home/ChangePassword",
-                data: formData,
-                processData: false,
-                contentType: false,
-                type: "POST",
-                success: function (data) {
-                    console.log(data);
-                    $('#div_msg').show();
-                    if (data.Error != null) {
-                        $('#div_msg div').attr('class', 'alert alert-danger').html(data.Error);
-                    } else {
-                        //$('#div_msg div').attr('class', 'alert alert-success').html(data.Message);
-                        hideModal();
                     }
                 }
-            }
-        );
-    }
+            );
+        }
 
-    function refreshData() {
-        $('#oldpass').val('');
-        $('#newpass').val('');
-        $('#retypepass').val('');
-        $('#div_msg').hide();
-    }
+        function changePass(inputId) {
+            var oldpass = document.getElementById('oldpass');
+            var formData = new FormData();
+            formData.append("oldpass", document.getElementById('oldpass').value);
+            formData.append("newpass", document.getElementById('newpass').value);
+            formData.append("retypepass", document.getElementById('retypepass').value);
+
+            $.ajax(
+                {
+                    url: "/Student/Home/ChangePassword",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    type: "POST",
+                    success: function (data) {
+                        console.log(data);
+                        $('#div_msg').show();
+                        if (data.Error != null) {
+                            $('#div_msg div').attr('class', 'alert alert-danger').html(data.Error);
+                        } else {
+                            //$('#div_msg div').attr('class', 'alert alert-success').html(data.Message);
+                            hideModal();
+                        }
+                    }
+                }
+            );
+        }
+
+        function refreshData() {
+            $('#oldpass').val('');
+            $('#newpass').val('');
+            $('#retypepass').val('');
+            $('#div_msg').hide();
+        }
 
 
-</script>
+    </script>*@
 
 @section Modals{
     <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"

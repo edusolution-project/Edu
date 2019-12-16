@@ -10,6 +10,10 @@
         max-width: 100% !important;
     }
 
+    .main-column img {
+        height: auto !important;
+    }
+
 #part-menu {
     position: absolute;
     top: 0;
@@ -80,7 +84,7 @@ p {
         height: auto;
     }
 
-.card-body {
+.uimod_exam .card-body {
     padding-bottom: 56px;
 }
 
