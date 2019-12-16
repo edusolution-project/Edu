@@ -226,7 +226,7 @@
                         <div id="list-news-old-@id" class="list-new-feeds">
 
                         </div>
-                        @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+                        @{ if (currentClass != null && currentClass.IsAllow)
                             {
                                 <div id="form-post">
                                     <textarea rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
@@ -249,7 +249,7 @@
                                 </button>
                             </div>
                             <div class="body-comment"></div>
-                            @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+                            @{ if (currentClass != null && currentClass.IsAllow)
                                 {
                                     <div class="form-comment" id="form-comment">
                                         <textarea rows="3" style="border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
@@ -559,7 +559,7 @@
 
 
     </script>
-    @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+    @{ if (currentClass != null && currentClass.IsAllow)
         {
             <script>
                 $("#form-comment>textarea").on("keypress", function (e) {

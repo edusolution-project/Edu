@@ -227,7 +227,7 @@
                             <div id="list-news-old-@id" class="list-new-feeds">
 
                             </div>
-                            @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+                            @{ if (currentClass != null && currentClass.IsAllow)
                                 {
                                     <div id="form-post">
                                         <textarea rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
@@ -250,7 +250,7 @@
                                     </button>
                                 </div>
                                 <div class="body-comment"></div>
-                                @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+                                @{ if (currentClass != null && currentClass.IsAllow)
                                     {
                                         <div class="form-comment" id="form-comment">
                                             <textarea rows="3" style="border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
@@ -563,19 +563,19 @@
 
         
     </script>
-    @{ if (currentClass == null || (currentClass != null && currentClass.IsAllow))
+    @{ if (currentClass != null && currentClass.IsAllow)
         {
             <script>
                 $("#form-comment>textarea").on("keypress", function (e) {
                     if (e.which == 13) {
                         createComment($(this).val(), document.getElementById("comment-box-new-feed").querySelector("input[name='ParentID']").value);
-                        $(this).val("");
+                        $(this).html("");
                     }
                 })
                 $("#form-post>textarea").on("keypress", function (e) {
                     if (e.which == 13) {
                         createNewFeed($(this).val());
-                        $(this).val("");
+                        $(this).html("");
                     }
                 })
             </script>
