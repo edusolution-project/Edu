@@ -90,6 +90,7 @@ connection.on("ReceiveGroup", function (data) {
                                     </div>
                                 </div>`;
                 news.innerHTML += html;
+                news.scrollBy(0, news.offsetHeight);
             }
         }
         if (data.message.type == "comment") {
@@ -118,7 +119,9 @@ connection.on("ReceiveGroup", function (data) {
                                     </div>
                                 </div>`;
             var ojChat = document.getElementById("comment-box-new-feed");
-            ojChat.querySelector(".body-comment").innerHTML += html;
+            var commentBody = ojChat.querySelector(".body-comment");
+            commentBody.innerHTML += html;
+            commentBody.scrollBy(0, commentBody.offsetHeight);
         }
     } else {
         var ulcontentView = document.getElementById("chat-box").querySelector("#ul-contact-views");
