@@ -59,6 +59,14 @@ connection.on("ReceiveGroup", function (data) {
             var news = document.getElementById("list-news-old-" + strId);
             var old = document.getElementById(realData.ID);
             if (old == null) {
+                var media = "";
+                var title = "";
+                if (item.medias.length > 0) {
+                    media = `<div class="media-post"><img src="${item.medias[0].path}" /></div>`;
+                }
+                if (item.title != void 0 && item.title != "") {
+                    title = `<div class="content-title-post">${item.title}</div>`;
+                }
                 var html = `<div class="item-feed" id="${item.ID}">
                                     <div class="user-info-post">
                                         <div class="row">
@@ -77,7 +85,7 @@ connection.on("ReceiveGroup", function (data) {
                                                 <span class="float-right text-time">${formatDate(item.created)}</span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div>${title}${media}
                                     <div class="content-post">
                                         ${item.content}
                                     </div>
