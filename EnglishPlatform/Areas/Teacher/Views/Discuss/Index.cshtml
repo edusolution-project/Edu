@@ -565,13 +565,13 @@
                 $("#form-comment>textarea").on("keypress", function (e) {
                     if (e.which == 13) {
                         createComment($(this).val(), document.getElementById("comment-box-new-feed").querySelector("input[name='ParentID']").value);
-                        $(this).val("");
+                        $(this).html("");
                     }
                 })
                 $("#form-post>textarea").on("keypress", function (e) {
                     if (e.which == 13) {
                         createNewFeed($(this).val());
-                        $(this).val("");
+                        $(this).html("");
                     }
                 })
             </script>
