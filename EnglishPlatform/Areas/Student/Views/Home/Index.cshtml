@@ -8,9 +8,15 @@
     <link href="~/css/calendar/daygrid.css" rel="stylesheet" />
     <link href="~/css/calendar/list.css" rel="stylesheet" />
     <link href="~/css/calendar/timegrid.css" rel="stylesheet" />*@
-@*<script>
-        activeTab = "dashboard";
-    </script>*@
+<script>
+    setActiveMenu("home");
+</script>
+
+<style>
+    .list-lesson {
+        background: red;
+    }
+</style>
 
 <section class="module" id="dashboard_content">
     <div class="card-header">
@@ -47,15 +53,11 @@
                 </div>
             </div>
 
-            <script>
-
-            </script>
-
             <div class="col-md-6">
                 <div class="box radius margin-b20 padding-20">
                     <div class="heading flex">
                         <h4 class="box-head">Khoá học đang diễn ra</h4>
-                        <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <ul class="list-lesson" v-if="active_course.length">
                         <li v-for="(item,k) in active_course">
@@ -77,7 +79,7 @@
                 <div class="box radius padding-20">
                     <div class="heading flex">
                         <h4 class="box-head">Thảo luận</h4>
-                        <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="@Url.Action("Index","Discuss")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <ul class="list-discus">
                         <li v-for="(item,k) in discussion">
@@ -95,13 +97,13 @@
             <div class="col-md-12 margin-b20">
                 <div class="heading flex">
                     <h4 class="box-head">Khóa học đã kết thúc</h4>
-                    <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                    <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                 </div>
             </div>
             <ul class="row">
                 <li class="col-md-4 less-done list" v-for="(item,k) in finish_course">
                     <div class="box radius">
-                        <a href="#" class="flex">
+                        <a :href="'@Url.Action("Detail", "Course")/' + item.id" class="flex">
                             <span class="per">{{item.per + '%'}}</span>
                             <div class="info">
                                 <span>{{item.title}}</span>
@@ -117,7 +119,9 @@
     </div>
 </section>
 
-<script>
+
+@section Scripts{
+    <script>
     new Vue({
         el: "#main",
         mounted() {
@@ -195,7 +199,7 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('StartDate', '@DateTime.Now.ToString("MM/dd/yyyy")');
+                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")');
                 let _url = '@Url.Action("GetActiveList", "Course")'
 
                 axios.post(_url, _form)
@@ -209,7 +213,7 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('StartDate', '@DateTime.Now.ToString("MM/dd/yyyy")');
+                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")');
                 let _url = '@Url.Action("GetFinishList", "Course")'
 
                 axios.post(_url, _form)
@@ -221,173 +225,5 @@
             }
         }
     });
-</script>
-
-
-@*<div id="calendarModalView" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title"></h4>
-
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                </div>
-                <div id="modalBody" class="modal-body">
-                    <div class="form-group form-inline">
-                        <label for="start-date"> Start : </label>
-                        <b name="start-date"></b>
-                    </div>
-                    <div class="form-group form-inline">
-                        <label for="end-date"> End : </label>
-                        <b name="end-date"></b>
-                    </div>
-                    <div class="form-group">
-                        <label for="end-date">Link : </label>
-                        <a href="#" name="link"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>*@
-
-@*<style>
-        .active-region, past-region{
-            margin-top:20px;
-        }
-
-        .fc-content {
-            font-size: 9px;
-            cursor: pointer;
-        }
-
-        .fc-center {
-            font-size: 7px;
-        }
-
-        /*.fc-toolbar.fc-header-toolbar {
-            margin-bottom: .5em;
-        }*/
-
-        .fc-toolbar .fc-button {
-            /*padding: 0.2em;*/
-            /*line-height: 1em;*/
-        }
-
-        .fc-dayGrid-view .fc-body .fc-row {
-            min-height: 3em;
-        }
-
-        .fc-day-header {
-            font-weight: normal;
-            border: solid 1px #CCC !important;
-            /*font-size: 11px;*/
-        }
-
-            .fc-day-header span {
-                font-size: 11px;
-            }
-
-        .fc-day-top {
-            text-align: right;
-            padding-right: 3px !important;
-        }
-
-        .fc-button .fc-icon {
-            font-size: 1em;
-        }
-
-        .fc-icon {
-            height: 1em;
-        }
-    </style>*@
-@*<script src="~/js/lib/schedule-mini.js"></script>
-    <script>
-        var schedulex = new CalendarLib.Schedule($);
-            schedulex.onLoad({
-                type: "@User?.FindFirst("Type").Value",
-                controller: 'Calendar'
-            });
-
-        function LoadData() {
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("GetList", "Course")',
-                data: { },
-                dataType:"json",
-                success: function (data) {
-                    var activeCourse = $('#activeCourse tbody');
-                    var pastCourse = $('#pastCourse tbody');
-                    activeCourse.html("");
-                    pastCourse.html("");
-                    if (data.Data.length > 0)
-                    {
-                        var counter = 0;
-                        var pastcounter = 0;
-                        for (i = 0; i < data.Data.length; ++i) {
-                            item = data.Data[i];
-                            //var active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' disabled> <div class='handle'></div> </button></td>";
-
-                            var startdate = moment(item.StartDate).format('DD/MM/YYYY');
-                            var enddate = moment(item.EndDate).format('DD/MM/YYYY');
-                            var today = new Date();
-
-                            //var totalday = moment(item.EndDate).diff(moment(item.StartDate), 'days');
-                            //var completeday = moment(today).diff(moment(item.StartDate), 'days');
-                            //if(completeday > totalday) completeday = totalday;
-
-                            var past = moment(today).diff(moment(item.EndDate), 'days') > 0;
-
-                            var count = past ? ++pastcounter : ++counter;
-
-                            var totalLesson = 1;
-                            var completeLesson = 0;
-                            if (item.Progress != null) {
-                                completeLesson = item.Progress.CompletedLessons.length;
-                                totalLesson = item.Progress.TotalLessons;
-                            }
-
-                            var row =
-                                "<tr>" +
-                                    "<td class='text-center'>" + count + "</td>" +
-                                    "<td><a href='"+'@Url.Action("Detail", "Course")' + "/" + item.ID + "' >" + item.SubjectName + "</a></td>" +
-                                    "<td><a href='"+'@Url.Action("Detail", "Course")' + "/" + item.ID + "' >" + item.Name + "</a></td>" +
-                                    //"<td>" + item.GradeName + "</td>" +
-                                    "<td class='text-center'>" + startdate + " - " + enddate + "</td>" +
-                                    //"<td class='text-center'>Đã hoàn thành</td>" +
-                                    "<td class='text-center'>" + Math.ceil(completeLesson * 100 / totalLesson) + "%</td>"+
-                                "</tr>";
-                            if (past) {
-                                $('.past-region').show();
-                                 pastCourse.append(row);
-                            }
-                            else {
-                                $('#activeCourse').show();
-                                activeCourse.append(row);
-                            }
-                        }
-                        if (counter === 0) {
-                            $('#placeholderActive').empty().append($("<div>", { class: "w-100 text-left pt-0 mb-3", text: "Không có khóa học nào" }));
-                        }
-                        else
-                            $('#placeholderActive').hide();
-
-                        if (pastcounter === 0) {
-                            $('#placeholderPast').empty().append($("<div>", { class: "w-100 text-left pt-0 mb-3", style:"font-size:1rem;", text: "Không có khóa học nào" }));
-                        }
-                        else
-                            $('#placeholderPast').hide();
-                    }
-                },
-                error: function() {
-                    alert("Error");
-                }
-            });
-        };
-
-        $(document).ready(function(){
-            //LoadMyClass();
-            //LoadTodayLesson();
-            LoadData();
-        });
-    </script>*@
-
+    </script>
+}

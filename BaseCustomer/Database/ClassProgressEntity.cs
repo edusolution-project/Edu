@@ -22,6 +22,8 @@ namespace BaseCustomerEntity.Database
         public string LastLessonID { get; set; }
         [JsonProperty("LastDate")]
         public DateTime LastDate { get; set; }
+        [JsonProperty("AvgPoint")]
+        public double AvgPoint { get; set; }
 
     }
 

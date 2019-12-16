@@ -218,6 +218,67 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
+        public JsonResult GetReview(string ExamID)
+        {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Student not found",
+                });
+
+            var exam = _examService.GetItemByID(ExamID);
+            if (exam == null)
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Exam not found",
+                });
+
+            if (!exam.Status)
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Exam not complete",
+                });
+
+            var lesson = _lessonService.GetItemByID(exam.LessonID);
+            if (lesson == null)
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Origin Exam not found",
+                });
+
+
+            var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
+            var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+            var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
+
+            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID).ToList();
+            var lessonview = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
+            {
+                Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                {
+                    Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                        .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                        {
+                            CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
+                        }))?.ToList()
+                })).ToList()
+            });
+
+
+            //Get full result
+            return new JsonResult(
+                new Dictionary<string, object> {
+                        { "Data", lessonview },
+                        { "Exam", exam }
+                });
+        }
+
+        [HttpPost]
         public async Task<JsonResult> CreateDetail(ExamDetailEntity item)
         {
             if (!_examService.IsOverTime(item.ExamID))

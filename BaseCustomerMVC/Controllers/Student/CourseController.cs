@@ -173,7 +173,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 return null;
             }
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
-            //filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate <= today && o.EndDate >= today));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             //model.TotalRecord = data.Count();
@@ -193,7 +193,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                            endDate = o.EndDate,
                            percent,
-                           score = "---"
+                           score = progress != null ? progress.AvgPoint : 0
                        }).ToList();
             return Json(new { Data = std });
         }
@@ -208,7 +208,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 return null;
             }
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate > today));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             //model.TotalRecord = data.Count();
@@ -227,7 +227,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            title = o.Name,
                            endDate = o.EndDate,
                            per,
-                           score = "---"
+                           score = progress != null ? progress.AvgPoint : 0
                        }).ToList();
             return Json(new { Data = std });
         }
