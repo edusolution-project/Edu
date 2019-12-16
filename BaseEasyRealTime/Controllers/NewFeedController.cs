@@ -101,14 +101,27 @@ namespace BaseEasyRealTime.Controllers
                     if (string.IsNullOrEmpty(id))
                     {
                         var data = _service.CreateQuery();
-                        if (data.Count(_ => true && _.State == state && (_.Receivers.Contains(receivers) || state == 0) && _.RemoveByAdmin == false) <= pageSize)
+                        if(state == 0)
                         {
-                            var realData = data.Find(_ => true && _.State == state && (_.Receivers.Contains(receivers) || state == 0) && _.RemoveByAdmin == false)?.Skip((int)(pageSize * pageIndex)).Limit((int)pageSize)?.ToList();
+                            if(data.Count(_=>true && _.State > 0 && (_.Receivers.Contains(receivers)||_.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false) <= 5)
+                            {
+                                var realData = data.Find(_ => true && _.State > 0 && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false)
+                                    ?.SortByDescending(_=>_.Created)
+                                    ?.Skip(0)
+                                    ?.Limit(5)
+                                    ?.ToList();
+                                return new JsonResult(new { code = 200, msg = "Success", data = realData?.OrderByDescending(o=>o.Created)?.ToList() });
+                            }
+                        }
+
+                        if (data.Count(_ => true && _.State == state && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false) <= pageSize)
+                        {
+                            var realData = data.Find(_ => true && _.State == state && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false)?.Skip((int)(pageSize * pageIndex)).Limit((int)pageSize)?.ToList();
                             return new JsonResult(new { code = 200, msg = "Success", data = realData });
                         }
                         else
                         {
-                            return new JsonResult(new { code = 200, msg = "Success", data = data.Find(_ => true && _.State == state && (_.Receivers.Contains(receivers) || state == 0) && _.RemoveByAdmin == false)?.ToList() });
+                            return new JsonResult(new { code = 200, msg = "Success", data = data.Find(_ => true && _.State == state && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false)?.ToList() });
                         }
                     }
                     else
