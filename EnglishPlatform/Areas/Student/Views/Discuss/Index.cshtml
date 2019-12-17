@@ -133,21 +133,28 @@
         margin-bottom: 10px;
     }
 
-        .item-feed .content-post {
-            padding-left: 30px;
-            text-align: justify;
-        }
+    .item-feed .content-post {
+        padding-left: 30px;
+        text-align: justify;
+    }
 
-        .item-feed .extends-post > a {
-            color: #D03239;
-            padding: 5px;
-            padding-left: 30px;
-            font-size: 0.85em;
-        }
+    .item-feed .extends-post > a {
+        color: #D03239;
+        padding: 5px;
+        padding-left: 30px;
+        font-size: 0.85em;
+    }
 
-            .item-feed .extends-post > a:hover, .item-feed .extends-post > a:active {
-                text-decoration: none;
-            }
+    .item-feed .extends-post > a:hover, .item-feed .extends-post > a:active {
+        text-decoration: none;
+    }
+    .item-feed.item-comment.chude {
+        background: #7cc6f13b;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 1.05em;
+    }
 
     .list-new-feeds, .body-comment {
         padding: 10px;
@@ -525,20 +532,24 @@
         }
         var openChat = function (id) {
             var chude = "";
+            var media = "";
             var root = document.getElementById(id);
             if (root != null) {
                 var title = root.querySelector(".content-title-post");
                 if (title != null) {
                     chude = title.innerHTML;
                 }
+                var htmlMedia = root.querySelector(".media-post");
+                if (htmlMedia != null) {
+                    media = htmlMedia.outerHTML;
+                }
             }
-
             var ojChat = document.getElementById("comment-box-new-feed");
             ojChat.classList.add("open");
             ojChat.querySelector("input[name='ParentID']").value = id;
-            ojChat.querySelector(".body-comment").innerHTML = `<div class="item-feed item-comment">
+            ojChat.querySelector(".body-comment").innerHTML = `<div class="item-feed item-comment chude">
                                     <div class="content-post">
-                                        ${chude}
+                                        ${chude} ${media}
                                     </div>
                                 </div>`;
             $.ajax({
