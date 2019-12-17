@@ -16,9 +16,32 @@
     activeTab = "calendar";
 </script>
 <style>
-
+    #schedule{
+        margin-top:30px;
+        height:calc(100vh - 135px);
+    }
+    .fc-toolbar.fc-header-toolbar{
+        display:none;
+    }
     .fc-day-header {
+        height: 50px;
+        line-height: 43px;
         border: solid 1px #CCC !important;
+    }
+    .fc-unthemed .fc-content, .fc-unthemed .fc-divider, .fc-unthemed .fc-list-heading td, .fc-unthemed .fc-list-view, .fc-unthemed .fc-popover, .fc-unthemed .fc-row, .fc-unthemed tbody, .fc-unthemed td, .fc-unthemed th, .fc-unthemed thead{
+        border-color:#D0DFE8;
+    }
+    .fc-ltr .fc-dayGrid-view .fc-day-top .fc-day-number{
+        float:left;
+    }
+    .fc-event, .fc-event-dot{
+        background:none;
+    }
+    .fc-event{
+        border:none;
+    }
+    .fc-time{
+        color:#d05151
     }
 </style>
 <div class="left-col">
@@ -26,10 +49,7 @@
         <h1 class="col-md-11">@ViewData["Title"]</h1>
     </div>
 
-    <div class="main-container">
-        <div id="schedule"></div>
-
-    </div>
+    <div id="schedule"></div>
 </div>
 
 @section Scripts{
@@ -38,7 +58,11 @@
         var schedulex = new CalendarLib.Schedule($);
         schedulex.onLoad({
             type: "@User?.FindFirst("Type").Value",
-            controller: 'Calendar'
+            controller: 'Calendar',
+            header: {},
+            isDev:!0,
+            defaultView: "dayGridMonth",
+            height: document.getElementById("schedule").offsetHeight
         });
         $('#start-date').datetimepicker({
             formatTime: 'H:i',

@@ -41,7 +41,7 @@
     <script src="~/js/lib/config.url.base.js"></script>
     <script src="~/js/lib/notification/notification.js"></script>
     <script src="~/js/lib/xhr.js"></script>
-
+    <script src="~/easy-real-time/js/easy-real-time.js"></script>
     <script src="~/js/hubs/render.html.js"></script>
     <script src="~/lib/signalr/signalr.js"></script>
     <script src="~/js/hubs/connection.js"></script>
@@ -102,10 +102,5 @@
     @await Html.PartialAsync("_modalLogout")
     @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
-    <script src="~/easy-real-time/js/easy-real-time.js"></script>
-    @*<div id="chat-box"></div>*@
-    <script>
-        var easyRealTime = new easyRealTime();
-    </script>
 </body>
 </html>
