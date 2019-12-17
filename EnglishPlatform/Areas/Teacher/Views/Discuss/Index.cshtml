@@ -679,6 +679,9 @@
                         createNewFeed($(this).val());
                         $(this).val("");
                         if (formPost != null) {
+                            formPost.querySelector("input[name='Title']").value = "";
+                            formPost.querySelector("input[type='file']").value = "";
+                            filesList = {};
                             var previewMedia = formPost.querySelector('.media-preview');
                             if (previewMedia != null) {
                                 previewMedia.innerHTML = "";

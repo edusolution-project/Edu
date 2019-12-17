@@ -17,10 +17,65 @@
     var activeTab = "comments";
 </script>
 <style>
+    #form-post .file-media {
+        position: absolute;
+        right: 15px;
+        top: 0;
+        bottom: 0;
+        height: 50px;
+        width: 50px;
+        margin: auto;
+    }
+
+    #form-post .media-preview {
+        position: absolute;
+        max-height: 80px;
+        max-width: 100%;
+        top: -80px;
+        padding: 5px;
+        overflow: hidden;
+    }
+
+    #form-post {
+        position: relative;
+    }
+
+        #form-post .box-content-view-media > img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #form-post .box-content-view-media {
+            display: inline-block;
+            width: 100%;
+            height: 80px;
+        }
+
+        #form-post .box-view-media {
+            position: relative;
+        }
+
+        #form-post .btn-remove {
+            position: absolute;
+            right: 0;
+            background: #fff;
+        }
+
     .list-member {
         height: 500px;
         max-height: 100%;
         overflow: auto;
+    }
+
+    .content-title-post {
+        padding: 10px 0px 15px 33px;
+        font-weight: 500;
+        color: #51bfe5;
+        font-size: 17px;
+    }
+
+    .media-post {
+        padding: 5px 30px;
     }
 
     .box-search {
@@ -103,7 +158,7 @@
     .list-new-feeds, .body-comment {
         padding: 10px;
         max-height: 80%;
-        height: calc(100vh - 190px);
+        height: calc(100vh - 252px);
         overflow: auto;
         overflow-x: hidden;
     }
@@ -112,7 +167,7 @@
         min-height: calc(100vh - 245px);
         border-left: 1px solid #ccc;
         border-right: 1px solid #ccc;
-        background:#ccc;
+        background: #fff;
     }
 
     .inf-group .img-group {
@@ -188,9 +243,18 @@
                 top: 6px;
             }
 </style>
-<div id="dashboard_content">
-    <div class="container-fluid">
-        <div class="row">
+<section class="module" id="dashboard_content">
+    <div class="card-header">
+        <div class="flex border-b padding-b25">
+            <h2 class="title">Welcome to <font>EDUCOO</font></h2>
+            <div class="search-box">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" placeholder="Search">
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row margin-b20">
             <div class="col-12">
                 <div class="row">
                     <div class="col-12">
@@ -230,7 +294,14 @@
                             @{ if (currentClass != null && currentClass.IsAllow)
                                 {
                                     <div id="form-post">
-                                        <textarea rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
+                                        <div class="media-preview"></div>
+                                        <div class="header-form-post">
+                                            <input class="form-control" name="Title" placeholder="Nội dung chủ đề" tabindex="1" required />
+                                        </div>
+                                        <br />
+                                        <textarea tabindex="2" rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
+                                        <input type="file" name="NewFeedMedia" style="display:none" />
+                                        <button class="file-media"><img src="~/images/jpg.png" /></button>
                                     </div>
                                 }
                             }
@@ -242,7 +313,7 @@
                             <div id="comment-box-new-feed" class="position-absolute">
                                 <input type="hidden" value="" name="ParentID" />
                                 <div class="header">
-                                    Chủ đề thảo luận
+                                    <span id="chudethaoluan">chủ đề thảo luận</span>
                                     <button class="btn-close">
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path fill-rule="evenodd" clip-rule="evenodd" d="M1.04791 1.57179C0.540802 2.07896 0.540803 2.90125 1.04791 3.40842L5.63841 7.99951L1.04695 12.5916C0.539849 13.0987 0.53985 13.921 1.04696 14.4282L1.57164 14.9529C2.07874 15.4601 2.90092 15.4601 3.40803 14.9529L7.99949 10.3609L12.5909 14.9529C13.098 15.4601 13.9202 15.4601 14.4273 14.9529L14.952 14.4282C15.4591 13.921 15.4591 13.0987 14.952 12.5916L10.3606 7.99951L14.9511 3.40842C15.4582 2.90124 15.4582 2.07896 14.9511 1.57179L14.4264 1.04704C13.9193 0.539864 13.0971 0.539864 12.59 1.04704L7.99949 5.63813L3.40898 1.04703C2.90188 0.539864 2.0797 0.539864 1.57259 1.04704L1.04791 1.57179Z" fill="#4E6774" />
@@ -253,7 +324,7 @@
                                 @{ if (currentClass != null && currentClass.IsAllow)
                                     {
                                         <div class="form-comment" id="form-comment">
-                                            <textarea rows="3" style="border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
+                                            <textarea rows="3" style="padding-right: 70px;border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
                                         </div>
                                     }
                                 }
@@ -275,6 +346,18 @@
                             </div>
                             <div class="list-member">
                                 @{
+                                    if (teacher != null)
+                                    {
+                                        <div class="info-user">
+                                            <div class="avatar-user">
+                                                <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                                                    <path d='M24 12C24 18.6275 18.6275 24 12 24C5.3725 24 0 18.6275 0 12C0 5.3725 5.3725 0 12 0C18.6275 0 24 5.3725 24 12Z' fill='#7CC6F1' />
+                                                    <path d='M14.7283 11.6221C15.8306 10.7919 16.5447 9.47278 16.5447 7.98981C16.5447 5.48401 14.506 3.44531 12 3.44531C9.4942 3.44531 7.45551 5.48401 7.45551 7.98981C7.45551 9.47278 8.16943 10.7919 9.27173 11.6221C6.32043 12.7299 4.21417 15.5804 4.21417 18.9141H5.62042C5.62042 15.3962 8.48236 12.5345 12.0002 12.5345C15.5178 12.5345 18.3798 15.3962 18.3798 18.9141H19.786C19.7858 15.5804 17.6797 12.7299 14.7283 11.6221ZM8.86176 7.98981C8.86176 6.25928 10.2695 4.85156 12 4.85156C13.7305 4.85156 15.1382 6.25928 15.1382 7.98981C15.1382 9.72034 13.7305 11.1282 12 11.1282C10.2695 11.1282 8.86176 9.72034 8.86176 7.98981Z' fill='white' />
+                                                </svg>
+                                            </div>
+                                            <div data-email="@teacher.Email" class="name">@teacher.Name (Giáo viên)</div>
+                                        </div>
+                                    }
                                     if (numberStudent > 0)
                                     {
                                         for (int i = 0; i < numberStudent; i++)
@@ -291,18 +374,7 @@
                                             </div>
                                         }
                                     }
-                                    if (teacher != null)
-                                    {
-                                        <div class="info-user">
-                                            <div class="avatar-user">
-                                                <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-                                                    <path d='M24 12C24 18.6275 18.6275 24 12 24C5.3725 24 0 18.6275 0 12C0 5.3725 5.3725 0 12 0C18.6275 0 24 5.3725 24 12Z' fill='#7CC6F1' />
-                                                    <path d='M14.7283 11.6221C15.8306 10.7919 16.5447 9.47278 16.5447 7.98981C16.5447 5.48401 14.506 3.44531 12 3.44531C9.4942 3.44531 7.45551 5.48401 7.45551 7.98981C7.45551 9.47278 8.16943 10.7919 9.27173 11.6221C6.32043 12.7299 4.21417 15.5804 4.21417 18.9141H5.62042C5.62042 15.3962 8.48236 12.5345 12.0002 12.5345C15.5178 12.5345 18.3798 15.3962 18.3798 18.9141H19.786C19.7858 15.5804 17.6797 12.7299 14.7283 11.6221ZM8.86176 7.98981C8.86176 6.25928 10.2695 4.85156 12 4.85156C13.7305 4.85156 15.1382 6.25928 15.1382 7.98981C15.1382 9.72034 13.7305 11.1282 12 11.1282C10.2695 11.1282 8.86176 9.72034 8.86176 7.98981Z' fill='white' />
-                                                </svg>
-                                            </div>
-                                            <div data-email="@teacher.Email" class="name">@teacher.Name</div>
-                                        </div>
-                                    }
+
                                 }
 
                             </div>
@@ -312,10 +384,9 @@
             </div>
         </div>
     </div>
-</div>
-
-@section Scripts{
-    <script>
+</section>
+    @section Scripts{
+        <script>
         $("#choosen-group").on("change", function () {
             var value = $(this).val();
             if (value == null || value == "") {
@@ -410,6 +481,14 @@
                         if (listItem != null && listItem.length > 0) {
                             for (var i = 0; i < listItem.length; i++) {
                                 var item = listItem[i];
+                                var media = "";
+                                var title = "";
+                                if (item.medias.length > 0) {
+                                    media = `<div class="media-post"><img src="${item.medias[0].path}" /></div>`;
+                                }
+                                if (item.title != void 0 && item.title != "") {
+                                    title = `<div class="content-title-post">${item.title}</div>`;
+                                }
                                 var html = `<div class="item-feed" id="${item.ID}">
                                     <div class="user-info-post">
                                         <div class="row">
@@ -420,21 +499,10 @@
                                                             <path d='M24 12C24 18.6275 18.6275 24 12 24C5.3725 24 0 18.6275 0 12C0 5.3725 5.3725 0 12 0C18.6275 0 24 5.3725 24 12Z' fill='#7CC6F1' />
                                                             <path d='M14.7283 11.6221C15.8306 10.7919 16.5447 9.47278 16.5447 7.98981C16.5447 5.48401 14.506 3.44531 12 3.44531C9.4942 3.44531 7.45551 5.48401 7.45551 7.98981C7.45551 9.47278 8.16943 10.7919 9.27173 11.6221C6.32043 12.7299 4.21417 15.5804 4.21417 18.9141H5.62042C5.62042 15.3962 8.48236 12.5345 12.0002 12.5345C15.5178 12.5345 18.3798 15.3962 18.3798 18.9141H19.786C19.7858 15.5804 17.6797 12.7299 14.7283 11.6221ZM8.86176 7.98981C8.86176 6.25928 10.2695 4.85156 12 4.85156C13.7305 4.85156 15.1382 6.25928 15.1382 7.98981C15.1382 9.72034 13.7305 11.1282 12 11.1282C10.2695 11.1282 8.86176 9.72034 8.86176 7.98981Z' fill='white' />
                                                         </svg>
-                                                    </div>
-                                                    <div class="name">${item.name}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-5">
-                                                <span class="float-right text-time">${formatDate(item.created)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="content-post">
-                                        ${item.content}
-                                    </div>
-                                    <div class="extends-post">
-
-                                    </div>
+                                                    </div><div class="name">${item.name}</div></div></div>
+                                            <div class="col-lg-5"><span class="float-right text-time">${formatDate(item.created)}</span></div></div></div>${title}${media}
+                                    <div class="content-post">${item.content}</div>
+                                    <div class="extends-post"></div>
                                 </div>`;
                                 loadCountComment(item.ID);
                                 var strId = item.receivers[0] == null || item.receivers[0] == "" || item.receivers[0] == void 0 ? "" : item.receivers[0];
@@ -473,10 +541,23 @@
             });
         }
         var openChat = function (id) {
+            var chude = "";
+            var root = document.getElementById(id);
+            if (root != null) {
+                var title = root.querySelector(".content-title-post");
+                if (title != null) {
+                    chude = title.innerHTML;
+                }
+            }
+
             var ojChat = document.getElementById("comment-box-new-feed");
             ojChat.classList.add("open");
             ojChat.querySelector("input[name='ParentID']").value = id;
-            ojChat.querySelector(".body-comment").innerHTML = "";
+            ojChat.querySelector(".body-comment").innerHTML = `<div class="item-feed item-comment">
+                                    <div class="content-post">
+                                        ${chude}
+                                    </div>
+                                </div>`;
             $.ajax({
                 url: "@Url.Action("Get", "Comment")?parentID=" + id+"&IsReply=false",
                 type: "GET",
@@ -511,74 +592,120 @@
             });
         }
         //string title,string content,int state,HashSet<string> receivers
-        var createNewFeed = function (msg) {
-            if (msg.trim() == "") return;
-            $.ajax({
-                url: "@Url.Action("CREATE", "NewFeed")",
-                type: "POST",
-                data: {
-                    title: "",
-                    content: msg,
-                    state:@State,
-                    receivers: ['@ViewBag.ID']
-                },
-                success: function (data) {
-                    if (connection != void 0) {
-                        var item = data.data;
-                        var strId = item.receivers[0] == null || item.receivers[0] == "" || item.receivers[0] == void 0 ? "" : item.receivers[0];
-                        if (strId == "") {
-                            connection.invoke("SendToGroup", { type: "newfeed", obj: data }, 'Online');
-                        } else {
-                            connection.invoke("SendToGroup", { type: "newfeed", obj: data }, 'newfeed-' + strId);
-                        }
-                        
-                    }
-                }
-            });
-        }
-        var createComment = function (content, id) {
-            if (content.trim() == "") return;
-            $.ajax({
-                url: "@Url.Action("CREATE", "Comment")",
-                type: "POST",
-                data: {
-                    content: content,
-                    parentID:id
-                },
-                success: function (data) {
-                    if ('@ViewBag.ID' == "" || '@ViewBag.ID' == null || '@ViewBag.ID' == void 0) {
-                        connection.invoke("SendToGroup", { type: "comment", obj: data }, 'Online');
-                    } else {
-                        connection.invoke("SendToGroup", { type: "comment", obj: data }, 'newfeed-@ViewBag.ID');
-                    }
-                    
-                }
-            })
-        }
+
         $("#comment-box-new-feed>.header>.btn-close").click(function () {
             var ojChat = document.getElementById("comment-box-new-feed");
             ojChat.querySelector("input[name='ParentID']").value = "";
             ojChat.classList.remove("open");
         });
 
-        
-    </script>
-    @{ if (currentClass != null && currentClass.IsAllow)
-        {
-            <script>
+
+        </script>
+        @{ if (currentClass != null && currentClass.IsAllow)
+            {
+                <script>
+
+                var filesList = {};
+                $("#form-post>button.file-media").click(function () {
+                    $("#form-post>input[type='file']").click();
+                });
+                var formPost = document.getElementById("form-post");
+                if (formPost != null) {
+                    var previewMedia = formPost.querySelector('.media-preview');
+                    var inputFile = formPost.querySelector("input[type='file']");
+                    if (inputFile != null) {
+                        inputFile.onchange = function () {
+                            var files = inputFile.files;
+				            for(var i = 0; i < files.length;i++){
+					            var file = files[i];
+					            if(file != null){
+						            var id = generateId();
+						            var url = createBlodUrl(file);
+						            filesList[id] = file;
+						            if(previewMedia.childNodes.length >= 5){
+							            previewMedia.appendChild(createBoxMedia(id,url,file.type,true));
+						            }else{
+							            previewMedia.appendChild(createBoxMedia(id,url,file.type,false));
+						            }
+					            }
+				            }
+                        }
+                    }
+                }
+                var createNewFeed = function (msg) {
+                    if (msg.trim() == "") return;
+                    var Title = "";
+                    if (formPost != null) {
+                        Title = formPost.querySelector("input[name='Title']").value;
+                        if (Title.trim() == "") return;
+                    }
+                    var keys = Object.keys(filesList);
+                    var dataForm = new FormData();
+                    dataForm.append("title",Title);
+                    dataForm.append("content", msg);
+                    dataForm.append("state", @State);
+                    dataForm.append("receivers", ['@ViewBag.ID']);
+                    if (keys != null && keys != void 0) {
+                        for (var i = 0; i < keys.length; i++) {
+                            var key = keys;
+                            dataForm.append("file", filesList[key]);
+                        }
+                        if (_ajax != void 0) {
+                            _ajax.proccess("POST", "@Url.Action("CREATE", "NewFeed")", dataForm).then(function (res) {
+                                var data = JSON.parse(res);
+                                if (connection != void 0) {
+                                    var item = data.data;
+                                    var strId = item.receivers[0] == null || item.receivers[0] == "" || item.receivers[0] == void 0 ? "" : item.receivers[0];
+                                    if (strId == "") {
+                                        connection.invoke("SendToGroup", { type: "newfeed", obj: data }, 'Online');
+                                    } else {
+                                        connection.invoke("SendToGroup", { type: "newfeed", obj: data }, 'newfeed-' + strId);
+                                    }
+                                }
+                            })
+                        }
+                    }
+                }
+                var createComment = function (content, id) {
+                    if (content.trim() == "") return;
+                    $.ajax({
+                        url: "@Url.Action("CREATE", "Comment")",
+                        type: "POST",
+                        data: {
+                            content: content,
+                            parentID:id
+                        },
+                        success: function (data) {
+                            if ('@ViewBag.ID' == "" || '@ViewBag.ID' == null || '@ViewBag.ID' == void 0) {
+                                connection.invoke("SendToGroup", { type: "comment", obj: data }, 'Online');
+                            } else {
+                                connection.invoke("SendToGroup", { type: "comment", obj: data }, 'newfeed-@ViewBag.ID');
+                            }
+                        }
+                    })
+                }
                 $("#form-comment>textarea").on("keypress", function (e) {
                     if (e.which == 13) {
                         createComment($(this).val(), document.getElementById("comment-box-new-feed").querySelector("input[name='ParentID']").value);
-                        $(this).html("");
+                        $(this).val("");
                     }
                 })
                 $("#form-post>textarea").on("keypress", function (e) {
                     if (e.which == 13) {
                         createNewFeed($(this).val());
-                        $(this).html("");
+                        $(this).val("");
+                        if (formPost != null) {
+                            formPost.querySelector("input[name='Title']").value = "";
+                            formPost.querySelector("input[type='file']").value = "";
+                            filesList = {};
+                            var previewMedia = formPost.querySelector('.media-preview');
+                            if (previewMedia != null) {
+                                previewMedia.innerHTML = "";
+                            }
+                        }
                     }
                 })
-            </script>
+                </script>
+            }
         }
     }
-}
