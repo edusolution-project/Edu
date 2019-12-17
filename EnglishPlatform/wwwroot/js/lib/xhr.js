@@ -1,4 +1,107 @@
 ﻿"use trict";
+// dec2hex :: Integer -> String
+function dec2hex(dec) {
+    return ('0' + dec.toString(16)).substr(-2)
+}
+
+// generateId :: Integer -> String
+function generateId(len) {
+    var arr = new Uint8Array((len || 40) / 2)
+    window.crypto.getRandomValues(arr)
+    return Array.from(arr, dec2hex).join('')
+}
+var createBlodUrl = function (file) {
+    if (file == null || file == void 0 || file == "") return "";
+    return URL.createObjectURL(file);
+}
+var boxRemove = function () {
+    var btn = document.createElement('button');
+    btn.classList = 'btn btn-remove';
+    btn.setAttribute('onclick', 'removeMedia(this)');
+    btn.innerText = 'x';
+    return btn;
+}
+var removeMedia = function (self) {
+    var parent = self.parentElement;
+    var state = parent.dataset.state;
+    delete filesList[state];
+    if (parent.parentElement != null && parent.parentElement != void 0) {
+        var root = parent.parentElement.parentElement;
+        if (root != void 0 && root != null) {
+            root.querySelector("input[type='file']").value="";
+        }
+    }
+    parent.remove();
+}
+
+var boxMedia = function (id) {
+    var div = document.createElement("div");
+    div.dataset.state = id;
+    div.classList = 'box-view-media';
+    var x = boxRemove();
+    div.appendChild(x);
+    return div;
+}
+var createBoxMedia = function (id, url, type, isHidden) {
+    var subStr = type.split('/')[0];
+    switch (subStr) {
+        case 'video':
+            return videoBox(id, url);
+        case 'audio':
+            return audioBox(id, url);
+        case 'image':
+            return imgBox(id, url);
+        default:
+            return defaultBox(id, url);
+    }
+}
+var boxContent = function () {
+    var div = document.createElement("div");
+    div.classList = 'box-content-view-media';
+    return div;
+}
+var videoBox = function (id, url) {
+    var root = boxMedia(id);
+    var parent = boxContent();
+    var video = document.createElement('video');
+    video.src = url;
+    video.classList = 'media';
+    video.controls = "true";
+    parent.appendChild(video);
+    root.appendChild(parent);
+    return root;
+}
+var audioBox = function (id, url) {
+    var root = boxMedia(id);
+    var parent = boxContent();
+    var audio = document.createElement('audio');
+    audio.src = url;
+    audio.classList = 'media';
+    audio.controls = "true";
+    parent.appendChild(audio);
+    root.appendChild(parent);
+    return root;
+}
+var imgBox = function (id, url) {
+    var root = boxMedia(id);
+    var parent = boxContent();
+    var img = document.createElement('img');
+    img.src = url;
+    img.classList = 'media';
+    parent.appendChild(img);
+    root.appendChild(parent);
+    return root;
+}
+var defaultBox = function (id, url) {
+    var root = boxMedia(id);
+    var parent = boxContent();
+    var img = document.createElement('iframe');
+    img.src = url;
+    img.classList = 'media';
+    parent.appendChild(img);
+    root.appendChild(parent);
+    return root;
+}
 var MyAjax = (function () {
     function MyAjax() {
         this._request = new XMLHttpRequest();
