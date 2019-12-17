@@ -160,15 +160,15 @@
                         } else {
                             active = "<button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger' onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\"> <div class='handle'></div> </button>";
                         }
-
                         var startdate = "---";
-                        if(moment(item.StartDate) > new Date(2018,1,1)) startdate = moment(item.StartDate).format('DD/MM/YYYY');
+                        console.log(item.StartDate);
+                        if(moment(item.StartDate) > new Date(2018,1,1)) startdate = moment(item.StartDate).format('DD/MM/YYYY HH:mm');
                         var enddate = "---";
-                        if(moment(item.EndDate) > new Date(2018,1,1)) enddate = moment(item.EndDate).format('DD/MM/YYYY');
+                        if(moment(item.EndDate) > new Date(2018,1,1)) enddate = moment(item.EndDate).format('DD/MM/YYYY HH:mm');
 
                         var rowData = $("<div>", {"class":"modules-content-item row"});
-                        var leftPart = $("<div>", {"class":"col-md-6"});
-                        var rightPart = $("<div>", {"class":"col-md-2 text-right"});
+                        var leftPart = $("<div>", {"class":"col-md-7"});
+                        var rightPart = $("<div>", {"class":"col-md-1 text-right"});
                         leftPart.append($("<span>", {"class":"modules-content-item-icon" + (item.TemplateType === 2? (" assignment atype" + item.Etype):"")}));
                         rightPart.append(active);
                         var itemData = $("<div>", {"class":"modules-content-item-info"});
@@ -188,10 +188,10 @@
 
                         leftPart.append(itemData);
                         rowData.append(leftPart)
-                            .append($("<div>", {"class":"col-md-2 text-right"})
-                                .append($("<input>", {"sid": item.ScheduleID, "target":"StartDate", "type":"text", "readonly":"readonly","class":"text-holder", "value": startdate, "onchange":"updateSchedule(this)"})))
-                            .append($("<div>", {"class":"col-md-2 text-right"})
-                                .append($("<input>",{"sid": item.ScheduleID, "target":"EndDate", "type":"text", "readonly":"readonly","class":"text-holder", "value": enddate, "onchange":"updateSchedule(this)"})))
+                            .append($("<div>", {"class":"col-md-2 text-center"})
+                                .append($("<input>", {"sid": item.ScheduleID, "target":"StartDate", "type":"text", "readonly":"readonly","class":"text-holder text-center", "value": startdate, "onchange":"updateSchedule(this)"})))
+                            .append($("<div>", {"class":"col-md-2 text-center"})
+                                .append($("<input>",{"sid": item.ScheduleID, "target":"EndDate", "type":"text", "readonly":"readonly","class":"text-holder text-center", "value": enddate, "onchange":"updateSchedule(this)"})))
                             .append(rightPart);
 
                         if (item.ChapterID == null) {
@@ -203,12 +203,22 @@
                             parent.append(rowData);
                         }
                     }
-                    $('.text-holder').datepicker({
-                        defaultDate: 0,
-                        changeMonth: true,
-                        changeYear: true,
-                        dateFormat: "dd/mm/yy"
+                    $('.text-holder').datetimepicker({
+                        formatTime: 'H:i',
+                        formatDate: 'd/m/Y',
+                        timepickerScrollbar: false,
+                        scrollMonth: false,
+                        defaultTime: '08:00',
+                        step: 15
+                        //altField: '#' + fieldID,
+                        //altFormat: 'yy-mm-dd hh:mm'
                     });
+                //    .datepicker({
+                //        defaultDate: 0,
+                //        changeMonth: true,
+                //        changeYear: true,
+                //        dateFormat: "dd/mm/yy"
+                //    });
                 }
                 $(indicator).removeClass("fas fa-spinner fa-spin");
             },
@@ -221,8 +231,8 @@
     function updateSchedule(obj) {
         var currentval = $(obj).val();
         var scheduleid = $(obj).attr("sid");
-        var startdate = moment($(obj).parent().parent().find("[target=StartDate]").val(),"DD/MM/YYYY").format("MM-DD-YYYY");
-        var enddate = moment($(obj).parent().parent().find("[target=EndDate]").val(),"DD/MM/YYYY").format("MM-DD-YYYY");
+        var startdate = moment($(obj).parent().parent().find("[target=StartDate]").val(),"DD/MM/YYYY HH:mm").format("MM-DD-YYYY HH:mm:ss");
+        var enddate = moment($(obj).parent().parent().find("[target=EndDate]").val(),"DD/MM/YYYY HH:mm").format("MM-DD-YYYY HH:mm:ss");
         console.log(startdate);
         console.log(enddate);
 

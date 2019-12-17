@@ -26,7 +26,7 @@
         <div class="box">
             <div class="flex">
                 <div id="avatar_box" v-if="isInfo">
-                    <img v-on:error="errorImgUrl()" :src="profile.avatar" alt="" v-if="profile.avatar" />
+                    <img v-on:error="errorImgUrl()" :src="avatar.src" alt="" v-if="avatar" />
                     <label for="in_avatar">Đổi hình đại diện</label>
                     <input type="file" :ref="`avatar`" v-on:change="previewThumb()" id="in_avatar">
                 </div>
@@ -164,24 +164,31 @@
                     //this.avatar.file = this.profile.avatar
                 },
                 updateProfile() {
-                     let _url = '@Url.Action("SaveProfile","Home")'
+                    let _url = '@Url.Action("SaveProfile","Home")'
                     let _form = new FormData()
                     _form.append("FullName", this.profile.FullName);
                     _form.append("Phone", this.profile.Phone);
-                     if(this.avatar.file){
-                         _form.append('Avatar', this.avatar.file)
-                     }
-                     axios.post(_url,_form)
-                         .them(response =>{
-                    
-                         }).catch(e=>{})
+                    if (this.avatar.file) {
+                        _form.append('fileUpload', this.avatar.file)
+                    }
+                    let _headers = {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                    axios.post(_url, _form, _headers)
+                        .then(response => {
+                        }).catch(e => { })
                 },
                 updatePassword() {
-                    // let _url = 'apiUpdatePassword'
-                    // axios.post(_url)
-                    //     .them(response =>{
-                    //
-                    //     }).catch(e=>{})
+                    let _url = '@Url.Action("ChangePassword","Home")'
+                    let _form = new FormData()
+                    _form.append("oldpass", this.password_old);
+                    _form.append("newpass", this.password_new);
+                    _form.append("retypepass", this.password_confirm);
+                    axios.post(_url, _form)
+                        .them(response => {
+                        }).catch(e => { })
                 },
                 errorImgUrl() {
                     this.avatar.src = null;
@@ -189,21 +196,23 @@
                     this.$forceUpdate();
                 },
                 previewThumb() {
+                    let _that = this
                     if (event.target.files[0]['type'] === 'image/jpeg' ||
                         event.target.files[0]['type'] === 'image/png' ||
                         event.target.files[0]['type'] === 'image/gif') {
                     } else {
                         return
                     }
-                    this.avatar.src = URL.createObjectURL(event.target.files[0])
-                    this.avatar.file = event.target.files[0]
+                    _that.avatar.src = URL.createObjectURL(event.target.files[0])
+                    _that.avatar.file = event.target.files[0]
                     var src = URL.createObjectURL(event.target.files[0])
+                    console.log(this.avatar);
                     setTimeout(function () {
                         var imgTesting = new Image();
                         imgTesting.src = src;
                         setTimeout(function () {
-                            img.height = imgTesting.height;
-                            img.width = imgTesting.width;
+                            _that.avatar.height = imgTesting.height;
+                            _that.avatar.width = imgTesting.width;
                         }, 1000);
                     }, 1000);
                 },

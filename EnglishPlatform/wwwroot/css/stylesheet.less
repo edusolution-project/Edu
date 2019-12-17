@@ -76,6 +76,9 @@ a{
 }
 .flex{
     display: flex;
+    @media (max-width: 420px){
+        flex-direction: column;
+    }
 }
 .width-100{
     width: 100%
@@ -185,14 +188,19 @@ a{
         width: 340px;
         display: none;
     }
+    .frame{
+        padding-left: 40px;
+        padding-right: 40px;
+    }
 }
 .card-header{
     background: transparent;
     border: none;
 }
 #box_login{
-    width: 35%;
-    margin-left: calc(~"60% - 50px");
+    width: 470px;
+    margin: 0 auto;
+    // margin-left: calc(~"60% - 50px");
     padding: 0 15px;
     .card-header{
         h3{
@@ -1223,6 +1231,7 @@ a{
         line-height: 23px;
         color: @red;
         margin-bottom: 6px;
+        display: block;
     }
     p{
         font-size: 12px;

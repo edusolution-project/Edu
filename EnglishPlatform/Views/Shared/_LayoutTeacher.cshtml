@@ -43,6 +43,10 @@
     <script type="text/javascript" src="~/js/popper.min.js"></script>
     <script type="text/javascript" src="~/vendor/bootstrap/js/bootstrap.js"></script>
     <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
+    <link href="~/js/lib/datetimepicker/jq.datetimepicker.css" rel="stylesheet" />
+    <script src="~/js/lib/datetimepicker/php-date-formatter.min.js"></script>
+    <script src="~/js/lib/datetimepicker/jquery.mousewheel.js"></script>
+    <script src="~/js/lib/datetimepicker/jquery.datetimepicker.js"></script>
 
     <script src="~/js/jquery.scrollbar.min.js"></script>
     <link href="~/css/jquery.scrollbar.css" rel="stylesheet" />
@@ -52,6 +56,7 @@
     <script src="~/js/lib/teacher.config.url.base.js"></script>
     <script src="~/js/lib/notification/notification.js"></script>
     <script src="~/js/lib/xhr.js"></script>
+    <script src="~/easy-real-time/js/easy-real-time.js"></script>
     <script src="~/js/hubs/render.html.js"></script>
     <script src="~/lib/signalr/signalr.js"></script>
     <script src="~/js/hubs/connection.js"></script>
@@ -94,10 +99,7 @@
     @await Html.PartialAsync("_modalLogout")
     @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
-    <script src="~/easy-real-time/js/easy-real-time.js"></script>
-    <div id="chat-box"></div>
-    <script>
-        var easyRealTime = new easyRealTime();
-    </script>
+    
+    <div id="chat-box"></div>   
 </body>
 </html>

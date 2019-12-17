@@ -22,72 +22,7 @@
 
     <div class="main-container">
         <div id="schedule"></div>
-        <div id="calendarModal" class="modal fade">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 id="modalTitle" class="modal-title">Thêm sự kiện</h4>
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                    </div>
-                    <div id="modalBody" class="modal-body">
-                        <form action="#" name="scheduleForm">
-                            <input type="hidden" class="form-control" name="id" value="">
-                            <label for="">Tên sự kiện :</label>
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="Title" placeholder="Title">
-                            </div>
-                            <div class="form-group">
-                                <label for="">Bắt đầu :</label>
-                                <div class="input-group date">
-                                    <input type="text" name="StartDate" class="form-control datetimepicker-input" id="start-date" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="">Kết thúc :</label>
-                                <div class="input-group date">
-                                    <input type="text" name="EndDate" class="form-control datetimepicker-input" id="end-date" />
-                                </div>
-                            </div>
-                            <label for="">Link :</label>
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="url" placeholder="//link">
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-success" onclick="submitEvent()" data-dismiss="modal">Thêm</button>
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div id="calendarModalView" class="modal fade">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title"></h4>
-                        @*<button type="button" class="edit"><span aria-hidden="true">edit</span> <span class="sr-only">edit</span></button>
-                            <button type="button" class="delete"><span aria-hidden="true">delete</span> <span class="sr-only">delete</span></button>*@
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                    </div>
-                    <div id="modalBody" class="modal-body">
-                        <div class="form-group form-inline">
-                            <label for="start-date"> Bắt đầu : </label>
-                            <b name="start-date"></b>
-                        </div>
-                        <div class="form-group form-inline">
-                            <label for="end-date">Kết thúc : </label>
-                            <b name="end-date"></b>
-                        </div>
-                        <div class="form-group">
-                            <label for="end-date">Link liên kết : </label>
-                            <a href="#" name="link"></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -97,10 +32,10 @@
         border-color: #76828e;
     }
 
-    .fc-button-primary:hover
-    {
-        background-color: #004085;
-    }
+        .fc-button-primary:hover {
+            background-color: #004085;
+        }
+
         .fc-button-primary:not(:disabled).fc-button-active,
         .fc-button-primary:not(:disabled):active {
             color: #fff;
@@ -132,3 +67,70 @@
         }
     </script>
 }
+
+@section Modals { <div id="calendarModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 id="modalTitle" class="modal-title">Thêm sự kiện</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                </div>
+                <div id="modalBody" class="modal-body">
+                    <form action="#" name="scheduleForm">
+                        <input type="hidden" class="form-control" name="id" value="">
+                        <label for="">Tên sự kiện :</label>
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="Title" placeholder="Title">
+                        </div>
+                        <div class="form-group">
+                            <label for="">Bắt đầu :</label>
+                            <div class="input-group date">
+                                <input type="text" name="StartDate" class="form-control datetimepicker-input" id="start-date" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="">Kết thúc :</label>
+                            <div class="input-group date">
+                                <input type="text" name="EndDate" class="form-control datetimepicker-input" id="end-date" />
+                            </div>
+                        </div>
+                        <label for="">Link :</label>
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="url" placeholder="//link">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="submitEvent()" data-dismiss="modal">Thêm</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="calendarModalView" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"></h4>
+                    @*<button type="button" class="edit"><span aria-hidden="true">edit</span> <span class="sr-only">edit</span></button>
+                        <button type="button" class="delete"><span aria-hidden="true">delete</span> <span class="sr-only">delete</span></button>*@
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                </div>
+                <div id="modalBody" class="modal-body">
+                    <div class="form-group form-inline">
+                        <label for="start-date"> Bắt đầu : </label>
+                        <b name="start-date"></b>
+                    </div>
+                    <div class="form-group form-inline">
+                        <label for="end-date">Kết thúc : </label>
+                        <b name="end-date"></b>
+                    </div>
+                    <div class="form-group">
+                        <label for="end-date">Link liên kết : </label>
+                        <a href="#" name="link"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>}

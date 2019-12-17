@@ -1,0 +1,73 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutStudent_noChat.cshtml";
+    var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var currentLesson = ViewBag.Lesson as BaseCustomerMVC.Models.StudentLessonViewModel;
+    var currentChapter = ViewBag.Chapter as BaseCustomerEntity.Database.ChapterEntity;
+    var nextLesson = ViewBag.NextLesson as BaseCustomerEntity.Database.LessonEntity;
+    var exam = ViewBag.Exam as BaseCustomerMVC.Models.ExamReviewViewModel;
+    ViewData["Title"] = currentLesson.Title;
+}
+
+<script>
+    activeTab = "course";
+</script>
+
+<script>
+    activeTab = "course";
+</script>
+<div class="left-col">
+    <div class="page-title row">
+        <h2 class="col-md-6 p-0">
+            @*<a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
+                "Modules" ,"Course")/@currentClass.ID">@currentClass.Name</a>*@
+            @if (currentChapter != null)
+            {
+                @*<span>/</span>*@ <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
+                            "Modules" ,"Course")/@currentClass.ID#@currentChapter.ID">@currentChapter.Name</a>
+                        }
+            / @currentLesson.Title
+        </h2>
+        @if (nextLesson != null)
+        {
+            <h2 class="col-md-6 p-0 text-right">
+                Next > <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
+                            "Detail" ,"Lesson")/@nextLesson.ID/@currentClass.ID">@nextLesson.Title</a>
+                        </h2>
+                    }
+    </div>
+    <div class="main-container">
+        <!-- Begin Page Content -->
+        <div id="exam-student" class="h-100">
+        </div>
+        <!-- End of Main Content -->
+        <input type="hidden" name="ExamID" id="ExamID" value="" />
+    </div>
+
+    <div id="lessonSummary" class="shadow">
+    </div>
+
+</div>
+@section Footer{}
+@section Scripts{
+
+    <script src="~/js/content-render.js?20191212"></script>
+    <script>
+            var config = {
+                container: "exam-student",
+                mod: mod.STUDENT_REVIEW,
+                url: {
+                    load: '@Url.Action("GetLessonReview", "Lesson")',
+                    list_part: '@Url.Action("Ge", "Exam")',
+                },
+                type: @currentLesson.TemplateType,
+                lesson_id: '@currentLesson.ID',
+                class_id: '@currentClass.ID',
+                chap_id: '@currentLesson.ChapterID',
+                exam_id: '@exam.ID'
+            }
+            var widget = new Lesson.onReady(config);
+    </script>
+    <link href="~/css/detailui.css" rel="stylesheet" />
+
+}

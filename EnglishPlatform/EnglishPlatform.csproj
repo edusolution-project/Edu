@@ -56,7 +56,7 @@
     <None Include="Areas\Admin\Views\Teacher\Index.cshtml" />
     <None Include="Areas\Student\Views\Home\Index.cshtml" />
     <None Include="Areas\Student\Views\Lesson\Index.cshtml" />
-    <None Include="Areas\Student\Views\Lesson\Detail.cshtml" />
+    <None Include="Areas\Student\Views\Lesson\Detail_new.cshtml" />
     <None Include="Areas\Student\Views\Course\Calendar.cshtml" />
     <None Include="Areas\Student\Views\Course\Detail.cshtml" />
     <None Include="Areas\Student\Views\Course\Index.cshtml" />
