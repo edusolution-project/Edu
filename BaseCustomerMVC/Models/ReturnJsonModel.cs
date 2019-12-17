@@ -15,6 +15,10 @@ namespace BaseCustomerMVC.Models
 
         [JsonProperty("Location")]
         public string Location { get; set; }
+
+        [JsonProperty("Data")]
+        public object Data { get; set; }
+
     }
 
     public class ReturnStatus

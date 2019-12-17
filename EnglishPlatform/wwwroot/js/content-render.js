@@ -78,12 +78,15 @@ var Lesson = (function () {
                 renderPreview();
                 break;
             case mod.STUDENT_EXAM:
-
                 renderExam();
                 break;
-            default:
+            case mod.STUDENT_LECTURE:
                 renderStandardLayout();
-                renderPreview();
+                renderLecture()
+                break;
+            case mod.STUDENT_REVIEW:
+                renderStandardLayout();
+                renderStudentReview();
                 break;
         }
     }
@@ -164,6 +167,9 @@ var Lesson = (function () {
                     case mod.TEACHEREDIT:
                         loadLessonParts({ LessonID: config.lesson_id, ClassID: config.class_id }, callback);
                         break;
+                    case mod.STUDENT_REVIEW:
+                        loadLessonParts({ LessonID: config.lesson_id, ClassID: config.class_id, ExamID: config.exam_id }, callback);
+                        break;
                     default:
                         callback();
                         break;
@@ -173,6 +179,7 @@ var Lesson = (function () {
     }
 
     var loadLessonParts = function (param, callback) {
+        console.log(param);
         var formData = new FormData();
         if (param != null)
             Object.keys(param).forEach(e => formData.append(e, param[e]));
@@ -221,11 +228,10 @@ var Lesson = (function () {
         $('.main-column').addClass('scrollbar-outer').scrollbar();
     }
 
-    var renderLessonData = function () {
+    var renderLessonData = function (                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ) {
         if (isNull(_data)) {
             throw "No data";
         }
-
         var data = _data;
 
         var mainContainer = $('#' + config.container);
@@ -363,6 +369,7 @@ var Lesson = (function () {
                 headerRow.append(lessonButton);
                 break;
             case mod.STUDENT_EXAM:
+            case mod.STUDENT_REVIEW:
                 //no header
                 break;
             case mod.REVIEW:
@@ -386,7 +393,6 @@ var Lesson = (function () {
         }
 
         $('.mod_' + config.mod).addClass("uimod_" + _UImode);
-
         //body
         switch (config.mod) {
             case mod.PREVIEW:
@@ -422,6 +428,7 @@ var Lesson = (function () {
                 }
                 break;
             case mod.STUDENT_EXAM:
+            case mod.STUDENT_LECTURE:
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
@@ -430,7 +437,7 @@ var Lesson = (function () {
                 lessontabs.append(tabs);
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
-                    renderExamPart(item);
+                    renderStudentPart(item);
                 }
                 if (_UImode == UIMode.EXAM_ONLY) {
                     $('#rightCol .tab-pane').each(function () {
@@ -451,7 +458,7 @@ var Lesson = (function () {
                     })
                 }
                 break;
-            case mod.REVIEW:
+            default:
                 break;
         }
 
@@ -1888,42 +1895,9 @@ var Lesson = (function () {
             "LessonID": config.lesson_id,
             "ClassID": config.class_id
         }, renderLessonData);
-        //    if (!isNull(res)) {
-
-        //        var resData = JSON.parse(res);
-        //        if (resData.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
-        //            var exam = resData.Exam;
-        //            if (exam == null || exam.Status == true) {
-        //                removeLocalData("CurrentExam");
-        //                if (exam != null) resData.Exam.ID = null;
-        //                renderLesson(resData);
-        //            }
-        //            else {
-        //                setLocalData("CurrentExam", resData.Exam.ID);
-        //                renderLesson(resData);
-        //                renderBoDem();
-        //                $("#counter").html(resData.Timer);
-        //                countdown();
-        //                $('.quizNumber').removeClass("d-none");
-        //            }
-        //        }
-        //        startDragDrop();
-        //    }
-        //} else {
-        //    renderLesson(data);
-        //    if (data.Data.TemplateType != TEMPLATE_TYPE.LESSON) {
-        //        renderBoDem();
-        //        $("#counter").html(getLocalData("Timer"));
-        //        var currentExam = getLocalData("CurrentExam");
-        //        if (currentExam != null) {
-        //            countdown();
-        //            $('.quizNumber').removeClass("d-none");
-        //        }
-        //    }
-        //    startDragDrop();
     }
 
-    var renderExamPart = function (data) {
+    var renderStudentPart = function (data) {
         var mainContainer = $('#' + config.container);
         var leftCol = mainContainer.find('#leftCol');
         var rightCol = mainContainer.find('#rightCol');
@@ -2379,6 +2353,24 @@ var Lesson = (function () {
         }
     }
 
+    //student review
+    var renderStudentReview = function (data) {
+        loadLesssonData({
+            "LessonID": config.lesson_id,
+            "ClassID": config.class_id,
+            "ExamID": config.exam_id
+        }, renderLessonData);
+    }
+
+    var renderLecture = function () {
+        loadLesssonData({
+            "LessonID": config.lesson_id,
+            "ClassID": config.class_id
+        }, renderLessonData);
+    }
+
+
+
     var goBack = function () {
         document.location = "/student/Course/Modules/" + config.class_id;
     }
@@ -2393,331 +2385,10 @@ var Lesson = (function () {
         document.location = config.url.review + '/' + examid;
     }
 
-    //var renderLesson = function (data) {
-    //    //writeLog("renderLesson", data);
-    //    var container = document.getElementById(config.container);
-    //    if (container == null) throw "Element id " + config.container + " not exist - create now";
-
-    //    if (data.Data.TemplateType == TEMPLATE_TYPE.LESSON) {
-    //        // bài giảng
-    //        //writeLog("bài giảng", data);
-    //        container.innerHTML = '<div class="" id="lessonContainer"></div>';
-    //        var lessonContainer = container.querySelector("#lessonContainer");
-    //        lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-8">' + data.Data.Title + '</div>' + tab + '</div></div><div id="body-exam" class="card-body"></div></div></div></div>';
-    //        var bodyExam = lessonContainer.querySelector("#body-exam");
-    //        var content = renderContent(data.Data);
-    //        bodyExam.innerHTML = '<div class="row">' + content + '</div>';
-    //    }
-    //    else {
-    //        // bài thi
-    //        //writeLog("bài tập", data);
-    //        var counter = data.Data.Timer >= 10 ? data.Data.Timer + ":00" : "0" + data.Data.Timer + ":00";
-    //        if (getLocalData("Timer") == null) setLocalData("Timer", counter);
-    //        container.innerHTML = '<div class="" id="lessonContainer"></div>';
-    //        var lessonContainer = container.querySelector("#lessonContainer");
-    //        lessonContainer.innerHTML = '<div class="lesson lesson-box"><div class="lesson-container"><div class="card shadow mb-4"><div class="card-header"><div class="row"><div class="lesson-header-title col-lg-4">' + data.Data.Title + '</div><div class="text-center col-lg-4">Thời gian làm bài <span id="counter" class="time-counter">' + counter + '</span></div></div></div><div id="body-exam" class="card-body"></div></div></div></div>';
-
-    //        var bodyExam = lessonContainer.querySelector("#body-exam");
-    //        var lastExam = data.Exam;
-    //        var lastExamResult = "";
-    //        var doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Bắt đầu làm bài</div>';
-    //        var tryleft = 0;
-
-    //        var limit = data.Data.Limit;
-
-    //        if (lastExam != null && lastExam.Status == true) {
-    //            var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm:ss A");
-    //            lastExamResult = "<div id='last-result' class='col-md-12 text-center'>Bài kiểm tra đã hoàn thành lúc " + lastdate + "</div>";
-
-    //            var tried = lastExam.Number;
-    //            tryleft = limit - tried;
-
-    //            if (limit > 0) {
-    //                tryleft = limit - tried;
-    //                if (tryleft > 0) {
-    //                    doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Bạn còn <b>' + tryleft + '</b> lần làm lại. Thực hiện lại bài?</div>';
-    //                }
-    //                else
-    //                    doButton = '<div class="btn btn-danger">Bạn đã hết lượt làm bài</div>';
-    //            }
-    //            else {
-    //                doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Thực hiện lại bài</div>';
-    //            }
-    //        }
-    //        var content = checkExam()
-    //            ? renderContent(data.Data)
-    //            : (lastExamResult + '<div class="text-center pt-5 pb-5 col-md-12">' + doButton + '</div>');
-    //        bodyExam.innerHTML = '<div class="row">' + content + '</div>';
-    //        if (checkExam) {
-    //            document.querySelector("input[name='ExamID']").value = getLocalData("CurrentExam");
-    //        }
-    //    }
-    //    if ($('textarea[data-type=ESSAY]').length > 0) {
-    //        $(document).ready(function () {
-    //            CKEDITOR.replace($('textarea[data-type=ESSAY]').attr('id'));
-    //        });
-    //    }
-
-    //}
-
     /// tồn tại exam cũ thì return true;
     var checkExam = function () {
         return !isNull(getLocalData("CurrentExam"));
     }
-
-    //render bài tập
-    var renderSinglePart = function (data, index, type) {
-        //writeLog("renderSinglePart", data);
-        var active = "";
-        if (index != void 0 && index == 0) {
-            active = "show active";
-        }
-
-        var html = '<div id="pills-part-' + data.ID + '" class="tab-pane fade ' + active + '" role="tabpanel" aria-labelledby="pills-' + data.ID + '">';
-        html += '<div class="part-box ' + data.Type + '" id="' + data.ID + '">';
-
-        switch (data.Type) {
-            case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data);
-                break;
-            case "QUIZ2": html += renderQUIZ2(data);//type == 2 ? renderQUIZ2(data) : renderQUIZ2_BG(data);
-                break;
-            case "QUIZ3": html += renderQUIZ3(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
-                break;
-            case "ESSAY": html += renderESSAY(data); //type == 2 ? renderESSAY(data) : renderESSAY_BG(data);
-                break;
-            case "VOCAB": html += renderVOCAB(data); //type == 2 ? renderVOCAB(data) : renderVOCAB_BG(data);
-                break;
-            case "DOC": html += renderDOC(data);
-                break;
-            case "IMG": html += renderIMG(data);
-                break;
-            case "AUDIO": html += renderAUDIO(data);
-                break;
-            case "VIDEO": html += renderVIDEO(data);
-                break;
-            default: html += renderTEXT(data); //text
-                break;
-        }
-        html += '</div></div>';
-        return html;
-    }
-
-    var renderTEXT = function (data) {
-        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="content-wrapper col-md-10 d-inline-block align-top">';
-        html += '<div class="doc-content">' + data.Description + '</div>';
-        html += '</div>';
-        return html;
-    }
-
-    var renderVIDEO = function (data) {
-        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
-        html += '<div class="media-holder VIDEO"><video controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the video tag</video></div>';
-        html += '</div>';
-        return html;
-    }
-
-    var renderAUDIO = function (data) {
-        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
-        html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the audio tag</audio></div>';
-        html += '</div>';
-        return html;
-    }
-
-    var renderIMG = function (data) {
-        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
-        html += '<div class="media-holder ' + data.Type + '"><img src="' + data.Media.Path + '" title="' + data.Title + '" class="img-fluid lazy"></div>';
-        html += '</div>';
-        return html;
-    }
-
-    var renderDOC = function (data) {
-        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
-        html += '<div class="media-holder ' + data.Type + '"><embed src="' + data.Media.Path + '" style="width: 100%; height: 800px; border:1px solid"></div>';
-        html += '</div>';
-        return html;
-    }
-
-    var renderVOCAB = function (data) {
-        var title = '<div class="part-box-header col-md-2 d-inline-block sticky-top"><h5 class="title">' + data.Title + '</h5></div>';
-        var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
-        html += '<div class="media-holder ' + data.Type + '">Not Support</div>';
-        html += '</div>';
-        return html;
-    }
-
-    var renderQUIZ1 = function (data) {
-        //writeLog("renderQUIZ1", data);
-        var toggleButton = '<button class="btn-toggle-width btn btn-info" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
-        var html = '<div class="part-box-header col-md-6 d-inline-block sticky-top"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + toggleButton + '</div>';
-        html += '<div class="quiz-wrapper col-md-6 d-inline-block align-top">';
-        for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-            var item = data.Questions[i];
-            html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
-            html += '<div class="quiz-box-header"><h5 class="title">(' + item.Point + 'đ) ' + item.Content + '</h5>' + renderMedia(item.Media) + '</div>';
-            html += '<div class="answer-wrapper">';
-            for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
-                var answer = item.CloneAnswers[x];
-                html += '<fieldset class="answer-item d-inline mr-4" id="' + answer.ID + '">';
-                html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '" onclick="AnswerQuestion(this)">';
-                html += '<input id="' + answer.ID + '" type="radio" data-type="QUIZ1" value="' + answer.Content + '" class="input-checkbox answer-checkbox form-check-input" name="rd_' + item.ID + '">';
-                html += '<label class="answer-text form-check-label" for="' + answer.ID + '">' + answer.Content + '</label>';
-                html += '</div>';
-                html += renderMedia(answer.Media);
-                html += '</fieldset>';
-            }
-            html += '</div></div>';
-        }
-        html += '</div>';
-        return html;
-    }
-
-    var renderQUIZ2 = function (data) {
-        //writeLog("renderQUIZ2", data);
-        var toggleButton = '<button class="btn-toggle-width btn btn-info" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
-        var html = '<div class="part-box-header col-md-6 d-inline-block sticky-top"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + toggleButton + '</div>';
-        html += '<div class="quiz-wrapper col-md-6 d-inline-block align-top">';
-        for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-            var item = data.Questions[i];
-            var itemContent = item.Content == null ? "Câu hỏi số " + (i + 1) + " : " : item.Content;
-            html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
-            html += '<div class="quiz-box-header"><h5 class="title">(' + item.Point + 'đ) ' + itemContent + '</h5>' + renderMedia(item.Media) + '</div>';
-            html += '<div class="answer-wrapper">';
-            html += '<fieldset class="answer-item" id="quiz2-' + item.ID + '">';
-            var content = "";
-            //for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
-            //    var answer = item.CloneAnswers[x];
-            //    content += content == "" ? answer.Content : " | " + answer.Content;
-            //}
-            html += '<input id="inputQZ2-' + item.ID + '" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="" data-type="QUIZ2" type="text" class="input-text answer-text form-control" placeholder="' + content + '" onfocusout="AnswerQuestion(this)" autocomplete="off">';
-            html += '</fieldset>';
-            html += '</div></div>';
-        }
-        html += '</div>';
-        return html;
-    }
-
-    var renderQUIZ3 = function (data) {
-        //writeLog("renderQUIZ3", data);
-        var toggleButton = '<button class="btn-toggle-width btn btn-info" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
-        var html = '<div class="part-box-header col-md-6 d-inline-block sticky-top"> <h5 class="title">' + data.Title + '</h5>' + renderMedia(data.Media) + toggleButton + '</div>';
-        html += '<div class="col-md-6 d-inline-block align-top">';
-        html += '<div class="quiz-wrapper col-lg-8 d-inline-block align-top">';
-        var answers = "";
-        for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-            var item = data.Questions[i];
-            var content = item.Content == null || item.Content == "null" || item.Content == void 0 ? "___" : item.Content;
-            html += '<div class="quiz-item row" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
-            html += '<div class="quiz-pane col-6 align-top"><div class="pane-item"><div class="quiz-text">' + content + '</div></div></div>';
-            html += '<div class="answer-pane col-6 ui-droppable align-top" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-type="' + data.Type + '"><div class="pane-item placeholder">Thả câu trả lời tại đây</div></div>';
-            html += '</div>';
-            for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
-                var answer = item.CloneAnswers[x];
-                var media = renderMedia(answer.Media);
-                if (media == "") {
-                    answers += '<fieldset data-type="QUIZ3" class="answer-item ui-draggable ui-draggable-handle" id="' + answer.ID + '"><label class="answer-text">' + answer.Content + '</label></fieldset>';
-                }
-                else {
-                    answers += '<fieldset data-type="QUIZ3" class="answer-item ui-draggable ui-draggable-handle" id="' + answer.ID + '">' + media + '</fieldset>';
-                }
-
-            }
-        }
-        html += '</div>';
-        html += '<div class="answer-wrapper no-child col-lg-4 ui-droppable d-inline-block sticky-top" data-part-id="' + data.ID + '">' + answers + '</div>';
-        html += '</div>';
-        return html;
-    }
-
-    var renderESSAY = function (data) {
-        //writeLog("renderESSAY", data);
-        var html = '<div class="part-box-header">' + (data.Title == null ? '' : ('<h5 class="title">' + data.Title + '</h5>')) + '<div class="description">' + data.Description + '</div>' + renderMedia(data.Media) + '</div>';
-        html += '<div class="quiz-wrapper">';
-        html += '<div class="quiz-item" id="' + data.ID + '" data-part-id="' + data.ID + '"></div>';
-        html += '<div class="answer-wrapper">';
-        html += '<div class="answer-content"><textarea data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-type="ESSAY" id="essay-' + data.ID + '" class="form-control" row="3" placeholder="Câu trả lời" onfocusout="AnswerQuestion(this)"></textarea></div>';
-        html += '</div>';
-        html += '</div>';
-        return html;
-    }
-
-    var renderMedia = function (data) {
-        if (data == null || data == void 0 || data == "") return "";
-        var arr = data.Extension.split('/');
-        if (arr.includes("video")) {
-            return '<div class="media-holder "><video controls=""><source src="' + data.Path + '" type="' + data.Extension + '">Your browser does not support the video tag</video></div>';
-        }
-        if (arr.includes("audio")) {
-            return '<div class="media-holder "><audio controls=""><source src="' + data.Path + '" type="' + data.Extension + '">Your browser does not support the audio tag</audio></div>'
-        }
-        if (arr.includes("image")) {
-            return '<div class="media-holder "><img src="' + data.Path + '" class="img-fluid lazy" title="' + data.Name + '"></div>';
-        }
-        return "";
-    }
-
-    var renderContent = function (data) {
-        var tabList = '<div id="pills-tabContent" class="tab-content position-relative" style="z-index:0">';
-        var nav = '<div id="nav-menu" class="col-md-12 mb-3 pb-3 bd-bottom">';
-        var nav_bottom = '<div id="nav-menu" class="col-md-12 mt-3 pt-3 bd-top">';
-        nav += '<div class="col-md-1 text-left d-inline-block"><button class="prevtab btn btn-success" data-toggle="tooltip" title="Phần trước" onclick="PrevPart()"><i class="fas fa-arrow-left"></i></button></div>'; //left button
-        nav_bottom += '<div class="col-md-4 text-left d-inline-block"><button class="prevtab btn btn-success" onclick="PrevPart()"><i class="fas fa-arrow-left"></i></button></div>';
-        nav += '<div class="lesson-tabs col-md-10 d-inline-block"><ul id="pills-tab" class="nav nav-pills compact" onclick="toggle_tab_compact()">';
-        for (var i = 0; i < data.Parts.length; i++) {
-            var item = data.Parts[i];
-            var icon = arrIcon[item.Type];
-            if (icon == void 0) icon = arrIcon["TEXT"];
-            tabList += renderSinglePart(item, i, data.TemplateType);
-            var title = item.Title == void 0 || item.Title == null || item.Title == "null" ? "" : item.Title;
-            if (i == 0) {
-                nav += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link active" data-toggle="pill" data-target="#pills-part-' + item.ID + '" onclick="tab_set_active(this)">' + (i + 1).toString() + " - " + icon + '' + title + '</a></li>';
-            }
-            else {
-                nav += '<li class="nav-item"><a id="pills-' + item.ID + '" class="nav-link" data-toggle="pill" data-target="#pills-part-' + item.ID + '" onclick="tab_set_active(this)">' + (i + 1).toString() + " - " + icon + '' + title + '</a></li>';
-            }
-        }
-        nav += '</ul></div>';
-        nav += '<div class="col-md-1 text-right d-inline-block"><button class="nexttab btn btn-success" data-toggle="tooltip" title="Phần sau" onclick="NextPart()"><i class="fas fa-arrow-right"></i></button></div>'; //right button
-
-        nav_bottom += '<div class="col-md-4 text-center d-inline-block"><button class="btn btn-success pl-5 pr-5" onclick="CompleteExam()">Nộp bài</button></div>';
-        nav_bottom += '<div class="col-md-4 text-right d-inline-block"><button class="nexttab btn btn-success" onclick="NextPart()"><i class="fas fa-arrow-right"></i></button></div>';
-        nav_bottom += '</div>';
-        nav += '</div>';
-        tabList += '</div>';
-        html = //nav + 
-            '<div class="col-md-12"><div class="lesson-body" id="' + data.ID + '">' + tabList + '</div></div>' + nav_bottom;
-        return html;
-    }
-
-    //var beginExam = function (_this) {
-    //    var dataform = new FormData();
-    //    dataform.append("LessonID", config.lesson_id);
-    //    dataform.append("ClassID", config.class_id);
-    //    Ajax(config.url.start, dataform, "POST", false)
-    //        .then(function (res) {
-    //            var data = JSON.parse(res);
-    //            if (data.Error == null) {
-    //                notification("success", "Bắt đầu làm bài", 3000);
-    //                document.querySelector("input[name='ExamID']").value = data.Data.ID;
-    //                // chưa viết hàm khác kịp (chỉ load những phần chưa load);????
-    //                localStorage.setItem("CurrentExam", data.Data.ID);
-    //                renderExam();
-    //                renderBoDem();
-    //                countdown();
-    //                $('.quizNumber').removeClass("d-none");
-    //            } else {
-    //                notification("error", data.Error, 3000);
-    //            }
-    //        })
-    //        .catch(function (err) {
-    //            notification("error", err, 3000);
-    //        })
-    //}
-
 
     var version = function () {
         return "1.0.0";
@@ -2852,8 +2523,6 @@ var Lesson = (function () {
         }
     }
 
-
-
     var delAnswerForStudent = function (quizID) {
         removeLocalData(quizID);
 
@@ -2976,7 +2645,6 @@ var Lesson = (function () {
         }
         startDragDrop();
     }
-
 
     var rendAgain = function (value) {
         console.log(value);

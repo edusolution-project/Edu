@@ -10,6 +10,10 @@
         max-width: 100% !important;
     }
 
+    .main-column img {
+        height: auto !important;
+    }
+
 #part-menu {
     position: absolute;
     top: 0;
@@ -79,6 +83,19 @@ p {
         z-index: 1000;
         height: auto;
     }
+
+.uimod_exam .card-body {
+    padding-bottom: 56px;
+}
+
+.card-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    background: #CCC;
+}
 
 footer {
     display: none;

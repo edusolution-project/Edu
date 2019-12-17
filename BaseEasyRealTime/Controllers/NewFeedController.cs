@@ -101,7 +101,7 @@ namespace BaseEasyRealTime.Controllers
                     if (string.IsNullOrEmpty(id))
                     {
                         var data = _service.CreateQuery();
-                        if (data.Count(_ => true && _.State == state && (_.Receivers.Contains(receivers) || state == 0) && _.RemoveByAdmin == false) <= pageSize)
+                        if (data.Count(_ => true && _.State == state && (_.Receivers.Contains(receivers) || state == 0) && _.RemoveByAdmin == false) >= pageSize)
                         {
                             var realData = data.Find(_ => true && _.State == state && (_.Receivers.Contains(receivers) || state == 0) && _.RemoveByAdmin == false)?.Skip((int)(pageSize * pageIndex)).Limit((int)pageSize)?.ToList();
                             return new JsonResult(new { code = 200, msg = "Success", data = realData });

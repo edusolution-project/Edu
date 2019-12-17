@@ -72,7 +72,9 @@ namespace BaseCustomerMVC.Globals
             var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (listLessonPart != null && listLessonPart.Count > 0)
             {
-                if (_cloneLessonPartService.CreateQuery().CountDocuments(o => o.ParentID == lesson.ID && o.TeacherID == @class.TeacherID) == 0)
+                if (_cloneLessonPartService.CreateQuery().CountDocuments(
+                    o => o.ParentID == lesson.ID &&
+                    o.TeacherID == @class.TeacherID && o.ClassID == @class.ID) == 0)
                 {
                     foreach (var lessonpart in listLessonPart)
                     {

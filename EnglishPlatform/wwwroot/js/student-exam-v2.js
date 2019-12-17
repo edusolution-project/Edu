@@ -725,13 +725,13 @@ var ExamStudent = (function () {
 
         //nav += '<div class="lesson-tabs col-md-10 d-inline-block"><ul id="pills-tab" class="nav nav-pills compact" onclick="toggle_tab_compact()">';
 
-        _totalPart = data.Parts.length;
+        _totalPart = data.Part.length;
         if (_totalPart <= 1)
             next_btn.prop("disabled", true);
 
 
-        for (var i = 0; i < data.Parts.length; i++) {
-            var item = data.Parts[i];
+        for (var i = 0; i < data.Part.length; i++) {
+            var item = data.Part[i];
             var icon = arrIcon[item.Type];
             if (icon == void 0) icon = arrIcon["TEXT"];
             tabList += rednerLessonPart(item, i, data.TemplateType);

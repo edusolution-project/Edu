@@ -5,25 +5,25 @@
     </div>
     <div class="menu-bar">
         <ul>
-            <li class="active">
+            <li for="home">
                 <a href="@Url.Action("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
             </li>
-            <li>
+            <li for="profile">
                 <a href="@Url.Action("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
             </li>
-            <li>
-                <a href="@Url.Action("Index" , "Calendar")" title="Quản lý khoá học"><i class="ic ic-book"></i>Quản lý môn học</a>
+            <li for="course">
+                <a href="@Url.Action("Index" , "Course")" title="Quản lý khoá học"><i class="ic ic-book"></i>Quản lý môn học</a>
             </li>
-            <li>
+            <li for="calendar">
                 <a href="@Url.Action("Index" , "Calendar" )" title="Quản lý lịch học"><i class="ic ic-celendar"></i>Quản lý lịch học</a>
             </li>
-            <li>
+            <li for="discussion">
                 <a href="@Url.Action("Index" , "Discuss" )" title="Thảo luận"><i class="ic ic-discussion"></i>Thảo luận</a>
             </li>
-            <li>
+            <li for="preference">
                 <a href="@Url.Action("Index" , "Reference" )" title="Tài liệu tham khảo"><i class="ic ic-file"></i>Tài liệu tham khảo</a>
             </li>
-            <li>
+            <li for="news">
                 <a href="@Url.Action("Index", "News" )" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>
             </li>
         </ul>
@@ -32,3 +32,8 @@
         <img src="/pictures/undraw_book_lover_mkck.png" alt="">
     </div>
 </aside>
+<script>
+    var setActiveMenu = function (menu) {
+        $('.menu-bar li[for=' + menu + ']').addClass('active');
+    }
+</script>
