@@ -26,6 +26,7 @@
         width: 50px;
         margin: auto;
     }
+
     #form-post .media-preview {
         position: absolute;
         max-height: 80px;
@@ -34,34 +35,38 @@
         padding: 5px;
         overflow: hidden;
     }
+
     #form-post {
         position: relative;
     }
-    #form-post .box-content-view-media >img {
-        max-width: 100%;
-        max-height: 100%;
-    }
 
-    #form-post .box-content-view-media {
-        display: inline-block;
-        width: 100%;
-        height: 80px;
-    }
+        #form-post .box-content-view-media > img {
+            max-width: 100%;
+            max-height: 100%;
+        }
 
-    #form-post .box-view-media {
-        position: relative;
-    }
+        #form-post .box-content-view-media {
+            display: inline-block;
+            width: 100%;
+            height: 80px;
+        }
 
-    #form-post .btn-remove {
-        position: absolute;
-        right: 0;
-        background: #fff;
-    }
+        #form-post .box-view-media {
+            position: relative;
+        }
+
+        #form-post .btn-remove {
+            position: absolute;
+            right: 0;
+            background: #fff;
+        }
+
     .list-member {
         height: 500px;
         max-height: 100%;
         overflow: auto;
     }
+
     .content-title-post {
         padding: 10px 0px 15px 33px;
         font-weight: 500;
@@ -72,19 +77,14 @@
     .media-post {
         padding: 5px 30px;
     }
+
     .box-search {
         width: 100%;
-        display: block;
-        padding-top: 20px;
-        height: 100%;
-        float: left;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #7cc6f1;
     }
 
         .box-search > select {
             border-radius: 5px;
-            padding: 5px 10px;
+            padding: 10px 10px;
             font-size: 0.85em;
             border-color: #7cc6f1;
         }
@@ -149,6 +149,14 @@
                 text-decoration: none;
             }
 
+        .item-feed.item-comment.chude {
+            background: #7cc6f13b;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+        }
+
     .list-new-feeds, .body-comment {
         padding: 10px;
         max-height: 80%;
@@ -161,7 +169,7 @@
         min-height: calc(100vh - 245px);
         border-left: 1px solid #ccc;
         border-right: 1px solid #ccc;
-        background:#fff;
+        background: #fff;
     }
 
     .inf-group .img-group {
@@ -526,20 +534,24 @@
         }
         var openChat = function (id) {
             var chude = "";
+            var media = "";
             var root = document.getElementById(id);
             if (root != null) {
                 var title = root.querySelector(".content-title-post");
                 if (title != null) {
                     chude = title.innerHTML;
                 }
+                var htmlMedia = root.querySelector(".media-post");
+                if (htmlMedia != null) {
+                    media = htmlMedia.outerHTML;
+                }
             }
-
             var ojChat = document.getElementById("comment-box-new-feed");
             ojChat.classList.add("open");
             ojChat.querySelector("input[name='ParentID']").value = id;
-            ojChat.querySelector(".body-comment").innerHTML = `<div class="item-feed item-comment">
+            ojChat.querySelector(".body-comment").innerHTML = `<div class="item-feed item-comment chude">
                                     <div class="content-post">
-                                        ${chude}
+                                        ${chude} ${media}
                                     </div>
                                 </div>`;
             $.ajax({
@@ -679,6 +691,9 @@
                         createNewFeed($(this).val());
                         $(this).val("");
                         if (formPost != null) {
+                            formPost.querySelector("input[name='Title']").value = "";
+                            formPost.querySelector("input[type='file']").value = "";
+                            filesList = {};
                             var previewMedia = formPost.querySelector('.media-preview');
                             if (previewMedia != null) {
                                 previewMedia.innerHTML = "";
