@@ -33,19 +33,20 @@
                     <ul class="list-lesson">
                         <li v-for="(item,k) in lesson_week">
                             <div class="c-left">
-
-                                <p><a :href="'@Url.Action("Detail", "Course")/' + item.classID"><span class="title">{{item.className}}</span></a> - 
-                                   <a :href="'@Url.Action("Detail", "Lesson")/' + item.lessonID + '/' + item.classID">
-                                       <span>{{item.title}}</span>
-                                   </a></p>
-                                <div class="d-time"><i class="ti-time"></i>{{item.startDate | }} - {{item.endDate}}</div>
+                                <p>
+                                    <a :href="'@Url.Action("Detail", "Course")/' + item.classID"><span class="title">{{item.className}}</span></a> -
+                                    <a :href="'@Url.Action("Detail", "Lesson")/' + item.lessonID + '/' + item.classID">
+                                        <span>{{item.title}}</span>
+                                    </a>
+                                </p>
+                                <div class="d-time"><i class="ti-time"></i>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</div>
                             </div>
                             @*<div class="c-right" v-bind:class="{bad : parseInt(item.per)<50}">
-                                <div class="flex">
-                                    <b-progress :value="item.score" :max="item.total_scrore" class="mb-3"></b-progress>
-                                    <span>{{item.per}}%</span>
-                                </div>
-                            </div>*@
+                                    <div class="flex">
+                                        <b-progress :value="item.score" :max="item.total_scrore" class="mb-3"></b-progress>
+                                        <span>{{item.per}}%</span>
+                                    </div>
+                                </div>*@
                         </li>
                     </ul>
 
@@ -62,7 +63,7 @@
                         <li v-for="(item,k) in active_course">
                             <div class="c-left">
                                 <p><a :href="'@Url.Action("Detail", "Course")/' + item.id"><span class="title">{{item.subjectName}}</span> - <span>{{item.courseName}}</span></a></p>
-                                <div class="d-time"><i class="ti-time"></i>{{item.endDate}}</div>
+                                <div class="d-time"><i class="ti-time"></i>{{formatTime(item.endDate)}}</div>
                             </div>
                             <div class="c-right" v-bind:class="{bad : parseInt(item.per)<50}">
                                 <div class="flex">
@@ -83,10 +84,10 @@
                     <ul class="list-discus">
                         <li v-for="(item,k) in discussion">
                             <div class="flex c-top">
-                                <a href="#" :title="item.title" class="title">{{item.title}}</a>
-                                <div class="c-right"><i class="icofont icofont-user"></i>{{item.member + ' members'}}</div>
+                                <a href="#" :title="item.title" class="title">{{item.content}}</a>
+                                <div class="c-right"><i class="icofont icofont-user"></i>{{3 + ' members'}}</div>
                             </div>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.</p>
+                            <p>{{item.content}}.</p>
                         </li>
                     </ul>
                 </div>
@@ -200,12 +201,12 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")');
+                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
                 let _url = '@Url.Action("GetActiveList", "Course")'
 
                 axios.post(_url, _form)
                     .then(response => {
-                        console.log(response.data)
+                        //console.log(response.data)
                         _that.active_course = response.data.data;
                         //console.log(_that.active_course);
                     }).catch(e => { })
@@ -214,13 +215,13 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")');
+                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
                 let _url = '@Url.Action("GetFinishList", "Course")'
 
                 axios.post(_url, _form)
                     .then(response => {
-                        console.log(response.data)
-                        _that.finish_course = response.data.data;
+                        //console.log(response.data)
+                        _that.finish_course = response.data.data
                         //console.log(_that.active_course);
                     }).catch(e => { })
             },
@@ -228,15 +229,33 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")');
+                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
                 let _url = '@Url.Action("GetThisWeekLesson", "Course")'
 
                 axios.post(_url, _form)
                     .then(response => {
-                        console.log(response.data)
+                        //console.log(response.data)
                         _that.lesson_week = response.data.data;
-                        console.log(_that.lesson_week);
+                        //console.log(_that.lesson_week);
                     }).catch(e => { })
+            },
+            getNewFeed() {
+                let _that = this
+                // Truyen param vào đây
+                let _form = new FormData()
+                @*_form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")');*@
+                let _url = '@Url.Action("Get", "NewFeed")'
+
+                axios.get(_url, _form)
+                    .then(response => {
+                        //console.log(response.data)
+                        _that.discussion = response.data.data
+                        //console.log(_that.active_course);
+                    }).catch(e => { })
+            },
+            formatTime(time) {
+                if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
+                return moment(time).format("DD/MM/YYYY hh:mm")
             }
         }
     });

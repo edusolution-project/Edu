@@ -25,7 +25,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult Index(string id, string searchText)
         {
             var teacher = _teacherService.Collection.Find(o => o.Email == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value)?.SingleOrDefault();
-            var listClass = _classService.Collection.Find(o => o.Students.Contains(User.Claims.GetClaimByType("UserID").Value)).ToList();
+            var listClass = _classService.Collection.Find(o => o.TeacherID == User.Claims.GetClaimByType("UserID").Value).ToList();
             var listActive = listClass.Select(o => new ClassInfo()
             {
                 ID = o.ID,

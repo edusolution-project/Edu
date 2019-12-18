@@ -160,7 +160,6 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(respone);
         }
 
-
         public JsonResult GetActiveList(DateTime today)
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
@@ -265,7 +264,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            classID = _class.ID,
                            className = _class.Name,
                            title = _lesson.Title,
-                           lessonid = _lesson.ID,
+                           lessonID = _lesson.ID,
                            startDate = o.StartDate,
                            endDate = o.EndDate
                        }).ToList();
@@ -421,49 +420,50 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(response);
         }
 
-        public JsonResult GetActiveList()
-        {
-            var filter = new List<FilterDefinition<ClassEntity>>();
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //Chỉ dùng cho sidebar cũ
+        //public JsonResult GetActiveList()
+        //{
+        //    var filter = new List<FilterDefinition<ClassEntity>>();
+        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
 
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Students.Contains(UserID) && o.EndDate >= DateTime.Now.ToLocalTime().Date));
+        //    filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Students.Contains(UserID) && o.EndDate >= DateTime.Now.ToLocalTime().Date));
 
-            var activeClasses = _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)).ToList();
+        //    var activeClasses = _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)).ToList();
 
-            var responseData = new List<ClassActiveViewModel>();
+        //    var responseData = new List<ClassActiveViewModel>();
 
-            var subjects = _subjectService.GetAll().ToList();
+        //    var subjects = _subjectService.GetAll().ToList();
 
-            var _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
+        //    var _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
 
-            responseData =
-                (from r in activeClasses.ToList()
-                 let progress = _progressService.GetItemByClassID(r.ID, UserID)
-                 select _activeMapping.AutoOrtherType(r, new ClassActiveViewModel()
-                 {
-                     Progress = progress == null ? 0 : (progress.TotalLessons != 0 ? progress.CompletedLessons.Count * 100 / progress.TotalLessons : 0),
-                     SubjectName = subjects.SingleOrDefault(s => s.ID == r.SubjectID).Name
-                 })).ToList();
+        //    responseData =
+        //        (from r in activeClasses.ToList()
+        //         let progress = _progressService.GetItemByClassID(r.ID, UserID)
+        //         select _activeMapping.AutoOrtherType(r, new ClassActiveViewModel()
+        //         {
+        //             Progress = progress == null ? 0 : (progress.TotalLessons != 0 ? progress.CompletedLessons.Count * 100 / progress.TotalLessons : 0),
+        //             SubjectName = subjects.SingleOrDefault(s => s.ID == r.SubjectID).Name
+        //         })).ToList();
 
 
-            //foreach (var _class in activeClasses)
-            //{
-            //    var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == _class.ID);
-            //    var learned = _learningHistoryService.CreateQuery().Aggregate().Match(o => o.ClassID == _class.ID && o.StudentID ).Group(o => o.LessonID,
-            //        o => new { x = o.Select(x => 1).First() }).ToList().Count();
-            //    responseData.Add(_activeMapping.AutoOrtherType(_class, new ClassActiveViewModel()
-            //    {
-            //        Progress = (int)(totalLessons != 0 ? learned * 100 / totalLessons : 0),
-            //        SubjectName = subjects.SingleOrDefault(s => s.ID == _class.SubjectID).Name
-            //    }));
-            //}
+        //    //foreach (var _class in activeClasses)
+        //    //{
+        //    //    var totalLessons = _lessonScheduleService.CreateQuery().CountDocuments(o => o.ClassID == _class.ID);
+        //    //    var learned = _learningHistoryService.CreateQuery().Aggregate().Match(o => o.ClassID == _class.ID && o.StudentID ).Group(o => o.LessonID,
+        //    //        o => new { x = o.Select(x => 1).First() }).ToList().Count();
+        //    //    responseData.Add(_activeMapping.AutoOrtherType(_class, new ClassActiveViewModel()
+        //    //    {
+        //    //        Progress = (int)(totalLessons != 0 ? learned * 100 / totalLessons : 0),
+        //    //        SubjectName = subjects.SingleOrDefault(s => s.ID == _class.SubjectID).Name
+        //    //    }));
+        //    //}
 
-            var response = new Dictionary<string, object>
-            {
-                { "Data", responseData }
-            };
-            return new JsonResult(response);
-        }
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data", responseData }
+        //    };
+        //    return new JsonResult(response);
+        //}
 
         public IActionResult Index(DefaultModel model)
         {
