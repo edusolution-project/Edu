@@ -9,6 +9,7 @@ namespace BaseEasyRealTime.Entities
 {
     public class NewFeedEntity : MessageEntity
     {
+        public string Title { get; set; }
         public string Name { get; set; }
     }
     public class NewFeedService : ServiceBase<NewFeedEntity>

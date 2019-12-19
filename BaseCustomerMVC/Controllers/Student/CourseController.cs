@@ -161,8 +161,6 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
 
-        [Obsolete]
-        [HttpPost]
         public JsonResult GetActiveList(DateTime today)
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
@@ -170,17 +168,16 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return null;
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Authentication Error"
+                });
             }
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
-            //model.TotalRecord = data.Count();
-            //var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-            //    ? data.ToList()
-            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
-
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
@@ -231,6 +228,51 @@ namespace BaseCustomerMVC.Controllers.Student
                        }).ToList();
             return Json(new { Data = std });
         }
+
+        public JsonResult GetThisWeekLesson(DateTime today)
+        {
+
+            var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
+            var endWeek = startWeek.AddDays(7);
+
+            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Authentication Error"
+                });
+            }
+
+            var classFilter = new List<FilterDefinition<ClassEntity>>();
+            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
+            var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project("{_id: 1}").ToList();
+
+            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter));
+
+            var std = (from o in data.ToList()
+                       let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
+                       where _lesson != null
+                       let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+                       where _class != null
+                       select new
+                       {
+                           id = o.ID,
+                           classID = _class.ID,
+                           className = _class.Name,
+                           title = _lesson.Title,
+                           lessonid = _lesson.ID,
+                           startDate = o.StartDate,
+                           endDate = o.EndDate
+                       }).ToList();
+            return Json(new { Data = std });
+        }
+
+
 
 
         [Obsolete]

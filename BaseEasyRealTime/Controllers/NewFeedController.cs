@@ -20,7 +20,7 @@ namespace BaseEasyRealTime.Controllers
             _service = service;
         }
         [HttpPost]
-        public JsonResult Create(string content,int state,HashSet<string> receivers)
+        public JsonResult Create(string title,string content,int state,HashSet<string> receivers)
         {
             try
             {
@@ -31,6 +31,7 @@ namespace BaseEasyRealTime.Controllers
                     files?.TryGetValue("success", out media);
                     var item = new NewFeedEntity()
                     {
+                        Title = title,
                         State = state,
                         Content = content,
                         Name = User.Identity.Name,

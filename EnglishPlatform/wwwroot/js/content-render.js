@@ -84,7 +84,7 @@ var Lesson = (function () {
                 renderStandardLayout();
                 renderLecture()
                 break;
-            default:
+            case mod.STUDENT_REVIEW:
                 renderStandardLayout();
                 renderStudentReview();
                 break;
@@ -228,7 +228,7 @@ var Lesson = (function () {
         $('.main-column').addClass('scrollbar-outer').scrollbar();
     }
 
-    var renderLessonData = function () {
+    var renderLessonData = function (                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ) {
         if (isNull(_data)) {
             throw "No data";
         }
@@ -2357,7 +2357,8 @@ var Lesson = (function () {
     var renderStudentReview = function (data) {
         loadLesssonData({
             "LessonID": config.lesson_id,
-            "ClassID": config.class_id
+            "ClassID": config.class_id,
+            "ExamID": config.exam_id
         }, renderLessonData);
     }
 

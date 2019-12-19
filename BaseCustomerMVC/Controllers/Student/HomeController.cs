@@ -100,7 +100,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var account = _studentService.GetItemByID(_studentid);
                 account.FullName = entity.FullName;
                 account.Phone = entity.Phone;
-                if(fileUpload != null)
+                if (fileUpload != null)
                 {
                     var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
                     account.Avatar = pathImage;
@@ -187,6 +187,16 @@ namespace BaseCustomerMVC.Controllers.Student
             var acc = _studentService.GetItemByID(_studentid);
 
             AccountEntity user = _accountService.GetAccountByEmail(acc.Email);
+
+            if (!Security.Encrypt(oldpass).Equals(user.PassWord))
+            {
+                return new JsonResult(
+                new Dictionary<string, object>
+                 {
+                        { "Error", "Old password not correct" }
+                 });
+            }
+
 
             if (Security.Encrypt(newpass).Equals(user.PassWord))
             {

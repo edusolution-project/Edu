@@ -540,9 +540,9 @@ var datetimepickerFactory = function ($) {
         value: '',
         rtl: false,
 
-        format: 'Y/m/d H:i',
+        format: 'd/m/Y H:i',
         formatTime: 'H:i',
-        formatDate: 'Y/m/d',
+        formatDate: 'd/m/Y',
 
         startDate: false, // new Date(), '1986/12/08', '-1970/01/05','-1970/01/05',
         step: 60,
@@ -633,8 +633,8 @@ var datetimepickerFactory = function ($) {
 
     var dateHelper = null,
         defaultDateHelper = null,
-        globalLocaleDefault = 'en',
-        globalLocale = 'en';
+        globalLocaleDefault = 'vi',
+        globalLocale = 'vi';
 
     var dateFormatterOptionsDefault = {
         meridiem: ['AM', 'PM']
@@ -659,8 +659,8 @@ var datetimepickerFactory = function ($) {
     var dateFormatters = {
         moment: {
             default_options: {
-                format: 'YYYY/MM/DD HH:mm',
-                formatDate: 'YYYY/MM/DD',
+                format: 'DD/MM/YYYY HH:mm',
+                formatDate: 'DD/MM/YYYY',
                 formatTime: 'HH:mm',
             },
             formatter: {
