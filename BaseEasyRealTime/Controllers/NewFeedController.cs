@@ -105,7 +105,7 @@ namespace BaseEasyRealTime.Controllers
                         var data = _service.CreateQuery();
                         if(state == 0)
                         {
-                            if(data.Count(_=>true && _.State > 0 && (_.Receivers.Contains(receivers)||_.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false) <= 5)
+                            if(data.Count(_=>true && _.State > 0 && (_.Receivers.Contains(receivers)||_.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false) >= 5)
                             {
                                 var realData = data.Find(_ => true && _.State > 0 && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false)
                                     ?.SortByDescending(_=>_.Created)

@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "My Events";
-    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+    Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
 }
 
 <link href="~/css/calendar/core.css" rel="stylesheet" />
@@ -12,45 +12,56 @@
 <script src="~/js/lib/datetimepicker/jquery.mousewheel.js"></script>
 <script src="~/js/lib/datetimepicker/jquery.datetimepicker.js"></script>
 
+
 <script>
-    activeTab = "calendar";
+    setActiveMenu("calendar");
 </script>
+
+<section class="module" id="dashboard_content">
+    <div class="card-header">
+        <div class="flex border-b padding-b25">
+            <h2 class="title">@ViewData["Title"]</h2>
+        </div>
+    </div>
+    <div id="schedule" class="pl-3 pr-3"></div>
+</section>
+
 <style>
-    #schedule{
-        margin-top:30px;
-        height:calc(100vh - 135px);
+    #schedule {
+        margin-top: 30px;
+        height: calc(100vh - 135px);
     }
-    .fc-toolbar.fc-header-toolbar{
-        display:none;
+
+    .fc-toolbar.fc-header-toolbar {
+        display: none;
     }
+
     .fc-day-header {
         height: 50px;
         line-height: 43px;
         border: solid 1px #CCC !important;
     }
-    .fc-unthemed .fc-content, .fc-unthemed .fc-divider, .fc-unthemed .fc-list-heading td, .fc-unthemed .fc-list-view, .fc-unthemed .fc-popover, .fc-unthemed .fc-row, .fc-unthemed tbody, .fc-unthemed td, .fc-unthemed th, .fc-unthemed thead{
-        border-color:#D0DFE8;
+
+    .fc-unthemed .fc-content, .fc-unthemed .fc-divider, .fc-unthemed .fc-list-heading td, .fc-unthemed .fc-list-view, .fc-unthemed .fc-popover, .fc-unthemed .fc-row, .fc-unthemed tbody, .fc-unthemed td, .fc-unthemed th, .fc-unthemed thead {
+        border-color: #D0DFE8;
     }
-    .fc-ltr .fc-dayGrid-view .fc-day-top .fc-day-number{
-        float:left;
+
+    .fc-ltr .fc-dayGrid-view .fc-day-top .fc-day-number {
+        float: left;
     }
-    .fc-event, .fc-event-dot{
-        background:none;
+
+    .fc-event, .fc-event-dot {
+        background: none;
     }
-    .fc-event{
-        border:none;
+
+    .fc-event {
+        border: none;
     }
-    .fc-time{
-        color:#d05151
+
+    .fc-time {
+        color: #d05151
     }
 </style>
-<div class="left-col">
-    <div class="page-title row">
-        <h1 class="col-md-11">@ViewData["Title"]</h1>
-    </div>
-
-    <div id="schedule"></div>
-</div>
 
 @section Scripts{
     <script src="~/js/lib/schedule.js"></script>

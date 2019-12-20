@@ -228,7 +228,7 @@ var Lesson = (function () {
         $('.main-column').addClass('scrollbar-outer').scrollbar();
     }
 
-    var renderLessonData = function (                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ) {
+    var renderLessonData = function () {
         if (isNull(_data)) {
             throw "No data";
         }
@@ -240,7 +240,7 @@ var Lesson = (function () {
         var lessonBody = mainContainer.find('.card-body');
         var lessonFooter = mainContainer.find('.card-footer');
 
-        _totalPart = data.Part.length;
+        _totalPart = data.Part != null ? data.Part.length : 0;
         //header
         switch (config.mod) {
             case mod.PREVIEW:
