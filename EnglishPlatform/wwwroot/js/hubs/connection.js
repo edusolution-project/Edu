@@ -106,6 +106,10 @@ connection.on("ReceiveGroup", function (data) {
             if (numberComment != null) {
                 numberComment.innerHTML = parseInt(numberComment.innerHTML) + 1;
             }
+            var media2 = "";
+            if (item.medias.length > 0) {
+                media2 = `<div class="media-post"><img src="${item.medias[0].path}" /></div>`;
+            }
             var html = `<div class="item-feed item-comment">
                                     <div class="user-info-post">
                                         <div class="row">
@@ -124,7 +128,7 @@ connection.on("ReceiveGroup", function (data) {
                                     </div>
                                     <div class="content-post">
                                         ${item.content}
-                                    </div>
+                                    </div>${media2}
                                 </div>`;
             var ojChat = document.getElementById("comment-box-new-feed");
             var commentBody = ojChat.querySelector(".body-comment");
