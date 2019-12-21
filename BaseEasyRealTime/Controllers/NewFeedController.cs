@@ -20,7 +20,7 @@ namespace BaseEasyRealTime.Controllers
             _service = service;
         }
         [HttpPost]
-        public JsonResult Create(string title,string content,int state,HashSet<string> receivers)
+        public JsonResult Create(string title, string content, int state, HashSet<string> receivers)
         {
             try
             {
@@ -42,14 +42,14 @@ namespace BaseEasyRealTime.Controllers
                         Views = new HashSet<string>()
                     };
                     _service.CreateOrUpdate(item);
-                    return new JsonResult(new { code = 200 , msg = "Đăng bài thành công" , data = item });
+                    return new JsonResult(new { code = 200, msg = "Đăng bài thành công", data = item });
                 }
                 else
                 {
-                    return new JsonResult(new { code = 201, msg = "Đăng nhập đển viết bài !!! "});
+                    return new JsonResult(new { code = 201, msg = "Đăng nhập đển viết bài !!! " });
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new JsonResult(new { code = 500, msg = ex.Message, data = ex });
             }
@@ -69,7 +69,7 @@ namespace BaseEasyRealTime.Controllers
                     }
                     else
                     {
-                        return new JsonResult(new { code = 404, msg = "Không tìm thấy bài đăng"});
+                        return new JsonResult(new { code = 404, msg = "Không tìm thấy bài đăng" });
                     }
                 }
                 else
@@ -94,7 +94,7 @@ namespace BaseEasyRealTime.Controllers
         /// 
         [HttpGet]
         [Obsolete]
-        public JsonResult Get(string id, int state, string receivers, long pageIndex, long pageSize)
+        public JsonResult Get(string id, int state, string receivers, long pageIndex = 0, long pageSize = 5)
         {
             try
             {
@@ -103,22 +103,22 @@ namespace BaseEasyRealTime.Controllers
                     if (string.IsNullOrEmpty(id))
                     {
                         var data = _service.CreateQuery();
-                        if(state == 0)
+                        if (state == 0)
                         {
-                            if(data.Count(_=>true && _.State > 0 && (_.Receivers.Contains(receivers)||_.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false) >= 5)
+                            if (data.Count(_ => true && _.State > 0 && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false) >= 5)
                             {
-                                var realData = data.Find(_ => true && _.State > 0 && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false)
-                                    ?.SortByDescending(_=>_.Created)
+                                var realData = data.Find(_ => true && _.State > 0 && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false)
+                                    ?.SortByDescending(_ => _.Created)
                                     ?.Skip(0)
                                     ?.Limit(5)
                                     ?.ToList();
-                                return new JsonResult(new { code = 200, msg = "Success", data = realData?.OrderByDescending(o=>o.Created)?.ToList() });
+                                return new JsonResult(new { code = 200, msg = "Success", data = realData?.OrderByDescending(o => o.Created)?.ToList() });
                             }
                         }
 
-                        if (data.Count(_ => true && _.State == state && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false) <= pageSize)
+                        if (data.Count(_ => true && _.State == state && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false) >= pageSize)
                         {
-                            var realData = data.Find(_ => true && _.State == state && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false)?.Skip((int)(pageSize * pageIndex)).Limit((int)pageSize)?.ToList();
+                            var realData = data.Find(_ => true && _.State == state && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false)?.Skip((int)(pageSize * pageIndex)).Limit((int)pageSize)?.ToList();
                             return new JsonResult(new { code = 200, msg = "Success", data = realData });
                         }
                         else
