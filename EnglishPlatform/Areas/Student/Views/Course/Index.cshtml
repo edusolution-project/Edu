@@ -3,113 +3,223 @@
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
     ViewData["Title"] = "My Courses";
+    var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
 }
 
 <script>
-    activeTab = "course";
-    activeSub = "home";
+    setActiveMenu("course");
 </script>
-<div class="left-col">
-    <div class="page-title">
-        <h1>@ViewData["Title"]</h1>
-    </div>
-    <div class="main-container">
-        <div class="active-region">
-            <div class="block-title pt-2 pb-2">
-                <h2>Ongoing</h2>
-            </div>
-            <table id="activeCourse" class="table" width="100%" cellspacing="0">
-                <thead>
-                    <tr class="text-center">
-                        <th class="text-center">Index</th>
-                        <th class="text-left">Subject</th>
-                        <th class="text-left">Course</th>
-                        <th class="text-center">Period</th>
-                        <th class="text-center">Progress</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        <div class="past-region" style="display: none">
-            <div class="block-title">
-                <h2>Past Enrollments</h2>
-            </div>
-            <table id="pastCourse" class="table" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th class="text-center">Index</th>
-                        <th class="text-left">Subject</th>
-                        <th class="text-left">Course</th>
-                        <th class="text-center">Period</th>
-                        <th class="text-center">Result</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-</div>
+<script src="~/js/daterangepicker.min.js"></script>
+<link href="~/css/daterangepicker.css" rel="stylesheet" />
 
+<section class="module" id="dashboard_content">
+    <div class="card-header">
+        <div class="flex border-b padding-b25">
+            <div class="box filter-box">
+                <input type="text" v-model="daterange" value="" name="dates" >
+                <span class="ic ic-picker"></span>
+            </div>
+
+            <div class="box filter-box w-152">
+                <select v-model="subject" v-on:change="changeSubject()">
+                    <option value="">Choose Subject</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box w-152">
+                <select name="" v-model="grade" v-on:change="changeGrade()">
+                    <option value="">Choose Level</option>
+                    <option v-for="(item,k) in list_grades" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="search-box">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" placeholder="Search">
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="row row-list">
+            <div class="col-md-3 course-item" v-for="(item,k) in list_course">
+                <div class="box radius">
+                    <a :href="'@Url.Action("Detail", "Course")/' + item.ID" class="thumb"><img :src="item.Thumb" :alt="item.Name"></a>
+                    <div class="detail box">
+                        <a :href="'@Url.Action("Detail", "Course")/' + item.ID" title="" class="title">{{item.Name}}</a>
+                        <p><i class="ti-time"></i>{{formatShortDate(item.EndDate)}}</p>
+                        <div class="c-bot flex">
+                            <a :href="'@Url.Action("Detail", "Course")/' + item.ID" title="Học ngay" class="btn-learn">Học ngay</a>
+                            <div class="c-right">
+                                {{item.CompletePercent + '%'}}<span class="ic ic-subtag"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box margin-t20 flex">
+            <div class="paging-view">
+                Hiển thị:
+                <select name="" v-model="view">
+                    <option value="10">10 kết quả</option>
+                    <option value="20">20 kết quả</option>
+                    <option value="30">30 kết quả</option>
+                </select>
+            </div>
+            <div class="page-control">
+                <div class="inner">
+                    <button><i class="ti-angle-left"></i></button>
+                    <button><i class="ti-angle-double-left"></i></button>
+                    <input type="text" v-model="page" />
+                    <button><i class="ti-angle-double-right"></i></button>
+                    <button><i class="ti-angle-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+@*<section class="module" id="dashboard_content">
+        <div class="card-header">
+            <div class="flex border-b padding-b25">
+                <h2 class="title">@ViewData["Title"]</h2>
+            </div>
+        </div>
+        <div class="main-container pl-3 pr-3">
+            <div class="active-region">
+                <div class="block-title pt-2 pb-2">
+                    <h2>Ongoing</h2>
+                </div>
+                <table id="activeCourse" class="table" width="100%" cellspacing="0">
+                    <thead>
+                        <tr class="text-center">
+                            <th class="text-center">Index</th>
+                            <th class="text-left">Subject</th>
+                            <th class="text-left">Course</th>
+                            <th class="text-center">Period</th>
+                            <th class="text-center">Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="past-region" style="display: none">
+                <div class="block-title">
+                    <h2>Past Enrollments</h2>
+                </div>
+                <table id="pastCourse" class="table" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Index</th>
+                            <th class="text-left">Subject</th>
+                            <th class="text-left">Course</th>
+                            <th class="text-center">Period</th>
+                            <th class="text-center">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>*@
+<script>
+    $('input[name="dates"]').daterangepicker();
+</script>
 @section Scripts{
     <script>
 
-        function LoadData() {
-        $.ajax({
-            type: "POST",
-            url: '@Url.Action("GetList", "Course")',
-            data: {},
-            dataType:"json",
-            success: function (data) {
-                var body = $('#activeCourse tbody');
-                var pastBody = $('#pastCourse tbody');
-                body.html("");
-                if (data.Data.length > 0)
-                {
-                    var counter = 0;
-                    var pastcounter = 0;
-                    for (i = 0; i < data.Data.length; ++i) {
-                        item = data.Data[i];
-
-                        var startdate = moment(item.StartDate).format('DD/MM/YYYY');
-                        var enddate = moment(item.EndDate).format('DD/MM/YYYY');
-
-                        var totalLesson = 1;
-                        var completeLesson = 0;
-                        if (item.Progress != null) {
-                            completeLesson = item.Progress.CompletedLessons.length;
-                            totalLesson = item.Progress.TotalLessons;
-                        }
-
-                        var today = new Date();
-                        var past = moment(today).diff(moment(item.EndDate), 'days') > 0;
-                        var count = past ? ++pastcounter : ++counter;
-
-                        var row ="<tr>" +
-                            "<td class='text-center'>"+ count +"</td>"+
-                            "<td><a href='"+'@Url.Action("Detail", "Course")' + "/" + item.ID + "' >" + item.SubjectName + "</a></td>" +
-                            "<td><a href='"+'@Url.Action("Detail", "Course")' + "/" + item.ID + "' >" + item.Name + "</a></td>" +
-                            //"<td>" + item.TeacherName + "</td>" +
-                            "<td class='text-center'>" + startdate + " - " + enddate + "</td>" +
-                             "<td class='text-center'>" + Math.ceil(completeLesson * 100 / totalLesson) + "%</td>"+
-                        "</tr>";
-                        if (past) {
-                            $('.past-region').show();
-                             pastBody.append(row);
-                        }
-                        else {
-                            body.append(row);
-                        }
-                    }
+        new Vue({
+            el: ".module",
+            mounted() {
+                var start = moment().subtract(29, 'days');
+                var end = moment();
+                $('input[name="dates"]').daterangepicker({
+                    startDate: start,
+                    endDate: end,
+                    locale: {
+                        format: "DD/MM/YYYY",
+                    },
+                    onSelect: function(dateText) {
+        console.log("Selected date: " + dateText + "; input's current value: " + this.value);
+    }
+                });
+                this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                this.list_grades_full = @Html.Raw(Json.Serialize(grades));
+                //console.log(this.list_grades_full);
+                this.changeSubject()
+            },
+            data: {
+                list_course: [
+                ],
+                list_subject: [],
+                list_grades_full: [],
+                list_grades: [],
+                subject:'',
+                grade: '',
+                daterange: '',
+                view: 10,
+                page: 1
+            },
+            watch: {
+                daterange: function () {
+                    console.log(this.daterange)
                 }
             },
-            error: function (err) {
-                console.log(err.responseText)
+            methods: {
+                getCourse() {
+                    console.log(1);
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('GradeID', _that.grade)
+                    _form.append('SubjectID', _that.subject)
+                    _form.append('PageSize', _that.view)
+                    _form.append('PageIndex', _that.page)
+
+                    var dateArr = _that.daterange.split(' - ');
+                    if (dateArr.length == 2) {
+                        _form.append('StartDate',  moment(dateArr[0],"DD/MM/YYYY").format("MM/DD/YYYY"))
+                        _form.append('EndDate',  moment(dateArr[1],"DD/MM/YYYY").format("MM/DD/YYYY"))
+                    }
+                    let _url = '@Url.Action("GetList", "Course")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            console.log(response.data)
+                            _that.list_course = response.data.Data;
+                            //console.log(_that.active_course);
+                        }).catch(e => { })
+                },
+                changeSubject() {
+                    let _that = this
+                    //console.log(this.subject)
+                    //console.log(this.list_grades_full)
+                    _that.list_grades = [];
+
+                    for (i = 0; i < _that.list_grades_full.length; i++)
+                    {
+                        //console.log(_that.list_grades_full[i].SubjectID)
+                        if (_that.list_grades_full[i].SubjectID == _that.subject) {
+                            _that.list_grades.push(_that.list_grades_full[i])
+                        }
+                    }
+                    _that.grade = ""
+                    _that.changeGrade()
+                },
+                changeGrade() {
+                    let _that = this
+                    _that.getCourse()
+                },
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-";
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                addEvent ({ type, target }) {
+            alert(1)
+    }
             }
         });
-    };
-
-    LoadData();
 
     </script>
 }

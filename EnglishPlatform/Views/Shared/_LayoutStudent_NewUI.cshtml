@@ -157,8 +157,32 @@
             </div>
         </aside>
     </main>
-
-    @*@await Html.PartialAsync("_modalLogout")*@
+    <script>
+    new Vue({
+        el: ".list-news",
+        mounted() {
+        },
+        data: {
+            list_news: [
+                {
+                    title: 'Đã đến lúc HLV Park',
+                    description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                    thumbnail: '/pictures/news1.png'
+                },
+                {
+                    title: 'HLV Park: Có khi p',
+                    description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                    thumbnail: '/pictures/news2.png'
+                },
+                {
+                    title: 'Tiến Dũng và Văn Toả',
+                    description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                    thumbnail: '/pictures/news3.png'
+                }
+            ]
+        }
+    });
+    </script>
     @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
 </body>

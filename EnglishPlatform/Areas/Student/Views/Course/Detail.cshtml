@@ -131,7 +131,7 @@
                         chapBody.append($("<h5>", {
                             class: "card-title text-white pt-2",
                             style: "text-decoration:none",
-                            text: chapter.Name
+                            html: chapter.Name
                         }));
 
                         //chapter.Description = ".card-img-top places an image to the top of the card. With .card-text, text can be added to the card. Text within .card-text can also be styled with the standard HTML tags.";
@@ -140,7 +140,7 @@
                             chapBody.append($("<p>", {
                                 class: "card-text mb-2 text-white",
                                 style: "font-size: 80%",
-                                text: chapter.Description.replace(/\n/g, "<br/>")
+                                html: chapter.Description.replace(/\n/g, "<br/>")
                             }));
 
                         chapWrapper.append($("<a>", { class: "box-link", href: modulesLink + "#" + chapter.ID }).append(chapContent));

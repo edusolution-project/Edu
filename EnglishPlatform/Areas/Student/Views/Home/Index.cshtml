@@ -39,8 +39,12 @@
                     <ul class="list-lesson">
                         <li v-for="(item,k) in lesson_week">
                             <div class="c-left">
-                                <p><span class="title">{{item.title}}</span> - <span>{{item.lesson}}</span></p>
-                                <div class="d-time"><i class="ti-time"></i>{{item.date}}</div>
+                                <p>
+                                    <a :href="'@Url.Action("Detail", "Course")/' + item.classID"><span class="title">{{item.className}}</span></a> - <a :href="'@Url.Action("Detail", "Lesson")/' + item.lessonID + '/' + item.classID">
+                                        <span>{{item.title}}</span>
+                                    </a>
+                                </p>
+                                <div class="d-time"><i class="ti-time"></i>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</div>
                             </div>
                             <div class="c-right" v-bind:class="{bad : parseInt(item.per)<50}">
                                 <div class="flex">
@@ -84,8 +88,8 @@
                     <ul class="list-discus">
                         <li v-for="(item,k) in discussion">
                             <div class="flex c-top">
-                                <a href="#" :title="item.title" class="title">{{item.title}}</a>
-                                <div class="c-right"><i class="icofont icofont-user"></i>{{item.member + ' members'}}</div>
+                                <a :href="'@Url.Action("Index","Discuss")#' + item.ID" :title="item.title" class="title">{{item.title == null? item.content:item.title}}</a>
+                                <div class="c-right"><i class="icofont icofont-user"></i>{{3 + ' members'}}</div>
                             </div>
                             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.</p>
                         </li>
@@ -123,7 +127,7 @@
 @section Scripts{
     <script>
     new Vue({
-        el: "#main",
+        el: ".module",
         mounted() {
             this.getActiveCourse()
             this.getFinishCourse()
@@ -170,28 +174,11 @@
                 }
             ],
             finish_course: [
-            ],
-            list_news: [
-                {
-                    title: 'Đã đến lúc HLV Park',
-                    description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                    thumbnail: '/pictures/news1.png'
-                },
-                {
-                    title: 'HLV Park: Có khi p',
-                    description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                    thumbnail: '/pictures/news2.png'
-                },
-                {
-                    title: 'Tiến Dũng và Văn Toả',
-                    description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                    thumbnail: '/pictures/news3.png'
-                }
             ]
         },
         watch: {
             lesson_week: function (val) {
-                console.log(val)
+                //console.log(val)
             }
         },
         methods: {
@@ -218,9 +205,25 @@
 
                 axios.post(_url, _form)
                     .then(response => {
+                        //console.log(response.data)
+                        _that.lesson_week = response.data.data;
+                        //console.log(_that.lesson_week);
+                    }).catch(e => { })
+            },
+            getNewFeed() {
+                let _that = this
+                let _url = '@Url.Action("Get", "NewFeed")'
+
+                axios.get(_url, {
+                    params: {
+                        pageSize: 5,
+                        pageIndex: 0
+                    }
+                })
+                    .then(response => {
                         console.log(response.data)
-                        _that.finish_course = response.data.data;
-                        console.log(_that.active_course);
+                        _that.discussion = response.data.data
+                        //console.log(_that.active_course);
                     }).catch(e => { })
             }
         }
