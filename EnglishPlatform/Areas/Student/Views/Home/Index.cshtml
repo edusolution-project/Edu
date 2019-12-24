@@ -83,10 +83,10 @@
                     <ul class="list-discus">
                         <li v-for="(item,k) in discussion">
                             <div class="flex c-top">
-                                <a :href="'@Url.Action("Index","Discuss")#' + item.ID" :title="item.title" class="title">{{item.title == null? item.content:item.title}}</a>
+                                <a :href="'@Url.Action("Index","Discuss")#' + item.ID" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
                                 <div class="c-right"><i class="icofont icofont-user"></i>{{3 + ' members'}}</div>
                             </div>
-                            <p>{{item.content}}.</p>
+                            <p>{{shortenString(item.content,160)}}.</p>
                         </li>
                     </ul>
                 </div>
@@ -102,7 +102,7 @@
             <ul class="row">
                 <li class="col-md-4 less-done list" v-for="(item,k) in finish_course">
                     <div class="box radius">
-                        <a :href="'@Url.Action("Detail", "Course")/' + item.id" class="flex">
+                        <a :href="'@Url.Action("Detail", "Course")?' + 'id=' + (item.receivers != null ? item.receivers[0]:'') + '&' + item.id" class="flex">
                             <span class="per">{{item.per + '%'}}</span>
                             <div class="info">
                                 <span>{{item.title}}</span>
@@ -154,7 +154,8 @@
 
                 axios.post(_url, _form)
                     .then(response => {
-                        //console.log(response.data)
+                        console.log("Active")
+                        console.log(response.data)
                         _that.active_course = response.data.data;
                         //console.log(_that.active_course);
                     }).catch(e => { })
@@ -168,7 +169,8 @@
 
                 axios.post(_url, _form)
                     .then(response => {
-                        //console.log(response.data)
+                        console.log("Finish")
+                        console.log(response.data)
                         _that.finish_course = response.data.data
                         //console.log(_that.active_course);
                     }).catch(e => { })
@@ -182,7 +184,8 @@
 
                 axios.post(_url, _form)
                     .then(response => {
-                        //console.log(response.data)
+                        console.log("Week")
+                        console.log(response.data)
                         _that.lesson_week = response.data.data;
                         //console.log(_that.lesson_week);
                     }).catch(e => { })
@@ -206,6 +209,11 @@
             formatTime(time) {
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
                 return moment(time).format("DD/MM/YYYY hh:mm")
+            },
+            shortenString(str, length) {
+                if (str.length <= length)
+                    return str;
+                return str.substring(0, length) + "...";
             }
         }
     });

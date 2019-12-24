@@ -149,8 +149,7 @@ namespace BaseCustomerMVC.Controllers.Student
             model.TotalRecord = data.Count();
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
-
+                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
 
             var std =
                 (from o in DataResponse
@@ -159,7 +158,7 @@ namespace BaseCustomerMVC.Controllers.Student
                  let subject = _subjectService.GetItemByID(o.SubjectID)
                  let grade = _gradeService.GetItemByID(o.GradeID)
                  let teacher = _teacherService.GetItemByID(o.TeacherID)
-                 let complete = progress != null && progress.TotalLessons > 0 ? progress.CompletedLessons.Count * 100 / progress.TotalLessons : 0
+                 let complete = progress != null && progress.TotalLessons > 0 ? progress.CompletedLessons.Count * 100 / progress.TotalLessons : 0                 
                  select _mappingList.AutoOrtherType(o, new StudentClassViewModel()
                  {
                      CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
@@ -250,7 +249,6 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult GetThisWeekLesson(DateTime today)
         {
-
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
@@ -269,50 +267,9 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var classFilter = new List<FilterDefinition<ClassEntity>>();
             classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
-            var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project("{_id: 1}").ToList();
+            var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
 
-            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter));
-
-            var std = (from o in data.ToList()
-                       let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
-                       where _lesson != null
-                       let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-                       where _class != null
-                       select new
-                       {
-                           id = o.ID,
-                           classID = _class.ID,
-                           className = _class.Name,
-                           title = _lesson.Title,
-                           lessonID = _lesson.ID,
-                           startDate = o.StartDate,
-                           endDate = o.EndDate
-                       }).ToList();
-            return Json(new { Data = std });
-        }
-
-
-
-
-            var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
-            var endWeek = startWeek.AddDays(7);
-
-            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Json(new ReturnJsonModel
-                {
-                    StatusCode = ReturnStatus.ERROR,
-                    StatusDesc = "Authentication Error"
-                });
-            }
-
-            var classFilter = new List<FilterDefinition<ClassEntity>>();
-            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
-            var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project("{_id: 1}").ToList();
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
 
             var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter));
 

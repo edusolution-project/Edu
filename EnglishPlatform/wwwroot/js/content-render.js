@@ -52,6 +52,7 @@ var Lesson = (function () {
             end: "", //exam: complete lesson
             review: "" //review: review result
         },
+        overdue: false, //check if lesson is over
         lesson_id: "",
         class_id: "",
         exam_id: ""
