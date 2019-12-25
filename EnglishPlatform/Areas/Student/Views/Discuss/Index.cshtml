@@ -17,7 +17,7 @@
     var activeTab = "comments";
 </script>
 <style>
-    #form-post .file-media {
+    #form-post .file-media,.form-comment .file-media {
         position: absolute;
         right: 15px;
         top: 0;
@@ -27,7 +27,7 @@
         margin: auto;
     }
 
-    #form-post .media-preview {
+    #form-comment .media-preview,#form-post .media-preview,.form-comment .media-preview {
         position: absolute;
         max-height: 80px;
         max-width: 100%;
@@ -36,16 +36,18 @@
         overflow: hidden;
     }
 
-    #form-post {
+    #form-post,.form-comment {
         position: relative;
     }
 
-        #form-post .box-content-view-media > img {
+        #form-comment .box-content-view-media > img ,#form-post .box-content-view-media > img {
             max-width: 100%;
             max-height: 100%;
+            height:100%;
+            width:auto;
         }
 
-        #form-post .box-content-view-media {
+        #form-post .box-content-view-media,#form-comment .box-content-view-media {
             display: inline-block;
             width: 100%;
             height: 80px;
@@ -55,7 +57,7 @@
             position: relative;
         }
 
-        #form-post .btn-remove {
+        #form-post .btn-remove,#form-comment .btn-remove {
             position: absolute;
             right: 0;
             background: #fff;
@@ -77,7 +79,9 @@
     .media-post {
         padding: 5px 30px;
     }
-
+    .item-feed .media-post > img, .item-comment .media-post > img {
+        width: auto;
+    }
     .box-search {
         width: 100%;
     }
@@ -131,13 +135,18 @@
 
     .item-feed {
         margin-bottom: 10px;
+        padding: 5px 10px;
     }
-
+    .item-feed:hover, .item-feed.active {
+        box-shadow: 0 0 10px #ccc;
+    }
     .item-feed .content-post {
         padding-left: 30px;
         text-align: justify;
     }
-
+    .body-comment .item-feed .content-post{
+        padding-left:0;
+    }
     .item-feed .extends-post > a {
         color: #D03239;
         padding: 5px;
@@ -314,7 +323,10 @@
                                 @{ if (currentClass != null && currentClass.IsAllow)
                                     {
                                         <div class="form-comment" id="form-comment">
+                                            <div class="media-preview"></div>                                            
                                             <textarea rows="3" style="padding-right: 70px;border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
+                                            <input type="file" name="comment-file" style="display:none" />
+                                            <button class="file-media"><img src="~/images/jpg.png" /></button>
                                         </div>
                                     }
                                 }
@@ -479,7 +491,7 @@
                                 if (item.title != void 0 && item.title != "") {
                                     title = `<div class="content-title-post">${item.title}</div>`;
                                 }
-                                var html = `<div class="item-feed" id="${item.ID}">
+                                var html = `<div class="item-feed" id="${item.ID}" onclick="openChat('${item.ID}')">
                                     <div class="user-info-post">
                                         <div class="row">
                                             <div class="col-lg-7">
@@ -531,13 +543,22 @@
             });
         }
         var openChat = function (id) {
-            var chude = "";
+            $(".item-feed").removeClass('active');
+            var content = "";
             var media = "";
+            var chude = "Chủ đề";
             var root = document.getElementById(id);
+            if (!root.classList.contains('active')) {
+                root.classList.add('active');
+            }
             if (root != null) {
-                var title = root.querySelector(".content-title-post");
+                var chudeT = root.querySelector('.content-title-post');
+                if (chudeT != null) {
+                    chude = chudeT.innerHTML;
+                }
+                var title = root.querySelector(".content-post");
                 if (title != null) {
-                    chude = title.innerHTML;
+                    content = title.innerHTML;
                 }
                 var htmlMedia = root.querySelector(".media-post");
                 if (htmlMedia != null) {
@@ -545,11 +566,12 @@
                 }
             }
             var ojChat = document.getElementById("comment-box-new-feed");
+            ojChat.querySelector("#chudethaoluan").innerHTML = chude;
             ojChat.classList.add("open");
             ojChat.querySelector("input[name='ParentID']").value = id;
             ojChat.querySelector(".body-comment").innerHTML = `<div class="item-feed item-comment chude">
                                     <div class="content-post">
-                                        ${chude} ${media}
+                                        ${media}${content} 
                                     </div>
                                 </div>`;
             $.ajax({
@@ -559,6 +581,10 @@
                     if (data.code == 200) {
                         for (var i = 0; i < data.data.length; i++) {
                             var item = data.data[i];
+                            var media = "";
+                            if (item.medias.length > 0) {
+                               media = `<div class="media-post"><img src="${item.medias[0].path}" /></div>`;
+                            }
                             var html = `<div class="item-feed item-comment">
                                     <div class="user-info-post">
                                         <div class="row">
@@ -577,7 +603,7 @@
                                     </div>
                                     <div class="content-post">
                                         ${item.content}
-                                    </div>
+                                    </div>${media}
                                 </div>`;
                             ojChat.querySelector(".body-comment").innerHTML += html;
                         }
@@ -598,17 +624,50 @@
         @{ if (currentClass != null && currentClass.IsAllow)
             {
                 <script>
-
-                var filesList = {};
+                    var filesListComment = {};
+                    var filesList = {};
+                    var formComment = document.getElementById("form-comment");
+                    $("#form-comment>.file-media").click(function () {
+                        $("#form-comment>input[type='file']").click();
+                        if (formComment != null) {
+                        var previewMedia2 = formComment.querySelector('.media-preview');
+                        var inputFileComment = formComment.querySelector("input[type='file']");
+                        if (inputFileComment != null) {
+                            inputFileComment.onchange = function () {
+                                previewMedia2.innerHTML = "";
+                                filesListComment = {};
+                                console.log(inputFileComment,inputFileComment.files);
+                                var files2 = inputFileComment.files;
+                                console.log(files2.length);
+				                for(var i = 0; i < files2.length;i++){
+                                    var file2 = files2[i];
+					                if(file2 != null){
+						                var id = generateId();
+						                var url = createBlodUrl(file2);
+						                filesListComment[id] = file2;
+						                if(previewMedia2.childNodes.length >= 5){
+							                previewMedia2.appendChild(createBoxMedia(id,url,file2.type,true));
+						                }else{
+							                previewMedia2.appendChild(createBoxMedia(id,url,file2.type,false));
+						                }
+					                }
+				                }
+                            }
+                        }
+                    }
+                    });
                 $("#form-post>button.file-media").click(function () {
                     $("#form-post>input[type='file']").click();
                 });
                 var formPost = document.getElementById("form-post");
                 if (formPost != null) {
                     var previewMedia = formPost.querySelector('.media-preview');
+                    
                     var inputFile = formPost.querySelector("input[type='file']");
                     if (inputFile != null) {
                         inputFile.onchange = function () {
+                            previewMedia.innerHTML = "";
+                            filesList = {};
                             var files = inputFile.files;
 				            for(var i = 0; i < files.length;i++){
 					            var file = files[i];
@@ -662,32 +721,51 @@
                 }
                 var createComment = function (content, id) {
                     if (content.trim() == "") return;
-                    $.ajax({
-                        url: "@Url.Action("CREATE", "Comment")",
-                        type: "POST",
-                        data: {
-                            content: content,
-                            parentID:id
-                        },
-                        success: function (data) {
-                            if ('@ViewBag.ID' == "" || '@ViewBag.ID' == null || '@ViewBag.ID' == void 0) {
-                                connection.invoke("SendToGroup", { type: "comment", obj: data }, 'Online');
-                            } else {
-                                connection.invoke("SendToGroup", { type: "comment", obj: data }, 'newfeed-@ViewBag.ID');
-                            }
+                    var keys = Object.keys(filesListComment);
+                    var dataForm = new FormData();
+                    dataForm.append("content", content);
+                    dataForm.append("parentID", id);
+                    if (keys != null && keys != void 0) {
+                        for (var i = 0; i < keys.length; i++) {
+                            var key = keys;
+                            dataForm.append("file", filesListComment[key]);
                         }
-                    })
+                        if (_ajax != void 0) {
+                            _ajax.proccess("POST", "@Url.Action("CREATE", "Comment")", dataForm).then(function (res) {
+                                var data = JSON.parse(res);
+                                if (connection != void 0) {
+                                    var strId = '@ViewBag.ID';
+                                    if (strId == "") {
+                                        connection.invoke("SendToGroup", { type: "comment", obj: data }, 'Online');
+                                    } else {
+                                        connection.invoke("SendToGroup", { type: "comment", obj: data }, 'newfeed-@ViewBag.ID');
+                                    }
+                                }
+                            })
+                        }
+                    }
                 }
                 $("#form-comment>textarea").on("keypress", function (e) {
                     if (e.which == 13) {
                         createComment($(this).val(), document.getElementById("comment-box-new-feed").querySelector("input[name='ParentID']").value);
                         $(this).val("");
+                        $(this).html("");
+                        if (formComment != null) {
+                            var clear = {};;
+                            formComment.querySelector("input[type='file']").value = "";
+                            inputFileComment = {};
+                            var previewMedia2 = formComment.querySelector('.media-preview');
+                            if (previewMedia2 != null) {
+                                previewMedia2.innerHTML = "";
+                            }
+                        }
                     }
                 })
                 $("#form-post>textarea").on("keypress", function (e) {
                     if (e.which == 13) {
                         createNewFeed($(this).val());
                         $(this).val("");
+                        $(this).html("");
                         if (formPost != null) {
                             formPost.querySelector("input[name='Title']").value = "";
                             formPost.querySelector("input[type='file']").value = "";
@@ -698,7 +776,7 @@
                             }
                         }
                     }
-                })
+                });
                 </script>
             }
         }
