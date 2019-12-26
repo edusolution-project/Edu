@@ -158,7 +158,7 @@ namespace BaseCustomerMVC.Controllers.Student
                  let subject = _subjectService.GetItemByID(o.SubjectID)
                  let grade = _gradeService.GetItemByID(o.GradeID)
                  let teacher = _teacherService.GetItemByID(o.TeacherID)
-                 let complete = progress != null && progress.TotalLessons > 0 ? progress.CompletedLessons.Count * 100 / progress.TotalLessons : 0                 
+                 let complete = progress != null && progress.TotalLessons > 0 ? progress.CompletedLessons.Count * 100 / progress.TotalLessons : 0
                  select _mappingList.AutoOrtherType(o, new StudentClassViewModel()
                  {
                      CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
@@ -503,9 +503,10 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public IActionResult Detail(DefaultModel model, string id)
+        public IActionResult Detail(string id)
         {
-            if (model == null) return null;
+            return Redirect(Url.Action("Modules", "Course") + "/" + id);
+            //if (model == null) return null;
             var currentClass = _service.GetItemByID(id);
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (currentClass == null)
@@ -530,16 +531,22 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public IActionResult Modules(DefaultModel model, string id)
+        public IActionResult Modules(string id, int old = 0)
         {
-            if (model == null) return null;
+            //if (model == null) return null;
             var currentClass = _service.GetItemByID(id);
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (currentClass == null)
                 return RedirectToAction("Index");
             if (currentClass.Students.IndexOf(userId) < 0)
                 return RedirectToAction("Index");
+            var progress = _progressService.GetItemByClassID(id, userId);
+            var completePercent = 0;
+            if (progress != null && progress.TotalLessons > 0)
+                completePercent = progress.CompletedLessons.Count * 100 / progress.TotalLessons;
+            ViewBag.CompletePercent = completePercent;
             ViewBag.Class = currentClass;
+            if (old == 1) return View("Modules_o");
             return View();
         }
 

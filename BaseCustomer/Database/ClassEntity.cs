@@ -14,16 +14,10 @@ namespace BaseCustomerEntity.Database
         public string Name { get; set; }
         [JsonProperty("Code")]
         public string Code { get; set; }
-        [JsonProperty("GradeID")]
-        public string GradeID { get; set; }
-        [JsonProperty("SubjectID")]
-        public string SubjectID { get; set; }
-        [JsonProperty("CourseID")]
-        public string CourseID { get; set; }
-        [JsonProperty("TeacherID")]
-        public string TeacherID { get; set; }
         [JsonProperty("Students")]
         public List<string> Students { get; set; } = new List<string>();
+        [JsonProperty("Members")]
+        public List<ClassMemberType> Members{get;set;}
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
         [JsonProperty("Updated")]
@@ -35,6 +29,20 @@ namespace BaseCustomerEntity.Database
         public int Order { get; set; }
         [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
+        [JsonProperty("EndDate")]
+        public DateTime EndDate { get; set; }
+        [JsonProperty("IsGroup")]
+        public bool? IsGroup { get; set; } = false;
+
+        //Multiple
+        [JsonProperty("GradeID")]
+        public string GradeID { get; set; }
+        [JsonProperty("SubjectID")]
+        public string SubjectID { get; set; }
+        [JsonProperty("CourseID")]
+        public string CourseID { get; set; }
+        [JsonProperty("TeacherID")]
+        public string TeacherID { get; set; }
         [JsonProperty("Syllabus")]
         public string Syllabus { get; set; }
         [JsonProperty("Modules")]
@@ -47,10 +55,7 @@ namespace BaseCustomerEntity.Database
         public string Description { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
-        [JsonProperty("EndDate")]
-        public DateTime EndDate { get; set; }
-        [JsonProperty("IsGroup")]
-        public bool? IsGroup { get; set; } = false;
+        
     }
 
     public class ClassService : ServiceBase<ClassEntity>
@@ -87,5 +92,10 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().UpdateManyAsync(t => t.ID.Equals(ID),
                 Builders<ClassEntity>.Update.AddToSet("Students", studentID)).Result.ModifiedCount;
         }
+
+        //public long RemoveMember(string ID, string memberID)
+        //{
+
+        //}
     }
 }
