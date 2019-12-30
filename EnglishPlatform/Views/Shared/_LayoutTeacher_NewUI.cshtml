@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@ViewBag.Title</title>
+    @*<environment include="Development">
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+                  asp-fallback-href="~/css/bootstrap.min.css"
+                  asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        </environment>*@
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Be+Vietnam&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" href="/css/stylesheet.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    <script src="~/js/bootstrap-vue.min.js"></script>
+    <script src="~/js/jquery.min.js"></script>
+    <script src="~/js/moment.min.js"></script>
+    <script src="~/js/moment-with-locales.min.js"></script>
+    <script src="~/js/lib/config.url.base.js"></script>
+    <script src="~/js/lib/notification/notification.js"></script>
+    <script src="~/js/lib/xhr.js"></script>
+    <script src="~/easy-real-time/js/easy-real-time.js"></script>
+    <script src="~/js/hubs/render.html.js"></script>
+    <script src="~/lib/signalr/signalr.js"></script>
+    <script src="~/js/hubs/connection.js"></script>
+    
+    <script type="text/javascript">
+        const g_CurrentUser = {
+            email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
+            name: "@User.Identity.Name",
+            type:'@User.FindFirst("Type")?.Value'
+        }
+    </script>
+</head>
+<body>
+    <main id="main">
+        @await Html.PartialAsync("_sideBarStudentNewUI")
+        @RenderBody()
+        <aside class="sidebar" id="sidebar_right">
+            <div class="box padding-15" id="plan_box">
+                <div class="select-date flex">
+                    <button class="btn-prv"><i class="ti-angle-left"></i></button>
+                    <div class="week">
+                        02/12/2019 - 09/12/2019
+                    </div>
+                    <button class="btn-prv"><i class="ti-angle-right"></i></button>
+                </div>
+                <div class="table-detail">
+                    <div class="tr">
+                        <div class="c-d td">T2</div>
+                        <div class="c-cl td">
+                            <div class="flex">
+                                <span class="time">08:30</span>
+                                <span class="title">IEL</span>
+                            </div>
+                            <div class="flex">
+                                <span class="time">08:30</span>
+                                <span class="title">IEL</span>
+                            </div>
+                        </div>
+                        <div class="c-cl td">
+
+                        </div>
+                    </div>
+                    <div class="tr">
+                        <div class="c-d td">T3</div>
+                        <div class="c-cl td">
+                        </div>
+                        <div class="c-cl td">
+                            <div class="flex">
+                                <span class="time">08:30</span>
+                                <span class="title">IEL</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tr">
+                        <div class="c-d td">T4</div>
+                        <div class="c-cl td">
+                            <div class="flex">
+                                <span class="time">08:30</span>
+                                <span class="title">IEL</span>
+                            </div>
+                        </div>
+                        <div class="c-cl td">
+                            <div class="flex">
+                                <span class="time">08:30</span>
+                                <span class="title">IEL</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tr">
+                        <div class="c-d td">T5</div>
+                        <div class="c-cl td">
+                        </div>
+                        <div class="c-cl td">
+                            <div class="flex">
+                                <span class="time">08:30</span>
+                                <span class="title">IEL</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tr">
+                        <div class="c-d td">T6</div>
+                        <div class="c-cl td">
+                        </div>
+                        <div class="c-cl td">
+                            <div class="flex">
+                                <span class="time">08:30</span>
+                                <span class="title">IEL</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tr">
+                        <div class="c-d td">T7</div>
+                        <div class="c-cl td">
+                            <div class="flex">
+                                <span class="time">08:30</span>
+                                <span class="title">IEL</span>
+                            </div>
+                        </div>
+                        <div class="c-cl td">
+                        </div>
+                    </div>
+                    <div class="tr">
+                        <div class="c-d td">CN</div>
+                        <div class="c-cl td">
+                        </div>
+                        <div class="c-cl td">
+                            <div class="flex">
+                                <span class="time">08:30</span>
+                                <span class="title">IEL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="adv">
+                <img src="/pictures/adv1.png" alt="">
+            </div>
+            <div class="box padding-15">
+                <div class="heading flex">
+                    <h4 class="box-head">Tin tức nổi bật</h4>
+                    <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                </div>
+                <ul class="list list-news">
+                    <li v-for="(item,k) in list_news">
+                        <a href="#" :title="item.title" class="thumb"><img :src="item.thumbnail" /></a>
+                        <div class="info">
+                            <a href="#" :title="item.title" class="title">{{item.title}}</a>
+                            <p>{{item.description}}</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+    </main>
+    <script>
+        new Vue({
+            el: ".list-news",
+            mounted() {
+            },
+            data: {
+                list_news: [
+                    {
+                        title: 'Đã đến lúc HLV Park',
+                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                        thumbnail: '/pictures/news1.png'
+                    },
+                    {
+                        title: 'HLV Park: Có khi p',
+                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                        thumbnail: '/pictures/news2.png'
+                    },
+                    {
+                        title: 'Tiến Dũng và Văn Toả',
+                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                        thumbnail: '/pictures/news3.png'
+                    }
+                ]
+            }
+        });
+    </script>
+    @RenderSection("Modals", false)
+    @RenderSection("Scripts", false)
+</body>
+</html>
+

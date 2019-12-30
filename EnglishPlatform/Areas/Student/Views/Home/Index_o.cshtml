@@ -23,85 +23,75 @@
         </div>
     </div>
     <div class="card-body">
-        <div class="box mb-3">
-            <div class="heading flex mb-2">
-                <h4 class="box-head">Bài học tuần này</h4>
-                <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
-            </div>
-            <div class="box bg-1 padding-15">
-                <ul class="box list-scroll">
-                    <li v-for="(item,k) in lesson_week">
-                        <div class="box radius">
-                            <div class="padding-15 inner">
-                                <h4><i class="ic ic-headphone-o"></i>{{item.className}}</h4>
-                                <a href="#" title="IELTS Preparation" class="title">{{item.title}}</a>
-                                <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
-                                <div class="c-bot">
+        <div class="row margin-b20">
+            <div class="col-md-6">
+                <div class="box radius padding-20">
+                    <div class="heading flex">
+                        <h4 class="box-head">Bài học tuần này</h4>
+                        <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                    </div>
+                    <ul class="list-lesson">
+                        <li v-for="(item,k) in lesson_week">
+                            <div class="c-left">
+                                <p>
+                                    <a :href="'@Url.Action("Detail", "Course")/' + item.classID"><span class="title">{{item.className}}</span></a> - <a :href="'@Url.Action("Detail", "Lesson")/' + item.lessonID + '/' + item.classID">
+                                        <span>{{item.title}}</span>
+                                    </a>
+                                </p>
+                                <div class="d-time"><i class="ti-time"></i>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</div>
+                            </div>
+                            @*<div class="c-right" v-bind:class="{bad : parseInt(item.per)<50}">
                                     <div class="flex">
                                         <b-progress :value="item.score" :max="item.total_scrore" class="mb-3"></b-progress>
                                         <span>{{item.per}}%</span>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
+                                </div>*@
+                        </li>
+                    </ul>
+
+                </div>
             </div>
-        </div>
-        <div class="row margin-b20">
+
             <div class="col-md-6">
-                <div class="box mb-3">
-                    <div class="heading flex mb-2">
+                <div class="box radius margin-b20 padding-20">
+                    <div class="heading flex">
                         <h4 class="box-head">Khoá học đang diễn ra</h4>
                         <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
-                    <div class="box bg-1 padding-15 height-245">
-                        <ul class="box list-scroll">
-                            <li v-for="(item,k) in active_course">
-                                <div class="box radius">
-                                    <div class="thumb">
-                                        <img src="/pictures/ielts1.png" alt="">
-                                    </div>
-                                    <div class="padding-15 inner">
-                                        <a  :href="'@Url.Action("Detail", "Course")/' + item.id" title="{{item.courseName}}" class="title">{{item.courseName}}</a>
-                                        <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
-                                        <div class="c-bot">
-                                            <div class="flex reverse">
-                                                <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
-                                                <div class="flex justify-content-between">
-                                                    <span>{{item.percent}}%</span>
-                                                    <span>{{item.score}} điểm</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                    <ul class="list-lesson" v-if="active_course.length">
+                        <li v-for="(item,k) in active_course">
+                            <div class="c-left">
+                                <p><a :href="'@Url.Action("Detail", "Course")/' + item.id"><span class="title">{{item.subjectName}}</span> - <span>{{item.courseName}}</span></a></p>
+                                <div class="d-time"><i class="ti-time"></i>{{formatTime(item.endDate)}}</div>
+                            </div>
+                            <div class="c-right" v-bind:class="{bad : parseInt(item.per)<50}">
+                                <div class="flex">
+                                    <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
+                                    <span>{{item.percent}}%</span>
                                 </div>
-                            </li>
-                        </ul>
-                    </div>
+                                <span>{{item.score}} điểm</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <p v-else cla>No active course</p>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="box mb-3">
+                <div class="box radius padding-20">
                     <div class="heading flex">
                         <h4 class="box-head">Thảo luận</h4>
                         <a href="@Url.Action("Index","Discuss")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
-                    <div class="box bg-1 padding-15 height-245">
-                        <ul class="list-discus">
-                            <li v-for="(item,k) in discussion">
-                                <div class="flex c-top">
-                                    <a :href="'@Url.Action("Index","Discuss")#' + item.ID" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
-                                    <div class="c-right"><i class="icofont icofont-user"></i>{{3 + ' members'}}</div>
-                                </div>
-                                <p>{{shortenString(item.content,160)}}.</p>
-                            </li>
-                        </ul>
-                    </div>
+                    <ul class="list-discus">
+                        <li v-for="(item,k) in discussion">
+                            <div class="flex c-top">
+                                <a :href="'@Url.Action("Index","Discuss")#' + item.ID" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
+                                <div class="c-right"><i class="icofont icofont-user"></i>{{3 + ' members'}}</div>
+                            </div>
+                            <p>{{shortenString(item.content,160)}}.</p>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
-        
         <div class="module">
             <div class="col-md-12 margin-b20">
                 <div class="heading flex">
@@ -124,8 +114,10 @@
                 </li>
             </ul>
         </div>
+
     </div>
 </section>
+
 
 @section Scripts{
     <script>
@@ -215,7 +207,6 @@
                     }).catch(e => { })
             },
             formatTime(time) {
-                console.log(time);
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
                 return moment(time).format("DD/MM/YYYY hh:mm")
             },

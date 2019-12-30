@@ -1,0 +1,176 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var avatar = HttpContextAccessor.HttpContext.Session.GetString("userAvatar");
+}
+<!-- Sidebar -->
+<nav class="sidebar collapse position-fixed col p-0 m-0">
+
+    <div id="sidebar-content">
+        <ul class="sidebar-holder p-0">
+            <li class="sidebar-item home">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )">
+                    <i></i>
+                </a>
+            </li>
+
+            <li class="sidebar-item profile">
+                <a class="nav-link p-0 overflow-hidden position-relative" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')" title="Profile">
+
+                    @if (!string.IsNullOrEmpty(avatar))
+                    {
+                        <img style="opacity: 1; width:100%;min-height:100%; max-width:50px;" class="position-absolute"
+                             src='@avatar'
+                             id="leftMenuPhotoAcc" />
+                    }
+
+                    <span>Account</span>
+                </a>
+                <div class="extra">
+                    <div class="avatarHolder">
+                        @{
+                            var name = User.Identity.Name;
+                            var shortname = name[0].ToString();
+                            var hchar = name.Split(' ');
+                            if (hchar.Length > 1)
+                            {
+                                shortname += hchar[1][0];
+                            }
+                        }
+
+                        <div aria-label="User profile picture" class="avatar">
+                            <div class="shortname position-relative">
+                                @if (!string.IsNullOrEmpty(avatar))
+                                {
+                                    <img class="position-absolute" style="top:0; left: 0; bottom: 0; right:0; border-radius: 50%; opacity: 1; width:100%;min-height:100%"
+                                         src='@avatar'
+                                         id="sidebarPhotoAcc" />
+                                }
+                                @shortname.ToUpper()
+                            </div>
+                        </div>
+
+                        <h2 class="fullname">@User.Identity.Name</h2>
+
+                        <form action="/logout" method="post">
+                            <button type="submit" class="btn my-btn btn-logout">
+                                Sign out
+                            </button>
+                        </form>
+                        <hr role="presentation">
+                        <ul class="action-wrapper">
+                            <li>
+                                <a href="@Url.Action("Profile","Home")" class="btn my-btn action-link">Profile</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+
+            @*<li class="sidebar-item dashboard">
+                    <a class="nav-link p-0" href="@Url.Action("Index" , "Home" )" title="Dashboard">
+                        <i></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>*@
+
+            <li class="sidebar-item curriculum">
+                <a class="nav-link p-0" href="@Url.Action("Index", "Curriculum" )" title="Curriculum Management">
+                    <i></i>
+                    <span>Curriculum</span>
+                </a>
+            </li>
+            <li class="sidebar-item course">
+                <a class="nav-link p-0" href="@Url.Action("Index","Class")" title="Class Management">
+                    <i></i>
+                    <span>Class Management</span>
+                </a>
+            </li>
+            <li class="sidebar-item calendar">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )" title="Calendar">
+                    <i></i>
+                    <span>Calendar</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item students" style="background-image:none">
+                <a class="nav-link p-0" href="@Url.Action("Index", "StudentManage" )" title="Student Management">
+                    <i class="fas fa-users"></i>
+                    <span>Student</span>
+                </a>
+            </li>
+            <li class="sidebar-item comments" style="background-image:none">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )" title="Discussion">
+                    <i class="fas fa-comments" aria-hidden="true"></i>
+                    <span>Announcement</span>
+                </a>
+            </li>
+            <li class="sidebar-item guide">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )" title="Reference">
+                    <i></i>
+                    <span>Reference</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item accounts" style="background-image:none">
+                <a class="nav-link p-0" href="#" title="Account Management">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Accounts</span>
+                </a>
+            </li>
+
+            <li class="sidebar-item settings" style="background-image:none">
+                <a class="nav-link p-0" href="#" title="Settings">
+                    <i class="fas fa-cogs"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+
+
+        </ul>
+    </div>
+    <div id="extra-sidebar" class="collapse">
+        <button type="button" class="btn btn-close my-btn" onclick="closeExtra()">X</button>
+        <div class="content">
+
+        </div>
+    </div>
+    <button class="sidebar-toggler" type="button" data-toggle="collapse" data-target=".sidebar" aria-controls="sidebar-content" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="sidebar-toggler-icon"></i>
+    </button>
+</nav>
+<!-- End of Sidebar -->
+<script>
+
+    $(document).ready(function () {
+        $('.sidebar-item.' + activeTab).addClass("active");
+        $(".right-content").click(function () {
+            closeExtra();
+        });
+        $('.sidebar-item a').tooltip({
+            trigger: 'hover'
+        });
+
+    });
+
+    function showExtra(tab) {
+        if ($('#extra-sidebar.show').length == 0) {
+            setActiveSidebar(tab);
+            $('#extra-sidebar .content').empty().append($('.sidebar-item.' + tab + " .extra").clone());
+        } else {
+            setActiveSidebar(activeTab);
+        }
+    }
+
+    function closeExtra() {
+        setActiveSidebar(activeTab);
+        $('#extra-sidebar').removeClass('show');
+    }
+
+    function setActiveSidebar(tab) {
+        $('.sidebar-item.active').removeClass("active");
+        $('.sidebar-item.' + tab).addClass("active");
+    }
+
+
+</script>

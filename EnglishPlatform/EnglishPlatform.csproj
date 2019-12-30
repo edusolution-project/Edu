@@ -88,8 +88,12 @@
     <None Include="wwwroot\css\uivar.scss" />
     <None Include="wwwroot\css\_sidebar.scss" />
     <None Include="wwwroot\easy-real-time\js\easy-real-time.js" />
+    <None Include="wwwroot\fonts\Be-VietNamLatin.woff2" />
+    <None Include="wwwroot\fonts\Be-VietNamRegular.woff2" />
     <None Include="wwwroot\fonts\feather.svg" />
     <None Include="wwwroot\fonts\icofont.svg" />
+    <None Include="wwwroot\fonts\Simple-Line-Icons.svg" />
+    <None Include="wwwroot\fonts\Simple-Line-Icons.woff2" />
     <None Include="wwwroot\fonts\themify.svg" />
     <None Include="wwwroot\js\bootstrap-tagsinput.js" />
     <None Include="wwwroot\js\bootstrap-vue.min.js" />
@@ -97,6 +101,7 @@
     <None Include="wwwroot\js\curriculum-lesson-frame.js" />
     <None Include="wwwroot\js\curriculum-lesson.js" />
     <None Include="wwwroot\js\custom.js" />
+    <None Include="wwwroot\js\daterangepicker.min.js" />
     <None Include="wwwroot\js\demo\datatables-demo.js" />
     <None Include="wwwroot\js\fullcalendar.min.js" />
     <None Include="wwwroot\js\hub-student.js" />
@@ -585,6 +590,10 @@
     <None Include="wwwroot\js\teacher-exam.js" />
     <None Include="wwwroot\js\teacher-lesson-frame.js" />
     <None Include="wwwroot\js\teacher-lesson.js" />
+    <None Include="wwwroot\libs\axios-0.19.0.min.js" />
+    <None Include="wwwroot\libs\bootstrap-vue.min.js" />
+    <None Include="wwwroot\libs\vue-2.6.0.js" />
+    <None Include="wwwroot\libs\vuejs-datepicker.min.js" />
     <None Include="wwwroot\scss\navs\_global.scss" />
     <None Include="wwwroot\scss\navs\_sidebar.scss" />
     <None Include="wwwroot\scss\navs\_topbar.scss" />
