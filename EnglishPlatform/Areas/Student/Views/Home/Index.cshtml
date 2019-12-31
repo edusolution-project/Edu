@@ -33,13 +33,13 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <h4><i class="ic ic-headphone-o"></i>{{item.className}}</h4>
-                                <a href="#" title="IELTS Preparation" class="title">{{item.title}}</a>
+                                <h4 title="item.className"><i class="ic ic-headphone-o"></i>{{item.className}}</h4>
+                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classID" :title="item.title" class="title">{{item.title}}</a>
                                 <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
                                 <div class="c-bot">
                                     <div class="flex">
                                         <b-progress :value="item.score" :max="item.total_scrore" class="mb-3"></b-progress>
-                                        <span>{{item.per}}%</span>
+                                        <span>0%</span>
                                     </div>
                                 </div>
                             </div>
@@ -58,24 +58,26 @@
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in active_course">
-                                <div class="box radius">
-                                    <div class="thumb">
-                                        <img src="/pictures/ielts1.png" alt="">
-                                    </div>
-                                    <div class="padding-15 inner">
-                                        <a  :href="'@Url.Action("Detail", "Course")/' + item.id" title="{{item.courseName}}" class="title">{{item.courseName}}</a>
-                                        <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
-                                        <div class="c-bot">
-                                            <div class="flex reverse">
-                                                <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
-                                                <div class="flex justify-content-between">
-                                                    <span>{{item.percent}}%</span>
-                                                    <span>{{item.score}} điểm</span>
+                                <a :href="'@Url.Action("Detail","Course")/' + item.id" :title="item.courseName">
+                                    <div class="box radius">
+                                        <div class="thumb">
+                                            <img src="/pictures/ielts1.png" alt="">
+                                        </div>
+                                        <div class="padding-15 inner">
+                                            <a :href="'@Url.Action("Detail","Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
+                                            <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
+                                            <div class="c-bot">
+                                                <div class="flex reverse">
+                                                    <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
+                                                    <div class="flex justify-content-between">
+                                                        <span>{{item.percent}}%</span>
+                                                        <span>{{item.score}} điểm</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -101,7 +103,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="module">
             <div class="col-md-12 margin-b20">
                 <div class="heading flex">
