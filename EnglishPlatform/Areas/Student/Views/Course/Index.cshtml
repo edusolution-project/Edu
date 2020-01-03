@@ -20,7 +20,6 @@
                 <input type="text" value="01/08/2019 - 30/09/2019" name="dates">
                 <span class="ic ic-picker"></span>
             </div>
-
             <div class="box filter-box w-152">
                 <select v-model="subject" v-on:change="changeSubject()">
                     <option value="">Choose Subject</option>
@@ -61,7 +60,7 @@
         <div class="box margin-t20 flex">
             <div class="paging-view">
                 Hiển thị:
-                <select name="" v-model="view">
+                <select name="" v-model="view" v-on:change="getCourse()">
                     <option value="10">10 kết quả</option>
                     <option value="20">20 kết quả</option>
                     <option value="30">30 kết quả</option>
@@ -80,54 +79,6 @@
     </div>
 </section>
 
-
-
-@*<section class="module" id="dashboard_content">
-        <div class="card-header">
-            <div class="flex border-b padding-b25">
-                <h2 class="title">@ViewData["Title"]</h2>
-            </div>
-        </div>
-        <div class="main-container pl-3 pr-3">
-            <div class="active-region">
-                <div class="block-title pt-2 pb-2">
-                    <h2>Ongoing</h2>
-                </div>
-                <table id="activeCourse" class="table" width="100%" cellspacing="0">
-                    <thead>
-                        <tr class="text-center">
-                            <th class="text-center">Index</th>
-                            <th class="text-left">Subject</th>
-                            <th class="text-left">Course</th>
-                            <th class="text-center">Period</th>
-                            <th class="text-center">Progress</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <div class="past-region" style="display: none">
-                <div class="block-title">
-                    <h2>Past Enrollments</h2>
-                </div>
-                <table id="pastCourse" class="table" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th class="text-center">Index</th>
-                            <th class="text-left">Subject</th>
-                            <th class="text-left">Course</th>
-                            <th class="text-center">Period</th>
-                            <th class="text-center">Result</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </section>*@
-<script>
-    $('input[name="dates"]').daterangepicker();
-</script>
 @section Scripts{
     <script>
 
@@ -142,11 +93,18 @@
                     locale: {
                         format: "DD/MM/YYYY",
                     }
+                }, function (s, e, label) {
+                    RepDate(s,e);
+                    GetCourse();
                 });
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 //console.log(this.list_grades_full);
                 this.changeSubject()
+                window.ChooseCalendar = this.chooseCalendar
+                window.GetCourse = this.getCourse
+                window.RepDate = this.repDate
+                $('input[name=dates]').siblings('.ic-picker').click(function () { ChooseCalendar() });
             },
             data: {
                 list_course: [
@@ -157,7 +115,28 @@
                 subject:'',
                 grade: '',
                 view: 10,
-                page: 1
+                page: 1,
+                startdate: moment().subtract(29, 'days'),
+                enddate: moment()
+            },
+            computed: {
+                sDate: {
+                    get() {
+                        return moment(this.startdate).format("MM/DD/YYYY");
+                    },
+                    set(value) {
+                        this.startdate = value;
+                    }
+                },
+                eDate: {
+                    get() {
+                        return moment(this.enddate).format("MM/DD/YYYY");
+                    },
+                    set(value) {
+                        this.enddate = value;
+                    }
+                }
+
             },
             watch: {
             },
@@ -169,6 +148,8 @@
                     _form.append('SubjectID', _that.subject)
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
+                    _form.append('StartDate', _that.sDate)
+                    _form.append('EndDate', _that.eDate)
                     let _url = '@Url.Action("GetList", "Course")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -198,8 +179,15 @@
                     _that.getCourse()
                 },
                 formatShortDate(date) {
-                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-";
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
+                },
+                chooseCalendar() {
+                    $('input[name=dates]').focus().click()
+                }
+                , repDate(svalue, evalue) {
+                    this.eDate = evalue;
+                    this.sDate = svalue;
                 }
             }
         });

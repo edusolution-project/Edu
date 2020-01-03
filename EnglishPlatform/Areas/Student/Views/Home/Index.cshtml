@@ -85,7 +85,7 @@
             </div>
             <div class="col-md-6">
                 <div class="box mb-3">
-                    <div class="heading flex">
+                    <div class="heading flex mb-2">
                         <h4 class="box-head">Thảo luận</h4>
                         <a href="@Url.Action("Index","Discuss")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
@@ -164,8 +164,8 @@
 
                 axios.post(_url, _form)
                     .then(response => {
-                        console.log("Active")
-                        console.log(response.data)
+                        //console.log("Active")
+                        //console.log(response.data)
                         _that.active_course = response.data.data;
                         //console.log(_that.active_course);
                     }).catch(e => { })
@@ -175,12 +175,14 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('PageSize', 5)
+                _form.append('PageIndex', 1)
                 let _url = '@Url.Action("GetFinishList", "Course")'
 
                 axios.post(_url, _form)
                     .then(response => {
-                        console.log("Finish")
-                        console.log(response.data)
+                        //console.log("Finish")
+                        //console.log(response.data)
                         _that.finish_course = response.data.data
                         //console.log(_that.active_course);
                     }).catch(e => { })

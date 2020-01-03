@@ -213,7 +213,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return Json(new { Data = std });
         }
 
-        public JsonResult GetFinishList(DateTime today)
+        public JsonResult GetFinishList(DefaultModel model, DateTime today)
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
@@ -226,13 +226,12 @@ namespace BaseCustomerMVC.Controllers.Student
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
-            //model.TotalRecord = data.Count();
-            //var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-            //    ? data.ToList()
-            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+            model.TotalRecord = data.CountDocuments();
+            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
+                ? data.ToList()
+                : data.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
 
-
-            var std = (from o in data.ToList()
+            var std = (from o in DataResponse
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
                        let per = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
                        select new
