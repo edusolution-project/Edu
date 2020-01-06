@@ -1,491 +1,194 @@
 ﻿@{
-    ViewData["Title"] = "My Classes";
-    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
-    var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
-    var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
-    var user = ViewBag.User as string;
-    var hasManageRole = (bool)(ViewBag.Managable ?? false);
+
+    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
+    ViewData["Title"] = "My Courses";
+    var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
 }
 
-<link href="~/css/calendar/core.css" rel="stylesheet" />
-<link href="~/css/calendar/daygrid.css" rel="stylesheet" />
-<link href="~/css/calendar/list.css" rel="stylesheet" />
-<link href="~/css/calendar/timegrid.css" rel="stylesheet" />
 <script>
-    activeTab = "course";
+    setActiveMenu("course");
+</script>
+<script src="~/js/daterangepicker.min.js"></script>
+<link href="~/css/daterangepicker.css" rel="stylesheet" />
 
-    /**/</script>
-
-<style>
-    .fc-content {
-        font-size: 9px;
-        cursor: pointer;
-    }
-
-    .fc-center {
-        font-size: 7px;
-    }
-
-    /*.fc-toolbar.fc-header-toolbar {
-            margin-bottom: .5em;
-        }*/
-
-    .fc-toolbar .fc-button {
-        /*padding: 0.2em;*/
-        /*line-height: 1em;*/
-    }
-
-    .fc-dayGrid-view .fc-body .fc-row {
-        min-height: 3em;
-    }
-
-    .fc-scroller {
-        height: auto !important;
-    }
-
-    .fc-day-header {
-        font-weight: normal;
-        border: solid 1px #CCC !important;
-        /*font-size: 11px;*/
-    }
-
-        .fc-day-header span {
-            font-size: 11px;
-        }
-
-    .fc-day-top {
-        text-align: right;
-        padding-right: 3px !important;
-    }
-
-    .fc-button .fc-icon {
-        font-size: 1em;
-    }
-
-    .fc-icon {
-        height: 1em;
-    }
-
-    .fc-content {
-        font-size: 9px;
-        cursor: pointer;
-    }
-
-    .fc-center {
-        font-size: 7px;
-    }
-
-    /*.fc-toolbar.fc-header-toolbar {
-            margin-bottom: .5em;
-        }*/
-
-    .fc-toolbar .fc-button {
-        /*padding: 0.2em;*/
-        /*line-height: 1em;*/
-    }
-
-    .fc-dayGrid-view .fc-body .fc-row {
-        min-height: 3em;
-    }
-
-    .fc-day-header {
-        font-weight: normal;
-        border: solid 1px #CCC !important;
-        /*font-size: 11px;*/
-    }
-
-        .fc-day-header span {
-            font-size: 11px;
-        }
-
-    .fc-day-top {
-        text-align: right;
-        padding-right: 3px !important;
-    }
-
-    .fc-button .fc-icon {
-        font-size: 1em;
-    }
-
-    .fc-icon {
-        height: 1em;
-    }
-</style>
-
-<div class="left-col">
-    <div class="page-title row">
-        <h1 class="col-md-11">@ViewData["Title"]</h1>
-    </div>
-
-    <!-- Begin Page Content -->
-    <div class="row m-0">
-        <div class="main-container col-md-10">
-            @if (hasManageRole)
-            {
-                <div class="text-right pt-3">
-                    <button type="button" onclick="ShowAddClass()" class="btn btn-primary" data-placement="top" title="Add Class" data-toggle="modal"
-                            data-target="#modalCourse">
-                        <i class="fas fa-plus"></i> Add Class
-                    </button>
+<section class="module" id="dashboard_content">
+    <div class="card-header">
+        <div class="flex border-b padding-b25 justify-content-between">
+            <div class="flex">
+                <div class="box filter-box w-152">
+                    <select name="">
+                        <option value="">Khoá học</option>
+                    </select>
                 </div>
-            }
-            <div class="search-filter pt-3">
-                <div class="form-row">
-                    <div class="form-group row col-md-4">
-                        <label for="staticText" class="col-sm-4 col-form-label">Subject:</label>
-                        <div class="col-sm-8">
-                            <select id="SubjectID" class="form-control" onchange="LoadGrade()">
-                                <option value="">-- All --</option>
-                                @{
-                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                    {
-                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                    }
-
-                                }
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group row col-md-4 offset-4">
-                        <label for="staticText" class="col-sm-4 col-form-label">Grade:</label>
-                        <div class="col-sm-8">
-                            <select id="GradeID" class="form-control" onchange="LoadData()">
-                                <option value="">-- Not set --</option>
-                                @{
-                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                    {
-                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                    }
-
-                                }
-                            </select>
-                        </div>
-                    </div>
+                <div class="box filter-box w-152">
+                    <select name="">
+                        <option value="">Môn học</option>
+                    </select>
                 </div>
-            </div>
-            <div class="active-region">
-                <div class="block-title">
-                    <h2>Ongoing</h2>
+                <div class="box filter-box w-152">
+                    <select name="">
+                        <option value="">Cấp độ</option>
+                    </select>
                 </div>
-                <table id="activeCourse" class="table" width="100%" cellspacing="0">
-                    <thead>
-                        <tr class="text-center">
-                            <th class="text-left">Index</th>
-                            <th class="text-left">Class</th>
-                            <th class="text-left">Subject</th>
-                            <th class="text-left">Grade</th>
-                            @*<th>Giáo viên</th>*@
-                            <th class="text-center">Registered Students</th>
-                            <th class="text-center">Period</th>
-                            @if (hasManageRole)
-                            {
-                                <th class="text-center">Action</th>
-                            }
-                            @*<th>Trạng thái</th>*@
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <div class="past-region" style="display: none">
-                <div class="block-title">
-                    <h2>Past Classes</h2>
-                </div>
-                <table id="pastCourse" class="table" width="100%" cellspacing="0">
-                    <thead>
-                        <tr class="text-center">
-                            <th class="text-left">Index</th>
-                            <th class="text-left">Class</th>
-                            <th class="text-left">Subject</th>
-                            <th class="text-left">Grade</th>
-                            <th class="text-center">Registered Students</th>
-                            <th class="text-center">Period</th>
-                            @if (hasManageRole)
-                            {
-                                <th class="text-center">Action</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
             </div>
         </div>
-        <div class="col-md-2">
-            <div id="schedule" class="pt-3"></div>
+    </div>
+    <div class="card-body">
+        <table id="ed_table" class="table">
+            <thead>
+                <tr>
+                    <th v-for="(field,k) in fields">{{field.label}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(item,k) in tableData" v-if="item.id > 0">
+                    <td>{{k+1}}</td>
+                    <td><a href="/teacher/class_detail.html" :title="item.class_name" class="title">{{item.class_name}}</a></td>
+                    <td>{{item.class_code}}</td>
+                    <td>{{item.level}}</td>
+                    <td>{{item.students}}</td>
+                    <td><span>{{item.start_date}}</span><span>{{item.end_date}}</span></td>
+                    <td>
+                        <div class="d-flex btn-group">
+                            <a class="btn-act btn-edit" href="#"><i class="ti-pencil-alt"></i></a>
+                            <button class="btn-act btn-trash" v-on:click="destroy(item.id)"><i class="ti-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="box margin-t20 flex">
+            <div class="paging-view">
+                Hiển thị:
+                <select v-model="view">
+                    <option value="10">10 kết quả</option>
+                    <option value="20">20 kết quả</option>
+                    <option value="30">30 kết quả</option>
+                </select>
+            </div>
+            <div class="page-control">
+                <div class="inner">
+                    <button><i class="ti-angle-left"></i></button>
+                    <button><i class="ti-angle-double-left"></i></button>
+                    <input type="text" v-model="page" />
+                    <button><i class="ti-angle-double-right"></i></button>
+                    <button><i class="ti-angle-right"></i></button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+</section>
 
 @section Scripts{
-    <script src="~/js/lib/schedule-mini.js"></script>
     <script>
 
-        function LoadCourse() {
-            var course = $("select[name='CourseID']");
-            var data = {
-                cp: true
-            }
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("GetActiveList", "Curriculum")',
-                dataType: "json",
-                data: data,
-                success: function (res) {
-                    if (res.Data != null) {
-                        if (res.Data.length > 0) {
-                            for (var i = 0; i < res.Data.length; i++) {
-                                var item = res.Data[i];
-                                course.append("<option value='" + item.ID + "' s='" + item.SubjectID + "' g='" + item.GradeID + "' style='display:none'>" + item.Name + "</option>");
-                            }
-                        }
-                    }
+        new Vue({
+            el: ".module",
+            data: {
+            tableData : [
+                {
+                    id : 1,
+                    class_name : 'IELTS Preparation',
+                    class_code : 'IEL',
+                    level : 'A2',
+                    students : 3,
+                    start_date : '02/11/2019',
+                    end_date : '02/11/2019',
+                    state : true
                 },
-                error: function (err) {
-
-                }
-            })
-        }
-
-        function LoadData() {
-        hideModal();
-        var UserID = '@user';
-        var searchText = $("#searchText").val();
-        var subject = $("#SubjectID").val();
-        var grade = $("#GradeID").val();
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("GetList", "Class")',
-                data: { SearchText: searchText, SubjectID: subject, GradeID: grade, UserID: UserID },
-                dataType: "json",
-                success: function (data) {
-                    var activeCourse = $('#activeCourse tbody');
-                    var pastCourse = $('#pastCourse tbody');
-                    activeCourse.html("");
-                    pastCourse.html("");
-                    if (data.Data.length > 0) {
-                        var counter = 0;
-                        var pastcounter = 0;
-                        for (i = 0; i < data.Data.length; ++i) {
-                            item = data.Data[i];
-                            //var active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' disabled> <div class='handle'></div> </button></td>";
-
-                            var startdate = moment(item.StartDate).format('DD/MM/YYYY');
-                            var enddate = moment(item.EndDate).format('DD/MM/YYYY');
-                            var today = new Date();
-
-                            var past = moment(today).diff(moment(item.EndDate), 'days') > 0;
-
-                            var count = past ? ++pastcounter : ++counter;
-
-                            var row = $("<tr>");
-                            row.append($("<td>", { text: count }));
-                            row.append($("<td>").append($("<a>", {
-                                href: "@Url.Action("Detail", "Class")/" + item.ID,
-                                text: item.Name
-                            })));
-                            row.append($("<td>", { text: item.SubjectName }));
-                            row.append($("<td>", { text: item.GradeName }));
-                            row.append($("<td>", { text: item.Students.length, class: "text-center" }));
-                            row.append($("<td>", { text: startdate + " - " + enddate, class: "text-center" }));
-                            @if (hasManageRole)
-                            {
-                                @:var editbtn = $("<button>", {
-                                @:onclick: "Edit('" + item.ID + "','@Url.Action("GetDetail", "Class")','@Url.Action("Create", "Class")',this)",
-                                @:type: 'button', class: 'btn text-primary', "data-placement": 'top', title: 'Edit', "data-toggle": 'modal', "data-target": '#modalCourse'
-                                @:}).append($("<i>", { class: "fas fa-edit" }));
-                                @:var removebtn = $("<button>", {
-                                @:onclick: "var result = confirm('Remove " + item.Name + "?'); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("Remove", "Class")',LoadData); else return;",
-                                @:type: 'button', class: 'btn text-danger', "data-placement": 'top', title: 'Remove',
-                                @:}).append($("<i>", {class: "fas fa-trash"}));
-                                @:row.append($("<td>", { class: "text-center" }).append(editbtn).append(removebtn));
-                            };
-
-                            if (past) {
-                                $('.past-region').show();
-                                pastCourse.append(row);
-                            }
-                            else {
-                                activeCourse.append(row);
-                            }
-                        }
-                    }
+                {
+                    id : 2,
+                    class_name : 'Destination B1',
+                    class_code : 'PET',
+                    level : 'A2',
+                    students : 6,
+                    start_date : '02/11/2019',
+                    end_date : '02/11/2019',
+                    state : false
                 },
-                error: function () {
-                    alert("Error");
+                {
+                    id : 3,
+                    class_name : 'Ngữ pháp A2',
+                    class_code : 'PET',
+                    level : 'A2',
+                    students : 13,
+                    start_date : '02/11/2019',
+                    end_date : '02/11/2019',
+                    state : false
+                },
+                {
+                    id : 4,
+                    class_name : 'Giao tiếp cơ bản',
+                    class_code : 'IELTS',
+                    level : 'A2',
+                    students : 20,
+                    start_date : '02/11/2019',
+                    end_date : '02/11/2019',
+                    state : false
+                },
+            ],
+            fields : [
+                {
+                    key : 'stt',
+                    label : '#'
+                },
+                {
+                    key : 'class_name',
+                    label : 'Lớp học'
+                },
+                {
+                    key : 'class_code',
+                    label : 'Mã lớp'
+                },
+                {
+                    key : 'level',
+                    label : 'Cấp độ'
+                },
+                {
+                    key : 'students',
+                    label : 'Học viên'
+                },
+                {
+                    key : 'date',
+                    label : 'Thời gian'
+                },
+                {
+                    key : 'actions',
+                    label : 'Tác vụ'
                 }
-            });
-        };
+            ],
+            week : '',
+            view : 10,
+            page : 1,
+            pageSize : 10
+        },
+        watch : {
 
-        function LoadGrade() {
-            var subject = $("#SubjectID").val();
-            var grade = $("#GradeID").val();
-            if (subject === "") subject = "---";
-            $('#GradeID option:gt(0)[for!=' + subject + ']').hide();
-            $('#GradeID option:gt(0)[for=' + subject + ']').show();
-            //if ($('#GradeID option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {
-            $('#GradeID').val($('#GradeID option:visible:first').attr('value'));
-            //}
-            LoadData();
-        }
+        },
+        methods: {
+            getData(){
+                let _data = []
 
-        function FilterCourse() {
-            var course = $("select[name='CourseID']");
-            var GradeID = $("select[name='GradeID']").val();
-            course.find("option[g=" + GradeID + "]").show();
-            course.find("option[g!=" + GradeID + "]").hide();
-            var currentSelected = course.val();
-            if (currentSelected != null && currentSelected != "") {
-                if (course.find("option[value=" + currentSelected + "]:not(:visible)").length > 0)
-                    if (course.find("option:visible").length > 0)
-                        course.val(course.find("option:visible:first").attr("value"));
-                    else
-                        course.val("");
-            }
-            else {
-                console.log(course.find("option:visible"));
-                if (course.find("option:visible").length > 0)
-                    course.val(course.find("option:visible:first").attr("value"));
-                else
-                    course.val("");
+                this.tableData = _data
+            },
+            getNews(){
+                // tương tự như trên
+            },
+            destroy(id){
+                this.tableData.forEach(function(item,k){
+                    if(item.id == id){
+                        item.id = 0
+                    }
+                })
+                let _data = this.tableData.filter(function(a){
+                    return a.id > 0
+                })
+                this.tableData = _data
             }
         }
-
-        function LoadGradeInput(obj) {
-            var subject = $(obj).val();
-            var grade = $(obj).parent().parent().find("[name=GradeID]");
-            $(grade).find('option[for!=' + subject + ']').hide();
-            $(grade).find('option[for=' + subject + ']').show(0);
-            $(grade).val($(grade).find('option[for=' + subject + ']:first').attr('value'));
-            FilterCourse();
-        }
-
-        $(document).ready(function () {
-            LoadGrade();
-            LoadCourse();
-
-        $('.datepicker').each(function () {
-            var fieldID = $(this).next().attr("id");
-            $(this).datepicker({
-                changeMonth: true,
-                changeYear: true,
-                dateFormat: 'dd/mm/yy',
-                altField: '#' + fieldID,
-                altFormat: 'yy-mm-dd'
-            }).val("");
-        })
-    });
-
-        var schedulex = new CalendarLib.Schedule($);
-
-        schedulex.onLoad({
-            type: "@User?.FindFirst("Type").Value",
-            controller: 'Calendar'
         });
 
-        function ShowAddClass() {
-            $('#modalCourse input[type!=hidden]').val('');
-            $('#modalCourse input[name=ID]').remove();
-            $('#modalCourse select').each(function () {
-                $(this).val($(this).find("option:first").val());
-            });
-        }
     </script>
-}
-
-@section Modals{
-    <div class="modal fade" id="modalCourse" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            @using (Html.BeginForm("Create", "Course", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
-            {
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="ModalCenterTitle">Add Class</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="form-group col-md-6">
-                                <label for="staticText" class="col-form-label">Class name</label>
-                                <input type="text" class="form-control" name="Name" placeholder="Class name" required>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="staticText" class="col-form-label">Code</label>
-                                <input type="text" class="form-control" name="Code" placeholder="Code" required>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="staticText" class="col-form-label">Subject</label>
-                                <select name="SubjectID" class="form-control" onchange="LoadGradeInput(this)" required>
-                                    <option value="">--- Chooss subject --- </option>
-                                    @{
-                                        for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                        {
-                                            <option value="@listSubject[i].ID"> @listSubject[i].Name</option>
-                                        }
-
-                                    }
-                                </select>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="staticText" class="col-form-label">Grade</label>
-                                <select name="GradeID" class="form-control" onchange="FilterCourse()" required>
-                                    <option value="">--- Choose Grade --- </option>
-                                    @{
-                                        for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                        {
-                                            <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID" style="display: none">@listGrade[i].Name</option>
-                                        }
-
-                                    }
-                                </select>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="staticText" class="col-form-label">Curriculum</label>
-                                <select name="CourseID" class="form-control" onfocus="FilterCourse()" required>
-                                    <option value="">--- Choose Curriculum --- </option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="staticText" class="col-form-label">Start date</label>
-                                <input type="text" class="form-control datepicker" placeholder="Start date" required>
-                                <input type="hidden" name="StartDate" class="hiddenDate" id="StartDate" value="">
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="staticText" class="col-form-label">End date</label>
-                                <input type="text" class="form-control datepicker" placeholder="End date" required>
-                                <input type="hidden" name="EndDate" class="hiddenDate" id="EndDate" value="">
-                            </div>
-                            <div class="form-group col-md-6 d-none">
-                                <label for="staticText" class="col-form-label">Teacher</label>
-                                @*<select name="TeacherID" class="form-control">
-                                        @{
-                                            for (int i = 0; listTeacher != null && i < listTeacher.Count; i++)
-                                            {
-                                                <option value="@listTeacher[i].ID">@listTeacher[i].FullName (@listTeacher[i].Email)</option>
-                                            }
-
-                                        }
-                                    </select>*@
-                                <input type="hidden" name="TeacherID" value="@user" />
-                            </div>
-
-                            <div class="form-group col-md-6 d-none">
-                                <label for="staticText" class="col-form-label">Status</label>
-                                @*<select name="IsActive" class="form-control">
-                                        <option value="true" selected>Hoạt động</option>
-                                        <option value="false">Không hoạt động</option>
-                                    </select>*@
-                                <input name="IsActive" type="hidden" value="true" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "Class" )','create',LoadData)">Save</button>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
 }

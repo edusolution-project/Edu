@@ -1,8 +1,7 @@
 ﻿@{
-    ViewData["Title"] = "My Events";
-    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    ViewData["Title"] = "Các hoạt động đang diễn ra";
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
 }
-
 <link href="~/css/calendar/core.css" rel="stylesheet" />
 <link href="~/css/calendar/daygrid.css" rel="stylesheet" />
 <link href="~/css/calendar/list.css" rel="stylesheet" />
@@ -12,55 +11,37 @@
 <script src="~/js/lib/datetimepicker/jquery.mousewheel.js"></script>
 <script src="~/js/lib/datetimepicker/jquery.datetimepicker.js"></script>
 
-
 <script>
-    setActiveMenu("calendar");
+    activeTab = "calendar";
 </script>
 
-<section class="module" id="dashboard_content">
-    <div class="card-header">
-        <div class="flex border-b padding-b25">
-            <h2 class="title">@ViewData["Title"]</h2>
-        </div>
+<div class="left-col">
+    <div class="page-title row">
+        <h1 class="col-md-11">@ViewData["Title"]</h1>
     </div>
-    <div id="schedule" class="pl-3 pr-3"></div>
-</section>
+
+    <div class="main-container">
+        <div id="schedule"></div>
+
+    </div>
+</div>
 
 <style>
-    #schedule {
-        margin-top: 30px;
-        height: calc(100vh - 135px);
+    .fc-button-primary {
+        background-color: #76828e;
+        border-color: #76828e;
     }
 
-    .fc-toolbar.fc-header-toolbar {
-        display: none;
-    }
+        .fc-button-primary:hover {
+            background-color: #004085;
+        }
 
-    .fc-day-header {
-        height: 50px;
-        line-height: 43px;
-        border: solid 1px #CCC !important;
-    }
-
-    .fc-unthemed .fc-content, .fc-unthemed .fc-divider, .fc-unthemed .fc-list-heading td, .fc-unthemed .fc-list-view, .fc-unthemed .fc-popover, .fc-unthemed .fc-row, .fc-unthemed tbody, .fc-unthemed td, .fc-unthemed th, .fc-unthemed thead {
-        border-color: #D0DFE8;
-    }
-
-    .fc-ltr .fc-dayGrid-view .fc-day-top .fc-day-number {
-        float: left;
-    }
-
-    .fc-event, .fc-event-dot {
-        background: none;
-    }
-
-    .fc-event {
-        border: none;
-    }
-
-    .fc-time {
-        color: #d05151
-    }
+        .fc-button-primary:not(:disabled).fc-button-active,
+        .fc-button-primary:not(:disabled):active {
+            color: #fff;
+            background-color: #004085;
+            border-color: #76828e;
+        }
 </style>
 
 @section Scripts{
@@ -69,11 +50,7 @@
         var schedulex = new CalendarLib.Schedule($);
         schedulex.onLoad({
             type: "@User?.FindFirst("Type").Value",
-            controller: 'Calendar',
-            header: {},
-            isDev:!0,
-            defaultView: "dayGridMonth",
-            height: document.getElementById("schedule").offsetHeight
+            controller: 'Calendar'
         });
         $('#start-date').datetimepicker({
             formatTime: 'H:i',
@@ -91,29 +68,28 @@
     </script>
 }
 
-@section Modals{
-    <div id="calendarModal" class="modal fade">
+@section Modals { <div id="calendarModal" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 id="modalTitle" class="modal-title"></h4>
+                    <h4 id="modalTitle" class="modal-title">Thêm sự kiện</h4>
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
                 </div>
                 <div id="modalBody" class="modal-body">
                     <form action="#" name="scheduleForm">
                         <input type="hidden" class="form-control" name="id" value="">
-                        <label for="">Title :</label>
+                        <label for="">Tên sự kiện :</label>
                         <div class="form-group">
                             <input type="text" class="form-control" name="Title" placeholder="Title">
                         </div>
                         <div class="form-group">
-                            <label for="">StartDate :</label>
+                            <label for="">Bắt đầu :</label>
                             <div class="input-group date">
                                 <input type="text" name="StartDate" class="form-control datetimepicker-input" id="start-date" />
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="">End Date :</label>
+                            <label for="">Kết thúc :</label>
                             <div class="input-group date">
                                 <input type="text" name="EndDate" class="form-control datetimepicker-input" id="end-date" />
                             </div>
@@ -145,7 +121,7 @@
                     <div class="form-group form-inline">
                         <label for="start-date"> Bắt đầu : </label>
                         <b name="start-date"></b>
-                    </div>b
+                    </div>
                     <div class="form-group form-inline">
                         <label for="end-date">Kết thúc : </label>
                         <b name="end-date"></b>
@@ -157,5 +133,4 @@
                 </div>
             </div>
         </div>
-    </div>
-}
+    </div>}

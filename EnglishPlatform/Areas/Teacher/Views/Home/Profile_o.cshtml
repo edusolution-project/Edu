@@ -1,0 +1,242 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model BaseCustomerEntity.Database.TeacherEntity;
+
+@{
+    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    ViewData["Title"] = "Update Account Info";
+}
+
+
+<script>
+    activeTab = "profile";
+</script>
+
+<div class="left-col">
+    <div class="page-title row">
+        <h1 class="col-md-10">@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+        <div class="row pt-2">
+            <form action="/teacher/Home/UploadPhoto" method="post" enctype="multipart/form-data" asp-antiforgery="true" id="formUpload">
+                <div class="col-md-2">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <img class="img-responsive" src="@ViewBag.avatar" id="myAccount_photo" width="128" height="128" />
+                                <input name="files" id="files" type="file" accept="image/*"
+                                       multiple="false" style="display:none"
+                                       onchange="uploadFiles('files')" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <div class="form-group">
+                                    <div class="alert alert-danger" role="alert" id="msgUploadPhoto" style="display:none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+
+            <div class="col-md-8">
+                <form action="/teacher/Home/Profile" method="post">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="FullName">Họ tên</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <input asp-for="FullName" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="Phone">Điện thoại</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <input asp-for="Phone" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="Email">Email</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <input asp-for="Email" readonly="true" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary" data-placement="top" onclick="refreshData()"
+                                        title="Change Password" data-toggle="modal" data-target="#changePassModal">
+                                    Change password
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <input type="button" class="btn btn-primary btn-user btn-block" onclick="submit(this)" value="Save">
+                            </div>
+                        </div>
+                    </div>
+                    @if (ViewBag.Visible != null)
+                    {
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="alert alert-success" role="alert">
+                                    @ViewBag.Description
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("#myAccount_photo").click(function () {
+        $("#files").click();
+    });
+
+    function submitForm(formId) {
+        document.getElementById(formId).submit();
+    }
+
+    function uploadFiles(inputId) {
+        var input = document.getElementById(inputId);
+        var files = input.files[0];
+        var formData = new FormData();
+        formData.append("fileUpload", files);
+
+        $.ajax(
+            {
+                url: "/teacher/Home/UploadPhoto",
+                data: formData,
+                processData: false,
+                contentType: false,
+                type: "POST",
+                success: function (data) {
+                    console.log(data);
+                    if (data.StatusCode === '0') {
+                        document.getElementById('msgUploadPhoto').style.display = 'block';
+                        document.getElementById('msgUploadPhoto').innerHTML = data.StatusDesc;
+                    } else {
+                        console.log(data);
+                        $("#myphotoTeacher").attr('src', data.StatusDesc);
+                        $("#sidebarPhotoAcc").attr('src', data.StatusDesc);
+                        $("#leftMenuPhotoAcc").attr('src', data.StatusDesc);
+                        $("#msgUploadPhoto").style.display = 'none';
+                    }
+
+                }
+            }
+        );
+    }
+
+    function changePass(inputId) {
+        var oldpass = document.getElementById('oldpass');
+        var formData = new FormData();
+        formData.append("oldpass", document.getElementById('oldpass').value);
+        formData.append("newpass", document.getElementById('newpass').value);
+        formData.append("retypepass", document.getElementById('retypepass').value);
+
+        $.ajax(
+            {
+                url: "/teacher/Home/ChangePassword",
+                data: formData,
+                processData: false,
+                contentType: false,
+                type: "POST",
+                success: function (data) {
+                    console.log(data);
+                    $('#div_msg').show();
+                    if (data.Error != null) {
+                        $('#div_msg div').attr('class', 'alert alert-danger').html(data.Error);
+                    } else {
+                        //$('#div_msg div').attr('class', 'alert alert-success').html(data.Message);
+                        hideModal();
+                    }
+                }
+            }
+        );
+    }
+
+    function refreshData() {
+        $('#oldpass').val('');
+        $('#newpass').val('');
+        $('#retypepass').val('');
+        $('#div_msg').hide();
+    }
+
+
+</script>
+
+@section Modals{
+    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+         aria-hidden="true" id="changePassModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Change Password</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div class="row">
+
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group" id="div_msg" style="display:none">
+                            <div role="alert">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Current Password:</label>
+                            <input type="password" class="form-control" name="oldpass" id="oldpass">
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">New Password:</label>
+                            <input type="password" class="form-control" name="newpass" id="newpass">
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Retype Password:</label>
+                            <input type="password" class="form-control" name="retypepass" id="retypepass">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="changePass()">Change</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+

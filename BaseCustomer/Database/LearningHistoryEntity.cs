@@ -123,16 +123,17 @@ namespace BaseCustomerEntity.Database
                 && o.LessonID == item.LessonID);
         }
 
-        public long CountLessonLearnt(string StudentID, string LessonID)
+        public long CountLessonLearnt(string StudentID, string LessonID, string ClassID)
         {
             return CountHistory(new LearningHistoryEntity
             {
                 StudentID = StudentID,
+                ClassID = ClassID,
                 LessonID = LessonID
             });
         }
 
-        public DateTime GetFirstLearnt(string StudentID, string LessonID)
+        public DateTime GetLastLearnt(string StudentID, string LessonID)
         {
             return Collection.Find(t => t.StudentID == StudentID && t.LessonID == LessonID).SortByDescending(t => t.ID).Project(t => t.Time).FirstOrDefault();
         }

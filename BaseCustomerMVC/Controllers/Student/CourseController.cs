@@ -277,6 +277,7 @@ namespace BaseCustomerMVC.Controllers.Student
                        where _lesson != null
                        let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
                        where _class != null
+                       let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
                        select new
                        {
                            id = o.ID,
@@ -285,7 +286,8 @@ namespace BaseCustomerMVC.Controllers.Student
                            title = _lesson.Title,
                            lessonID = _lesson.ID,
                            startDate = o.StartDate,
-                           endDate = o.EndDate
+                           endDate = o.EndDate,
+                           isLearnt = isLearnt
                        }).ToList();
             return Json(new { Data = std });
         }

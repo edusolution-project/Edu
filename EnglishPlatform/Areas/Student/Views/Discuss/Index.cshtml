@@ -14,10 +14,10 @@
     var currentClass = ViewBag.Class as ClassInfo;
 }
 <script>
-    var activeTab = "comments";
+    setActiveMenu("discussion");
 </script>
 <style>
-    #form-post .file-media,.form-comment .file-media {
+    #form-post .file-media, .form-comment .file-media {
         position: absolute;
         right: 15px;
         top: 0;
@@ -27,7 +27,7 @@
         margin: auto;
     }
 
-    #form-comment .media-preview,#form-post .media-preview,.form-comment .media-preview {
+    #form-comment .media-preview, #form-post .media-preview, .form-comment .media-preview {
         position: absolute;
         max-height: 80px;
         max-width: 100%;
@@ -36,18 +36,18 @@
         overflow: hidden;
     }
 
-    #form-post,.form-comment {
+    #form-post, .form-comment {
         position: relative;
     }
 
-        #form-comment .box-content-view-media > img ,#form-post .box-content-view-media > img {
+        #form-comment .box-content-view-media > img, #form-post .box-content-view-media > img {
             max-width: 100%;
             max-height: 100%;
-            height:100%;
-            width:auto;
+            height: 100%;
+            width: auto;
         }
 
-        #form-post .box-content-view-media,#form-comment .box-content-view-media {
+        #form-post .box-content-view-media, #form-comment .box-content-view-media {
             display: inline-block;
             width: 100%;
             height: 80px;
@@ -57,7 +57,7 @@
             position: relative;
         }
 
-        #form-post .btn-remove,#form-comment .btn-remove {
+        #form-post .btn-remove, #form-comment .btn-remove {
             position: absolute;
             right: 0;
             background: #fff;
@@ -79,9 +79,11 @@
     .media-post {
         padding: 5px 30px;
     }
+
     .item-feed .media-post > img, .item-comment .media-post > img {
         width: auto;
     }
+
     .box-search {
         width: 100%;
     }
@@ -137,16 +139,20 @@
         margin-bottom: 10px;
         padding: 5px 10px;
     }
-    .item-feed:hover, .item-feed.active {
-        box-shadow: 0 0 10px #ccc;
+
+        .item-feed:hover, .item-feed.active {
+            box-shadow: 0 0 10px #ccc;
+        }
+
+        .item-feed .content-post {
+            padding-left: 30px;
+            text-align: justify;
+        }
+
+    .body-comment .item-feed .content-post {
+        padding-left: 0;
     }
-    .item-feed .content-post {
-        padding-left: 30px;
-        text-align: justify;
-    }
-    .body-comment .item-feed .content-post{
-        padding-left:0;
-    }
+
     .item-feed .extends-post > a {
         color: #D03239;
         padding: 5px;
@@ -154,9 +160,10 @@
         font-size: 0.85em;
     }
 
-    .item-feed .extends-post > a:hover, .item-feed .extends-post > a:active {
-        text-decoration: none;
-    }
+        .item-feed .extends-post > a:hover, .item-feed .extends-post > a:active {
+            text-decoration: none;
+        }
+
     .item-feed.item-comment.chude {
         background: #7cc6f13b;
         padding: 10px;
@@ -323,7 +330,7 @@
                                 @{ if (currentClass != null && currentClass.IsAllow)
                                     {
                                         <div class="form-comment" id="form-comment">
-                                            <div class="media-preview"></div>                                            
+                                            <div class="media-preview"></div>
                                             <textarea rows="3" style="padding-right: 70px;border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
                                             <input type="file" name="comment-file" style="display:none" />
                                             <button class="file-media"><img src="~/images/jpg.png" /></button>
@@ -387,8 +394,8 @@
         </div>
     </div>
 </section>
-    @section Scripts{
-        <script>
+@section Scripts{
+    <script>
         $("#choosen-group").on("change", function () {
             var value = $(this).val();
             if (value == null || value == "") {
@@ -571,7 +578,7 @@
             ojChat.querySelector("input[name='ParentID']").value = id;
             ojChat.querySelector(".body-comment").innerHTML = `<div class="item-feed item-comment chude">
                                     <div class="content-post">
-                                        ${media}${content} 
+                                        ${media}${content}
                                     </div>
                                 </div>`;
             $.ajax({
@@ -620,10 +627,10 @@
         });
 
 
-        </script>
-        @{ if (currentClass != null && currentClass.IsAllow)
-            {
-                <script>
+    </script>
+    @{ if (currentClass != null && currentClass.IsAllow)
+        {
+            <script>
                     var filesListComment = {};
                     var filesList = {};
                     var formComment = document.getElementById("form-comment");
@@ -662,7 +669,7 @@
                 var formPost = document.getElementById("form-post");
                 if (formPost != null) {
                     var previewMedia = formPost.querySelector('.media-preview');
-                    
+
                     var inputFile = formPost.querySelector("input[type='file']");
                     if (inputFile != null) {
                         inputFile.onchange = function () {
@@ -777,7 +784,7 @@
                         }
                     }
                 });
-                </script>
-            }
+            </script>
         }
     }
+}

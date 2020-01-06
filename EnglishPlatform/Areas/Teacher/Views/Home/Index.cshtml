@@ -1,228 +1,313 @@
 ﻿@{
     ViewData["Title"] = "Dashboard - " + DateTime.Now.ToString("D");
-    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
 }
-<link href="~/css/calendar/core.css" rel="stylesheet" />
-<link href="~/css/calendar/daygrid.css" rel="stylesheet" />
-<link href="~/css/calendar/list.css" rel="stylesheet" />
-<link href="~/css/calendar/timegrid.css" rel="stylesheet" />
 <script>
-    activeTab = "dashboard";
+    setActiveMenu("home");
 </script>
-<div class="left-col">
-    <div class="page-title row">
-        <h1 class="col-md-6 col-sm-12">Dashboard: @User.Identity.Name</h1>
-        <h2 class="col-md-6 text-right col-sm-12">
-            @DateTime.Now.ToString("D")
-        </h2>
-    </div>
-    <div class="row m-0">
-        <div class="main-container  col-md-10">
-            <div class="active-region">
-                <div class="block-title">
-                    <h2>Ongoing</h2>
-                </div>
-                <table id="activeCourse" class="table" style="display:none" width="100%" cellspacing="0">
-                    <thead>
-                        <tr class="text-center">
-                            <th class="text-left">Index</th>
-                            <th class="text-left">Class</th>
-                            <th class="text-left">Subject</th>
-                            @*<th class="text-left">Cấp độ</th>
-                                <th>Giáo viên</th>*@
-                            <th class="text-center">Registered Students</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Due</th>
-                            @*
-                                <th>Trạng thái</th>*@
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                <div id="placeholderActive">
-                    <i class="fas fa-circle-notch fa-spin"></i> Loading ...
-                </div>
-            </div>
-            <div class="past-region" style="display: none">
-                <div class="block-title">
-                    <h2>Past Classes</h2>
-                </div>
-                <table id="pastCourse" class="table" width="100%" cellspacing="0">
-                    <thead>
-                        <tr class="text-center">
-                            <th class="text-left">Index</th>
-                            <th class="text-left">Class</th>
-                            <th class="text-left">Subject</th>
-                            <th class="text-center">Registered Students</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Due</th>
-                            @*
-                                <th>Trạng thái</th>*@
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div id="schedule" class="pt-3"></div>
-        </div>
-    </div>
-</div>
-<div id="calendarModalView" class="modal fade">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title"></h4>
-                @*<button type="button" class="edit"><span aria-hidden="true">edit</span> <span class="sr-only">edit</span></button>
-                    <button type="button" class="delete"><span aria-hidden="true">delete</span> <span class="sr-only">delete</span></button>*@
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-            </div>
-            <div id="modalBody" class="modal-body">
-                <div class="form-group form-inline">
-                    <label for="start-date"> Bắt đầu : </label>
-                    <b name="start-date"></b>
-                </div>
-                <div class="form-group form-inline">
-                    <label for="end-date">Kết thúc : </label>
-                    <b name="end-date"></b>
-                </div>
-                <div class="form-group">
-                    <label for="end-date">Link liên kết : </label>
-                    <a href="#" name="link"></a>
-                </div>
+
+<section class="module" id="dashboard_content">
+    <div class="card-header">
+        <div class="flex border-b padding-b25">
+            <h2 class="title">Welcome to <font>EDUCOO</font></h2>
+            <div class="search-box">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" placeholder="Search">
             </div>
         </div>
     </div>
-</div>
+    <div class="card-body">
+        <div class="box mb-3">
+            <div class="heading flex mb-2">
+                <h4 class="box-head">Bài giảng tuần này</h4>
+                <a href="@Url.Action("Index","Class")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+            </div>
+            <div class="box bg-1 padding-15">
+                <ul class="box list-scroll">
+                    <li>
+                        <div class="box radius">
+                            <div class="padding-15 inner">
+                                <h4><i class="ic ic-headphone-o"></i>Listening</h4>
+                                <a href="#" title="IELTS Preparation" class="title">IELTS Preparation</a>
+                                <p><i class="ic ic-pickdate-r"></i>4/6 tuần</p>
+                                <div class="c-bot">
+                                    <p><i class="icofont icofont-user"></i>3 học viên</p>
+                                    <p><i class="ti-time"></i>12/08/2019</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="box radius">
+                            <div class="padding-15 inner">
+                                <h4><i class="ic ic-readbook-o"></i>Listening</h4>
+                                <a href="#" title="IELTS Preparation" class="title">IELTS Preparation</a>
+                                <p><i class="ic ic-pickdate-r"></i>4/6 tuần</p>
+                                <div class="c-bot">
+                                    <p><i class="icofont icofont-user"></i>3 học viên</p>
+                                    <p><i class="ti-time"></i>12/08/2019</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row margin-b20">
+            <div class="col-md-6">
+                <div class="box mb-3">
+                    <div class="heading flex mb-2">
+                        <h4 class="box-head">Khóa học đang diễn ra</h4>
+                        <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                    </div>
+                    <div class="box bg-1 padding-15 height-245">
+                        <ul class="box list-scroll">
+                            <li>
+                                <div class="box radius">
+                                    <div class="thumb">
+                                        <img src="/pictures/ielts1.png" alt="">
+                                    </div>
+                                    <div class="padding-15 inner">
+                                        <a href="#" title="IELTS Preparation" class="title">IELTS Preparation</a>
+                                        <p><i class="ic ic-pickdate-r"></i>4/6 tuần</p>
+                                        <div class="c-bot">
+                                            <p><i class="icofont icofont-user"></i>3 học viên</p>
+                                            <p><i class="ti-time"></i>12/08/2019</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="box radius">
+                                    <div class="thumb">
+                                        <img src="/pictures/ielts1.png" alt="">
+                                    </div>
+                                    <div class="padding-15 inner">
+                                        <a href="#" title="IELTS Preparation" class="title">IELTS Preparation</a>
+                                        <p><i class="ic ic-pickdate-r"></i>4/6 tuần</p>
+                                        <div class="c-bot">
+                                            <p><i class="icofont icofont-user"></i>3 học viên</p>
+                                            <p><i class="ti-time"></i>12/08/2019</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="box mb-3">
+                    <div class="heading flex mb-2">
+                        <h4 class="box-head">Thảo luận</h4>
+                        <a href="/discussion.html" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                    </div>
+                    <div class="box bg-1 padding-15 height-245">
+                        <ul class="list-discus">
+                            <li v-for="(item,k) in discussion">
+                                <div class="flex c-top">
+                                    <a href="discussion_detail.html" :title="item.title" class="title">{{item.title}}</a>
+                                    <div class="c-right"><i class="icofont icofont-user"></i>{{item.member + ' members'}}</div>
+                                </div>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="module">
+            <div class="row">
+                <div class="col-md-12 margin-b20">
+                    <div class="heading flex">
+                        <h4 class="box-head">Khóa học đã kết thúc</h4>
+                        <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <ul class="row">
+                <li class="col-md-4 less-done list" v-for="(item,k) in Lesson_done">
+                    <div class="box radius">
+                        <a href="#" class="flex">
+                            <span class="per checked"><i class="ic ic-checked"></i></span>
+                            <div class="info">
+                                <span>{{item.title}}</span>
+                                <span>{{item.date}}</span>
+                            </div>
+                            <span class="arr-right ti-arrow-right"></span>
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </div>
 
-<script src="~/js/lib/schedule-mini.js"></script>
+    </div>
+</section>
 
-<script>
-
-    function LoadData() {
-        $.ajax({
-            type: "POST",
-            url: '@Url.Action("GetList", "Class")',
-            data: { },
-            dataType:"json",
-            success: function (data) {
-
-                $('#placeholderActive').hide();
-
-                var activeCourse = $('#activeCourse tbody');
-                var pastCourse = $('#pastCourse tbody');
-                activeCourse.html("");
-                pastCourse.html("");
-                var counter = 0;
-                var pastcounter = 0;
-                if (data.Data.length > 0)
+@section Scripts{
+    <script>
+    new Vue({
+        el: ".module",
+		mounted(){
+            // khởi tạo dữ liệu khi load Trang
+            // chỗ này sẽ chạy lúc đầu khi vào trang
+            this.getLessonWeek()
+            this.getLessonDone()
+            this.getLessonDay()
+            this.getNews()
+		},
+        data: {
+            Lesson_week : [
                 {
-                    for (i = 0; i < data.Data.length; ++i) {
-                        item = data.Data[i];
-                        //var active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' disabled> <div class='handle'></div> </button></td>";
-
-                        var startdate = moment(item.StartDate).format('DD/MM/YYYY');
-                        var enddate = moment(item.EndDate).format('DD/MM/YYYY');
-                        var today = new Date();
-
-                        var totalday = moment(item.EndDate).diff(moment(item.StartDate), 'days');
-                        var completeday = moment(today).diff(moment(item.StartDate), 'days');
-                        if(completeday > totalday) completeday = totalday;
-
-
-                        var past = moment(today).diff(moment(item.EndDate), 'days') > 0;
-
-                        var count = past ? ++pastcounter : ++counter;
-
-                        var row =
-                            "<tr>" +
-                                "<td>" + count + "</td>" +
-                                "<td><a href='@Url.Action("Detail", "Class")/" + item.ID + "'>" + item.Name + "</td>" +
-                                "<td>" + item.SubjectName + "</td>" +
-                                //"<td>" + item.GradeName + "</td>" +
-                                "<td class='text-center'>" + item.Students.length + "</td>" +
-                                "<td class='text-center'>" + Math.ceil(completeday/7) + "/" + Math.ceil(totalday/7)  + " tuần</td>" +
-                                "<td class='text-center'>" + enddate +"</td>"+
-                            "</tr>";
-                        if (past) {
-                            $('.past-region').show();
-                             pastCourse.append(row);
-                        }
-                        else {
-                            $('#activeCourse').show();
-                            activeCourse.append(row);
-                        }
-                    }
-
+                    Lesson : 'Lesson 1',
+                    title : 'IELTS Practice',
+                    date : '12/08/2019 ',
+                    score : 2,
+                    total_scrore : 5,
+                    per : '70'
+                },
+                {
+                    Lesson : 'Lesson 2',
+                    title : 'IELTS Practice',
+                    date : '12/08/2019 ',
+                    score : 3,
+                    total_scrore : 5,
+                    per : '40'
+                },
+                {
+                    Lesson : 'Thì hiện tại tiếp diễn',
+                    title : 'Ngữ pháp A2',
+                    date : '12/08/2019 ',
+                    score : 4.5,
+                    total_scrore : 5,
+                    per : '45'
                 }
-                if (counter === 0) {
-                    $('#placeholderActive').empty().append($("<div>", {"class":"w-100 text-left p-3 mb-3","text":"Không có lớp"}));
+            ],
+            Lesson_day : [
+                {
+                    Lesson : 'Lesson 1',
+                    title : 'IELTS Practice',
+                    date : '12/08/2019 ',
+                    score : 4.5,
+                    total_scrore : 5,
+                    per : '70'
+                },
+                {
+                    Lesson : 'Lesson 2',
+                    title : 'IELTS Practice',
+                    date : '12/08/2019 ',
+                    score : 4.5,
+                    total_scrore : 5,
+                    per : '70'
+                },
+                {
+                    Lesson : 'Thì hiện tại tiếp diễn',
+                    title : 'Ngữ pháp A2',
+                    date : '12/08/2019 ',
+                    score : 4.5,
+                    total_scrore : 5,
+                    per : '70'
                 }
-            },
-            error: function() {
-                alert("Error");
+            ],
+            discussion : [
+                {
+                    title : 'IELTS 5.0',
+                    member : 3,
+                    description : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.'
+                },
+                {
+                    title : 'IELTS 5.1',
+                    member : 12,
+                    description : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.'
+                }
+            ],
+            Lesson_done : [
+                {
+                    title : 'IELTS Practice',
+                    score : 7,
+                    per : 90,
+                    date : '12/08/2019'
+                },
+                {
+                    title : 'Destination',
+                    score : 8,
+                    per : 70,
+                    date : '12/08/2019'
+                },
+                {
+                    title : 'Destination',
+                    score : 5,
+                    per : 50,
+                    date : '12/08/2019'
+                }
+            ],
+            list_news : [
+                {
+                    title : 'Đã đến lúc HLV Park',
+                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                    thumbnail : '/pictures/news1.png'
+                },
+                {
+                    title : 'HLV Park: Có khi p',
+                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                    thumbnail : '/pictures/news2.png'
+                },
+                {
+                    title : 'Tiến Dũng và Văn Toả',
+                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                    thumbnail : '/pictures/news3.png'
+                }
+            ],
+            week : ''
+        },
+        watch : {
+            Lesson_week : function(val){
+                console.log(val)
             }
-        });
-    };
-
-    $(document).ready(function(){
-        //LoadMyClass();
-        //LoadTodayLesson();
-        LoadData();
-    });
-
-       var schedulex = new CalendarLib.Schedule($);
-        schedulex.onLoad({
-            type: "@User?.FindFirst("Type").Value",
-            controller: 'Calendar'
-        });
-
-</script>
-
-<style>
-    .fc-content {
-        font-size: 9px;
-        cursor: pointer;
-    }
-
-    .fc-center {
-        font-size: 7px;
-    }
-
-    /*.fc-toolbar.fc-header-toolbar {
-            margin-bottom: .5em;
-        }*/
-
-    .fc-toolbar .fc-button {
-        /*padding: 0.2em;*/
-        /*line-height: 1em;*/
-    }
-
-    .fc-dayGrid-view .fc-body .fc-row {
-        min-height: 3em;
-    }
-
-    .fc-day-header {
-        font-weight: normal;
-        border: solid 1px #CCC !important;
-        /*font-size: 11px;*/
-    }
-
-        .fc-day-header span {
-            font-size: 11px;
+        },
+        methods: {
+            getLessonWeek(){
+                let _that = this
+                // Truyen param vào đây
+                let _params = {
+                    week : _that.week
+                }
+                // link api để gọi
+                // Nếu method là GET
+                // let _url = 'apiGetLessonWeek'
+                // axios.get(_url,{params:_params})
+                //     .then(response =>{
+                //         console.log(response.data)
+                //         // sửa lại theo format mà api cụ thể trả về (chỗ này chỉ là demo)
+                //         if(response.data.succes){
+                //             // Gán dữ liệu vào biến đã khởi tạo nó sẽ render ra ở view
+                //             _that.Lesson_week = response.data.data
+                //         }else{
+                //             // xử lý lỗi
+                //         }
+                //     }).catch(e =>{})
+                    // Nếu là POST
+                    // nếu ko đc thì phải dùng FormData @@
+                // axios.post(_url,_params)
+                //     .then(response =>{
+                //         console.log(response.data)
+                //         if(response.data.succes){
+                //             _that.Lesson_week = response.data.data
+                //         }else{
+                //             //
+                //         }
+                //     }).catch(e =>{})
+            },
+            getLessonDone(){
+                // tương tự như trên
+            },
+            getLessonDay(){
+                // tương tự như trên
+            },
+            getNews(){
+                // tương tự như trên
+            },
         }
-
-    .fc-day-top {
-        text-align: right;
-        padding-right: 3px !important;
-    }
-
-    .fc-button .fc-icon {
-        font-size: 1em;
-    }
-
-    .fc-icon {
-        height: 1em;
-    }
-</style>
+    });
+    </script>
+}

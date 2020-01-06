@@ -1,291 +1,114 @@
 ﻿@{
-    ViewData["Title"] = "Bí kíp hay & sách đáng đọc";
-    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
-    var myClasses = ViewBag.AllClass as List<BaseCustomerEntity.Database.ClassEntity>;
-    var owner = ViewBag.User as string;
+    ViewData["Title"] = "Reference - " + DateTime.Now.ToString("D");
+    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
 }
 <script>
-    activeTab = "reference";
+    setActiveMenu("reference");
 </script>
-<div class="left-col">
-    <div class="page-title">
-        <h1>@ViewData["Title"]</h1>
-    </div>
-    <div class="main-container">
-        <div class="main-content">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="pt-3 pb-3 text-right"><button class="btn btn-primary" data-toggle="modal" data-target="#refModal" onclick="EditRef()">Thêm tài liệu mới</button></div>
-                    <table id="tblRef" class="table" width="100%" cellspacing="0">
-                        <thead>
-                            <tr class="text-center">
-                                <th class="text-center">STT</th>
-                                <th class="text-center">Title</th>
-                                @*<th class="text-left">Mô tả</th>*@
-                                <th class="text-center">Người gửi</th>
-                                <th class="text-center">Link liên kết</th>
-                                <th class="text-center">File đính kèm</th>
-                                <th class="text-center">Lượt xem</th>
-                                <th class="text-center">Lượt tải</th>
-                                <th class="text-center"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+
+<section class="module" id="dashboard_content">
+    <div class="card-header">
+        <div class="flex border-b padding-b25">
+            <div class="width-100 flex">
+                <div class="box filter-box w-152">
+                    <select v-model="course">
+                        <option value="">Khoá học</option>
+                        <option value="all">Tất cả</option>
+                    </select>
                 </div>
+                <div class="box filter-box w-152">
+                    <select v-model="level">
+                        <option value="">Cấp độ</option>
+                        <option value="0">Tất cả</option>
+                    </select>
+                </div>
+            </div>
+            <div class="search-box">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" placeholder="Search">
             </div>
         </div>
     </div>
-</div>
-@section Modals {
-    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-hidden="true" id="refModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Cập nhật tài liệu tham khảo</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div>
-                        <input type="hidden" name="ID" id="refID" />
-                        <div class="form-group">
-                            <label class="col-form-label">Title:</label>
-                            <input type="text" class="form-control" name="Title" id="refTitle" required>
+    <div class="card-body">
+        <div class="row ls-doc">
+            <div class="col-md-12">
+                <div class="inner">
+                    <a href="#" title="" class="thumb">
+                        <img src="/pictures/doc1.png" alt="">
+                    </a>
+                    <div class="entry">
+                        <div class="flex j-between">
+                            <div class="c-left">
+                                <a href="#" title="" class="title">IELTS Practice Tests</a>
+                                <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                            </div>
+                            <div class="c-right">
+                                <a href="#" title="Xem" class="btn-view">Xem</a>
+                                <a href="#" title="Tải về" class="btn-download">Tải về</a>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Mô tả:</label>
-                            <textarea class="form-control" name="Description" id="refDescription" rows="3"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Link liên kết:</label>
-                            <input type="text" class="form-control" name="Link" id="refLink">
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">File đính kèm:</label>
-                            <button class="btn-secondary btn p-1" id="btnAttachment" onclick="ChooseFile(this); return false;">Chọn file</button>
-                            <input type="file" class="d-none" name="attachment" id="refAttachment" onchange="DisplayFile(this)">
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Phạm vi chia sẻ:</label>
-                            <select name="range" onchange="ChooseRange()" id="refRange" class="form-control d-inline w-25">
-                                <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Công khai</option>
-                                <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
-                                <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
-                            </select>
-                            <select name="target" id="refTarget" class="form-control d-none w-25">
-                                @*<option>--- Chọn lớp ---</option>*@
-                                @if (myClasses != null && myClasses.Count > 0)
-                                {
-                                    foreach (var _class in myClasses)
-                                    {
-                                        <option value="@_class.ID">@_class.Name (@_class.Code)</option>
-                                    }
-                                }
-                            </select>
-                        </div>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</p>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="UploadRef(); return false;">Save</button>
+            </div>
+            <div class="col-md-12">
+                <div class="inner">
+                    <a href="#" title="" class="thumb">
+                        <img src="/pictures/doc2.png" alt="">
+                    </a>
+                    <div class="entry">
+                        <div class="flex j-between">
+                            <div class="c-left">
+                                <a href="#" title="" class="title">IELTS Practice Tests</a>
+                                <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                            </div>
+                            <div class="c-right">
+                                <a href="#" title="Xem" class="btn-view">Xem</a>
+                                <a href="#" title="Tải về" class="btn-download">Tải về</a>
+                            </div>
+                        </div>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-}
-<style>
-    .ui-front {
-        z-index: 9999;
-    }
-</style>
-@section Scripts {
+</section>
 
+@section Scripts{
     <script>
-
-        $(document).ready(function () {
-            LoadRef();
-        });
-
-        var allclass = @Html.Raw(Json.Serialize(myClasses));
-        var pageIndex = 0;
-        var pageSize = 30;
-        var defaultRange = '@BaseCustomerEntity.Database.REF_RANGE.ALL';
-        var defaultTarget = '';
-
-        function LoadRef() {
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("GetList", "Reference")',
-                data: {
-                    Range: '@BaseCustomerEntity.Database.REF_RANGE.ALL',
-                    Target: '',
-                    PageIndex: pageIndex + 1,
-                    PageSize: pageSize
+        new Vue({
+            el: ".module",
+            data: {
+            list_news : [
+                {
+                    title : 'Đã đến lúc HLV Park',
+                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                    thumbnail : '/pictures/news1.png'
                 },
-                dataType: "json",
-                success: function (data) {
-
-                    var refs = data.Data;
-
-                    var refBody = $('#tblRef tbody');
-                    refBody.empty();
-                    var counter = (pageSize * pageIndex) + 1;
-                    if (refs.length > 0) {
-                        for (i = 0; i < refs.length; ++i) {
-                            var ref = refs[i];
-
-                            var rowsContent = $("<tr>", { "id": ref.ID });
-                            var index = $("<td>", { text: counter++, class:"text-center" });
-                            var title = $("<td>", { text: ref.Title, class:"text-center" });
-                            var owner = $("<td>", { text: ref.OwnerName, class:"text-center" });
-                            var link = $("<td>", { class: "text-center" });
-                            if (ref.Link != null) {
-                                link.append($("<a>",
-                                    {
-                                        href: ref.Link,
-                                        title: ref.Link,
-                                        target: "_blank",
-                                        text: ref.Link
-                                    }));
-                            }
-                            var attachment = $("<td>", { class: "text-center" });
-                            if (ref.Media != null) {
-                                attachment.append($("<a>",
-                                    {
-                                        href: "http://" + window.location.hostname + (window.location.port ? ':' + window.location.port : '') + ref.Media.Path,
-                                        title: ref.Media.Name,
-                                        target: "_blank"
-                                    }).append($("<i>", { class: "fa fa-download", "aria-hidden": "true" })));
-                            }
-                            var view = $("<td>", { text: ref.Viewed, class: "text-center" });
-                            var download = $("<td>", { text: ref.Downloaded, class:"text-center" });
-                            var action = $("<td>");
-                            if (ref.OwnerID == '@owner') {
-                                action.append($("<a>", { href: "javascript:void(0)", onclick: "EditRef('" + ref.ID + "')", text: "Sửa", "data-toggle": "modal", "data-target":"#refModal" }));
-                                action.append(" ");
-                                action.append($("<a>", { href: "javascript:void(0)", onclick: "RemoveRef('" + ref.ID + "')", text: "Xóa" }));
-                            }
-                            rowsContent.append(index).append(title).append(owner).append(link).append(attachment).append(view).append(download).append(action);
-
-                            refBody.append(rowsContent);
-                        }
-                    }
+                {
+                    title : 'HLV Park: Có khi p',
+                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                    thumbnail : '/pictures/news2.png'
                 },
-                error: function (res) {
-                    console.log(res.responseText);
+                {
+                    title : 'Tiến Dũng và Văn Toả',
+                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
+                    thumbnail : '/pictures/news3.png'
                 }
-            });
-        }
+            ],
+            week : '',
+            course : 'all',
+            level : 0
+        },
+        watch : {
+        },
+        methods: {
 
-        function ChooseRange() {
-            if ($('#refRange').val() === '@BaseCustomerEntity.Database.REF_RANGE.CLASS') {
-                $('#refTarget').addClass('d-inline');
-            }
-            else {
-                $('#refTarget').removeClass('d-inline');
-            }
+            getNews(){
+                // tương tự như trên
+            },
         }
-
-        function UploadRef() {
-            var id = $('#refID').val();
-            var title = $('#refTitle').val();
-            if (title === '') {
-                alert('Chưa nhập Title');
-                $('#refTitle').focus();
-            }
-            var description = $('#refDescription').val();
-            var link = $('#refLink').val();
-            var range = $('#refRange').val();
-            var target = $('#refTarget').val();
-            if (range === '@BaseCustomerEntity.Database.REF_RANGE.CLASS' && target === '') {
-                alert('Chưa chọn lớp được chia sẻ');
-                $('#refTarget').focus();
-            }
-
-            var dataform = new FormData();
-            dataform.append("ID", id);
-            dataform.append("Title", title);
-            dataform.append("Description", description);
-            dataform.append("Link", link);
-            dataform.append("Range", range);
-            dataform.append("Target", target);
-            if($('#refAttachment')[0].files.length > 0)
-                dataform.append('file', $('#refAttachment')[0].files[0]);
-            $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("Save", "Reference")',
-                    data: dataform,
-                    contentType: false,
-                    processData: false,
-                    success: function (data) {
-                        var error = data.Error;
-                        if (error != null) {
-                            alert("Có lỗi: " + error);
-                            return false;
-                        }
-                        else {
-                            LoadRef();
-                            hideModal();
-                        }
-                    },
-                    error: function (res) {
-                        console.log(res.responseText);
-                    }
-                });
-        }
-
-        function EditRef(id) {
-            console.log(id);
-            $('#refTitle').val('');
-                $('#refDescription').val('');
-                $('#refLink').val('');
-                $('#refAttachment').val(null);
-                $('#btnAttachment').text("Chọn file");
-                $('#refID').val("");
-            if (id === undefined) {
-                $('#refRange').val(defaultRange).change();
-                $('#refTarget').val(defaultTarget);
-            }
-            else {
-                $('#refID').val(id);
-                $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("GetDetail", "Reference")',
-                    data: { ID: id },
-                    dataType:"json",
-                    success: function (data) {
-                        if (data != null && data.Data != null) {
-                            var ref = data.Data;
-                            $('#refTitle').val(ref.Title);
-                            $('#refDescription').val(ref.Description);
-                            $('#refLink').val(ref.Link);
-                            $('#refAttachment').val(null);
-                            if(ref.Media != null)
-                                $('#btnAttachment').text(ref.Media.Name);
-                            $('#refRange').val(ref.Range).change();
-                            $('#refTarget').val(ref.Target);
-                        }
-                        else {
-                            alert("Error");
-                            hideModal();
-                        }
-                    },
-                    error: function (res) {
-                        console.log(res.responseText);
-                    }
-                });
-            }
-        }
-
-        function ChooseFile(obj) {
-            $(obj).siblings('input[type=file]').focus().click();
-        }
-
-        function DisplayFile(obj) {
-            $(obj).siblings('button').text($(obj)[0].files[0].name);
-        }
+        });
     </script>
 }

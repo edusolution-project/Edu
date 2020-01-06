@@ -38,8 +38,7 @@
                                 <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
                                 <div class="c-bot">
                                     <div class="flex">
-                                        <b-progress :value="item.score" :max="item.total_scrore" class="mb-3"></b-progress>
-                                        <span>0%</span>
+                                        <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Hoàn Thành' : 'Chưa hoàn thành'}}
                                     </div>
                                 </div>
                             </div>
@@ -208,7 +207,7 @@
 
                 axios.get(_url, {
                     params: {
-                        pageSize: 5,
+                        pageSize: 6,
                         pageIndex: 0
                     }
                 })

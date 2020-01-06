@@ -1,434 +1,176 @@
 ﻿@{
-    ViewData["Title"] = "Curriculums";
-    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
-    var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
-    var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
-    var listModGrade = ViewBag.ModGrade as List<BaseCustomerEntity.Database.ModGradeEntity>;
-    var listModSubject = ViewBag.ModSubject as List<BaseCustomerEntity.Database.ModSubjectEntity>;
-    var user = ViewBag.User as string;
-    var role = ViewBag.RoleCode as string;
+    ViewData["Title"] = "Dashboard - " + DateTime.Now.ToString("D");
+    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
 }
-
 <script>
-    activeTab = "curriculum";
+    setActiveMenu("curriculum");
 </script>
 
-
-<div class="left-col">
-    <div class="page-title row">
-        <h1 class="col-md-11">@ViewData["Title"]</h1>
-        <div class="col-md-1 text-right">
-            <button type="button" onclick="addCourse()" class="btn btn-primary" data-placement="top" title="Add Curriculum" data-toggle="modal" data-target="#courseModal"> <i class="fas fa-plus"></i> </button>
-        </div>
-    </div>
-
-    <!-- Begin Page Content -->
-    <div class="main-container">
-        <div class="search-filter pt-3">
-            <div class="form-row">
-                <div class="form-group row col-md-4">
-                    <label for="staticText" class="col-sm-4 col-form-label">Subject</label>
-                    <div class="col-sm-8">
-                        <select id="SubjectID" class="form-control" onchange="LoadGrade(this)">
-                            <option value="">---</option>
-                            @{
-                                for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                {
-                                    <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                }
-
-                            }
-                        </select>
-                    </div>
+<section class="module" id="dashboard_content">
+    <div class="card-header">
+        <div class="flex border-b padding-b25 justify-content-between">
+            <div class="flex">
+                <div class="w-250 box filter-box">
+                    <select name="">
+                        <option value="">IELTS Preparation</option>
+                    </select>
                 </div>
-                <div class="form-group row col-md-4 offset-md-4">
-                    <label for="staticText" class="col-sm-4 col-form-label">Grade</label>
-                    <div class="col-sm-8">
-                        <select id="GradeID" class="form-control" onchange="LoadCourse()">
-                            <option value="" for="all">---</option>
-                            @{
-                                for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                {
-                                    <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                }
-
-                            }
-                        </select>
-                    </div>
+                <div class="box filter-box w-152">
+                    <select name="">
+                        <option value="">Môn học</option>
+                    </select>
+                </div>
+                <div class="box filter-box w-152">
+                    <select name="">
+                        <option value="">Cấp độ</option>
+                    </select>
                 </div>
             </div>
+            <b-button v-b-modal.modal_event class="btn-addevent"><i class="ti-plus"></i> Thêm bài giảng</b-button>
         </div>
-
-        <table id="tblCurriculum" class="table" width="100%" cellspacing="0">
+    </div>
+    <div class="card-body">
+        <table id="ed_table" class="table">
             <thead>
                 <tr>
-                    <th class="text-left">STT</th>
-                    <th class="text-left">Title</th>
-                    <th class="text-left">Subject</th>
-                    <th class="text-left">Grade</th>
-                    @*<th class="text-center">Người tạo</th>*@
-                    <th class="text-center">Create Date</th>
-                    <th class="text-center">
-                        Status
-                    </th>
-                    <th>
-                    </th>
+                    <th v-for="(field,k) in fields">{{field.label}}</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <tr v-for="(item,k) in tableData" v-if="item.id > 0">
+                    <td>{{k+1}}</td>
+                    <td>{{item.lesson_name}}</td>
+                    <td>{{item.subject_name}}</td>
+                    <td>{{item.level}}</td>
+                    <td>{{item.created_at}}</td>
+                    <td><b-form-checkbox switch v-model="item.state" v-on:change="toggleState(item)"></b-form-checkbox></td>
+                    <td>
+                        <div class="d-flex btn-group">
+                            <a class="btn-act btn-edit" href="#"><i class="ti-pencil-alt"></i></a>
+                            <button class="btn-act btn-trash" v-on:click="destroy(item.id)"><i class="ti-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
         </table>
-
-        @if (role == "head-teacher")
-        {
-            <div class="card shadow clone mt-4">
-                <div class="card-header">
-                    <h4 class="m-0 font-weight-bold text-primary">Curriculum Store</h4>
-                </div>
-                <div class="card-body">
-                    <div class="search-filter">
-                        <div class="form-row">
-                            <div class="form-group row col-md-4">
-                                <label for="staticText" class="col-sm-12 col-md-4 col-form-label">Subjects:</label>
-                                <div class="col-sm-12  col-md-8">
-                                    <select id="ModSubjectID" class="form-control" onchange="LoadModGrade(this)">
-                                        @{
-                                            for (int i = 0; listModSubject != null && i < listModSubject.Count; i++)
-                                            {
-                                                <option value="@listModSubject[i].ID">@listModSubject[i].Name</option>
-                                            }
-
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group row col-md-4 offset-md-4">
-                                <label for="staticText" class="col-sm-4 col-form-label">Grade:</label>
-                                <div class="col-sm-8">
-                                    <select id="ModGradeID" class="form-control" onchange="LoadModCourse()">
-                                        @{
-                                            for (int i = 0; listModGrade != null && i < listModGrade.Count; i++)
-                                            {
-                                                <option value="@listModGrade[i].ID" for="@listModGrade[i].SubjectID">@listModGrade[i].Name</option>
-                                            }
-
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="modCourseWrapper" class="card-deck">
-                    </div>
-                </div>
+        <div class="box margin-t20 flex">
+            <div class="paging-view">
+                Hiển thị:
+                <select v-model="view">
+                    <option value="10">10 kết quả</option>
+                    <option value="20">20 kết quả</option>
+                    <option value="30">30 kết quả</option>
+                </select>
             </div>
-        }
-    </div>
-    <!-- End of Main Content -->
-</div>
-
-@section Modals{
-
-    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="courseModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Create curriculum</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="@Url.Action("CreateOrUpdate","Curriculum")" id="modal-body" name="cloneForm" enctype="multipart/form-data" method="post">
-                        <input type="hidden" name="ID" />
-                        <input type="hidden" name="CreateUser" value="@user" />
-                        <input type="hidden" name="IsActive" value="false" />
-                        <div class="form-group">
-                            <label class="col-form-label">Title:</label>
-                            <input type="text" class="form-control" name="Name" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Subject:</label>
-                            <select name="SubjectID" class="form-control" onchange="ChangeGrade(this, 'select[name=GradeID]')">
-                                @{
-                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                    {
-                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                    }
-
-                                }
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Grade:</label>
-                            <select name="GradeID" class="form-control">
-                                @{
-                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                    {
-                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
-                                    }
-
-                                }
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="message-text" class="col-form-label">Description:</label>
-                            <textarea class="form-control" name="Description"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('cloneForm', '@Url.Action("CreateOrUpdate","Curriculum")','update' , ReloadCourse)">Save</button>
+            <div class="page-control">
+                <div class="inner">
+                    <button><i class="ti-angle-left"></i></button>
+                    <button><i class="ti-angle-double-left"></i></button>
+                    <input type="text" v-model="page" />
+                    <button><i class="ti-angle-double-right"></i></button>
+                    <button><i class="ti-angle-right"></i></button>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="cloneModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Get curriculum</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="@Url.Action("Clone","Curriculum")" id="modal-body" name="modalForm" enctype="multipart/form-data" method="post">
-                        <input type="hidden" name="CourseID" id="rootCourseID" />
-                        <input type="hidden" name="CreateUser" value="@user" />
-                        <input type="hidden" name="IsActive" value="false" />
-                        <div>
-                            <div class="form-group">
-                                <label class="col-form-label">Original:</label>
-                                <input type="text" class="form-control lock" id="rootCourseName" readonly>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Title:</label>
-                            <input type="text" class="form-control" name="Name" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Subject:</label>
-                            <select name="SubjectID" class="form-control" onchange="ChangeGrade(this, 'select[name=GradeID]')" required>
-                                <option value="">--- Choose subject ---</option>
-                                @{
-                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
-                                    {
-                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Grade:</label>
-                            <select name="GradeID" class="form-control" required>
-                                <option value="">--- Choose grade ---</option>
-                                @{
-                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
-                                    {
-                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID" style="display:none">@listGrade[i].Name</option>
-                                    }
-
-                                }
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="message-text" class="col-form-label">Description:</label>
-                            <textarea class="form-control" name="Description"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('modalForm', '@Url.Action("Clone","Curriculum")','update' , ReloadCourse)">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+</section>
 
 @section Scripts{
     <script>
-
-    var modal = $(".modal");
-    var modalTitle = $("#modalTitle");
-    var containerLesson = $("#lessonContainer");
-    var userID = "";
-    var clientID = "";
-
-    function LoadCourse() {
-        var searchText = $("#searchText").val();
-        var subject = $("#SubjectID").val();
-        var grade = $("#GradeID").val();
-        showLoading();
-        $.ajax({
-            type: "POST",
-            url: '@Url.Action("GetList", "Curriculum")',
-            data: { SearchText: searchText, SubjectID: subject, GradeID: grade },
-            dataType:"json",
-            success: function (data) {
-                var body = $('#tblCurriculum tbody');
-                body.html("");
-                if (data.Data.length > 0)
+    new Vue({
+        el: ".module",
+		data: {
+            tableData : [
                 {
-
-                    for (i = 0; i < data.Data.length; ++i) {
-                        item = data.Data[i];
-                        var active = "";
-                        if (item.IsActive) {
-                            active = "<td class='text-center'><div class='custom-control custom-switch'><input id='tgs" + item.ID + "' type=\"checkbox\" class=\"custom-control-input\" onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish", "Curriculum")',ToggleSwitch(this))\" checked /><label class=\"custom-control-label\" for=\"tgs" + item.ID + "\"> </label> </div></td>";
-                        }
-                        else {
-                            active = "<td class='text-center'><div class='custom-control custom-switch'><input id='tgs" + item.ID + "' type=\"checkbox\" class=\"custom-control-input\" onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish", "Curriculum")',ToggleSwitch(this))\"><label class=\"custom-control-label\" for=\"tgs" + item.ID + "\"> </label> </div></td>";
-                        }
-                        var created = $.datepicker.formatDate('dd/mm/yy', new Date(item.Created));
-
-
-                        var row = $("<tr>");
-                        row.append($("<td>", { text: i + 1 }));
-                        row.append($("<td>", { class: "Name" })
-                            .append($("<a>", { href: "@Url.Action("Detail","Curriculum")/" + item.ID, text: item.Name })));
-                        row.append($("<td>", { class: "Subject", value: item.SubjectID, text: item.SubjectName }));
-                        row.append($("<td>", { class: "Grade", value: item.GradeID, text: item.GradeName }));
-                        console.log(2);
-                        row.append($("<td>", { class: "text-center", text: created }));
-                        row.append(active);
-                        var btnEdit = $("<button>", { class: "btn btn-primary", "data-toggle": "modal", "data-target": "#courseModal", "data-placement": "top", title: "Edit", onclick: "EditCourse(this,'" + item.ID + "')", });
-                        btnEdit.append($("<i>", { class: "fas fa-edit" }));
-                        var btnRemove = $("<button>", { class: "btn btn-remove btn-danger", "data-placement": "top", title: "Remove", onclick: "if(confirm('Chắc chắn xóa?')){ showLoading(); ExcuteOnlyItem('" + item.ID + "', '@Url.Action("Remove","Curriculum")', ReloadCourse)}" });
-                        btnRemove.append($("<i>", { class: "fas fa-trash" }));
-                        row.append($("<td>", { class: "text-center" })
-                            .append(btnEdit).append(btnRemove)
-                        );
-
-                        body.append(row);
-                    }
-                    $('.btn').tooltip({trigger : 'hover'});
-                }
-                hideLoading();
-            },
-            error: function() {
-                alert("Error");
-                hideLoading();
-            }
-        });
-    };
-
-    function LoadModCourse() {
-        var searchText = $("#searchText").val();
-        var subject = $("#ModSubjectID").val();
-        var grade = $("#ModGradeID").val();
-        showLoading();
-        $.ajax({
-            type: "POST",
-            url: '@Url.Action("GetModList", "Curriculum")',
-            data: { SearchText: searchText, SubjectID: subject, GradeID: grade },
-            dataType:"json",
-            success: function (data) {
-                var body = $('#modCourseWrapper');
-                body.html("");
-                if (data.Data.length > 0)
+                    id : 1,
+                    lesson_name : 'IELTS Preparation',
+                    subject_name : 'Listening',
+                    level : 'A2',
+                    created_at : '02/11/2019',
+                    state : true
+                },
                 {
-                    for (i = 0; i < data.Data.length; ++i) {
-                        item = data.Data[i];
-                        var active = "<td><button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
-
-                        body.append("<div class='item mb-4 col-md-4 col-lg-3'>" +
-                            "<div class='card'>" +
-                            "<img src='../img/english.jpg' class='img-fluid lazy' alt='...'>" +
-                            "<div class='card-body'>" +
-                                "<h5 class=\"card-title\">" + item.Name + "</h5>" +
-                                "<p class=\"card-text\">" + item.Name + "</p>" +
-                                "<button type=\"button\" class=\"btn btn-primary\" data-toggle='modal' data-target='#cloneModal' onclick=\"ShowClone('" + item.ID + "','" + item.Name + "')\"><i class=\"fas fa-download mr-2\"></i>Get</button>" +
-                            "</div>" +
-                            "</div>" +
-                            "</div>"
-                        );
-                    }
+                    id : 2,
+                    lesson_name : 'Destination B1',
+                    subject_name : 'PET',
+                    level : 'A2',
+                    created_at : '02/11/2019',
+                    state : false
+                },
+                {
+                    id : 3,
+                    lesson_name : '	Ngữ pháp A2',
+                    subject_name : 'KET',
+                    level : 'A2',
+                    created_at : '02/11/2019',
+                    state : true
+                },
+            ],
+            fields : [
+                {
+                    key : 'stt',
+                    label : '#'
+                },
+                {
+                    key : 'lesson_name',
+                    label : 'Tên bài giảng'
+                },
+                {
+                    key : 'subject_name',
+                    label : 'Môn học'
+                },
+                {
+                    key : 'level',
+                    label : 'Cấp độ'
+                },
+                {
+                    key : 'created_at',
+                    label : 'Ngày tạo'
+                },
+                {
+                    key : 'state',
+                    label : 'Trạng thái'
+                },
+                {
+                    key : 'actions',
+                    label : 'Tác vụ'
                 }
-                hideLoading();
+            ],
+            week : '',
+            view : 10,
+            page : 1,
+            pageSize : 10
+        },
+        watch : {
+        },
+        methods: {
+            getData(){
+                let _data = []
+
+                this.tableData = _data
             },
-            error: function() {
-                alert("Error");
-                hideLoading();
+            getNews(){
+                // tương tự như trên
+            },
+            destroy(id){
+                this.tableData.forEach(function(item,k){
+                    if(item.id == id){
+                        item.id = 0
+                    }
+                })
+                let _data = this.tableData.filter(function(a){
+                    return a.id > 0
+                })
+                this.tableData = _data
+            },
+            toggleState(obj){
+                this.tableData.forEach(function(item,k){
+                    if(item.id === obj.id){
+                        item.state = !item.state
+                    }
+                })
             }
-        });
-    };
-
-    function ShowClone(id, name) {
-        $('#rootCourseID').val(id);
-        $('#rootCourseName').val(name);
-    }
-
-    function ChangeGrade(obj, wrapper) {
-        var subject = $(obj).val();
-        var grade = $(wrapper).val();
-        if(subject == "") subject = "---";
-        if(grade == "") grade = "---";
-        $(wrapper).find('option[for!=' + subject + ']').hide();
-        $(wrapper).find('option[for=' + subject + ']').show();
-        $(wrapper).find('option[for=all]').show();
-        if ($(wrapper).find('option[for!=' + subject + '][value=' + grade + ']:visible').length == 0) {
-            $(wrapper).val($(wrapper).find('option[for=' + subject + ']:first').attr('value'));
         }
-    }
-
-    function LoadGrade(obj) {
-        ChangeGrade(obj,'#GradeID');
-        LoadCourse();
-    }
-
-    function LoadModGrade(obj) {
-        ChangeGrade(obj,'#ModGradeID');
-        LoadModCourse();
-    }
-
-    $(document).ready(function () {
-        LoadGrade($("#SubjectID"));
-        LoadModGrade($("#ModSubjectID"));
     });
-
-    function EditCourse(obj, ID) {
-        modalTitle.text("Update Info");
-        var name = $(obj).parent().siblings(".Name").text().trim();
-        modal.find("[name=Name]").val(name);
-        var subject = $(obj).parent().siblings(".Subject").attr("value");
-        var grade = $(obj).parent().siblings(".Grade").attr("value");
-        var sbj = modal.find("[name=SubjectID]");
-        var grd = modal.find("[name=GradeID]");
-        sbj.val(subject);
-        ChangeGrade(sbj,grd);
-        $(grd).val(grade);
-        var description = $(obj).parent().siblings(".Description").text().trim();
-        modal.find("[name=Description]").val(description);
-        modal.find("[name=ID]").val(ID);
-    }
-
-    function addCourse() {
-        modalTitle.text("Create curriculum");
-        modal.find("[name=Name]").val("");
-        modal.find("[name=ID]").val("");
-        modal.find("[name=Description]").val("");
-        var sbj = modal.find("[name=SubjectID]");
-        var grd = modal.find("[name=GradeID]");
-        ChangeGrade(sbj,grd);
-    }
-
-    function ReloadCourse(e){
-        console.log(e);
-        hideLoading();
-        hideModal();
-        LoadCourse();
-    }
-
-    var showModal = function () {
-        modal.modal('show');
-    };
-
-    var hideModal = function () {
-        modal.modal('hide');
-        };
-
     </script>
 }

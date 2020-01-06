@@ -8,7 +8,6 @@
 
 
 <script>
-    //activeTab = "profile";
     setActiveMenu("profile");
 </script>
 
@@ -88,35 +87,14 @@
 
     <script>
         new Vue({
-            el: "#main",
+            el: ".module",
             mounted() {
                 this.getProfile()
             },
             data: {
                 isInfo: true,
                 isPass: false,
-                list_news: [
-                    {
-                        title: 'Đã đến lúc HLV Park',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news1.png'
-                    },
-                    {
-                        title: 'HLV Park: Có khi p',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news2.png'
-                    },
-                    {
-                        title: 'Tiến Dũng và Văn Toả',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news3.png'
-                    }
-                ],
                 profile: {
-                    FullName: 'Nguyễn Văn A',
-                    Phone: '0989666999',
-                    Email: 'test@gmail.com',
-                    Avatar: '/images/no-avatar.png'
                 },
                 avatar: {
                     src: '/images/no-avatar.png',
@@ -157,7 +135,7 @@
                              if(response.data.StatusCode){
                                  this.profile = response.data.Data
                                  this.avatar.src = this.profile.Avatar
-                                this.avatar.file = this.profile.Avatar
+                                 this.avatar.file = this.profile.Avatar
                              }
                          }).catch(e =>{})
                     //this.avatar.src = this.profile.avatar
@@ -232,126 +210,3 @@
 
 
 }
-
-@*<script type="text/javascript">
-        $("#myAccount_photo").click(function () {
-            $("#files").click();
-        });
-
-        function submitForm(formId) {
-            document.getElementById(formId).submit();
-        }
-
-        function uploadFiles(inputId) {
-            var input = document.getElementById(inputId);
-            var files = input.files[0];
-            var formData = new FormData();
-            formData.append("fileUpload", files);
-
-            $.ajax(
-                {
-                    url: "/Student/Home/UploadPhoto",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    type: "POST",
-                    success: function (data) {
-                        console.log(data);
-                        if (data.StatusCode === '0') {
-                            document.getElementById('msgUploadPhoto').style.display = 'block';
-                            document.getElementById('msgUploadPhoto').innerHTML = data.StatusDesc;
-                        } else {
-                            console.log(data);
-                            $("#myAccount_photo").attr('src', data.StatusDesc);
-                            $("#sidebarPhotoAcc").attr('src', data.StatusDesc);
-                            $("#leftMenuPhotoAcc").attr('src', data.StatusDesc);
-                            $("#msgUploadPhoto").style.display = 'none';
-                        }
-
-                    }
-                }
-            );
-        }
-
-        function changePass(inputId) {
-            var oldpass = document.getElementById('oldpass');
-            var formData = new FormData();
-            formData.append("oldpass", document.getElementById('oldpass').value);
-            formData.append("newpass", document.getElementById('newpass').value);
-            formData.append("retypepass", document.getElementById('retypepass').value);
-
-            $.ajax(
-                {
-                    url: "/Student/Home/ChangePassword",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    type: "POST",
-                    success: function (data) {
-                        console.log(data);
-                        $('#div_msg').show();
-                        if (data.Error != null) {
-                            $('#div_msg div').attr('class', 'alert alert-danger').html(data.Error);
-                        } else {
-                            //$('#div_msg div').attr('class', 'alert alert-success').html(data.Message);
-                            hideModal();
-                        }
-                    }
-                }
-            );
-        }
-
-        function refreshData() {
-            $('#oldpass').val('');
-            $('#newpass').val('');
-            $('#retypepass').val('');
-            $('#div_msg').hide();
-        }
-
-
-    </script>*@
-
-@section Modals{
-    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
-         aria-hidden="true" id="changePassModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Change Password</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <div class="row">
-
-                    </div>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="form-group" id="div_msg" style="display:none">
-                            <div role="alert">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Current Password:</label>
-                            <input type="password" class="form-control" name="oldpass" id="oldpass">
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">New Password:</label>
-                            <input type="password" class="form-control" name="newpass" id="newpass">
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Retype Password:</label>
-                            <input type="password" class="form-control" name="retypepass" id="retypepass">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="changePass()">Change</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-

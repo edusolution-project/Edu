@@ -1,7 +1,7 @@
 ﻿@using BaseCustomerMVC.Controllers.Student
 @{
     ViewData["Title"] = "Discussion";
-    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    Layout = "~/Views/Shared/_layoutTeacher.cshtml";
     var classList = ViewBag.Data as List<ClassInfo>;
     var listStudent = ViewBag.Students as List<MemberInfo>;
     var teacher = ViewBag.Teacher as BaseCustomerMVC.Controllers.Student.MemberInfo;
@@ -14,10 +14,10 @@
     var currentClass = ViewBag.Class as ClassInfo;
 }
 <script>
-    setActiveMenu("discussion");
+    var activeTab = "comments";
 </script>
 <style>
-    #form-post .file-media,.form-comment .file-media {
+    #form-post .file-media {
         position: absolute;
         right: 15px;
         top: 0;
@@ -27,7 +27,7 @@
         margin: auto;
     }
 
-    #form-comment .media-preview,#form-post .media-preview,.form-comment .media-preview {
+    #form-post .media-preview {
         position: absolute;
         max-height: 80px;
         max-width: 100%;
@@ -36,18 +36,16 @@
         overflow: hidden;
     }
 
-    #form-post,.form-comment {
+    #form-post {
         position: relative;
     }
 
-        #form-comment .box-content-view-media > img ,#form-post .box-content-view-media > img {
+        #form-post .box-content-view-media > img {
             max-width: 100%;
             max-height: 100%;
-            height:100%;
-            width:auto;
         }
 
-        #form-post .box-content-view-media,#form-comment .box-content-view-media {
+        #form-post .box-content-view-media {
             display: inline-block;
             width: 100%;
             height: 80px;
@@ -57,7 +55,7 @@
             position: relative;
         }
 
-        #form-post .btn-remove,#form-comment .btn-remove {
+        #form-post .btn-remove {
             position: absolute;
             right: 0;
             background: #fff;
@@ -79,9 +77,7 @@
     .media-post {
         padding: 5px 30px;
     }
-    .item-feed .media-post > img, .item-comment .media-post > img {
-        width: auto;
-    }
+
     .box-search {
         width: 100%;
     }
@@ -135,35 +131,31 @@
 
     .item-feed {
         margin-bottom: 10px;
-        padding: 5px 10px;
-    }
-    .item-feed:hover, .item-feed.active {
-        box-shadow: 0 0 10px #ccc;
-    }
-    .item-feed .content-post {
-        padding-left: 30px;
-        text-align: justify;
-    }
-    .body-comment .item-feed .content-post{
-        padding-left:0;
-    }
-    .item-feed .extends-post > a {
-        color: #D03239;
-        padding: 5px;
-        padding-left: 30px;
-        font-size: 0.85em;
     }
 
-    .item-feed .extends-post > a:hover, .item-feed .extends-post > a:active {
-        text-decoration: none;
-    }
-    .item-feed.item-comment.chude {
-        background: #7cc6f13b;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        font-size: 1.05em;
-    }
+        .item-feed .content-post {
+            padding-left: 30px;
+            text-align: justify;
+        }
+
+        .item-feed .extends-post > a {
+            color: #D03239;
+            padding: 5px;
+            padding-left: 30px;
+            font-size: 0.85em;
+        }
+
+            .item-feed .extends-post > a:hover, .item-feed .extends-post > a:active {
+                text-decoration: none;
+            }
+
+        .item-feed.item-comment.chude {
+            background: #7cc6f13b;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+        }
 
     .list-new-feeds, .body-comment {
         padding: 10px;
@@ -253,103 +245,116 @@
                 top: 6px;
             }
 </style>
-<section class="module" id="dashboard_content">
-    <div class="card-header">
-        <div class="flex border-b padding-b25">
-            <div class="box-search">
-                <select class="group-list float-left" id="choosen-group">
-                    <option value="">------ Chọn khóa học -------</option>
-                    @for (int i = 0; classList != null && i < classList.Count; i++)
-                    {
-                        var item = classList[i];
-                        if (item.ID == ViewBag.ID)
-                        {
-                            <option selected value="@item.ID">@item.Name</option>
-                        }
-                        else
-                        {
-                            <option value="@item.ID">@item.Name</option>
-                        }
-                    }
-                </select>
-            </div>
-            <div class="search-box">
-                <button><i class="ic ic-find"></i></button>
-                <input type="text" name="" placeholder="Search">
-            </div>
-        </div>
-    </div>
-    <div class="card-body">
-        <div class="row margin-b20">
-            <div class="col-12">
-                <div class="row">
-                    <div class="col-8">
-                        <div class="list">
-                            <div id="list-book-mard"></div>
-                            <div id="list-news-record"></div>
-                            <div id="list-news-old-@id" class="list-new-feeds">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="row">
+                <div class="col-12">
+                    <div class="box-search">
+                        <select class="group-list float-left" id="choosen-group">
+                            <option value="">------ Chọn khóa học -------</option>
+                            @for (int i = 0; classList != null && i < classList.Count; i++)
+                            {
+                                var item = classList[i];
+                                if (item.ID == ViewBag.ID)
+                                {
+                                    <option selected value="@item.ID">@item.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.ID">@item.Name</option>
+                                }
+                            }
+                        </select>
+                        <div class="float-right form-group-search">
+                            <a href="javascript:void(0)" class="icon-search" id="input-search-content">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M7.29631 2.66666C4.73944 2.66666 2.66669 4.73941 2.66669 7.29628C2.66669 9.85316 4.73944 11.9259 7.29631 11.9259C8.53631 11.9259 9.66244 11.4384 10.4935 10.6446C10.5157 10.6171 10.5396 10.5905 10.5652 10.565C10.5907 10.5394 10.6173 10.5156 10.6448 10.4934C11.4385 9.66229 11.9259 8.53621 11.9259 7.29628C11.9259 4.73941 9.85319 2.66666 7.29631 2.66666ZM12.638 11.2236C13.4476 10.1244 13.9259 8.76619 13.9259 7.29628C13.9259 3.63484 10.9578 0.666656 7.29631 0.666656C3.63487 0.666656 0.666687 3.63484 0.666687 7.29628C0.666687 10.9577 3.63487 13.9259 7.29631 13.9259C8.7663 13.9259 10.1245 13.4475 11.2238 12.6379L13.6263 15.0403C14.0168 15.4308 14.65 15.4308 15.0405 15.0403C15.431 14.6498 15.431 14.0166 15.0405 13.6261L12.638 11.2236Z" fill="#7CC6F1" />
+                                </svg>
+                            </a>
+                            <input id="search-text" class="input-search" value="" placeholder="Tìm kiếm" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-8">
+                    <div class="list">
+                        <div id="list-book-mard"></div>
+                        <div id="list-news-record"></div>
+                        <div id="list-news-old-@id" class="list-new-feeds">
 
+                        </div>
+                        @{ if (currentClass != null && currentClass.IsAllow)
+                            {
+                                <div id="form-post">
+                                    <div class="media-preview"></div>
+                                    <div class="header-form-post">
+                                        <input class="form-control" name="Title" placeholder="Nội dung chủ đề" tabindex="1" required/>
+                                    </div>
+                                    <br />
+                                    <textarea tabindex="2" rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
+                                    <input type="file" name="NewFeedMedia" style="display:none"/>
+                                    <button class="file-media"><img src="~/images/jpg.png" /></button>
+                                </div>
+                            }
+                        }
+
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="position-relative w-100">
+                        <div id="comment-box-new-feed" class="position-absolute">
+                            <input type="hidden" value="" name="ParentID" />
+                            <div class="header">
+                                <span id="chudethaoluan">chủ đề thảo luận</span>
+                                <button class="btn-close">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M1.04791 1.57179C0.540802 2.07896 0.540803 2.90125 1.04791 3.40842L5.63841 7.99951L1.04695 12.5916C0.539849 13.0987 0.53985 13.921 1.04696 14.4282L1.57164 14.9529C2.07874 15.4601 2.90092 15.4601 3.40803 14.9529L7.99949 10.3609L12.5909 14.9529C13.098 15.4601 13.9202 15.4601 14.4273 14.9529L14.952 14.4282C15.4591 13.921 15.4591 13.0987 14.952 12.5916L10.3606 7.99951L14.9511 3.40842C15.4582 2.90124 15.4582 2.07896 14.9511 1.57179L14.4264 1.04704C13.9193 0.539864 13.0971 0.539864 12.59 1.04704L7.99949 5.63813L3.40898 1.04703C2.90188 0.539864 2.0797 0.539864 1.57259 1.04704L1.04791 1.57179Z" fill="#4E6774" />
+                                    </svg>
+                                </button>
                             </div>
+                            <div class="body-comment"></div>
                             @{ if (currentClass != null && currentClass.IsAllow)
                                 {
-                                    <div id="form-post">
-                                        <div class="media-preview"></div>
-                                        <div class="header-form-post">
-                                            <input class="form-control" name="Title" placeholder="Nội dung chủ đề" tabindex="1" required />
-                                        </div>
-                                        <br />
-                                        <textarea tabindex="2" rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
-                                        <input type="file" name="NewFeedMedia" style="display:none" />
-                                        <button class="file-media"><img src="~/images/jpg.png" /></button>
+                                    <div class="form-comment" id="form-comment">
+                                        <textarea rows="3" style="padding-right: 70px;border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
                                     </div>
                                 }
                             }
 
                         </div>
                     </div>
-                    <div class="col-4">
-                        <div class="position-relative w-100">
-                            <div id="comment-box-new-feed" class="position-absolute">
-                                <input type="hidden" value="" name="ParentID" />
-                                <div class="header">
-                                    <span id="chudethaoluan">chủ đề thảo luận</span>
-                                    <button class="btn-close">
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M1.04791 1.57179C0.540802 2.07896 0.540803 2.90125 1.04791 3.40842L5.63841 7.99951L1.04695 12.5916C0.539849 13.0987 0.53985 13.921 1.04696 14.4282L1.57164 14.9529C2.07874 15.4601 2.90092 15.4601 3.40803 14.9529L7.99949 10.3609L12.5909 14.9529C13.098 15.4601 13.9202 15.4601 14.4273 14.9529L14.952 14.4282C15.4591 13.921 15.4591 13.0987 14.952 12.5916L10.3606 7.99951L14.9511 3.40842C15.4582 2.90124 15.4582 2.07896 14.9511 1.57179L14.4264 1.04704C13.9193 0.539864 13.0971 0.539864 12.59 1.04704L7.99949 5.63813L3.40898 1.04703C2.90188 0.539864 2.0797 0.539864 1.57259 1.04704L1.04791 1.57179Z" fill="#4E6774" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="body-comment"></div>
-                                @{ if (currentClass != null && currentClass.IsAllow)
-                                    {
-                                        <div class="form-comment" id="form-comment">
-                                            <div class="media-preview"></div>                                            
-                                            <textarea rows="3" style="padding-right: 70px;border-radius: 3px;resize: none;background: #F0F3F4;" class="form-control" placeholder="nội dung trả lời"></textarea>
-                                            <input type="file" name="comment-file" style="display:none" />
-                                            <button class="file-media"><img src="~/images/jpg.png" /></button>
-                                        </div>
-                                    }
-                                }
-
-                            </div>
+                    <div class="box-info-contact">
+                        <div class="inf-group">
+                            <div class="img-group"></div>
+                            <div class="name" id="GroupName">@currentClass?.Name</div>
+                            <span class="number-member">
+                                <svg width="10" height="14" viewBox="0 0 10 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5.00031 7.02866C3.53863 7.02866 2.3536 5.60029 2.3536 3.83829C2.3536 2.07626 2.74266 0.647888 5.00031 0.647888C7.25796 0.647888 7.64709 2.07626 7.64709 3.83829C7.64709 5.60029 6.46206 7.02866 5.00031 7.02866Z" fill="#839AA6" />
+                                    <path d="M9.99948 11.9003C9.99993 11.792 10.0004 11.8698 9.99948 11.9003V11.9003Z" fill="#839AA6" />
+                                    <path d="M0.00134277 11.9838C-7.21334e-05 11.9545 0.000858726 11.78 0.00134277 11.9838V11.9838Z" fill="#839AA6" />
+                                    <path d="M0.00732803 11.771C0.0563459 8.7016 0.460285 7.82698 3.55135 7.27335C3.55135 7.27335 3.98647 7.82359 5.00063 7.82359C6.0148 7.82359 6.44999 7.27335 6.44999 7.27335C9.50732 7.82094 9.93583 8.68259 9.99217 11.6713C9.99679 11.9154 9.99893 11.9282 9.99976 11.8999C9.99957 11.953 9.99934 12.0511 9.99934 12.2224C9.99934 12.2224 9.26343 13.6946 5.00063 13.6946C0.737905 13.6946 0.00191879 12.2224 0.00191879 12.2224C0.00191879 12.1123 0.00184345 12.0359 0.00173092 11.9838C0.00255775 12.0013 0.00421047 11.9674 0.00732803 11.771Z" fill="#839AA6" />
+                                </svg> @total thành viên
+                            </span>
                         </div>
-                        <div class="box-info-contact">
-                            <div class="inf-group">
-                                <div class="img-group"></div>
-                                <div class="name" id="GroupName">@currentClass?.Name</div>
-                                <span class="number-member">
-                                    <svg width="10" height="14" viewBox="0 0 10 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M5.00031 7.02866C3.53863 7.02866 2.3536 5.60029 2.3536 3.83829C2.3536 2.07626 2.74266 0.647888 5.00031 0.647888C7.25796 0.647888 7.64709 2.07626 7.64709 3.83829C7.64709 5.60029 6.46206 7.02866 5.00031 7.02866Z" fill="#839AA6" />
-                                        <path d="M9.99948 11.9003C9.99993 11.792 10.0004 11.8698 9.99948 11.9003V11.9003Z" fill="#839AA6" />
-                                        <path d="M0.00134277 11.9838C-7.21334e-05 11.9545 0.000858726 11.78 0.00134277 11.9838V11.9838Z" fill="#839AA6" />
-                                        <path d="M0.00732803 11.771C0.0563459 8.7016 0.460285 7.82698 3.55135 7.27335C3.55135 7.27335 3.98647 7.82359 5.00063 7.82359C6.0148 7.82359 6.44999 7.27335 6.44999 7.27335C9.50732 7.82094 9.93583 8.68259 9.99217 11.6713C9.99679 11.9154 9.99893 11.9282 9.99976 11.8999C9.99957 11.953 9.99934 12.0511 9.99934 12.2224C9.99934 12.2224 9.26343 13.6946 5.00063 13.6946C0.737905 13.6946 0.00191879 12.2224 0.00191879 12.2224C0.00191879 12.1123 0.00184345 12.0359 0.00173092 11.9838C0.00255775 12.0013 0.00421047 11.9674 0.00732803 11.771Z" fill="#839AA6" />
-                                    </svg> @total thành viên
-                                </span>
-                            </div>
-                            <div class="list-member">
-                                @{
-                                    if (teacher != null)
+                        <div class="list-member">
+                            @{
+                                if (teacher != null)
+                                {
+                                    <div class="info-user">
+                                        <div class="avatar-user">
+                                            <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                                                <path d='M24 12C24 18.6275 18.6275 24 12 24C5.3725 24 0 18.6275 0 12C0 5.3725 5.3725 0 12 0C18.6275 0 24 5.3725 24 12Z' fill='#7CC6F1' />
+                                                <path d='M14.7283 11.6221C15.8306 10.7919 16.5447 9.47278 16.5447 7.98981C16.5447 5.48401 14.506 3.44531 12 3.44531C9.4942 3.44531 7.45551 5.48401 7.45551 7.98981C7.45551 9.47278 8.16943 10.7919 9.27173 11.6221C6.32043 12.7299 4.21417 15.5804 4.21417 18.9141H5.62042C5.62042 15.3962 8.48236 12.5345 12.0002 12.5345C15.5178 12.5345 18.3798 15.3962 18.3798 18.9141H19.786C19.7858 15.5804 17.6797 12.7299 14.7283 11.6221ZM8.86176 7.98981C8.86176 6.25928 10.2695 4.85156 12 4.85156C13.7305 4.85156 15.1382 6.25928 15.1382 7.98981C15.1382 9.72034 13.7305 11.1282 12 11.1282C10.2695 11.1282 8.86176 9.72034 8.86176 7.98981Z' fill='white' />
+                                            </svg>
+                                        </div>
+                                        <div data-email="@teacher.Email" class="name">@teacher.Name (Giáo viên)</div>
+                                    </div>
+                                }
+                                if (numberStudent > 0)
+                                {
+                                    for (int i = 0; i < numberStudent; i++)
                                     {
+                                        var itemStudent = listStudent[i];
                                         <div class="info-user">
                                             <div class="avatar-user">
                                                 <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -357,38 +362,23 @@
                                                     <path d='M14.7283 11.6221C15.8306 10.7919 16.5447 9.47278 16.5447 7.98981C16.5447 5.48401 14.506 3.44531 12 3.44531C9.4942 3.44531 7.45551 5.48401 7.45551 7.98981C7.45551 9.47278 8.16943 10.7919 9.27173 11.6221C6.32043 12.7299 4.21417 15.5804 4.21417 18.9141H5.62042C5.62042 15.3962 8.48236 12.5345 12.0002 12.5345C15.5178 12.5345 18.3798 15.3962 18.3798 18.9141H19.786C19.7858 15.5804 17.6797 12.7299 14.7283 11.6221ZM8.86176 7.98981C8.86176 6.25928 10.2695 4.85156 12 4.85156C13.7305 4.85156 15.1382 6.25928 15.1382 7.98981C15.1382 9.72034 13.7305 11.1282 12 11.1282C10.2695 11.1282 8.86176 9.72034 8.86176 7.98981Z' fill='white' />
                                                 </svg>
                                             </div>
-                                            <div data-email="@teacher.Email" class="name">@teacher.Name (Giáo viên)</div>
+                                            <div data-email="@itemStudent.Email" class="name">@itemStudent.Name</div>
                                         </div>
                                     }
-                                    if (numberStudent > 0)
-                                    {
-                                        for (int i = 0; i < numberStudent; i++)
-                                        {
-                                            var itemStudent = listStudent[i];
-                                            <div class="info-user">
-                                                <div class="avatar-user">
-                                                    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-                                                        <path d='M24 12C24 18.6275 18.6275 24 12 24C5.3725 24 0 18.6275 0 12C0 5.3725 5.3725 0 12 0C18.6275 0 24 5.3725 24 12Z' fill='#7CC6F1' />
-                                                        <path d='M14.7283 11.6221C15.8306 10.7919 16.5447 9.47278 16.5447 7.98981C16.5447 5.48401 14.506 3.44531 12 3.44531C9.4942 3.44531 7.45551 5.48401 7.45551 7.98981C7.45551 9.47278 8.16943 10.7919 9.27173 11.6221C6.32043 12.7299 4.21417 15.5804 4.21417 18.9141H5.62042C5.62042 15.3962 8.48236 12.5345 12.0002 12.5345C15.5178 12.5345 18.3798 15.3962 18.3798 18.9141H19.786C19.7858 15.5804 17.6797 12.7299 14.7283 11.6221ZM8.86176 7.98981C8.86176 6.25928 10.2695 4.85156 12 4.85156C13.7305 4.85156 15.1382 6.25928 15.1382 7.98981C15.1382 9.72034 13.7305 11.1282 12 11.1282C10.2695 11.1282 8.86176 9.72034 8.86176 7.98981Z' fill='white' />
-                                                    </svg>
-                                                </div>
-                                                <div data-email="@itemStudent.Email" class="name">@itemStudent.Name</div>
-                                            </div>
-                                        }
-                                    }
-
                                 }
 
-                            </div>
+                            }
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
-    @section Scripts{
-        <script>
+</div>
+
+@section Scripts{
+    <script>
         $("#choosen-group").on("change", function () {
             var value = $(this).val();
             if (value == null || value == "") {
@@ -491,7 +481,7 @@
                                 if (item.title != void 0 && item.title != "") {
                                     title = `<div class="content-title-post">${item.title}</div>`;
                                 }
-                                var html = `<div class="item-feed" id="${item.ID}" onclick="openChat('${item.ID}')">
+                                var html = `<div class="item-feed" id="${item.ID}">
                                     <div class="user-info-post">
                                         <div class="row">
                                             <div class="col-lg-7">
@@ -543,22 +533,13 @@
             });
         }
         var openChat = function (id) {
-            $(".item-feed").removeClass('active');
-            var content = "";
+            var chude = "";
             var media = "";
-            var chude = "Chủ đề";
             var root = document.getElementById(id);
-            if (!root.classList.contains('active')) {
-                root.classList.add('active');
-            }
             if (root != null) {
-                var chudeT = root.querySelector('.content-title-post');
-                if (chudeT != null) {
-                    chude = chudeT.innerHTML;
-                }
-                var title = root.querySelector(".content-post");
+                var title = root.querySelector(".content-title-post");
                 if (title != null) {
-                    content = title.innerHTML;
+                    chude = title.innerHTML;
                 }
                 var htmlMedia = root.querySelector(".media-post");
                 if (htmlMedia != null) {
@@ -566,12 +547,11 @@
                 }
             }
             var ojChat = document.getElementById("comment-box-new-feed");
-            ojChat.querySelector("#chudethaoluan").innerHTML = chude;
             ojChat.classList.add("open");
             ojChat.querySelector("input[name='ParentID']").value = id;
             ojChat.querySelector(".body-comment").innerHTML = `<div class="item-feed item-comment chude">
                                     <div class="content-post">
-                                        ${media}${content} 
+                                        ${chude} ${media}
                                     </div>
                                 </div>`;
             $.ajax({
@@ -581,10 +561,6 @@
                     if (data.code == 200) {
                         for (var i = 0; i < data.data.length; i++) {
                             var item = data.data[i];
-                            var media = "";
-                            if (item.medias.length > 0) {
-                               media = `<div class="media-post"><img src="${item.medias[0].path}" /></div>`;
-                            }
                             var html = `<div class="item-feed item-comment">
                                     <div class="user-info-post">
                                         <div class="row">
@@ -603,7 +579,7 @@
                                     </div>
                                     <div class="content-post">
                                         ${item.content}
-                                    </div>${media}
+                                    </div>
                                 </div>`;
                             ojChat.querySelector(".body-comment").innerHTML += html;
                         }
@@ -612,7 +588,7 @@
             });
         }
         //string title,string content,int state,HashSet<string> receivers
-
+        
         $("#comment-box-new-feed>.header>.btn-close").click(function () {
             var ojChat = document.getElementById("comment-box-new-feed");
             ojChat.querySelector("input[name='ParentID']").value = "";
@@ -620,54 +596,21 @@
         });
 
 
-        </script>
-        @{ if (currentClass != null && currentClass.IsAllow)
-            {
-                <script>
-                    var filesListComment = {};
-                    var filesList = {};
-                    var formComment = document.getElementById("form-comment");
-                    $("#form-comment>.file-media").click(function () {
-                        $("#form-comment>input[type='file']").click();
-                        if (formComment != null) {
-                        var previewMedia2 = formComment.querySelector('.media-preview');
-                        var inputFileComment = formComment.querySelector("input[type='file']");
-                        if (inputFileComment != null) {
-                            inputFileComment.onchange = function () {
-                                previewMedia2.innerHTML = "";
-                                filesListComment = {};
-                                console.log(inputFileComment,inputFileComment.files);
-                                var files2 = inputFileComment.files;
-                                console.log(files2.length);
-				                for(var i = 0; i < files2.length;i++){
-                                    var file2 = files2[i];
-					                if(file2 != null){
-						                var id = generateId();
-						                var url = createBlodUrl(file2);
-						                filesListComment[id] = file2;
-						                if(previewMedia2.childNodes.length >= 5){
-							                previewMedia2.appendChild(createBoxMedia(id,url,file2.type,true));
-						                }else{
-							                previewMedia2.appendChild(createBoxMedia(id,url,file2.type,false));
-						                }
-					                }
-				                }
-                            }
-                        }
-                    }
-                    });
+    </script>
+    @{ if (currentClass != null && currentClass.IsAllow)
+        {
+            <script>
+                
+                var filesList = {};
                 $("#form-post>button.file-media").click(function () {
                     $("#form-post>input[type='file']").click();
                 });
                 var formPost = document.getElementById("form-post");
                 if (formPost != null) {
                     var previewMedia = formPost.querySelector('.media-preview');
-                    
                     var inputFile = formPost.querySelector("input[type='file']");
                     if (inputFile != null) {
                         inputFile.onchange = function () {
-                            previewMedia.innerHTML = "";
-                            filesList = {};
                             var files = inputFile.files;
 				            for(var i = 0; i < files.length;i++){
 					            var file = files[i];
@@ -721,51 +664,32 @@
                 }
                 var createComment = function (content, id) {
                     if (content.trim() == "") return;
-                    var keys = Object.keys(filesListComment);
-                    var dataForm = new FormData();
-                    dataForm.append("content", content);
-                    dataForm.append("parentID", id);
-                    if (keys != null && keys != void 0) {
-                        for (var i = 0; i < keys.length; i++) {
-                            var key = keys;
-                            dataForm.append("file", filesListComment[key]);
+                    $.ajax({
+                        url: "@Url.Action("CREATE", "Comment")",
+                        type: "POST",
+                        data: {
+                            content: content,
+                            parentID:id
+                        },
+                        success: function (data) {
+                            if ('@ViewBag.ID' == "" || '@ViewBag.ID' == null || '@ViewBag.ID' == void 0) {
+                                connection.invoke("SendToGroup", { type: "comment", obj: data }, 'Online');
+                            } else {
+                                connection.invoke("SendToGroup", { type: "comment", obj: data }, 'newfeed-@ViewBag.ID');
+                            }
                         }
-                        if (_ajax != void 0) {
-                            _ajax.proccess("POST", "@Url.Action("CREATE", "Comment")", dataForm).then(function (res) {
-                                var data = JSON.parse(res);
-                                if (connection != void 0) {
-                                    var strId = '@ViewBag.ID';
-                                    if (strId == "") {
-                                        connection.invoke("SendToGroup", { type: "comment", obj: data }, 'Online');
-                                    } else {
-                                        connection.invoke("SendToGroup", { type: "comment", obj: data }, 'newfeed-@ViewBag.ID');
-                                    }
-                                }
-                            })
-                        }
-                    }
+                    })
                 }
                 $("#form-comment>textarea").on("keypress", function (e) {
                     if (e.which == 13) {
                         createComment($(this).val(), document.getElementById("comment-box-new-feed").querySelector("input[name='ParentID']").value);
                         $(this).val("");
-                        $(this).html("");
-                        if (formComment != null) {
-                            var clear = {};;
-                            formComment.querySelector("input[type='file']").value = "";
-                            inputFileComment = {};
-                            var previewMedia2 = formComment.querySelector('.media-preview');
-                            if (previewMedia2 != null) {
-                                previewMedia2.innerHTML = "";
-                            }
-                        }
                     }
                 })
                 $("#form-post>textarea").on("keypress", function (e) {
                     if (e.which == 13) {
                         createNewFeed($(this).val());
                         $(this).val("");
-                        $(this).html("");
                         if (formPost != null) {
                             formPost.querySelector("input[name='Title']").value = "";
                             formPost.querySelector("input[type='file']").value = "";
@@ -776,8 +700,8 @@
                             }
                         }
                     }
-                });
-                </script>
-            }
+                })
+            </script>
         }
     }
+}
