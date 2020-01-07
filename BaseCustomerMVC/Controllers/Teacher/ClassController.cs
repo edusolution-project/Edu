@@ -130,7 +130,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
         }
 
-        public IActionResult Index(DefaultModel model)
+        public IActionResult Index(DefaultModel model, int beta = 0)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
@@ -141,7 +141,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
                 grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
-
             }
 
             ViewBag.Grade = grade;
@@ -150,7 +149,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.User = UserID;
             ViewBag.Model = model;
             ViewBag.Managable = CheckPermission(PERMISSION.COURSE_EDIT);
-            return View();
+            if (beta == 1)
+                return View();
+            return View("Index_o");
         }
 
         public IActionResult Detail(DefaultModel model)

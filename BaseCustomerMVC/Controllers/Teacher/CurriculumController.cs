@@ -105,7 +105,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _fileProcess = new FileProcess(evn);
         }
 
-        public IActionResult Index(DefaultModel model)
+        public IActionResult Index(DefaultModel model, int beta = 0)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();//: new TeacherEntity();
@@ -130,7 +130,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             ViewBag.Model = model;
-            return View();
+            if (beta == 1)
+                return View();
+            return View("Index_o");
         }
 
         public IActionResult Detail(string ID)

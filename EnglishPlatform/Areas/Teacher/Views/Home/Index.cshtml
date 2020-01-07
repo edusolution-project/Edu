@@ -148,165 +148,101 @@
     <script>
     new Vue({
         el: ".module",
-		mounted(){
-            // khởi tạo dữ liệu khi load Trang
-            // chỗ này sẽ chạy lúc đầu khi vào trang
-            this.getLessonWeek()
-            this.getLessonDone()
-            this.getLessonDay()
-            this.getNews()
-		},
+		mounted() {
+            this.getWeekLesson()
+            this.getActiveCourse()
+            this.getFinishCourse()
+            this.getNewFeed()
+        },
         data: {
-            Lesson_week : [
-                {
-                    Lesson : 'Lesson 1',
-                    title : 'IELTS Practice',
-                    date : '12/08/2019 ',
-                    score : 2,
-                    total_scrore : 5,
-                    per : '70'
-                },
-                {
-                    Lesson : 'Lesson 2',
-                    title : 'IELTS Practice',
-                    date : '12/08/2019 ',
-                    score : 3,
-                    total_scrore : 5,
-                    per : '40'
-                },
-                {
-                    Lesson : 'Thì hiện tại tiếp diễn',
-                    title : 'Ngữ pháp A2',
-                    date : '12/08/2019 ',
-                    score : 4.5,
-                    total_scrore : 5,
-                    per : '45'
-                }
+            lesson_week: [
             ],
-            Lesson_day : [
-                {
-                    Lesson : 'Lesson 1',
-                    title : 'IELTS Practice',
-                    date : '12/08/2019 ',
-                    score : 4.5,
-                    total_scrore : 5,
-                    per : '70'
-                },
-                {
-                    Lesson : 'Lesson 2',
-                    title : 'IELTS Practice',
-                    date : '12/08/2019 ',
-                    score : 4.5,
-                    total_scrore : 5,
-                    per : '70'
-                },
-                {
-                    Lesson : 'Thì hiện tại tiếp diễn',
-                    title : 'Ngữ pháp A2',
-                    date : '12/08/2019 ',
-                    score : 4.5,
-                    total_scrore : 5,
-                    per : '70'
-                }
+            active_course: [
             ],
-            discussion : [
-                {
-                    title : 'IELTS 5.0',
-                    member : 3,
-                    description : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.'
-                },
-                {
-                    title : 'IELTS 5.1',
-                    member : 12,
-                    description : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.'
-                }
+            discussion: [
             ],
-            Lesson_done : [
-                {
-                    title : 'IELTS Practice',
-                    score : 7,
-                    per : 90,
-                    date : '12/08/2019'
-                },
-                {
-                    title : 'Destination',
-                    score : 8,
-                    per : 70,
-                    date : '12/08/2019'
-                },
-                {
-                    title : 'Destination',
-                    score : 5,
-                    per : 50,
-                    date : '12/08/2019'
-                }
-            ],
-            list_news : [
-                {
-                    title : 'Đã đến lúc HLV Park',
-                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                    thumbnail : '/pictures/news1.png'
-                },
-                {
-                    title : 'HLV Park: Có khi p',
-                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                    thumbnail : '/pictures/news2.png'
-                },
-                {
-                    title : 'Tiến Dũng và Văn Toả',
-                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                    thumbnail : '/pictures/news3.png'
-                }
-            ],
-            week : ''
+            finish_course: [
+            ]
         },
         watch : {
-            Lesson_week : function(val){
+            lesson_week : function(val){
                 console.log(val)
             }
         },
         methods: {
-            getLessonWeek(){
+            getActiveCourse() {
                 let _that = this
                 // Truyen param vào đây
-                let _params = {
-                    week : _that.week
-                }
-                // link api để gọi
-                // Nếu method là GET
-                // let _url = 'apiGetLessonWeek'
-                // axios.get(_url,{params:_params})
-                //     .then(response =>{
-                //         console.log(response.data)
-                //         // sửa lại theo format mà api cụ thể trả về (chỗ này chỉ là demo)
-                //         if(response.data.succes){
-                //             // Gán dữ liệu vào biến đã khởi tạo nó sẽ render ra ở view
-                //             _that.Lesson_week = response.data.data
-                //         }else{
-                //             // xử lý lỗi
-                //         }
-                //     }).catch(e =>{})
-                    // Nếu là POST
-                    // nếu ko đc thì phải dùng FormData @@
-                // axios.post(_url,_params)
-                //     .then(response =>{
-                //         console.log(response.data)
-                //         if(response.data.succes){
-                //             _that.Lesson_week = response.data.data
-                //         }else{
-                //             //
-                //         }
-                //     }).catch(e =>{})
+                let _form = new FormData()
+                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                let _url = '@Url.Action("GetActiveList", "Class")'
+
+                axios.post(_url, _form)
+                    .then(response => {
+                        //console.log("Active")
+                        //console.log(response.data)
+                        _that.active_course = response.data.data;
+                        //console.log(_that.active_course);
+                    }).catch(e => { })
             },
-            getLessonDone(){
-                // tương tự như trên
+            getFinishCourse() {
+                let _that = this
+                // Truyen param vào đây
+                let _form = new FormData()
+                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('PageSize', 5)
+                _form.append('PageIndex', 1)
+                let _url = '@Url.Action("GetFinishList", "Course")'
+
+                axios.post(_url, _form)
+                    .then(response => {
+                        //console.log("Finish")
+                        //console.log(response.data)
+                        _that.finish_course = response.data.data
+                        //console.log(_that.active_course);
+                    }).catch(e => { })
             },
-            getLessonDay(){
-                // tương tự như trên
+            getWeekLesson() {
+                let _that = this
+                // Truyen param vào đây
+                let _form = new FormData()
+                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                let _url = '@Url.Action("GetThisWeekLesson", "Course")'
+
+                axios.post(_url, _form)
+                    .then(response => {
+                        console.log("Week")
+                        console.log(response.data)
+                        _that.lesson_week = response.data.data;
+                        //console.log(_that.lesson_week);
+                    }).catch(e => { })
             },
-            getNews(){
-                // tương tự như trên
+            getNewFeed() {
+                let _that = this
+                let _url = '@Url.Action("Get", "NewFeed")'
+
+                axios.get(_url, {
+                    params: {
+                        pageSize: 6,
+                        pageIndex: 0
+                    }
+                })
+                    .then(response => {
+                        console.log(response.data)
+                        _that.discussion = response.data.data
+                        //console.log(_that.active_course);
+                    }).catch(e => { })
             },
+            formatTime(time) {
+                console.log(time);
+                if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
+                return moment(time).format("DD/MM/YYYY hh:mm")
+            },
+            shortenString(str, length) {
+                if (str.length <= length)
+                    return str;
+                return str.substring(0, length) + "...";
+            }
         }
     });
     </script>

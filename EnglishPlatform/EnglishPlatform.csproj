@@ -64,7 +64,7 @@
     <None Include="Areas\Teacher\Views\Calendar\CheckTeacher.cshtml" />
     <None Include="Areas\Teacher\Views\Calendar\CheckTeacherStudent.cshtml" />
     <None Include="Areas\Teacher\Views\Calendar\Detail.cshtml" />
-    <None Include="Areas\Teacher\Views\Calendar\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Calendar\Index_o.cshtml" />
     <None Include="Areas\Teacher\Views\Calendar\Lesson.cshtml" />
     <None Include="Areas\Teacher\Views\Schedule\CheckList.cshtml" />
     <None Include="Areas\Teacher\Views\Schedule\CheckTeacher.cshtml" />
@@ -77,7 +77,7 @@
     <None Include="Areas\Teacher\Views\Curriculum\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Lesson.cshtml" />
-    <None Include="Areas\Teacher\Views\Discuss\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Discuss\Index_o.cshtml" />
     <None Include="Areas\Teacher\Views\Home\Index.cshtml" />
     <None Include="Areas\Teacher\Views\News\Index.cshtml" />
     <None Include="compilerconfig.json" />
@@ -2330,11 +2330,23 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <Content Update="Areas\Teacher\Views\Class\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="Areas\Teacher\Views\Curriculum\Index.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Update="Areas\Teacher\Views\Home\Profile.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Areas\Teacher\Views\News\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Areas\Teacher\Views\Reference\Index.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
