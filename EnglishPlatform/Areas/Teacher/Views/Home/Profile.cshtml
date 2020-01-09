@@ -26,6 +26,7 @@
             <div class="flex">
                 <div id="avatar_box" v-if="isInfo">
                     <img v-on:error="errorImgUrl()" :src="avatar.src" alt="" v-if="avatar" />
+                    <img v-else src="/images/no-avatar.png"/>
                     <label for="in_avatar">Đổi hình đại diện</label>
                     <input type="file" :ref="`avatar`" v-on:change="previewThumb()" id="in_avatar">
                 </div>

@@ -49,7 +49,7 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             string _studentid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
             var account = _studentService.GetItemByID(_studentid);
-            ViewBag.avatar = account.Avatar ?? "/img/defaultAvatar.png";
+            ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;
             _session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
             return View(account);
         }
@@ -60,8 +60,10 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 string _studentid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
                 var account = _studentService.GetItemByID(_studentid);
-                ViewBag.avatar = account.Avatar ?? "/img/defaultAvatar.png";
-                _session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
+                var avatar = account.Avatar ?? _default.defaultAvatar;
+                _session.SetString("userAvatar", avatar);
+                ViewBag.avatar = avatar;
+                account.Avatar = avatar;
                 return Json(new ReturnJsonModel
                 {
                     StatusCode = ReturnStatus.SUCCESS,

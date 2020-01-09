@@ -91,7 +91,8 @@ button, input, a {
     .box.radius {
         border-radius: 6px;
         border: 1px solid #D0DFE8;
-        overflow: hidden
+        overflow: hidden;
+        width: 100%;
     }
 
 .relative {
@@ -1114,105 +1115,100 @@ button, input, a {
     align-items: center
 }
 
-    .course-item .box {
-        width: 100%
-    }
-
     .course-item .thumb {
         display: block;
         overflow: hidden;
-        width: 100%;
+        height: 0;
         padding-top: 56%;
         position: relative;
+        width: 100%;
     }
 
-@media (max-width:1366px) {
-    .course-item .thumb {
-        height: 150px
-    }
-}
-
-.course-item .thumb img {
-    position: absolute;
-    top: 50%;
-    margin-top: -28%;
-}
-
-.course-item .detail {
-    padding: 10px
-}
-
-    .course-item .detail p {
-        font-size: 12px;
-        color: #839AA6;
-        line-height: 18px;
-        margin-bottom: 10px
-    }
-
-        .course-item .detail p .ti-time {
-            margin-right: 5px
-        }
-
-    .course-item .detail .c-bot {
-        border-top: 1px solid #D0DFE8;
-        padding-top: 10px
-    }
-
-        .course-item .detail .c-bot .c-right {
+        .course-item .thumb img {
             width: 100%;
-            white-space: nowrap;
-            text-align: right;
-            margin-left: 15px
+            max-width: 100%;
+            vertical-align: middle;
+            border: none;
+            position: absolute;
+            top: 50%;
+            margin-top: -50%;
         }
 
-            .course-item .detail .c-bot .c-right .ic-subtag {
-                margin-left: 7px;
-                margin-bottom: -2px
+    .course-item .detail {
+        padding: 10px
+    }
+
+        .course-item .detail p {
+            font-size: 12px;
+            color: #839AA6;
+            line-height: 18px;
+            margin-bottom: 10px
+        }
+
+            .course-item .detail p .ti-time {
+                margin-right: 5px
             }
 
-.course-item .title {
-    display: block;
-    font-size: 16px;
-    font-weight: 600;
-    color: #D03239;
-    margin-bottom: 7px;
-    line-height: 23px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap
-}
+        .course-item .detail .c-bot {
+            border-top: 1px solid #D0DFE8;
+            padding-top: 10px
+        }
 
-.course-item .btn-learn {
-    display: block;
-    color: #fff;
-    text-transform: uppercase;
-    border-radius: 2px;
-    padding: 3px 8px;
-    font-weight: 600;
-    text-align: center;
-    width: 95px;
-    white-space: nowrap
-}
+            .course-item .detail .c-bot .c-right {
+                width: 100%;
+                white-space: nowrap;
+                text-align: right;
+                margin-left: 15px
+            }
 
-    .course-item .btn-learn:hover, .course-item .btn-learn:focus {
-        text-decoration: none
+                .course-item .detail .c-bot .c-right .ic-subtag {
+                    margin-left: 7px;
+                    margin-bottom: -2px
+                }
+
+    .course-item .title {
+        display: block;
+        font-size: 16px;
+        font-weight: 600;
+        color: #D03239;
+        margin-bottom: 7px;
+        line-height: 23px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap
     }
 
-.course-item:nth-child(4n+1) .btn-learn {
-    background: #D03239
-}
+    .course-item .btn-learn {
+        display: block;
+        color: #fff;
+        text-transform: uppercase;
+        border-radius: 2px;
+        padding: 3px 8px;
+        font-weight: 600;
+        text-align: center;
+        width: 95px;
+        white-space: nowrap
+    }
 
-.course-item:nth-child(4n+2) .btn-learn {
-    background: #E8A623
-}
+        .course-item .btn-learn:hover, .course-item .btn-learn:focus {
+            text-decoration: none
+        }
 
-.course-item:nth-child(4n+3) .btn-learn {
-    background: #00D085
-}
+    .course-item:nth-child(4n+1) .btn-learn {
+        background: #D03239
+    }
 
-.course-item:nth-child(4n+4) .btn-learn {
-    background: #1C6D72
-}
+    .course-item:nth-child(4n+2) .btn-learn {
+        background: #E8A623
+    }
+
+    .course-item:nth-child(4n+3) .btn-learn {
+        background: #00D085
+    }
+
+    .course-item:nth-child(4n+4) .btn-learn {
+        background: #1C6D72
+    }
 
 .paging-view {
     font-size: 13px;
@@ -1424,35 +1420,6 @@ button, input, a {
     border-bottom: none
 }
 
-.ls-pratice li .parrent {
-    color: #00BBD4
-}
-
-    .ls-pratice li .parrent .ic {
-        margin-bottom: -6px;
-        margin-right: 8px
-    }
-
-    .ls-pratice li .parrent::after {
-        content: "\e648";
-        font-family: themify;
-        position: absolute;
-        right: 5px;
-        top: 4px
-    }
-
-    .ls-pratice li .parrent.collapsed::after {
-        content: "\e64b"
-    }
-
-.ls-pratice li:nth-child(n+2) .parrent {
-    color: #B70058
-}
-
-.ls-pratice li:nth-child(n+3) .parrent {
-    color: #D03239
-}
-
 .ls-pratice .card-body {
     background: #F0F3F4;
     border-radius: 10px;
@@ -1542,31 +1509,6 @@ button, input, a {
         }
 
         .ls-pratice .sub-practice .btn-act.btn-act {
-            margin-left: 15px
-        }
-
-    .ls-pratice .sub-practice .date {
-        display: block;
-        min-width: 140px;
-        background: #fff;
-        border-radius: 4px;
-        padding: 5px 18px
-    }
-
-        .ls-pratice .sub-practice .date::after {
-            content: "\25BC";
-            margin-left: 10px
-        }
-
-        .ls-pratice .sub-practice .date.st::after {
-            color: #13A6FB
-        }
-
-        .ls-pratice .sub-practice .date.ed::after {
-            color: #D03239
-        }
-
-        .ls-pratice .sub-practice .date ~ .date {
             margin-left: 15px
         }
 
@@ -2079,7 +2021,7 @@ button, input, a {
 }
 
     .list-scroll li {
-        width: 165px;
+        width: 160px;
         display: table
     }
 
@@ -2121,7 +2063,7 @@ button, input, a {
             font-size: 12px;
             color: #4E6774;
             line-height: 18px;
-            margin-bottom: 5px
+            margin-bottom: 7px
         }
 
             .list-scroll li p i {
@@ -2150,13 +2092,13 @@ button, input, a {
             }
 
         .list-scroll li .thumb {
-            height: 92px;
+            height: 89px;
             overflow: hidden
         }
 
         .list-scroll li .inner {
             white-space: nowrap;
-            width: 165px
+            width: 157px
         }
 
         .list-scroll li:nth-child(4n+2) h4 {
@@ -2192,8 +2134,7 @@ button, input, a {
             }
 
             .list-scroll li .progress ~ div {
-                color: #13A6FB;
-                font-size: 13px
+                color: #13A6FB
             }
 
             .list-scroll li .progress.bad ~ div {
@@ -2343,10 +2284,3 @@ button, input, a {
         .bot-noti .alert-text.error {
             background: #D03239
         }
-
-.info-practice h4 {
-    font-size: 16px;
-    color: #000;
-    font-weight: 600;
-    margin-bottom: 15px
-}

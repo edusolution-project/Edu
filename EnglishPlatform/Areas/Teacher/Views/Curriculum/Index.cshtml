@@ -1,6 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Dashboard - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
 }
 <script>
     setActiveMenu("curriculum");
@@ -10,19 +12,16 @@
     <div class="card-header">
         <div class="flex border-b padding-b25 justify-content-between">
             <div class="flex">
-                <div class="w-250 box filter-box">
-                    <select name="">
-                        <option value="">IELTS Preparation</option>
-                    </select>
-                </div>
                 <div class="box filter-box w-152">
-                    <select name="">
+                    <select v-model="subject" v-on:change="changeSubject()">
                         <option value="">Môn học</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                     </select>
                 </div>
                 <div class="box filter-box w-152">
-                    <select name="">
+                    <select name="" v-model="grade" v-on:change="changeGrade()">
                         <option value="">Cấp độ</option>
+                        <option v-for="(item,k) in list_grades" :value="item.ID">{{item.Name}}</option>
                     </select>
                 </div>
             </div>
@@ -37,13 +36,13 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item,k) in tableData" v-if="item.id > 0">
-                    <td>{{k+1}}</td>
-                    <td>{{item.lesson_name}}</td>
-                    <td>{{item.subject_name}}</td>
-                    <td>{{item.level}}</td>
-                    <td>{{item.created_at}}</td>
-                    <td><b-form-checkbox switch v-model="item.state" v-on:change="toggleState(item)"></b-form-checkbox></td>
+                <tr v-for="(item,k) in list_data" v-if="item.ID">
+                    <td>{{(page - 1) * view + (k+1)}}</td>
+                    <td>{{item.Name}}</td>
+                    <td>{{item.SubjectName}}</td>
+                    <td>{{item.GradeName}}</td>
+                    <td>{{formatShortDate(item.Created)}}</td>
+                    <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
                     <td>
                         <div class="d-flex btn-group">
                             <a class="btn-act btn-edit" href="#"><i class="ti-pencil-alt"></i></a>
@@ -56,7 +55,7 @@
         <div class="box margin-t20 flex">
             <div class="paging-view">
                 Hiển thị:
-                <select v-model="view">
+                <select v-model="view" v-on:change="getData()">
                     <option value="10">10 kết quả</option>
                     <option value="20">20 kết quả</option>
                     <option value="30">30 kết quả</option>
@@ -64,11 +63,11 @@
             </div>
             <div class="page-control">
                 <div class="inner">
-                    <button><i class="ti-angle-left"></i></button>
-                    <button><i class="ti-angle-double-left"></i></button>
-                    <input type="text" v-model="page" />
-                    <button><i class="ti-angle-double-right"></i></button>
-                    <button><i class="ti-angle-right"></i></button>
+                    <button v-on:click="goPage(0)"><i class="ti-angle-left"></i></button>
+                    <button v-on:click="goPage(page - 1)"><i class="ti-angle-double-left"></i></button>
+                    <input type="text" v-model="page" v-on:change="getData()" />
+                    <button v-on:click="goPage(page + 1)"><i class="ti-angle-double-right"></i></button>
+                    <button v-on:click="goPage(max_page)"><i class="ti-angle-right"></i></button>
                 </div>
             </div>
         </div>
@@ -77,100 +76,177 @@
 
 @section Scripts{
     <script>
-    new Vue({
-        el: ".module",
-		data: {
-            tableData : [
-                {
-                    id : 1,
-                    lesson_name : 'IELTS Preparation',
-                    subject_name : 'Listening',
-                    level : 'A2',
-                    created_at : '02/11/2019',
-                    state : true
+        new Vue({
+            el: "#main",
+             mounted() {
+                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
+                 this.changeSubject()
+            },
+            data: {
+                fields: [
+                    {
+                        key: 'stt',
+                        label: '#'
+                    },
+                    {
+                        key: 'lesson_name',
+                        label: 'Tên bài giảng'
+                    },
+                    {
+                        key: 'subject_name',
+                        label: 'Môn học'
+                    },
+                    {
+                        key: 'level',
+                        label: 'Cấp độ'
+                    },
+                    {
+                        key: 'created_at',
+                        label: 'Ngày tạo'
+                    },
+                    {
+                        key: 'state',
+                        label: 'Trạng thái'
+                    },
+                    {
+                        key: 'actions',
+                        label: 'Tác vụ'
+                    }
+                ],
+                list_data: [],
+                list_subject: [],
+                list_grades_full: [],
+                list_grades: [],
+                subject: '',
+                grade: '',
+                view: 10,
+                hPage: 1,
+                pageSize: 10,
+                max_page: 0
+            },
+            watch: {
+            },
+            computed: {
+                page: {
+                    get() {
+                        return parseInt(this.hPage);
+                    },
+                    set(value) {
+                        console.log(value);
+                        this.hPage = value;
+                    }
                 },
-                {
-                    id : 2,
-                    lesson_name : 'Destination B1',
-                    subject_name : 'PET',
-                    level : 'A2',
-                    created_at : '02/11/2019',
-                    state : false
+            },
+            methods: {
+                getData() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('GradeID', _that.grade)
+                    _form.append('SubjectID', _that.subject)
+                    _form.append('PageSize', _that.view)
+                    _form.append('PageIndex', _that.page)
+                    let _url = '@Url.Action("GetList", "Curriculum")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            console.log(response.data);
+                            _that.list_data = response.data.Data;
+                            var tt = response.data.Model.totalRecord;
+                            console.log(this.view);
+                            this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
+                            //console.log(_that.active_course);
+                        }).catch(e => { })
                 },
-                {
-                    id : 3,
-                    lesson_name : '	Ngữ pháp A2',
-                    subject_name : 'KET',
-                    level : 'A2',
-                    created_at : '02/11/2019',
-                    state : true
-                },
-            ],
-            fields : [
-                {
-                    key : 'stt',
-                    label : '#'
-                },
-                {
-                    key : 'lesson_name',
-                    label : 'Tên bài giảng'
-                },
-                {
-                    key : 'subject_name',
-                    label : 'Môn học'
-                },
-                {
-                    key : 'level',
-                    label : 'Cấp độ'
-                },
-                {
-                    key : 'created_at',
-                    label : 'Ngày tạo'
-                },
-                {
-                    key : 'state',
-                    label : 'Trạng thái'
-                },
-                {
-                    key : 'actions',
-                    label : 'Tác vụ'
-                }
-            ],
-            week : '',
-            view : 10,
-            page : 1,
-            pageSize : 10
-        },
-        watch : {
-        },
-        methods: {
-            getData(){
-                let _data = []
+                changeSubject() {
+                    let _that = this
+                    //console.log(this.subject)
+                    //console.log(this.list_grades_full)
+                    _that.list_grades = [];
 
-                this.tableData = _data
-            },
-            getNews(){
-                // tương tự như trên
-            },
-            destroy(id){
-                this.tableData.forEach(function(item,k){
-                    if(item.id == id){
-                        item.id = 0
+                    for (i = 0; i < _that.list_grades_full.length; i++)
+                    {
+                        //console.log(_that.list_grades_full[i].SubjectID)
+                        if (_that.list_grades_full[i].SubjectID == _that.subject) {
+                            _that.list_grades.push(_that.list_grades_full[i])
+                        }
                     }
-                })
-                let _data = this.tableData.filter(function(a){
-                    return a.id > 0
-                })
-                this.tableData = _data
-            },
-            toggleState(obj){
-                this.tableData.forEach(function(item,k){
-                    if(item.id === obj.id){
-                        item.state = !item.state
-                    }
-                })
+                    _that.grade = ""
+                    _that.changeGrade()
+                },
+                changeGrade() {
+                    let _that = this
+                    _that.getData()
+                },
+                destroy(id) {
+                    //this.tableData.forEach(function (item, k) {
+                    //    if (item.id == id) {
+                    //        item.id = 0
+                    //    }
+                    //})
+                    //let _data = this.tableData.filter(function (a) {
+                    //    return a.id > 0
+                    //})
+                    //this.tableData = _data
+                },
+                toggleState(obj) {
+                    let _that = this
+                    _that.list_data.forEach(function (item, k) {
+                        if (item.ID === obj.ID) {
+                            let _url = item.IsActive ? '@Url.Action("Unpublish", "Curriculum")' : '@Url.Action("Publish", "Curriculum")'
+                            item.IsActive = !item.IsActive
+                            let _form = new FormData()
+                            _form.append('ArrID', item.ID)
+                            axios.post(_url, _form)
+                                .then(response => {
+                                    console.log(response);
+                                    item.IsActive = !item.IsActive;
+                                    this.list_data = _that.list_data;
+                                }).catch(e => { })
+                        }
+                    })
+                },
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                goPage(pgIdx) {
+                    if (pgIdx < 1) pgIdx = 1;
+                    if (pgIdx > this.max_page)
+                        pgIdx = this.max_page;
+                    this.page = pgIdx;
+                    this.getData();
+                }
             }
-        }
-    });
+        });
     </script>
+}
+@section Modals{
+    <b-modal id="modal_event" centered title="Thêm bài giảng mới">
+        <b-col class="form-group">
+            <label for="">Tên bài giảng</label>
+            <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng">
+        </b-col>
+        <div class="d-flex">
+            <b-col class="form-group">
+                <label for="">Môn học</label>
+                <select class="form-control" name="">
+                    <option value="">Chọn khoá học</option>
+                </select>
+            </b-col>
+            <b-col class="form-group">
+                <label for="">Cấp độ</label>
+                <select class="form-control" name="">
+                    <option value="">Chọn cấp độ</option>
+                </select>
+            </b-col>
+        </div>
+        <b-col class="form-group">
+            <label for="">Mô tả</label>
+            <textarea name="name" rows="3" class="form-control"></textarea>
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="success">Lưu</b-button>
+            <b-button variant="danger">Huỷ</b-button>
+        </template>
+    </b-modal>
 }

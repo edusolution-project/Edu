@@ -117,9 +117,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
                 var grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
-                ViewBag.Grade = grade;
-                ViewBag.Subject = subject;
+                ViewBag.Grades = grade;
+                ViewBag.Subjects = subject;
             }
+
 
             var modsubject = _modsubjectService.GetAll().ToList();
             var modgrade = _modgradeService.GetAll().ToList();
@@ -130,9 +131,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             ViewBag.Model = model;
-            if (beta == 1)
-                return View();
-            return View("Index_o");
+            //if (beta == 1)
+            return View();
+            //return View("Index_o");
         }
 
         public IActionResult Detail(string ID)
@@ -251,24 +252,39 @@ namespace BaseCustomerMVC.Controllers.Teacher
             filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
-
-            //var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
-            //    ? data
-            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
-            var DataResponse = data;
+            model.TotalRecord = data.CountDocuments();
 
             var response = new Dictionary<string, object>
             {
-                { "Data", DataResponse.ToList().Select(o =>
-
-                    _courseViewMapping.AutoOrtherType(o, new CourseViewModel(){
-                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                        SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
-                        TeacherName = _teacherService.GetItemByID(o.CreateUser)?.FullName
-                    })).ToList()
-                },
-                { "Model", model }
             };
+
+            if (model.PageIndex < 0 || model.PageIndex * model.PageSize > model.TotalRecord)
+            {
+                response = new Dictionary<string, object>
+                {
+                    { "Model", model }
+                };
+            }
+            else
+            {
+                var DataResponse = data == null || model.TotalRecord <= 0 //|| model.TotalRecord < model.PageSize
+                    ? data
+                    : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize);
+                //var DataResponse = data;
+
+                response = new Dictionary<string, object>
+                {
+                    { "Data", DataResponse.ToList().Select(o =>
+
+                        _courseViewMapping.AutoOrtherType(o, new CourseViewModel(){
+                            GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+                            SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
+                            TeacherName = _teacherService.GetItemByID(o.CreateUser)?.FullName
+                        })).ToList()
+                    },
+                    { "Model", model }
+                };
+            }
             return new JsonResult(response);
         }
 

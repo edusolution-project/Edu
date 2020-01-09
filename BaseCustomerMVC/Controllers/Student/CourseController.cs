@@ -208,7 +208,8 @@ namespace BaseCustomerMVC.Controllers.Student
                            subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                            endDate = o.EndDate,
                            percent,
-                           score = progress != null ? progress.AvgPoint : 0
+                           score = progress != null ? progress.AvgPoint : 0,
+                           thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                        }).ToList();
             return Json(new { Data = std });
         }

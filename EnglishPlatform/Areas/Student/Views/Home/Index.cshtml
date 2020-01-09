@@ -33,7 +33,7 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <h4 title="item.className"><i class="ic ic-headphone-o"></i>{{item.className}}</h4>
+                                <a :href="'@Url.Action("Detail","Course")/' + item.classID" :title="item.className" class="title"><h4><i class="ic ic-headphone-o"></i>{{item.className}}</h4></a>
                                 <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classID" :title="item.title" class="title">{{item.title}}</a>
                                 <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
                                 <div class="c-bot">
@@ -60,7 +60,8 @@
                                 <a :href="'@Url.Action("Detail","Course")/' + item.id" :title="item.courseName">
                                     <div class="box radius">
                                         <div class="thumb">
-                                            <img src="/pictures/ielts1.png" alt="">
+                                            <img v-if="item.thumb" :src="item.thumb" alt="">
+                                            <img v-else src="/pictures/ielts1.png" alt="">
                                         </div>
                                         <div class="padding-15 inner">
                                             <a :href="'@Url.Action("Detail","Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
@@ -174,7 +175,7 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
-                _form.append('PageSize', 5)
+                _form.append('PageSize', 6)
                 _form.append('PageIndex', 1)
                 let _url = '@Url.Action("GetFinishList", "Course")'
 

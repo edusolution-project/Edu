@@ -32,10 +32,6 @@
         height: calc(100vh - 135px);
     }
 
-    .fc-toolbar.fc-header-toolbar {
-        display: none;
-    }
-
     .fc-day-header {
         height: 50px;
         line-height: 43px;
@@ -63,99 +59,19 @@
     }
 </style>
 
-@section Scripts{
+@section scripts{ 
     <script src="~/js/lib/schedule.js"></script>
+    <script src="~/js/lib/Calendar.js"></script>
     <script>
-        var schedulex = new CalendarLib.Schedule($);
-        schedulex.onLoad({
-            type: "@User?.FindFirst("Type").Value",
-            controller: 'Calendar',
-            header: {},
+        var EduCalendar = new EduCalendar();
+        EduCalendar.useEduTemplate().loadConfig({
+            url:"/EndUser/data/events.json",
+            type:"student",
             isDev:!0,
-            defaultView: "dayGridMonth",
-            height: document.getElementById("schedule").offsetHeight
-        });
-        $('#start-date').datetimepicker({
-            formatTime: 'H:i',
-            formatDate: 'd.m.Y',
-            timepickerScrollbar: false
-        });
-        $('#end-date').datetimepicker({
-            formatTime: 'H:i',
-            formatDate: 'd.m.Y',
-            timepickerScrollbar: false
-        });
-        var submitEvent = function () {
-            schedulex.addEvent("scheduleForm");
-        }
+            height:"parent",
+            eventRender:function(info){
+              console.log(info.el,info.event.extendedProps);
+            }
+          }).renderCalendar();
     </script>
-}
-
-@section Modals{
-    <div id="calendarModal" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 id="modalTitle" class="modal-title"></h4>
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                </div>
-                <div id="modalBody" class="modal-body">
-                    <form action="#" name="scheduleForm">
-                        <input type="hidden" class="form-control" name="id" value="">
-                        <label for="">Title :</label>
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="Title" placeholder="Title">
-                        </div>
-                        <div class="form-group">
-                            <label for="">StartDate :</label>
-                            <div class="input-group date">
-                                <input type="text" name="StartDate" class="form-control datetimepicker-input" id="start-date" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="">End Date :</label>
-                            <div class="input-group date">
-                                <input type="text" name="EndDate" class="form-control datetimepicker-input" id="end-date" />
-                            </div>
-                        </div>
-                        <label for="">Link :</label>
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="url" placeholder="//link">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" onclick="submitEvent()" data-dismiss="modal">Thêm</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="calendarModalView" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title"></h4>
-                    @*<button type="button" class="edit"><span aria-hidden="true">edit</span> <span class="sr-only">edit</span></button>
-                        <button type="button" class="delete"><span aria-hidden="true">delete</span> <span class="sr-only">delete</span></button>*@
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                </div>
-                <div id="modalBody" class="modal-body">
-                    <div class="form-group form-inline">
-                        <label for="start-date"> Bắt đầu : </label>
-                        <b name="start-date"></b>
-                    </div>b
-                    <div class="form-group form-inline">
-                        <label for="end-date">Kết thúc : </label>
-                        <b name="end-date"></b>
-                    </div>
-                    <div class="form-group">
-                        <label for="end-date">Link liên kết : </label>
-                        <a href="#" name="link"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 }

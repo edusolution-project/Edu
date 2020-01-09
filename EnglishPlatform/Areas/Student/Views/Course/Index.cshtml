@@ -83,10 +83,10 @@
     <script>
 
         new Vue({
-            el: ".module",
+            el: "#main",
             mounted() {
-                var start = moment().subtract(29, 'days');
-                var end = moment();
+                var start = moment();
+                var end = moment().add(29, 'days');
                 $('input[name="dates"]').daterangepicker({
                     startDate: start,
                     endDate: end,

@@ -24,28 +24,14 @@
             </div>
             <div class="box bg-1 padding-15">
                 <ul class="box list-scroll">
-                    <li>
+                    <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <h4><i class="ic ic-headphone-o"></i>Listening</h4>
-                                <a href="#" title="IELTS Preparation" class="title">IELTS Preparation</a>
-                                <p><i class="ic ic-pickdate-r"></i>4/6 tuần</p>
+                                <a :href="'@Url.Action("Detail","Class")/' + item.classID" :title="item.className" class="title"><h4><i class="ic ic-headphone-o"></i>{{item.className}}</h4></a>
+                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
-                                    <p><i class="icofont icofont-user"></i>3 học viên</p>
-                                    <p><i class="ti-time"></i>12/08/2019</p>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="box radius">
-                            <div class="padding-15 inner">
-                                <h4><i class="ic ic-readbook-o"></i>Listening</h4>
-                                <a href="#" title="IELTS Preparation" class="title">IELTS Preparation</a>
-                                <p><i class="ic ic-pickdate-r"></i>4/6 tuần</p>
-                                <div class="c-bot">
-                                    <p><i class="icofont icofont-user"></i>3 học viên</p>
-                                    <p><i class="ti-time"></i>12/08/2019</p>
+                                    <p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>
+                                    <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
                                 </div>
                             </div>
                         </div>
@@ -58,36 +44,21 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Khóa học đang diễn ra</h4>
-                        <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="@Url.Action("Index","Class")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="box list-scroll">
-                            <li>
+                            <li v-for="(item,k) in active_course">
                                 <div class="box radius">
                                     <div class="thumb">
-                                        <img src="/pictures/ielts1.png" alt="">
+                                        <img v-if="item.thumb"  :src="item.thumb" alt="">
+                                        <img v-else src="/pictures/ielts1.png" alt="">
                                     </div>
                                     <div class="padding-15 inner">
-                                        <a href="#" title="IELTS Preparation" class="title">IELTS Preparation</a>
-                                        <p><i class="ic ic-pickdate-r"></i>4/6 tuần</p>
+                                        <a :href="'@Url.Action("Detail","Class")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
                                         <div class="c-bot">
-                                            <p><i class="icofont icofont-user"></i>3 học viên</p>
-                                            <p><i class="ti-time"></i>12/08/2019</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="box radius">
-                                    <div class="thumb">
-                                        <img src="/pictures/ielts1.png" alt="">
-                                    </div>
-                                    <div class="padding-15 inner">
-                                        <a href="#" title="IELTS Preparation" class="title">IELTS Preparation</a>
-                                        <p><i class="ic ic-pickdate-r"></i>4/6 tuần</p>
-                                        <div class="c-bot">
-                                            <p><i class="icofont icofont-user"></i>3 học viên</p>
-                                            <p><i class="ti-time"></i>12/08/2019</p>
+                                            <p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>
+                                            <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -106,10 +77,10 @@
                         <ul class="list-discus">
                             <li v-for="(item,k) in discussion">
                                 <div class="flex c-top">
-                                    <a href="discussion_detail.html" :title="item.title" class="title">{{item.title}}</a>
-                                    <div class="c-right"><i class="icofont icofont-user"></i>{{item.member + ' members'}}</div>
+                                    <a :href="'@Url.Action("Index","Discuss")#' + item.ID" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
+                                    <div class="c-right"><i class="icofont icofont-user"></i>{{3 + ' members'}}</div>
                                 </div>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.</p>
+                                <p>{{shortenString(item.content,160)}}.</p>
                             </li>
                         </ul>
                     </div>
@@ -121,18 +92,18 @@
                 <div class="col-md-12 margin-b20">
                     <div class="heading flex">
                         <h4 class="box-head">Khóa học đã kết thúc</h4>
-                        <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="@Url.Action("Index","Class")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
             <ul class="row">
-                <li class="col-md-4 less-done list" v-for="(item,k) in Lesson_done">
+                <li class="col-md-4 less-done list" v-for="(item,k) in finish_course">
                     <div class="box radius">
-                        <a href="#" class="flex">
+                        <a :href="'@Url.Action("Detail","Class")/' + item.id" :title="item.title" class="flex">
                             <span class="per checked"><i class="ic ic-checked"></i></span>
                             <div class="info">
                                 <span>{{item.title}}</span>
-                                <span>{{item.date}}</span>
+                                <span><i class="ti-time"></i> {{formatDate(item.endDate)}}</span>
                             </div>
                             <span class="arr-right ti-arrow-right"></span>
                         </a>
@@ -190,9 +161,9 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
-                _form.append('PageSize', 5)
+                _form.append('PageSize', 6)
                 _form.append('PageIndex', 1)
-                let _url = '@Url.Action("GetFinishList", "Course")'
+                let _url = '@Url.Action("GetFinishList", "Class")'
 
                 axios.post(_url, _form)
                     .then(response => {
@@ -207,7 +178,7 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
-                let _url = '@Url.Action("GetThisWeekLesson", "Course")'
+                let _url = '@Url.Action("GetThisWeekLesson", "Class")'
 
                 axios.post(_url, _form)
                     .then(response => {
@@ -237,6 +208,11 @@
                 console.log(time);
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
                 return moment(time).format("DD/MM/YYYY hh:mm")
+            },
+            formatDate(time) {
+                console.log(time);
+                if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
+                return moment(time).format("DD/MM/YYYY")
             },
             shortenString(str, length) {
                 if (str.length <= length)

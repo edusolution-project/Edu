@@ -640,6 +640,76 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
+        public JsonResult GetActiveList(DateTime today)
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Authentication Error"
+                });
+            }
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == userId));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
+
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+
+            var std = (from o in data.ToList()
+                       let progress = _progressService.GetItemByClassID(o.ID, userId)
+                       let percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                       let totalweek = (o.EndDate.Date - o.StartDate.Date).TotalDays / 7
+                       select new
+                       {
+                           id = o.ID,
+                           courseID = o.CourseID,
+                           courseName = o.Name,
+                           subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
+                           thumb = o.Image ?? "",
+                           endDate = o.EndDate,
+                           //week = totalweek > 0 ? (DateTime.Now.Date - o.StartDate.Date).TotalDays / 7 / totalweek : 0,
+                           students = o.Students.Count
+                       }).ToList();
+            return Json(new { Data = std });
+        }
+
+        public JsonResult GetFinishList(DefaultModel model, DateTime today)
+        {
+            var filter = new List<FilterDefinition<ClassEntity>>();
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return null;
+            }
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == userId));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
+
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            model.TotalRecord = data.CountDocuments();
+            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
+                ? data.ToList()
+                : data.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+
+            var std = (from o in DataResponse
+                       let progress = _progressService.GetItemByClassID(o.ID, userId)
+                       let per = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                       select new
+                       {
+                           id = o.ID,
+                           courseID = o.CourseID,
+                           title = o.Name,
+                           endDate = o.EndDate,
+                           per,
+                           //score = progress != null ? progress.AvgPoint : 0
+                       }).ToList();
+            return Json(new { Data = std });
+        }
+
+
         public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", string UserID = "")
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
@@ -672,41 +742,89 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        public JsonResult GetActiveList()
+        public JsonResult GetThisWeekLesson(DateTime today)
         {
-            var filter = new List<FilterDefinition<ClassEntity>>();
-            TeacherEntity teacher = null;
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+            var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
+            var endWeek = startWeek.AddDays(7);
+
+            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
             {
-                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
-                if (teacher == null)
+                return Json(new ReturnJsonModel
                 {
-                    return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",UserID },
-                        {"Msg","Không có thông tin giảng viên" }
-                    });
-                }
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Authentication Error"
+                });
             }
-            if (teacher != null)
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID && o.EndDate >= DateTime.Now.ToLocalTime().Date));
 
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
-            var DataResponse = data;
-            if (data != null)
-                DataResponse = data.Limit(3);
+            var classFilter = new List<FilterDefinition<ClassEntity>>();
+            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == userId));
+            var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
 
-            var response = new Dictionary<string, object>
-            {
-                { "Data", DataResponse.ToList().Select(t=> _activeMapping.AutoOrtherType(t, new ClassActiveViewModel(){
-                    Progress = (int)((DateTime.Now.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays  * 100 / (t.EndDate.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays),
-                    SubjectName = _subjectService.GetItemByID(t.SubjectID).Name
-                    }))
-                    }
-            };
-            return new JsonResult(response);
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
+
+            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter));
+
+            var std = (from o in data.ToList()
+                       let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
+                       where _lesson != null
+                       let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+                       where _class != null
+                       //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
+                       select new
+                       {
+                           id = o.ID,
+                           classID = _class.ID,
+                           className = _class.Name,
+                           title = _lesson.Title,
+                           lessonID = _lesson.ID,
+                           startDate = o.StartDate,
+                           endDate = o.EndDate,
+                           students = _class.Students.Count
+                           //isLearnt = isLearnt
+                       }).ToList();
+            return Json(new { Data = std });
         }
+
+
+        //public JsonResult GetActiveList()
+        //{
+        //    var filter = new List<FilterDefinition<ClassEntity>>();
+        //    TeacherEntity teacher = null;
+        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+        //    {
+        //        teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+        //        if (teacher == null)
+        //        {
+        //            return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",UserID },
+        //                {"Msg","Không có thông tin giảng viên" }
+        //            });
+        //        }
+        //    }
+        //    if (teacher != null)
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID && o.EndDate >= DateTime.Now.ToLocalTime().Date));
+
+        //    var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+        //    var DataResponse = data;
+        //    if (data != null)
+        //        DataResponse = data.Limit(3);
+
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data", DataResponse.ToList().Select(t=> _activeMapping.AutoOrtherType(t, new ClassActiveViewModel(){
+        //            Progress = (int)((DateTime.Now.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays  * 100 / (t.EndDate.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays),
+        //            SubjectName = _subjectService.GetItemByID(t.SubjectID).Name
+        //            }))
+        //            }
+        //    };
+        //    return new JsonResult(response);
+        //}
 
         [HttpPost]
         [Obsolete]
