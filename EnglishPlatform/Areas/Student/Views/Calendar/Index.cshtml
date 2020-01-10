@@ -67,11 +67,11 @@
         EduCalendar.useEduTemplate().loadConfig({
             url:"/EndUser/data/events.json",
             type:"student",
-            isDev:!0,
+            isDev:!1,
             height:"parent",
             eventRender:function(info){
               console.log(info.el,info.event.extendedProps);
             }
-          }).renderCalendar();
+        }).renderCalendar();
     </script>
 }
