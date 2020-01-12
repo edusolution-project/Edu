@@ -93,6 +93,28 @@ namespace BaseCustomerMVC.Globals
             }).ToList();
             return DataResponse;
         }
+        [Obsolete]
+        public List<CalendarEventModel> GetListEvent(DateTime startDate, DateTime endDate, List<string> classList, string userid)
+        {
+            var filter = new List<FilterDefinition<CalendarEntity>>();
+            if (startDate > DateTime.MinValue && endDate > DateTime.MinValue)
+            {
+                var _startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
+                var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
+                filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.StartDate >= _startDate || o.EndDate <= _endDate) || (o.CreateUser == userid)));
+            }
+            filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.IsDel == false));
+            var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
+            var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList().Select(o => new CalendarEventModel()
+            {
+                start = o.StartDate,
+                groupid = o.GroupID,
+                id = o.ID,
+                title = o.Title,
+                url = o.UrlRoom == null ? "" : o.UrlRoom
+            }).ToList();
+            return DataResponse;
+        }
 
         public CalendarEntity GetByScheduleId(string scheduleID)
         {

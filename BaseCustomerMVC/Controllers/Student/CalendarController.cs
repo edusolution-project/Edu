@@ -20,12 +20,16 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CalendarReportService _calendarReportService;
         private readonly CalendarHelper _calendarHelper;
         private readonly ClassService _classService;
+        private readonly TeacherService _teacherService;
+        private readonly StudentService _studentService;
         public CalendarController(
             CalendarService calendarService,
             CalendarLogService calendarLogService,
             CalendarReportService calendarReportService,
             CalendarHelper calendarHelper,
-            ClassService classService
+            ClassService classService,
+            TeacherService teacherService,
+            StudentService studentService
             )
         {
             this._calendarService = calendarService;
@@ -33,6 +37,8 @@ namespace BaseCustomerMVC.Controllers.Student
             this._calendarReportService = calendarReportService;
             _calendarHelper = calendarHelper;
             _classService = classService;
+            _teacherService = teacherService;
+            _studentService = studentService;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -46,7 +52,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User?.FindFirst("UserID").Value;
             var listClass = _classService.Collection.Find(o => o.Students.Contains(userId))?.ToList();
             if (listClass == null) return Task.FromResult(new JsonResult(null));
-            var data = _calendarHelper.GetListEvent(model.StartDate, model.EndDate, listClass.Select(o => o.ID).ToList());
+            var data = _calendarHelper.GetListEvent(model.StartDate, model.EndDate, listClass.Select(o => o.ID).ToList(), userId);
             return Task.FromResult(new JsonResult(data));
         }
         [HttpPost]
@@ -56,18 +62,35 @@ namespace BaseCustomerMVC.Controllers.Student
             var DataResponse = _calendarService.GetItemByID(id);
             return Task.FromResult(new JsonResult(DataResponse));
         }
-        //[HttpPost]
-        //[Obsolete]
-        //public bool Create(CalendarEntity item)
-        //{
-        //    // check validate
-        //    return _calendarHelper.CreateEvent(item).Result;
-        //}
-        //[HttpPost]
-        //[Obsolete]
-        //public bool Delete(string id)
-        //{
-        //    return _calendarHelper.RemoveEvent(id).Result;
-        //}
+        [HttpPost]
+        [Obsolete]
+        public JsonResult Create(CalendarEntity item)
+        {
+            item.CreateUser = User?.FindFirst("UserID").Value;
+            item.Created = DateTime.Now;
+            // check validate
+            var data = _calendarHelper.CreateEvent(item).Result;
+            if(data == null)
+            {
+                return new JsonResult(new
+                {
+                    code = 400,
+                    msg = "đã có event tồn tại",
+                    data = data
+                });
+            }
+
+            return new JsonResult(new {
+                code =201,
+                msg = "tạo thành công",
+                data = data
+            });
+        }
+        [HttpPost]
+        [Obsolete]
+        public bool Delete(string id)
+        {
+            return _calendarHelper.RemoveEvent(id).Result;
+        }
     }
 }

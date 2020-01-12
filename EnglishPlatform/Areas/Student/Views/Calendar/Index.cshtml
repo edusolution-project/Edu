@@ -21,96 +21,45 @@
 
 <section class="module" id="dashboard_content">
     <div class="card-header">
-        <div class="flex border-b padding-b25">
-            <h2 class="title">@ViewData["Title"]</h2>
-        </div>
     </div>
     <div id="schedule" class="pl-3 pr-3"></div>
 </section>
+<div id="skype-event" class="skype-event">
 
+</div>
+<div class="form-event" id="form-event">
+    <div class="header-form-event">Sự kiện</div>
+    <div class="body-form-event">
+        <div class="item-event">
+            <label for="Title">Tiêu đề</label>
+            <input type="text" name="Title" class="form-control" placeholder="Nhập tiêu đề">
+        </div>
+        <div class="item-event">
+            <label for="Thời gian">Thời gian</label>
+            <div class="group-input-event">
+                <input type="text" name="Time" class="form-control timepicker" placeholder="Nhập giờ">
+                <input style="margin-left:5px;" type="date" value="" name="Date" class="form-control" placeholder="Nhập tiêu đề">
+            </div>
+        </div>
+        <div class="item-event">
+            <label for="Content">Nội dung</label>
+            <textarea name="Content" id="Content" style="resize: none;" class="form-control"></textarea>
+        </div>
+    </div>
+    <div class="footer-form-event">
+        <button class="btn btn-primary btn-save-event" id="btn-save-event">Lưu</button>
+        <button class="btn btn-o btn-cancel-event" id="btn-cancel-event">Hủy</button>
+    </div>
+</div>
+<div id="dark-smooke" class="dark-smooke" onclick="javascript: document.body.classList.remove('open-add-event');"></div>
 
 @section Scripts{
     @*longht add 2020-01-12*@
     <script src="~/js/calendar/js/jquery.timepicker.min.js"></script>
     <script src="~/js/calendar/js/sweetalert.min.js"></script>
     <script src="~/js/lib/schedule.js"></script>
-    <script src="~/js/calendar/js/Calendar.js"></script>
-    <div id="skype-event" class="skype-event">
-
-    </div>
-    <div class="form-event" id="form-event">
-        <div class="header-form-event">Sự kiện</div>
-        <div class="body-form-event">
-            <div class="item-event">
-                <label for="Title">Tiêu đề</label>
-                <input type="text" name="Title" class="form-control" placeholder="Nhập tiêu đề">
-            </div>
-            <div class="item-event">
-                <label for="Thời gian">Thời gian</label>
-                <div class="group-input-event">
-                    <input type="text" name="Time" class="form-control timepicker" placeholder="Nhập giờ">
-                    <input style="margin-left:5px;" type="date" value="" name="Date" class="form-control" placeholder="Nhập tiêu đề">
-                </div>
-            </div>
-            <div class="item-event">
-                <label for="Content">Nội dung</label>
-                <textarea name="Content" id="Content" style="resize: none;" class="form-control"></textarea>
-            </div>
-        </div>
-        <div class="footer-form-event">
-            <button class="btn btn-primary btn-save-event" id="btn-save-event">Lưu</button>
-            <button class="btn btn-o btn-cancel-event" id="btn-cancel-event">Hủy</button>
-        </div>
-    </div>
-    <div id="dark-smooke" class="dark-smooke"></div>
-    <script src="js/Calendar.js"></script>
+    <script src="/js/calendar/js/Calendar.js"></script>
     <script>
-        var EduCalendar = new EduCalendar();
-        EduCalendar.useEduTemplate().loadConfig({
-            url: "@Url.Action("GetList","Calendar")",
-            type: "teacher",
-            isDev: !1,
-            height: "parent",
-            eventClick: function (info) {
-                var eventInfo = info.event;
-                var startDate = eventInfo.start;
-                var title = eventInfo.title;
-                var content = eventInfo.extendedProps.content;
-                var timeEvent = changeTime(startDate);
-                var dateEvent = `${startDate.getFullYear()}-${startDate.getMonth() + 1}-${startDate.getDate()}`;
-                document.body.classList.add("open-add-event");
-                EduCalendar.schedule.Ajax.PostAny("@Url.Action("GetDetail","Calendar")", JSON.stringify({ id=eventInfo.id })).then(function (data) {
-                    console.log(data);
-                })
-
-                if (eventInfo.extendedProps != null && eventInfo.extendedProps.skype != void 0) {
-                    //chạy ajax get event
-                } else {
-                    var formEvent = document.getElementById("form-event");
-                    var bodyEvent = formEvent.querySelector(".body-form-event");
-                    if (bodyEvent != null) {
-                        var Title = bodyEvent.querySelector("input[name='Title']");
-                        if (Title != null) {
-                            Title.value = title;
-                        }
-                        var Content = bodyEvent.querySelector("textarea[name='Content']");
-                        if (Content != null) {
-                            Content.value = eventInfo.extendedProps.content != void 0
-                                ? content
-                                : "";
-                        }
-                        var time = bodyEvent.querySelector("input[name='Time']");
-                        if (time != null) {
-                            time.value = timeEvent;
-                        }
-                        var date = bodyEvent.querySelector("input[name='Date']");
-                        if (date != null) {
-                            date.value = dateEvent;
-                        }
-                    }
-                }
-            }
-        }).renderCalendar();
         var changeTime = function (date) {
             var hours = date.getHours();
             var minute = date.getMinutes();
@@ -130,8 +79,95 @@
         }
     </script>
     <script>
+        var EduCalendar = new EduCalendar();
+        EduCalendar.useEduTemplate().loadConfig({
+            url: "@Url.Action("GetList","Calendar")",
+            type: "teacher",
+            isDev: !1,
+            height: "parent",
+            eventClick: function (info) {
+                var eventInfo = info.event;
+                var startDate = eventInfo.start;
+                var title = eventInfo.title;
+                var content = eventInfo.extendedProps.content;
+                var timeEvent = changeTime(startDate);
+                var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
+                var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
+                var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
+                document.body.classList.add("open-add-event");
+                getEventDetails(eventInfo.id);
+                if (eventInfo.extendedProps != null && eventInfo.extendedProps.skype != void 0) {
+                    //chạy ajax get event
+                } else {
+                    
+                }
+            }
+        }).renderCalendar();
+        var checkTime = function (date,min,max) {
+            var now = new Date();
+            var next = date;
+            if (max == void 0) return ((next - now) / 6000 > min);
+            else return ((next - now) / 6000 > min) && ((next - now) / 6000 < max);
+        }
+        var getEventDetails = function (id) {
+            EduCalendar.schedule.Ajax.PostAny("@Url.Action("GetDetail","Calendar")?id=" + id, null).then(function (data) {
+                if (data != null) {
+                    var jsonData = JSON.parse(data);
+                    if (jsonData.CreateUser == "@User.FindFirst("UserID")?.Value") {
+                        var startDate = new Date(jsonData.StartDate);
+                        var timeEvent = changeTime(startDate);
+                        var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
+                        var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
+                        var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
+                        var formEvent = document.getElementById("form-event");
+                        var bodyEvent = formEvent.querySelector(".body-form-event");
+                        if (bodyEvent != null) {
+                            var Title = bodyEvent.querySelector("input[name='Title']");
+                            if (Title != null) {
+                                Title.value = jsonData.Title;
+                            }
+                            var Content = bodyEvent.querySelector("textarea[name='Content']");
+                            if (Content != null) {
+                                Content.value = jsonData.Content != void 0
+                                    ? jsonData.Content
+                                    : "";
+                            }
+                            var time = bodyEvent.querySelector("input[name='Time']");
+                            if (time != null) {
+                                time.value = timeEvent;
+                            }
+                            var date = bodyEvent.querySelector("input[name='Date']");
+                            if (date != null) {
+                                date.value = dateEvent;
+                            }
+                        }
+                        if (checkTime(new Date(jsonData.Created),0)) {
+                            // cho phép xóa
+                        }
+                    }
+                    else {
+                        if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != void 0) {
+                            // > 0 và < 10 phút
+                            if (checkTime(new Date(jsonData.Created), 0, 10)) {
+                                //gọi skype
+                            }
+                        }
+                    }
+                }
+            })
+        }
+        
+    </script>
+    <script>
         var formEvent = document.getElementById("form-event");
         document.getElementById("btn-cancel-event").onclick = function () {
+             var formEvent = document.getElementById("form-event");
+             var bodyEvent = formEvent.querySelector(".body-form-event");
+            var Title = bodyEvent.querySelector("input[name='Title']");
+            if (Title.value == "" || Title.value == null || Title.value == void 0) {
+                document.body.classList.remove("open-add-event");
+                return;
+            }
             swal({
                 title: "Bạn muốn hủy thông tin trên?",
                 text: "Dữ liệu bạn đã ghi sẽ bị mất !!",
@@ -155,7 +191,46 @@
                 });
         }
         document.getElementById("btn-save-event").onclick = function () {
-
+            var formEvent = document.getElementById("form-event");
+            var bodyEvent = formEvent.querySelector(".body-form-event");
+            var title = "", content = "", startdate = null;
+            if (bodyEvent != null) {
+                var Title = bodyEvent.querySelector("input[name='Title']");
+                if (Title != null) {
+                    title = Title.value;
+                }
+                var Content = bodyEvent.querySelector("textarea[name='Content']");
+                if (Content != null) {
+                    content = Content.value;
+                }
+                var time = bodyEvent.querySelector("input[name='Time']");
+                var date = bodyEvent.querySelector("input[name='Date']");
+                if (date != null && time != null) {
+                    var timeEvent = time.value.replace('PM', "").replace("AM", "");
+                    startdate = new Date(`${date.value} ${timeEvent}`);
+                }
+            var newFormData = new FormData();
+            newFormData.append("Title", title);
+            newFormData.append("Content", content);
+            newFormData.append("StartDate", `${date.value} ${timeEvent}`);
+            newFormData.append("EndDate", `${date.value} ${timeEvent}`);
+            newFormData.append("GroupID", '@User.FindFirst("UserID")?.Value');
+            EduCalendar.schedule.Ajax.PostAny("@Url.Action("Create","Calendar")", newFormData).then(function (data) {
+                if (data != null) {
+                    console.log(data);
+                    var dataJson = JSON.parse(data);
+                    if (dataJson.code == 201) {
+                        swal("Tạo mới!", "Đã tạo thành công.", "success");
+                    }
+                    else
+                        swal("Tạo mới!", dataJson.msg, "warning");
+                } else {
+                     swal("Tạo mới!", "thất bại", "warning");
+                }
+                document.body.classList.remove("open-add-event");
+            })
+            }
+            
         }
 
         if ($ != void 0 && $('.timepicker') != void 0) {
@@ -175,73 +250,4 @@
     <script>
 
     </script>
-}
-
-@section Modals{
-    <div id="calendarModal" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 id="modalTitle" class="modal-title"></h4>
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                </div>
-                <div id="modalBody" class="modal-body">
-                    <form action="#" name="scheduleForm">
-                        <input type="hidden" class="form-control" name="id" value="">
-                        <label for="">Title :</label>
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="Title" placeholder="Title">
-                        </div>
-                        <div class="form-group">
-                            <label for="">StartDate :</label>
-                            <div class="input-group date">
-                                <input type="text" name="StartDate" class="form-control datetimepicker-input" id="start-date" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="">End Date :</label>
-                            <div class="input-group date">
-                                <input type="text" name="EndDate" class="form-control datetimepicker-input" id="end-date" />
-                            </div>
-                        </div>
-                        <label for="">Link :</label>
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="url" placeholder="//link">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" onclick="submitEvent()" data-dismiss="modal">Thêm</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="calendarModalView" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title"></h4>
-                    @*<button type="button" class="edit"><span aria-hidden="true">edit</span> <span class="sr-only">edit</span></button>
-                        <button type="button" class="delete"><span aria-hidden="true">delete</span> <span class="sr-only">delete</span></button>*@
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
-                </div>
-                <div id="modalBody" class="modal-body">
-                    <div class="form-group form-inline">
-                        <label for="start-date"> Bắt đầu : </label>
-                        <b name="start-date"></b>
-                    </div>b
-                    <div class="form-group form-inline">
-                        <label for="end-date">Kết thúc : </label>
-                        <b name="end-date"></b>
-                    </div>
-                    <div class="form-group">
-                        <label for="end-date">Link liên kết : </label>
-                        <a href="#" name="link"></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 }

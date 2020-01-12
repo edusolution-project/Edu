@@ -1,4 +1,4 @@
-@charset "UTF-8";
+﻿@charset "UTF-8";
 .fc {
   direction: ltr;
   text-align: left;
@@ -1090,7 +1090,7 @@ body.open-add-event .dark-smooke {
 }
 
 #schedule{
-  height: 100%;
+  height: calc(100vh - 50px);
 }
 .form-event {
   position: fixed;

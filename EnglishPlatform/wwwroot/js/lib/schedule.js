@@ -14382,11 +14382,9 @@ var CalendarLib =
 
             var ScheduleXHR = /** @class */ (function () {
                 function ScheduleXHR() {
-                    this._request = new XMLHttpRequest();
-                    this._request = new XMLHttpRequest();
                 }
                 ScheduleXHR.prototype.onProccess = function (url, method, data, async) {
-                    var request = this._request;
+                    var request = new XMLHttpRequest();
                     return new Promise(function (resolve, reject) {
                         request.onreadystatechange = function () {
                             if (request.readyState == 4) {
@@ -14447,21 +14445,13 @@ var CalendarLib =
             }());
 
             var Schedule = /** @class */ (function () {
-                function Schedule(jquery) {
+                function Schedule() {
                     this._config = {
-                        controller: '',
+                        url: "",
                         container_id: 'schedule',
                         type: '',
                         isDev: !1,
-                        modal_id: "#calendarModal",
-                        view_id: "#calendarModalView",
-                        defaultView: 'timeGridWeek',
-                        url: {
-                            getList: "",
-                            getDetail: "",
-                            create: "",
-                            delete: ""
-                        },
+                        defaultView: 'dayGridMonth',
                         eventClick: null,
                         plugins: [_fullcalendar_interaction__WEBPACK_IMPORTED_MODULE_1__["default"], _fullcalendar_daygrid__WEBPACK_IMPORTED_MODULE_2__["default"], _fullcalendar_timegrid__WEBPACK_IMPORTED_MODULE_3__["default"], _fullcalendar_list__WEBPACK_IMPORTED_MODULE_4__["default"]],
                         efaultDate: new Date(),
@@ -14471,35 +14461,23 @@ var CalendarLib =
                         selectable: false,
                         height: 'parent',
                         header: null,
+                        locale: "vi",
+                        timeFormat: 'H(:mm)',
+                        customButtons: {},
                         eventRender: function (info) {
                             info.el.setAttribute("data-href", info.el.getAttribute("href") || "");
-                            info.el.removeAttribute("href");
-                            //info.el.style.color="#fff";
+                            info.el.setAttribute("target", "_blank");
+                            //info.el.removeAttribute("href");
                         },
-                        select: function (arg) {
-                            // var title = prompt('Event Title:');
-                            // if (title) {
-                            //     if(_self._calendar != undefined)
-                            //     _self._calendar.addEvent({
-                            //         title: title,
-                            //         start: arg.start,
-                            //         end: arg.end,
-                            //         allDay: arg.allDay
-                            //     })
-                            // }
-                            // if(_self._calendar != undefined)
-                            // _self._calendar.unselect();
+                        views: {
+                            dayGridMonth: {
+                                titleFormat: { year: 'numeric', month: '2-digit', day: '2-digit' }
+                                // other view-specific options here
+                            }
                         },
                         events: null
                     };
-                    this._url = {
-                        getList: "",
-                        getDetail: "",
-                        create: "",
-                        delete: ""
-                    };
-                    this._xhr = new ScheduleXHR();
-                    this._$ = jquery;
+                    this.Ajax = new ScheduleXHR();
                 }
                 Schedule.prototype.groupConfig = function (options, config) {
                     if (options == null || typeof (options) == "undefined")
@@ -14512,70 +14490,18 @@ var CalendarLib =
                 Schedule.prototype.onLoad = function (options) {
                     var _self = this;
                     _self._config = _self.groupConfig(options, _self._config);
-                    _self.onLoadUrl();
-                    document.addEventListener("DOMContentLoaded", function () {
+                    var onRenden = function () {
                         var el = document.getElementById(_self._config.container_id);
                         if (el == null)
                             throw _self._config.container_id + " not exist";
                         var calender = new _fullcalendar_core__WEBPACK_IMPORTED_MODULE_0__["Calendar"](el, _self.onLoadOptionsCalendarByType());
                         calender.render();
-                        _self._calendar = calender;
-                    }, !0);
+                        _self.EduCalendar = calender;
+                    };
+                    this.onReady(onRenden);
                 };
-                Schedule.prototype.deleteEvent = function (id) {
-                    var dataForm = this._xhr.CreateFormData({ id: id });
-                    var _self = this;
-                    this._xhr.PostForm(this._url.delete, dataForm).then(function (res) {
-                        var data = JSON.parse(res);
-                        if (data) {
-                            if (_self._calendar != undefined) {
-                                var event_1 = _self._calendar.getEventById(id);
-                                if (event_1 != null)
-                                    event_1.remove();
-                            }
-                        }
-                    }).catch(function (err) { console.log(err); });
-                    this._$(this._config.view_id).modal('toggle');
-                };
-                Schedule.prototype.addEvent = function (formName) {
-                    var _self = this;
-                    var form = document.querySelector("form[name=" + formName + "]");
-                    var data = form == null ? new FormData() : this._xhr.CreateFormData({}, form);
-                    this._xhr.PostForm(this._url.create, data).then(function (res) {
-                        var data = JSON.parse(res);
-                        if (data != null) {
-                            if (_self._calendar != undefined)
-                                _self._calendar.addEvent({
-                                    id: data.ID,
-                                    groupId: data.GroupID,
-                                    title: data.Title,
-                                    start: data.StartDate,
-                                    //end: data.EndDate,
-                                    allDay: false,
-                                    url: ""
-                                });
-                        }
-                    })
-                        .catch(function (err) {
-                            console.log(err);
-                        });
-                };
-                Schedule.prototype.onLoadUrl = function () {
-                    var urlBase = "/" + this._config.type + "/" + this._config.controller;
-                    this._url.getList =
-                        this._config.url.getList == "" || this._config.url.getList == null
-                            ? urlBase + "/getlist"
-                            : this._config.url.getList;
-                    this._url.getDetail =
-                        this._config.url.getDetail == "" || this._config.url.getDetail == null
-                            ? urlBase + "/getdetail"
-                            : this._config.url.getDetail;
-                    this._url.create = this._config.url.create == "" || this._config.url.create == null
-                        ? urlBase + "/create"
-                        : this._config.url.create;
-                    this._url.delete = this._config.url.delete == "" || this._config.url.delete == null
-                        ? urlBase + "/delete"
-                        : this._config.url.delete;
+                Schedule.prototype.onReady = function (T) {
+                    document.addEventListener("DOMContentLoaded", T, !0);
                 };
                 Schedule.prototype.formatDateTimeToString = function (date) {
                     if (date == null)
@@ -14585,12 +14511,13 @@ var CalendarLib =
                     var _month = date.getMonth() + 1 >= 10 ? date.getMonth() + 1 : "0" + (date.getMonth() + 1);
                     var _hours = date.getHours() >= 10 ? date.getHours() : "0" + date.getHours();
                     var _minute = date.getMinutes() >= 10 ? date.getMinutes() : "0" + date.getMinutes();
-                    var _strDate = _year + "/" + _month + "/" + _date + " " + _hours + ":" + _minute;
+                    var _strDate = _year + "/" + _month + "/" + _date + " " + _hours + ":" + _minute + "00";
                     return _strDate;
                 };
                 Schedule.prototype.onLoadOptionsCalendarByType = function () {
                     var _self = this;
-                    var optionsInput = {
+                    this.Options = {
+                        customButtons: this._config.customButtons,
                         plugins: this._config.plugins,
                         height: this._config.height,
                         header: this._config.header == null ? {
@@ -14603,38 +14530,45 @@ var CalendarLib =
                         navLinks: this._config.navLinks,
                         editable: this._config.editable,
                         eventLimit: this._config.eventLimit,
-                        defaultView: this._config.defaultView
+                        defaultView: this._config.defaultView,
+                        locale: this._config.locale,
+                        eventTimeFormat: {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            meridiem: false
+                        },
+                        dateClick: this._config.dateClick,
+                        eventClick: this._config.eventClick
+                        //timeFormat:this._config.timeFormat == null ? 'H(:mm)' : this._config.timeFormat
                     };
                     if (this._config.isDev) {
-                        optionsInput.events = this._config.events == null ? [
+                        this.Options.events = this._config.events == null ? [
                             {
                                 title: 'All Day Event',
-                                start: '2019-08-25',
+                                start: '2019-12-30',
                             },
                             {
                                 title: 'Long Event',
-                                start: '2019-08-25',
-                                end: '2019-08-26'
+                                start: '2019-12-25',
+                                end: '2019-12-26'
                             },
                             {
                                 id: 999,
                                 title: 'Repeating Event',
-                                start: '2019-08-25T16:00:00'
+                                start: '2019-12-20T16:00:00'
                             },
                             {
                                 id: 999,
                                 title: 'Repeating Event',
-                                start: '22019-08-25T16:00:00'
+                                start: '2019-12-15T16:00:00'
                             },
                             {
                                 title: 'Conference',
-                                start: '2019-08-25',
-                                end: '2019-09-02'
+                                start: '2019-12-25',
                             },
                             {
                                 title: 'Meeting',
-                                start: '2019-08-25T10:30:00',
-                                end: '2019-08-25T12:30:00'
+                                start: '2019-12-25T10:30:00',
                             },
                             {
                                 id: 999,
@@ -14655,147 +14589,28 @@ var CalendarLib =
                             },
                             {
                                 title: 'Dinner',
-                                start: '2019-12-25T20:00:00'
+                                start: '2019-12-10T20:00:00'
                             },
                             {
                                 title: 'Birthday Party',
-                                start: '2019-12-17T07:00:00'
+                                start: '2019-12-19T17:30:00'
                             },
                             {
                                 title: 'Click for Google',
                                 url: 'http://google.com/',
-                                start: '2019-12-17T07:00:00'
+                                start: '2019-12-18T10:00:00'
                             }
                         ] : this._config.events;
                     }
                     else {
-                        optionsInput.events = this._config.events == null ? {
-                            url: _self._config.url.getlist == "" ? _self._url.getList : _self._config.url.getlist,
+                        this.Options.events = this._config.events == null ? {
+                            url: _self._config.url,
                             failure: function (err) {
                                 console.error("getlist-event-error: ", err);
                             }
                         } : this._config.events;
                     }
-                    switch (this._config.type) {
-                        case "student":
-                            optionsInput.selectable = this._config.selectable;
-                            optionsInput.eventClick = this._config.eventClick == null
-                                ? function (info) {
-                                    var id = info.event.id;
-                                    var title = info.event.title;
-                                    var startStr = _self.formatDateTimeToString(info.event.start);
-                                    var endStr = _self.formatDateTimeToString(info.event.end);
-                                    var url = info.event.url;
-                                    _self._$(_self._config.view_id + " button.delete").remove();
-                                    _self._$(_self._config.view_id + " button.edit").remove();
-                                    _self._$(_self._config.view_id + " .modal-title").html(title);
-                                    if (startStr != "") {
-                                        _self._$(_self._config.view_id + " [name='start-date']").html(startStr);
-                                    }
-                                    else {
-                                        _self._$(_self._config.view_id + " [name='start-date']").html("");
-                                    }
-                                    if (endStr != "") {
-                                        _self._$(_self._config.view_id + " [name='end-date']").html(endStr);
-                                    }
-                                    else {
-                                        _self._$(_self._config.view_id + " [name='end-date']").html("");
-                                    }
-                                    if (url != null && url != "" && url != void 0) {
-                                        _self._$(_self._config.view_id + " [name='link']").html(title);
-                                        _self._$(_self._config.view_id + " [name='link']").attr("href", url);
-                                    }
-                                    else {
-                                        _self._$(_self._config.view_id + " [name='link']").html("");
-                                        _self._$(_self._config.view_id + " [name='link']").attr("href", "#");
-                                    }
-                                    _self._$(_self._config.view_id).modal();
-                                }
-                                : this._config.eventClick;
-                            return optionsInput;
-                        case "teacher":
-                            optionsInput.header = this._config.header == null || this._config.header == {}
-                                ? {
-                                    left: 'prev,next today',
-                                    center: 'title',
-                                    right: 'addEvent,dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-                                }
-                                : this._config.header;
-                            optionsInput.customButtons = this._config.customButtons == null
-                                ? {
-                                    addEvent: {
-                                        text: 'add event',
-                                        click: function (e) {
-                                            _self._$('#modalTitle').html("<div>Thêm event</div>");
-                                            //_self._$('#modalBody').html("");
-                                            _self._$('#eventUrl').attr('href', "");
-                                            _self._$('#calendarModal').modal();
-                                        }
-                                    }
-                                }
-                                : this._config.customButtons;
-                            optionsInput.selectable = this._config.selectable;
-                            optionsInput.select = this._config.select,
-                                optionsInput.eventClick = this._config.eventClick == null
-                                    ? function (info) {
-                                        var id = info.event.id;
-                                        var title = info.event.title;
-                                        var startStr = _self.formatDateTimeToString(info.event.start);
-                                        var endStr = _self.formatDateTimeToString(info.event.end);
-                                        var url = info.event.url;
-                                        //var dataForm = _self._xhr.CreateFormData({id:id});
-                                        // _self._xhr.PostForm(_self._url.getDetail,dataForm).then(function(res){
-                                        //     console.log(res);
-                                        // }).catch(function(err){
-                                        //     console.log(err);
-                                        // })
-                                        _self._$(_self._config.view_id + " button.delete").click(function () {
-                                            if (confirm("Bạn muốn xóa event : " + title)) {
-                                                _self.deleteEvent(id);
-                                                _self._$(_self._config.view_id + " button.delete").off("click");
-                                            }
-                                        });
-                                        _self._$(_self._config.view_id + " .modal-title").html(title);
-                                        if (startStr != "") {
-                                            _self._$(_self._config.view_id + " [name='start-date']").html(startStr);
-                                        }
-                                        else {
-                                            _self._$(_self._config.view_id + " [name='start-date']").html("");
-                                        }
-                                        if (endStr != "") {
-                                            _self._$(_self._config.view_id + " [name='end-date']").html(endStr);
-                                        }
-                                        else {
-                                            _self._$(_self._config.view_id + " [name='end-date']").html("");
-                                        }
-                                        if (url != null && url != "" && url != void 0) {
-                                            _self._$(_self._config.view_id + " [name='link']").html(title);
-                                            _self._$(_self._config.view_id + " [name='link']").attr("href", url);
-                                        }
-                                        else {
-                                            _self._$(_self._config.view_id + " [name='link']").html("");
-                                            _self._$(_self._config.view_id + " [name='link']").attr("href", "#");
-                                        }
-                                        _self._$(_self._config.view_id).modal();
-                                        // _self._$('#modalTitle').html("<div>Xem event</div>");
-                                        // //_self._$('#modalBody').html("");
-                                        // _self._$('form input[name="id"]').val(info.event.id);
-                                        // _self._$('form input[name="title"]').val(info.event.title);
-                                        // _self._$('form input[name="startDate"]').val();
-                                        // _self._$('form input[name="endDate"]').val(_self.formatDateTimeToString(info.event.end));
-                                        // _self._$('form input[name="url"]').val(info.event.url);
-                                        // _self._$(_self._config.modal_id).modal();
-                                    }
-                                    : this._config.eventClick;
-                            return optionsInput;
-                        default:
-                            optionsInput.eventClick = this._config.eventClick == null
-                                ? function () {
-                                    console.log("admin");
-                                }
-                                : this._config.eventClick;
-                            return optionsInput;
-                    }
+                    return this.Options;
                 };
                 return Schedule;
             }());
