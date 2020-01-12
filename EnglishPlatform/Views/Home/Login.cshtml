@@ -18,47 +18,52 @@
                     <a href="/" title="educoo" class="logo"><img src="/images/Logo.png" alt="educoo" /></a>
                 </div>
             </div>
-            <div class="box" id="box_login">
-                <div class="card-header">
-                    <h3 v-if="signin">Đăng nhập với tài khoản</h3>
-                    <h3 v-if="forgot"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button> Quên mật khẩu</h3>
-                    <h3 v-if="signup"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button>Đăng ký</h3>
-                    <div class="note" v-if="signin">Chưa có tài khoản? <a href="javascript:;" title="Đăng ký ngay!" v-on:click="changeState()">Đăng ký ngay!</a> </div>
-                    <div class="note" v-if="forgot">Vui lòng nhập địa chỉ Email để đặt lại mật khẩu mới.</div>
+            <div class="flex">
+                <div class="frame col-md-5">
+                    <img src="/images/frame.png" alt="">
                 </div>
-                <div class="card-body">
-                    <form method="POST" action="/" id="sign_form">
-                        <div class="form-group">
-                            <label for="email">Địa chỉ email</label>
-                            <input type="text" name="UserName" class="form-control" placeholder="Nhập email" id="email" v-model="email">
+                <div class="col-md-7">
+                    <div class="box" id="box_login">
+                        <div class="card-header">
+                            <h3 v-if="signin">Đăng nhập với tài khoản</h3>
+                            <h3 v-if="forgot"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button> Quên mật khẩu</h3>
+                            <h3 v-if="signup"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button>Đăng ký</h3>
+                            <div class="note" v-if="signin">Chưa có tài khoản? <a href="javascript:;" title="Đăng ký ngay!" v-on:click="changeState()">Đăng ký ngay!</a> </div>
+                            <div class="note" v-if="forgot">Vui lòng nhập địa chỉ Email để đặt lại mật khẩu mới.</div>
                         </div>
-                        <div class="form-group" v-if="signup">
-                            <label for="name">Họ và tên</label>
-                            <input type="text" name="Name" class="form-control" placeholder="Nhập họ tên" id="name" v-model="name">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="email">Địa chỉ email</label>
+                                <input type="text" v-model="email" class="form-control" placeholder="Nhập email" id="email">
+                            </div>
+                            <div class="form-group" v-if="signup">
+                                <label for="name">Họ và tên</label>
+                                <input type="text" v-model="name" class="form-control" placeholder="Nhập họ tên" id="name">
+                            </div>
+                            <div class="form-group" v-if="signup">
+                                <label for="phone">Số điện thoại</label>
+                                <input type="text" v-model="phone" class="form-control" placeholder="Nhập số điện thoại" id="phone">
+                            </div>
+                            <div class="form-group" v-if="!forgot">
+                                <label for="password">Mật khẩu</label>
+                                <input type="password" v-model="password" class="form-control" placeholder="Nhập mật khẩu" id="password">
+                            </div>
+                            <div class="form-group" v-if="!forgot">
+                                <label for="username">Tài khoản đăng nhập</label>
+                                <select class="form-control" name="Type" id="usertype" v-model="usertype">
+                                    <option value="student" selected>Student</option>
+                                    <option value="teacher">Teacher</option>
+                                    <option v-if="signin" value="admin">Administrator</option>
+                                </select>
+                            </div>
+                            <div class="center">
+                                <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signin" :disabled="disable" v-on:click="signIn()">Đăng nhập</button>
+                                <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="forgot" :disabled="disable" v-on:click="renewPass()">Đặt lại mật khẩu</button>
+                                <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signup" :disabled="disable" v-on:click="signUp()">Đăng ký</button>
+                                <a href="javascript:;" title="Quên mật khẩu?" class="forgot-link" v-if="signin" v-on:click="changeState(2)">Quên mật khẩu?</a>
+                            </div>
                         </div>
-                        <div class="form-group" v-if="signup">
-                            <label for="phone">Số điện thoại</label>
-                            <input type="text" name="Phone" class="form-control" placeholder="Nhập số điện thoại" id="phone" v-model="phone">
-                        </div>
-                        <div class="form-group" v-if="!forgot">
-                            <label for="password">Mật khẩu</label>
-                            <input type="password" name="PassWord" class="form-control" placeholder="Nhập mật khẩu" id="password" v-model="password">
-                        </div>
-                        <div class="form-group" v-if="!forgot">
-                            <label for="usertype">Tài khoản đăng nhập</label>
-                            <select class="form-control" name="Type" id="usertype" v-model="usertype">
-                                <option value="student" selected>Student</option>
-                                <option value="teacher">Teacher</option>
-                                <option v-if="signin" value="admin">Administrator</option>
-                            </select>
-                        </div>
-                        <div class="center">
-                            <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signin" :disabled="disable" v-on:click="signIn()">Đăng nhập</button>
-                            <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="forgot" :disabled="disable" v-on:click="renewPass()">Đặt lại mật khẩu</button>
-                            <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signup" :disabled="disable" v-on:click="signUp()">Đăng ký</button>
-                            <a href="javascript:;" title="Quên mật khẩu?" class="forgot-link" v-if="signin" v-on:click="changeState(2)">Quên mật khẩu?</a>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </section>

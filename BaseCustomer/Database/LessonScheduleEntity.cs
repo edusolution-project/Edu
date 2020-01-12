@@ -43,5 +43,11 @@ namespace BaseCustomerEntity.Database
 
             Collection.Indexes.CreateManyAsync(indexs);
         }
+
+        public LessonScheduleEntity GetItemByLessonID(string lessonid)
+        {
+            if (string.IsNullOrEmpty(lessonid) || lessonid == "0") return null;
+            return Collection.Find(o => o.LessonID == lessonid)?.SingleOrDefault();
+        }
     }
 }
