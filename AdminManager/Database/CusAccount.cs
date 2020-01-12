@@ -8,6 +8,8 @@ namespace AdminManager.Database
 {
     public class CusAccount : EntityBase
     {
-
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public string TemPassword { get; set; }
     }
 }

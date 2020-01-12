@@ -20,8 +20,9 @@ namespace AdminManager.Controllers
         {
             return View();
         }
-        [Route("/dang-nhap")]
-        public IActionResult Login()
+        [HttpGet("/dang-nhap")]
+        [HttpPost("/login")]
+        public IActionResult Login(string username, string password)
         {
             return View();
         }
