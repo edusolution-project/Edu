@@ -97,6 +97,9 @@
     <None Include="wwwroot\fonts\themify.svg" />
     <None Include="wwwroot\js\bootstrap-tagsinput.js" />
     <None Include="wwwroot\js\bootstrap-vue.min.js" />
+    <None Include="wwwroot\js\calendar\js\Calendar.js" />
+    <None Include="wwwroot\js\calendar\js\jquery.timepicker.min.js" />
+    <None Include="wwwroot\js\calendar\js\sweetalert.min.js" />
     <None Include="wwwroot\js\content-render.js" />
     <None Include="wwwroot\js\curriculum-lesson-frame.js" />
     <None Include="wwwroot\js\curriculum-lesson.js" />

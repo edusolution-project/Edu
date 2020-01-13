@@ -11,7 +11,9 @@
 <script src="~/js/lib/datetimepicker/php-date-formatter.min.js"></script>
 <script src="~/js/lib/datetimepicker/jquery.mousewheel.js"></script>
 <script src="~/js/lib/datetimepicker/jquery.datetimepicker.js"></script>
-
+@*longht add 2020-01-12*@
+<link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
+<link href="~/js/calendar/css/style.css" rel="stylesheet" />
 
 <script>
     setActiveMenu("calendar");
@@ -19,17 +21,19 @@
 
 <section class="module" id="dashboard_content">
     <div class="card-header">
-        <div class="flex border-b padding-b25">
-            <h2 class="title">@ViewData["Title"]</h2>
-        </div>
     </div>
     <div id="schedule" class="pl-3 pr-3"></div>
 </section>
+<div id="skype-event" class="skype-event">
 
 <style>
     #schedule {
         margin-top: 30px;
         height: calc(100vh - 135px);
+    }
+
+    .fc-toolbar.fc-header-toolbar {
+        display: none;
     }
 
     .fc-day-header {
@@ -59,19 +63,33 @@
     }
 </style>
 
-@section scripts{ 
+@section Scripts{
     <script src="~/js/lib/schedule.js"></script>
-    <script src="~/js/lib/Calendar.js"></script>
     <script>
-        var EduCalendar = new EduCalendar();
-        EduCalendar.useEduTemplate().loadConfig({
-            url:"/EndUser/data/events.json",
-            type:"student",
-            isDev:!1,
-            height:"parent",
-            eventRender:function(info){
-              console.log(info.el,info.event.extendedProps);
-            }
-        }).renderCalendar();
+        var schedulex = new CalendarLib.Schedule($);
+        schedulex.onLoad({
+            type: "@User?.FindFirst("Type").Value",
+            controller: 'Calendar',
+            header: {},
+            isDev:!0,
+            defaultView: "dayGridMonth",
+            height: document.getElementById("schedule").offsetHeight
+        });
+        $('#start-date').datetimepicker({
+            formatTime: 'H:i',
+            formatDate: 'd.m.Y',
+            timepickerScrollbar: false
+        });
+        $('#end-date').datetimepicker({
+            formatTime: 'H:i',
+            formatDate: 'd.m.Y',
+            timepickerScrollbar: false
+        });
+        var submitEvent = function () {
+            schedulex.addEvent("scheduleForm");
+        }
+    </script>
+    <script>
+
     </script>
 }

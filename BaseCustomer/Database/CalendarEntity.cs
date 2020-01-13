@@ -37,6 +37,12 @@ namespace BaseCustomerEntity.Database
         public DateTime Created { get; set; }
         [JsonProperty("ScheduleID")]
         public string ScheduleID { get; set; }
+        // longht add 2020-01-12
+        [JsonProperty("Skype")]
+        public string Skype { get; set; }
+        [JsonProperty("Content")]
+        public string Content { get; set; }
+
     }
     public class CalendarService : ServiceBase<CalendarEntity>
     {
