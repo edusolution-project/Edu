@@ -30,6 +30,7 @@
 <div class="form-event" id="form-event">
     <div class="header-form-event">Sự kiện</div>
     <div class="body-form-event">
+        <input type="hidden" name="ID" value="" />
         <div class="item-event">
             <label for="Title">Tiêu đề</label>
             <input type="text" name="Title" class="form-control" placeholder="Nhập tiêu đề">
@@ -49,6 +50,7 @@
     <div class="footer-form-event">
         <button class="btn btn-primary btn-save-event" id="btn-save-event">Lưu</button>
         <button class="btn btn-o btn-cancel-event" id="btn-cancel-event">Hủy</button>
+        <button class="btn btn-o btn-delete-event btn-danger" id="btn-delete-event">Xóa</button>
     </div>
 </div>
 <div id="dark-smooke" class="dark-smooke" onclick="javascript: document.body.classList.remove('open-add-event');"></div>
@@ -121,6 +123,7 @@
                         var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
                         var formEvent = document.getElementById("form-event");
                         var bodyEvent = formEvent.querySelector(".body-form-event");
+                        bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
                         if (bodyEvent != null) {
                             var Title = bodyEvent.querySelector("input[name='Title']");
                             if (Title != null) {
@@ -140,6 +143,7 @@
                             if (date != null) {
                                 date.value = dateEvent;
                             }
+                            formEvent.classList.add("edit-form");
                         }
                         if (checkTime(new Date(jsonData.Created),0)) {
                             // cho phép xóa
@@ -209,7 +213,11 @@
                     var timeEvent = time.value.replace('PM', "").replace("AM", "");
                     startdate = new Date(`${date.value} ${timeEvent}`);
                 }
-            var newFormData = new FormData();
+                var newFormData = new FormData();
+                var ID = bodyEvent.querySelector("input[name='ID']").value;
+                if (ID != "") {
+                    newFormData.append("ID", ID);
+                }
             newFormData.append("Title", title);
             newFormData.append("Content", content);
             newFormData.append("StartDate", `${date.value} ${timeEvent}`);
@@ -221,6 +229,13 @@
                     var dataJson = JSON.parse(data);
                     if (dataJson.code == 201) {
                         swal("Tạo mới!", "Đã tạo thành công.", "success");
+                        var event = {
+                            id: dataJson.data.ID,
+                            title: dataJson.data.Title,
+                            groupid: dataJson.data.GroupID,
+                            start: dataJson.data.StartDate
+                        };
+                        EduCalendar.schedule.EduCalendar.addEvent(event);
                     }
                     else
                         swal("Tạo mới!", dataJson.msg, "warning");
@@ -232,7 +247,42 @@
             }
             
         }
+        document.getElementById("btn-delete-event").onclick = function () {
 
+            swal({
+                title: "Bạn muốn xóa thông tin trên?",
+                text: "Dữ liệu bạn đã ghi sẽ bị mất !!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "Đồng ý",
+                cancelButtonText: "Hủy",
+                closeOnConfirm: false
+            },
+                function () {
+                    document.body.classList.remove("open-add-event");
+                    var formEvent = document.getElementById("form-event");
+                    var bodyEvent = formEvent.querySelector(".body-form-event");
+                    var id = bodyEvent.querySelector("input[name='ID']").value;
+                    EduCalendar.schedule.Ajax.PostAny("@Url.Action("Delete","Calendar")?id=" + id, null).then(function (data) {
+                        if (data == true || data == "true") {
+                           
+                            var event = EduCalendar.schedule.EduCalendar.getEventById(id);
+                            if (event != null) {
+                                event.remove();
+                                swal("Xóa!", "Đã hủy thành công.", "success");
+                            }
+                            else {
+                                swal("Xóa!", "không thể xóa", "warning");
+                            }
+                        } else {
+                            swal("Xóa!", "không thể xóa", "error");
+                        }
+                    })
+                });
+
+            
+        }
         if ($ != void 0 && $('.timepicker') != void 0) {
             $('.timepicker').timepicker({
                 timeFormat: 'HH:mm p',

@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdminManager", "AdminManage
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RouterCustomer", "RouterCustomer\RouterCustomer.csproj", "{8A3A6025-EF3D-4BD4-BC77-B7C4ECAF2F19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaketingExtends", "MaketingExtends\MaketingExtends.csproj", "{50B5C679-15D1-4CDC-9455-23B28BAC4E74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaketingExtends", "MaketingExtends\MaketingExtends.csproj", "{50B5C679-15D1-4CDC-9455-23B28BAC4E74}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

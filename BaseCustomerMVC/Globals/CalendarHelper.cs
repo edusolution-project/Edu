@@ -31,6 +31,11 @@ namespace BaseCustomerMVC.Globals
         }
         public Task<CalendarEntity> CreateEvent(CalendarEntity item)
         {
+            if (string.IsNullOrEmpty(item.ID))
+            {
+                _calendarService.CreateOrUpdate(item);
+                return Task.FromResult(item);
+            }
             if (existEvent(item.EndDate, item.StartDate, item.GroupID))
             {
                 _calendarService.CreateOrUpdate(item);
@@ -40,11 +45,13 @@ namespace BaseCustomerMVC.Globals
             return Task.FromResult<CalendarEntity>(null);
         }
 
-        public Task<bool> RemoveEvent(string id)
+        public Task<bool> RemoveEvent(string id, string user)
         {
             var delItem = _calendarService.GetItemByID(id);
+            
             if (delItem != null)
             {
+                if (delItem.StartDate <= DateTime.Now || delItem.CreateUser == user) return Task.FromResult(false);
                 delItem.IsDel = true;
                 _calendarService.CreateOrUpdate(delItem);
                 return Task.FromResult(true);
