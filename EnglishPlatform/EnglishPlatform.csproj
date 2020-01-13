@@ -595,6 +595,8 @@
     <None Include="wwwroot\js\teacher-lesson.js" />
     <None Include="wwwroot\libs\axios-0.19.0.min.js" />
     <None Include="wwwroot\libs\bootstrap-vue.min.js" />
+    <None Include="wwwroot\libs\quill-editor\quill-vue.min.js" />
+    <None Include="wwwroot\libs\quill-editor\quill.min.js" />
     <None Include="wwwroot\libs\vue-2.6.0.js" />
     <None Include="wwwroot\libs\vuejs-datepicker.min.js" />
     <None Include="wwwroot\scss\navs\_global.scss" />

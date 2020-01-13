@@ -390,7 +390,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 return new JsonResult(new Dictionary<string, object>
                 {
-                    { "Data", item },
+                    {"Data", item },
                     {"Error",null }
                 });
             }

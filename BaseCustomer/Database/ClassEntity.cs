@@ -33,7 +33,7 @@ namespace BaseCustomerEntity.Database
         public DateTime EndDate { get; set; }
         [JsonProperty("IsGroup")]
         public bool? IsGroup { get; set; } = false;
-
+        
         //Multiple
         [JsonProperty("GradeID")]
         public string GradeID { get; set; }

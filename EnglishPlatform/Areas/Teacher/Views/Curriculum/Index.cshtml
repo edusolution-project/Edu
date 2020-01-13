@@ -4,6 +4,12 @@
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
 }
+<!-- Include vue-quill-editor -->
+<script src="../libs/quill-editor/quill.min.js"></script>
+<script src="../libs/quill-editor/quill-vue.min.js"></script>
+<link href="../libs/quill-editor/quill.core.css" rel="stylesheet">
+<link href="../libs/quill-editor/quill.snow.css" rel="stylesheet">
+<link href="../libs/quill-editor/quill.bubble.css" rel="stylesheet">
 <script>
     setActiveMenu("curriculum");
 </script>
@@ -25,7 +31,7 @@
                     </select>
                 </div>
             </div>
-            <b-button v-b-modal.modal_event class="btn-addevent" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
+            <b-button class="btn-addevent" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
         </div>
     </div>
     <div class="card-body">
@@ -38,7 +44,7 @@
             <tbody>
                 <tr v-for="(item,k) in list_data" v-if="item.ID">
                     <td>{{(page - 1) * view + (k+1)}}</td>
-                    <td> 
+                    <td>
                         <a :href="'@Url.Action("Detail","Curriculum")/' + item.ID" :title="item.Name">
                             {{item.Name}}
                         </a>
@@ -49,8 +55,8 @@
                     <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
                     <td>
                         <div class="d-flex btn-group">
-                            <a class="btn-act btn-edit" href="#" v-b-modal.modal_event v-on:click="showEditItem(item.ID)"><i class="ti-pencil-alt"></i></a>
-                            <button class="btn-act btn-trash" v-on:click="destroy(item.ID)"><i class="ti-trash"></i></button>
+                            <a class="btn-act btn-edit" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
+                            <button class="btn-act btn-trash" v-on:click="removeCurriculum(item)"><i class="ti-trash"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -79,7 +85,10 @@
 </section>
 
 @section Scripts{
+
+
     <script>
+        Vue.use(VueQuillEditor)
         new Vue({
             el: "#main",
              mounted() {
@@ -87,7 +96,13 @@
                  this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                  this.changeSubject()
             },
+            components: {
+          	    LocalQuillEditor: VueQuillEditor.quillEditor
+            },
             data: {
+                editorOption: {
+                    theme: 'snow'
+                },
                 fields: [
                     {
                         key: 'stt',
@@ -124,11 +139,12 @@
                 list_grades: [],
                 list_add_grades: [],
                 addItem: {
-                    id: '',
-                    title: '',
-                    subject: '',
-                    grade: '',
-                    description: '',
+                    ID: '',
+                    Name: '',
+                    SubjectID: '',
+                    GradeID: '',
+                    Description: '',
+                    Init: false
                 },
                 subject: '',
                 grade: '',
@@ -149,7 +165,7 @@
                     }
                  },
                  add_subject() {
-                     return this.addItem.subject;
+                     return this.addItem.SubjectID;
                  }
             },
             watch: {
@@ -198,19 +214,18 @@
                     _that.list_add_grades = [];
                     for (i = 0; i < _that.list_grades_full.length; i++)
                     {
-                        if (_that.list_grades_full[i].SubjectID == _that.addItem.subject) {
+                        if (_that.list_grades_full[i].SubjectID == _that.addItem.SubjectID) {
                             _that.list_add_grades.push(_that.list_grades_full[i])
                         }
                     }
-                   _that.addItem.grade = ""
+                    if (_that.addItem.Init)
+                        _that.addItem.Init = false
+                    else
+                        _that.addItem.GradeID = ""
                 },
                 changeGrade() {
                     let _that = this
                     _that.getData()
-                },
-                destroy(id) {
-                    this.getData();
-
                 },
                 toggleState(obj) {
                     let _that = this;
@@ -228,30 +243,64 @@
                         }
                     })
                 },
-                showEditItem(ID) {
-                    console.log(ID);
+                showEditItem(obj) {
                     let _that = this;
-                    if (ID == null) {
-                        _that.addItem.id = '';
-                        _that.addItem.subject = '';
-                        _that.addItem.grade = '';
-                        _that.addItem.description = '';
-                        _that.addItem.title = '';
+                    if (obj == null) {
+                        _that.addItem.ID = '';
+                        _that.addItem.SubjectID = '';
+                        _that.addItem.GradeID = '';
+                        _that.addItem.Description = '';
+                        _that.addItem.Name = '';
                     }
                     else {
-                        _that.list_data.forEach(function (item, k) {
-                            if (item.ID === ID) {
-                                _that.addItem.id = ID;
-                                _that.addItem.subject = item.SubjectID;
-                                _that.addItem.grade = item.GradeID;
-                                _that.addItem.description = item.Description;
-                                _that.addItem.title = item.Name;
-                            }
-                        });
+                        console.log(obj.GradeID)
+                        _that.addItem.ID = obj.ID;
+                        _that.addItem.SubjectID = obj.SubjectID;
+                        _that.addItem.Init = true;
+                        _that.addItem.GradeID = obj.GradeID;
+                        _that.addItem.Description = obj.Description;
+                        _that.addItem.Name = obj.Name;
                     }
+                    _that.$bvModal.show('modal_event')
                 },
                 addCurriculum() {
-                    alert(1);
+                    let _that = this
+                    let _form = new FormData()
+
+                    if (_that.addItem.Name == '') {
+                        alert("Please fill in required fields");
+                        this.$refs["addName"].focus();
+                        return false;
+                    }
+
+                    if (_that.addItem.SubjectID == '') {
+                        alert("Please select subject");
+                        return false;
+                    }
+
+                    if (_that.addItem.GradeID == '') {
+                        alert("Please select grade");
+                        return false;
+                    }
+
+                    _form.append('ID', _that.addItem.ID)
+                    _form.append('GradeID', _that.addItem.GradeID)
+                    _form.append('SubjectID', _that.addItem.SubjectID)
+                    _form.append('Name', _that.addItem.Name)
+                    _form.append('Description', _that.addItem.Description)
+                    let _url = '@Url.Action("CreateOrUpdate","Curriculum")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            console.log(response.data);
+                            if (response.data.Error != null)
+                                alert(response.data.Error)
+                            else {
+                                this.getData();
+                                _that.$bvModal.hide('modal_event');
+                            }
+                        }).catch(e => {
+                            alert("Error: " + e)
+                        })
                 },
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
@@ -271,6 +320,26 @@
                     if (this.addItem.id == '')
                         return 'Thêm bài giảng mới';
                     else return 'Cập nhật nội dung';
+                },
+                removeCurriculum(obj) {
+                    if (confirm("Confirm Delete " + obj.Name)) {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('ArrID', obj.ID)
+                    let _url = '@Url.Action("Remove","Curriculum")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            console.log(response.data);
+                            if (response.data.Error != null)
+                                alert(response.data.Error)
+                            else {
+                                this.getData();
+                                _that.$bvModal.hide('modal_event');
+                            }
+                        }).catch(e => {
+                            alert("Error: " + e)
+                        })
+                    }
                 }
             }
         });
@@ -279,20 +348,20 @@
 @section Modals{
     <b-modal id="modal_event" centered v-bind:title="getEditTitle()">
         <b-col class="form-group">
-            <label for="">Tên bài giảng</label>
-            <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng" v-model="addItem.title">
+            <label for="">Tên bài giảng *</label>
+            <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng" v-model="addItem.Name" ref="addName">
         </b-col>
         <div class="d-flex">
             <b-col class="form-group">
                 <label for="">Môn học</label>
-                <select class="form-control" v-model="addItem.subject">
+                <select class="form-control" v-model="addItem.SubjectID">
                     <option value="">Chọn khoá học</option>
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                 </select>
             </b-col>
             <b-col class="form-group">
                 <label for="">Cấp độ</label>
-                <select class="form-control" v-model="addItem.grade">
+                <select class="form-control" v-model="addItem.GradeID">
                     <option value="">Chọn cấp độ</option>
                     <option v-for="(item,k) in list_add_grades" :value="item.ID">{{item.Name}}</option>
                 </select>
@@ -300,7 +369,11 @@
         </div>
         <b-col class="form-group">
             <label for="">Mô tả</label>
-            <textarea name="name" rows="3" class="form-control" v-model="addItem.description"></textarea>
+            <quill-editor v-model="addItem.Description"
+                          ref="quillEditorA"
+                          :options="editorOption">
+            </quill-editor>
+            @*<textarea name="name" rows="3" class="form-control" v-model="addItem.description"></textarea>*@
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <b-button variant="success" v-on:click="addCurriculum()">Lưu</b-button>
