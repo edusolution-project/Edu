@@ -51,7 +51,7 @@ namespace BaseCustomerMVC.Globals
             
             if (delItem != null)
             {
-                if (delItem.StartDate <= DateTime.Now || delItem.CreateUser == user) return Task.FromResult(false);
+                if (delItem.StartDate <= DateTime.Now || delItem.CreateUser != user) return Task.FromResult(false);
                 delItem.IsDel = true;
                 _calendarService.CreateOrUpdate(delItem);
                 return Task.FromResult(true);
