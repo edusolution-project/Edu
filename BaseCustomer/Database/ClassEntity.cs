@@ -17,7 +17,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Students")]
         public List<string> Students { get; set; } = new List<string>();
         [JsonProperty("Members")]
-        public List<ClassMemberType> Members{get;set;}
+        public List<ClassMemberType> Members { get; set; }
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
         [JsonProperty("Updated")]
@@ -33,7 +33,9 @@ namespace BaseCustomerEntity.Database
         public DateTime EndDate { get; set; }
         [JsonProperty("IsGroup")]
         public bool? IsGroup { get; set; } = false;
-        
+        [JsonProperty("Subjects")]
+        public string Subjects { get; set; }
+
         //Multiple
         [JsonProperty("GradeID")]
         public string GradeID { get; set; }
@@ -55,7 +57,7 @@ namespace BaseCustomerEntity.Database
         public string Description { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
-        
+
     }
 
     public class ClassService : ServiceBase<ClassEntity>
@@ -93,9 +95,16 @@ namespace BaseCustomerEntity.Database
                 Builders<ClassEntity>.Update.AddToSet("Students", studentID)).Result.ModifiedCount;
         }
 
-        //public long RemoveMember(string ID, string memberID)
-        //{
+        public long AddMemberToClass(string ID, ClassMemberType member)
+        {
+            return CreateQuery().UpdateManyAsync(t => t.ID.Equals(ID),
+                Builders<ClassEntity>.Update.AddToSet("Members", member)).Result.ModifiedCount;
+        }
 
-        //}
+        public long AddSubjectToClass(string ID, string subjectID)
+        {
+            return CreateQuery().UpdateManyAsync(t => t.ID.Equals(ID),
+                Builders<ClassEntity>.Update.AddToSet("Subjects", subjectID)).Result.ModifiedCount;
+        }
     }
 }

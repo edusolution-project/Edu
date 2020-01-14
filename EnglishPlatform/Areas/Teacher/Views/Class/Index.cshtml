@@ -2,37 +2,36 @@
 
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
-    ViewData["Title"] = "My Courses";
-    var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
-    var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
+    ViewData["Title"] = "My Courses - " + DateTime.Now.ToString("D");
+    var subjects = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
 }
-
+<script src="~/js/daterangepicker.min.js"></script>
+<link href="~/css/daterangepicker.css" rel="stylesheet" />
 <script>
     setActiveMenu("course");
 </script>
-<script src="~/js/daterangepicker.min.js"></script>
-<link href="~/css/daterangepicker.css" rel="stylesheet" />
+
 
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b padding-b25 justify-content-between">
             <div class="flex">
-                <div class="box filter-box w-152">
-                    <select name="">
-                        <option value="">Khoá học</option>
-                    </select>
+                <div class="box filter-box">
+                    <input type="text" value="01/08/2019 - 30/09/2019" name="dates">
+                    <span class="ic ic-picker"></span>
                 </div>
                 <div class="box filter-box w-152">
-                    <select name="">
-                        <option value="">Môn học</option>
+                    <select v-model="subject">
+                        <option value="">Choose Subject</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                     </select>
                 </div>
-                <div class="box filter-box w-152">
-                    <select name="">
-                        <option value="">Cấp độ</option>
-                    </select>
+                <div class="search-box">
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" placeholder="Search">
                 </div>
             </div>
+            <b-button class="btn-addevent" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm lớp</b-button>
         </div>
     </div>
     <div class="card-body">
@@ -43,17 +42,16 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item,k) in tableData" v-if="item.id > 0">
-                    <td>{{k+1}}</td>
-                    <td><a href="/teacher/class_detail.html" :title="item.class_name" class="title">{{item.class_name}}</a></td>
-                    <td>{{item.class_code}}</td>
-                    <td>{{item.level}}</td>
-                    <td>{{item.students}}</td>
-                    <td><span>{{item.start_date}}</span><span>{{item.end_date}}</span></td>
+                <tr v-for="(item,k) in tableData">
+                    <td>{{(page - 1) * view + (k+1)}}</td>
+                    <td><a :href="'@Url.Action("Detail","Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
+                    <td>{{item.SubjectName}}</td>
+                    <td>{{item.Students.length}}</td>
+                    <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
                     <td>
                         <div class="d-flex btn-group">
-                            <a class="btn-act btn-edit" href="#"><i class="ti-pencil-alt"></i></a>
-                            <button class="btn-act btn-trash" v-on:click="destroy(item.id)"><i class="ti-trash"></i></button>
+                            <a class="btn-act btn-edit" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
+                            <button class="btn-act btn-trash" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -62,7 +60,7 @@
         <div class="box margin-t20 flex">
             <div class="paging-view">
                 Hiển thị:
-                <select v-model="view">
+                <select v-model="view" v-on:change="getData()">
                     <option value="10">10 kết quả</option>
                     <option value="20">20 kết quả</option>
                     <option value="30">30 kết quả</option>
@@ -70,11 +68,11 @@
             </div>
             <div class="page-control">
                 <div class="inner">
-                    <button><i class="ti-angle-left"></i></button>
-                    <button><i class="ti-angle-double-left"></i></button>
-                    <input type="text" v-model="page" />
-                    <button><i class="ti-angle-double-right"></i></button>
-                    <button><i class="ti-angle-right"></i></button>
+                    <button v-on:click="goPage(0)"><i class="ti-angle-left"></i></button>
+                    <button v-on:click="goPage(page - 1)"><i class="ti-angle-double-left"></i></button>
+                    <input type="text" v-model="page" v-on:change="getData()" />
+                    <button v-on:click="goPage(page + 1)"><i class="ti-angle-double-right"></i></button>
+                    <button v-on:click="goPage(max_page)"><i class="ti-angle-right"></i></button>
                 </div>
             </div>
         </div>
@@ -86,108 +84,238 @@
 
         new Vue({
             el: ".module",
-            data: {
-            tableData : [
-                {
-                    id : 1,
-                    class_name : 'IELTS Preparation',
-                    class_code : 'IEL',
-                    level : 'A2',
-                    students : 3,
-                    start_date : '02/11/2019',
-                    end_date : '02/11/2019',
-                    state : true
-                },
-                {
-                    id : 2,
-                    class_name : 'Destination B1',
-                    class_code : 'PET',
-                    level : 'A2',
-                    students : 6,
-                    start_date : '02/11/2019',
-                    end_date : '02/11/2019',
-                    state : false
-                },
-                {
-                    id : 3,
-                    class_name : 'Ngữ pháp A2',
-                    class_code : 'PET',
-                    level : 'A2',
-                    students : 13,
-                    start_date : '02/11/2019',
-                    end_date : '02/11/2019',
-                    state : false
-                },
-                {
-                    id : 4,
-                    class_name : 'Giao tiếp cơ bản',
-                    class_code : 'IELTS',
-                    level : 'A2',
-                    students : 20,
-                    start_date : '02/11/2019',
-                    end_date : '02/11/2019',
-                    state : false
-                },
-            ],
-            fields : [
-                {
-                    key : 'stt',
-                    label : '#'
-                },
-                {
-                    key : 'class_name',
-                    label : 'Lớp học'
-                },
-                {
-                    key : 'class_code',
-                    label : 'Mã lớp'
-                },
-                {
-                    key : 'level',
-                    label : 'Cấp độ'
-                },
-                {
-                    key : 'students',
-                    label : 'Học viên'
-                },
-                {
-                    key : 'date',
-                    label : 'Thời gian'
-                },
-                {
-                    key : 'actions',
-                    label : 'Tác vụ'
-                }
-            ],
-            week : '',
-            view : 10,
-            page : 1,
-            pageSize : 10
-        },
-        watch : {
-
-        },
-        methods: {
-            getData(){
-                let _data = []
-
-                this.tableData = _data
-            },
-            getNews(){
-                // tương tự như trên
-            },
-            destroy(id){
-                this.tableData.forEach(function(item,k){
-                    if(item.id == id){
-                        item.id = 0
+            mounted() {
+                var start = moment();
+                var end = moment().add(29, 'days');
+                $('input[name="dates"]').daterangepicker({
+                    startDate: start,
+                    endDate: end,
+                    locale: {
+                        format: "DD/MM/YYYY",
                     }
-                })
-                let _data = this.tableData.filter(function(a){
-                    return a.id > 0
-                })
-                this.tableData = _data
+                }, function (s, e, label) {
+                    RepDate(s,e);
+                    GetData();
+                });
+                this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                //console.log(this.list_grades_full);
+                window.ChooseCalendar = this.chooseCalendar
+                window.GetData = this.getData
+                window.RepDate = this.repDate
+                $('input[name=dates]').siblings('.ic-picker').click(function () { ChooseCalendar() });
+                this.getData()
+            },
+            data: {
+                list_subject: [],
+                tableData: [
+                ],
+                fields: [
+                    {
+                        key: 'stt',
+                        label: '#'
+                    },
+                    {
+                        key: 'class_name',
+                        label: 'Lớp học'
+                    },
+                    {
+                        key: 'subject',
+                        label: 'Môn học'
+                    },
+                    {
+                        key: 'students',
+                        label: 'Học viên'
+                    },
+                    {
+                        key: 'date',
+                        label: 'Thời gian'
+                    },
+                    {
+                        key: 'actions',
+                        label: 'Tác vụ'
+                    }
+                ],
+                subject: '',
+                list_subject: [],
+                view: 10,
+                page: 1,
+                startdate: moment(),
+                enddate: moment().add(29, 'days')
+            },
+            computed: {
+                sDate: {
+                    get() {
+                        return moment(this.startdate).format("MM/DD/YYYY");
+                    },
+                    set(value) {
+                        this.startdate = value;
+                    }
+                },
+                eDate: {
+                    get() {
+                        return moment(this.enddate).format("MM/DD/YYYY");
+                    },
+                    set(value) {
+                        this.enddate = value;
+                    }
+                }
+            },
+            watch: {
+                subject: function () {
+                    this.getData()
+                }
+            },
+            methods: {
+                getData() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('SubjectID', _that.subject)
+                    _form.append('PageSize', _that.view)
+                    _form.append('PageIndex', _that.page)
+                    _form.append('StartDate', _that.sDate)
+                    _form.append('EndDate', _that.eDate)
+                    let _url = '@Url.Action("GetList", "Class")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.tableData = response.data.Data;
+                            var tt = response.data.Model.totalRecord;
+                            this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
+                            //console.log(_that.active_course);
+                        }).catch(e => { })
+                },
+                changeAddSubject() {
+                    let _that = this
+                    _that.list_add_grades = [];
+                    for (i = 0; i < _that.list_grades_full.length; i++)
+                    {
+                        if (_that.list_grades_full[i].SubjectID == _that.addItem.SubjectID) {
+                            _that.list_add_grades.push(_that.list_grades_full[i])
+                        }
+                    }
+                    if (_that.addItem.Init)
+                        _that.addItem.Init = false
+                    else
+                        _that.addItem.GradeID = ""
+                },
+                toggleState(obj) {
+                    let _that = this;
+                    _that.list_data.forEach(function (item, k) {
+                        if (item.ID === obj.ID) {
+                            let _url = item.IsActive ? '@Url.Action("Unpublish", "Curriculum")' : '@Url.Action("Publish", "Curriculum")'
+                            let _form = new FormData()
+                            _form.append('ArrID', item.ID);
+                            axios.post(_url, _form)
+                                .then(response => {
+                                    console.log('update ok');
+                                    //item.IsActive = !item.IsActive;
+                                    //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
+                                }).catch(e => { })
+                        }
+                    })
+                },
+                showEditItem(obj) {
+                    let _that = this;
+                    if (obj == null) {
+                        _that.addItem.ID = '';
+                        _that.addItem.SubjectID = '';
+                        _that.addItem.GradeID = '';
+                        _that.addItem.Description = '';
+                        _that.addItem.Name = '';
+                    }
+                    else {
+                        console.log(obj.GradeID)
+                        _that.addItem.ID = obj.ID;
+                        _that.addItem.SubjectID = obj.SubjectID;
+                        _that.addItem.Init = true;
+                        _that.addItem.GradeID = obj.GradeID;
+                        _that.addItem.Description = obj.Description;
+                        _that.addItem.Name = obj.Name;
+                    }
+                    _that.$bvModal.show('modal_event')
+                },
+                addItem() {
+                    let _that = this
+                    let _form = new FormData()
+
+                    if (_that.addItem.Name == '') {
+                        alert("Please fill in required fields");
+                        this.$refs["addName"].focus();
+                        return false;
+                    }
+
+                    if (_that.addItem.SubjectID == '') {
+                        alert("Please select subject");
+                        return false;
+                    }
+
+                    if (_that.addItem.GradeID == '') {
+                        alert("Please select grade");
+                        return false;
+                    }
+
+                    _form.append('ID', _that.addItem.ID)
+                    _form.append('GradeID', _that.addItem.GradeID)
+                    _form.append('SubjectID', _that.addItem.SubjectID)
+                    _form.append('Name', _that.addItem.Name)
+                    _form.append('Description', _that.addItem.Description)
+                    let _url = '@Url.Action("Create","Class")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            console.log(response.data);
+                            if (response.data.Error != null)
+                                alert(response.data.Error)
+                            else {
+                                this.getData();
+                                _that.$bvModal.hide('modal_event');
+                            }
+                        }).catch(e => {
+                            alert("Error: " + e)
+                        })
+                },
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                goPage(pgIdx) {
+                    if (pgIdx < 1) pgIdx = 1;
+                    if (pgIdx > this.max_page)
+                        pgIdx = this.max_page;
+                    this.page = pgIdx;
+                    this.getData();
+                },
+                hideModal() {
+                    $('.close').click();
+                },
+                getEditTitle() {
+                    if (this.addItem.id == '')
+                        return 'Thêm bài giảng mới';
+                    else return 'Cập nhật nội dung';
+                },
+                removeItem(obj) {
+                    if (confirm("Confirm delete \"" + obj.Name + '"')) {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('ArrID', obj.ID)
+                    let _url = '@Url.Action("Remove","Class")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            console.log(response.data);
+                            if (response.data.Error != null)
+                                alert(response.data.Error)
+                            else {
+                                this.getData();
+                                _that.$bvModal.hide('modal_event');
+                            }
+                        }).catch(e => {
+                            alert("Error: " + e)
+                        })
+                    }
+                },
+                repDate(svalue, evalue) {
+                    this.eDate = evalue;
+                    this.sDate = svalue;
+                }
             }
-        }
         });
 
     </script>

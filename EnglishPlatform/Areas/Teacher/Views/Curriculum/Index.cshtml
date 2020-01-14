@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Dashboard - " + DateTime.Now.ToString("D");
+    ViewData["Title"] = "Curriculum - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
@@ -56,7 +56,7 @@
                     <td>
                         <div class="d-flex btn-group">
                             <a class="btn-act btn-edit" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
-                            <button class="btn-act btn-trash" v-on:click="removeCurriculum(item)"><i class="ti-trash"></i></button>
+                            <button class="btn-act btn-trash" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -263,7 +263,7 @@
                     }
                     _that.$bvModal.show('modal_event')
                 },
-                addCurriculum() {
+                addItem() {
                     let _that = this
                     let _form = new FormData()
 
@@ -321,8 +321,8 @@
                         return 'Thêm bài giảng mới';
                     else return 'Cập nhật nội dung';
                 },
-                removeCurriculum(obj) {
-                    if (confirm("Confirm Delete " + obj.Name)) {
+                removeItem(obj) {
+                    if (confirm('Confirm delete "' + obj.Name  + '"')) {
                     let _that = this
                     let _form = new FormData()
                     _form.append('ArrID', obj.ID)

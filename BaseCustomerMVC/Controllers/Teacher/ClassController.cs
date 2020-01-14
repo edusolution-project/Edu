@@ -149,9 +149,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.User = UserID;
             ViewBag.Model = model;
             ViewBag.Managable = CheckPermission(PERMISSION.COURSE_EDIT);
-            if (beta == 1)
-                return View();
-            return View("Index_o");
+            //if (beta == 1)
+            return View();
+            //return View("Index_o");
         }
 
         public IActionResult Detail(DefaultModel model)
@@ -615,16 +615,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
-            if (!string.IsNullOrEmpty(GradeID))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == GradeID));
-            }
+            //if (!string.IsNullOrEmpty(GradeID))
+            //{
+            //    filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == GradeID));
+            //}
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.CountDocuments();
-            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
+            var DataResponse = data == null || model.TotalRecord <= 0 // || model.TotalRecord < model.PageSize
                 ? data
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize);
 
             var response = new Dictionary<string, object>
             {
@@ -708,7 +708,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        }).ToList();
             return Json(new { Data = std });
         }
-
 
         public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", string UserID = "")
         {
