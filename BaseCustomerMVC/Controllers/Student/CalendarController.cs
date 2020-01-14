@@ -90,7 +90,7 @@ namespace BaseCustomerMVC.Controllers.Student
         [Obsolete]
         public bool Delete(string id)
         {
-            return _calendarHelper.RemoveEvent(id).Result;
+            return _calendarHelper.RemoveEvent(id, User.FindFirst("UserID").Value).Result;
         }
     }
 }

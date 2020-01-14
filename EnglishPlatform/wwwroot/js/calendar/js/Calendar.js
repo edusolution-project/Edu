@@ -228,8 +228,10 @@ var EduCalendar = (function(){
         if (info == void 0) {
             var formEvent = document.getElementById("form-event");
             if (formEvent != null) {
+                formEvent.classList.remove("edit-form");
                 var bodyEvent = formEvent.querySelector(".body-form-event");
                 if (bodyEvent != null) {
+                    bodyEvent.querySelector('input[name="ID"]').value = "";
                     var Title = bodyEvent.querySelector("input[name='Title']");
                     if (Title != null) {
                         Title.value = '';
