@@ -31,8 +31,9 @@ namespace BaseCustomerMVC.Globals
         }
         public Task<CalendarEntity> CreateEvent(CalendarEntity item)
         {
-            if (string.IsNullOrEmpty(item.ID))
+            if (!string.IsNullOrEmpty(item.ID))
             {
+                // update event
                 _calendarService.CreateOrUpdate(item);
                 return Task.FromResult(item);
             }
