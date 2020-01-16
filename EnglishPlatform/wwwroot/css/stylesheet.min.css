@@ -228,6 +228,19 @@ button, input, a {
     list-style: none
 }
 
+.good {
+    color: #00D085;
+    font-weight: 600
+}
+
+.right {
+    float: right
+}
+
+.left {
+    float: left
+}
+
 #login_frame {
     position: relative;
     overflow: hidden
@@ -632,6 +645,72 @@ button, input, a {
     background-image: url(../images/checked-o.png);
     width: 24px;
     height: 24px
+}
+
+.ic-paper-clip {
+    background-image: url(../images/paper-clip.png);
+    width: 17px;
+    height: 18px
+}
+
+.ic-plus-c {
+    background-image: url(../images/plus-circle.png);
+    width: 14px;
+    height: 14px
+}
+
+.ic-book-open {
+    background-image: url(../images/book-open.png);
+    width: 24px;
+    height: 18px
+}
+
+.ic-book-close {
+    background-image: url(../images/book-close.png);
+    width: 24px;
+    height: 24px
+}
+
+.ic-paper-done {
+    background-image: url(../images/paper-done.png);
+    width: 18px;
+    height: 21px
+}
+
+.ic-paper-yet {
+    background-image: url(../images/paper-yet.png);
+    width: 18px;
+    height: 21px
+}
+
+.ic-book-multi {
+    background-image: url(../images/books-multi.png);
+    width: 24px;
+    height: 19px
+}
+
+.ic-award {
+    background-image: url(../images/award.png);
+    width: 23px;
+    height: 23px
+}
+
+.ic-award-2 {
+    background-image: url(../images/award-2.png);
+    width: 23px;
+    height: 23px
+}
+
+.ic-award-3 {
+    background-image: url(../images/award-3.png);
+    width: 23px;
+    height: 23px
+}
+
+.ic-award-n {
+    background-image: url(../images/award-n.png);
+    width: 23px;
+    height: 23px
 }
 
 .fo {
@@ -1120,10 +1199,8 @@ button, input, a {
 
     .course-item .thumb {
         display: block;
-        overflow: hidden;
-        width: 100%;
-        padding-top: 56%;
-        position: relative;
+        height: 250px;
+        overflow: hidden
     }
 
 @media (max-width:1366px) {
@@ -1133,9 +1210,8 @@ button, input, a {
 }
 
 .course-item .thumb img {
-    position: absolute;
-    top: 50%;
-    margin-top: -28%;
+    height: 100%;
+    max-height: 100%
 }
 
 .course-item .detail {
@@ -1256,7 +1332,8 @@ button, input, a {
         }
 
     .page-control li {
-        display: block
+        display: block;
+        font-size: 16px
     }
 
         .page-control li a {
@@ -1266,9 +1343,23 @@ button, input, a {
             padding: 2px 10px
         }
 
+            .page-control li a.page-link {
+                padding: .5rem .75rem
+            }
+
         .page-control li.active a, .page-control li:hover a {
             color: #D03239
         }
+
+        .page-control li.page-item.active .page-link {
+            color: #D03239;
+            background-color: transparent;
+            border-color: transparent
+        }
+
+    .page-control .page-link {
+        border: none
+    }
 
 .time-line {
     margin-bottom: 0
@@ -1415,6 +1506,10 @@ button, input, a {
         color: #000
     }
 
+    .btn-collapse.flex {
+        display: flex
+    }
+
 .ls-pratice li .inner {
     padding: 10px 0;
     border-bottom: 1px solid #D0DFE8
@@ -1445,12 +1540,28 @@ button, input, a {
         content: "\e64b"
     }
 
+    .ls-pratice li .parrent.done {
+        color: #3DB39E !important
+    }
+
+    .ls-pratice li .parrent.yet {
+        color: #4E6774 !important
+    }
+
+        .ls-pratice li .parrent.yet .ic-edit-small {
+            margin-bottom: -2px
+        }
+
 .ls-pratice li:nth-child(n+2) .parrent {
     color: #B70058
 }
 
 .ls-pratice li:nth-child(n+3) .parrent {
     color: #D03239
+}
+
+.ls-pratice li .btn-group {
+    margin-right: 25px
 }
 
 .ls-pratice .card-body {
@@ -1545,9 +1656,22 @@ button, input, a {
             margin-left: 15px
         }
 
+    .ls-pratice .sub-practice .btn-group .btn-act {
+        padding: 5px 0;
+        min-width: 10px
+    }
+
+        .ls-pratice .sub-practice .btn-group .btn-act.btn-edit {
+            color: #13A6FB
+        }
+
+        .ls-pratice .sub-practice .btn-group .btn-act.btn-trash {
+            color: #738B99
+        }
+
     .ls-pratice .sub-practice .date {
         display: block;
-        min-width: 140px;
+        width: 140px;
         background: #fff;
         border-radius: 4px;
         padding: 5px 18px
@@ -1555,7 +1679,10 @@ button, input, a {
 
         .ls-pratice .sub-practice .date::after {
             content: "\25BC";
-            margin-left: 10px
+            margin-left: 10px;
+            position: absolute;
+            top: 2px;
+            right: 8px
         }
 
         .ls-pratice .sub-practice .date.st::after {
@@ -1872,6 +1999,10 @@ button, input, a {
     justify-content: space-between
 }
 
+.j-end {
+    justify-content: flex-end
+}
+
 .tab {
     margin: 0;
     display: flex
@@ -2014,11 +2145,16 @@ button, input, a {
     line-height: 16px;
     font-weight: 600;
     border-color: #13A6FB !important;
-    text-transform: uppercase
+    text-transform: uppercase;
+    height: 40px
 }
 
     .btn-addevent:hover {
         color: #fff
+    }
+
+    .btn-addevent.btn-student {
+        font-size: 20px
     }
 
 .modal-backdrop {
@@ -2150,7 +2286,7 @@ button, input, a {
             }
 
         .list-scroll li .thumb {
-            height: 92px;
+            height: 85px;
             overflow: hidden
         }
 
@@ -2236,7 +2372,8 @@ button, input, a {
 
     #ed_table tbody td {
         text-align: center;
-        vertical-align: middle
+        vertical-align: middle;
+        padding: 1rem .5rem
     }
 
         #ed_table tbody td span {
@@ -2247,17 +2384,17 @@ button, input, a {
             color: #000
         }
 
+.btn-act {
+    background: none;
+    outline: none;
+    border: none;
+    font-size: 20px;
+    padding: 5px 8px
+}
+
 .btn-group {
     justify-content: center
 }
-
-    .btn-group .btn-act {
-        background: none;
-        outline: none;
-        border: none;
-        font-size: 20px;
-        padding: 5px 8px
-    }
 
     .btn-group .btn-edit {
         color: #13A6FB
@@ -2282,10 +2419,19 @@ button, input, a {
     margin-right: 20px
 }
 
+    .ls-overview .thumb.small {
+        width: 70px
+    }
+
 .ls-overview .label {
     font-weight: 600;
     display: inline-block;
     margin-right: 5px
+}
+
+.ls-overview .c-right.flex {
+    justify-content: center;
+    flex-direction: column
 }
 
 .ls-overview .c-right p {
@@ -2349,4 +2495,117 @@ button, input, a {
     color: #000;
     font-weight: 600;
     margin-bottom: 15px
+}
+
+.picker-schedule {
+    white-space: normal
+}
+
+    .picker-schedule .vdp-datepicker__calendar {
+        right: 0
+    }
+
+    .picker-schedule .vdp-datepicker input {
+        border: none;
+        width: 100%
+    }
+
+#modal_class .modal-dialog {
+    max-width: 1200px
+}
+
+#modal_class .vdp-datepicker input {
+    border: none
+}
+
+#modal_class .btn-success {
+    background-color: #13A6FB;
+    border-color: #13A6FB
+}
+
+#modal_class .btn-danger {
+    background-color: #839AA6;
+    border-color: #839AA6
+}
+
+#modal_class .btn {
+    min-width: 90px;
+    text-transform: uppercase
+}
+
+#thumb_class {
+    position: relative;
+    width: 160px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden
+}
+
+.frm-upload {
+    position: relative;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    width: 160px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+    .frm-upload input {
+        position: absolute;
+        opacity: 0;
+        visibility: hidden
+    }
+
+    .frm-upload .ic-paper-clip {
+        margin-right: 5px
+    }
+
+.list-subject li {
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #D0DFE8
+}
+
+    .list-subject li div ~ div {
+        margin-left: 15px
+    }
+
+    .list-subject li .btn-act {
+        margin-top: 20px
+    }
+
+    .list-subject li:last-child {
+        border-bottom: none;
+        margin-bottom: 0
+    }
+
+.btn-add-sub {
+    color: #13A6FB;
+    font-size: 16px;
+    font-weight: 600
+}
+
+    .btn-add-sub .ic {
+        margin-bottom: -1px
+    }
+
+.rate span {
+    display: block;
+    margin-left: 15px;
+    line-height: 2.9;
+    font-size: 16px;
+    font-weight: 600
+}
+
+    .rate span .ic {
+        margin-right: 8px
+    }
+
+td a {
+    color: #13A6FB
 }

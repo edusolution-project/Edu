@@ -49,6 +49,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<CloneLessonPartQuestionService>();
 
             services.AddSingleton<ClassService>();
+            services.AddSingleton<ClassSubjectService>();
             services.AddSingleton<ClassProgressService>();
 
             services.AddSingleton<ExamService>();

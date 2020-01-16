@@ -1,8 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Curriculums";
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
-    var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
-    var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var listGrade = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
+    var listSubject = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var listModGrade = ViewBag.ModGrade as List<BaseCustomerEntity.Database.ModGradeEntity>;
     var listModSubject = ViewBag.ModSubject as List<BaseCustomerEntity.Database.ModSubjectEntity>;
     var user = ViewBag.User as string;

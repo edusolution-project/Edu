@@ -22,6 +22,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _service;
+        private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
         private readonly ClassProgressService _progressService;
 
@@ -64,6 +65,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             AccountService accountService,
             GradeService gradeservice,
             SubjectService subjectService,
+            ClassSubjectService classSubjectService,
             TeacherService teacherService,
             ClassService service,
             CourseService courseService,
@@ -97,6 +99,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _teacherService = teacherService;
             _courseService = courseService;
             _service = service;
+            _classSubjectService = classSubjectService;
             _progressService = progressService;
 
             _chapterService = chapterService;
@@ -130,28 +133,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
         }
 
-        public IActionResult Index(DefaultModel model, int beta = 0)
+        public IActionResult Index(DefaultModel model, int old = 0)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
-            var subject = new List<SubjectEntity>();
-            var grade = new List<GradeEntity>();
             if (teacher != null && teacher.Subjects != null)
             {
-                subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
-                grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+                var subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                var grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+                ViewBag.Grades = grade;
+                ViewBag.Subjects = subject;
             }
-
-            ViewBag.Grade = grade;
-            ViewBag.Subject = subject;
 
             ViewBag.User = UserID;
             ViewBag.Model = model;
             ViewBag.Managable = CheckPermission(PERMISSION.COURSE_EDIT);
-            //if (beta == 1)
+            if (old == 1)
+                return View("Index_o");
             return View();
-            //return View("Index_o");
         }
 
         public IActionResult Detail(DefaultModel model)
@@ -333,7 +333,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
         //Class Detail Management
-
         [HttpPost]
         public JsonResult GetDetail(string ID)
         {
@@ -354,7 +353,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 return new JsonResult(new Dictionary<string, object>
                 {
-                    { "Data", null },
                     {"Error", ex.Message }
                 });
             }
@@ -543,6 +541,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
             };
             return new JsonResult(response);
         }
+
+        public JsonResult GetListTeacher(string SubjectID = "")
+        {
+            var filter = new List<FilterDefinition<TeacherEntity>>();
+
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            if (string.IsNullOrEmpty(SubjectID))
+                return new JsonResult(new Dictionary<string, object> { });
+
+            filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Subjects.Contains(SubjectID)));
+            var teachers = _teacherService.Collection.Find(Builders<TeacherEntity>.Filter.And(filter));
+            var response = new Dictionary<string, object>
+            {
+                { "Data", teachers.ToList().Select(o => new
+                    {
+                       id = o.ID,
+                       fullname = o.FullName
+                    }
+                    ).ToList()
+                }
+            };
+            return new JsonResult(response);
+        }
+
 
         public JsonResult GetMarks(DefaultModel model)
         {
@@ -827,49 +850,68 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Create(ClassEntity item)
+        public JsonResult Create(ClassEntity item, List<ClassSubjectEntity> ClassSubjects)
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.ID = null;
                 item.Created = DateTime.Now;
 
-                if (!String.IsNullOrEmpty(item.Code))
-                {
-                    if (_service.CreateQuery().Find(t => t.Code == item.Code).FirstOrDefault() != null)
-                        return new JsonResult(new Dictionary<string, object>()
-                        {
-                            {"Error", "Class code used" }
-                        });
-                }
-                var course = _courseService.GetItemByID(item.CourseID);
-                if (course == null || !course.IsActive)
-                    return new JsonResult(new Dictionary<string, object>()
-                        {
-                            {"Error", "Curriculum is not available" }
-                        });
-                item.Description = course.Description;
-                item.LearningOutcomes = course.LearningOutcomes;
-                item.Image = course.Image;
+                //if (!String.IsNullOrEmpty(item.Code))
+                //{
+                //    if (_service.CreateQuery().Find(t => t.Code == item.Code).FirstOrDefault() != null)
+                //        return new JsonResult(new Dictionary<string, object>()
+                //        {
+                //            {"Error", "Class code used" }
+                //        });
+                //}
                 _service.CreateOrUpdate(item);
 
-                //Create Class => Create Lesson Schedule & Clone all lesson
-                var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
-
-                var schedules = new List<LessonScheduleEntity>();
-                if (lessons != null)
-                    foreach (LessonEntity lesson in lessons)
+                //Create class subjects
+                if (ClassSubjects != null && ClassSubjects.Count > 0)
+                {
+                    foreach (var csubject in ClassSubjects)
                     {
-                        _lessonScheduleService.CreateQuery().InsertOne(new LessonScheduleEntity
+                        var subject = _subjectService.GetItemByID(csubject.SubjectID);
+                        if (subject == null) continue;
+                        var course = _courseService.GetItemByID(item.CourseID);
+                        if (course == null || !course.IsActive)
+                            return new JsonResult(new Dictionary<string, object>()
                         {
-                            ClassID = item.ID,
-                            LessonID = lesson.ID,
-                            IsActive = true
+                            {"Error", "Curriculum for " + subject.Name + " is not available" }
                         });
-                        _lessonHelper.CloneLessonForClass(lesson, item);
-                    }
+                        csubject.ClassID = item.ID;
+                        csubject.Description = course.Description;
+                        csubject.LearningOutcomes = course.LearningOutcomes;
+                        //subject.Image = course.Image;
+                        _classSubjectService.CreateOrUpdate(csubject);
 
-                _courseService.Collection.UpdateOneAsync(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
+                        //Create Class => Create Lesson Schedule & Clone all lesson
+                        var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
+
+                        var schedules = new List<LessonScheduleEntity>();
+                        if (lessons != null)
+                            foreach (LessonEntity lesson in lessons)
+                            {
+                                _lessonScheduleService.CreateQuery().InsertOne(new LessonScheduleEntity
+                                {
+                                    ClassID = item.ID,
+                                    ClassSubjectID = csubject.ID,
+                                    LessonID = lesson.ID,
+                                    IsActive = true
+                                });
+                                _lessonHelper.CloneLessonForClass(lesson, csubject);
+                            }
+                        _courseService.Collection.UpdateOneAsync(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
+                    }
+                }
+
+                //var course = _courseService.GetItemByID(item.CourseID);
+                //if (course == null || !course.IsActive)
+                //    return new JsonResult(new Dictionary<string, object>()
+                //        {
+                //            {"Error", "Curriculum is not available" }
+                //        });
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -881,60 +923,63 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             else
             {
+                //Edit common data only, class subject must be edited in class detail page
                 var oldData = _service.GetItemByID(item.ID);
                 if (oldData == null) return new JsonResult(new Dictionary<string, object>()
                 {
-                    {"Error", "Data not correct" }
+                    {"Error", "Class not found" }
                 });
-                if (item.Code != oldData.Code)
-                {
-                    if (_service.CreateQuery().Find(t => t.Code == item.Code).FirstOrDefault() != null)
-                        return new JsonResult(new Dictionary<string, object>()
-                        {
-                            {"Error", "Class code used" }
-                        });
-                }
+
+                //if (item.Code != oldData.Code)
+                //{
+                //    if (_service.CreateQuery().Find(t => t.Code == item.Code).FirstOrDefault() != null)
+                //        return new JsonResult(new Dictionary<string, object>()
+                //        {
+                //            {"Error", "Class code used" }
+                //        });
+                //}
 
                 oldData.Updated = DateTime.Now;
 
 
-                if (item.CourseID != oldData.CourseID)
-                {
-                    //remove old schedule
-                    _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == item.ID);
-                    //remove clone lesson part
-                    _lessonHelper.RemoveClone(item.ID);
-                    //remove progress: learning history => class progress, chapter progress, lesson progress
-                    _learningHistoryService.RemoveClassHistory(item.ID);
-                    //resest exam
-                    _examService.RemoveClassExam(item.ID);
+                //if (item.CourseID != oldData.CourseID)
+                //{
+                //    //remove old schedule
+                //    _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == item.ID);
+                //    //remove clone lesson part
+                //    _lessonHelper.RemoveClone(item.ID);
+                //    //remove progress: learning history => class progress, chapter progress, lesson progress
+                //    _learningHistoryService.RemoveClassHistory(item.ID);
+                //    //resest exam
+                //    _examService.RemoveClassExam(item.ID);
 
-                    //Create Class => Create Lesson Schedule & Clone all lesson
-                    var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
+                //    //Create Class => Create Lesson Schedule & Clone all lesson
+                //    var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
 
-                    if (lessons != null)
-                        foreach (LessonEntity lesson in lessons)
-                        {
-                            var schedule = new LessonScheduleEntity
-                            {
-                                ClassID = item.ID,
-                                LessonID = lesson.ID,
-                                IsActive = true
-                            };
-                            _lessonScheduleService.CreateOrUpdate(schedule);
-                            //_calendarHelper.ConvertCalendarFromSchedule(schedule, "");
+                //    if (lessons != null)
+                //        foreach (LessonEntity lesson in lessons)
+                //        {
+                //            var schedule = new LessonScheduleEntity
+                //            {
+                //                ClassID = item.ID,
+                //                LessonID = lesson.ID,
+                //                IsActive = true
+                //            };
+                //            _lessonScheduleService.CreateOrUpdate(schedule);
+                //            //_calendarHelper.ConvertCalendarFromSchedule(schedule, "");
 
-                            _lessonHelper.CloneLessonForClass(lesson, item);
-                        }
-                }
+                //            _lessonHelper.CloneLessonForClass(lesson, item);
+                //        }
+                //}
 
                 oldData.Name = item.Name;
                 oldData.Code = item.Code;
                 oldData.StartDate = item.StartDate;
                 oldData.EndDate = item.EndDate;
-                oldData.CourseID = item.CourseID;
-                oldData.GradeID = item.GradeID;
-                oldData.TeacherID = item.TeacherID;
+                oldData.Description = item.Description;
+                //oldData.CourseID = item.CourseID;
+                //oldData.GradeID = item.GradeID;
+                //oldData.TeacherID = item.TeacherID;
 
                 _service.CreateOrUpdate(oldData);
 

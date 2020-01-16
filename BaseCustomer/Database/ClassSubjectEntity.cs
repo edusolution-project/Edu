@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -32,7 +33,6 @@ namespace BaseCustomerEntity.Database
         public string Description { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
-
     }
 
     public class ClassSubjectService : ServiceBase<ClassSubjectEntity>
@@ -44,6 +44,17 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public List<ClassSubjectEntity> GetByClassID(string ClassID)
+        {
+            return Collection.Find(t => t.ClassID == ClassID).ToList();
+        }
+
+        public Task RemoveClassSubjects(string ClassID)
+        {
+            _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID);
+            return Task.CompletedTask;
         }
     }
 

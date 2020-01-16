@@ -34,7 +34,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("IsGroup")]
         public bool? IsGroup { get; set; } = false;
         [JsonProperty("Subjects")]
-        public string Subjects { get; set; }
+        public List<string> Subjects { get; set; }
 
         //Multiple
         [JsonProperty("GradeID")]

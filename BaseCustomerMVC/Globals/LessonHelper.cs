@@ -67,7 +67,7 @@ namespace BaseCustomerMVC.Globals
 
         //Clone Lesson
         //Clone Lesson
-        public void CloneLessonForClass(LessonEntity lesson, ClassEntity @class)
+        public void CloneLessonForClass(LessonEntity lesson, ClassSubjectEntity @class)
         {
             var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (listLessonPart != null && listLessonPart.Count > 0)

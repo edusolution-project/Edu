@@ -19,6 +19,8 @@ namespace BaseCustomerEntity.Database
         public bool IsActive { get; set; }
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
     }
     public class LessonScheduleService : ServiceBase<LessonScheduleEntity>
     {
