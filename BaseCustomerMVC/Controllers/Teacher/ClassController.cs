@@ -856,15 +856,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 item.ID = null;
                 item.Created = DateTime.Now;
-
-                //if (!String.IsNullOrEmpty(item.Code))
-                //{
-                //    if (_service.CreateQuery().Find(t => t.Code == item.Code).FirstOrDefault() != null)
-                //        return new JsonResult(new Dictionary<string, object>()
-                //        {
-                //            {"Error", "Class code used" }
-                //        });
-                //}
+                var userId = User.Claims.GetClaimByType("UserID").Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Permission Error" }
+                        });
+                }
+                item.TeacherID = userId; // creator
                 _service.CreateOrUpdate(item);
 
                 //Create class subjects
@@ -874,7 +874,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         var subject = _subjectService.GetItemByID(csubject.SubjectID);
                         if (subject == null) continue;
-                        var course = _courseService.GetItemByID(item.CourseID);
+                        var course = _courseService.GetItemByID(csubject.CourseID);
                         if (course == null || !course.IsActive)
                             return new JsonResult(new Dictionary<string, object>()
                         {
@@ -887,7 +887,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         _classSubjectService.CreateOrUpdate(csubject);
 
                         //Create Class => Create Lesson Schedule & Clone all lesson
-                        var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID).ToList();
+                        var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == csubject.CourseID).ToList();
 
                         var schedules = new List<LessonScheduleEntity>();
                         if (lessons != null)
@@ -902,7 +902,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 });
                                 _lessonHelper.CloneLessonForClass(lesson, csubject);
                             }
-                        _courseService.Collection.UpdateOneAsync(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
+                        _courseService.Collection.UpdateOneAsync(t => t.ID == csubject.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
                     }
                 }
 

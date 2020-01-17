@@ -43,7 +43,7 @@ namespace BaseCustomerEntity.Database
         public string SubjectID { get; set; }
         [JsonProperty("CourseID")]
         public string CourseID { get; set; }
-        [JsonProperty("TeacherID")]
+        [JsonProperty("TeacherID")] 
         public string TeacherID { get; set; }
         [JsonProperty("Syllabus")]
         public string Syllabus { get; set; }

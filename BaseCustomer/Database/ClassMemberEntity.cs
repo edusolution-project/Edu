@@ -18,8 +18,9 @@ namespace BaseCustomerEntity.Database
         public string TeacherID { get; set; }
     }
 
-    public class ClassMemberType {
-        public const int
+    public class ClassMemberType
+    {
+        public const int 
             TEACHER = 1,
             CLASS_ASSISTANT = 2,
             CUSTOMER_MANAGEMENT = 3;
