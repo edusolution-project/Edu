@@ -31,12 +31,14 @@ namespace BaseCustomerMVC.Globals
         }
         public Task<CalendarEntity> CreateEvent(CalendarEntity item)
         {
+            // kiem tra co phai sua event hay ko ?
             if (!string.IsNullOrEmpty(item.ID))
             {
                 // update event
                 _calendarService.CreateOrUpdate(item);
                 return Task.FromResult(item);
             }
+            // check event da ton tai hay chua
             if (existEvent(item.EndDate, item.StartDate, item.GroupID))
             {
                 _calendarService.CreateOrUpdate(item);
@@ -52,6 +54,7 @@ namespace BaseCustomerMVC.Globals
             
             if (delItem != null)
             {
+                // neu event ko phai cua user hoac da het thoi gian thi ko the huy
                 if (delItem.StartDate <= DateTime.Now || delItem.CreateUser != user) return Task.FromResult(false);
                 delItem.IsDel = true;
                 _calendarService.CreateOrUpdate(delItem);

@@ -1152,11 +1152,17 @@ body.open-add-event .form-event{
 #btn-update-event, #btn-delete-event, .edit-form #btn-cancel-event {
     display: none;
 }
-.edit-form #btn-update-event, .edit-form #btn-delete-event {
+.edit-form #btn-update-event, .edit-form #btn-delete-event, .edit-form #btn-save-event {
     display: inline-block;
 }
 #btn-save-event, #btn-cancel-event{
     display:inline-block;
+}
+.view-form #btn-update-event,
+.view-form #btn-delete-event,
+.view-form #btn-cancel-event,
+.view-form #btn-save-event {
+    display: none;
 }
 button.fc-btnAddEvent-button.fc-button.fc-button-primary {
     background: #1195e2;

@@ -116,6 +116,7 @@
                 if (data != null) {
                     var jsonData = JSON.parse(data);
                     if (jsonData.CreateUser == "@User.FindFirst("UserID")?.Value") {
+                       
                         var startDate = new Date(jsonData.StartDate);
                         var timeEvent = changeTime(startDate);
                         var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
@@ -143,9 +144,10 @@
                             if (date != null) {
                                 date.value = dateEvent;
                             }
+                            formEvent.classList.remove("view-form");
                             formEvent.classList.add("edit-form");
                         }
-                        if (checkTime(new Date(jsonData.Created),0)) {
+                        if (checkTime(new Date(jsonData.Created), 0)) {
                             // cho phép xóa
                         }
                     }
@@ -155,7 +157,70 @@
                             if (checkTime(new Date(jsonData.Created), 0, 10)) {
                                 //gọi skype
                             }
+                        } else {
+                            
+                            var startDate = new Date(jsonData.StartDate);
+                            var timeEvent = changeTime(startDate);
+                            var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
+                            var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
+                            var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
+                            var formEvent = document.getElementById("form-event");
+                            var bodyEvent = formEvent.querySelector(".body-form-event");
+                            bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
+                            if (bodyEvent != null) {
+                                var Title = bodyEvent.querySelector("input[name='Title']");
+                                if (Title != null) {
+                                    Title.value = jsonData.Title;
+                                }
+                                var Content = bodyEvent.querySelector("textarea[name='Content']");
+                                if (Content != null) {
+                                    Content.value = jsonData.Content != void 0
+                                        ? jsonData.Content
+                                        : "";
+                                }
+                                var time = bodyEvent.querySelector("input[name='Time']");
+                                if (time != null) {
+                                    time.value = timeEvent;
+                                }
+                                var date = bodyEvent.querySelector("input[name='Date']");
+                                if (date != null) {
+                                    date.value = dateEvent;
+                                }
+                                formEvent.classList.add("edit-form");
+                                formEvent.classList.add("view-form");
+                            }
                         }
+                    }
+                } else {
+                    var event = EduCalendar.schedule.EduCalendar.getEventById(id);
+                    console.log(id, event);
+                    var timeEvent = changeTime(event.start);
+                    var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
+                    var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
+                    var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
+                    var formEvent = document.getElementById("form-event");
+                    var bodyEvent = formEvent.querySelector(".body-form-event");
+                        bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
+                    if (bodyEvent != null) {
+                        var Title = bodyEvent.querySelector("input[name='Title']");
+                        if (Title != null) {
+                            Title.value = event.Title;
+                        }
+                        var Content = bodyEvent.querySelector("textarea[name='Content']");
+                        if (Content != null) {
+                            Content.value = event.Content != void 0
+                                ? event.Content
+                                : "";
+                        }
+                        var time = bodyEvent.querySelector("input[name='Time']");
+                        if (time != null) {
+                            time.value = timeEvent;
+                        }
+                        var date = bodyEvent.querySelector("input[name='Date']");
+                        if (date != null) {
+                            date.value = dateEvent;
+                        }
+                        formEvent.classList.add("view-form");
                     }
                 }
             })
@@ -215,8 +280,10 @@
                 }
                 var newFormData = new FormData();
                 var ID = bodyEvent.querySelector("input[name='ID']").value;
+                var isUpdate = false;
                 if (ID != "") {
                     newFormData.append("ID", ID);
+                    isUpdate = true;
                 }
             newFormData.append("Title", title);
             newFormData.append("Content", content);
@@ -228,14 +295,27 @@
                     console.log(data);
                     var dataJson = JSON.parse(data);
                     if (dataJson.code == 201) {
-                        swal("Tạo mới!", "Đã tạo thành công.", "success");
-                        var event = {
-                            id: dataJson.data.ID,
-                            title: dataJson.data.Title,
-                            groupid: dataJson.data.GroupID,
-                            start: dataJson.data.StartDate
-                        };
-                        EduCalendar.schedule.EduCalendar.addEvent(event);
+                        if (isUpdate) {
+                            swal("Update!", "Cập nhật thành công.", "success");
+                            EduCalendar.schedule.EduCalendar.getEventById(dataJson.data.ID).remove();
+                            var event = {
+                                id: dataJson.data.ID,
+                                title: dataJson.data.Title,
+                                groupid: dataJson.data.GroupID,
+                                start: dataJson.data.StartDate
+                            };
+                            EduCalendar.schedule.EduCalendar.addEvent(event);
+                        }
+                        else {
+                            swal("Tạo mới!", "Đã tạo thành công.", "success");
+                            var event = {
+                                id: dataJson.data.ID,
+                                title: dataJson.data.Title,
+                                groupid: dataJson.data.GroupID,
+                                start: dataJson.data.StartDate
+                            };
+                            EduCalendar.schedule.EduCalendar.addEvent(event);
+                        }
                     }
                     else
                         swal("Tạo mới!", dataJson.msg, "warning");

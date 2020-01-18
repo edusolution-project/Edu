@@ -66,9 +66,14 @@ namespace BaseCustomerMVC.Controllers.Student
         [Obsolete]
         public JsonResult Create(CalendarEntity item)
         {
-            item.CreateUser = User?.FindFirst("UserID").Value;
-            item.Created = DateTime.Now;
-            // check validate
+            if (string.IsNullOrEmpty(item.ID))
+            {
+                // nguoi tao
+                item.CreateUser = User?.FindFirst("UserID").Value;
+                // ngay tao
+                item.Created = DateTime.Now;
+                // check validate
+            }
             var data = _calendarHelper.CreateEvent(item).Result;
             if(data == null)
             {
