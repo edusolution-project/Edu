@@ -62,16 +62,40 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         [HttpPost]
         [Obsolete]
-        public CalendarEntity Create(CalendarEntity item)
+        public JsonResult Create(CalendarEntity item)
         {
+            if (string.IsNullOrEmpty(item.ID))
+            {
+                // nguoi tao
+                item.CreateUser = User?.FindFirst("UserID").Value;
+                // ngay tao
+                item.Created = DateTime.Now;
+                // check validate
+            }
             // check validate
-           return _calendarHelper.CreateEvent(item).Result;
+            var data = _calendarHelper.CreateEvent(item).Result;
+            if (data == null)
+            {
+                return new JsonResult(new
+                {
+                    code = 400,
+                    msg = "đã có event tồn tại",
+                    data = data
+                });
+            }
+
+            return new JsonResult(new
+            {
+                code = 201,
+                msg = "tạo thành công",
+                data = data
+            });
         }
         [HttpPost]
         [Obsolete]
         public bool Delete(string id)
         {
-            return _calendarHelper.RemoveEvent(id,User.FindFirst("UserID").Value).Result;
+            return _calendarHelper.RemoveEvent(id, User.FindFirst("UserID").Value).Result;
         }
     }
 }

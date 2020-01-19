@@ -649,6 +649,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ? data
                 : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize);
 
+
+
+
             var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
