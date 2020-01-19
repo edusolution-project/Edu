@@ -1,0 +1,299 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    ViewData["Title"] = currentClass.Name;
+    var subject = ViewBag.Subject as BaseCustomerEntity.Database.SubjectEntity;
+    var grade = ViewBag.Grade as BaseCustomerEntity.Database.GradeEntity;
+}
+
+<script>
+    activeTab = "course";
+    modulesLink = "@Url.Action("Modules", "Class")/@currentClass.ID";
+    activeSub = "home";
+</script>
+
+
+<div class="left-col">
+    <div class="page-title">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="main-container">
+        <div class="sub-sidebar">
+            @await Html.PartialAsync("_subSidebarTeacher")
+        </div>
+        <div class="main-content">
+            <div class="row">
+                <div class="col-md-10">
+                    <div class="intro-wrapper content-block">
+                        <div class="detail pb-3 row">
+                            <div class="text-left col-md-10">
+                                <div class="lession-label d-inline-block">Period: <b>@currentClass.StartDate.ToString("dd/MM/yyyy") - @currentClass.EndDate.ToString("dd/MM/yyyy")</b></div> -
+                                <div class="lession-label d-inline-block">
+                                    Status:
+                                    @if (currentClass.EndDate.Date > DateTime.Now.Date)
+                                    {
+                                        <b>Ongoing</b>
+                                    }
+                                    else
+                                    {
+                                        <b>Complete</b>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="banner p-2 mb-3 row" style="background: #e60028;border-radius: 5px;color:#FFF;">
+                            <div class="banner-img col-sm-2 align-top" style="">
+                                <div>
+                                    <img id="imgCourseAvatar" src="@(string.IsNullOrEmpty(currentClass.Image) ? "/img/default.jpg":currentClass.Image)" style="width:auto; height:100px; color:#000; max-width:100%;" />
+                                </div>
+                            </div>
+                            <div class="banner__info col-sm-10 pl-2">
+                                <div class="lession-label">Code: <b>@currentClass.Code?.ToUpper()</b></div>
+                                <div class="lession-label">Subject: <b>@subject.Name</b></div>
+                                <div class="lession-label">Grade: <b>@grade.Name</b></div>
+                            </div>
+                        </div>
+                        @if (currentClass.Description != null)
+                        {
+                            <div class="row pb-3">
+                                <label class="form-label align-top" for="courseTarget"><b style="color:#e60028">Description</b></label>
+                                <div class="align-top">
+                                    <div for="dsp">
+                                        @Html.Raw(currentClass?.Description)
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (currentClass.LearningOutcomes != null)
+                        {
+                            <div class="row pb-3">
+                                <label class="form-label align-top" for="courseContent"><b style="color:#e60028">Learning Outcomes</b></label>
+                                <div class="align-top">
+                                    <div for="dsp">
+                                        @Html.Raw(currentClass?.LearningOutcomes)
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="syllabus-wrapper content-block">
+                        <table class="w-100 table-big-title table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="width:10%" class="text-center">
+                                        <h3>
+                                            Index
+                                        </h3>
+                                    </th>
+                                    <th style="width:50%">
+                                        <h3>
+                                            Chapter
+                                        </h3>
+                                    </th>
+                                    <th style="width:40%">
+                                        <h3>
+                                            Activities
+                                        </h3>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    @*<div class="assignment-wrapper content-block">
+                            <div class="block-title">
+                                <h2>Assignments</h2>
+                            </div>
+                            <table class="w-100 table-hover table-normal-title">
+                                <thead>
+                                    <tr style="font-weight:700">
+                                        <th style="width:20%">
+                                            Date
+                                        </th>
+                                        <th style="width:60%">
+                                            Description
+                                        </th>
+                                        <th style="width:20%" class="text-right"></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>*@
+                </div>
+                <div class="col-md-2">
+                    @await Html.PartialAsync("MiniCalendar")
+                    @await Html.PartialAsync("Markbox")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Modals{
+    <div class="modal fade edit-modal" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="chapterModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add Chapter</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="@Url.Action("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="ID" />
+                        <input type="hidden" name="ClassID" value="@currentClass.ID" />
+                        <input type="hidden" name="ParentID" value="" />
+
+                        <div class="form-group">
+                            <label class="col-form-label">Tên chương mục:</label>
+                            <input type="text" class="form-control" name="Name" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Mô tả:</label>
+                            <textarea class="form-control" name="Description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("UpdateChapterInfo","Class")','update' , LoadChapters)">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+
+    var chapters = [];
+    var lessons = [];
+    var scheduleBody = $('.modules-wrapper');
+    var syllabusBody = $('.syllabus-wrapper tbody');
+    var assignmentBody = $('.assignment-wrapper tbody');
+
+    function LoadChapters(data) {
+        if (data != null) {
+            var json = JSON.parse(data);
+            if (json.Error != null) {
+                alert(json.Error);
+                return false;
+            }
+            hideModal();
+        }
+
+        chapters = [];
+         $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetMainChapters", "Class")',
+            data: {ID: '@currentClass.ID' },
+            dataType:"json",
+            success: function (data) {
+                scheduleCounter = 1;
+                syllabusBody.html("");
+                rcCounter = 0;
+
+                chapters = data.Data;
+                if (chapters.length > 0) {
+                    for (i = 0; i < chapters.length; ++i) {
+                        var chapter = chapters[i];
+                        var chapContent = $("<tr id='chap" + chapter.ID + "' class='item-row'>");
+                        chapContent.append($("<td>", {"class":"text-center", "text": ++rcCounter}));
+                        var leftContent = $("<div>", {"class": "col-sm-10"});
+                        var rightContent = $("<div>", {"class": "col-sm-2 text-right row-action"});
+                        chapContent.append($("<td>").append($("<a>", {
+                                "class":"action-link",
+                                "name":"Name",
+                                "href": modulesLink + "#" + chapter.ID,
+                                "text": chapter.Name
+                                })));
+                        chapContent.append($("<td class='row'>").append(leftContent).append(rightContent));
+                        if(chapter.Description != null)
+                            leftContent.append($("<span>", {"name": "Description"}).append(chapter.Description.replace(/\n/g,"<br/>")));
+                        rightContent.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "pid": chapter.ParentID, "title": "Sửa", "onclick" : "EditChapter(this, '" + chapter.ID + "'); return false;" }));
+                        syllabusBody.append(chapContent);
+                    }
+                    $('.row-action i').tooltip();
+                }
+            },
+            error: function (res) {
+                console.log(res.responseText);
+            }
+        });
+    }
+
+    function LoadAssignments()
+    {
+        lessons = [];
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetAssignments", "LessonSchedule")',
+            data: {ClassID: '@currentClass.ID' },
+            dataType:"json",
+            success: function (data) {
+                lessons = data.Data.Lessons;
+                if (lessons.length > 0) {
+                    for (j = 0; j < lessons.length; j++) {
+                        var item = lessons[j];
+
+                        var startdate = moment(item.StartDate).format('DD/MM/YYYY');
+                        var enddate = moment(item.Enddate).format('DD/MM/YYYY');
+
+                        var assigmentRow = $("<tr>");
+                        assigmentRow.append($("<td>", {"text":startdate}));
+                        assigmentRow.append($("<td>").append($("<i class='assignment-icon icon'>")).append($("<a>", {
+                                        "href": "@Url.Action("Detail", "Lesson")/" + item.ID + "/@currentClass.ID",
+                                        "class": "action-link",
+                                        "text": item.Title ,
+                                        "style": "margin-left:5px;"
+                                    })));
+                        assigmentRow.append($("<td>", { "class":"text-right font-italic", "text": "hạn cuối " + enddate}));
+                        assignmentBody.append(assigmentRow);
+                    }
+                }
+            },
+            error: function (res) {
+                console.log(res.responseText);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        LoadChapters();
+        LoadAssignments();
+    });
+
+    function editClassInfo(){
+        document.location = '@Url.Action("Edit","Class", new {ID = currentClass.ID })';
+    }
+
+    function EditChapter(obj, ID) {
+        var modal = $("#chapterModal");
+        var modalTitle = modal.find("#modalTitle");
+        modalTitle.text("Cập nhật chương mục");
+        var name = $(obj).parent().parent().parent().find("[name=Name]").text().trim();
+        var description = $(obj).parent().parent().parent().find("[name=Description]").text().trim();
+        var parent = $(obj).attr("pid");
+        modal.find("[name=Name]").val(name);
+        modal.find("[name=Description]").val(description);
+        modal.find("[name=ParentID]").val(parent);
+        modal.find("[name=ID]").val(ID);
+    }
+
+    function chooseFile(obj) {
+        $(obj).siblings("input[type=file]").focus().click();
+    }
+
+    function changeMedia(obj) {
+        var file = $(obj)[0].files[0];
+        $(obj).siblings(".btnAddFile").text(file.name);
+        $(obj).siblings("img").remove();
+    }
+    </script>
+}
+

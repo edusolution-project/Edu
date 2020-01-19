@@ -13,6 +13,10 @@ namespace BaseCustomerEntity.Database
     {
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
+        [JsonProperty("StartDate")]
+        public DateTime StartDate { get; set; }
+        [JsonProperty("EndDate")]
+        public DateTime EndDate { get; set; }
         [JsonProperty("GradeID")]
         public string GradeID { get; set; }
         [JsonProperty("SubjectID")]

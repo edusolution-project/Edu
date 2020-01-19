@@ -209,7 +209,7 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('StartDate', _that.sDate)
                     _form.append('EndDate', _that.eDate)
-                    let _url = '@Url.Action("GetList", "Class")'
+                    let _url = '@Url.Action("GetManageList", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.tableData = response.data.Data;
@@ -269,7 +269,7 @@
 
                     var _enddate = '';
                     try {
-                        _enddate = moment(_that.class_info.StartDate).format("MM/DD/YYYY")
+                        _enddate = moment(_that.class_info.EndDate).format("MM/DD/YYYY")
                     }
                     catch{
                         alert("Vui lòng nhập ngày kết thúc lớp");
