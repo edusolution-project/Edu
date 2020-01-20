@@ -17,7 +17,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Students")]
         public List<string> Students { get; set; } = new List<string>();
         [JsonProperty("Members")]
-        public List<ClassMemberType> Members { get; set; }
+        public List<ClassMemberEntity> Members { get; set; }
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
         [JsonProperty("Updated")]

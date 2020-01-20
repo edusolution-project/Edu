@@ -19,16 +19,16 @@ namespace BaseCustomerMVC.Globals
             _evn = evn;
             RootPath = _evn.WebRootPath + "/Files";
         }
-        public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "")
+        public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "", string folder = "")
         {
-            string folder = "";
             string extension = Path.GetExtension(formFile.FileName);
             string type = extension.Replace(".", string.Empty).ToUpper();
 
-            if (_imageType.Contains(type)) folder = "IMG";
-            else if (_videoType.Contains(type)) folder = "VIDEO";
-            else if (_audioType.Contains(type)) folder = "AUDIO";
-            else folder = "OTHERS";
+            if (string.IsNullOrEmpty(folder))
+                if (_imageType.Contains(type)) folder = "IMG";
+                else if (_videoType.Contains(type)) folder = "VIDEO";
+                else if (_audioType.Contains(type)) folder = "AUDIO";
+                else folder = "OTHERS";
 
             folder += ("/" + DateTime.Now.ToString("yyyyMMdd"));
             string uploads = Path.Combine(RootPath, folder);

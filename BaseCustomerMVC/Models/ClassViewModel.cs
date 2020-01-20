@@ -22,10 +22,13 @@ namespace BaseCustomerMVC.Models
             Created = item.Created;
             Updated = item.Updated;
             IsActive = item.IsActive;
+            Image = item.Image;
             IsAdmin = item.IsAdmin;
             StartDate = item.StartDate;
             EndDate = item.EndDate;
             Order = item.Order;
+            Subjects = item.Subjects;
+            Members = item.Members;
         }
         [JsonProperty("CourseName")]
         public string CourseName { get; set; }

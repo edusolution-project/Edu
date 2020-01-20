@@ -12,7 +12,7 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex mb-2">
-            <h2 class="title"><a href="/teacher/classes.html" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>IELTS Practice</h2>
+            <h2 class="title"><a href="@Url.Action("Index", "Class")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>@currentClass.Name</h2>
             <div class="search-box">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" placeholder="Search">
@@ -21,18 +21,18 @@
         <div class="flex j-between border-b">
             <div class="tab bg-none">
                 <ul class="flex">
-                    <li v-bind:class="{active : tab1}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
-                    <li v-bind:class="{active : tab2}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Môn học</a></li>
-                    <li v-bind:class="{active : tab3}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Học viên</a></li>
-                    <li v-bind:class="{active : tab4}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>
-                    <li v-bind:class="{active : tab5}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(4)">Thảo luận</a></li>
+                    <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
+                    <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Môn học</a></li>
+                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Học viên</a></li>
+                    <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>
+                    <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(4)">Thảo luận</a></li>
                 </ul>
             </div>
             <div class="c-right"></div>
         </div>
     </div>
     <div class="card-body">
-        <div class="box" v-if="tab1">
+        <div class="box" v-if="tab[0]">
             <ul class="box list ls-overview mb-3">
                 <li class="flex margin-b20">
                     <a href="#" class="thumb"><img src="/pictures/ielts1.png" alt="" /></a>
@@ -53,7 +53,7 @@
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
             </div>
         </div>
-        <div class="box" v-if="tab2">
+        <div class="box" v-if="tab[1]">
             <ul class="list ls-pratice">
                 <li v-for="(obj,i) in practices">
                     <div class="inner">
@@ -68,10 +68,10 @@
                                                 <ul class="list">
                                                     <li class="sub-practice" v-if="item.detail.length" v-for="(exe,j) in item.detail">
                                                         <div class="flex j-between width-100">
-                                                            <span class="width-100">{{exe.title}}</span>
+                                                            <span class="width-100">{{obj.title}}</span>
                                                             <div class="flex width-100 j-end picker-schedule">
-                                                                <vuejs-datepicker v-model="exe.start_date" format="dd/M/yyyy" class="date st"></vuejs-datepicker>
-                                                                <vuejs-datepicker v-model="exe.end_date" format="dd/M/yyyy" class="date ed"></vuejs-datepicker>
+                                                                <vuejs-datepicker v-model="obj.start_date" format="dd/M/yyyy" class="date st"></vuejs-datepicker>
+                                                                <vuejs-datepicker v-model="obj.end_date" format="dd/M/yyyy" class="date ed"></vuejs-datepicker>
                                                             </div>
                                                         </div>
                                                     </li>
@@ -86,7 +86,7 @@
                 </li>
             </ul>
         </div>
-        <div class="box" v-if="tab3">
+        <div class="box" v-if="tab[2]">
             <table id="ed_table" class="table">
                 <thead>
                     <tr>
@@ -106,7 +106,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="box" v-if="tab4">
+        <div class="box" v-if="tab[3]">
             <div class="row ls-doc">
                 <div class="col-md-12">
                     <div class="inner">
@@ -150,6 +150,9 @@
                 </div>
             </div>
         </div>
+        <div class="box" v-if="tab[4]">
+            Thảo luận
+        </div>
     </div>
 </section>
 @section Scripts{
@@ -163,6 +166,7 @@
                 vuejsDatepicker
             },
             data: {
+                title: '',
                 practices: [
                     {
                         id: 1,
@@ -324,11 +328,12 @@
                 ],
                 view: 10,
                 page: 1,
-                tab1: true,
-                tab2: false,
-                tab3: false,
-                tab4: false,
-                tab5: false
+                tab: [true, false, false, false, false]
+                //tab1: true,
+                //tab2: false,
+                //tab3: false,
+                //tab4: false,
+                //tab5: false
             },
             watch: {
             },
@@ -346,32 +351,13 @@
                 tabChange(a = 0) {
                     // có thể load data theo từng tab để tối ưu hiệu năng
                     // this.getData()
-                    switch (a) {
-                        case 1:
-                            this.tab1 = false
-                            this.tab2 = true
-                            this.tab3 = false
-                            this.tab4 = false
-                            break;
-                        case 2:
-                            this.tab1 = false
-                            this.tab2 = false
-                            this.tab4 = false
-                            this.tab3 = true
-                            break;
-                        case 3:
-                            this.tab1 = false
-                            this.tab2 = false
-                            this.tab3 = false
-                            this.tab4 = true
-                            break;
-                        default:
-                            this.tab1 = true
-                            this.tab2 = false
-                            this.tab3 = false
-                            this.tab4 = false
-                            break;
-                    }
+                    let _that = this
+                    _that.tab.forEach(function (item, k) {
+                        _that.tab[k] = false;
+                    })                    
+                    this.tab = _that.tab
+                    this.tab[a] = true
+                    this.$forceUpdate()
                 }
             }
         });

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
+using Microsoft.AspNetCore.Http;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -763,9 +764,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var returndata = from o in classData
                              where o.Subjects != null
                              let sname = string.Join(", ", _subjectService.Collection.AsQueryable().Where(t => o.Subjects.Contains(t.ID)).Select(t => t.Name).ToList())
-                             select new ClassViewModel(o)
+                             select new Dictionary<string, object>
                              {
-                                 SubjectName = sname
+                                 { "ID", o.ID },
+                                 { "Name", o.Name },
+                                 { "Students", o.Students },
+                                 { "Created", o.Created },
+                                 { "IsActive", o.IsActive },
+                                 { "Image", o.Image },
+                                 { "StartDate", o.StartDate },
+                                 { "EndDate", o.EndDate },
+                                 { "Order", o.Order },
+                                 { "Subjects", o.Subjects },
+                                 { "Members", o.Members },
+                                 { "Description", o.Description },
+                                 { "SubjectName", sname }
                              };
 
             var response = new Dictionary<string, object>
@@ -862,7 +875,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Create(ClassEntity item, List<ClassSubjectEntity> ClassSubjects)
+        public JsonResult Create(ClassEntity item, List<ClassSubjectEntity> ClassSubjects, IFormFile fileUpload)
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
@@ -878,6 +891,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 item.TeacherID = userId; // creator
                 item.Subjects = new List<string>();
+                item.Members = new List<ClassMemberEntity>();
+
+                if (fileUpload != null)
+                {
+                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG").Result;
+                    item.Image = pathImage;
+                }
+
                 _service.CreateOrUpdate(item);
 
                 //Create class subjects
@@ -886,13 +907,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     foreach (var csubject in ClassSubjects)
                     {
                         var subject = _subjectService.GetItemByID(csubject.SubjectID);
-                        if (subject == null) continue;
+                        if (subject == null)
+                        {
+                            //throw new Exception("Subject " + csubject.SubjectID + " is not avaiable");
+                            continue;
+                        }
                         var course = _courseService.GetItemByID(csubject.CourseID);
                         if (course == null || !course.IsActive)
-                            return new JsonResult(new Dictionary<string, object>()
                         {
-                            {"Error", "Curriculum for " + subject.Name + " is not available" }
-                        });
+                            //throw new Exception("Course " + csubject.CourseID + " is not avaiable");
+                            continue;
+                        }
+
+                        var teacher = _teacherService.GetItemByID(csubject.TeacherID);
+                        if (teacher == null || !teacher.IsActive || !teacher.Subjects.Contains(csubject.SubjectID))
+                        {
+                            //throw new Exception("Teacher " + csubject.TeacherID + " is not avaiable");
+                            continue;
+                        }
+
                         csubject.ClassID = item.ID;
                         csubject.Description = course.Description;
                         csubject.LearningOutcomes = course.LearningOutcomes;
@@ -901,7 +934,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //subject.Image = course.Image;
                         _classSubjectService.CreateOrUpdate(csubject);
                         item.Subjects.Add(subject.ID);
-
+                        item.Members.Add(new ClassMemberEntity
+                        {
+                            Name = teacher.FullName,
+                            TeacherID = teacher.ID,
+                            Type = ClassMemberType.TEACHER
+                        });
                         //Create Class => Create Lesson Schedule & Clone all lesson
                         var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == csubject.CourseID).ToList();
 
@@ -997,8 +1035,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //oldData.CourseID = item.CourseID;
                 //oldData.GradeID = item.GradeID;
                 //oldData.TeacherID = item.TeacherID;
-
                 _service.CreateOrUpdate(oldData);
+
+                //TODO: Update Class Subject Here
 
                 _courseService.Collection.UpdateOneAsync(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
 

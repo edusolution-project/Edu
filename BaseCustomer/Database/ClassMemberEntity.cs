@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace BaseCustomerEntity.Database
 {
-    public class ClassMemberEntity : EntityBase
+    public class ClassMemberEntity
     {
         [JsonProperty("Name")]
         public string Name { get; set; }

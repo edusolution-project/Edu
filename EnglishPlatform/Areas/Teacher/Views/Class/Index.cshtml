@@ -102,6 +102,7 @@
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 window.ChooseCalendar = this.chooseCalendar
+                window.changeAddSubject = this.changeAddSubject
                 window.GetData = this.getData
                 window.RepDate = this.repDate
                 $('input[name=dates]').siblings('.ic-picker').click(function () { ChooseCalendar() });
@@ -368,13 +369,43 @@
                         }
                     }
                     else {
-                        //console.log(obj.GradeID)
-                        //_that.class_info.ID = obj.ID;
-                        //_that.class_info.SubjectID = obj.SubjectID;
-                        //_that.class_info.Init = true;
-                        //_that.class_info.GradeID = obj.GradeID;
-                        //_that.class_info.Description = obj.Description;
-                        //_that.class_info.Name = obj.Name;
+                        _that.class_info.ID = obj.ID;
+                        _that.class_info.Description = obj.Description;
+                        _that.class_info.Name = obj.Name;
+                        _that.class_info.thumbnail = {
+                            src: obj.Image,
+                            file: null,
+                            height: 90,
+                            width: 160
+                        }
+                        _that.class_info.StartDate = obj.StartDate;
+                        _that.class_info.EndDate = obj.EndDate;
+                        _that.class_info.subject = [];
+
+                        let _form = new FormData()
+                        _form.append('ClassID', obj.ID)
+                        let _url = '@Url.Action("GetClassSubjects", "ClassSubject")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                var _data = response.data.Data;
+                                _data.forEach(function (item, k) {
+                                    _that.class_info.subject.push({
+                                        UID: moment().format("DDMMYYYYhhmmssSSS") + k,
+                                        ID: item.ID,
+                                        SubjectID: item.SubjectID,
+                                        GradeID: item.GradeID,
+                                        TeacherID: item.TeacherID,
+                                        CourseID: item.CourseID
+                                    })
+                                    _that.changeAddSubject(item)
+                                    _that.changeAddGrade(item)
+                                })
+
+
+
+
+                                //_that.$forceUpdate()
+                            }).catch(e => { })
                     }
                     _that.$bvModal.show('modal_class')
                 },
@@ -389,14 +420,14 @@
                 changeAddSubject(obj) {
                     let _that = this;
                     if (_that.list_grades_full.filter(function (item) {
-                        return obj.GradeID == item.GradeID && obj.SubjectID == item.SubjectID
+                        return obj.GradeID == item.ID && obj.SubjectID == item.SubjectID
                     }).length == 0) {
                         _that.class_info.subject.forEach(function (sbj) {
+                            console.log(obj.UID)
                             if (sbj.UID == obj.UID) {
                                 sbj.GradeID = ''
                                 sbj.CourseID = ''
                                 sbj.TeacherID = ''
-                                console.log('Change')
                                 return
                             }
                         });
@@ -454,7 +485,7 @@
                     let length = this.class_info.subject.length;
                     this.curr = length
                     let _subject = {
-                        UID: moment().format("DDMMYYYYhhmmss"),
+                        UID: moment().format("DDMMYYYYhhmmssSSS"),
                         ID: '',
                         SubjectID: '',
                         GradeID: '',
@@ -605,7 +636,7 @@
 
         <template v-slot:modal-footer="{ ok, cancel}">
             <b-button variant="success" v-on:click="createClass()">Lưu</b-button>
-            <b-button variant="danger">Huỷ</b-button>
+            <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
         </template>
     </b-modal>
 }

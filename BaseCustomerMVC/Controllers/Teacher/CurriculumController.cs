@@ -210,7 +210,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        [BaseAccess.Attribule.AccessCtrl("Bài giảng chung", "teacher")]
+        //[BaseAccess.Attribule.AccessCtrl("Bài giảng chung", "teacher")]
         public IActionResult Lesson(DefaultModel model, string CourseID, int frameview = 0)
         {
             //if (!User.IsInRole("head-teacher"))
