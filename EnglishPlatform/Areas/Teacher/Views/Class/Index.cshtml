@@ -292,7 +292,7 @@
                         }
 
                     var valid = true
-
+                    var alert = false
                     if (_that.class_info.subject != null) {
                         _that.class_info.subject.forEach(function (item, k) {
                             if (item.SubjectID == '' || item.GradeID == '' || item.CourseID == '' || item.TeacherID == '') {
@@ -300,6 +300,8 @@
                                 valid = false
                                 return false;
                             }
+                            if (item.ID != null && item.ID != '')
+                                alert = true
                             _form.append('ClassSubjects[' + k + '].ID', item.ID)
                             _form.append('ClassSubjects[' + k + '].SubjectID', item.SubjectID)
                             _form.append('ClassSubjects[' + k + '].GradeID', item.GradeID)
@@ -308,7 +310,14 @@
                         })
                     }
 
+                    
+
                     if (!valid) return false
+
+
+                    if (alert) {
+                        if(!confirm("Lưu ý: thay đổi thông tin môn học sẽ khởi tạo lại toàn bộ thông tin liên quan đến học tập của môn học. Tiếp tục?"))
+                    }
 
                     let _url = '@Url.Action("Create","Class")'
                     axios.post(_url, _form)
