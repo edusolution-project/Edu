@@ -14,6 +14,8 @@ namespace BaseCustomerEntity.Database
         public string StudentID { get; set; }
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
         [JsonProperty("CompletedLessons")]
         public List<string> CompletedLessons { get; set; }
         [JsonProperty("TotalLessons")]
@@ -23,8 +25,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("LastDate")]
         public DateTime LastDate { get; set; }
         [JsonProperty("AvgPoint")]
-        public double AvgPoint { get; set; }
-
+        public double AvgPoint { get; set; }        
     }
 
     public class ClassProgressService : ServiceBase<ClassProgressEntity>

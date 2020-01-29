@@ -48,7 +48,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _studentHelper = new StudentHelper(studentService, accountService);
         }
 
-        public IActionResult Index(DefaultModel model)
+        public IActionResult Index(DefaultModel model, int old = 0)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
@@ -68,6 +68,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.User = UserID;
             ViewBag.Model = model;
             ViewBag.Managable = CheckPermission(PERMISSION.MEMBER_COURSE_EDIT);
+            if (old == 1)
+                return View("Index - o");
             return View();
         }
 

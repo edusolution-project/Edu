@@ -10,6 +10,10 @@ namespace BaseCustomerEntity.Database
     {
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
+
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
+
         [JsonProperty("CompletedLessons")]
         public int CompletedLessons { get; set; }
         [JsonProperty("TotalLessons")]

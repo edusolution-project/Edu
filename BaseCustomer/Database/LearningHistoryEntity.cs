@@ -12,6 +12,8 @@ namespace BaseCustomerEntity.Database
     {
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
         [JsonProperty("ChapterID")]
         public string ChapterID { get; set; }
         [JsonProperty("LessonID")]
@@ -26,7 +28,7 @@ namespace BaseCustomerEntity.Database
         public int ViewCount { get; set; } //State 
         [JsonProperty("Time")]
         public DateTime Time { get; set; }
-
+        
     }
     public class LearningHistoryService : ServiceBase<LearningHistoryEntity>
     {
@@ -80,6 +82,7 @@ namespace BaseCustomerEntity.Database
             else
                 oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
                 && o.ClassID == item.ClassID
+                && o.ClassSubjectID == item.ClassSubjectID
                 && o.LessonID == item.LessonID).ToList();
 
             item.Time = DateTime.Now;
@@ -144,6 +147,15 @@ namespace BaseCustomerEntity.Database
             _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
             _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
             _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
+            return Task.CompletedTask;
+        }
+
+        public Task RemoveClassSubjectHistory(string ClassSubjectID)
+        {
+            _ = Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             return Task.CompletedTask;
         }
     }

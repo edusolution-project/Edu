@@ -58,6 +58,13 @@ namespace BaseCustomerMVC.Globals
             _cloneAnswerService.Collection.DeleteMany(o => o.ClassID == id);
         }
 
+        public void RemoveCloneClassSubject(string id)
+        {
+            _cloneLessonPartService.Collection.DeleteMany(o => o.ClassSubjectID == id);
+            _cloneQuestionService.Collection.DeleteMany(o => o.ClassSubjectID == id);
+            _cloneAnswerService.Collection.DeleteMany(o => o.ClassSubjectID == id);
+        }
+
         public void RemoveClone(string[] ids)
         {
             _cloneLessonPartService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
@@ -82,7 +89,8 @@ namespace BaseCustomerMVC.Globals
                         clonepart.ID = null;
                         clonepart.OriginID = lessonpart.ID;
                         clonepart.TeacherID = @class.TeacherID;
-                        clonepart.ClassID = @class.ID;
+                        clonepart.ClassID = @class.ClassID;
+                        clonepart.ClassSubjectID = @class.ID;
                         CloneLessonPart(clonepart);
                     }
                 }
@@ -102,6 +110,7 @@ namespace BaseCustomerMVC.Globals
                     cloneQuestion.ParentID = item.ID;
                     cloneQuestion.ID = null;
                     cloneQuestion.ClassID = item.ClassID;
+                    cloneQuestion.ClassSubjectID = item.ClassSubjectID;
                     cloneQuestion.LessonID = item.ParentID;
                     CloneLessonQuestion(cloneQuestion);
                 }
@@ -121,6 +130,7 @@ namespace BaseCustomerMVC.Globals
                     cloneAnswer.ParentID = item.ID;
                     cloneAnswer.ID = null;
                     cloneAnswer.ClassID = item.ClassID;
+                    cloneAnswer.ClassSubjectID = item.ClassSubjectID;
                     CloneLessonAnswer(cloneAnswer);
                 }
             }

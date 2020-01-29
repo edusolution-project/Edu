@@ -8,7 +8,6 @@ namespace BaseCustomerMVC.Models
 {
     public class ClassViewModel : ClassEntity
     {
-
         public ClassViewModel(ClassEntity item)
         {
             ID = item.ID;

@@ -288,6 +288,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 await _learningHistoryService.CreateHist(new LearningHistoryEntity()
                 {
                     ClassID = exam.ClassID,
+                    ClassSubjectID = exam.ClassSubjectID,
                     LessonID = exam.LessonID,
                     LessonPartID = item.LessonPartID,
                     QuestionID = item.QuestionID,
@@ -382,6 +383,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     ClassID = exam.ClassID,
                     LessonID = exam.LessonID,
+                    ClassSubjectID = exam.ClassSubjectID,
                     LessonPartID = item.LessonPartID,
                     QuestionID = item.QuestionID,
                     Time = DateTime.Now,

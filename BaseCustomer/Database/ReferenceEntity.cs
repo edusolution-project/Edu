@@ -45,6 +45,7 @@ namespace BaseCustomerEntity.Database
             ALL = "all", 
             TEACHER = "teacher", 
             CLASS = "class",
+            CLASSSUBJECT = "classsubject",
             COURSE = "course",
             STUDENT = "student", PRIVATE = "private", UNSET = "";
     }

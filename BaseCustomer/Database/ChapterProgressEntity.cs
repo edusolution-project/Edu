@@ -14,6 +14,8 @@ namespace BaseCustomerEntity.Database
         public string StudentID { get; set; }
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
         [JsonProperty("ChapterID")]
         public string ChapterID { get; set; }
         [JsonProperty("ParentID")]
@@ -26,7 +28,6 @@ namespace BaseCustomerEntity.Database
         public string LastLessonID { get; set; }
         [JsonProperty("LastDate")]
         public DateTime LastDate { get; set; }
-
     }
 
     public class ChapterProgressService : ServiceBase<ChapterProgressEntity>

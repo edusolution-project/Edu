@@ -37,6 +37,8 @@ namespace BaseCustomerEntity.Database
         public DateTime Updated { get; set; }
         [JsonProperty("ClassID")]
         public string ClassID {get;set;}
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
         [JsonProperty("StudentID")]
         public string StudentID {get;set;}
 

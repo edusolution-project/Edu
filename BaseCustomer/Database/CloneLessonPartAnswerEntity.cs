@@ -9,10 +9,13 @@ namespace BaseCustomerEntity.Database
 {
     public class CloneLessonPartAnswerEntity : LessonPartAnswerEntity
     {
+        
         [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
     }
     public class CloneLessonPartAnswerService : ServiceBase<CloneLessonPartAnswerEntity>
     {

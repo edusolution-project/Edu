@@ -17,6 +17,8 @@ namespace BaseCustomerEntity.Database
         public int Timer { get; set; }
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
         [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
         [JsonProperty("LessonID")]
@@ -45,8 +47,8 @@ namespace BaseCustomerEntity.Database
         public long QuestionsTotal { get; set; }
         [JsonProperty("QuestionsDone")]
         public long QuestionsDone { get; set; }
-
     }
+
     public class ExamService : ServiceBase<ExamEntity>
     {
         private ExamDetailService _examDetailService { get; set; }
@@ -199,6 +201,13 @@ namespace BaseCustomerEntity.Database
         {
             Collection.DeleteManyAsync(t => t.ClassID == ClassID);
             _examDetailService.Collection.DeleteManyAsync(t => t.ClassID == ClassID);
+            return Task.CompletedTask;
+        }
+
+        public Task RemoveClassSubjectExam(string ClassSubjectID)
+        {
+            Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            _examDetailService.Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             return Task.CompletedTask;
         }
     }

@@ -310,13 +310,12 @@
                         })
                     }
 
-                    
-
                     if (!valid) return false
 
 
                     if (alert) {
-                        if(!confirm("Lưu ý: thay đổi thông tin môn học sẽ khởi tạo lại toàn bộ thông tin liên quan đến học tập của môn học. Tiếp tục?"))
+                        if (!confirm("Lưu ý: thay đổi thông tin môn học sẽ khởi tạo lại toàn bộ thông tin liên quan đến học tập của môn học. Tiếp tục?"))
+                            return false;
                     }
 
                     let _url = '@Url.Action("Create","Class")'
@@ -330,7 +329,7 @@
                                 _that.$bvModal.hide('modal_class');
                             }
                         }).catch(e => {
-                            alert("Error: " + e)
+                            console.log("Error: " + e)
                         })
                 },
                 removeClass(obj) {
@@ -409,9 +408,6 @@
                                     _that.changeAddSubject(item)
                                     _that.changeAddGrade(item)
                                 })
-
-
-
 
                                 //_that.$forceUpdate()
                             }).catch(e => { })
@@ -510,7 +506,6 @@
                 createSubject() {
                     console.log(this.class_info)
                 },
-
 
                 errorImgUrl() {
                     this.class_info.thumbnail.src = null;

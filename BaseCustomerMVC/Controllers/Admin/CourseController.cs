@@ -322,6 +322,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
                 else
                 {
+                    //TODO: Replace with classSubject
                     //remove old schedule
                     _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == item.ID);
                     //remove clone lesson part

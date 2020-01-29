@@ -13,6 +13,8 @@ namespace BaseCustomerEntity.Database
         public string StudentID { get; set; }
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
         [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
         [JsonProperty("AutoAvgPoint")]

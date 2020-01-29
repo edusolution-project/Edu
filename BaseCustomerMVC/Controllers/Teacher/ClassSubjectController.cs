@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
+using Newtonsoft.Json;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -38,6 +39,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
+        private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _lessonMapping;
         private readonly IHostingEnvironment _env;
 
 
@@ -132,6 +134,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 );
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
+            _lessonMapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
         }
 
         public JsonResult GetClassSubjects(string ClassID)
@@ -140,10 +143,75 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //    return null;
             var response = new Dictionary<string, object>
             {
-                { "Data", _classSubjectService.GetByClassID(ClassID) },
+                { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
+                          let subject = _subjectService.GetItemByID(r.SubjectID)
+                          let course = _courseService.GetItemByID(r.CourseID)
+                          select new ClassSubjectViewModel
+                          {
+                              ID = r.ID,
+                              SubjectID = r.SubjectID,
+                              SubjectName = subject.Name,
+                              GradeID = r.GradeID,
+                              CourseID = r.CourseID,
+                              CourseName = course.Name,
+                              TeacherID = r.TeacherID
+                          }).ToList()
+                },
             };
             return new JsonResult(response);
         }
 
+        [HttpPost]
+        public JsonResult GetContents(string ID, string Parent)
+        {
+            //try
+            //{
+                var currentClass = _classSubjectService.GetItemByID(ID);
+                if (currentClass == null)
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy lớp học" }
+                    });
+
+                if (string.IsNullOrEmpty(Parent))
+                    Parent = "0";
+
+                var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == Parent).ToList();
+                //var chapterExtends = _chapterExtendService.Search(currentClass.ID);
+
+                //foreach (var chapter in chapters)
+                //{
+                //    var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
+                //    if (extend != null) chapter.Description = extend.Description;
+                //}
+
+                var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == currentClass.CourseID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                               let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
+                               where schedule != null
+                               select _lessonMapping.AutoOrtherType(r, new LessonScheduleViewModel()
+                               {
+                                   ScheduleID = schedule.ID,
+                                   StartDate = schedule.StartDate,
+                                   EndDate = schedule.EndDate,
+                                   IsActive = schedule.IsActive
+                               })).ToList();
+
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", chapters },
+                    { "Lesson", lessons }
+                };
+
+                return new JsonResult(response);
+            //}
+            //catch (Exception ex)
+            //{
+            //    return new JsonResult(new Dictionary<string, object>
+            //    {
+            //        { "Data", null },
+            //        {"Error", ex.Message }
+            //    });
+            //}
+        }
     }
 }

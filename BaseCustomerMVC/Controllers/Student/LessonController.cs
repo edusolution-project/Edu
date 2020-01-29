@@ -18,6 +18,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly SubjectService _subjectService;
         private readonly CourseService _courseService;
         private readonly ClassService _classService;
+        private readonly ClassSubjectService _classSubjectService;
         private readonly ChapterService _chapterService;
         private readonly LessonScheduleService _lessonScheduleService;
 
@@ -44,6 +45,7 @@ namespace BaseCustomerMVC.Controllers.Student
             SubjectService subjectService
             , CourseService courseService
             , ClassService classService
+            , ClassSubjectService classSubjectService
             , ChapterService chapterService
             , LessonScheduleService lessonScheduleService
             , LearningHistoryService learningHistoryService
@@ -63,6 +65,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _subjectService = subjectService;
             _courseService = courseService;
             _classService = classService;
+            _classSubjectService = classSubjectService;
             _chapterService = chapterService;
             _lessonScheduleService = lessonScheduleService;
             _learningHistoryService = learningHistoryService;
@@ -349,7 +352,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         [System.Obsolete]
         [HttpPost]
-        public JsonResult GetLesson(string LessonID, string ClassID)
+        public JsonResult GetLesson(string LessonID, string ClassID, string ClassSubjectID)
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
@@ -361,22 +364,34 @@ namespace BaseCustomerMVC.Controllers.Student
                 return new JsonResult(
                 new Dictionary<string, object> { { "Error", "Lesson not found" } });
 
+
+
+            var currentcs = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (currentcs == null)
+                return new JsonResult(
+                new Dictionary<string, object> { { "Error", "Subject not found" } });
+
+            if (string.IsNullOrEmpty(ClassID))
+                ClassID = currentcs.ClassID;
+
             var currentClass = _classService.GetItemByID(ClassID);
             if (currentClass == null)
                 return new JsonResult(
                 new Dictionary<string, object> { { "Error", "Class not found" } });
 
+
             //Create learning history
             _ = _learningHistoryService.CreateHist(new LearningHistoryEntity()
             {
                 ClassID = ClassID,
+                ClassSubjectID = ClassSubjectID,
                 LessonID = LessonID,
                 ChapterID = lesson.ChapterID,
                 Time = DateTime.Now,
                 StudentID = userId
             });
 
-            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == ClassID).ToList();
+            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == ClassID && o.ClassSubjectID == ClassSubjectID).ToList();
 
             var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
             var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
@@ -394,7 +409,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 })).ToList()
             });
 
-            var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassID == ClassID && o.StudentID == userId).SortByDescending(o => o.Created).FirstOrDefault();
+            var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
+                //&& o.ClassID == ClassID 
+                && o.StudentID == userId).SortByDescending(o => o.Created).FirstOrDefault();
 
             if (lastexam == null)
             {
@@ -431,7 +448,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
             }
         }
-       
+
         [Obsolete]
         [HttpPost]
         public JsonResult GetSchedules(DefaultModel model)
