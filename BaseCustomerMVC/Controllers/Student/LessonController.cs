@@ -243,19 +243,23 @@ namespace BaseCustomerMVC.Controllers.Student
         public IActionResult Detail(DefaultModel model, string ClassID)
         {
             if (ClassID == null)
-                return RedirectToAction("Index", "Class");
-            var currentClass = _classService.GetItemByID(ClassID);
+                return RedirectToAction("Index", "Course");
+            var currentCs = _classSubjectService.GetItemByID(ClassID);
+            if (currentCs == null)
+                return RedirectToAction("Index", "Course");
+            var currentClass = _classService.GetItemByID(currentCs.ClassID);
             if (currentClass == null)
-                return RedirectToAction("Index", "Class");
+                return RedirectToAction("Index", "Course");
             var lesson = _lessonService.GetItemByID(model.ID);
             if (lesson == null)
-                return RedirectToAction("Index", "Class");
+                return RedirectToAction("Index", "Course");
 
             var chapter = _chapterService.GetItemByID(lesson.ChapterID);
 
             var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
 
             ViewBag.Class = currentClass;
+            ViewBag.Subject = currentCs;
             ViewBag.Lesson = lesson;
             ViewBag.NextLesson = nextLesson;
             ViewBag.Chapter = chapter;
@@ -364,8 +368,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 return new JsonResult(
                 new Dictionary<string, object> { { "Error", "Lesson not found" } });
 
-
-
             var currentcs = _classSubjectService.GetItemByID(ClassSubjectID);
             if (currentcs == null)
                 return new JsonResult(
@@ -464,7 +466,17 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
             }
 
-            var currentClass = _classService.GetItemByID(model.ID);
+            var currentCs = _classSubjectService.GetItemByID(model.ID);
+            if (currentCs == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var currentClass = _classService.GetItemByID(currentCs.ClassID);
             if (currentClass == null || currentClass.Students.IndexOf(UserID) < 0)
             {
                 return new JsonResult(new Dictionary<string, object> {
@@ -525,7 +537,17 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
             }
 
-            var currentClass = _classService.GetItemByID(model.ID);
+            var currentCs = _classSubjectService.GetItemByID(model.ID);
+            if (currentCs == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Không có thông tin lớp học" }
+                    });
+            }
+
+            var currentClass = _classService.GetItemByID(currentCs.ClassID);
             if (currentClass == null || currentClass.Students.IndexOf(UserID) < 0)
             {
                 return new JsonResult(new Dictionary<string, object> {
@@ -549,9 +571,9 @@ namespace BaseCustomerMVC.Controllers.Student
             var classSchedule = new ClassScheduleViewModel(course)
             {
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
-                           let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassID == model.ID).SortByDescending(o => o.ID).FirstOrDefault()
-                           let lastexam = r.TemplateType == LESSON_TEMPLATE.EXAM ? _examService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassID == model.ID).SortByDescending(o => o.ID).FirstOrDefault() : null
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == model.ID).FirstOrDefault()
+                           let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID).SortByDescending(o => o.ID).FirstOrDefault()
+                           let lastexam = r.TemplateType == LESSON_TEMPLATE.EXAM ? _examService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID).SortByDescending(o => o.ID).FirstOrDefault() : null
                            select _schedulemapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
                                ScheduleID = schedule.ID,

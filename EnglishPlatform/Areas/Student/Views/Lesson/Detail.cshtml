@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_LayoutStudent_noChat.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var currentClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
     var currentLesson = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
     var nextLesson = ViewBag.NextLesson as BaseCustomerEntity.Database.LessonEntity;
     var currentChapter = ViewBag.Chapter as BaseCustomerEntity.Database.ChapterEntity;
@@ -172,6 +173,7 @@
                 type: @currentLesson.TemplateType,
                 lesson_id: '@currentLesson.ID',
                 class_id: '@currentClass.ID',
+                class_subject_id: '@currentClassSubject.ID',
                 chap_id: '@currentLesson.ChapterID'
         }
         var widget = new ExamStudent.onReady(config);

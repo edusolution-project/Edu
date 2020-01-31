@@ -10,6 +10,12 @@ namespace BaseCustomerMVC.Models
     {
         [JsonProperty("ID")]
         public string ID { get; set; }
+        [JsonProperty("Name")]
+        public string Name { get; set; }
+        [JsonProperty("ClassID")]
+        public string ClassID { get; set; }
+        [JsonProperty("ClassName")]
+        public string ClassName { get; set; }
         [JsonProperty("SubjectID")]
         public string SubjectID { get; set; }
         [JsonProperty("SubjectName")]

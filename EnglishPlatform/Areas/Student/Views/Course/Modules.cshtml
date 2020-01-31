@@ -1,8 +1,8 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
-    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var currentCs = ViewBag.ClassSubject as BaseCustomerMVC.Models.ClassSubjectViewModel;
     var completePercent = (int)ViewBag.CompletePercent;
-    ViewData["Title"] = currentClass.Name + " - Modules";
+    ViewData["Title"] = currentCs.SubjectName + " - Modules";
 }
 
 <script>
@@ -35,7 +35,7 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b padding-b25">
-            <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>@currentClass.Name/<span class="end-break">Modules</span></h2>
+            <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>@currentCs.Name/<span class="end-break">Modules</span></h2>
             <div class="c-right bad">
                 <div class="flex">
                     <b-progress :value="7" :max="10" class="mb-3"></b-progress>
@@ -55,7 +55,7 @@
                                 <ul class="list">
 
                                     <li class="sub-practice" v-if="item.detail.length" v-for="(lesson,j) in item.detail">
-                                        <span class="c c1"> <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentClass.ID'">{{lesson.Title}}</a></span>
+                                        <span class="c c1"> <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'">{{lesson.Title}}</a></span>
                                         <template v-if="lesson.TemplateType === 2">
                                             <div class="c c2">
                                                 <template v-if="isViewed(lesson.LastJoin)">
@@ -70,12 +70,12 @@
                                             </div>
                                             <div class="c c4">
                                                 <template v-if="isViewed(lesson.LastJoin)">
-                                                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentClass.ID'" v-if="isInDue(lesson.EndDate)" title="Làm lại" class="btn-act act">Làm lại</a>
+                                                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="isInDue(lesson.EndDate)" title="Làm lại" class="btn-act act">Làm lại</a>
                                                     <a v-else title="Hết hạn" class="btn-act act bg-secondary" v-on:click="lockNotify()">Hết hạn</a>
-                                                    <a :href="'@Url.Action("Review", "Lesson")/' + lesson.ID + '/@currentClass.ID'" title="Xem đáp án" class="btn-act view">Xem đáp án</a>
+                                                    <a :href="'@Url.Action("Review", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="Xem đáp án" class="btn-act view">Xem đáp án</a>
                                                 </template>
                                                 <template v-else>
-                                                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentClass.ID'" title="Làm lại" class="btn-act act">Làm bài</a>
+                                                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="Làm lại" class="btn-act act">Làm bài</a>
                                                 </template>
                                             </div>
                                         </template>
@@ -89,7 +89,7 @@
                                             <div class="c c3" v-if()>
                                             </div>
                                             <div class="c c4">
-                                                <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentClass.ID'" title="isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'" class="btn-act act">{{isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'}}</a>
+                                                <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'" class="btn-act act">{{isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'}}</a>
                                             </div>
                                         </template>
                                     </li>
@@ -186,7 +186,7 @@
 
                 let _that = this
                 let _form = new FormData()
-                _form.append('ID', '@currentClass.ID')
+                _form.append('ID', '@currentCs.ID')
                 let _url = '@Url.Action("GetSchedules", "Lesson")'
                 axios.post(_url, _form)
                     .then(response => {
@@ -208,7 +208,7 @@
                     var name = _that.list_data[pos].Name;
                     let _form = new FormData()
                     _that.list_data[pos].Name = _that.list_data[pos].Name + "...";
-                    _form.append('ID', '@currentClass.ID')
+                    _form.append('ID', '@currentCs.ID')
                     _form.append('ChapterID', chapterId)
                     let _url = '@Url.Action("GetChapterContent", "Lesson")'
                     axios.post(_url, _form)

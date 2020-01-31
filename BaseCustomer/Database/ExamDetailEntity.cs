@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -36,11 +37,11 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Updated")]
         public DateTime Updated { get; set; }
         [JsonProperty("ClassID")]
-        public string ClassID {get;set;}
+        public string ClassID { get; set; }
         [JsonProperty("ClassSubjectID")]
         public string ClassSubjectID { get; set; }
         [JsonProperty("StudentID")]
-        public string StudentID {get;set;}
+        public string StudentID { get; set; }
 
     }
     public class ExamDetailService : ServiceBase<ExamDetailEntity>
@@ -48,6 +49,11 @@ namespace BaseCustomerEntity.Database
         public ExamDetailService(IConfiguration configuration) : base(configuration)
         {
 
+        }
+
+        public async Task ConvertClassSubject(ClassSubjectEntity classSubject)
+        {
+            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ExamDetailEntity>.Update.Set("ClassSubjectID", classSubject.ID));
         }
     }
 }

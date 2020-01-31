@@ -19,6 +19,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
+        private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
@@ -32,6 +33,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             SubjectService subjectService,
             TeacherService teacherService,
             ClassService classService,
+            ClassSubjectService classSubjectService,
             CourseService courseService,
             ChapterService chapterService,
             LessonService lessonService,
@@ -45,6 +47,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _teacherService = teacherService;
             _courseService = courseService;
             _classService = classService;
+            _classSubjectService = classSubjectService;
             _chapterService = chapterService;
             _lessonService = lessonService;
             _lessonPartService = lessonPartService;
@@ -59,13 +62,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (model == null) return null;
             if (ClassID == null)
                 return RedirectToAction("Index", "Class");
-            var currentClass = _classService.GetItemByID(ClassID);
+            var currentClassSubject = _classSubjectService.GetItemByID(ClassID);
+            if (currentClassSubject == null)
+                return RedirectToAction("Index", "Class");
+            var currentClass = _classService.GetItemByID(currentClassSubject.ClassID);
             if (currentClass == null)
                 return RedirectToAction("Index", "Class");
             var Data = _lessonService.GetItemByID(model.ID);
             if (Data == null)
                 return RedirectToAction("Index", "Class");
             ViewBag.Class = currentClass;
+            ViewBag.Subject = currentClassSubject;
             ViewBag.Data = Data;
             ViewBag.Title = Data.Title;
 

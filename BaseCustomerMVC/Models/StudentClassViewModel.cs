@@ -7,16 +7,16 @@ using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
-    public class StudentClassViewModel : ClassEntity
+    public class StudentClassViewModelV2 : ClassSubjectEntity
     {
+        [JsonProperty("ClassName")]
+        public string ClassName { get; set; }
         [JsonProperty("SubjectName")]
         public string SubjectName { get; set; }
         [JsonProperty("CourseName")]
         public string CourseName { get; set; }
         [JsonProperty("GradeName")]
         public string GradeName { get; set; }
-        [JsonProperty("TeacherName")]
-        public string TeacherName { get; set; }
         [JsonProperty("Thumb")]
         public string Thumb { get; set; }
         [JsonProperty("StudentNumber")]

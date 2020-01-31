@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -29,7 +30,7 @@ namespace BaseCustomerEntity.Database
         public List<MarkElement> MarkElements { get; set; } = new List<MarkElement>();
     }
 
-    public class MarkElement:EntityBase
+    public class MarkElement : EntityBase
     {
         [JsonProperty("Type")]
         public int? Type { get; set; }
@@ -55,6 +56,11 @@ namespace BaseCustomerEntity.Database
         public ScoreStudentEntity GetScoreStudentByStudentIdAndClassId(string studentid, string classid)
         {
             return Collection.Find(o => o.StudentID == studentid && o.ClassID == classid)?.SingleOrDefault();
+        }
+
+        public async Task UpdateClassSubject(ClassSubjectEntity classSubject)
+        {
+            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ScoreStudentEntity>.Update.Set("ClassSubjectID", classSubject.ID));
         }
     }
 }

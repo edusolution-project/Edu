@@ -15,6 +15,7 @@ namespace BaseCustomerMVC.Controllers.Student
     public class CourseController : StudentController
     {
         private readonly ClassService _service;
+        private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
         private readonly TeacherService _teacherService;
         private readonly SubjectService _subjectService;
@@ -41,7 +42,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LearningHistoryService _learningHistoryService;
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
-        private readonly MappingEntity<ClassEntity, StudentClassViewModel> _mappingList;
+        //private readonly MappingEntity<ClassEntity, StudentClassViewModel> _mappingList_old;
+        private readonly MappingEntity<ClassSubjectEntity, StudentClassViewModelV2> _mappingList;
         private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _studentMapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
 
@@ -51,6 +53,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
 
         public CourseController(ClassService service
+            , ClassSubjectService classSubjectService
             , CourseService courseService
             , TeacherService teacherService
             , SubjectService subjectService
@@ -83,6 +86,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _examService = examService;
             _examDetailService = examDetailService;
             _service = service;
+            _classSubjectService = classSubjectService;
             _courseService = courseService;
             _teacherService = teacherService;
             _subjectService = subjectService;
@@ -95,7 +99,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _lessonPartService = lessonPartService;
             _progressService = progressService;
             _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
-            _mappingList = new MappingEntity<ClassEntity, StudentClassViewModel>();
+            _mappingList = new MappingEntity<ClassSubjectEntity, StudentClassViewModelV2>();
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
             _studentMapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
@@ -145,7 +149,10 @@ namespace BaseCustomerMVC.Controllers.Student
                     filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == entity.SubjectID));
             }
 
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            var classIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
+
+            var data = _classSubjectService.Collection.Find(t => classIDs.Contains(t.ClassID));
+
             model.TotalRecord = data.Count();
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
@@ -155,17 +162,19 @@ namespace BaseCustomerMVC.Controllers.Student
                 (from o in DataResponse
                  let progress = _progressService.GetItemByClassID(o.ID, userId)
                  let course = _courseService.GetItemByID(o.CourseID)
+                 let @class = _service.GetItemByID(o.ClassID)
                  let subject = _subjectService.GetItemByID(o.SubjectID)
+                 where subject != null
                  let grade = _gradeService.GetItemByID(o.GradeID)
                  let teacher = _teacherService.GetItemByID(o.TeacherID)
                  let complete = progress != null && progress.TotalLessons > 0 ? progress.CompletedLessons.Count * 100 / progress.TotalLessons : 0
-                 select _mappingList.AutoOrtherType(o, new StudentClassViewModel()
+                 select _mappingList.AutoOrtherType(o, new StudentClassViewModelV2()
                  {
+                     ClassName = @class.Name,
                      CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
-                     StudentNumber = o.Students.Count,
-                     SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
+                     StudentNumber = @class.Students.Count,
+                     SubjectName = subject.Name,
                      GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "" : _gradeService.GetItemByID(o.GradeID).Name,
-                     TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" : _teacherService.GetItemByID(o.TeacherID).FullName,
                      Progress = progress,
                      Thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                      CompletePercent = complete > 100 ? 100 : complete
@@ -195,17 +204,20 @@ namespace BaseCustomerMVC.Controllers.Student
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            var classIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
+
+            var data = _classSubjectService.Collection.Find(t => classIDs.Contains(t.ClassID));
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
                        let percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                       let @class = _service.GetItemByID(o.ClassID)
+                       let subject = _subjectService.GetItemByID(o.SubjectID)
+                       where subject != null && @class != null
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
-                           courseName = o.Name,
-                           subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
+                           title = subject.Name,
                            endDate = o.EndDate,
                            percent,
                            score = progress != null ? progress.AvgPoint : 0,
@@ -226,8 +238,12 @@ namespace BaseCustomerMVC.Controllers.Student
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
 
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            var classIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
+
+            var data = _classSubjectService.Collection.Find(t => classIDs.Contains(t.ClassID));
+
             model.TotalRecord = data.CountDocuments();
+
             var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
                 ? data.ToList()
                 : data.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
@@ -235,11 +251,13 @@ namespace BaseCustomerMVC.Controllers.Student
             var std = (from o in DataResponse
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
                        let per = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                       let subject = _subjectService.GetItemByID(o.SubjectID)
+                       where subject != null
                        select new
                        {
                            id = o.ID,
                            courseID = o.CourseID,
-                           title = o.Name,
+                           title = subject.Name,
                            endDate = o.EndDate,
                            per,
                            score = progress != null ? progress.AvgPoint : 0
@@ -278,12 +296,18 @@ namespace BaseCustomerMVC.Controllers.Student
                        where _lesson != null
                        let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
                        where _class != null
+                       let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
+                       where _cs != null
+                       let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
+                       where _subject != null
                        let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
                        select new
                        {
                            id = o.ID,
                            classID = _class.ID,
                            className = _class.Name,
+                           classSubjectID = _cs.ID,
+                           subjectName = _subject.Name,
                            title = _lesson.Title,
                            lessonID = _lesson.ID,
                            startDate = o.StartDate,
@@ -509,15 +533,15 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             return Redirect(Url.Action("Modules", "Course") + "/" + id);
             //if (model == null) return null;
-            var currentClass = _service.GetItemByID(id);
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            if (currentClass.Students.IndexOf(userId) < 0)
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            ViewBag.UserID = userId;
-            return View();
+            //var currentClass = _service.GetItemByID(id);
+            //var userId = User.Claims.GetClaimByType("UserID").Value;
+            //if (currentClass == null)
+            //    return RedirectToAction("Index");
+            //if (currentClass.Students.IndexOf(userId) < 0)
+            //    return RedirectToAction("Index");
+            //ViewBag.Class = currentClass;
+            //ViewBag.UserID = userId;
+            //return View();
         }
 
         public IActionResult Syllabus(DefaultModel model, string id)
@@ -536,18 +560,31 @@ namespace BaseCustomerMVC.Controllers.Student
         public IActionResult Modules(string id, int old = 0)
         {
             //if (model == null) return null;
-            var currentClass = _service.GetItemByID(id);
+            var currentCs = _classSubjectService.GetItemByID(id);
+            if (currentCs == null)
+                return RedirectToAction("Index");
             var userId = User.Claims.GetClaimByType("UserID").Value;
+            var currentClass = _service.GetItemByID(currentCs.ClassID);
             if (currentClass == null)
                 return RedirectToAction("Index");
             if (currentClass.Students.IndexOf(userId) < 0)
                 return RedirectToAction("Index");
-            var progress = _progressService.GetItemByClassID(id, userId);
+            var progress = _progressService.GetItemByClassSubjectID(id, userId);
             var completePercent = 0;
             if (progress != null && progress.TotalLessons > 0)
                 completePercent = progress.CompletedLessons.Count * 100 / progress.TotalLessons;
+            var subject = _subjectService.GetItemByID(currentCs.SubjectID);
+            if (subject == null)
+                return RedirectToAction("Index");
             ViewBag.CompletePercent = completePercent;
-            ViewBag.Class = currentClass;
+            ViewBag.ClassSubject = new ClassSubjectViewModel()
+            {
+                ID = currentCs.ID,
+                Name = subject.Name,
+                CourseID = currentCs.CourseID,
+                ClassID = currentClass.ID,
+                ClassName = currentClass.Name,
+            };
             if (old == 1) return View("Modules_o");
             return View();
         }

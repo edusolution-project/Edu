@@ -1,12 +1,13 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
-    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    ViewData["Title"] = currentClass.Name;
+    var viewModel = ViewBag.ClassSubject as BaseCustomerMVC.Models.ClassSubjectViewModel;
+    var classSubject = ViewBag.ClassSubject as BaseCustomerEntity.Database.ClassSubjectEntity;
+    ViewData["Title"] = viewModel.Name;
     string userid = ViewBag.UserID;
 }
 <script>
     activeTab = "course";
-    modulesLink = "@Url.Action("Modules", "Course")/@currentClass.ID";
+    modulesLink = "@Url.Action("Modules", "Course")/@classSubject.ID";
     activeSub = "home";
 </script>
 <script src="~/js/masonry.pkgd.min.js"></script>
@@ -22,17 +23,17 @@
         <div class="main-content">
             <div class="intro-wrapper content-block">
                 <div class="block-title">
-                    <h2>@currentClass.Name</h2>
+                    <h2>@viewModel.SubjectName</h2>
                 </div>
                 <div class="course-syllabus">
-                    @if (!String.IsNullOrEmpty(currentClass.Image))
+                    @if (!String.IsNullOrEmpty(classSubject.Image))
                     {
-                        <img src="@currentClass.Image" title="@currentClass.Name" class="courseImg" />
+                        <img src="@classSubject.Image" title="@viewModel.Name" class="courseImg" />
                     }
-                    @if (!String.IsNullOrEmpty(currentClass.Description))
+                    @if (!String.IsNullOrEmpty(classSubject.Description))
                     {
                         <div class="courseDescription">
-                            @Html.Raw(currentClass.Description)
+                            @Html.Raw(classSubject.Description)
                         </div>
                     }
                 </div>
@@ -79,7 +80,7 @@
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetMainChapters", "Course")',
-            data: { ID: '@currentClass.ID', UserID: '@userid' },
+            data: { ID: '@classSubject.ID', UserID: '@userid' },
             dataType:"json",
             success: function (data) {
                 scheduleCounter = 1;

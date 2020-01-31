@@ -114,5 +114,9 @@ namespace BaseCustomerEntity.Database
             }
         }
 
+        public async Task UpdateClassSubject(ClassSubjectEntity classSubject)
+        {
+            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ChapterProgressEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+        }
     }
 }

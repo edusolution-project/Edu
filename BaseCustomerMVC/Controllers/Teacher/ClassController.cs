@@ -40,6 +40,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly IHostingEnvironment _env;
 
+        private readonly ChapterProgressService _chapterProgressService;
 
         //private readonly LessonPartService _lessonPartService;
         //private readonly LessonPartAnswerService _lessonPartAnswerService;
@@ -92,7 +93,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             StudentService studentService, IHostingEnvironment evn,
 
-            FileProcess fileProcess)
+            FileProcess fileProcess,
+
+            ChapterProgressService chapterProgressService
+
+            )
         {
             _accountService = accountService;
             _gradeService = gradeservice;
@@ -132,6 +137,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 );
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
+
+
+            _chapterProgressService = chapterProgressService;
         }
 
         public IActionResult Index(DefaultModel model, int old = 0)
@@ -712,7 +720,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 return null;
             }
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == userId));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
@@ -1249,5 +1257,92 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             }
         }
+
+        public IActionResult ConvertMultiSubject()
+        {
+            var allClass = _service.GetAll().ToList();
+            foreach (var @class in allClass)
+            {
+                if (@class.Subjects == null || @class.Subjects.Count == 0)
+                {
+                    //create class subject:
+                    var teacher = _teacherService.GetItemByID(@class.TeacherID);
+                    if (teacher == null)
+                    {
+                        //Delete Class
+                        _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == @class.ID);
+                        _lessonHelper.RemoveClone(@class.ID);
+                        _examService.Collection.DeleteMany(o => o.ClassID == @class.ID);
+                        _examDetailService.Collection.DeleteMany(o => o.ClassID == @class.ID);
+                        var delete = _service.Collection.DeleteMany(o => o.ID == @class.ID);
+                    }
+                    @class.Members = new List<ClassMemberEntity>
+                    {
+                        new ClassMemberEntity
+                        {
+                            TeacherID = teacher.ID,
+                            Name = teacher.FullName,
+                            Type = ClassMemberType.TEACHER
+                        }
+                    };
+                    var subject = _subjectService.GetItemByID(@class.SubjectID);
+                    if (subject == null)
+                    {
+                        //Delete Class
+                        _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == @class.ID);
+                        _lessonHelper.RemoveClone(@class.ID);
+                        _examService.Collection.DeleteMany(o => o.ClassID == @class.ID);
+                        _examDetailService.Collection.DeleteMany(o => o.ClassID == @class.ID);
+                        var delete = _service.Collection.DeleteMany(o => o.ID == @class.ID);
+                    }
+                    @class.Subjects = new List<string>
+                    {
+                        subject.ID
+                    };
+                    var course = _courseService.GetItemByID(@class.CourseID);
+                    if (course == null)
+                    {
+                        //Delete Class
+                        _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == @class.ID);
+                        _lessonHelper.RemoveClone(@class.ID);
+                        _examService.Collection.DeleteMany(o => o.ClassID == @class.ID);
+                        _examDetailService.Collection.DeleteMany(o => o.ClassID == @class.ID);
+                        var delete = _service.Collection.DeleteMany(o => o.ID == @class.ID);
+                    }
+                    //create classSubject
+                    var classSubject = new ClassSubjectEntity
+                    {
+                        ClassID = @class.ID,
+                        CourseID = course.ID,
+                        GradeID = @class.GradeID,
+                        TeacherID = @class.TeacherID,
+                        EndDate = @class.EndDate,
+                        StartDate = @class.StartDate,
+                        Image = course.Image,
+                        LearningOutcomes = course.LearningOutcomes,
+                        Description = course.Description,
+                        SubjectID = subject.ID
+                    };
+                    _classSubjectService.Save(classSubject);
+                    //Save Class
+                    _service.Save(@class);
+                    //Convert Progress
+                    _ = _chapterProgressService.UpdateClassSubject(classSubject);
+                    _ = _learningHistoryService.UpdateClassSubject(classSubject);
+                    _ = _lessonProgressService.UpdateClassSubject(classSubject);
+                    //Convert Schedule
+                    _ = _lessonScheduleService.UpdateClassSubject(classSubject);
+                    //Convert Clone Part
+                    _ = _lessonHelper.ConvertClassSubject(classSubject);
+                    //Convert Exam
+                    _ = _examService.ConvertClassSubject(classSubject);
+                    _ = _examDetailService.ConvertClassSubject(classSubject);
+                    //Convert Score
+                    _ = _scoreStudentService.UpdateClassSubject(classSubject);
+                }
+            }
+            return null;
+        }
+
     }
 }

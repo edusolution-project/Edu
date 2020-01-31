@@ -35,7 +35,7 @@
         <div class="box" v-if="tab[0]">
             <ul class="box list ls-overview mb-3">
                 <li class="flex margin-b20">
-                    <a href="#" class="thumb"><img src="/pictures/ielts1.png" alt="" /></a>
+                    <a href="#" class="thumb"><img :src="classImg" alt="" /></a>
                     <div class="c-right">
                         <p><span class="label">Tên lớp: </span>{{className}}</p>
                         @*<p><span class="label">Mã lớp : </span>IELTS_PL5_1</p>*@
@@ -139,7 +139,7 @@
             Thảo luận
         </div>
     </div>
-    
+
 </section>
 @section Scripts{
     <script type="text/x-template" id="chapContentTemp">
@@ -154,7 +154,7 @@
                                           v-bind:pos="k"
                                           v-bind:subchaps="filterItem(item, subchaps)"
                                           v-bind:lessons="filterLesson(item, lessons)"></chap-content>
-                            <lesson-item v-for="lesson in lessons" v-bind:data="lesson"></lesson-item>
+                            <lesson-item v-for="lesson in lessons" v-bind:data="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
                         </ul>
                     </b-card-body>
                 </b-collapse>
@@ -165,7 +165,7 @@
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice">
             <div class="flex j-between width-100">
-                <span class="width-100">{{data.Title}}</span>
+                <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject"> <span class="width-100">{{data.Title}}</span></a>
                 <div class="flex width-100 j-end picker-schedule">
                     <vuejs-datepicker v-model="data.StartDate" format="dd/M/yyyy" class="date st"></vuejs-datepicker>
                     <vuejs-datepicker v-model="data.EndDate" format="dd/M/yyyy" class="date ed"></vuejs-datepicker>
@@ -173,7 +173,7 @@
             </div>
         </li>
     </script>
-    
+
     <script>
         Vue.component('chap-content', {
             template: '#chapContentTemp',
@@ -187,7 +187,8 @@
         Vue.component('lesson-item',{
             template: '#lessonItemTemp',
             props: {
-                data: Object
+                data: Object,
+                classSubject: String
             }
         })
         new Vue({
@@ -205,6 +206,7 @@
                 startDate: '@currentClass.StartDate',
                 endDate: '@currentClass.EndDate',
                 classDescription: '@currentClass.Description',
+                classImg: '@currentClass.Image',
                 classSubjects: [
                     //{
                     //    id: 1,

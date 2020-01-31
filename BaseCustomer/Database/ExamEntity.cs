@@ -210,5 +210,10 @@ namespace BaseCustomerEntity.Database
             _examDetailService.Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             return Task.CompletedTask;
         }
+
+        public async Task ConvertClassSubject(ClassSubjectEntity classSubject)
+        {
+            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ExamEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+        }
     }
 }

@@ -158,5 +158,10 @@ namespace BaseCustomerEntity.Database
             _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             return Task.CompletedTask;
         }
+
+        public async Task UpdateClassSubject(ClassSubjectEntity classSubject)
+        {
+            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<LearningHistoryEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+        }
     }
 }

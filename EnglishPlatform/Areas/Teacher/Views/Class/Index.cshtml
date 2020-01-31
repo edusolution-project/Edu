@@ -407,8 +407,17 @@
                                     })
                                     _that.changeAddSubject(item)
                                     _that.changeAddGrade(item)
-                                })
+                                    if (_that.courseSource.filter(c => c.ID == item.CourseID).length == 0) {
 
+                                        _that.courseSource.push({
+                                            ID: item.CourseID,
+                                            Name: item.CourseName,
+                                            SubjectID: item.SubjectID,
+                                            GradeID: item.GradeID,
+                                            IsActive: false
+                                        })
+                                    }
+                                })
                                 //_that.$forceUpdate()
                             }).catch(e => { })
                     }
@@ -480,7 +489,8 @@
                                     ID: item.ID,
                                     Name: item.Name,
                                     SubjectID: obj.SubjectID,
-                                    GradeID: obj.GradeID
+                                    GradeID: obj.GradeID,
+                                    IsActive: true
                                 })
                             })
                             _that.loaded_course.push(key);
@@ -558,7 +568,7 @@
                     return item.SubjectID == obj.SubjectID
                 },
                 matchCourse(obj, item) {
-                    return item.SubjectID == obj.SubjectID && item.GradeID == obj.GradeID
+                    return item.SubjectID == obj.SubjectID && item.GradeID == obj.GradeID && (item.IsActive || (item.ID == obj.CourseID))
                 }
             }
         });

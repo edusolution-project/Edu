@@ -81,5 +81,10 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID).FirstOrDefault();
         }
+
+        public ClassProgressEntity GetItemByClassSubjectID(string ClassSubjectID, string StudentID)
+        {
+            return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID).FirstOrDefault();
+        }
     }
 }

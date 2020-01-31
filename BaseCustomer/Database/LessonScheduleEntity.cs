@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -50,6 +51,11 @@ namespace BaseCustomerEntity.Database
         {
             if (string.IsNullOrEmpty(lessonid) || lessonid == "0") return null;
             return Collection.Find(o => o.LessonID == lessonid)?.SingleOrDefault();
+        }
+
+        public async Task UpdateClassSubject(ClassSubjectEntity classSubject)
+        {
+            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<LessonScheduleEntity>.Update.Set("ClassSubjectID", classSubject.ID));
         }
     }
 }

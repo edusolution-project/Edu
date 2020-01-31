@@ -78,7 +78,7 @@ var ExamStudent = (function () {
     }
 
     var goPartInx = function (idx) {
-       
+
         var panes = $('.tab-pane');
         $('.tab-pane.active').removeClass('show active');
         $(panes[idx]).addClass('show active');
@@ -111,6 +111,7 @@ var ExamStudent = (function () {
         type: TEMPLATE_TYPE.EXAM,
         lesson_id: "",
         class_id: "",
+        class_subject_id: "",
         chap_id: ""
     }
 
@@ -136,8 +137,10 @@ var ExamStudent = (function () {
             var formData = new FormData();
             formData.append("LessonID", config.lesson_id);
             formData.append("ClassID", config.class_id);
+            formData.append("ClassSubjectID", config.class_subject_id);
             Ajax(config.url.load, formData, "POST", true).then(function (res) {
                 if (res != "Access Deny" && res != "null" && res != null && res.message != "res is not defined" && res != void 0) {
+                    console.log(data);
                     var resData = JSON.parse(res);
                     if (resData.Data.TemplateType != 1) {
                         var exam = resData.Exam;
@@ -189,7 +192,7 @@ var ExamStudent = (function () {
             $('#lessonContainer').scrollbar();
             //$('.mediaContainer.scrollbar-outer').scrollbar();
         }
-        
+
     }
 
     var setCurrentData = function (data) {
@@ -198,10 +201,11 @@ var ExamStudent = (function () {
     }
 
     var currentData = function () {
-        var dataform = new FormData();
-        dataform.append("ClassID", config.class_id);
-        dataform.append("LessonID", config.lesson_id);
-        Ajax(config.url.current, dataform, "POST", true).then(function (res) {
+        var formData = new FormData();
+        formData.append("ClassID", config.class_id);
+        formData.append("LessonID", config.lesson_id);
+        formData.append("ClassSubjectID", config.class_subject_id);
+        Ajax(config.url.current, formData, "POST", true).then(function (res) {
             if (res == null || res == "null") { localStorage.clear(); return null; }
             else {
                 var data = JSON.parse(res);
@@ -362,7 +366,7 @@ var ExamStudent = (function () {
 
         var html = '<div id="pills-part-' + data.ID + '" class="tab-pane ' + dspClass + active + '" role="tabpanel" aria-labelledby="pills-' + data.ID + '">';
 
-        html += '<div class="' + (type == TEMPLATE_TYPE.LESSON ? '': 'part-box ') + data.Type + '" id="' + data.ID + '">';
+        html += '<div class="' + (type == TEMPLATE_TYPE.LESSON ? '' : 'part-box ') + data.Type + '" id="' + data.ID + '">';
 
         switch (data.Type) {
             case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data);
@@ -754,10 +758,11 @@ var ExamStudent = (function () {
     }
 
     var beginExam = function (_this) {
-        var dataform = new FormData();
-        dataform.append("LessonID", config.lesson_id);
-        dataform.append("ClassID", config.class_id);
-        Ajax(config.url.start, dataform, "POST", false)
+        var formData = new FormData();
+        formData.append("LessonID", config.lesson_id);
+        formData.append("ClassID", config.class_id);
+        formData.append("ClassSubjectID", config.class_subject_id);
+        Ajax(config.url.start, formData, "POST", false)
             .then(function (res) {
                 var data = JSON.parse(res);
                 if (data.Error == null) {
@@ -899,19 +904,19 @@ var ExamStudent = (function () {
             default:
                 break;
         }
-        var dataform = new FormData();
+        var formData = new FormData();
         if (type != "ESSAY") {
-            dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
-            dataform.append("LessonPartID", partID);
-            dataform.append("AnswerID", answerID);
-            dataform.append("QuestionID", questionId);
-            dataform.append("AnswerValue", value);
+            formData.append("ExamID", document.querySelector("input[name='ExamID']").value);
+            formData.append("LessonPartID", partID);
+            formData.append("AnswerID", answerID);
+            formData.append("QuestionID", questionId);
+            formData.append("AnswerValue", value);
         } else {
-            dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
-            dataform.append("LessonPartID", partID);
-            dataform.append("AnswerValue", value);
+            formData.append("ExamID", document.querySelector("input[name='ExamID']").value);
+            formData.append("LessonPartID", partID);
+            formData.append("AnswerValue", value);
         }
-        Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
+        Ajax(config.url.answer, formData, "POST", false).then(function (res) {
         })
             .catch(function (err) {
                 notification("error", err, 3000);
@@ -926,9 +931,9 @@ var ExamStudent = (function () {
     var ExamComplete = function (isOvertime) {
         if (isOvertime || true) {
             var exam = document.querySelector("input[name='ExamID']");
-            var dataform = new FormData();
-            dataform.append("ExamID", exam.value);
-            Ajax(config.url.end, dataform, "POST", true)
+            var formData = new FormData();
+            formData.append("ExamID", exam.value);
+            Ajax(config.url.end, formData, "POST", true)
                 .then(function (res) {
                     stopcountdown();
                     var data = JSON.parse(res);
@@ -982,10 +987,10 @@ var ExamStudent = (function () {
 
     var delAnswerForStudent = function (quizID) {
         localStorage.removeItem(config.lesson_id + config.class_id + quizID);
-        var dataform = new FormData();
-        dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
-        dataform.append("QuestionID", quizID);
-        Ajax(config.url.removeans, dataform, "POST", false)
+        var formData = new FormData();
+        formData.append("ExamID", document.querySelector("input[name='ExamID']").value);
+        formData.append("QuestionID", quizID);
+        Ajax(config.url.removeans, formData, "POST", false)
             .then(function (res) {
                 renderQuizCounter();
                 var xxx = document.getElementById("quizNav" + quizID);
@@ -1000,10 +1005,10 @@ var ExamStudent = (function () {
 
     var delAnswerForStudentNoRender = function (quizID) {
         localStorage.removeItem(config.lesson_id + config.class_id + quizID);
-        var dataform = new FormData();
-        dataform.append("ExamID", document.querySelector("input[name='ExamID']").value);
-        dataform.append("QuestionID", quizID);
-        Ajax(config.url.removeans, dataform, "POST", false)
+        var formData = new FormData();
+        formData.append("ExamID", document.querySelector("input[name='ExamID']").value);
+        formData.append("QuestionID", quizID);
+        Ajax(config.url.removeans, formData, "POST", false)
             .then(function (res) {
                 renderQuizCounter();
                 var xxx = document.getElementById("quizNav" + quizID);

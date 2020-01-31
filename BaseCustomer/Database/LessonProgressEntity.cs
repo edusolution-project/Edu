@@ -71,5 +71,10 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID && t.LessonID == LessonID).FirstOrDefault();
         }
+
+        public async Task UpdateClassSubject(ClassSubjectEntity classSubject)
+        {
+            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<LessonProgressEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+        }
     }
 }
