@@ -26,7 +26,7 @@ namespace BaseCustomerMVC.Models
             StartDate = item.StartDate;
             EndDate = item.EndDate;
             Order = item.Order;
-            Subjects = item.Subjects;
+            Skills = item.Skills;
             Members = item.Members;
         }
         [JsonProperty("CourseName")]

@@ -262,7 +262,7 @@
                     }
                     _that.$bvModal.show('modal_event')
                 },
-                addItem() {
+                addData() {
                     let _that = this
                     let _form = new FormData()
 
@@ -375,7 +375,7 @@
             @*<textarea name="name" rows="3" class="form-control" v-model="addItem.description"></textarea>*@
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
-            <b-button variant="success" v-on:click="addCurriculum()">Lưu</b-button>
+            <b-button variant="success" v-on:click="addData()">Lưu</b-button>
             <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
         </template>
     </b-modal>

@@ -252,7 +252,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
 
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
+            var data = (filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);
             model.TotalRecord = data.CountDocuments();
 
             var response = new Dictionary<string, object>

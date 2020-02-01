@@ -20,6 +20,10 @@ namespace BaseCustomerMVC.Models
         public string SubjectID { get; set; }
         [JsonProperty("SubjectName")]
         public string SubjectName { get; set; }
+        [JsonProperty("SkillID")]
+        public string SkillID { get; set; }
+        [JsonProperty("SkillName")]
+        public string SkillName { get; set; }
         [JsonProperty("GradeID")]
         public string GradeID { get; set; }
         [JsonProperty("CourseID")]

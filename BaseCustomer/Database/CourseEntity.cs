@@ -30,6 +30,8 @@ namespace BaseCustomerEntity.Database
         public string GradeID { get; set; }
         [JsonProperty("SubjectID")]
         public string SubjectID { get; set; }
+        [JsonProperty("SkillID")]
+        public string SkillID { get; set; }
         [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
         [JsonProperty("IsAdmin")]
