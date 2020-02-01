@@ -617,66 +617,66 @@ namespace BaseCustomerMVC.Controllers.Teacher
             };
             return new JsonResult(response);
         }
-
+        
+        #region Old
         //Class Management
-        [HttpPost]
-        public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "", string UserID = "")
-        {
-            var filter = new List<FilterDefinition<ClassEntity>>();
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
-            TeacherEntity teacher = null;
-            if (string.IsNullOrEmpty(UserID))
-                UserID = User.Claims.GetClaimByType("UserID").Value;
-            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
-            {
-                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
-                if (teacher == null)
-                {
-                    return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Teacher not found" }
-                    });
-                }
-            }
-            if (teacher != null)
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID));
+        //[HttpPost]
+        //public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "", string UserID = "")
+        //{
+        //    var filter = new List<FilterDefinition<ClassEntity>>();
+        //    filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+        //    TeacherEntity teacher = null;
+        //    if (string.IsNullOrEmpty(UserID))
+        //        UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+        //    {
+        //        teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+        //        if (teacher == null)
+        //        {
+        //            return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",model },
+        //                {"Msg","Teacher not found" }
+        //            });
+        //        }
+        //    }
+        //    if (teacher != null)
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID));
 
-            if (!string.IsNullOrEmpty(model.SearchText))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
-            }
-            if (!string.IsNullOrEmpty(SubjectID))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            }
-            //if (!string.IsNullOrEmpty(GradeID))
-            //{
-            //    filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == GradeID));
-            //}
+        //    if (!string.IsNullOrEmpty(model.SearchText))
+        //    {
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
+        //    }
+        //    if (!string.IsNullOrEmpty(SubjectID))
+        //    {
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+        //    }
+        //    //if (!string.IsNullOrEmpty(GradeID))
+        //    //{
+        //    //    filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == GradeID));
+        //    //}
 
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
-            model.TotalRecord = data.CountDocuments();
-            var DataResponse = data == null || model.TotalRecord <= 0 // || model.TotalRecord < model.PageSize
-                ? data
-                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize);
+        //    var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+        //    model.TotalRecord = data.CountDocuments();
+        //    var DataResponse = data == null || model.TotalRecord <= 0 // || model.TotalRecord < model.PageSize
+        //        ? data
+        //        : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize);
 
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
+        //                //CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
+        //                //GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+        //                //SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
+        //                //TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
+        //            })
+        //        },
+        //        { "Model", model }
+        //    };
+        //    return new JsonResult(response);
+        //}
+        #endregion
 
-
-
-            var response = new Dictionary<string, object>
-            {
-                { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
-                        CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
-                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                        SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
-                        TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
-                    })
-                },
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
 
         public JsonResult GetActiveList(DateTime today)
         {
@@ -774,8 +774,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             model.TotalRecord = data.ToList().Count();
             var classData = _service.Collection.AsQueryable().Where(t => data.Contains(t.ID)).OrderByDescending(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToList();
             var returndata = from o in classData
-                             where o.Skills != null
-                             let sname = string.Join(", ", _skillService.GetList().Where(t => o.Skills.Contains(t.ID)).Select(t => t.Name).ToList())
+                                 //where o.Skills != null
+                             let sname = o.Skills == null ? "" : string.Join(", ", _skillService.GetList().Where(t => o.Skills.Contains(t.ID)).Select(t => t.Name).ToList())
                              select new Dictionary<string, object>
                              {
                                  { "ID", o.ID },
@@ -790,7 +790,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Skills", o.Skills },
                                  { "Members", o.Members },
                                  { "Description", o.Description },
-                                 { "SubjectName", sname }
+                                 { "SkillName", sname }
                              };
 
             var response = new Dictionary<string, object>
@@ -903,6 +903,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 item.TeacherID = userId; // creator
                 item.Skills = new List<string>();
+                item.Subjects = new List<string>();
                 item.Members = new List<ClassMemberEntity>();
                 item.IsActive = true;
 
@@ -974,6 +975,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         var nID = CreateNewClassSubject(csubject, item, out newMember);
                         if (!item.Skills.Contains(csubject.SkillID))
                             item.Skills.Add(csubject.SkillID);
+                        if (!item.Subjects.Contains(csubject.SubjectID))
+                            item.Subjects.Add(csubject.SubjectID);
                         if (!item.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             item.Members.Add(newMember);
                     }
@@ -1006,6 +1009,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _service.Save(oldData);
 
                 oldData.Skills = new List<string>();
+                oldData.Subjects = new List<string>();
                 oldData.Members = new List<ClassMemberEntity>();
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
                 if (oldSubjects != null)
@@ -1056,6 +1060,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             processCS.Add(nSbj.ID);
                             if (!oldData.Skills.Contains(nSbj.SkillID))
                                 oldData.Skills.Add(nSbj.SkillID);
+                            if (!oldData.Subjects.Contains(nSbj.SubjectID))
+                                oldData.Subjects.Add(nSbj.SubjectID);
                             if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                                 oldData.Members.Add(newMember);
 
@@ -1078,6 +1084,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         if (!oldData.Skills.Contains(nSbj.SkillID))
                             oldData.Skills.Add(nSbj.SkillID);
+                        if (!oldData.Subjects.Contains(nSbj.SubjectID))
+                            oldData.Subjects.Add(nSbj.SubjectID);
                         if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             oldData.Members.Add(newMember);
                     }

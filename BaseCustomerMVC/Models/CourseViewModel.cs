@@ -12,6 +12,8 @@ namespace BaseCustomerMVC.Models
     {
         [JsonProperty("CourseName")]
         public string CourseName { get; set; }
+        [JsonProperty("SkillName")]
+        public string SkillName { get; set; }
         [JsonProperty("SubjectName")]
         public string SubjectName { get; set; }
         [JsonProperty("GradeName")]

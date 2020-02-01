@@ -47,7 +47,7 @@
                 <tr v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td><a :href="'@Url.Action("Detail","Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
-                    <td>{{item.SubjectName}}</td>
+                    <td>{{item.SkillName}}</td>
                     <td>{{item.Students.length}}</td>
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
                     <td>
@@ -122,11 +122,11 @@
                     },
                     {
                         key: 'class_name',
-                        label: 'Lớp học'
+                        label: 'Tên lớp'
                     },
                     {
-                        key: 'subject',
-                        label: 'Môn học'
+                        key: 'skills',
+                        label: 'Kỹ năng'
                     },
                     {
                         key: 'students',
@@ -169,6 +169,7 @@
                             ID: '',
                             SubjectID: '',
                             GradeID: '',
+                            SkillID: '',
                             TeacherID: '',
                             CourseID: ''
                         }

@@ -8,6 +8,17 @@ namespace BaseCustomerMVC.Models
 {
     public class ClassViewModel : ClassEntity
     {
+        [JsonProperty("CourseName")]
+        public string CourseName { get; set; }
+        [JsonProperty("SubjectName")]
+        public string SubjectName { get; set; }
+        [JsonProperty("SkillName")]
+        public string SkillName { get; set; }
+        [JsonProperty("GradeName")]
+        public string GradeName { get; set; }
+        [JsonProperty("TeacherName")]
+        public string TeacherName { get; set; }
+
         public ClassViewModel(ClassEntity item)
         {
             ID = item.ID;
@@ -28,15 +39,8 @@ namespace BaseCustomerMVC.Models
             Order = item.Order;
             Skills = item.Skills;
             Members = item.Members;
+            Description = item.Description;
+            Image = item.Image;
         }
-        [JsonProperty("CourseName")]
-        public string CourseName { get; set; }
-        [JsonProperty("SubjectName")]
-        public string SubjectName { get; set; }
-        [JsonProperty("GradeName")]
-        public string GradeName { get; set; }
-        [JsonProperty("TeacherName")]
-        public string TeacherName { get; set; }
-
     }
 }

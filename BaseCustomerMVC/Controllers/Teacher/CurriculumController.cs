@@ -24,6 +24,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ChapterService _chapterService;
         private readonly GradeService _gradeService;
         private readonly LessonService _lessonService;
+        private readonly SkillService _skillService;
         private readonly LessonPartService _lessonPartService;
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
@@ -54,6 +55,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  ChapterService chapterService,
                  GradeService gradeService,
                  LessonService lessonService,
+                 SkillService skillService,
                  LessonPartService lessonPartService,
                  CloneLessonPartService cloneLessonPartService,
                  LessonPartAnswerService lessonPartAnswerService,
@@ -81,6 +83,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _subjectService = subjectService;
             _chapterService = chapterService;
             _gradeService = gradeService;
+            _skillService = skillService;
             _lessonService = lessonService;
             _lessonPartService = lessonPartService;
             _cloneLessonPartService = cloneLessonPartService;
@@ -117,8 +120,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
                 var grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+                var skills = _skillService.GetList();
                 ViewBag.Grades = grade;
                 ViewBag.Subjects = subject;
+                ViewBag.Skills = skills;
             }
 
 
@@ -278,6 +283,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     { "Data", DataResponse.ToList().Select(o =>
 
                         _courseViewMapping.AutoOrtherType(o, new CourseViewModel(){
+                            SkillName = _skillService.GetItemByID(o.SkillID)?.Name,
                             GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
                             SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
                             TeacherName = _teacherService.GetItemByID(o.CreateUser)?.FullName

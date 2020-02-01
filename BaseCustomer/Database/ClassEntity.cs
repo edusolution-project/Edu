@@ -33,6 +33,8 @@ namespace BaseCustomerEntity.Database
         public DateTime EndDate { get; set; }
         [JsonProperty("IsGroup")]
         public bool? IsGroup { get; set; } = false;
+        [JsonProperty("Subjects")]
+        public List<string> Subjects { get; set; }
         [JsonProperty("Skills")]
         public List<string> Skills { get; set; }
 
