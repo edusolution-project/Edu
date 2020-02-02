@@ -114,7 +114,7 @@
             <ul class="row">
                 <li class="col-md-4 less-done list" v-for="(item,k) in finish_course">
                     <div class="box radius">
-                        <a :href="'@Url.Action("Detail", "Course")?' + 'id=' + (item.receivers != null ? item.receivers[0]:'') + '&' + item.id" class="flex">
+                        <a :href="'@Url.Action("Detail", "Course")/' + item.id" class="flex">
                             <span class="per">{{item.per + '%'}}</span>
                             <div class="info">
                                 <span>{{item.title}}</span>

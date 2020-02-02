@@ -43,9 +43,9 @@
         <div class="row row-list">
             <div class="col-md-3 course-item" v-for="(item,k) in list_course">
                 <div class="box radius">
-                    <a :href="'@Url.Action("Detail", "Course")/' + item.ID" class="thumb"><img :src="item.Thumb" :alt="item.SubjectName + ' / ' + item.ClassName"></a>
+                    <a :href="'@Url.Action("Detail", "Course")/' + item.ID" class="thumb"><img :src="item.Thumb" :alt="item.Name"></a>
                     <div class="detail box">
-                        <a :href="'@Url.Action("Detail", "Course")/' + item.ID" title="" class="title">{{item.ClassName}}</a>
+                        <a :href="'@Url.Action("Detail", "Course")/' + item.ID" title="" class="title">{{item.Name}}</a>
                         <p><i class="ti-time"></i>{{formatShortDate(item.EndDate)}}</p>
                         <div class="c-bot flex">
                             <a :href="'@Url.Action("Detail", "Course")/' + item.ID" title="Học ngay" class="btn-learn">Học ngay</a>

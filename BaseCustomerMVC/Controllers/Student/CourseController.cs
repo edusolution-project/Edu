@@ -16,6 +16,7 @@ namespace BaseCustomerMVC.Controllers.Student
     {
         private readonly ClassService _service;
         private readonly ClassSubjectService _classSubjectService;
+        private readonly SkillService _skillService;
         private readonly CourseService _courseService;
         private readonly TeacherService _teacherService;
         private readonly SubjectService _subjectService;
@@ -42,8 +43,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LearningHistoryService _learningHistoryService;
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
-        //private readonly MappingEntity<ClassEntity, StudentClassViewModel> _mappingList_old;
-        private readonly MappingEntity<ClassSubjectEntity, StudentClassViewModelV2> _mappingList;
+        private readonly MappingEntity<ClassEntity, StudentClassViewModel> _mappingList;
+        //private readonly MappingEntity<ClassSubjectEntity, StudentClassViewModelV2> _mappingList;
         private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _studentMapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
 
@@ -54,6 +55,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public CourseController(ClassService service
             , ClassSubjectService classSubjectService
+            , SkillService skillService
             , CourseService courseService
             , TeacherService teacherService
             , SubjectService subjectService
@@ -86,6 +88,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _examService = examService;
             _examDetailService = examDetailService;
             _service = service;
+            _skillService = skillService;
             _classSubjectService = classSubjectService;
             _courseService = courseService;
             _teacherService = teacherService;
@@ -99,7 +102,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _lessonPartService = lessonPartService;
             _progressService = progressService;
             _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
-            _mappingList = new MappingEntity<ClassSubjectEntity, StudentClassViewModelV2>();
+            _mappingList = new MappingEntity<ClassEntity, StudentClassViewModel>();
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
             _studentMapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
@@ -526,17 +529,22 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public IActionResult Detail(string id)
         {
-            return Redirect(Url.Action("Modules", "Course") + "/" + id);
-            //if (model == null) return null;
-            //var currentClass = _service.GetItemByID(id);
-            //var userId = User.Claims.GetClaimByType("UserID").Value;
-            //if (currentClass == null)
-            //    return RedirectToAction("Index");
-            //if (currentClass.Students.IndexOf(userId) < 0)
-            //    return RedirectToAction("Index");
-            //ViewBag.Class = currentClass;
-            //ViewBag.UserID = userId;
-            //return View();
+            //return Redirect(Url.Action("Modules", "Course") + "/" + id);
+            var currentClass = _service.GetItemByID(id);
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (currentClass == null)
+                return RedirectToAction("Index");
+            if (currentClass.Students.IndexOf(userId) < 0)
+                return RedirectToAction("Index");
+            var vm = new ClassViewModel(currentClass);
+            var subjects = _classSubjectService.GetByClassID(currentClass.ID);
+            var skillIDs = subjects.Select(t => t.SkillID).Distinct();
+            var subjectIDs = subjects.Select(t => t.SubjectID).Distinct();
+            vm.SkillName = string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList());
+            vm.SubjectName = string.Join(", ", _subjectService.Collection.Find(t => subjectIDs.Contains(t.ID)).Project(t => t.Name).ToList());
+            ViewBag.Class = vm;
+            ViewBag.UserID = userId;
+            return View();
         }
 
         public IActionResult Syllabus(DefaultModel model, string id)
