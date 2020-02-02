@@ -62,6 +62,12 @@ namespace BaseCustomerEntity.Database
             _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID);
             return Task.CompletedTask;
         }
+
+        public Task UpdateCourseSkill(string CourseID, string SkillID)
+        {
+            _ = Collection.UpdateManyAsync(t => t.CourseID == CourseID, Builders<ClassSubjectEntity>.Update.Set("SkillID", SkillID));
+            return Task.CompletedTask;
+        }
     }
 
 }

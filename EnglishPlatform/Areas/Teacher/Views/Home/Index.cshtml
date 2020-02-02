@@ -27,8 +27,8 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <a :href="'@Url.Action("Detail","Class")/' + item.classID" :title="item.className" class="title"><h4><i class="ic ic-headphone-o"></i>{{item.className}}</h4></a>
-                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classID" :title="item.title" class="title">{{item.title}}</a>
+                                <a :href="'@Url.Action("Detail","Class")/' + item.classID" :title="item.className" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@Url.Action("Detail","Class")/' + item.classID" :title="item.title" class="title">{{item.className}}</a>
                                 <div class="c-bot">
                                     <p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>
                                     <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>

@@ -155,7 +155,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
                 var grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
                 ViewBag.Grades = grade;
-                ViewBag.Skills = subject;
+                ViewBag.Subjects = subject;
             }
 
             ViewBag.User = UserID;
@@ -172,7 +172,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)
                 return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
+            var vm = new ClassViewModel(currentClass);
+            var subjects = _classSubjectService.GetByClassID(currentClass.ID);
+            var skillIDs = subjects.Select(t => t.SkillID).Distinct();
+            var subjectIDs = subjects.Select(t => t.SubjectID).Distinct();
+            vm.SkillName = string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList());
+            vm.SubjectName = string.Join(", ", _subjectService.Collection.Find(t => subjectIDs.Contains(t.ID)).Project(t => t.Name).ToList());
+            ViewBag.Class = vm;
             ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
             ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
             return View();
@@ -617,7 +623,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             };
             return new JsonResult(response);
         }
-        
+
         #region Old
         //Class Management
         //[HttpPost]
@@ -692,9 +698,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
+            //filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            var data = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
@@ -730,8 +736,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.CountDocuments();
             var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
-                ? data.ToList()
-                : data.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+                ? data.SortByDescending(t => t.ID).ToList()
+                : data.SortByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
 
             var std = (from o in DataResponse
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
@@ -775,7 +781,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var classData = _service.Collection.AsQueryable().Where(t => data.Contains(t.ID)).OrderByDescending(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToList();
             var returndata = from o in classData
                                  //where o.Skills != null
-                             let sname = o.Skills == null ? "" : string.Join(", ", _skillService.GetList().Where(t => o.Skills.Contains(t.ID)).Select(t => t.Name).ToList())
+                             let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
+                             let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
                              select new Dictionary<string, object>
                              {
                                  { "ID", o.ID },
@@ -826,24 +833,40 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
 
-            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter));
+            var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
 
+            var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
+            //var std = (from o in data.ToList()
+            //           let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
+            //           where _lesson != null
+            //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+            //           where _class != null
+            //           //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
+            //           select new
+            //           {
+            //               id = o.ID,
+            //               classID = _class.ID,
+            //               className = _class.Name,
+            //               title = _lesson.Title,
+            //               lessonID = _lesson.ID,
+            //               startDate = o.StartDate,
+            //               endDate = o.EndDate,
+            //               students = _class.Students.Count
+            //               //isLearnt = isLearnt
+            //           }).ToList();
             var std = (from o in data.ToList()
-                       let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
-                       where _lesson != null
                        let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
                        where _class != null
+                       let skill = _skillService.GetItemByID(o.SkillID)
                        //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
                        select new
                        {
                            id = o.ID,
                            classID = _class.ID,
                            className = _class.Name,
-                           title = _lesson.Title,
-                           lessonID = _lesson.ID,
-                           startDate = o.StartDate,
                            endDate = o.EndDate,
-                           students = _class.Students.Count
+                           students = _class.Students.Count,
+                           skill = skill
                            //isLearnt = isLearnt
                        }).ToList();
             return Json(new { Data = std });
@@ -1133,6 +1156,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 nSbj.StartDate = @class.StartDate;
                 nSbj.EndDate = @class.EndDate;
 
+                nSbj.SkillID = course.SkillID;
                 nSbj.Description = course.Description;
                 nSbj.LearningOutcomes = course.LearningOutcomes;
 
@@ -1354,6 +1378,42 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult ConvertSkills()
         {
+            var courses = _courseService.GetAll().ToList();
+            foreach (var course in courses)
+            {
+                if (course.SkillID == null)
+                {
+                    var name = course.Name.ToLower();
+                    if (name.IndexOf("listen") >= 0 || name.IndexOf("nghe") >= 0)
+                    {
+                        course.SkillID = "1";
+                    }
+                    else if (name.IndexOf("speak") >= 0)
+                    {
+                        course.SkillID = "2";
+                    }
+                    else if (name.IndexOf("read") >= 0)
+                    {
+                        course.SkillID = "3";
+                    }
+                    else if (name.IndexOf("writ") >= 0)
+                    {
+                        course.SkillID = "4";
+                    }
+                    else if (name.IndexOf("voca") >= 0)
+                    {
+                        course.SkillID = "5";
+                    }
+                    else if (name.IndexOf("gramma") >= 0)
+                    {
+                        course.SkillID = "6";
+                    }
+                    else
+                        course.SkillID = "7";
+                }
+                _courseService.Save(course);
+                _classSubjectService.UpdateCourseSkill(course.ID, course.SkillID);
+            }
             return null;
         }
     }

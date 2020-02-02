@@ -10,10 +10,10 @@ namespace BaseCustomerEntity.Database
 {
     public class SkillEntity : EntityBase
     {
+        [JsonProperty("Name_vn")]
+        public string Name_vn { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
-        [JsonProperty("Name_en")]
-        public string Name_en { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
     }
@@ -27,13 +27,13 @@ namespace BaseCustomerEntity.Database
         {
             return new List<SkillEntity>
             {
-                new SkillEntity{ID = "1", Name = "Nghe", Name_en = "Listening", Image = "/images/skill/listening.png" },
-                new SkillEntity{ID = "2", Name = "Nói", Name_en = "Speaking", Image = "/images/skill/speaking.png" },
-                new SkillEntity{ID = "3", Name = "Đọc", Name_en = "Reading", Image = "/images/skill/reading.png" },
-                new SkillEntity{ID = "4", Name = "Viết", Name_en = "Writing", Image = "/images/skill/writing.png" },
-                new SkillEntity{ID = "5", Name = "Từ vựng", Name_en = "Vocabulary", Image = "/images/skill/vocabulary.png" },
-                new SkillEntity{ID = "6", Name = "Ngữ pháp", Name_en = "Grammar", Image = "/images/skill/grammar.png" },
-                new SkillEntity{ID = "7", Name = "Tổng hợp", Name_en = "General", Image = "/images/skill/general.png" },
+                new SkillEntity{ID = "1", Name_vn = "Nghe", Name = "Listening", Image = "/images/skill/listening.png" },
+                new SkillEntity{ID = "2", Name_vn = "Nói", Name = "Speaking", Image = "/images/skill/speaking.png" },
+                new SkillEntity{ID = "3", Name_vn = "Đọc", Name = "Reading", Image = "/images/skill/reading.png" },
+                new SkillEntity{ID = "4", Name_vn = "Viết", Name = "Writing", Image = "/images/skill/writing.png" },
+                new SkillEntity{ID = "5", Name_vn = "Từ vựng", Name = "Vocabulary", Image = "/images/skill/vocabulary.png" },
+                new SkillEntity{ID = "6", Name_vn = "Ngữ pháp", Name = "Grammar", Image = "/images/skill/grammar.png" },
+                new SkillEntity{ID = "7", Name_vn = "Tổng hợp", Name = "General", Image = "/images/skill/general.png" },
             };
         }
 

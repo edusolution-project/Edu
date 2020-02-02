@@ -104,7 +104,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _teacherService = teacherService;
             _courseService = courseService;
             _classService = service;
-            _skillService = _skillService;
+            _skillService = skillService;
             _classSubjectService = classSubjectService;
             _progressService = progressService;
 
@@ -149,13 +149,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
                           let subject = _subjectService.GetItemByID(r.SubjectID)
                           let course = _courseService.GetItemByID(r.CourseID)
-                          let skill = _skillService.GetItemByID(r.SkillID)
+                          let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
                           select new ClassSubjectViewModel
                           {
                               ID = r.ID,
                               SubjectID = r.SubjectID,
                               SkillID = r.SkillID,
                               SkillName = skill != null ? skill.Name : "",
+                              SkillImage = skill != null ? skill.Image : "",
                               SubjectName = subject.Name,
                               GradeID = r.GradeID,
                               CourseID = r.CourseID,

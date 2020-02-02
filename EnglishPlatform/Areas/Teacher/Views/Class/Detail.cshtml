@@ -1,7 +1,7 @@
 ﻿@{
 
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
-    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var currentClass = ViewBag.Class as BaseCustomerMVC.Models.ClassViewModel;
     ViewData["Title"] = currentClass.Name;
 }
 <script src="/libs/vuejs-datepicker.min.js"></script>
@@ -39,8 +39,9 @@
                     <div class="c-right">
                         <p><span class="label">Tên lớp: </span>{{className}}</p>
                         @*<p><span class="label">Mã lớp : </span>IELTS_PL5_1</p>*@
-                        <p><span class="label">Cấp độ : </span>Ban 5.0+</p>
-                        <p><span class="label">Môn học : </span>Listening, Speaking, Grammar</p>
+                        @*<p><span class="label">Cấp độ : </span>{{gradeName}}</p>*@
+                        <p><span class="label">Chương trình học: </span>{{subjectName}}</p>
+                        <p><span class="label">Môn học: </span>{{skillName}}</p>
                         <ul class="time-line flex">
                             <li><i class="ti-time"></i>Bắt đầu: {{formatShortDate(startDate)}} </li>
                             <li><i class="ti-time"></i>Kết thúc: {{formatShortDate(endDate)}} </li>
@@ -57,7 +58,7 @@
             <ul class="list ls-pratice">
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)"><i class="ic" v-bind:class="[obj.Icon]"></i>{{obj.Title}}</a>
+                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title}}</a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion" role="tabpanel">
                             <ul class="list">
                                 <chap-content v-for="(item,k) in list_chapters" v-if="matchedItem(item, obj.ID + '-')"
@@ -207,6 +208,8 @@
                 endDate: '@currentClass.EndDate',
                 classDescription: '@currentClass.Description',
                 classImg: '@currentClass.Image',
+                subjectName: '@currentClass.SubjectName',
+                skillName: '@currentClass.SkillName',
                 classSubjects: [
                     //{
                     //    id: 1,
@@ -445,8 +448,8 @@
                                 _data.forEach(function (item, k) {
                                     _that.classSubjects.push({
                                         ID: item.ID,
-                                        Title: item.SubjectName + ' - ' + item.CourseName,
-                                        Icon: 'ic-headphone-o',
+                                        Title: item.SkillName,
+                                        Image:  item.SkillImage,
                                         Chapters: [],
                                         Lessons: []
                                     })

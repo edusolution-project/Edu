@@ -32,6 +32,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonExtendService _lessonExtendService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
+        private readonly ClassSubjectService _classSubjectService;
 
         private readonly ModCourseService _modservice;
         private readonly ModProgramService _modprogramService;
@@ -63,7 +64,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  LessonExtendService lessonExtendService,
                  TeacherService teacherService,
                  ModCourseService modservice,
-                 ClassService classService
+                 ClassService classService,
+                 ClassSubjectService classSubjectService
 
                 , ModProgramService modprogramService
                 , ModSubjectService modsubjectService
@@ -93,6 +95,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _teacherService = teacherService;
             _modservice = modservice;
             _classService = classService;
+            _classSubjectService = classSubjectService;
             //_modprogramService = modprogramService;
             _modsubjectService = modsubjectService;
             _modchapterService = modchapterService;
@@ -376,23 +379,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
             try
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var data = _service.CreateQuery().Find(o => o.ID == item.ID).SingleOrDefault();
-                if (data == null)
+                var olditem = _service.CreateQuery().Find(o => o.ID == item.ID).SingleOrDefault();
+                if (olditem == null)
                 {
                     item.Created = DateTime.Now;
                     item.CreateUser = UserID;
                     item.IsAdmin = true;
                     item.IsActive = false;
                     item.Updated = DateTime.Now;
-                    _service.CreateQuery().InsertOne(item);
+                    _service.Save(item);
                 }
                 else
                 {
-                    item.Updated = DateTime.Now;
-                    item.Order = data.Order;
-                    item.Created = data.Created;
-                    item.CreateUser = data.CreateUser;
-                    _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                    olditem.Updated = DateTime.Now;
+                    olditem.Description = item.Description;
+                    olditem.SubjectID = item.SubjectID;
+                    olditem.GradeID = item.GradeID;
+                    olditem.SkillID = item.SkillID;
+                    _service.Save(olditem);
+                    //update class subject using this course, temporary use
+                    _classSubjectService.UpdateCourseSkill(olditem.ID, olditem.SkillID);
                 }
 
                 return new JsonResult(new Dictionary<string, object>

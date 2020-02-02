@@ -259,6 +259,7 @@
                         _that.addItem.GradeID = '';
                         _that.addItem.Description = '';
                         _that.addItem.Name = '';
+                        _that.addItem.SkillID = '';
                     }
                     else {
                         console.log(obj.GradeID)
@@ -268,6 +269,7 @@
                         _that.addItem.GradeID = obj.GradeID;
                         _that.addItem.Description = obj.Description;
                         _that.addItem.Name = obj.Name;
+                        _that.addItem.SkillID = obj.SkillID == null ? '': obj.SkillID;
                     }
                     _that.$bvModal.show('modal_event')
                 },
