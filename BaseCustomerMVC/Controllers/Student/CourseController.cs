@@ -149,10 +149,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == entity.SubjectID));
             }
 
-            var classIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
-
-            var data = _classSubjectService.Collection.Find(t => classIDs.Contains(t.ClassID));
-
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
@@ -162,19 +159,17 @@ namespace BaseCustomerMVC.Controllers.Student
                 (from o in DataResponse
                  let progress = _progressService.GetItemByClassID(o.ID, userId)
                  let course = _courseService.GetItemByID(o.CourseID)
-                 let @class = _service.GetItemByID(o.ClassID)
                  let subject = _subjectService.GetItemByID(o.SubjectID)
-                 where subject != null
                  let grade = _gradeService.GetItemByID(o.GradeID)
                  let teacher = _teacherService.GetItemByID(o.TeacherID)
                  let complete = progress != null && progress.TotalLessons > 0 ? progress.CompletedLessons.Count * 100 / progress.TotalLessons : 0
-                 select _mappingList.AutoOrtherType(o, new StudentClassViewModelV2()
+                 select _mappingList.AutoOrtherType(o, new StudentClassViewModel()
                  {
-                     ClassName = @class.Name,
                      CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
-                     StudentNumber = @class.Students.Count,
-                     SubjectName = subject.Name,
+                     StudentNumber = o.Students.Count,
+                     SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                      GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "" : _gradeService.GetItemByID(o.GradeID).Name,
+                     TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" : _teacherService.GetItemByID(o.TeacherID).FullName,
                      Progress = progress,
                      Thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                      CompletePercent = complete > 100 ? 100 : complete
