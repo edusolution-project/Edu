@@ -202,20 +202,17 @@ namespace BaseCustomerMVC.Controllers.Student
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
-            var classIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
-
-            var data = _classSubjectService.Collection.Find(t => classIDs.Contains(t.ClassID));
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
                        let percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
-                       let @class = _service.GetItemByID(o.ClassID)
-                       let subject = _subjectService.GetItemByID(o.SubjectID)
-                       where subject != null && @class != null
                        select new
                        {
                            id = o.ID,
-                           title = subject.Name,
+                           courseID = o.CourseID,
+                           courseName = o.Name,
+                           subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                            endDate = o.EndDate,
                            percent,
                            score = progress != null ? progress.AvgPoint : 0,
@@ -236,12 +233,8 @@ namespace BaseCustomerMVC.Controllers.Student
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
 
-            var classIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
-
-            var data = _classSubjectService.Collection.Find(t => classIDs.Contains(t.ClassID));
-
+            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.CountDocuments();
-
             var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
                 ? data.ToList()
                 : data.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
@@ -249,13 +242,11 @@ namespace BaseCustomerMVC.Controllers.Student
             var std = (from o in DataResponse
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
                        let per = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
-                       let subject = _subjectService.GetItemByID(o.SubjectID)
-                       where subject != null
                        select new
                        {
                            id = o.ID,
                            courseID = o.CourseID,
-                           title = subject.Name,
+                           title = o.Name,
                            endDate = o.EndDate,
                            per,
                            score = progress != null ? progress.AvgPoint : 0
