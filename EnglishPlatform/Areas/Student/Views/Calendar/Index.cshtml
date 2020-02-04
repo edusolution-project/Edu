@@ -193,7 +193,6 @@
                     }
                 } else {
                     var event = EduCalendar.schedule.EduCalendar.getEventById(id);
-                    console.log(id, event);
                     var timeEvent = changeTime(event.start);
                     var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
                     var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;

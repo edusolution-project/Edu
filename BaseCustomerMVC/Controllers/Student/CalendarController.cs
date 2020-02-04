@@ -49,6 +49,7 @@ namespace BaseCustomerMVC.Controllers.Student
         [Obsolete]
         public Task<JsonResult> GetList(DefaultModel model)
         {
+            if (!User.Identity.IsAuthenticated) return Task.FromResult(new JsonResult(540));
             var userId = User?.FindFirst("UserID").Value;
             var listClass = _classService.Collection.Find(o => o.Students.Contains(userId))?.ToList();
             if (listClass == null) return Task.FromResult(new JsonResult(null));
