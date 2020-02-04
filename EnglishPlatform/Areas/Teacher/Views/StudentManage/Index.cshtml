@@ -433,7 +433,8 @@
                 hideModal() {
                     $('.close').click();
                 },
-                showStudentModal(obj) {
+                showStudentModal() {
+                    this.add_student.class_id = this.search_class_id
                     this.$bvModal.show('modal_event')
                 },
                 chooseStudent(student) {

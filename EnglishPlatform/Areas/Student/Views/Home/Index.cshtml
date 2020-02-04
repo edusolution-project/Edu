@@ -33,8 +33,8 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <a :href="'@Url.Action("Detail","Course")/' + item.classID" :title="item.className" class="title"><h4><i class="ic ic-headphone-o"></i>{{item.subjectName}}</h4></a>
-                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classID" :title="item.title" class="title">{{item.title}}</a>
+                                <a :href="'@Url.Action("Modules","Course")/' + item.id" :title="item.className" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@Url.Action("Modules","Course")/' + item.id" :title="item.title" class="title">{{item.className}}</a>
                                 <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
                                 <div class="c-bot">
                                     <div class="flex">

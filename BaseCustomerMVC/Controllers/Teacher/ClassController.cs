@@ -831,7 +831,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             var classFilter = new List<FilterDefinition<ClassEntity>>();
-            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == userId));
+            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t=> t.TeacherID == userId)));
             var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
 
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));

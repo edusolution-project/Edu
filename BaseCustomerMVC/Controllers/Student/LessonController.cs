@@ -18,6 +18,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly SubjectService _subjectService;
         private readonly CourseService _courseService;
         private readonly ClassService _classService;
+        private readonly ClassStudentService _classStudentService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly ChapterService _chapterService;
         private readonly LessonScheduleService _lessonScheduleService;
@@ -45,6 +46,7 @@ namespace BaseCustomerMVC.Controllers.Student
             SubjectService subjectService
             , CourseService courseService
             , ClassService classService
+            , ClassStudentService classStudentService
             , ClassSubjectService classSubjectService
             , ChapterService chapterService
             , LessonScheduleService lessonScheduleService
@@ -65,6 +67,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _subjectService = subjectService;
             _courseService = courseService;
             _classService = classService;
+            _classStudentService = classStudentService;
             _classSubjectService = classSubjectService;
             _chapterService = chapterService;
             _lessonScheduleService = lessonScheduleService;
@@ -240,7 +243,7 @@ namespace BaseCustomerMVC.Controllers.Student
         /// <param name="id">LessonID</param>
         /// <param name="ClassID">ClassID</param>
         /// <returns></returns>
-        public IActionResult Detail(DefaultModel model, string ClassID)
+        public IActionResult Detail(DefaultModel model, string ClassID, int newui = 0)
         {
             if (ClassID == null)
                 return RedirectToAction("Index", "Course");
@@ -264,7 +267,8 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.NextLesson = nextLesson;
             ViewBag.Chapter = chapter;
             ViewBag.Type = lesson.TemplateType;
-
+            if (newui == 1)
+                return View("Detail_new");
             return View();
         }
 
@@ -368,15 +372,18 @@ namespace BaseCustomerMVC.Controllers.Student
                 return new JsonResult(
                 new Dictionary<string, object> { { "Error", "Lesson not found" } });
 
+            if (string.IsNullOrEmpty(ClassSubjectID))
+                ClassSubjectID = ClassID;
+
             var currentcs = _classSubjectService.GetItemByID(ClassSubjectID);
             if (currentcs == null)
                 return new JsonResult(
                 new Dictionary<string, object> { { "Error", "Subject not found" } });
 
-            if (string.IsNullOrEmpty(ClassID))
-                ClassID = currentcs.ClassID;
+            //if (string.IsNullOrEmpty(ClassID))
+            //    ClassID = currentcs.ClassID;
 
-            var currentClass = _classService.GetItemByID(ClassID);
+            var currentClass = _classService.GetItemByID(currentcs.ClassID);
             if (currentClass == null)
                 return new JsonResult(
                 new Dictionary<string, object> { { "Error", "Class not found" } });
@@ -393,7 +400,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 StudentID = userId
             });
 
-            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == ClassID && o.ClassSubjectID == ClassSubjectID).ToList();
+            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassSubjectID == currentcs.ID).ToList();
 
             var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
             var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
@@ -477,16 +484,21 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             var currentClass = _classService.GetItemByID(currentCs.ClassID);
-            if (currentClass == null || currentClass.Students.IndexOf(UserID) < 0)
-            {
+            if (currentClass == null)
                 return new JsonResult(new Dictionary<string, object> {
                         {"Data",null },
                         {"Error",model },
                         {"Msg","Không có thông tin lớp học" }
                     });
-            }
+            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, UserID);
+            if (classStudent == null)
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Học viên không có trong danh sách lớp" }
+                    });
 
-            var course = _courseService.GetItemByID(currentClass.CourseID);
+            var course = _courseService.GetItemByID(currentCs.CourseID);
 
             if (course == null)
             {
@@ -548,16 +560,21 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             var currentClass = _classService.GetItemByID(currentCs.ClassID);
-            if (currentClass == null || currentClass.Students.IndexOf(UserID) < 0)
-            {
+            if (currentClass == null)
                 return new JsonResult(new Dictionary<string, object> {
                         {"Data",null },
                         {"Error",model },
                         {"Msg","Không có thông tin lớp học" }
                     });
-            }
+            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, UserID);
+            if (classStudent == null)
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error",model },
+                        {"Msg","Học viên không có trong danh sách lớp" }
+                    });
 
-            var course = _courseService.GetItemByID(currentClass.CourseID);
+            var course = _courseService.GetItemByID(currentCs.CourseID);
 
             if (course == null)
             {
