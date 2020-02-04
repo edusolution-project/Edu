@@ -38,7 +38,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonProgressService _lessonProgressService;
         private readonly LearningHistoryService _learningHistoryService;
 
-        private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _mapping;
+        private readonly MappingEntity<StudentEntity, ClassStudentViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _lessonMapping;
         private readonly IHostingEnvironment _env;
@@ -120,7 +120,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _scoreStudentService = scoreStudentService;
 
             _studentService = studentService;
-            _mapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
+            _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
             _env = evn;
             _fileProcess = fileProcess;

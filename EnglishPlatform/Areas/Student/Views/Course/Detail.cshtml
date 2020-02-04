@@ -11,11 +11,11 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex padding-b25">
-            <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{className}}</h2>
+            <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
             <div class="c-right">
                 <ul class="time-line flex">
-                    <li><i class="ti-time"></i>Bắt đầu: 14/08/2019 </li>
-                    <li><i class="ti-time"></i>Kết thúc: 21/08/2019 </li>
+                    <li><i class="ti-time"></i>Bắt đầu: {{formatShortDate(startDate)}} </li>
+                    <li><i class="ti-time"></i>Kết thúc: {{formatShortDate(endDate)}} </li>
                 </ul>
             </div>
         </div>
@@ -34,8 +34,8 @@
                 <li class="flex margin-b20">
                     <a href="#" class="thumb"><img :src="classImg" alt="" /></a>
                     <div class="c-right">
-                        <p><span class="label">Khóa học: </span>{{className}}</p>
-                        <p><span class="label">Chương trình: </span>{{subjectName}}</p>
+                        <p><span class="label">Khóa học: </span>{{domDecoder(className)}}</p>
+                        <p><span class="label">Chương trình: </span>{{domDecoder(subjectName)}}</p>
                         <p><span class="label">Môn học: </span>{{skillName}}</p>
                         <ul class="time-line flex">
                             <li><i class="ti-time"></i>Bắt đầu: {{formatShortDate(startDate)}} </li>
@@ -46,7 +46,7 @@
             </ul>
             <div class="box info-practice">
                 <h4>Chi tiết lớp học</h4>
-                <p>{{classDescription}}</p>
+                <p>{{domDecoder(classDescription)}}</p>
             </div>
         </div>
         <div class="row row-list" v-if="tab[1]">
@@ -162,6 +162,11 @@
         	            return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
                     })
                 },
+                domDecoder(str) {
+                    let parser = new DOMParser();
+                    let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
+                    return dom.body.textContent;
+                }
             }
         });
     </script>

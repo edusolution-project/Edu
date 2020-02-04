@@ -21,9 +21,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly AccountService _accountService;
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
+        private readonly SkillService _skillService;
         private readonly ClassService _classService;
+        private readonly ClassStudentService _classStudentService;
+        private readonly ClassSubjectService _classSubjectService;
         private readonly StudentService _studentService;
         private readonly StudentHelper _studentHelper;
+        private readonly ClassProgressService _progressService;
+        private readonly ScoreStudentService _scoreStudentService;
         private readonly IHostingEnvironment _env;
 
 
@@ -33,6 +38,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             SubjectService subjectService,
             TeacherService teacherService,
             ClassService classService,
+            SkillService skillService,
+            ClassStudentService classStudentService,
+            ClassSubjectService classSubjectService,
+            ClassProgressService classProgressService,
+            ScoreStudentService scoreStudentService,
             StudentService studentService,
             IHostingEnvironment evn
             )
@@ -42,6 +52,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _subjectService = subjectService;
             _teacherService = teacherService;
             _classService = classService;
+            _skillService = skillService;
+            _progressService = classProgressService;
+            _scoreStudentService = scoreStudentService;
+            _classStudentService = classStudentService;
+            _classSubjectService = classSubjectService;
             _studentService = studentService;
             _env = evn;
 
@@ -64,6 +79,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             ViewBag.Grade = grade;
             ViewBag.Subject = subject;
+            ViewBag.Skills = _skillService.GetList();
 
             ViewBag.User = UserID;
             ViewBag.Model = model;
@@ -87,20 +103,92 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public JsonResult AddStudent(string ClassID, string StudentID)
         {
             if (string.IsNullOrEmpty(ClassID))
-                return Json(new { Error = "Class not found" });
+                return Json(new { error = "Lớp không tồn tại" });
+            var @class = _classService.GetItemByID(ClassID);
+            if (@class == null)
+                return Json(new { error = "Lớp không tồn tại" });
             var student = _studentService.GetItemByID(StudentID);
             if (student == null)
-                return Json(new { Error = "Student not avaiable" });
-            if (_classService.AddStudentToClass(ClassID, student.ID) > 0)
+                return Json(new { error = "Học viên không tồn tại" });
+            var classstudents = _classStudentService.GetClassStudents(ClassID);
+            if (classstudents.Any(t => t.StudentID == StudentID))
             {
-                if (!student.IsActive)
-                {
-                    _studentHelper.ChangeStatus(student.ID, true);
-                }
-                return Json(new { data = student });
+                //already in class
+                return Json(new { data = @class, msg = "Học viên đã có trong lớp" });
             }
+            var newstudent = new ClassStudentEntity { ClassID = ClassID, StudentID = StudentID };
+            _classStudentService.Save(newstudent);
+            if(newstudent.ID != null)
+                return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
+            return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
+        }
+
+        public JsonResult GetList(DefaultModel model, string SubjectID, string ClassID, string TeacherID, string SkillID, string GradeID)
+        {
+            var filterCs = new List<FilterDefinition<ClassSubjectEntity>>();
+            if (!string.IsNullOrEmpty(ClassID))
+                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.ClassID == ClassID));
+            if (!string.IsNullOrEmpty(SubjectID))
+                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             else
-                return Json(new { error = "Can't add student now" });
+            {
+                //filter trong những môn được phân công
+            }
+            if (!string.IsNullOrEmpty(TeacherID))
+                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+            if (!string.IsNullOrEmpty(SkillID))
+                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SkillID == SkillID));
+            if (!string.IsNullOrEmpty(GradeID))
+                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+
+
+            var classids = (filterCs.Count > 0 ? _classSubjectService.Collection
+                .Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs))
+                //.Find(Builders<ClassSubjectEntity>.Filter.And(filterCs))
+                : _classSubjectService.Collection.Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.Empty)).ToList();
+
+            if (classids == null || classids.Count() == 0)
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Model", model }
+                });
+
+            var studentids = _classStudentService.Collection.Find(t => classids.Contains(t.ClassID)).SortByDescending(t => t.ID);
+            model.TotalRecord = studentids.CountDocuments();
+            var filter = new List<FilterDefinition<StudentEntity>>();
+
+            var retStudents = studentids.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+
+            //filter.Add(Builders<StudentEntity>.Filter.Where(o => retStudents.Contains(o.ID)));
+            //var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
+
+            var _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
+
+            var studentsView =
+                (from r in retStudents
+                 let @class = _classService.GetItemByID(r.ClassID)
+                 where @class != null
+                 let @student = _studentService.GetItemByID(r.StudentID)
+                 where @student != null
+                 let progress = _progressService.GetItemByClassID(@class.ID, @student.ID)
+                 let percent = progress == null ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                 select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
+                 {
+                     ClassID = @class.ID,
+                     ClassName = @class.Name,
+                     ClassStatus = "Đang học",
+                     LastJoinDate = DateTime.Now,
+                     Progress = progress,
+                     Percent = percent > 100 ? 100 : percent,
+                     Score = _scoreStudentService.GetScoreStudentByStudentIdAndClassId(@class.ID, @student.ID)
+                 })).ToList();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", studentsView },
+                { "Model", model }
+            };
+            return new JsonResult(response);
         }
 
         public JsonResult Search(string term)
@@ -221,6 +309,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-
+        public IActionResult ConvertStudent()
+        {
+            var classes = _classService.GetAll().ToList();
+            foreach (var @class in classes)
+            {
+                _classStudentService.RemoveClass(@class.ID);
+                var students = @class.Students;
+                foreach (var student in students)
+                {
+                    _classStudentService.Save(new ClassStudentEntity
+                    {
+                        ClassID = @class.ID,
+                        StudentID = student
+                    });
+                }
+            }
+            return null;
+        }
     }
 }

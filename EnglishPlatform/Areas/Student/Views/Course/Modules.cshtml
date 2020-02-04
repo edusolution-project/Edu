@@ -2,40 +2,17 @@
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var currentCs = ViewBag.ClassSubject as BaseCustomerMVC.Models.ClassSubjectViewModel;
     var completePercent = (int)ViewBag.CompletePercent;
-    ViewData["Title"] = currentCs.SubjectName + " - Modules";
+    ViewData["Title"] = currentCs.ClassName + " - " + currentCs.SkillName;
 }
 
 <script>
     setActiveMenu("course");
 </script>
 
-@*<script>
-        activeTab = "course";
-        modulesLink = "@Url.Action("Modules","Course")";
-        activeSub = "modules";
-    </script>*@
-@*<div class="left-col">
-        <div class="page-title">
-            <h1>@ViewData["Title"]</h1>
-        </div>
-        <div class="main-container">
-            <div class="sub-sidebar">
-                @await Html.PartialAsync("_subSidebarStudent")
-            </div>
-            <div class="main-content">
-                <div class="modules-wrapper">
-                    <div class="p-3">
-                        <i class="fas fa-circle-notch fa-spin"></i> Loading ...
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>*@
-
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b padding-b25">
-            <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>@currentCs.Name/<span class="end-break">Modules</span></h2>
+            <h2 class="title"><a href="@Url.Action("Detail","Course")/@currentCs.ClassID" title="@currentCs.ClassName"><i class="ti-arrow-left"></i></a>@currentCs.ClassName/<span class="end-break">@currentCs.SkillName</span></h2>
             <div class="c-right bad">
                 <div class="flex">
                     <b-progress :value="7" :max="10" class="mb-3"></b-progress>
@@ -113,68 +90,6 @@
 		},
         data: {
             list_data : [
-                {
-                    title : 'Section 1',
-                    id : 1,
-                    detail : [
-
-                    ]
-                },
-                {
-                    title : 'Section 2',
-                    id : 2,
-                    detail : [
-                        {
-                            title : 'Exercise 1',
-                            note : 'Làm bài lần cuối',
-                            date : '20/11/2019 09:46:58 PM',
-                            score : 7,
-                            id : 1
-                        },
-                        {
-                            title : 'Exercise 1',
-                            note : 'Làm bài lần cuối',
-                            date : '20/11/2019 09:46:58 PM',
-                            score : 7,
-                            id : 1
-                        },
-                        {
-                            title : 'Exercise 1',
-                            note : 'Làm bài lần cuối',
-                            date : '20/11/2019 09:46:58 PM',
-                            score : 7,
-                            id : 1
-                        }
-                    ]
-                },
-                {
-                    title : 'Section 3',
-                    id : 3,
-                    detail : [
-                        {
-                            title : 'Exercise 1',
-                            note : 'Làm bài lần cuối',
-                            date : '20/11/2019 09:46:58 PM',
-                            score : 7,
-                            id : 1
-                        },
-                        {
-                            title : 'Exercise 1',
-                            note : 'Làm bài lần cuối',
-                            date : '20/11/2019 09:46:58 PM',
-                            score : 7,
-                            id : 1
-                        },
-                        {
-                            title : 'Exercise 1',
-                            note : 'Làm bài lần cuối',
-                            date : '20/11/2019 09:46:58 PM',
-                            score : 7,
-                            id : 1
-                        }
-                    ]
-                },
-
             ],
             view : 10,
             page : 1

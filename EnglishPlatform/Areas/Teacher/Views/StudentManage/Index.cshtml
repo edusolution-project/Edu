@@ -5,41 +5,52 @@
     var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
     var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
     var listTeacher = ViewBag.Teacher as List<BaseCustomerEntity.Database.TeacherEntity>;
+    var listSkills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
+    var listClass = ViewBag.Classes as List<BaseCustomerEntity.Database.ClassEntity>;
     var user = ViewBag.User as string;
     var hasManageRole = (bool)(ViewBag.Managable ?? false);
 }
-
-<script src="../libs/quill-editor/quill.min.js"></script>
-<script src="../libs/quill-editor/quill-vue.min.js"></script>
-<link href="../libs/quill-editor/quill.core.css" rel="stylesheet">
-<link href="../libs/quill-editor/quill.snow.css" rel="stylesheet">
-<link href="../libs/quill-editor/quill.bubble.css" rel="stylesheet">
-
 <script>
     setActiveMenu("student");
 </script>
 
 <section class="module" id="dashboard_content">
+
     <div class="card-header">
         <div class="flex border-b padding-b25 justify-content-between">
             <div class="flex">
                 <div class="box filter-box w-152">
-                    <select name="">
-                        <option value="">Môn học</option>
+                    <select name="" v-model="search_class_id">
+                        <option value="">Lớp</option>
+                        <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
                     </select>
                 </div>
                 <div class="box filter-box w-152">
-                    <select name="">
+                    <select name="" v-model="search_subject_id">
+                        <option value="">Chương trình</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </div>
+                <div class="box filter-box w-152">
+                    <select name="" v-model="search_skill_id">
+                        <option value="">Môn học</option>
+                        <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </div>
+                <div class="box filter-box w-152">
+                    <select name="" v-model="search_grade_id">
                         <option value="">Cấp độ</option>
+                        <option v-for="(item,k) in list_grades_full" v-if="matchGrade(item)" :value="item.ID">{{item.Name}}</option>
                     </select>
                 </div>
-                <div class="w-250 box filter-box">
-                    <select name="">
-                        <option value="">Giáo viên</option>
-                    </select>
-                </div>
+                @*<div class="w-152 box filter-box">
+                        <select name="" v-model="search.teacher_id">
+                            <option value="">Giáo viên</option>
+                            <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                        </select>
+                    </div>*@
             </div>
-            <b-button v-b-modal.modal_event class="btn-addevent btn-student"><i class="ti-plus"></i></b-button>
+            <b-button class="btn-addevent btn-student" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
         </div>
     </div>
     <div class="card-body">
@@ -50,14 +61,15 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item,k) in tableData" v-if="item.id > 0">
-                    <td>{{k+1}}</td>
-                    <td><a href="/teacher/student_detail.html" :title="item.name">{{item.name}}</a></td>
-                    <td>{{item.email}}</td>
-                    <td>{{item.phone}}</td>
-                    <td v-bind:class="{good : (item.per > 50)}">{{item.per+'%'}}</td>
+                <tr v-for="(item,k) in tableData">
+                    <td>{{(page - 1) * view + (k+1)}}</td>
+                    <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
+                    <td>{{item.ClassName}}</td>
+                    <td>{{item.Email}}</td>
+                    <td>{{item.Phone}}</td>
+                    <td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
                     <td>{{item.last_update}}</td>
-                    <td v-bind:class="{good : (item.score > 5)}">{{item.score + ' điểm'}}</td>
+                    <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>
                     <td><button class="btn-act btn-trash"><i class="ti-trash"></i></button></td>
                 </tr>
             </tbody>
@@ -65,17 +77,24 @@
         <div class="box margin-t20 flex">
             <div class="paging-view">
                 Hiển thị:
-                <select v-model="view">
+                <select v-model="view" v-on:change="getData()">
                     <option value="10">10 kết quả</option>
                     <option value="20">20 kết quả</option>
                     <option value="30">30 kết quả</option>
                 </select>
             </div>
             <div class="page-control">
+                @*<div class="inner">
+                        <button v-on:click="goPage(0)"><i class="ti-angle-left"></i></button>
+                        <button v-on:click="goPage(page - 1)"><i class="ti-angle-double-left"></i></button>
+                        <input type="text" v-model="page" v-on:change="getData()" />
+                        <button v-on:click="goPage(page + 1)"><i class="ti-angle-double-right"></i></button>
+                        <button v-on:click="goPage(max_page)"><i class="ti-angle-right"></i></button>
+                    </div>*@
                 <div class="right">
                     <b-pagination v-model="page"
-                                  :total-rows="total_record"
-                                  :per-page="pageSize"
+                                  :total-rows="totalRec"
+                                  :per-page="view"
                                   v-on:input="getData()"></b-pagination>
                 </div>
             </div>
@@ -83,27 +102,201 @@
     </div>
 </section>
 
+
 @section Scripts {
+
+    <script type="text/x-template" id="autocomplete">
+        <div class="autocomplete">
+            <input type="text" v-on:input="onChange" v-model="search" v-on:keyup.down="onArrowDown" v-on:keyup.up="onArrowUp" v-on:keyup.enter="onEnter" class="form-control" placeholder="Nhập để tìm kiếm (>2 chữ)" />
+            <ul id="autocomplete-results" v-show="isOpen" class="autocomplete-results">
+                <li class="loading" v-if="isLoading">
+                    Loading results...
+                </li>
+                <li v-else v-for="(result, i) in results" :key="i" v-on:click="setResult(result)" class="autocomplete-result" :class="{'is-active': i === arrowCounter }">
+                    {{ result.FullName }}
+                </li>
+            </ul>
+
+        </div>
+    </script>
+
+    <style>
+        #app {
+            font-family: "Avenir", Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            color: #2c3e50;
+            margin-top: 60px;
+        }
+
+        .autocomplete {
+            position: relative;
+            width: 100%;
+        }
+
+        .autocomplete-results {
+            padding: 0;
+            margin: 0;
+            border: 1px solid #eeeeee;
+            max-height: 120px;
+            overflow: auto;
+            width: 100%;
+            position: absolute;
+            background: #FFF;
+        }
+
+        .autocomplete-result {
+            list-style: none;
+            text-align: left;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+            .autocomplete-result.is-active,
+            .autocomplete-result:hover {
+                background-color: #4aae9b;
+                color: white;
+            }
+    </style>
+
     <script>
-        Vue.use(VueQuillEditor)
+        Vue.component("autocomplete",
+            {
+                template: "#autocomplete",
+                props: {
+                    items: {
+                        type: Array,
+                        required: false,
+                        default: () => []
+                    }
+                },
+                data() {
+                    return {
+                        isOpen: false,
+                        results: [],
+                        search: "",
+                        isLoading: false,
+                        arrowCounter: 0,
+                        loadedTerms: [],
+                    };
+                },
+                methods: {
+                    onChange() {
+                        // Let's warn the parent that a change was made
+                        this.$emit("input", this.search);
+                        //console.log("change");
+                        if (this.search.length >= 2) {
+                            //checkifTerm is loaded
+                            //clearTimeout(this.timeout)
+                            var _that = this
+                            var term = _that.search.toLowerCase()
+                            //this.timeout = setTimeout(function () {
+                            if (this.loadedTerms.filter(item => item.term.indexOf(term) > -1).length == 0) {
+                                this.isLoading = true;
+                                let _form = new FormData()
+                                _form.append('term', term)
+                                let _url = '@Url.Action("Search","StudentManage")'
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        this.isLoading = false
+                                        this.items = response.data
+                                        this.loadedTerms.push({
+                                            term: term,
+                                            data: response.data
+                                        })
+                                        this.isOpen = true
+                                        this.$forceUpdate();
+                                    }).catch(e => { })
+                            } else {
+                                this.items = this.loadedTerms.filter(item => item.term.indexOf(term) > -1)[0].data;
+                                this.filterResults();
+                                this.isOpen = true;
+                                this.$forceUpdate();
+                            }
+                            //}, 200)
+                            // Is the data given by an outside ajax request?
+
+                        }
+                        else {
+                            this.isOpen = false
+                        }
+                    },
+                    filterResults() {
+                        // first uncapitalize all the things
+                        this.results = this.items.filter(item => {
+                            return item.FullName.toLowerCase().indexOf(this.search.toLowerCase()) > -1;
+                        });
+                    },
+                    setResult(result) {
+                        this.search = result.FullName;
+                        this.isOpen = false;
+                        this.arrowCounter = -1;
+                        this.$emit("chooseitem", result);
+                    },
+                    onArrowDown(evt) {
+                        if (this.arrowCounter < this.results.length) {
+                            this.arrowCounter = this.arrowCounter + 1;
+                        }
+                    },
+                    onArrowUp() {
+                        if (this.arrowCounter > 0) {
+                            this.arrowCounter = this.arrowCounter - 1;
+                        }
+                    },
+                    onEnter() {
+                        if (this.arrowCounter < 0 || this.arrowCounter > this.results.length)
+                            return false;
+                        this.setResult(this.results[this.arrowCounter])
+                        //this.search = this.results[this.arrowCounter].FullName;
+                        //this.isOpen = false;
+                        //this.arrowCounter = -1;
+                        //this.$emit("chooseStudent", result);
+                    },
+                    handleClickOutside(evt) {
+                        if (!this.$el.contains(evt.target)) {
+                            this.isOpen = false;
+                            this.arrowCounter = -1;
+                        }
+                    }
+                },
+                watch: {
+                    items: function (val, oldValue) {
+                        // actually compare them
+                        if (val.length !== oldValue.length) {
+                            this.results = val;
+                            this.isLoading = false;
+                        }
+                    }
+                },
+                mounted() {
+                    document.addEventListener("click", this.handleClickOutside);
+                },
+                destroyed() {
+                    document.removeEventListener("click", this.handleClickOutside);
+                }
+            }
+        )
+    </script>
+
+    <script>
         new Vue({
             el: "#main",
             mounted() {
-                this.getNews()
-            },
-            components: {
-                LocalQuillEditor: VueQuillEditor.quillEditor
+                this.getData()
+                this.getActiveClass()
+                this.list_subject = @Html.Raw(Json.Serialize(listSubject));
+                this.list_grades_full = @Html.Raw(Json.Serialize(listGrade));
+                this.list_skill = @Html.Raw(Json.Serialize(listSkills));
             },
             data: {
                 editorOption: {
                     theme: 'snow'
                 },
-                lessons: {
-                    id: 0,
-                    lesson_name: '',
-                    subject_name: '',
-                    level: '',
-                    content: ''
+                add_student: {
+                    id: "",
+                    name: "",
+                    email: "",
+                    class_id: ""
                 },
                 fields: [
                     {
@@ -113,6 +306,10 @@
                     {
                         key: 'name',
                         label: 'Họ tên'
+                    },
+                    {
+                        key: 'class',
+                        label: 'Lớp'
                     },
                     {
                         key: 'email',
@@ -128,7 +325,7 @@
                     },
                     {
                         key: 'last_update',
-                        label: 'Lần cuối'
+                        label: 'Lần học cuối'
                     },
                     {
                         key: 'score',
@@ -140,62 +337,77 @@
                     }
                 ],
                 tableData: [
-                    {
-                        id: 1,
-                        name: 'Huong Ho',
-                        email: 'lanhuongho0507@gmail.com',
-                        phone: '0983750705',
-                        per: 23,
-                        last_update: '08:45 02/11/2019',
-                        score: 4,
-                    },
-                    {
-                        id: 2,
-                        name: 'Nguyễn Thị Quỳnh Đan',
-                        email: 'quynhdanhanu@gmail.com',
-                        phone: '0983750705',
-                        per: 51,
-                        last_update: '08:45 02/11/2019',
-                        score: 6,
-                    },
                 ],
-                list_news: [
-                    {
-                        title: 'Đã đến lúc HLV Park',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news1.png'
-                    },
-                    {
-                        title: 'HLV Park: Có khi p',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news2.png'
-                    },
-                    {
-                        title: 'Tiến Dũng và Văn Toả',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news3.png'
-                    },
-                ],
+                list_subject: [],
+                list_skill: [],
+                list_grades_full: [],
+                teacherSource: [],
+                courseSource: [],
+                list_active_class: [],
                 week: '',
-                view: 10,
+                view: 30,
                 page: 1,
-                pageSize: 10,
-                total_record: 22,
-                student_name: ''
+                search_class_id: '',
+                search_subject_id: '',
+                search_grade_id: '',
+                search_teacher_id: '',
+                search_skill_id: '',
+                totalRec: 0,
             },
             watch: {
-                lessons: function (val) {
-                    console.log(val);
+                search_subject_id: function () {
+                    this.getData()
+                },
+                search_grade_id: function () {
+                    this.getData()
+                },
+                search_skill_id: function () {
+                    this.getData()
+                },
+                search_class_id: function () {
+                    this.getData()
                 }
             },
             methods: {
                 getData() {
-                    let _data = []
-
-                    this.tableData = _data
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('SubjectID', _that.search_subject_id)
+                    _form.append('ClassID', _that.search_class_id)
+                    _form.append('SkillID', _that.search_skill_id)
+                    _form.append('GradeID', _that.search_grade_id)
+                    _form.append('TeacherID', _that.search_teacher_id)
+                    _form.append('PageSize', _that.view)
+                    _form.append('PageIndex', _that.page)
+                    let _url = '@Url.Action("GetList", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.tableData = response.data.Data;
+                            this.tableData = _that.tableData
+                            this.totalRec = response.data.Model.totalRecord
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
+                        }).catch(e => { })
                 },
-                getNews() {
-                    // tương tự như trên
+                getActiveClass() {
+                    if (this.list_active_class.length == 0) {
+                        let _that = this
+                        let _form = new FormData()
+                        _form.append('skipActive', false)
+                        let _url = '@Url.Action("GetManageList","Class")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                var _data = response.data.Data;
+                                _data.forEach(function (item, k) {
+                                    console.log(item);
+                                    _that.list_active_class.push({
+                                        ID: item.ID,
+                                        Name: item.Name
+                                    })
+                                })
+                            }).catch(e => { })
+                    }
+                    this.add_student.class_id = ''
                 },
                 destroy(id) {
                     this.tableData.forEach(function (item, k) {
@@ -215,10 +427,52 @@
                         }
                     })
                 },
-                showInfo(obj) {
-                    // console.log(obj)
-                    this.lessons = obj
+                matchGrade(item) {
+                    return item.SubjectID == this.search_subject_id
+                },
+                hideModal() {
+                    $('.close').click();
+                },
+                showStudentModal(obj) {
                     this.$bvModal.show('modal_event')
+                },
+                chooseStudent(student) {
+                    this.add_student.name = student.Name
+                    this.add_student.email = student.Email
+                    this.add_student.id = student.ID
+                },
+                createStudent() {
+                    let _that = this
+                    let _form = new FormData()
+                    if (_that.add_student.class_id == '') {
+                        alert('Chưa chọn lớp học');
+                        return false;
+                    }
+                    if (_that.add_student.id == '') {
+                        alert('Vui lòng chọn lại học viên')
+                        return false;
+                    }
+                    _form.append('ClassID', _that.add_student.class_id)
+                    _form.append('StudentID', _that.add_student.id)
+                    let _url = '@Url.Action("AddStudent", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            if (response.data.error != null) {
+                                alert(response.data.error);
+                                return false;
+                            }
+                            else {
+                                alert(response.data.msg)
+                                this.search_class_id = _that.add_student.class_id
+                                this.search_grade_id = ''
+                                this.search_skill_id = ''
+                                this.search_subject_id = ''
+                                this.getData()
+                                this.hideModal()
+                            }
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
+                        }).catch(e => { console.log(e) })
                 }
             }
         });
@@ -227,14 +481,21 @@
 }
 
 @section Modals{
-    <b-modal id="modal_event" centered title="Thêm học viên">
+    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm học viên">
+        <b-col class="form-group">
+            <label for="">Lớp</label>
+            <select v-model="add_student.class_id" class="form-control">
+                <option value="">Chọn lớp</option>
+                <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
+            </select>
+        </b-col>
         <b-col class="form-group">
             <label for="">Học viên</label>
-            <input type="text" v-model="student_name" class="form-control" placeholder="Nhập để tìm kiếm">
+            <autocomplete v-on:chooseitem="chooseStudent" />
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
-            <b-button variant="success">Lưu</b-button>
-            <b-button variant="danger">Huỷ</b-button>
+            <b-button variant="success" v-on:click="createStudent()">Lưu</b-button>
+            <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
         </template>
     </b-modal>
 }

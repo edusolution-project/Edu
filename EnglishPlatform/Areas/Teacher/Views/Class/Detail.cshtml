@@ -12,7 +12,7 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex mb-2">
-            <h2 class="title"><a href="@Url.Action("Index", "Class")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{className}}</h2>
+            <h2 class="title"><a href="@Url.Action("Index", "Class")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
             <div class="search-box">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" placeholder="Search">
@@ -37,7 +37,7 @@
                 <li class="flex margin-b20">
                     <a href="#" class="thumb"><img :src="classImg" alt="" /></a>
                     <div class="c-right">
-                        <p><span class="label">Tên lớp: </span>{{className}}</p>
+                        <p><span class="label">Tên lớp: </span>{{domDecoder(className)}}</p>
                         @*<p><span class="label">Mã lớp : </span>IELTS_PL5_1</p>*@
                         @*<p><span class="label">Cấp độ : </span>{{gradeName}}</p>*@
                         <p><span class="label">Chương trình: </span>{{subjectName}}</p>
@@ -51,7 +51,7 @@
             </ul>
             <div class="box info-practice">
                 <h4>Chi tiết lớp học</h4>
-                <p>{{classDescription}}</p>
+                <p>{{domDecoder(classDescription)}}</p>
             </div>
         </div>
         <div class="box" v-if="tab[1]">
@@ -61,6 +61,7 @@
                         <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title}}</a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion" role="tabpanel">
                             <ul class="list">
+                                <vuejs-datepicker format="dd/M/yyyy" class="date ed"></vuejs-datepicker>
                                 <chap-content v-for="(item,k) in list_chapters" v-if="matchedItem(item, obj.ID + '-')"
                                               v-bind:data="item"
                                               v-bind:pos="k"
@@ -80,14 +81,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item,k) in tableData" v-if="item.id > 0">
-                        <td>{{k+1}}</td>
-                        <td><a href="/teacher/student_detail.html" :title="item.name">{{item.name}}</a></td>
-                        <td>{{item.email}}</td>
-                        <td>{{item.phone}}</td>
-                        <td v-bind:class="{good : (item.per > 50)}">{{item.per+'%'}}</td>
+                    <tr v-for="(item,k) in studentData">
+                        <td>{{(k+1)}}</td>
+                        <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
+                        <td>{{item.Email}}</td>
+                        <td>{{item.Phone}}</td>
+                        <td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
                         <td>{{item.last_update}}</td>
-                        <td v-bind:class="{good : (item.score > 5)}">{{item.score + ' điểm'}}</td>
+                        <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -147,6 +148,7 @@
         <li class="col-md-12">
             <div class="inner">
                 <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic ic-edit-small"></i>{{data.Title}}<i class="ic ic-collapse"></i></a>
+                <vuejs-datepicker format="dd/M/yyyy" class="date ed"></vuejs-datepicker>
                 <b-collapse :id="`prc-${data.ID}-${pos}`" role="tabpanel">
                     <b-card-body>
                         <ul class="list">
@@ -211,113 +213,8 @@
                 subjectName: '@currentClass.SubjectName',
                 skillName: '@currentClass.SkillName',
                 classSubjects: [
-                    //{
-                    //    id: 1,
-                    //    title: 'Listening',
-                    //    icon: 'ic-headphone-o'
-                    //},
-                    //{
-                    //    id: 2,
-                    //    title: 'Speaking',
-                    //    icon: 'ic-microphone-o'
-                    //},
-                    //{
-                    //    id: 3,
-                    //    title: 'Grammar',
-                    //    icon: 'ic-grammar-o'
-                    //},
-                ],
-                list_news: [
-                    {
-                        title: 'Đã đến lúc HLV Park',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news1.png'
-                    },
-                    {
-                        title: 'HLV Park: Có khi p',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news2.png'
-                    },
-                    {
-                        title: 'Tiến Dũng và Văn Toả',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news3.png'
-                    }
                 ],
                 list_data: [
-                    {
-                        title: 'Section 1',
-                        id: 1,
-                        detail: [
-                            {
-                                title: 'Exercise 1',
-                                note: 'Làm bài lần cuối',
-                                date: '20/11/2019 09:46:58 PM',
-                                start_date: '20/11/2019',
-                                end_date: '20/12/2019',
-                                score: 7,
-                                id: 1,
-                                state: true
-                            },
-                            {
-                                title: 'Exercise 1',
-                                note: 'Làm bài lần cuối',
-                                date: '20/11/2019 09:46:58 PM',
-                                start_date: '20/11/2019',
-                                end_date: '20/12/2019',
-                                score: 7,
-                                id: 1,
-                                state: true
-                            },
-                            {
-                                title: 'Exercise 1',
-                                note: 'Làm bài lần cuối',
-                                date: '20/11/2019 09:46:58 PM',
-                                start_date: '20/11/2019',
-                                end_date: '20/12/2019',
-                                score: 7,
-                                id: 1,
-                                state: false
-                            }
-                        ]
-                    },
-                    {
-                        title: 'Section 2',
-                        id: 2,
-                        detail: [
-                            {
-                                title: 'Ngữ pháp cơ bản',
-                                note: 'Làm bài lần cuối',
-                                date: '20/11/2019 09:46:58 PM',
-                                start_date: '20/11/2019',
-                                end_date: '20/12/2019',
-                                score: 7,
-                                id: 1,
-                                state: false
-                            },
-                            {
-                                title: 'Exercise 1',
-                                note: 'Làm bài lần cuối',
-                                date: '20/11/2019 09:46:58 PM',
-                                start_date: '20/11/2019',
-                                end_date: '20/12/2019',
-                                score: 7,
-                                id: 1,
-                                state: false
-                            },
-                            {
-                                title: 'Luyện nói nâng cao',
-                                note: 'Làm bài lần cuối vào ngày',
-                                date: '20/11/2019 09:46:58 PM',
-                                start_date: '20/11/2019',
-                                end_date: '20/12/2019',
-                                score: 7,
-                                id: 1,
-                                state: false
-                            }
-                        ]
-                    }
-
                 ],
                 list_subjects: [],
                 list_chapters: [],
@@ -347,41 +244,18 @@
                     },
                     {
                         key: 'last_update',
-                        label: 'Lần cuối'
+                        label: 'Lần học cuối'
                     },
                     {
                         key: 'score',
                         label: 'Kết quả'
                     }
                 ],
-                tableData: [
-                    {
-                        id: 1,
-                        name: 'Huong Ho',
-                        email: 'lanhuongho0507@gmail.com',
-                        phone: '0983750705',
-                        per: 23,
-                        last_update: '08:45 02/11/2019',
-                        score: 4,
-                    },
-                    {
-                        id: 2,
-                        name: 'Nguyễn Thị Quỳnh Đan',
-                        email: 'quynhdanhanu@gmail.com',
-                        phone: '0983750705',
-                        per: 51,
-                        last_update: '08:45 02/11/2019',
-                        score: 6,
-                    },
+                studentData: [
                 ],
                 view: 10,
                 page: 1,
                 tab: [true, false, false, false, false]
-                //tab1: true,
-                //tab2: false,
-                //tab3: false,
-                //tab4: false,
-                //tab5: false
             },
             watch: {
             },
@@ -403,7 +277,7 @@
                             this.loadClassSubjects();
                             break;
                         case 2:
-                            this.loadStudentManagement();
+                            this.loadClassStudent();
                             break;
                         case 3:
                             this.loadPreference();
@@ -512,8 +386,21 @@
                                 _that.$forceUpdate()
                             }).catch(e => { })
                 },
-                loadStudentManagement() {
-                    console.log(3)
+                loadClassStudent() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('ClassID', _that.classID)
+                    _form.append('PageSize', 1000)
+                    _form.append('PageIndex', 1)
+                    let _url = '@Url.Action("GetList", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.studentData = response.data.Data;
+                            this.studentData = _that.studentData
+                            this.totalRec = response.data.Model.totalRecord
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
+                        }).catch(e => { })
                 },
                 loadPreference() {
                     console.log(4)
@@ -534,6 +421,11 @@
         	            return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
                     })
                 },
+                domDecoder(str) {
+                    let parser = new DOMParser();
+                    let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
+                    return dom.body.textContent;
+                }
             }
         });
     </script>

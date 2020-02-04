@@ -19,6 +19,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly SkillService _skillService;
         private readonly CourseService _courseService;
         private readonly TeacherService _teacherService;
+        private readonly ClassStudentService _classStudentService;
         private readonly SubjectService _subjectService;
         private readonly GradeService _gradeService;
         private readonly LessonService _lessonService;
@@ -45,7 +46,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, StudentClassViewModel> _mappingList;
         //private readonly MappingEntity<ClassSubjectEntity, StudentClassViewModelV2> _mappingList;
-        private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _studentMapping;
+        private readonly MappingEntity<StudentEntity, ClassStudentViewModel> _studentMapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
 
         private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
@@ -57,6 +58,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , ClassSubjectService classSubjectService
             , SkillService skillService
             , CourseService courseService
+            , ClassStudentService classStudentService
             , TeacherService teacherService
             , SubjectService subjectService
             , GradeService gradeService
@@ -91,6 +93,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _skillService = skillService;
             _classSubjectService = classSubjectService;
             _courseService = courseService;
+            _classStudentService = classStudentService;
             _teacherService = teacherService;
             _subjectService = subjectService;
             _gradeService = gradeService;
@@ -105,7 +108,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _mappingList = new MappingEntity<ClassEntity, StudentClassViewModel>();
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
-            _studentMapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
+            _studentMapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
 
 
@@ -128,7 +131,9 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else
             {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
+                var classids = _classStudentService.GetStudentClasses(userId);
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => classids.Contains(o.ID)));
+                //filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
             }
             if (!string.IsNullOrEmpty(model.SearchText))
             {
@@ -152,7 +157,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == entity.SubjectID));
             }
 
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+            var data = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t=> t.ID);
             model.TotalRecord = data.Count();
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
@@ -199,7 +204,9 @@ namespace BaseCustomerMVC.Controllers.Student
                     StatusDesc = "Authentication Error"
                 });
             }
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
+
+            var classids = _classStudentService.GetStudentClasses(userId);
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => classids.Contains(o.ID)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
@@ -230,7 +237,9 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 return null;
             }
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
+            var classids = _classStudentService.GetStudentClasses(userId);
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => classids.Contains(o.ID)));
+            //filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
@@ -433,7 +442,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                     //let learned = _learningHistoryService.CreateQuery().AsQueryable()
                                     //.Where(t => t.StudentID == r.ID && t.ClassID == currentClass.ID)
                                     //.GroupBy(t => new { t.StudentID, t.ClassID, t.LessonID }).Count()
-                                select _studentMapping.AutoOrtherType(r, new ClassMemberViewModel()
+                                select _studentMapping.AutoOrtherType(r, new ClassStudentViewModel()
                                 {
                                     ClassName = currentClass.Name,
                                     ClassStatus = "Đang học",
@@ -525,7 +534,8 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (currentClass == null)
                 return RedirectToAction("Index");
-            if (currentClass.Students.IndexOf(userId) < 0)
+            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
+            if (classStudent == null)
                 return RedirectToAction("Index");
             var vm = new ClassViewModel(currentClass);
             var subjects = _classSubjectService.GetByClassID(currentClass.ID);
@@ -561,7 +571,8 @@ namespace BaseCustomerMVC.Controllers.Student
             var currentClass = _service.GetItemByID(currentCs.ClassID);
             if (currentClass == null)
                 return RedirectToAction("Index");
-            if (currentClass.Students.IndexOf(userId) < 0)
+            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
+            if (classStudent == null)
                 return RedirectToAction("Index");
             var progress = _progressService.GetItemByClassSubjectID(id, userId);
             var completePercent = 0;
@@ -578,6 +589,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 CourseID = currentCs.CourseID,
                 ClassID = currentClass.ID,
                 ClassName = currentClass.Name,
+                SkillName = _skillService.GetItemByID(currentCs.SkillID).Name
             };
             if (old == 1) return View("Modules_o");
             return View();
@@ -590,7 +602,8 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (currentClass == null)
                 return RedirectToAction("Index");
-            if (currentClass.Students.IndexOf(userId) < 0)
+            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
+            if (classStudent == null)
                 return RedirectToAction("Index");
             ViewBag.Class = currentClass;
             return View();
@@ -603,7 +616,8 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (currentClass == null)
                 return RedirectToAction("Index");
-            if (currentClass.Students.IndexOf(userId) < 0)
+            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
+            if (classStudent == null)
                 return RedirectToAction("Index");
             ViewBag.Class = currentClass;
             return View();

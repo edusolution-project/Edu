@@ -120,7 +120,7 @@
                     },
                     {
                         key: 'skill',
-                        label: 'Kĩ năng'
+                        label: 'Môn học'
                     },
                     {
                         key: 'level',
@@ -356,7 +356,7 @@
                             alert("Error: " + e)
                         })
                     }
-                }
+                },
             }
         });
     </script>
@@ -383,9 +383,9 @@
                 </select>
             </b-col>
             <b-col class="form-group">
-                <label for="">Kĩ năng</label>
+                <label for="">Môn học</label>
                 <select class="form-control" v-model="addItem.SkillID">
-                    <option value="">Chọn kỹ năng</option>
+                    <option value="">Chọn môn học</option>
                     <option v-for="(item,k) in list_skills" :value="item.ID">{{item.Name}}</option>
                 </select>
             </b-col>

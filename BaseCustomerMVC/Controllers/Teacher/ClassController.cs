@@ -37,7 +37,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonProgressService _lessonProgressService;
         private readonly LearningHistoryService _learningHistoryService;
 
-        private readonly MappingEntity<StudentEntity, ClassMemberViewModel> _mapping;
+        private readonly MappingEntity<StudentEntity, ClassStudentViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly IHostingEnvironment _env;
 
@@ -123,7 +123,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _scoreStudentService = scoreStudentService;
 
             _studentService = studentService;
-            _mapping = new MappingEntity<StudentEntity, ClassMemberViewModel>();
+            _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
             _env = evn;
             _fileProcess = fileProcess;
@@ -539,7 +539,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var filter = new List<FilterDefinition<StudentEntity>>();
             filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
             var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
-            var studentsView = students.ToList().Select(t => _mapping.AutoOrtherType(t, new ClassMemberViewModel()
+            var studentsView = students.ToList().Select(t => _mapping.AutoOrtherType(t, new ClassStudentViewModel()
             {
                 ClassName = currentClass.Name,
                 ClassStatus = "Đang học",
@@ -605,7 +605,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var filter = new List<FilterDefinition<StudentEntity>>();
             filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
             var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
-            var studentsView = students.ToList().Select(t => _mapping.AutoOrtherType(t, new ClassMemberViewModel()
+            var studentsView = students.ToList().Select(t => _mapping.AutoOrtherType(t, new ClassStudentViewModel()
             {
                 ClassName = currentClass.Name,
                 ClassStatus = "Đang học",
@@ -698,7 +698,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
-            //filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
             var data = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);
 
@@ -754,7 +754,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return Json(new { Data = std });
         }
 
-        public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "")
+        public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
             if (!string.IsNullOrEmpty(SubjectID))
@@ -769,16 +769,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
             }
-            filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate && o.EndDate >= model.StartDate));
+            if (model.StartDate > new DateTime(1900, 1, 1))
+                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
+            if (model.StartDate > new DateTime(1900, 1, 1))
+                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
 
             var data = _classSubjectService.Collection
                 //.AsQueryable().
                 //GroupBy(t => t.ClassID).Select(t => new ClassViewModel(t) {
                 //    CourseName = 
                 //})
-                .Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filter)).ToList();
-            model.TotalRecord = data.ToList().Count();
-            var classData = _service.Collection.AsQueryable().Where(t => data.Contains(t.ID)).OrderByDescending(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToList();
+                .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter): Builders<ClassSubjectEntity>.Filter.Empty).ToList();
+            model.TotalRecord = data.Count();
+            var classData = _service.Collection.AsQueryable().Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)).OrderByDescending(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToList();
             var returndata = from o in classData
                                  //where o.Skills != null
                              let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()

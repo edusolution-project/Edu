@@ -50,6 +50,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly CalendarHelper _calendarHelper;
+        private readonly ClassStudentService _classStudentService;
         private readonly IHostingEnvironment _env;
 
         private readonly LessonHelper _lessonHelper;
@@ -61,6 +62,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             CourseService courseService,
             TeacherService teacherService,
             StudentService studentService,
+            ClassStudentService classStudentService,
             LessonService lessonService,
             LessonScheduleService lessonScheduleService,
             ExamService examService,
@@ -525,6 +527,10 @@ namespace BaseCustomerMVC.Controllers.Admin
                             var listID = studentList.Select(o => o.ID);
                             itemCourse.Students.AddRange(listID);
                             itemCourse.Students = itemCourse.Students.Distinct().ToList();
+                            foreach(var student in itemCourse.Students)
+                            {
+
+                            }
                             _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
                         }
                     }

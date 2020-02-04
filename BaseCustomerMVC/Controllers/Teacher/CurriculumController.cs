@@ -784,6 +784,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         GradeID = newcourse.GradeID,
                         SubjectID = newcourse.SubjectID,
                         CreateUser = _userCreate,
+                        SkillID = newcourse.SkillID,
                         Created = DateTime.Now,
                         Updated = DateTime.Now,
                         IsActive = true,

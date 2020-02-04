@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var listGrade = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var listSubject = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var listSkill = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
     var listModGrade = ViewBag.ModGrade as List<BaseCustomerEntity.Database.ModGradeEntity>;
     var listModSubject = ViewBag.ModSubject as List<BaseCustomerEntity.Database.ModSubjectEntity>;
     var user = ViewBag.User as string;
@@ -41,7 +42,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-group row col-md-4 offset-md-4">
+                <div class="form-group row col-md-4">
                     <label for="staticText" class="col-sm-4 col-form-label">Grade</label>
                     <div class="col-sm-8">
                         <select id="GradeID" class="form-control" onchange="LoadCourse()">
@@ -50,6 +51,21 @@
                                 for (int i = 0; listGrade != null && i < listGrade.Count; i++)
                                 {
                                     <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID">@listGrade[i].Name</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row col-md-4">
+                    <label for="staticText" class="col-sm-4 col-form-label">Skill</label>
+                    <div class="col-sm-8">
+                        <select id="SkillID" class="form-control" onchange="LoadCourse()">
+                            <option value="" for="all">---</option>
+                            @{
+                                for (int i = 0; listSkill != null && i < listSkill.Count; i++)
+                                {
+                                    <option value="@listSkill[i].ID">@listSkill[i].Name</option>
                                 }
 
                             }
@@ -234,6 +250,19 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label class="col-form-label">Skill:</label>
+                            <select name="SkillID" class="form-control" required>
+                                <option value="">--- Choose skill ---</option>
+                                @{
+                                    for (int i = 0; listSkill != null && i < listSkill.Count; i++)
+                                    {
+                                        <option value="@listSkill[i].ID">@listSkill[i].Name</option>
+                                    }
+
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="message-text" class="col-form-label">Description:</label>
                             <textarea class="form-control" name="Description"></textarea>
                         </div>
@@ -261,6 +290,7 @@
         var searchText = $("#searchText").val();
         var subject = $("#SubjectID").val();
         var grade = $("#GradeID").val();
+        var skill = $("#SkillID").val();
         showLoading();
         $.ajax({
             type: "POST",

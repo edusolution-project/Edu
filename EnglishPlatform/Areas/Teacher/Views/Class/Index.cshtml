@@ -24,7 +24,7 @@
                 </div>
                 <div class="box filter-box w-152">
                     <select v-model="subject">
-                        <option value="">Choose Subject</option>
+                        <option value="">Chọn chương trình</option>
                         <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                     </select>
                 </div>
@@ -126,7 +126,7 @@
                     },
                     {
                         key: 'skills',
-                        label: 'Kỹ năng'
+                        label: 'Môn học'
                     },
                     {
                         key: 'students',
@@ -257,7 +257,7 @@
                     try {
                         _startdate = moment(_that.class_info.StartDate).format("MM/DD/YYYY")
                     }
-                    catch{
+                    catch(e){
                         alert("Vui lòng nhập ngày mở lớp");
                         _that.$refs["addStartDate"].showCalendar();//.focus();
                         return false;
@@ -273,7 +273,7 @@
                     try {
                         _enddate = moment(_that.class_info.EndDate).format("MM/DD/YYYY")
                     }
-                    catch{
+                    catch(e){
                         alert("Vui lòng nhập ngày kết thúc lớp");
                         _that.$refs["addStartDate"].showCalendar();//.focus();
                         return false;

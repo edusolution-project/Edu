@@ -17,7 +17,7 @@
     <div class="card-header">
         <div class="flex border-b padding-b25">
             <div class="box filter-box">
-                <input type="text" value="01/08/2019 - 30/09/2019" name="dates">
+                <input type="text" value="" name="dates">
                 <span class="ic ic-picker"></span>
             </div>
             <div class="box filter-box w-152">
@@ -116,8 +116,8 @@
                 grade: '',
                 view: 10,
                 page: 1,
-                startdate: moment().subtract(29, 'days'),
-                enddate: moment()
+                startdate: moment(),
+                enddate: moment().add(29, 'days')
             },
             computed: {
                 sDate: {
