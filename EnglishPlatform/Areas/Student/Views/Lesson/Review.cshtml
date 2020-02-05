@@ -1,7 +1,8 @@
 ﻿@{
-    Layout = "~/Views/Shared/_LayoutStudent_noChat.cshtml";
+    Layout = "~/Views/Shared/_LayoutStudent_NewUI_noChat.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var currentClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
     var currentLesson = ViewBag.Lesson as BaseCustomerMVC.Models.StudentLessonViewModel;
     var currentChapter = ViewBag.Chapter as BaseCustomerEntity.Database.ChapterEntity;
     var nextLesson = ViewBag.NextLesson as BaseCustomerEntity.Database.LessonEntity;
@@ -124,15 +125,15 @@
                 @if (currentChapter != null)
                 {
                     @*<span>/</span>*@ <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
-                            "Modules" ,"Course")/@currentClass.ID#@currentChapter.ID">@currentChapter.Name</a>
+                            "Modules" ,"Course")/@currentClassSubject.ID#@currentChapter.ID">@currentChapter.Name</a>
                         }
                 / @currentLesson.Title
             </h2>
             @if (nextLesson != null)
             {
                 <h2 class="col-md-6 p-0 text-right">
-                    Next > <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
-                            "Detail" ,"Lesson")/@nextLesson.ID/@currentClass.ID">@nextLesson.Title</a>
+                    Bài tiếp > <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
+                            "Detail" ,"Lesson")/@nextLesson.ID/@currentClassSubject.ID">@nextLesson.Title</a>
                         </h2>
                     }
         </div>
@@ -151,7 +152,7 @@
     </div>
     @section Footer { }
     @section Scripts{
-        <script src="~/js/student-exam-review.js?20191102v4"></script>
+        <script src="~/js/student-exam-review.js?20200205v2"></script>
         <script>
         //localStorage.clear();
 

@@ -118,7 +118,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             var newstudent = new ClassStudentEntity { ClassID = ClassID, StudentID = StudentID };
             _classStudentService.Save(newstudent);
-            if(newstudent.ID != null)
+            if (newstudent.ID != null)
                 return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
             return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
         }
@@ -171,7 +171,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  let @student = _studentService.GetItemByID(r.StudentID)
                  where @student != null
                  let progress = _progressService.GetItemByClassID(@class.ID, @student.ID)
-                 let percent = progress == null ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                 let percent = (progress == null || progress.TotalLessons == 0) ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
                  select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
                  {
                      ClassID = @class.ID,

@@ -281,14 +281,14 @@ var ExamReview = (function () {
             html += '<div class="student-answer">';
             html += '<fieldset class="answer-item d-inline mr-3">';
             html += '<div style="cursor: pointer; display:inline-block" class="form-check">';
-            html += '<label class="answer-text form-check-label"><i>Your Answer: </i></label>';
+            html += '<label class="answer-text form-check-label"><i>Trả lời: </i></label>';
             html += '</div>';
             html += '</fieldset>';
             html += '</div>';
             html += '<div>';
             html += '<fieldset class="answer-item d-inline mr-3">';
             html += '<div style="cursor: pointer; display:inline-block" class="form-check">';
-            html += '<label class="answer-text form-check-label"><i>Correct Answer: </i></label>';
+            html += '<label class="answer-text form-check-label"><i>Đáp án đúng: </i></label>';
             html += '</div>';
             html += '</fieldset>';
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
@@ -332,7 +332,7 @@ var ExamReview = (function () {
             html += '<div class="quiz-box-header"><h5 class="title">' + itemContent + '</h5>' + renderMedia(item.Media) + '</div>';
             html += '<div class="answer-wrapper row">';
             html += '<fieldset class="answer-item student-answer col-md-6" id="quiz2-' + item.ID + '">';
-            html += '<i>Your answer</i>';
+            html += '<i>Trả lời</i>';
             html += '</fieldset>';
             var content = "";
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
@@ -340,7 +340,7 @@ var ExamReview = (function () {
                 content += content == "" ? answer.Content : " | " + answer.Content;
             }
             html += '<fieldset class="answer-item col-md-6" id="quiz2-' + item.ID + '">';
-            html += '<i>Correct Answer :</i> <span class="text-success">' + content + '<span>';
+            html += '<i>Đáp án đúng :</i> <span class="text-success">' + content + '<span>';
             html += '</fieldset>';
             var description = "";
             if (item.Description != null)
@@ -366,8 +366,8 @@ var ExamReview = (function () {
 
         html += '<div class="row m-0">';
         html += '<div class="quiz-pane col-4 align-top"><div class="pane-item"><div class="quiz-text text-center">Quiz</div></div></div>';
-        html += '<div class="quiz-pane col-4 align-top"><div class="pane-item"><div class="quiz-text text-center">Your answer</div></div></div>';
-        html += '<div class="quiz-pane col-4 align-top"><div class="pane-item"><div class="quiz-text text-center">Correct answer</div></div></div>';
+        html += '<div class="quiz-pane col-4 align-top"><div class="pane-item"><div class="quiz-text text-center">Trả lời</div></div></div>';
+        html += '<div class="quiz-pane col-4 align-top"><div class="pane-item"><div class="quiz-text text-center">Đáp án đúng</div></div></div>';
         html += '</div>';
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
@@ -444,9 +444,9 @@ var ExamReview = (function () {
         var ct_action_holder = $('<div>', { class: "col-md-6 col-sm-8 text-center d-inline-block" });
 
         if (_type != 1) {
-            var explain_btn = $('<button>', { class: "btn btn-success pl-3 pr-3", onclick: "ToggleExplain(this)", text: "Toggle explaination" });
-            var golist_btn = $('<button>', { class: "btn btn-success pl-3 pr-3 ml-1", onclick: "GoList(this)", text: "Back to list" });
-            var redo_btn = $('<button>', { class: "btn btn-success pl-3 pr-3 mr-1", onclick: "Redo(this)", text: "Do it again" });
+            var explain_btn = $('<button>', { class: "btn btn-success pl-3 pr-3", onclick: "ToggleExplain(this)", text: "Bật/ tắt giải thích" });
+            var golist_btn = $('<button>', { class: "btn btn-success pl-3 pr-3 ml-1", onclick: "GoList(this)", text: "Về danh sách" });
+            var redo_btn = $('<button>', { class: "btn btn-success pl-3 pr-3 mr-1", onclick: "Redo(this)", text: "Thực hiện lại" });
             ct_action_holder.append(redo_btn).append(explain_btn).append(golist_btn);
         }
         var next_btn_holder = $('<div>', { class: "col-md-3 col-sm-2 text-right d-inline-block" });
@@ -548,11 +548,11 @@ var ExamReview = (function () {
     }
 
     var redo = function () {
-        document.location = config.url.exam + "/" + config.lesson.ID + "/" + config.exam.ClassID + "#redo";
+        document.location = config.url.exam + "/" + config.lesson.ID + "/" + config.exam.ClassSubjectID + "#redo";
     }
 
     var goList = function () {
-        document.location = config.url.list + "/" + config.exam.ClassID + "#" + config.lesson.ChapterID;
+        document.location = config.url.list + "/" + config.exam.ClassSubjectID + "#" + config.lesson.ChapterID;
     }
 
     window.ExamReview = {} || ExamReview;

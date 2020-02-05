@@ -1,15 +1,12 @@
 ﻿using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Globals;
 using BaseCustomerMVC.Models;
-using Core_v2.Interfaces;
 using Core_v2.Globals;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
@@ -295,7 +292,11 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
 
-            var currentClass = _classService.GetItemByID(exam.ClassID);
+            var currentCs = _classSubjectService.GetItemByID(exam.ClassSubjectID);
+            if (currentCs == null)
+                return RedirectToAction("Index", "Course");
+
+            var currentClass = _classService.GetItemByID(currentCs.ClassID);
             if (currentClass == null)
                 return RedirectToAction("Index", "Course");
 
@@ -327,6 +328,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             ViewBag.Lesson = lessonview;
             ViewBag.Class = currentClass;
+            ViewBag.Subject = currentCs;
             ViewBag.NextLesson = nextLesson;
             ViewBag.Chapter = chapter;
             ViewBag.Type = lesson.TemplateType;
@@ -590,7 +592,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == model.ID).FirstOrDefault()
                            let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID).SortByDescending(o => o.ID).FirstOrDefault()
-                           let lastexam = r.TemplateType == LESSON_TEMPLATE.EXAM ? _examService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID).SortByDescending(o => o.ID).FirstOrDefault() : null
+                           let lastexam = r.TemplateType == LESSON_TEMPLATE.EXAM ? _examService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID
+                           //&& x.Status
+                           ).SortByDescending(o => o.ID).FirstOrDefault() : null //get lastest exam
                            select _schedulemapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
                                ScheduleID = schedule.ID,
@@ -600,8 +604,10 @@ namespace BaseCustomerMVC.Controllers.Student
                                IsView = r.TemplateType == LESSON_TEMPLATE.EXAM ? lastexam != null : lastjoin != null,
                                LastJoin = r.TemplateType == LESSON_TEMPLATE.EXAM ? (lastexam != null ? lastexam.Updated : DateTime.MinValue) :
                                     lastjoin != null ? lastjoin.Time : DateTime.MinValue,
-                               DoPoint = lastexam != null ? (lastexam.MaxPoint > 0 ? lastexam.Point * 100 / lastexam.MaxPoint : 0) : 0,
-                               Tried = lastexam != null ? lastexam.Number : 0
+                               DoPoint = (lastexam != null && lastexam.Status) ? (lastexam.MaxPoint > 0 ? lastexam.Point * 100 / lastexam.MaxPoint : 0) : 0,//completed exam only
+                               Tried = lastexam != null ? lastexam.Number : 0,
+                               LastExam = (lastexam != null && lastexam.Status
+                               ) ? lastexam.ID : null
                            })).ToList()
             };
 

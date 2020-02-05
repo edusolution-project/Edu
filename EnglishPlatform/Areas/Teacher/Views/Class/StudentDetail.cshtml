@@ -1,74 +1,253 @@
 ﻿@{
 
-    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     var currentStudent = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
     ViewData["Title"] = currentClass.Name + " / " + currentStudent.FullName;
 }
-
+}
+<script src="~/js/daterangepicker.min.js"></script>
+<link href="~/css/daterangepicker.css" rel="stylesheet" />
+<script src="/libs/vuejs-datepicker.min.js"></script>
 <script>
-    activeTab = "course";
-    activeSub = "people";
+    setActiveMenu("course");
 </script>
-<div class="left-col">
-    <div class="page-title">
-        <h1>
-            <a href="@Url.Action("Members" ,"Class")/@currentClass.ID">@currentClass.Name</a>
-            / Student: @currentStudent.FullName
-        </h1>
-    </div>
-    <div class="main-container">
-        <div class="sub-sidebar">
-            @await Html.PartialAsync("_subSidebarTeacher")
-        </div>
-        <div class="main-content">
-            <div class="detail pb-3 row">
-                <div class="text-left col-md-10">
-                    <div class="lession-label d-inline-block">Period: <b>@currentClass.StartDate.ToString("dd/MM/yyyy") - @currentClass.EndDate.ToString("dd/MM/yyyy")</b></div> -
-                    <div class="lession-label d-inline-block">
-                        Status:
-                        @if (currentClass.EndDate.Date > DateTime.Now.Date)
-                        {
-                            <b>Ongoing</b>
-                        }
-                        else
-                        {
-                            <b>Complete</b>
-                        }
-                    </div>
-                </div>
-            </div>
 
-            <div>
-                <ul class="nav nav-tabs">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#" onclick="toggleStudentNav(this)" action="@Url.Action("StudentModules", "Class")/@currentStudent.ID/@currentClass.ID">Learning History</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="toggleStudentNav(this)" action="@Url.Action("StudentAssignment", "Class")/@currentStudent.ID/@currentClass.ID">Asssignment Result</a>
-                    </li>
+<section class="module" id="dashboard_content">
+    <div class="card-header">
+        <div class="flex mb-2">
+            <h2 class="title"><a href="@Url.Action("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
+            @*<div class="search-box">
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" placeholder="Search">
+                </div>*@
+        </div>
+        <div class="flex j-between border-b">
+            <div class="tab bg-none">
+                <ul class="flex">
+                    <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Lịch sử học tập" v-on:click="tabChange()">Lịch sử học tập</a></li>
+                    <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Kết quả" v-on:click="tabChange(1)">Kết quả</a></li>
                 </ul>
             </div>
-            <div class="mt-2" id="tabContent">
-
-            </div>
+            <div class="c-right"></div>
         </div>
     </div>
-</div>
+    <div class="card-body">
+        <div class="box" v-if="tab[0]">
+            <div class="flex j-between">
+                <div class="flex border-b padding-b25">
+                    <div class="box filter-box w-250">
+                        <input type="text" value="01/08/2019 - 30/09/2019" name="dates">
+                        <span class="ic ic-picker"></span>
+                    </div>
+                    @*<div class="w-250 box filter-box">
+                            <div class="flex">
+                                <vuejs-datepicker v-model="start_date" format="dd/M/yyyy"></vuejs-datepicker>
+                                <vuejs-datepicker v-model="to_date" format="dd/M/yyyy"></vuejs-datepicker>
+                            </div>
+                            <span class="ic ic-picker"></span>
+                        </div>*@
+                    <div class="box filter-box w-152">
+                        <select v-model="search_subject">
+                            <option value="">Môn học</option>
+                            <option v-for="(item, k) in classSubjects"
+                                    :value="item.ID">
+                                {{item.Title}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex rate">
+                    <span><i class="ic ic-paper-yet"></i>Điểm: 90</span>
+                    <span><i class="ic ic-award"></i>Xếp hạng: 1</span>
+                    <!-- <span><i class="ic ic-award-2"></i>Xếp hạng: 2</span> -->
+                    <!-- <span><i class="ic ic-award-3"></i>Xếp hạng: 3</span> -->
+                    <!-- <span><i class="ic ic-award-n"></i>Xếp hạng: 4</span> -->
+                </div>
+            </div>
+            <table id="ed_table" class="table">
+                <thead>
+                    <tr>
+                        <th v-for="(field,k) in fields">{{field.label}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item,k) in tableData">
+                        <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
+                        <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
+                        <td>{{formatFullDate(item.LearnLast)}}</td>
+                        <td>{{item.LearnCount}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="box" v-if="tab[1]">
+        </div>
+    </div>
+</section>
 
 @section Scripts {
     <script>
-        var toggleStudentNav = function (obj) {
-            if ($(obj).hasClass("active"))
-                return false;
-            $(obj).parent().siblings().find(".active").removeClass("active");
-            $(obj).addClass("active");
-            $('#tabContent').html('<div class="p-3"><i class="fas fa-circle-notch fa-spin"></i> Loading ...</div>');
-            $('#tabContent').load($(obj).attr('action'));
-        }
+        new Vue({
+            el: "#main",
+            mounted() {
+                this.loadClassSubjects()
+                var start = moment().add(-29, 'days');
+                var end = moment();
+                $('input[name="dates"]').daterangepicker({
+                    startDate: start,
+                    endDate: end,
+                    locale: {
+                        format: "DD/MM/YYYY",
+                    }
+                }, function (s, e, label) {
+                    RepDate(s, e);
+                        loadHistory();
+                });
+                window.RepDate = this.repDate
+                window.tabChange = this.tabChange
+                this.tabChange()
+            },
+            components: {
+                vuejsDatepicker
+            },
+            data: {
+                classID: '@currentClass.ID',
+                className: '@currentClass.Name',
+                classSubjects: [],
+                search_subject: '',
+                fields: [
+                    {
+                        key: 'lesson',
+                        label: 'Bài học'
+                    },
+                    {
+                        key: 'schedule',
+                        label: 'Lịch học'
+                    },
+                    {
+                        key: 'last_update',
+                        label: 'Lần cuối'
+                    },
+                    {
+                        key: 'total',
+                        label: 'Lượt học'
+                    },
+                ],
+                tableData: [
+                ],
+                view: 10,
+                page: 1,
+                startdate: moment(),
+                enddate: moment(),
+                tab: [true, false]
+            },
+            watch: {
+                search_subject: function () {
+                    console.log(this.search_subject)
+                    this.loadHistory()
+                }
+            },
+             computed: {
+                sDate: {
+                    get() {
+                        return moment(this.startdate).format("MM/DD/YYYY");
+                    },
+                    set(value) {
+                        this.startdate = value;
+                    }
+                },
+                eDate: {
+                    get() {
+                        return moment(this.enddate).format("MM/DD/YYYY");
+                    },
+                    set(value) {
+                        this.enddate = value;
+                    }
+                }
+            },
+            methods: {
+                loadPractice() {
+                    let _url = 'apiGetPractice'
+                    // axios.get(_url)
+                    //     .then(response =>{
+                    //         console.log(response.data);
+                    //         if(response.data.success){
+                    //             this.list_data = response.data.data
+                    //         }
+                    //     }).catch(e =>{})
+                },
+                loadHistory() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('ClassID', _that.classID)
+                    _form.append('ID', '@currentStudent.ID')
+                    _form.append('ClassSubjectID', _that.search_subject)
 
-        $(document).ready(function () {
-            $('#tabContent').load($('.nav-link.active').attr('action'));
+                    let _url = '@Url.Action("GetLearningProgress", "Class")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.tableData = response.data.Data;
+                        }).catch(e => { })
+                },
+                loadClassSubjects() {
+                    let _that = this
+                    if (_that.classSubjects.length > 0)
+                        return;
+
+                    let _form = new FormData()
+                    _form.append('ClassID', _that.classID)
+                    let _url = '@Url.Action("GetClassSubjects", "ClassSubject")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            var _data = response.data.Data;
+                            _that.classSubjects = [];
+                            _data.forEach(function (item, k) {
+                                _that.classSubjects.push({
+                                    ID: item.ID,
+                                    Title: item.SkillName,
+                                    Image: item.SkillImage,
+                                })
+                            })
+                        }).catch(e => { })
+                },
+                tabChange(a = 0) {
+                    // có thể load data theo từng tab để tối ưu hiệu năng
+                    // this.getData()
+                    let _that = this
+                    _that.tab.forEach(function (item, k) {
+                        _that.tab[k] = false;
+                    })
+                    this.tab = _that.tab
+                    this.tab[a] = true
+                    switch (a) {
+                        case 0:
+                            this.loadHistory();
+                            break;
+                        case 1:
+                            this.loadPractice();
+                            break;
+                    }
+                    this.$forceUpdate()
+                },
+                domDecoder(str) {
+                    let parser = new DOMParser();
+                    let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
+                    return dom.body.textContent;
+                },
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                formatFullDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY hh:mm A")
+                },
+                repDate(svalue, evalue) {
+                    this.eDate = evalue;
+                    this.sDate = svalue;
+                },
+            }
         });
     </script>
 }

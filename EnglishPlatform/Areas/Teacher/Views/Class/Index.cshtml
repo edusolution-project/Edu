@@ -48,7 +48,7 @@
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td><a :href="'@Url.Action("Detail","Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
                     <td>{{item.SkillName}}</td>
-                    <td>{{item.Students.length}}</td>
+                    <td>{{item.Students}}</td>
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
                     <td>
                         <div class="d-flex btn-group">

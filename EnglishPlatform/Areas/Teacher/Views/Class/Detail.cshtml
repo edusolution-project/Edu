@@ -12,11 +12,11 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex mb-2">
-            <h2 class="title"><a href="@Url.Action("Index", "Class")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
-            <div class="search-box">
+            <h2 class="title"><a href="@Url.Action("Detail", "Class")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
+            @*<div class="search-box">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" placeholder="Search">
-            </div>
+            </div>*@
         </div>
         <div class="flex j-between border-b">
             <div class="tab bg-none">
@@ -227,6 +227,25 @@
             mounted() {
                 this.loadClassDetail()
                 window.loadContent = this.loadContent
+                var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    console.log(hash)
+                    switch (hash) {
+                        case 'module':
+                            this.tabChange(1);
+                            break;
+                        case 'student':
+                            this.tabChange(2);
+                            break;
+                        case 'preference':
+                            this.tabChange(3);
+                            break;
+                        case 'discuss':
+                            this.tabChange(4);
+                            break;
+                    }
+                }
             },
             components: {
                 vuejsDatepicker

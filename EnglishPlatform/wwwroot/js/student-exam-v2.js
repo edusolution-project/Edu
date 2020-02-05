@@ -40,6 +40,7 @@ var ExamStudent = (function () {
         }
         var text = (minutes < 10 ? ("0" + minutes) : minutes) + ":" + (second < 10 ? ("0" + second) : second);
         $(".time-counter").text(text);
+        console.log(text)
         lessontimeout = setTimeout(function () {
             countdown();
         }, 1000);
@@ -281,7 +282,7 @@ var ExamStudent = (function () {
 
             var lastExam = data.Exam;
             var lastExamResult = "";
-            var doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Begin</div>';
+            var doButton = '<div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Bắt đầu làm bài</div>';
             var tryleft = 0;
 
             var limit = data.Data.Limit;
@@ -295,28 +296,28 @@ var ExamStudent = (function () {
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm:ss A");
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
-                        .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Last Attempt (" + tried + " tried) finished at " + lastdate }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Last Score: " + lastpoint.toFixed(0) + "%" })).html();
+                        .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lần thực hiện cuối (lần " + tried + ") đã hoàn thành lúc " + lastdate }))
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Điểm lần cuối: " + lastpoint.toFixed(0) + "%" })).html();
 
                 tryleft = limit - tried;
 
                 if (limit > 0) {
                     tryleft = limit - tried;
                     if (tryleft > 0) {
-                        doButton = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">You have <b>' + tryleft + '</b> tries left. Retry?</div></div>';
+                        doButton = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;">Bạn còn <b>' + tryleft + '</b> lần làm lại. Thực hiện lại bài?</div></div>';
                     }
                     else {
-                        doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Attempt limit reached</div></div>';
+                        doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Hết lượt làm lại bài</div></div>';
                         doable = false;
                     }
 
                 }
                 else {
-                    doButton = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="Redo(this)" style="cursor: pointer;">Do it again</div></div>';
+                    doButton = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="Redo(this)" style="cursor: pointer;">Thực hiện lại</div></div>';
                 }
-                review = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.Review(\'' + lastExam.ID + '\')" style="cursor: pointer;">Review answer</div></div>';
+                review = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.Review(\'' + lastExam.ID + '\')" style="cursor: pointer;">Xem đáp án</div></div>';
             }
-            var back = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.GoBack()" style="cursor: pointer;">Back to list</div></div>';
+            var back = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.GoBack()" style="cursor: pointer;">Về danh sách</div></div>';
             var content = checkExam()
                 ? renderContent(data.Data)
                 : (lastExamResult + '<div class="text-center p-3 col-md-12">' + doButton + review + back + '</div>');
@@ -530,7 +531,7 @@ var ExamStudent = (function () {
                 content = item.Content.replace(/\n/g, "<br/>");
             html += '<div class="quiz-item row m-0" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
             html += '<div class="quiz-pane col-6 align-top"><div class="pane-item"><div class="quiz-text">' + content + '</div></div></div>';
-            html += '<div class="answer-pane col-6 ui-droppable align-top" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-type="' + data.Type + '"><div class="pane-item placeholder">Drop your answer here</div></div>';
+            html += '<div class="answer-pane col-6 ui-droppable align-top" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-type="' + data.Type + '"><div class="pane-item placeholder">Thả đáp án vào đây</div></div>';
             html += '</div>';
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
@@ -646,7 +647,7 @@ var ExamStudent = (function () {
                 var content = item.Content == null || item.Content == "null" || item.Content == void 0 ? "___" : item.Content;
                 html += '<div class="quiz-item row" id="' + item.ID + '" data-part-id="' + item.ParentID + '">';
                 html += '<div class="quiz-pane col-6"><div class="pane-item"><div class="quiz-text">' + content + '</div></div></div>';
-                html += '<div class="answer-pane col-6 ui-droppable" data-id="' + item.ID + '"><div class="pane-item placeholder">Drop your answer here</div></div>';
+                html += '<div class="answer-pane col-6 ui-droppable" data-id="' + item.ID + '"><div class="pane-item placeholder">Thả đáp án vào đây</div></div>';
                 html += '</div>';
                 for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                     var answer = item.CloneAnswers[x];
@@ -666,7 +667,7 @@ var ExamStudent = (function () {
             return html;
         }
         else {
-            return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Begin </div></div>';
+            return '<div class="justify-content-center pt-5 pb-5"><div class="btn btn-primary" onclick="BeginExam(this)" style="cursor: pointer;"> Bắt đầu làm bài </div></div>';
         }
 
     }
@@ -715,7 +716,7 @@ var ExamStudent = (function () {
         var ct_action_holder = $('<div>', { class: "col-md-6 col-sm-8 text-center d-inline-block" });
 
         if (_type != 1) {
-            var complete_btn = $('<button>', { class: "btn btn-success pl-3 pr-3", onclick: "ExamComplete()", text: "Submit" });
+            var complete_btn = $('<button>', { class: "btn btn-success pl-3 pr-3", onclick: "ExamComplete()", text: "Nộp bài" });
             var timer = $('<div>', { id: 'bottom-counter', class: "d-inline-block time-counter text-white font-weight-bold align-middle pr-3" });
             ct_action_holder.append(timer).append(complete_btn);
         }
@@ -791,7 +792,7 @@ var ExamStudent = (function () {
     }
 
     var goBack = function () {
-        document.location = "/student/Course/Modules/" + config.class_id + (config.chap_id != "0" ? "#" + config.chap_id : "");
+        document.location = "/student/Course/Modules/" + config.class_subject_id + (config.chap_id != "0" ? "#" + config.chap_id : "");
     }
 
     var version = function () {
@@ -929,60 +930,61 @@ var ExamStudent = (function () {
     }
 
     var ExamComplete = function (isOvertime) {
-        if (isOvertime || true) {
-            var exam = document.querySelector("input[name='ExamID']");
-            var formData = new FormData();
-            formData.append("ExamID", exam.value);
-            Ajax(config.url.end, formData, "POST", true)
-                .then(function (res) {
-                    stopcountdown();
-                    var data = JSON.parse(res);
-                    notification("success", "Submit successfully", 3000);
-                    $('#body-exam').hide();
-                    $("#quizNavigator").addClass('d-none');
-                    $("#finish").remove();
-                    $('#lessonSummary').empty();
-                    $(".quizNumber").hide();
-                    $('#lessonContainer').removeClass('col-md-10');
-                    //$("#lessonContainlessonContainer");//.append('<div class="card show mb-4"></div>');
+        //if (isOvertime || true) {
+        var exam = document.querySelector("input[name='ExamID']");
+        var formData = new FormData();
+        formData.append("ExamID", exam.value);
+        Ajax(config.url.end, formData, "POST", true)
+            .then(function (res) {
+                stopcountdown();
+                var data = JSON.parse(res);
+                if (!isOvertime)
+                    notification("success", "Đã nộp bài", 3000);
+                $('#body-exam').hide();
+                $("#quizNavigator").addClass('d-none');
+                $("#finish").remove();
+                $('#lessonSummary').empty();
+                $(".quizNumber").hide();
+                $('#lessonContainer').removeClass('col-md-10');
+                //$("#lessonContainlessonContainer");//.append('<div class="card show mb-4"></div>');
 
-                    var lastExam = data;
+                var lastExam = data;
 
-                    var lastpoint = (lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0);
+                var lastpoint = (lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0);
 
-                    var limit = lastExam.limit;
-                    var tried = lastExam.number;
+                var limit = lastExam.limit;
+                var tried = lastExam.number;
 
-                    lastExamResult =
-                        $("<div>", { id: "last-result", class: "text-center" })
-                            .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Congratulation! You have complete your " + tried + " attempts!" }))
-                            .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Your score: " + lastpoint.toFixed(0) + "%" }));
+                lastExamResult =
+                    $("<div>", { id: "last-result", class: "text-center" })
+                        .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Điểm của bạn: " + lastpoint.toFixed(0) + "%" }));
 
+                tryleft = limit - tried;
+
+                if (limit > 0) {
                     tryleft = limit - tried;
-
-                    if (limit > 0) {
-                        tryleft = limit - tried;
-                        if (tryleft > 0) {
-                            doButton = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.Redo(this)" style="cursor: pointer;">You have <b>' + tryleft + '</b> try left. Thực hiện lại bài?</div></div>';
-                        }
-                        else
-                            doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Mo more try left</div></div>';
+                    if (tryleft > 0) {
+                        doButton = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.Redo(this)" style="cursor: pointer;">Bạn còn <b>' + tryleft + '</b> lần làm lại. Thực hiện lại bài?</div></div>';
                     }
-                    else {
-                        doButton = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.Redo(this)" style="cursor: pointer;">Do it again</div></div>';
-                    }
-                    console.log(lastExam);
-                    var review = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="Review(\'' + lastExam.id + '\')" style="cursor: pointer;">Review answer</div></div>';
-                    var back = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.GoBack()" style="cursor: pointer;">Back to list</div></div>';
+                    else
+                        doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Hết lượt làm bài</div></div>';
+                }
+                else {
+                    doButton = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.Redo(this)" style="cursor: pointer;">Thực hiện lại</div></div>';
+                }
+                console.log(lastExam);
+                var review = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="Review(\'' + lastExam.id + '\')" style="cursor: pointer;">Xem đáp án</div></div>';
+                var back = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.GoBack()" style="cursor: pointer;">Về danh sách</div></div>';
 
-                    var content = (lastExamResult.html() + '<div class="text-center p-3 p-3 col-md-12">' + doButton + review + back + '</div>');
+                var content = (lastExamResult.html() + '<div class="text-center p-3 p-3 col-md-12">' + doButton + review + back + '</div>');
 
-                    $("#lessonContainer").append(content);
-                })
-                .catch(function (err) {
-                    console.log(err);
-                });
-        }
+                $("#lessonContainer").append(content);
+            })
+            .catch(function (err) {
+                console.log(err);
+            });
+        //}
     }
 
     var delAnswerForStudent = function (quizID) {
@@ -1112,7 +1114,7 @@ var ExamStudent = (function () {
                     if ($(prevHolder).find(".placeholder").length > 0)
                         $(prevHolder).find(".placeholder").show();
                     else
-                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả đáp án vào đây" }));
                 }
 
                 var quiz = prevHolder.data("questionId");
@@ -1140,7 +1142,7 @@ var ExamStudent = (function () {
                     if ($(prevHolder).find(".placeholder").length > 0)
                         $(prevHolder).find(".placeholder").show();
                     else
-                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả đáp án vào đây" }));
                 }
 
                 //AnswerQuestion(this);
