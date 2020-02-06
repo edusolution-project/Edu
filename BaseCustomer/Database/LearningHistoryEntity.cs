@@ -28,7 +28,7 @@ namespace BaseCustomerEntity.Database
         public int ViewCount { get; set; } //State 
         [JsonProperty("Time")]
         public DateTime Time { get; set; }
-        
+
     }
     public class LearningHistoryService : ServiceBase<LearningHistoryEntity>
     {
@@ -147,6 +147,15 @@ namespace BaseCustomerEntity.Database
             _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
             _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
             _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
+            return Task.CompletedTask;
+        }
+
+        public Task RemoveClassStudentHistory(string ClassID, string StudentID)
+        {
+            _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
+            _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
+            _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
+            _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             return Task.CompletedTask;
         }
 

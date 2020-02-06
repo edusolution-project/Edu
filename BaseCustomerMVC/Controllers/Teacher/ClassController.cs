@@ -159,6 +159,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
                 ViewBag.Grades = grade;
                 ViewBag.Subjects = subject;
+                ViewBag.Skills = _skillService.GetList();
             }
 
             ViewBag.User = UserID;
@@ -340,13 +341,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            select _assignmentViewMapping.AutoOrtherType(r, new StudentAssignmentViewModel()
                            {
                                ScheduleID = schedule.ID,
-                               LessonStartDate = schedule.StartDate,
-                               LessonEndDate = schedule.EndDate,
+                               ScheduleStart = schedule.StartDate,
+                               ScheduleEnd = schedule.EndDate,
                                IsActive = schedule.IsActive,
-                               LearningNumber = exam == null ? 0 : exam.Number,
-                               LearningEndDate = exam == null ? DateTime.MinValue : exam.Updated,
-                               Result = exam == null ? 0 : exam.Point
-                           })).OrderBy(r => r.LessonStartDate).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+                               LearnCount = exam == null ? 0 : exam.Number,
+                               LearnLast = exam == null ? DateTime.MinValue : exam.Updated,
+                               Point = exam == null ? 0 : exam.Point
+                           })).OrderBy(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
             ViewBag.Lessons = lessons;
             return View();
         }
@@ -1308,6 +1309,54 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                LearnStart = progress.FirstDate,
                                LearnLast = progress.LastDate
                            })).OrderBy(r => r.LearnStart).ThenBy(r => r.ChapterID).ThenBy(r => r.ID).ToList();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", lessons},
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+        public JsonResult GetLearningResult(DefaultModel model, string ClassID, string ClassSubjectID)
+        {
+            var class_student = _classStudentService.GetClassStudent(ClassID, model.ID);
+            if (class_student == null)
+                return null;
+
+            var currentClass = _service.GetItemByID(ClassID);
+            if (currentClass == null)
+                return null;
+
+            //ViewBag.Class = currentClass;
+            //string courseid = currentClass.CourseID;
+            //var course = _courseService.GetItemByID(courseid);
+
+            List<LessonProgressEntity> data;
+            if (string.IsNullOrEmpty(ClassSubjectID))
+                data = _lessonProgressService.GetByClassID_StudentID(ClassID, class_student.StudentID);
+            else
+                data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, class_student.StudentID);
+
+            var subjects = _classSubjectService.GetByClassID(ClassID);
+
+            var lessons = (from progress in data
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           where schedule != null
+                           let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
+                           where classsubject != null
+                           let lesson = _lessonService.GetItemByID(progress.LessonID)
+                           let exam = _examService.CreateQuery().Find(x => x.StudentID == class_student.StudentID && x.LessonID == schedule.LessonID && x.ClassID == currentClass.ID).SortByDescending(x => x.Created).FirstOrDefault()
+                           select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               ScheduleStart = schedule.StartDate,
+                               ScheduleEnd = schedule.EndDate,
+                               IsActive = schedule.IsActive,
+                               LearnCount = exam == null ? 0 : exam.Number,
+                               LearnLast = exam == null ? DateTime.MinValue : exam.Updated,
+                               Point = exam == null ? 0 : exam.Point
+                           })).OrderBy(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
 
             var response = new Dictionary<string, object>
             {
