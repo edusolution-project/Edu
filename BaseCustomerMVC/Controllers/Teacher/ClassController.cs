@@ -23,6 +23,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _service;
+        private readonly ClassStudentService _classStudentService;
         private readonly SkillService _skillService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
@@ -69,6 +70,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             GradeService gradeservice,
             SubjectService subjectService,
             ClassSubjectService classSubjectService,
+            ClassStudentService classStudentService,
             TeacherService teacherService,
             ClassService service,
             SkillService skillService,
@@ -109,6 +111,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _service = service;
             _skillService = skillService;
             _classSubjectService = classSubjectService;
+            _classStudentService = classStudentService;
             _progressService = progressService;
 
             _chapterService = chapterService;
@@ -156,6 +159,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
                 ViewBag.Grades = grade;
                 ViewBag.Subjects = subject;
+                ViewBag.Skills = _skillService.GetList();
             }
 
             ViewBag.User = UserID;
@@ -301,14 +305,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            select _moduleViewMapping.AutoOrtherType(r, new StudentModuleViewModel()
                            {
                                ScheduleID = schedule.ID,
-                               LessonStartDate = schedule.StartDate,
-                               LessonEndDate = schedule.EndDate,
+                               ScheduleStart = schedule.StartDate,
+                               ScheduleEnd = schedule.EndDate,
                                IsActive = schedule.IsActive,
-                               LearningNumber = lessonProgress.TotalLearnt,
-                               LessonName = r.Title,
+                               LearnCount = lessonProgress.TotalLearnt,
                                TemplateType = r.TemplateType,
-                               LearningEndDate = lessonProgress.LastDate
-                           })).OrderBy(r => r.LessonStartDate).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+                               LearnLast = lessonProgress.LastDate
+                           })).OrderBy(r => r.LearnStart).ThenBy(r => r.ChapterID).ThenBy(r => r.ID).ToList();
             ViewBag.Lessons = lessons;
             return View();
         }
@@ -338,13 +341,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            select _assignmentViewMapping.AutoOrtherType(r, new StudentAssignmentViewModel()
                            {
                                ScheduleID = schedule.ID,
-                               LessonStartDate = schedule.StartDate,
-                               LessonEndDate = schedule.EndDate,
+                               ScheduleStart = schedule.StartDate,
+                               ScheduleEnd = schedule.EndDate,
                                IsActive = schedule.IsActive,
-                               LearningNumber = exam == null ? 0 : exam.Number,
-                               LearningEndDate = exam == null ? DateTime.MinValue : exam.Updated,
-                               Result = exam == null ? 0 : exam.Point
-                           })).OrderBy(r => r.LessonStartDate).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+                               LearnCount = exam == null ? 0 : exam.Number,
+                               LearnLast = exam == null ? DateTime.MinValue : exam.Updated,
+                               Point = exam == null ? 0 : exam.Point
+                           })).OrderBy(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
             ViewBag.Lessons = lessons;
             return View();
         }
@@ -683,7 +686,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //}
         #endregion
 
-
+        #region Homepage
         public JsonResult GetActiveList(DateTime today)
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
@@ -754,64 +757,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return Json(new { Data = std });
         }
 
-        public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
-        {
-            var filter = new List<FilterDefinition<ClassSubjectEntity>>();
-            if (!string.IsNullOrEmpty(SubjectID))
-            {
-                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            }
-            if (!string.IsNullOrEmpty(GradeID))
-            {
-                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
-            }
-            if (!string.IsNullOrEmpty(TeacherID))
-            {
-                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
-            }
-            if (model.StartDate > new DateTime(1900, 1, 1))
-                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
-            if (model.StartDate > new DateTime(1900, 1, 1))
-                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
-
-            var data = _classSubjectService.Collection
-                //.AsQueryable().
-                //GroupBy(t => t.ClassID).Select(t => new ClassViewModel(t) {
-                //    CourseName = 
-                //})
-                .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter): Builders<ClassSubjectEntity>.Filter.Empty).ToList();
-            model.TotalRecord = data.Count();
-            var classData = _service.Collection.AsQueryable().Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)).OrderByDescending(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToList();
-            var returndata = from o in classData
-                                 //where o.Skills != null
-                             let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
-                             let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
-                             select new Dictionary<string, object>
-                             {
-                                 { "ID", o.ID },
-                                 { "Name", o.Name },
-                                 { "Students", o.Students },
-                                 { "Created", o.Created },
-                                 { "IsActive", o.IsActive },
-                                 { "Image", o.Image },
-                                 { "StartDate", o.StartDate },
-                                 { "EndDate", o.EndDate },
-                                 { "Order", o.Order },
-                                 { "Skills", o.Skills },
-                                 { "Members", o.Members },
-                                 { "Description", o.Description },
-                                 { "SkillName", sname }
-                             };
-
-            var response = new Dictionary<string, object>
-                {
-                    { "Data", returndata.ToList()},
-                    { "Model", model }
-                };
-
-            return new JsonResult(response);
-        }
-
         public JsonResult GetThisWeekLesson(DateTime today)
         {
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
@@ -831,7 +776,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             var classFilter = new List<FilterDefinition<ClassEntity>>();
-            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t=> t.TeacherID == userId)));
+            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
             var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
 
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
@@ -874,42 +819,66 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        }).ToList();
             return Json(new { Data = std });
         }
+        #endregion
 
-        //public JsonResult GetActiveList()
-        //{
-        //    var filter = new List<FilterDefinition<ClassEntity>>();
-        //    TeacherEntity teacher = null;
-        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
-        //    if (!string.IsNullOrEmpty(UserID) && UserID != "0")
-        //    {
-        //        teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
-        //        if (teacher == null)
-        //        {
-        //            return new JsonResult(new Dictionary<string, object> {
-        //                {"Data",null },
-        //                {"Error",UserID },
-        //                {"Msg","Không có thông tin giảng viên" }
-        //            });
-        //        }
-        //    }
-        //    if (teacher != null)
-        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID && o.EndDate >= DateTime.Now.ToLocalTime().Date));
+        #region Manage
+        public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
+        {
+            var filter = new List<FilterDefinition<ClassSubjectEntity>>();
+            if (!string.IsNullOrEmpty(SubjectID))
+            {
+                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+            }
+            if (!string.IsNullOrEmpty(GradeID))
+            {
+                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+            }
+            if (!string.IsNullOrEmpty(TeacherID))
+            {
+                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+            }
+            if (model.StartDate > new DateTime(1900, 1, 1))
+                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
+            if (model.StartDate > new DateTime(1900, 1, 1))
+                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
 
-        //    var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
-        //    var DataResponse = data;
-        //    if (data != null)
-        //        DataResponse = data.Limit(3);
+            var data = _classSubjectService.Collection
+                //.AsQueryable().
+                //GroupBy(t => t.ClassID).Select(t => new ClassViewModel(t) {
+                //    CourseName = 
+                //})
+                .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
+            model.TotalRecord = data.Count();
+            var classData = _service.Collection.AsQueryable().Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)).OrderByDescending(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToList();
+            var returndata = from o in classData
+                                 //where o.Skills != null
+                             let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
+                             let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
+                             select new Dictionary<string, object>
+                             {
+                                 { "ID", o.ID },
+                                 { "Name", o.Name },
+                                 { "Students", _classStudentService.GetClassStudents(o.ID).Count },
+                                 { "Created", o.Created },
+                                 { "IsActive", o.IsActive },
+                                 { "Image", o.Image },
+                                 { "StartDate", o.StartDate },
+                                 { "EndDate", o.EndDate },
+                                 { "Order", o.Order },
+                                 { "Skills", o.Skills },
+                                 { "Members", o.Members },
+                                 { "Description", o.Description },
+                                 { "SkillName", sname }
+                             };
 
-        //    var response = new Dictionary<string, object>
-        //    {
-        //        { "Data", DataResponse.ToList().Select(t=> _activeMapping.AutoOrtherType(t, new ClassActiveViewModel(){
-        //            Progress = (int)((DateTime.Now.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays  * 100 / (t.EndDate.ToLocalTime().Date - t.StartDate.ToLocalTime().Date).TotalDays),
-        //            SubjectName = _subjectService.GetItemByID(t.SubjectID).Name
-        //            }))
-        //            }
-        //    };
-        //    return new JsonResult(response);
-        //}
+            var response = new Dictionary<string, object>
+                {
+                    { "Data", returndata.ToList()},
+                    { "Model", model }
+                };
+
+            return new JsonResult(response);
+        }
 
         [HttpPost]
         [Obsolete]
@@ -1296,7 +1265,108 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             }
         }
+        #endregion
 
+        #region Student Detail
+        public JsonResult GetLearningProgress(DefaultModel model, string ClassID, string ClassSubjectID)
+        {
+
+            var class_student = _classStudentService.GetClassStudent(ClassID, model.ID);
+            if (class_student == null)
+                return null;
+
+            var currentClass = _service.GetItemByID(ClassID);
+            if (currentClass == null)
+                return null;
+
+            //ViewBag.Class = currentClass;
+            //string courseid = currentClass.CourseID;
+            //var course = _courseService.GetItemByID(courseid);
+
+            List<LessonProgressEntity> data;
+            if (string.IsNullOrEmpty(ClassSubjectID))
+                data = _lessonProgressService.GetByClassID_StudentID(ClassID, class_student.StudentID);
+            else
+                data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, class_student.StudentID);
+
+            var subjects = _classSubjectService.GetByClassID(ClassID);
+
+            var lessons = (from progress in data
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           where schedule != null
+                           let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
+                           where classsubject != null
+                           let lesson = _lessonService.GetItemByID(progress.LessonID)
+                           select _moduleViewMapping.AutoOrtherType(lesson, new StudentModuleViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               ScheduleStart = schedule.StartDate,
+                               Skill = _skillService.GetItemByID(classsubject.SkillID).Name,
+                               ScheduleEnd = schedule.EndDate,
+                               IsActive = schedule.IsActive,
+                               LearnCount = progress.TotalLearnt,
+                               TemplateType = lesson.TemplateType,
+                               LearnStart = progress.FirstDate,
+                               LearnLast = progress.LastDate
+                           })).OrderBy(r => r.LearnStart).ThenBy(r => r.ChapterID).ThenBy(r => r.ID).ToList();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", lessons},
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+        public JsonResult GetLearningResult(DefaultModel model, string ClassID, string ClassSubjectID)
+        {
+            var class_student = _classStudentService.GetClassStudent(ClassID, model.ID);
+            if (class_student == null)
+                return null;
+
+            var currentClass = _service.GetItemByID(ClassID);
+            if (currentClass == null)
+                return null;
+
+            //ViewBag.Class = currentClass;
+            //string courseid = currentClass.CourseID;
+            //var course = _courseService.GetItemByID(courseid);
+
+            List<LessonProgressEntity> data;
+            if (string.IsNullOrEmpty(ClassSubjectID))
+                data = _lessonProgressService.GetByClassID_StudentID(ClassID, class_student.StudentID);
+            else
+                data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, class_student.StudentID);
+
+            var subjects = _classSubjectService.GetByClassID(ClassID);
+
+            var lessons = (from progress in data
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           where schedule != null
+                           let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
+                           where classsubject != null
+                           let lesson = _lessonService.GetItemByID(progress.LessonID)
+                           let exam = _examService.CreateQuery().Find(x => x.StudentID == class_student.StudentID && x.LessonID == schedule.LessonID && x.ClassID == currentClass.ID).SortByDescending(x => x.Created).FirstOrDefault()
+                           select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               ScheduleStart = schedule.StartDate,
+                               ScheduleEnd = schedule.EndDate,
+                               IsActive = schedule.IsActive,
+                               LearnCount = exam == null ? 0 : exam.Number,
+                               LearnLast = exam == null ? DateTime.MinValue : exam.Updated,
+                               Point = exam == null ? 0 : exam.Point
+                           })).OrderBy(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", lessons},
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+        #endregion
         public IActionResult ConvertMultiSubject()
         {
             var allClass = _service.GetAll().ToList();

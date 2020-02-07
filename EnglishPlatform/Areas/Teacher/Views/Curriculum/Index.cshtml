@@ -102,6 +102,7 @@
           	    LocalQuillEditor: VueQuillEditor.quillEditor
             },
             data: {
+                isLoading: false,
                 editorOption: {
                     theme: 'snow'
                 },
@@ -305,8 +306,10 @@
                     _form.append('Name', _that.addItem.Name)
                     _form.append('Description', _that.addItem.Description)
                     let _url = '@Url.Action("CreateOrUpdate","Curriculum")'
+                    _that.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
+                            _that.isLoading = false
                             console.log(response.data);
                             if (response.data.Error != null)
                                 alert(response.data.Error)
@@ -315,6 +318,7 @@
                                 _that.$bvModal.hide('modal_event');
                             }
                         }).catch(e => {
+                            _that.isLoading = false;
                             alert("Error: " + e)
                         })
                 },
@@ -399,8 +403,13 @@
             @*<textarea name="name" rows="3" class="form-control" v-model="addItem.description"></textarea>*@
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
-            <b-button variant="success" v-on:click="addData()">Lưu</b-button>
-            <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="addData()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
         </template>
     </b-modal>
 }

@@ -14,26 +14,24 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("ScheduleID")]
         public string ScheduleID { get; set; }
 
-        [JsonProperty("LessonId")]
-        public string LessonId { get; set; }
+        [JsonProperty("ScheduleStart")]
+        public DateTime ScheduleStart { get; set; }
 
-        [JsonProperty("LessonName")]
-        public string LessonName { get; set; }
+        [JsonProperty("ScheduleEnd")]
+        public DateTime ScheduleEnd { get; set; }
 
-        [JsonProperty("LessonStartDate")]
-        public DateTime LessonStartDate { get; set; }
+        [JsonProperty("LearnStart")]
+        public DateTime LearnStart { get; set; }
 
-        [JsonProperty("LessonEndDate")]
-        public DateTime LessonEndDate { get; set; }
 
-        [JsonProperty("LearningStartDate")]
-        public DateTime LearningStartDate { get; set; }
+        [JsonProperty("Skill")]
+        public string Skill { get; set; }
 
-        [JsonProperty("LearningEndDate")]
-        public DateTime LearningEndDate { get; set; }
+        [JsonProperty("LearnLast")]
+        public DateTime LearnLast { get; set; }
 
-        [JsonProperty("LearningNumber")]
-        public long LearningNumber { get; set; }
+        [JsonProperty("LearnCount")]
+        public long LearnCount { get; set; }
 
         [JsonProperty("TypeData")]
         public string TypeData { get; set; }

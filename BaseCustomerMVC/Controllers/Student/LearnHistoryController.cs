@@ -93,8 +93,6 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(response);
         }
 
-
-
         [HttpPost]
         public JsonResult GetAll()
         {

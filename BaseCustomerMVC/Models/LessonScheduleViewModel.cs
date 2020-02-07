@@ -31,6 +31,8 @@ namespace BaseCustomerMVC.Models
         public double DoPoint { get; set; }
         [JsonProperty("Tried")]
         public long Tried { get; set; }
+        [JsonProperty("LastExam")]
+        public string LastExam { get; set; }
 
     }
 }

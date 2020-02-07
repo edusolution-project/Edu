@@ -20,20 +20,20 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("LessonName")]
         public string LessonName { get; set; }
 
-        [JsonProperty("LessonStartDate")]
-        public DateTime LessonStartDate { get; set; }
+        [JsonProperty("ScheduleStart")]
+        public DateTime ScheduleStart { get; set; }
 
-        [JsonProperty("LessonEndDate")]
-        public DateTime LessonEndDate { get; set; }
+        [JsonProperty("ScheduleEnd")]
+        public DateTime ScheduleEnd { get; set; }
 
-        [JsonProperty("LearningStartDate")]
-        public DateTime LearningStartDate { get; set; }
+        [JsonProperty("LearnStart")]
+        public DateTime LearnStart { get; set; }
 
-        [JsonProperty("LearningEndDate")]
-        public DateTime LearningEndDate { get; set; }
+        [JsonProperty("LearnLast")]
+        public DateTime LearnLast { get; set; }
 
-        [JsonProperty("LearningNumber")]
-        public long LearningNumber { get; set; }
+        [JsonProperty("LearnCount")]
+        public long LearnCount { get; set; }
 
         [JsonProperty("Result")]
         public double Result { get; set; }

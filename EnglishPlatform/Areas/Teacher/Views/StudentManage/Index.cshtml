@@ -50,7 +50,10 @@
                         </select>
                     </div>*@
             </div>
-            <b-button class="btn-addevent btn-student" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
+            <div class="flex">
+                <b-button class="btn-addevent btn-student" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
+                <b-button class="btn-addevent btn-student" style="margin-left:5px" v-on:click="showStudentUploadModal()"><i class="ti-zip"></i></b-button>
+            </div>
         </div>
     </div>
     <div class="card-body">
@@ -70,7 +73,7 @@
                     <td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
                     <td>{{item.last_update}}</td>
                     <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>
-                    <td><button class="btn-act btn-trash"><i class="ti-trash"></i></button></td>
+                    <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
                 </tr>
             </tbody>
         </table>
@@ -289,6 +292,7 @@
                 this.list_skill = @Html.Raw(Json.Serialize(listSkills));
             },
             data: {
+                isLoading: false,
                 editorOption: {
                     theme: 'snow'
                 },
@@ -353,6 +357,9 @@
                 search_teacher_id: '',
                 search_skill_id: '',
                 totalRec: 0,
+                uploadfile: {
+                    file: null,
+                },
             },
             watch: {
                 search_subject_id: function () {
@@ -437,6 +444,10 @@
                     this.add_student.class_id = this.search_class_id
                     this.$bvModal.show('modal_event')
                 },
+                showStudentUploadModal() {
+                    this.add_student.class_id = this.search_class_id
+                    this.$bvModal.show('modal_upload')
+                },
                 chooseStudent(student) {
                     this.add_student.name = student.Name
                     this.add_student.email = student.Email
@@ -455,9 +466,47 @@
                     }
                     _form.append('ClassID', _that.add_student.class_id)
                     _form.append('StudentID', _that.add_student.id)
+                    _that.isLoading = true
                     let _url = '@Url.Action("AddStudent", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
+                            _that.isLoading = false
+                            if (response.data.error != null) {
+                                alert(response.data.error);
+                                return false;
+                            }
+                            else {
+                                alert(response.data.msg)
+                                this.search_class_id = _that.add_student.class_id
+                                this.search_grade_id = ''
+                                this.search_skill_id = ''
+                                this.search_subject_id = ''
+                                this.getData()
+                                this.hideModal()
+                            }
+                        }).catch(e => {
+                            _that.isLoading = false
+                            console.log(e)
+                        })
+                },
+                uploadStudent() {
+                    let _that = this
+                    let _form = new FormData()
+                    if (_that.add_student.class_id == '') {
+                        alert('Chưa chọn lớp học');
+                        return false;
+                    }
+                    if (!_that.uploadfile.file) {
+                         alert('Chưa chọn danh sách học viên');
+                        return false;
+                    }
+                    _form.append('ClassID', _that.add_student.class_id)
+                    _form.append('fileUpload', _that.uploadfile.file)
+                    _that.isLoading = true
+                    let _url = '@Url.Action("ImportStudent", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.isLoading = false
                             if (response.data.error != null) {
                                 alert(response.data.error);
                                 return false;
@@ -473,7 +522,41 @@
                             }
                             //var tt = response.data.Model.totalRecord;
                             //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
+                        }).catch(e => {
+                            _that.isLoading = false
+                            console.log(e)
+                        })
+                },
+                removeStudent(student) {
+                    if (!confirm('Xác nhận xóa học viên ' + student.FullName + ' khỏi lớp ' + student.ClassName + '?')) {
+                        return false;
+                    }
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('ClassID', student.ClassID)
+                    _form.append('StudentID', student.ID)
+                    let _url = '@Url.Action("RemoveStudent", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            if (response.data.error != null) {
+                                alert(response.data.error);
+                                return false;
+                            }
+                            else {
+                                alert(response.data.msg)
+                                this.getData()
+                                this.hideModal()
+                            }
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
                         }).catch(e => { console.log(e) })
+                },
+                changeFile() {
+                    console.log(event.target.files[0])
+                    this.uploadfile.file = event.target.files[0]
+                },
+                downloadTemplate() {
+                    window.open("@Url.Action("StudentTemplate", "StudentManage")");
                 }
             }
         });
@@ -495,8 +578,37 @@
             <autocomplete v-on:chooseitem="chooseStudent" />
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
-            <b-button variant="success" v-on:click="createStudent()">Lưu</b-button>
-            <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="createStudent()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
+
+    <b-modal :no-close-on-backdrop="true" id="modal_upload" centered title="Nhập học viên từ file">
+        <b-col class="form-group">
+            <label for="">Lớp</label>
+            <select v-model="add_student.class_id" class="form-control">
+                <option value="">Chọn lớp</option>
+                <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
+            </select>
+        </b-col>
+        <b-col class="form-group">
+            <label for="">Chọn danh sách học viên (excel)</label>
+            <input type="file" class="btn btn-info" :ref="`uploadfile`" accept=".xls,.xlsx" v-on:change="changeFile()" /><br />
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <button v-on:click="downloadTemplate()" class="btn btn-secondary">Tải file mẫu</button>
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="uploadStudent()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
         </template>
     </b-modal>
 }

@@ -59,7 +59,7 @@ namespace BaseCustomerEntity.Database
             }
             else
             {
-                await Collection.UpdateManyAsync(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID,
+                await Collection.UpdateManyAsync(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID && t.LessonID == item.LessonID,
                      new UpdateDefinitionBuilder<LessonProgressEntity>()
                      .Inc(t => t.TotalLearnt, 1)
                      .Set(t => t.LastDate, DateTime.Now)
@@ -70,6 +70,17 @@ namespace BaseCustomerEntity.Database
         public LessonProgressEntity GetByClassID_StudentID_LessonID(string ClassID, string StudentID, string LessonID)
         {
             return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID && t.LessonID == LessonID).FirstOrDefault();
+        }
+
+
+        public List<LessonProgressEntity> GetByClassID_StudentID(string ClassID, string StudentID)
+        {
+            return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID).SortByDescending(t => t.LastDate).ToList();
+        }
+
+        public List<LessonProgressEntity> GetByClassSubjectID_StudentID(string ClassSubjectID, string StudentID)
+        {
+            return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID).SortByDescending(t => t.LastDate).ToList();
         }
 
         public async Task UpdateClassSubject(ClassSubjectEntity classSubject)

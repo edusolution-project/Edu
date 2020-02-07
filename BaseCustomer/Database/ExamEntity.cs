@@ -204,6 +204,13 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
+        public Task RemoveClassStudentExam(string ClassID, string StudentID)
+        {
+            Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
+            _examDetailService.Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
+            return Task.CompletedTask;
+        }
+
         public Task RemoveClassSubjectExam(string ClassSubjectID)
         {
             Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);

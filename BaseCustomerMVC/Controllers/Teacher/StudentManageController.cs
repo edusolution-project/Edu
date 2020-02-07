@@ -29,6 +29,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly StudentHelper _studentHelper;
         private readonly ClassProgressService _progressService;
         private readonly ScoreStudentService _scoreStudentService;
+        private readonly LearningHistoryService _learningHistoryService;
+        private readonly ExamService _examService;
         private readonly IHostingEnvironment _env;
 
 
@@ -39,8 +41,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             TeacherService teacherService,
             ClassService classService,
             SkillService skillService,
+            ExamService examService,
             ClassStudentService classStudentService,
             ClassSubjectService classSubjectService,
+            LearningHistoryService learningHistoryService,
             ClassProgressService classProgressService,
             ScoreStudentService scoreStudentService,
             StudentService studentService,
@@ -51,6 +55,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _gradeService = gradeservice;
             _subjectService = subjectService;
             _teacherService = teacherService;
+            _examService = examService;
+            _learningHistoryService = learningHistoryService;
             _classService = classService;
             _skillService = skillService;
             _progressService = classProgressService;
@@ -91,13 +97,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult RemoveStudent(string ClassID, string StudentID)
         {
-            if (string.IsNullOrEmpty(ClassID))
-                return Json(new { Error = "Class not found" });
-            var currentClass = _classService.GetItemByID(ClassID);
-            if (currentClass == null || !currentClass.IsActive)
-                return Json(new { error = "Class not found" });
-            _ = _classService.RemoveStudent(ClassID, StudentID);
-            return Json(new { message = "Student Remove OK" });
+            if (string.IsNullOrEmpty(ClassID) || string.IsNullOrEmpty(StudentID))
+            {
+                return Json(new
+                {
+                    error = "Thông tin không chính xác"
+                });
+            }
+            var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
+            if (deleted > 0)
+            {
+                //remove history, exam, exam detail, progress...
+                _learningHistoryService.RemoveClassStudentHistory(ClassID, StudentID);
+                _examService.RemoveClassStudentExam(ClassID, StudentID);
+            }
+            return Json(new { msg = "đã xóa " + deleted + " học viên" });
         }
 
         public JsonResult AddStudent(string ClassID, string StudentID)
@@ -118,7 +132,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             var newstudent = new ClassStudentEntity { ClassID = ClassID, StudentID = StudentID };
             _classStudentService.Save(newstudent);
-            if(newstudent.ID != null)
+            if (newstudent.ID != null)
                 return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
             return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
         }
@@ -171,7 +185,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  let @student = _studentService.GetItemByID(r.StudentID)
                  where @student != null
                  let progress = _progressService.GetItemByClassID(@class.ID, @student.ID)
-                 let percent = progress == null ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                 let percent = (progress == null || progress.TotalLessons == 0) ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
                  select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
                  {
                      ClassID = @class.ID,
@@ -257,56 +271,62 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public async Task<JsonResult> ImportStudent(string ID)
+        public async Task<JsonResult> ImportStudent(string ClassID)
         {
             var form = HttpContext.Request.Form;
-            if (string.IsNullOrEmpty(ID)) return new JsonResult("Fail");
-            var itemCourse = _classService.GetItemByID(ID);
-            if (itemCourse == null) return new JsonResult("Fail");
-            if (itemCourse.Students == null) itemCourse.Students = new List<string>();
+            if (string.IsNullOrEmpty(ClassID))
+                return Json(new { error = "Không có thông tin lớp" });
+            var @class = _classService.GetItemByID(ClassID);
+            if (@class == null)
+                return Json(new { error = "Không có thông tin lớp" });
+
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
-            var filePath = Path.Combine(_env.WebRootPath, itemCourse.ID + "_" + file.FileName + DateTime.Now.ToString("ddMMyyyyhhmmss"));
-            List<StudentEntity> studentList = null;
+            var filePath = Path.Combine(_env.WebRootPath, @class.ID + "_" + DateTime.Now.ToString("ddMMyyyyhhmmss"));
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
                 stream.Close();
                 try
                 {
-                    var readStream = new FileStream(filePath, FileMode.Open);
-                    using (ExcelPackage package = new ExcelPackage(readStream))
-                    {
-                        ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
-                        int totalRows = workSheet.Dimension.Rows;
-                        studentList = new List<StudentEntity>();
-                        for (int i = 1; i <= totalRows; i++)
-                        {
-                            if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                            var studentEmail = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
-                            var student = _studentService.CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
-                            if (student != null)
-                                studentList.Add(student);
-                        }
+                    var counter = 0;
 
-                        var listID = studentList.Select(o => o.ID);
-                        itemCourse.Students.AddRange(listID);
-                        itemCourse.Students = itemCourse.Students.Distinct().ToList();
-                        _classService.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
+                    using (var readStream = new FileStream(filePath, FileMode.Open))
+                    {
+                        using (ExcelPackage package = new ExcelPackage(readStream))
+                        {
+                            ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
+                            int totalRows = workSheet.Dimension.Rows;
+                            var classStudents = _classStudentService.GetClassStudents(ClassID);
+                            var keyCol = 2;
+                            for (int i = 1; i <= totalRows; i++)
+                            {
+                                if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
+                                var studentEmail = workSheet.Cells[i, keyCol].Value == null ? "" : workSheet.Cells[i, keyCol].Value.ToString();
+                                if (string.IsNullOrEmpty(studentEmail)) continue;
+                                var student = _studentService.CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
+
+                                if (student == null) continue;
+                                if (classStudents.Any(t => t.StudentID == student.ID)) continue;
+
+                                _classStudentService.Save(new ClassStudentEntity
+                                {
+                                    StudentID = student.ID,
+                                    ClassID = @class.ID
+                                });
+                                counter++;
+                            }
+                        }
                     }
                     System.IO.File.Delete(filePath);
+                    return Json(new { msg = "Đã thêm mới " + counter + " học viên" });
                 }
                 catch (Exception ex)
                 {
-                    return new JsonResult(ex);
+                    return Json(new { error = ex.Message });
                 }
             }
-            Dictionary<string, object> response = new Dictionary<string, object>()
-            {
-                {"Data",studentList}
-            };
-            return new JsonResult(response);
         }
 
         public IActionResult ConvertStudent()
@@ -326,6 +346,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             }
             return null;
+        }
+
+        public async Task<IActionResult> StudentTemplate(DefaultModel model)
+        {
+
+            var list = new List<StudentEntity>() { new StudentEntity() {
+                ID = "undefined"
+                } };
+            var data = list.Select(o => new
+            {
+                STT = 1,
+                Email = "email@gmail.com",
+                Ten = "Nguyễn Văn A",
+                Ngay_sinh = "01/30/1999",
+            });
+            var stream = new MemoryStream();
+
+            using (var package = new ExcelPackage(stream))
+            {
+                var workSheet = package.Workbook.Worksheets.Add("DS_HV");
+                workSheet.Cells.LoadFromCollection(data, true);
+                package.Save();
+            }
+            stream.Position = 0;
+            string excelName = $"StudentTemplate.xlsx";
+
+            //return File(stream, "application/octet-stream", excelName);  
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
     }
 }
