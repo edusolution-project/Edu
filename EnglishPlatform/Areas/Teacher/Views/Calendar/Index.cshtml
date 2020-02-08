@@ -89,20 +89,7 @@
             height: "parent",
             eventClick: function (info) {
                 var eventInfo = info.event;
-                var startDate = eventInfo.start;
-                var title = eventInfo.title;
-                var content = eventInfo.extendedProps.content;
-                var timeEvent = changeTime(startDate);
-                var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
-                var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
-                var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
-                document.body.classList.add("open-add-event");
                 getEventDetails(eventInfo.id);
-                if (eventInfo.extendedProps != null && eventInfo.extendedProps.skype != void 0) {
-                    //chạy ajax get event
-                } else {
-
-                }
             }
         }).renderCalendar();
         var checkTime = function (date,min,max) {
@@ -116,6 +103,7 @@
                 if (data != null) {
                     var jsonData = JSON.parse(data);
                     if (jsonData.CreateUser == "@User.FindFirst("UserID")?.Value") {
+                        document.body.classList.add("open-add-event");
                         var startDate = new Date(jsonData.StartDate);
                         var timeEvent = changeTime(startDate);
                         var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
@@ -152,11 +140,27 @@
                     }
                     else {
                         if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != void 0) {
-                            // > 0 và < 10 phút
-                            if (checkTime(new Date(jsonData.Created), 0, 10)) {
-                                //gọi skype
-                            }
+                            document.body.classList.remove("open-add-event");
+                            var time = new Date(jsonData.Created);
+                            var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
+                           
+                            var str = `Học viên : ${jsonData.StudentName}`;
+                            swal({
+                                title: Title,
+                                type: "info",
+                                text: str,
+                                showCancelButton: true,
+                                confirmButtonClass: "btn-sm btn-primary",
+                                confirmButtonText: "Call skype",
+                                cancelButtonClass :"btn-sm",
+                                cancelButtonText:"close",
+                                closeOnConfirm: false
+                            },function () {
+                                swal.close();
+                                window.open(`skype:${jsonData.Skype}?call`, "_blank");
+                            });
                         } else {
+                            document.body.classList.add("open-add-event");
                             var startDate = new Date(jsonData.StartDate);
                             var timeEvent = changeTime(startDate);
                             var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
@@ -190,6 +194,7 @@
                         }
                     }
                 } else {
+                    document.body.classList.add("open-add-event");
                     var event = EduCalendar.schedule.EduCalendar.getEventById(id);
                     var timeEvent = changeTime(event.start);
                     var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;

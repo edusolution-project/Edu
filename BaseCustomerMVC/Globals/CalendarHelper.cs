@@ -105,6 +105,16 @@ namespace BaseCustomerMVC.Globals
                 title = o.Title,
                 url = o.UrlRoom == null ? "" : o.UrlRoom
             }).ToList();
+            var demodata = new CalendarEventModel()
+            {
+                start = DateTime.Now,
+                groupid = "Schedule",
+                id = "Test",
+                title = "Hoang Long",
+                url = "",
+                skype = "live:breakingdawn1235"
+            };
+            DataResponse.Add(demodata);
             return DataResponse;
         }
         [Obsolete]
