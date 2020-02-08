@@ -87,6 +87,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var acc = _teacherService.GetItemByID(_teacherId);
             acc.FullName = entity.FullName;
             acc.Phone = entity.Phone;
+            acc.Skype = entity.Skype;
             _teacherService.CreateOrUpdate(acc);
             ViewBag.avatar = acc.Avatar ?? _default.defaultAvatar;
             ViewBag.Description = "Lưu thành công!";

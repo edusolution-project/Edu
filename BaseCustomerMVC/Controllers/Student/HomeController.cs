@@ -88,6 +88,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var acc = _studentService.GetItemByID(_studentid);
             acc.FullName = entity.FullName;
             acc.Phone = entity.Phone;
+            acc.Skype = entity.Skype;
             _studentService.CreateOrUpdate(acc);
             ViewBag.avatar = acc.Avatar ?? _default.defaultAvatar;
             ViewBag.Description = "Lưu thành công!";
@@ -102,6 +103,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var account = _studentService.GetItemByID(_studentid);
                 account.FullName = entity.FullName;
                 account.Phone = entity.Phone;
+                account.Skype = entity.Skype;
                 if (fileUpload != null)
                 {
                     var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
