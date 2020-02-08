@@ -65,7 +65,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item,k) in progressData">
+                    <tr v-if="progressData == null || progressData.length <= 0">
+                        <td colspan="4">Chưa có lịch sử học tập</a></td>
+                    </tr>
+                    <tr v-for="(item,k) in progressData" v-else>
                         <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
                         <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
                         <td>{{formatFullDate(item.LearnLast)}}</td>
@@ -82,6 +85,9 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr v-if="resultData == null || resultData.length <= 0">
+                        <td colspan="5">Chưa có kết quả</a></td>
+                    </tr>
                     <tr v-for="(item,k) in resultData">
                         <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
                         <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>

@@ -45,12 +45,16 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item,k) in tableData">
+                <tr v-if="tableData == null || tableData.length <= 0">
+                    <td colspan="6">Không có thông tin phù hợp</a></td>
+                </tr>
+                <tr v-else v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td><a :href="'@Url.Action("Detail","Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
                     <td>{{item.SkillName}}</td>
                     <td>{{item.Students}}</td>
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
+                    <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
                     <td>
                         <div class="d-flex btn-group">
                             <a class="btn-act btn-edit" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
@@ -141,6 +145,10 @@
                         label: 'Thời gian'
                     },
                     {
+                        key: 'status',
+                        label: 'Trạng thái'
+                    },
+                    {
                         key: 'actions',
                         label: 'Tác vụ'
                     }
@@ -180,8 +188,6 @@
                         }
                     ]
                 },
-                teacherSource: [],
-                courseSource: [],
                 curr: 0
             },
             computed: {
@@ -229,9 +235,9 @@
                 //Class Action
                 toggleState(obj) {
                     let _that = this;
-                    _that.list_data.forEach(function (item, k) {
+                    _that.tableData.forEach(function (item, k) {
                         if (item.ID === obj.ID) {
-                            let _url = item.IsActive ? '@Url.Action("Unpublish", "Curriculum")' : '@Url.Action("Publish", "Curriculum")'
+                            let _url = item.IsActive ? '@Url.Action("Unpublish", "Class")' : '@Url.Action("Publish", "Class")'
                             let _form = new FormData()
                             _form.append('ArrID', item.ID);
                             axios.post(_url, _form)
@@ -360,7 +366,6 @@
                             })
                     }
                 },
-
                 //Modal Event
                 showClassModal(obj) {
                     let _that = this;
@@ -406,6 +411,30 @@
                             .then(response => {
                                 var _data = response.data.Data;
                                 _data.forEach(function (item, k) {
+                                    var lock = false
+                                    var valid_subject = _that.list_subject.filter(c => c.ID == item.SubjectID);
+                                    if (valid_subject.length == 0) {
+                                        console.log(_that.list_subject)
+                                        _that.list_subject.push({
+                                            ID: item.SubjectID,
+                                            Name: item.SubjectName,
+                                            IsActive: false
+                                        });
+
+                                        if (_that.list_grades_full.filter(c => c.ID == item.GradeID).length == 0) {
+                                            _that.list_grades_full.push({
+                                                ID: item.GradeID,
+                                                SubjectID: item.SubjectID,
+                                                Name: item.GradeName,
+                                                IsActive: false
+                                            })
+                                        }
+                                        lock = true
+                                    }
+                                    else {
+                                        lock = !valid_subject[0].IsActive
+                                    }
+
                                     _that.class_info.subject.push({
                                         UID: moment().format("DDMMYYYYhhmmssSSS") + k,
                                         ID: item.ID,
@@ -413,12 +442,24 @@
                                         SubjectID: item.SubjectID,
                                         GradeID: item.GradeID,
                                         TeacherID: item.TeacherID,
-                                        CourseID: item.CourseID
+                                        CourseID: item.CourseID,
+                                        IsLock: lock
                                     })
+
                                     _that.changeAddSubject(item)
                                     _that.changeAddGrade(item)
-                                    if (_that.courseSource.filter(c => c.ID == item.CourseID).length == 0) {
 
+
+                                    //if (_that.teacherSource.filter(c => c.ID == item.TeacherID && c.SubjectID == item.subject).length == 0) {
+                                    //    _that.teacherSource.push({
+                                    //        ID: item.TeacherID,
+                                    //        SubjectID: item.SubjectID,
+                                    //        Name: item.TeacherName,
+                                    //        IsActive: false
+                                    //    })
+                                    //}
+
+                                    if (_that.courseSource.filter(c => c.ID == item.CourseID).length == 0) {
                                         _that.courseSource.push({
                                             ID: item.CourseID,
                                             SkillID: item.SkillID,
@@ -448,11 +489,12 @@
                         return obj.GradeID == item.ID && obj.SubjectID == item.SubjectID
                     }).length == 0) {
                         _that.class_info.subject.forEach(function (sbj) {
-                            console.log(obj.UID)
+                            //console.log(obj.UID)
                             if (sbj.UID == obj.UID) {
                                 sbj.GradeID = ''
                                 sbj.CourseID = ''
                                 sbj.TeacherID = ''
+                                sbj.SkillID = ''
                                 return
                             }
                         });
@@ -460,8 +502,9 @@
 
                     //load teacher
                     if (obj.SubjectID != '') {
+                        //console.log(_that.loaded_teacher);
                         if (_that.loaded_teacher.includes(obj.SubjectID)) return;
-
+                        //_that.loaded_teacher.push(obj.SubjectID);
                         let _form = new FormData()
                         _form.append('SubjectID', obj.SubjectID)
                         let _url = '@Url.Action("GetListTeacher", "Class")'
@@ -470,12 +513,17 @@
                             var _data = response.data.Data;
                             _data.forEach(function (item, k)
                             {
+                                if (_that.teacherSource.filter(function (tc) {
+                                    return tc.ID == item.id && tc.SubjectID == obj.SubjectID
+                                }).length == 0)
                                 _that.teacherSource.push({
                                     ID: item.id,
                                     FullName: item.fullname,
-                                    SubjectID: obj.SubjectID
+                                    SubjectID: obj.SubjectID,
+                                    IsActive: true
                                 })
                             })
+                                console.log(_that.teacherSource)
                             _that.loaded_teacher.push(obj.SubjectID);
                         }).catch(e => { })
                     }
@@ -484,8 +532,7 @@
                     let _that = this;
                     if (obj.GradeID == '') return;
                     let key = obj.SubjectID + "_" + obj.GradeID
-                    if (_that.loaded_course.includes(key))
-                        return;
+                    if (_that.loaded_course.includes(key)) return;
                     //load course
                     let _form = new FormData()
                     _form.append('SubjectID', obj.SubjectID)
@@ -496,6 +543,9 @@
                             var _data = response.data.Data;
                             _data.forEach(function (item, k)
                             {
+                                if (_that.courseSource.filter(function (item) {
+                                    return obj.CourseID == item.ID && obj.SubjectID == item.SubjectID && obj.GradeID == item.GradeID
+                                }).length == 0)
                                 _that.courseSource.push({
                                     ID: item.ID,
                                     Name: item.Name,
@@ -573,11 +623,15 @@
                     this.eDate = evalue;
                     this.sDate = svalue;
                 },
+                matchSubject(obj, item) {
+                    return item.IsActive || item.ID == obj.SubjectID
+                },
                 matchGrade(obj, item) {
-                    return item.SubjectID == obj.SubjectID
+                    return item.SubjectID == obj.SubjectID && (item.IsActive || item.ID == obj.GradeID)
                 },
                 matchTeacher(obj, item) {
-                    return item.SubjectID == obj.SubjectID
+                    return (item.SubjectID == obj.SubjectID)
+                        && (item.IsActive || item.ID == obj.TeacherID)
                 },
                 matchCourse(obj, item) {
                     return item.SubjectID == obj.SubjectID && item.GradeID == obj.GradeID && item.SkillID == obj.SkillID && (item.IsActive || (item.ID == obj.CourseID))
@@ -625,41 +679,41 @@
                     <li v-for="(sub,k) in class_info.subject" class="flex" :id="sub.UID">
                         <div class="width-100">
                             <label for="">Chương trình</label>
-                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)">
+                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock">
                                 <option value="">Chọn chương trình</option>
-                                <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                                <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100">
                             <label for="">Cấp độ</label>
-                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)">
+                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock">
                                 <option value="">Chọn cấp độ</option>
                                 <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100">
                             <label for="">Môn học</label>
-                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)">
+                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
                                 <option value="">Chọn môn học</option>
                                 <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100">
                             <label for="">Bài giảng</label>
-                            <select v-model="sub.CourseID" class="form-control">
+                            <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">
                                 <option value="">Chọn bài giảng</option>
                                 <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100">
                             <label for="">Giáo viên</label>
-                            <select v-model="sub.TeacherID" class="form-control">
+                            <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
                                 <option value="">Chọn giáo viên</option>
                                 <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
                             </select>
                         </div>
                         <div class="btn-group">
-                            <button class="btn-act" v-on:click="removeSubject(k)"><i class="ti-trash"></i></button>
+                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock"><i class="ti-trash"></i></button>
                         </div>
                     </li>
                 </ul>

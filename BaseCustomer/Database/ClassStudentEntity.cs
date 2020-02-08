@@ -56,9 +56,19 @@ namespace BaseCustomerEntity.Database
             return Collection.DeleteMany(t => t.ClassID == ClassID).DeletedCount;
         }
 
+        public long RemoveManyClass(string[] ClassIDs)
+        {
+            return Collection.DeleteMany(t => ClassIDs.Contains(t.ClassID)).DeletedCount;
+        }
+
         public long RemoveClassStudent(string ClassID, string StudentID)
         {
             return Collection.DeleteMany(t => t.ClassID == ClassID && t.StudentID == StudentID).DeletedCount;
+        }
+
+        public long RemoveStudent(string StudentID)
+        {
+            return Collection.DeleteMany(t => t.StudentID == StudentID).DeletedCount;
         }
     }
 }

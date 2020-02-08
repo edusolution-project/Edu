@@ -16,6 +16,8 @@ namespace BaseCustomerEntity.Database
         public string Name { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
+        [JsonProperty("IsActive")]
+        public bool IsActive { get; set; }
     }
     public class SkillService : ServiceBase<SkillEntity>
     {
@@ -27,13 +29,13 @@ namespace BaseCustomerEntity.Database
         {
             return new List<SkillEntity>
             {
-                new SkillEntity{ID = "1", Name_vn = "Nghe", Name = "Listening", Image = "/images/skill/listening.png" },
-                new SkillEntity{ID = "2", Name_vn = "Nói", Name = "Speaking", Image = "/images/skill/speaking.png" },
-                new SkillEntity{ID = "3", Name_vn = "Đọc", Name = "Reading", Image = "/images/skill/reading.png" },
-                new SkillEntity{ID = "4", Name_vn = "Viết", Name = "Writing", Image = "/images/skill/writing.png" },
-                new SkillEntity{ID = "5", Name_vn = "Từ vựng", Name = "Vocabulary", Image = "/images/skill/vocabulary.png" },
-                new SkillEntity{ID = "6", Name_vn = "Ngữ pháp", Name = "Grammar", Image = "/images/skill/grammar.png" },
-                new SkillEntity{ID = "7", Name_vn = "Tổng hợp", Name = "General", Image = "/images/skill/general.png" },
+                new SkillEntity{ID = "1", Name_vn = "Nghe", Name = "Listening", Image = "/images/skill/listening.png", IsActive = true },
+                new SkillEntity{ID = "2", Name_vn = "Nói", Name = "Speaking", Image = "/images/skill/speaking.png", IsActive = true },
+                new SkillEntity{ID = "3", Name_vn = "Đọc", Name = "Reading", Image = "/images/skill/reading.png" , IsActive = true},
+                new SkillEntity{ID = "4", Name_vn = "Viết", Name = "Writing", Image = "/images/skill/writing.png" , IsActive = true},
+                new SkillEntity{ID = "5", Name_vn = "Từ vựng", Name = "Vocabulary", Image = "/images/skill/vocabulary.png", IsActive = true },
+                new SkillEntity{ID = "6", Name_vn = "Ngữ pháp", Name = "Grammar", Image = "/images/skill/grammar.png", IsActive = true },
+                new SkillEntity{ID = "7", Name_vn = "Tổng hợp", Name = "General", Image = "/images/skill/general.png", IsActive = true },
             };
         }
 
