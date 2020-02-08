@@ -89,7 +89,7 @@
             height: "parent",
             eventClick: function (info) {
                 var eventInfo = info.event;
-                getEventDetails(eventInfo.id);
+                getEventDetails(eventInfo.id, eventInfo.extendedProps.skype);
             }
         }).renderCalendar();
         var checkTime = function (date,min,max) {
@@ -98,7 +98,7 @@
             if (max == void 0) return ((next - now) / 6000 > min);
             else return ((next - now) / 6000 > min) && ((next - now) / 6000 < max);
         }
-        var getEventDetails = function (id) {
+        var getEventDetails = function (id,skype) {
             EduCalendar.schedule.Ajax.PostAny("@Url.Action("GetDetail","Calendar")?id=" + id, null).then(function (data) {
                 if (data != null) {
                     var jsonData = JSON.parse(data);
@@ -157,7 +157,11 @@
                                 closeOnConfirm: false
                             },function () {
                                 swal.close();
-                                window.open(`skype:${jsonData.Skype}?call`, "_blank");
+                                var _skype = jsonData.Skype;
+                                if (jsonData.Skype == null) {
+                                    _skype = skype;
+                                }
+                                window.open(`skype:${_skype}?call`, "_blank");
                             });
                         } else {
                             document.body.classList.add("open-add-event");
