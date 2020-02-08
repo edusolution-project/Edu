@@ -28,6 +28,8 @@ namespace BaseCustomerMVC.Models
         public string SkillImage { get; set; }
         [JsonProperty("GradeID")]
         public string GradeID { get; set; }
+        [JsonProperty("GradeName")]
+        public string GradeName { get; set; }
         [JsonProperty("CourseID")]
         public string CourseID { get; set; }
         [JsonProperty("CourseName")]

@@ -710,6 +710,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        let percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
                        let totalweek = (o.EndDate.Date - o.StartDate.Date).TotalDays / 7
                        let subject = _subjectService.GetItemByID(o.SubjectID)
+                       let studentCount = _classStudentService.GetClassStudents(o.ID).Count
                        select new
                        {
                            id = o.ID,
@@ -719,7 +720,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            thumb = o.Image ?? "",
                            endDate = o.EndDate,
                            //week = totalweek > 0 ? (DateTime.Now.Date - o.StartDate.Date).TotalDays / 7 / totalweek : 0,
-                           students = o.Students.Count
+                           students = studentCount
                        }).ToList();
             return Json(new { Data = std });
         }
@@ -781,42 +782,49 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
 
-            var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+            //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
 
-            var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
+            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+
+            //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
+            var std = (from o in data.ToList()
+                       let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
+                       where _lesson != null
+                       let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+                       where _class != null
+                       let _sbj = _classSubjectService.GetItemByID(o.ClassSubjectID)
+                       let skill = _skillService.GetItemByID(_sbj.SkillID)
+                       let studentCount = _classStudentService.GetClassStudents(_class.ID).Count
+                       //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
+                       select new
+                       {
+                           id = o.ID,
+                           classID = _class.ID,
+                           classsubjectID = _sbj.ID,
+                           className = _class.Name,
+                           title = _lesson.Title,
+                           lessonID = _lesson.ID,
+                           startDate = o.StartDate,
+                           endDate = o.EndDate,
+                           students = studentCount,
+                           skill = skill
+                           //isLearnt = isLearnt
+                       }).ToList();
             //var std = (from o in data.ToList()
-            //           let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
-            //           where _lesson != null
             //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
             //           where _class != null
+            //           let skill = _skillService.GetItemByID(o.SkillID)
             //           //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
             //           select new
             //           {
             //               id = o.ID,
             //               classID = _class.ID,
             //               className = _class.Name,
-            //               title = _lesson.Title,
-            //               lessonID = _lesson.ID,
-            //               startDate = o.StartDate,
             //               endDate = o.EndDate,
-            //               students = _class.Students.Count
+            //               students = _class.Students.Count,
+            //               skill = skill
             //               //isLearnt = isLearnt
             //           }).ToList();
-            var std = (from o in data.ToList()
-                       let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-                       where _class != null
-                       let skill = _skillService.GetItemByID(o.SkillID)
-                       //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
-                       select new
-                       {
-                           id = o.ID,
-                           classID = _class.ID,
-                           className = _class.Name,
-                           endDate = o.EndDate,
-                           students = _class.Students.Count,
-                           skill = skill
-                           //isLearnt = isLearnt
-                       }).ToList();
             return Json(new { Data = std });
         }
         #endregion
@@ -1030,7 +1038,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (nSbj != null)
                         {
                             var newMember = new ClassMemberEntity();
-                            if (nSbj.CourseID != oSbj.CourseID)
+                            if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                             {
                                 nSbj.ID = CreateNewClassSubject(nSbj, item, out newMember);
                                 if (string.IsNullOrEmpty(nSbj.ID))//Error
@@ -1041,6 +1049,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //update period
                                 oSbj.StartDate = item.StartDate;
                                 oSbj.EndDate = item.EndDate;
+                                oSbj.TeacherID = nSbj.TeacherID;
                                 _classSubjectService.Save(oSbj);
 
                                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
@@ -1188,6 +1197,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var ids = model.ArrID.Split(',');
                 if (ids.Length > 0)
                 {
+                    //Remove Class Student
+                    _classStudentService.RemoveManyClass(ids);
                     //remove Schedule, Part, Question, Answer
                     _lessonScheduleService.CreateQuery().DeleteMany(o => ids.Contains(o.ClassID));
                     _lessonHelper.RemoveClone(ids);
@@ -1270,7 +1281,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Student Detail
         public JsonResult GetLearningProgress(DefaultModel model, string ClassID, string ClassSubjectID)
         {
-
             var class_student = _classStudentService.GetClassStudent(ClassID, model.ID);
             if (class_student == null)
                 return null;
@@ -1367,6 +1377,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         #endregion
+
+
+        #region Fix Data
         public IActionResult ConvertMultiSubject()
         {
             var allClass = _service.GetAll().ToList();
@@ -1489,5 +1502,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             return null;
         }
+
+        public IActionResult FixClassStudent()
+        {
+            var classids = _classStudentService.GetAll().ToList().Select(t => t.ClassID).Distinct();
+            foreach (var classid in classids)
+            {
+                if (_service.GetItemByID(classid) == null)
+                {
+                    _classStudentService.RemoveClass(classid);
+                }
+            }
+            var studentids = _classStudentService.GetAll().ToList().Select(t => t.StudentID).Distinct();
+            foreach (var studentid in studentids)
+            {
+                if (_studentService.GetItemByID(studentid) == null)
+                {
+                    _classStudentService.RemoveStudent(studentid);
+                }
+            }
+            return null;
+        }
+        #endregion
     }
 }
