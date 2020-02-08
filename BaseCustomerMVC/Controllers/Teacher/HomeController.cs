@@ -201,7 +201,40 @@ namespace BaseCustomerMVC.Controllers.Teacher
             };
             return new JsonResult(response);
         }
+        [HttpPost]
+        public JsonResult SaveProfile(StudentEntity entity, IFormFile fileUpload)
+        {
+            try
+            {
+                string _studentid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
+                var account = _teacherService.GetItemByID(_studentid);
+                account.FullName = entity.FullName;
+                account.Phone = entity.Phone;
+                account.Skype = entity.Skype;
+                if (fileUpload != null)
+                {
+                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
+                    account.Avatar = pathImage;
+                    _session.SetString("userAvatar", account.Avatar);
+                }
 
+                _teacherService.CreateOrUpdate(account);
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.SUCCESS,
+                    StatusDesc = "SaveOk",
+                    Data = account
+                });
+            }
+            catch (Exception e)
+            {
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = e.Message,
+                });
+            }
+        }
         //[HttpPost]
         //public JsonResult ChangePassword(string oldpass, string newpass, string retypepass)
         //{
