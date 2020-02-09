@@ -2,7 +2,7 @@
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var currentCs = ViewBag.ClassSubject as BaseCustomerMVC.Models.ClassSubjectViewModel;
     var completePercent = (int)ViewBag.CompletePercent;
-    ViewData["Title"] = currentCs.ClassName + " - " + currentCs.SkillName;
+    ViewData["Title"] = currentCs.SkillName + " - " + currentCs.ClassName;
 }
 
 <script>
@@ -33,6 +33,7 @@
 
                                     <li class="sub-practice" v-if="item.detail.length" v-for="(lesson,j) in item.detail">
                                         <span class="c c1"> <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'">{{lesson.Title}}</a></span>
+
                                         @*Exam*@
                                         <template v-if="lesson.TemplateType === 2">
                                             <template v-if="isViewed(lesson.LastJoin)">
@@ -50,6 +51,10 @@
                                                 <div class="c c3">
                                                 </div>
                                             </template>
+                                            <div class="c schedule">
+                                                <span>{{formatTime(lesson.StartDate)}}</span><br />
+                                                <span>{{formatTime(lesson.EndDate)}}</span>
+                                            </div>
                                             <div class="c c4">
                                                 <template v-if="!isInDue(lesson.EndDate)">
                                                     <a title="Hết hạn" class="btn-act act bg-secondary" v-on:click="lockNotify()">Hết hạn</a>
@@ -71,7 +76,11 @@
                                                     <span>{{formatTime(lesson.LastJoin)}}</span>
                                                 </template>
                                             </div>
-                                            <div class="c c3">
+                                            <div class="c cs">
+                                            </div>
+                                            <div class="c schedule">
+                                                <span>{{formatTime(lesson.StartDate)}}</span><br />
+                                                <span>{{formatTime(lesson.EndDate)}}</span>
                                             </div>
                                             <div class="c c4">
                                                 <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'" class="btn-act act">{{isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'}}</a>
@@ -91,6 +100,10 @@
 @section Scripts {
     <style>
         .btn-act {
+            font-size: 12px;
+        }
+
+        .c.schedule {
             font-size: 12px;
         }
     </style>
@@ -149,7 +162,7 @@
                 }
             },
             formatTime(time) {
-                if (!this.isViewed(time)) return "-";
+                if (!this.isViewed(time)) return "";
                 return moment(time).format("DD/MM/YYYY hh:mm")
             },
             isViewed(time) {

@@ -33,12 +33,12 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <a :href="'@Url.Action("Modules","Course")/' + item.id" :title="item.className" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
-                                <a :href="'@Url.Action("Modules","Course")/' + item.id" :title="item.title" class="title">{{item.className}}</a>
-                                <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
+                                <a :href="'@Url.Action("Modules","Course")/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
+                                    <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
                                     <div class="flex">
-                                        <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Hoàn Thành' : 'Chưa hoàn thành'}}
+                                        <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
                                     </div>
                                 </div>
                             </div>
@@ -64,7 +64,7 @@
                                             <img v-else src="/pictures/ielts1.png" alt="">
                                         </div>
                                         <div class="padding-15 inner">
-                                            <a :href="'@Url.Action("Detail","Course")/' + item.id" :title="item.title" class="title">{{item.title}}</a>
+                                            <a :href="'@Url.Action("Detail","Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
                                             <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
                                             <div class="c-bot">
                                                 <div class="flex reverse">
