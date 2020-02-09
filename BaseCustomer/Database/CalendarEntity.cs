@@ -21,6 +21,12 @@ namespace BaseCustomerEntity.Database
         public string TeacherID { get; set; }
         [JsonProperty("TeacherName")]
         public string TeacherName { get; set; }
+
+        [JsonProperty("StudentID")]
+        public string StudentID { get; set; }
+        [JsonProperty("StudentName")]
+        public string StudentName { get; set; }
+
         [JsonProperty("UrlRoom")]
         public string UrlRoom { get; set; } // appaer
         [JsonProperty("LimitNumberUser")]

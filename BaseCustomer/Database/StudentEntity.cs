@@ -32,6 +32,8 @@ namespace BaseCustomerEntity.Database
         public string UserCreate { get; set; }
         [JsonProperty("CreateDate")]
         public DateTime CreateDate { get; set; }
+        [JsonProperty("Skype")]
+        public string Skype { get; set; }
     }
     public class StudentService : ServiceBase<StudentEntity>
     {

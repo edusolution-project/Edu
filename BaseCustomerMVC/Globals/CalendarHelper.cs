@@ -15,12 +15,14 @@ namespace BaseCustomerMVC.Globals
         private readonly ClassService _classService;
         private readonly TeacherService _teacherService;
         private readonly LessonScheduleService _lessonScheduleService;
+        private readonly StudentService _studentService;
         public CalendarHelper(
             CalendarService calendarService,
             LessonScheduleService lessonScheduleService,
             LessonService lessonService,
             ClassService classService,
-            TeacherService teacherService
+            TeacherService teacherService,
+            StudentService studentService
             )
         {
             _calendarService = calendarService;
@@ -28,6 +30,7 @@ namespace BaseCustomerMVC.Globals
             _classService = classService;
             _teacherService = teacherService;
             _lessonScheduleService = lessonScheduleService;
+            _studentService = studentService;
         }
         public Task<CalendarEntity> CreateEvent(CalendarEntity item)
         {
@@ -102,11 +105,23 @@ namespace BaseCustomerMVC.Globals
                 title = o.Title,
                 url = o.UrlRoom == null ? "" : o.UrlRoom
             }).ToList();
+            var demodata = new CalendarEventModel()
+            {
+                start = DateTime.Now,
+                groupid = "Schedule",
+                id = "Test",
+                title = "Hoang Long",
+                url = "",
+                skype = "live:breakingdawn1235"
+            };
+            DataResponse.Add(demodata);
             return DataResponse;
         }
         [Obsolete]
         public List<CalendarEventModel> GetListEvent(DateTime startDate, DateTime endDate, List<string> classList, string userid)
         {
+            bool isTeacher = _teacherService.GetItemByID(userid) != null;
+
             var filter = new List<FilterDefinition<CalendarEntity>>();
             if (startDate > DateTime.MinValue && endDate > DateTime.MinValue)
             {
@@ -122,7 +137,8 @@ namespace BaseCustomerMVC.Globals
                 groupid = o.GroupID,
                 id = o.ID,
                 title = o.Title,
-                url = o.UrlRoom == null ? "" : o.UrlRoom
+                url = o.UrlRoom == null ? "" : o.UrlRoom,
+                skype = isTeacher ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype
             }).ToList();
             return DataResponse;
         }

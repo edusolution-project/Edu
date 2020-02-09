@@ -40,6 +40,10 @@
                         <input type="text" v-model="profile.Phone" class="form-control" placeholder="Số điện thoại" id="msisdn">
                     </div>
                     <div class="form-group" v-if="isInfo">
+                        <label for="mskype">Skype</label>
+                        <input type="text" v-model="profile.Skype" class="form-control" placeholder="Skype" id="mskype">
+                    </div>
+                    <div class="form-group" v-if="isInfo">
                         <label for="email">Địa chỉ email</label>
                         <input type="text" v-model="profile.Email" class="form-control" placeholder="Email" id="email">
                     </div>
@@ -147,6 +151,7 @@
                     let _form = new FormData()
                     _form.append("FullName", this.profile.FullName);
                     _form.append("Phone", this.profile.Phone);
+                    _form.append("Skype", this.profile.Skype);
                     if (this.avatar.file) {
                         _form.append('fileUpload', this.avatar.file)
                     }
@@ -157,6 +162,9 @@
                     }
                     axios.post(_url, _form, _headers)
                         .then(response => {
+                            if (response.data.StatusCode == 1) {
+                                swal("update success !!", "" ,"success");
+                            }
                         }).catch(e => { })
                 },
                 updatePassword() {
@@ -167,6 +175,9 @@
                     _form.append("retypepass", this.password_confirm);
                     axios.post(_url, _form)
                         .them(response => {
+                            if (response.data.StatusCode == 1) {
+                                swal("update success !!", "" ,"success");
+                            }
                         }).catch(e => { })
                 },
                 errorImgUrl() {
