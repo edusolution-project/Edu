@@ -54,7 +54,7 @@ namespace BaseCustomerMVC.Globals
         public Task<bool> RemoveEvent(string id, string user)
         {
             var delItem = _calendarService.GetItemByID(id);
-            
+
             if (delItem != null)
             {
                 // neu event ko phai cua user hoac da het thoi gian thi ko the huy
@@ -138,7 +138,7 @@ namespace BaseCustomerMVC.Globals
                 id = o.ID,
                 title = o.Title,
                 url = o.UrlRoom == null ? "" : o.UrlRoom,
-                skype = isTeacher ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype
+                skype = isTeacher ? _studentService.GetItemByID(o.StudentID)?.Skype : _teacherService.GetItemByID(o.TeacherID)?.Skype
             }).ToList();
             return DataResponse;
         }
@@ -187,6 +187,7 @@ namespace BaseCustomerMVC.Globals
                 Title = lesson.Title,
                 TeacherID = teacher.ID,
                 TeacherName = teacher.FullName,
+                Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
                 Status = 0,
                 LimitNumberUser = 0,
                 UrlRoom = string.Empty,
