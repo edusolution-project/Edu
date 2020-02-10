@@ -25,18 +25,20 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("LastDate")]
         public DateTime LastDate { get; set; }
         [JsonProperty("AvgPoint")]
-        public double AvgPoint { get; set; }        
+        public double AvgPoint { get; set; }
     }
 
     public class ClassProgressService : ServiceBase<ClassProgressEntity>
     {
         private ClassService _classService;
+        private ClassSubjectService _classSubjectService;
         private LessonService _lessonService;
 
-        public ClassProgressService(IConfiguration config, ClassService classService, LessonService lessonService) : base(config)
+        public ClassProgressService(IConfiguration config, ClassService classService, LessonService lessonService, ClassSubjectService classSubjectService) : base(config)
         {
             _classService = classService;
             _lessonService = lessonService;
+            _classSubjectService = classSubjectService;
 
             var indexs = new List<CreateIndexModel<ClassProgressEntity>>
             {
@@ -59,8 +61,8 @@ namespace BaseCustomerEntity.Database
                 await Collection.InsertOneAsync(new ClassProgressEntity
                 {
                     StudentID = item.StudentID,
-                    CompletedLessons = new List<string>() { item.LessonID },
-                    TotalLessons = (int)_lessonService.CreateQuery().CountDocuments(t => t.CourseID == currentClass.CourseID),
+                    CompletedLessons = new List<string>() { item.ClassSubjectID }, //TODO: cập nhật khi số lượng môn học thay đổi
+                    TotalLessons = (int)_classSubjectService.CreateQuery().CountDocuments(t => t.ClassID == currentClass.ID),//TODO: Kiểm tra khi số lượng môn học thay đổi
                     ClassID = currentClass.ID,
                     LastDate = DateTime.Now,
                     LastLessonID = item.LessonID
@@ -70,9 +72,9 @@ namespace BaseCustomerEntity.Database
             {
                 await Collection.UpdateManyAsync(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID,
                      new UpdateDefinitionBuilder<ClassProgressEntity>()
-                     .AddToSet(t => t.CompletedLessons, item.LessonID)
+                     .AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
                      .Set(t => t.LastDate, DateTime.Now)
-                     .Set(t => t.LastLessonID, item.LessonID)
+                     .Set(t => t.LastLessonID, item.ClassSubjectID)
                      );
             }
         }

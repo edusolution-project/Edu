@@ -234,20 +234,20 @@
 
                 //Class Action
                 toggleState(obj) {
-                    let _that = this;
-                    _that.tableData.forEach(function (item, k) {
-                        if (item.ID === obj.ID) {
-                            let _url = item.IsActive ? '@Url.Action("Unpublish", "Class")' : '@Url.Action("Publish", "Class")'
+                    //let _that = this;
+                    //_that.tableData.forEach(function (item, k) {
+                    //    if (item.ID === obj.ID) {
+                            let _url = obj.IsActive ? '@Url.Action("Unpublish", "Class")' : '@Url.Action("Publish", "Class")'
                             let _form = new FormData()
-                            _form.append('ArrID', item.ID);
+                            _form.append('ArrID', obj.ID);
                             axios.post(_url, _form)
                                 .then(response => {
                                     console.log('update ok');
                                     //item.IsActive = !item.IsActive;
                                     //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
                                 }).catch(e => { })
-                        }
-                    })
+                        //}
+                    //})
                 },
                 createClass() {
 

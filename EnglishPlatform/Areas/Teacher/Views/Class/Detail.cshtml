@@ -82,6 +82,9 @@
                                                                 @*<vuejs-datepicker v-model="data.StartDate" format="dd/M/yyyy" class="date st" v-on:input="updateSchedule(data)"></vuejs-datepicker>*@
                                                                 @*<vuejs-datepicker v-model="data.EndDate" format="dd/M/yyyy" class="date ed" v-on:input="updateSchedule(data)"></vuejs-datepicker>*@
                                                             </div>
+                                                            <div class="status">
+                                                                <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                                                            </div>
                                                         </div>
                                                     </li>
                                                 </ul>
@@ -113,9 +116,9 @@
                         <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
                         <td>{{item.Email}}</td>
                         <td>{{item.Phone}}</td>
-                        <td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
+                        @*<td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>*@
                         <td>{{item.last_update}}</td>
-                        <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>
+                        @*<td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>*@
                     </tr>
                 </tbody>
             </table>
@@ -192,11 +195,19 @@
                 top: 7px;
             }
 
+        .ls-pratice .sub-practice .status {
+            padding: 10px
+        }
+
         .input-group.date input {
             width: 125px;
             border: none;
             padding: 0;
         }
+
+            .input-group.date input:read-only {
+                background: #FFF;
+            }
 
             .input-group.date input:focus {
                 outline: none !important;
@@ -223,7 +234,7 @@
         var datepickerComponent = Vue.extend({
           //v-el:select
           template: `<div class="input-group date" ref="inputgroup">` +
-            `<input type="text" class="form-control" v-model="dateVal"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>` +
+            `<input type="text" class="form-control" v-model="dateVal" readonly="readonly"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>` +
             `</div>`,
             props: {
                 obj: '',
@@ -247,7 +258,7 @@
             mounted: function () {
                 let _that = this
                 Vue.nextTick(function () {
-                    console.log($(_that.$refs.inputgroup))
+                    //console.log($(_that.$refs.inputgroup))
                     $($(_that.$refs.inputgroup).find('input')).datetimepicker({
                         formatTime: 'H:i',
                         formatDate: 'd/m/Y',
@@ -256,14 +267,15 @@
                         defaultTime: '08:00',
                         step: 15,
                         onChangeDateTime: function (dp, $input) {
+                            console.log($input.val())
                             _that.dateVal = $input.val()
-                            if (moment($input.val()).format() == "Invalid date") {
+                            if (moment($input.val(),"DD/MM/YYYY HH:mm").format() == "Invalid date") {
                                 console.log('false');
                                 return false;
                             }
-                                
+
                             if (_that.idx == '0') {
-                                if (_that.obj.StartDate != _that.date) {                            
+                                if (_that.obj.StartDate != _that.date) {
                                     _that.obj.StartDate = _that.date
                                     console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
                                     _that.$emit('input')
@@ -347,18 +359,18 @@
                         key: 'phone',
                         label: 'SĐT'
                     },
-                    {
-                        key: 'per',
-                        label: 'Tiến độ'
-                    },
+                    //{
+                    //    key: 'per',
+                    //    label: 'Tiến độ'
+                    //},
                     {
                         key: 'last_update',
                         label: 'Lần học cuối'
                     },
-                    {
-                        key: 'score',
-                        label: 'Kết quả'
-                    }
+                    //{
+                    //    key: 'score',
+                    //    label: 'Kết quả'
+                    //}
                 ],
                 studentData: [
                 ],
@@ -552,6 +564,24 @@
                     return list.filter((p) => {
         	            return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
                     })
+                },
+                 //Lesson Action
+                toggleLessonState(obj) {
+                    let _that = this;
+                    console.log(obj)
+                    //_that.tableData.forEach(function (item, k) {
+                        //if (item.ID === obj.ID) {
+                            let _url = obj.IsActive ? '@Url.Action("Unpublish", "LessonSchedule")' : '@Url.Action("Publish", "LessonSchedule")'
+                            let _form = new FormData()
+                            _form.append('ArrID', obj.ScheduleID);
+                            axios.post(_url, _form)
+                                .then(response => {
+                                    console.log('update ok');
+                                    //item.IsActive = !item.IsActive;
+                                    //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
+                                }).catch(e => { })
+                        //}
+                    //})
                 },
                 domDecoder(str) {
                     let parser = new DOMParser();

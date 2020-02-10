@@ -36,6 +36,7 @@
                                 <a :href="'@Url.Action("Modules","Course")/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
                                 <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
+                                    <a :href="'@Url.Action("Detail","Course")/' + item.classID" :title="item.className" class="title">{{item.className}}</a>
                                     <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
                                     <div class="flex">
                                         <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
@@ -51,7 +52,7 @@
             <div class="col-md-6">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
-                        <h4 class="box-head">Khoá học đang diễn ra</h4>
+                        <h4 class="box-head">Lớp học đang diễn ra</h4>
                         <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
@@ -107,7 +108,7 @@
         <div class="module">
             <div class="col-md-12 margin-b20">
                 <div class="heading flex">
-                    <h4 class="box-head">Khóa học đã kết thúc</h4>
+                    <h4 class="box-head">Lớp học đã kết thúc</h4>
                     <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                 </div>
             </div>

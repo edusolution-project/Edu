@@ -70,9 +70,9 @@
                     <td>{{item.ClassName}}</td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
-                    <td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
+                    @*<td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
                     <td>{{item.last_update}}</td>
-                    <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>
+                    <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>*@
                     <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
                 </tr>
             </tbody>
@@ -323,18 +323,18 @@
                         key: 'phone',
                         label: 'SĐT'
                     },
-                    {
-                        key: 'per',
-                        label: 'Tiến độ'
-                    },
-                    {
-                        key: 'last_update',
-                        label: 'Lần học cuối'
-                    },
-                    {
-                        key: 'score',
-                        label: 'Kết quả'
-                    },
+                    //{
+                    //    key: 'per',
+                    //    label: 'Tiến độ'
+                    //},
+                    //{
+                    //    key: 'last_update',
+                    //    label: 'Lần học cuối'
+                    //},
+                    //{
+                    //    key: 'score',
+                    //    label: 'Kết quả'
+                    //},
                     {
                         key: 'actions',
                         label: 'Tác vụ'
