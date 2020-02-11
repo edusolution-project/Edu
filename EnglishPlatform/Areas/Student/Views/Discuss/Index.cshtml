@@ -269,13 +269,15 @@
                     @for (int i = 0; classList != null && i < classList.Count; i++)
                     {
                         var item = classList[i];
+                        string Allow = item.IsAllow ? "Active" : "Off";
+                       
                         if (item.ID == ViewBag.ID)
                         {
-                            <option selected value="@item.ID">@item.Name</option>
+                            <option selected value="@item.ID">@item.Name (@Allow)</option>
                         }
                         else
                         {
-                            <option value="@item.ID">@item.Name</option>
+                            <option value="@item.ID">@item.Name (@Allow)</option>
                         }
                     }
                 </select>
