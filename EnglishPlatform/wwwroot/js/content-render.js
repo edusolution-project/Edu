@@ -209,7 +209,7 @@ var Lesson = (function () {
         lessonContent.append(lessonHeader);
 
         //main content (lesson content; part list...., 2 cols interface)
-        var cardBody = $("<div>", { "class": "card-body h-100 position-relative" });
+        var cardBody = $("<div>", { "class": "card-body position-absolute", "style": "top: 56px; bottom: 0; left: 0; right: 0" });
         lessonContent.append(cardBody);
 
         var lessonBody = $("<div>", { "class": "lesson-body h-100", "id": config.lesson_id });
@@ -371,9 +371,11 @@ var Lesson = (function () {
                 break;
             case mod.STUDENT_EXAM:
             case mod.STUDENT_REVIEW:
+                lessonBody.css('top', 0);
                 //no header
                 break;
             case mod.REVIEW:
+                lessonBody.css('top', 0);
                 //no header
                 break;
         }
@@ -1644,7 +1646,7 @@ var Lesson = (function () {
                 wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide" }));
                 break;
         }
-        wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddFile m-1 btn-sm", "style": "max-width:80%", "onclick": "chooseFile(this)", "value": "Choose media", "tabindex": -1 }));
+        wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddFile " + type + " m-1 btn-sm", "style": "max-width:80%", "onclick": "chooseFile(this)", "value": "Choose media", "tabindex": -1 }));
         wrapper.append($("<input>", { "type": "button", "class": "btn btn-danger btnResetFile btn-sm hide m-1", "onclick": "resetMedia(this)", "value": "x", "tabindex": -1 }));
         if (data != null) {
             if (data.Name != null) $(wrapper).find("[name='" + prefix + "Media.Name']").val(data.Name);

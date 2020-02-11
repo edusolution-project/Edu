@@ -832,6 +832,84 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Manage
         public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
+            //var filter = new List<FilterDefinition<ClassSubjectEntity>>();
+            //if (!string.IsNullOrEmpty(SubjectID))
+            //{
+            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+            //}
+            //if (!string.IsNullOrEmpty(GradeID))
+            //{
+            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+            //}
+            //if (!string.IsNullOrEmpty(TeacherID))
+            //{
+            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+            //}
+            //if (model.StartDate > new DateTime(1900, 1, 1))
+            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
+            //if (model.StartDate > new DateTime(1900, 1, 1))
+            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
+
+            //var data = _classSubjectService.Collection
+            //    //.AsQueryable().
+            //    //GroupBy(t => t.ClassID).Select(t => new ClassViewModel(t) {
+            //    //    CourseName = 
+            //    //})
+            //    .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
+            //model.TotalRecord = data.Count();
+            //var classData = _service.Collection.AsQueryable().Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)).OrderByDescending(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToList();
+            //var returndata = from o in classData
+            //                     //where o.Skills != null
+            //                 let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
+            //                 let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
+            //                 select new Dictionary<string, object>
+            //                 {
+            //                     { "ID", o.ID },
+            //                     { "Name", o.Name },
+            //                     { "Students", _classStudentService.GetClassStudents(o.ID).Count },
+            //                     { "Created", o.Created },
+            //                     { "IsActive", o.IsActive },
+            //                     { "Image", o.Image },
+            //                     { "StartDate", o.StartDate },
+            //                     { "EndDate", o.EndDate },
+            //                     { "Order", o.Order },
+            //                     { "Skills", o.Skills },
+            //                     { "Members", o.Members },
+            //                     { "Description", o.Description },
+            //                     { "SkillName", sname }
+            //                 };
+
+            //var response = new Dictionary<string, object>
+            //    {
+            //        { "Data", returndata.ToList()},
+            //        { "Model", model }
+            //    };
+
+            //return new JsonResult(response);
+            var returndata = FilterClass(model, SubjectID, GradeID, TeacherID, skipActive);
+
+            var response = new Dictionary<string, object>
+                {
+                    { "Data", returndata.ToList()},
+                    { "Model", model }
+                };
+            return new JsonResult(response);
+        }
+
+        public JsonResult GetClassList(DefaultModel model, string SubjectID = "", string GradeID = "")
+        {
+            var returndata = FilterClass(model, SubjectID, GradeID, User.Claims.GetClaimByType("UserID").Value, true);
+
+            var response = new Dictionary<string, object>
+                {
+                    { "Data", returndata.ToList()},
+                    { "Model", model }
+                };
+            return new JsonResult(response);
+        }
+
+        private List<Dictionary<string, object>> FilterClass(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
+        {
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
             if (!string.IsNullOrEmpty(SubjectID))
             {
@@ -879,14 +957,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "SkillName", sname }
                              };
 
-            var response = new Dictionary<string, object>
-                {
-                    { "Data", returndata.ToList()},
-                    { "Model", model }
-                };
 
-            return new JsonResult(response);
+            return returndata.ToList();
         }
+
 
         [HttpPost]
         [Obsolete]

@@ -303,7 +303,7 @@ namespace BaseCustomerMVC.Controllers.Student
                        let skill = _skillService.GetItemByID(_cs.SkillID)
                        let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
                        where _subject != null
-                       let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
+                       let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID, o.ClassSubjectID) != null
                        select new
                        {
                            id = o.ID,
@@ -317,7 +317,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            endDate = o.EndDate,
                            skill = skill,
                            isLearnt = isLearnt
-                       }).ToList();
+                       }).OrderBy(t => t.startDate).ToList();
             //var std = (from o in data.ToList()
             //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
             //           where _class != null

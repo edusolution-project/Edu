@@ -56,8 +56,9 @@
                                                 <span>{{formatTime(lesson.EndDate)}}</span>
                                             </div>
                                             <div class="c c4">
-                                                <template v-if="!isInDue(lesson.EndDate)">
-                                                    <a title="Hết hạn" class="btn-act act bg-secondary" v-on:click="lockNotify()">Hết hạn</a>
+                                                <template v-if="!isValid(lesson)">
+                                                    <a title="Chưa mở" class="btn-act act bg-secondary" v-if="moment(lesson.StartDate) > moment()" v-on:click="lockNotify(lesson,1)">Chưa mở</a>
+                                                    <a title="Hết hạn" class="btn-act act bg-secondary" v-else v-on:click="lockNotify(lesson,0)">Hết hạn</a>
                                                 </template>
                                                 <template v-else-if="lesson.Tried > 0">
                                                     <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="lesson.LastExam != null" title="Làm lại" class="btn-act act">Làm lại</a>
@@ -155,7 +156,7 @@
                     let _url = '@Url.Action("GetChapterContent", "Lesson")'
                     axios.post(_url, _form)
                         .then(response => {
-                            console.log(response.data.Data);
+                            //console.log(response.data.Data);
                             _that.list_data[pos].detail = response.data.Data.Lessons;
                             _that.list_data[pos].Name = name;
                         }).catch(e => { })
@@ -163,16 +164,29 @@
             },
             formatTime(time) {
                 if (!this.isViewed(time)) return "";
-                return moment(time).format("DD/MM/YYYY hh:mm")
+                return moment(time).format("DD/MM/YYYY HH:mm")
             },
             isViewed(time) {
                 return (moment(time) > moment(new Date(2000, 1, 1)));
             },
-            isInDue(time) {
-                 return (moment(time) < moment(new Date(2000, 1, 1))) || (moment(time) > moment());
+            isValid(item) {
+                var now = moment()
+                if (moment(item.StartDate) > now) return false
+                return (moment(item.EndDate) < moment(new Date(2000, 1, 1))) || (moment(item.EndDate) > now);
             },
-            lockNotify() {
-                alert("Lesson is overdue!");
+            lockNotify(item, start) {
+                if (start == 1)
+                    Swal.fire({
+                        title: 'Lưu ý',
+                        html: 'Bài học sẽ mở lúc ' + this.formatTime(item.StartDate),
+                        icon: 'warning'
+                    });
+                else
+                    Swal.fire({
+                        title: 'Lưu ý',
+                        html: 'Bài học đã hết hạn lúc ' + this.formatTime(item.EndDate),
+                        icon: 'warning'
+                    });
             }
         }
     });

@@ -144,9 +144,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             //if (string.IsNullOrEmpty(ClassID))
             //    return null;
+            var teacher = "";
+            if (User.IsInRole("teacher"))
+                teacher = User.Claims.GetClaimByType("UserID").Value;
             var response = new Dictionary<string, object>
             {
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
+                          where string.IsNullOrEmpty(teacher) || r.TeacherID == teacher
                           let subject = _subjectService.GetItemByID(r.SubjectID)
                           let course = _courseService.GetItemByID(r.CourseID)
                           let grade = _gradeService.GetItemByID(r.GradeID)

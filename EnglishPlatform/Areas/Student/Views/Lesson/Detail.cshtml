@@ -147,14 +147,14 @@
         <input type="hidden" name="ExamID" id="ExamID" value="" />
     </div>
 
-    <div id="lessonSummary" class="shadow">
+    <div id="lessonSummary" class="shadow expand">
     </div>
 
 </div>
 @section Footer{}
 @section Scripts{
 
-    <script src="~/js/student-exam-v2.js?20200205"></script>
+    <script src="~/js/student-exam-v2.js?20200211"></script>
 
     <script>
         //localStorage.clear();
@@ -168,7 +168,6 @@
                     removeans: '@Url.Action("RemoveDetail", "Exam")',
                     end: '@Url.Action("CompleteExam", "Exam")',
                     review: '@Url.Action("Review","Lesson")'
-
                 },
                 type: @currentLesson.TemplateType,
                 lesson_id: '@currentLesson.ID',

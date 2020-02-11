@@ -67,7 +67,7 @@
                         <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title}}</a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion" role="tabpanel">
                             <ul class="list">
-                                <li class="col-md-12" v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')">
+                                @*<li class="col-md-12" v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')">
                                     <div class="inner">
                                         <a href="javascript:;" v-b-toggle="`prc-${item.ID}-${k}`" class="btn-collapse" v-on:click="loadContent(item.ClassSubject, item.ID)"><i class="ic ic-edit-small"></i>{{item.Title}}<i class="ic ic-collapse"></i></a>
                                         <b-collapse :id="`prc-${item.ID}-${k}`" role="tabpanel">
@@ -79,8 +79,6 @@
                                                             <div class="flex width-100 j-end picker-schedule">
                                                                 <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st" v-on:input="updateSchedule(data)"></datepicker>
                                                                 <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed" v-on:input="updateSchedule(data)"></datepicker>
-                                                                @*<vuejs-datepicker v-model="data.StartDate" format="dd/M/yyyy" class="date st" v-on:input="updateSchedule(data)"></vuejs-datepicker>*@
-                                                                @*<vuejs-datepicker v-model="data.EndDate" format="dd/M/yyyy" class="date ed" v-on:input="updateSchedule(data)"></vuejs-datepicker>*@
                                                             </div>
                                                             <div class="status">
                                                                 <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
@@ -91,12 +89,12 @@
                                             </b-card-body>
                                         </b-collapse>
                                     </div>
-                                </li>
-                                @*<chap-content v-for="(item,k) in list_chapters" v-if="matchedItem(item, obj.ID + '-')"
+                                </li>*@
+                                <chap-content v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')"
                                     v-bind:data="item"
                                     v-bind:pos="k"
                                     v-bind:subchaps="filterItem(item, list_chapters)"
-                                    v-bind:lessons="filterItem(item, list_lessons)"></chap-content>*@
+                                    v-bind:lessons="filterItem(item, list_lessons)"></chap-content>
                             </ul>
                         </b-collapse>
                     </div>
@@ -175,7 +173,6 @@
 </section>
 @section Scripts{
 
-
     <style>
         .ls-pratice .card-body {
             overflow: visible;
@@ -213,6 +210,44 @@
                 outline: none !important;
             }
     </style>
+
+
+
+    <script type="text/x-template" id="chapContentTemp">
+            <li class="col-md-12">
+                <div class="inner">
+                    <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic ic-edit-small"></i>{{data.Title}}<i class="ic ic-collapse"></i></a>
+                    <b-collapse :id="`prc-${data.ID}-${pos}`" role="tabpanel">
+                        <b-card-body>
+                            <ul class="list">
+                                <chap-content v-for="(subItem,j) in subchaps"
+                                              v-bind:data="item"
+                                              v-bind:pos="k"
+                                              v-bind:subchaps="filterItem(item, subchaps)"
+                                              v-bind:lessons="filterLesson(item, lessons)"></chap-content>
+                                <lesson-item v-for="lesson in lessons" v-bind:data="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
+                            </ul>
+                        </b-card-body>
+                    </b-collapse>
+                </div>
+            </li>
+        </script>
+
+        <script type="text/x-template" id="lessonItemTemp">
+            <li class="sub-practice">
+                <div class="flex j-between width-100">
+                    <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject"> <span class="width-100">{{data.Title}}</span></a>
+                    <div class="flex width-100 j-end picker-schedule">
+                        <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st" v-on:input="updateSchedule(data)"></datepicker>
+                        <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed" v-on:input="updateSchedule(data)"></datepicker>
+                    </div>
+                    <div class="status">
+                        <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                    </div>
+                </div>
+            </li>
+        </script>
+
     <script>
         Vue.component('chap-content', {
             template: '#chapContentTemp',
@@ -262,29 +297,29 @@
                     $($(_that.$refs.inputgroup).find('input')).datetimepicker({
                         formatTime: 'H:i',
                         formatDate: 'd/m/Y',
-                        timepickerScrollbar: false,
+                        timepickerScrollbar: true,
                         scrollMonth: false,
                         defaultTime: '08:00',
                         step: 15,
                         onChangeDateTime: function (dp, $input) {
-                            console.log($input.val())
+                            //console.log($input.val())
                             _that.dateVal = $input.val()
                             if (moment($input.val(),"DD/MM/YYYY HH:mm").format() == "Invalid date") {
-                                console.log('false');
+                                //console.log('false');
                                 return false;
                             }
 
                             if (_that.idx == '0') {
                                 if (_that.obj.StartDate != _that.date) {
                                     _that.obj.StartDate = _that.date
-                                    console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
+                                    //console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
                                     _that.$emit('input')
                                 }
                             }
                             else {
                                 if (_that.obj.EndDate != _that.date) {
                                     _that.obj.EndDate = _that.date
-                                    console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
+                                    //console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
                                     _that.$emit('input')
                                 }
                             }
@@ -301,10 +336,11 @@
             mounted() {
                 this.loadClassDetail()
                 window.loadContent = this.loadContent
+                window.updateSchedule = this.updateSchedule
                 var hash = window.location.hash;
                 if (hash.startsWith('#')) {
                     hash = hash.split('#')[1]
-                    console.log(hash)
+                    //console.log(hash)
                     switch (hash) {
                         case 'module':
                             this.tabChange(1);
@@ -527,7 +563,7 @@
                         }).catch(e => { })
                 },
                 loadPreference() {
-                    console.log(4)
+                    //console.log(4)
                 },
                 loadComment() {
                     document.location = '@Url.Action("Index","Discuss", new { id = currentClass.ID })'
@@ -568,7 +604,7 @@
                  //Lesson Action
                 toggleLessonState(obj) {
                     let _that = this;
-                    console.log(obj)
+                    //console.log(obj)
                     //_that.tableData.forEach(function (item, k) {
                         //if (item.ID === obj.ID) {
                             let _url = obj.IsActive ? '@Url.Action("Unpublish", "LessonSchedule")' : '@Url.Action("Publish", "LessonSchedule")'
@@ -592,35 +628,3 @@
         });
     </script>
 }
-
-@*<script type="text/x-template" id="chapContentTemp">
-        <li class="col-md-12">
-            <div class="inner">
-                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic ic-edit-small"></i>{{data.Title}}<i class="ic ic-collapse"></i></a>
-                <b-collapse :id="`prc-${data.ID}-${pos}`" role="tabpanel">
-                    <b-card-body>
-                        <ul class="list">
-                            <chap-content v-for="(subItem,j) in subchaps"
-                                          v-bind:data="item"
-                                          v-bind:pos="k"
-                                          v-bind:subchaps="filterItem(item, subchaps)"
-                                          v-bind:lessons="filterLesson(item, lessons)"></chap-content>
-                            <lesson-item v-for="lesson in lessons" v-bind:data="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
-                        </ul>
-                    </b-card-body>
-                </b-collapse>
-            </div>
-        </li>
-    </script>
-
-    <script type="text/x-template" id="lessonItemTemp">
-        <li class="sub-practice">
-            <div class="flex j-between width-100">
-                <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject"> <span class="width-100">{{data.Title}}</span></a>
-                <div class="flex width-100 j-end picker-schedule">
-                    <vuejs-datepicker v-model="data.StartDate" format="dd/M/yyyy" class="date st"></vuejs-datepicker>
-                    <vuejs-datepicker v-model="data.EndDate" format="dd/M/yyyy" class="date ed"></vuejs-datepicker>
-                </div>
-            </div>
-        </li>
-    </script>*@

@@ -136,9 +136,9 @@ namespace BaseCustomerEntity.Database
             });
         }
 
-        public DateTime GetLastLearnt(string StudentID, string LessonID)
+        public LearningHistoryEntity GetLastLearnt(string StudentID, string LessonID, string ClassSubjectID)
         {
-            return Collection.Find(t => t.StudentID == StudentID && t.LessonID == LessonID).SortByDescending(t => t.ID).Project(t => t.Time).FirstOrDefault();
+            return Collection.Find(t => t.StudentID == StudentID && t.LessonID == LessonID && t.ClassSubjectID == ClassSubjectID).FirstOrDefault();
         }
 
         public Task RemoveClassHistory(string ClassID)

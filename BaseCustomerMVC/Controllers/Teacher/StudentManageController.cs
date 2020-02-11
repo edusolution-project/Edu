@@ -124,8 +124,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var student = _studentService.GetItemByID(StudentID);
             if (student == null)
                 return Json(new { error = "Học viên không tồn tại" });
-            var classstudents = _classStudentService.GetClassStudents(ClassID);
-            if (classstudents.Any(t => t.StudentID == StudentID))
+            var classstudent = _classStudentService.GetClassStudent(ClassID, student.ID);
+            if (classstudent != null)
             {
                 //already in class
                 return Json(new { data = @class, msg = "Học viên đã có trong lớp" });
@@ -140,14 +140,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public JsonResult GetList(DefaultModel model, string SubjectID, string ClassID, string TeacherID, string SkillID, string GradeID)
         {
             var filterCs = new List<FilterDefinition<ClassSubjectEntity>>();
+            if (User.IsInRole("teacher"))
+            {
+                TeacherID = User.Claims.GetClaimByType("UserID").Value;
+            }
             if (!string.IsNullOrEmpty(ClassID))
                 filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.ClassID == ClassID));
             if (!string.IsNullOrEmpty(SubjectID))
                 filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            else
-            {
-                //filter trong những môn được phân công
-            }
             if (!string.IsNullOrEmpty(TeacherID))
                 filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
             if (!string.IsNullOrEmpty(SkillID))

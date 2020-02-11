@@ -102,7 +102,7 @@ namespace EnglishPlatform.Controllers
                     return Json(new ReturnJsonModel
                     {
                         StatusCode = ReturnStatus.ERROR,
-                        StatusDesc = "Account's infomation is not correct"
+                        StatusDesc = "Thông tin tài khoản không đúng"
                     });
                 }
                 else
@@ -191,7 +191,7 @@ namespace EnglishPlatform.Controllers
                             return Json(new ReturnJsonModel
                             {
                                 StatusCode = ReturnStatus.ERROR,
-                                StatusDesc = "Can't signin now."
+                                StatusDesc = "Có lỗi, không đăng nhập được"
                             });
                         }
                     }
@@ -200,7 +200,7 @@ namespace EnglishPlatform.Controllers
                         return Json(new ReturnJsonModel
                         {
                             StatusCode = ReturnStatus.ERROR,
-                            StatusDesc = "Account is locked"
+                            StatusDesc = "Tài khoản chưa được mở. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
                         });
                     }
                 }

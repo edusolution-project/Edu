@@ -40,7 +40,7 @@ var ExamStudent = (function () {
         }
         var text = (minutes < 10 ? ("0" + minutes) : minutes) + ":" + (second < 10 ? ("0" + second) : second);
         $(".time-counter").text(text);
-        console.log(text)
+        //console.log(text)
         lessontimeout = setTimeout(function () {
             countdown();
         }, 1000);
@@ -1187,7 +1187,7 @@ var ExamStudent = (function () {
                     class: "total",
                     text: listQuiz.length
                 }))
-            ).append($('<button>', { class: "quizNumber d-none btn btn-success ml-2", onclick: "window.ToggleNav(this)", tooltips: "Toggle Scoreboard" })
+            ).append($('<button>', { class: "quizNumber d-none btn btn-success ml-2 btn-warning", onclick: "window.ToggleNav(this)", tooltips: "Toggle Scoreboard" })
                 .append($("<i>", { class: "fa fa-bars" })));
         }
         //var html = '<div id="quizNavigator" class="overlay">';

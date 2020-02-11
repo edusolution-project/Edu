@@ -6,6 +6,7 @@
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
+    var isHeadteacher = User.IsInRole("head-teacher");
 }
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
@@ -34,7 +35,10 @@
                     <input type="text" name="" placeholder="Search">
                 </div>
             </div>
-            <b-button class="btn-addevent" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+            @if (isHeadteacher)
+            {
+                <b-button clas="btn-addevent" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+            }
         </div>
     </div>
     <div class="card-body">
@@ -54,13 +58,16 @@
                     <td>{{item.SkillName}}</td>
                     <td>{{item.Students}}</td>
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
-                    <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
-                    <td>
-                        <div class="d-flex btn-group">
-                            <a class="btn-act btn-edit" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
-                            <button class="btn-act btn-trash" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
-                        </div>
-                    </td>
+                    @if (isHeadteacher)
+                    {
+                        <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
+                        <td>
+                            <div class="d-flex btn-group">
+                                <a class="btn-act btn-edit" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
+                                <button class="btn-act btn-trash" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
+                            </div>
+                        </td>
+                    }
                 </tr>
             </tbody>
         </table>
@@ -144,13 +151,9 @@
                         key: 'date',
                         label: 'Thời gian'
                     },
+                    @if (isHeadteacher)
                     {
-                        key: 'status',
-                        label: 'Trạng thái'
-                    },
-                    {
-                        key: 'actions',
-                        label: 'Tác vụ'
+                        @Html.Raw("{ key: 'status', label: 'Trạng thái' }, { key: 'actions', label: 'Tác vụ' }");
                     }
                 ],
                 subject: '',
@@ -166,20 +169,20 @@
                 startdate: moment(),
                 enddate: moment().add(29, 'days'),
                 class_info: {
-                    ID: '',
+                            ID: '',
                     Name: '',
                     StartDate: '',
                     EndDate: '',
                     Description: '',
                     thumbnail: {
-                        src: '',
+                                src: '',
                         file: null,
                         height: 90,
                         width: 160
                     },
                     subject: [
                         {
-                            ID: '',
+                                ID: '',
                             SubjectID: '',
                             GradeID: '',
                             SkillID: '',
@@ -222,14 +225,24 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('StartDate', _that.sDate)
                     _form.append('EndDate', _that.eDate)
-                    let _url = '@Url.Action("GetManageList", "Class")'
-                    axios.post(_url, _form)
-                        .then(response => {
-                            _that.tableData = response.data.Data;
-                            var tt = response.data.Model.totalRecord;
-                            this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
-                            //console.log(_that.active_course);
-                        }).catch(e => { })
+
+                    @if(!User.IsInRole("head-teacher"))
+                    {
+                        @:let _url = '@Url.Action("GetClassList", "Class")'
+                    }
+                    else
+                    {
+                        @:let _url = '@Url.Action("GetManageList", "Class")'
+
+                    }
+
+            axios.post(_url, _form)
+                .then(response => {
+                    _that.tableData = response.data.Data;
+                    var tt = response.data.Model.totalRecord;
+                    this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
+                    //console.log(_that.active_course);
+                }).catch(e => { })
                 },
 
                 //Class Action

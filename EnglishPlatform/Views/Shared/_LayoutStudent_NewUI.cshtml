@@ -11,14 +11,17 @@
                   asp-fallback-href="~/css/bootstrap.min.css"
                   asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         </environment>*@
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    @*<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />*@
+    <link href="~/css/bootstrap.4.3.1.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Be+Vietnam&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/fonts.css">
     @*longht them*@
     <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
     <link rel="stylesheet" href="/css/stylesheet.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    @*<script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>*@
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>*@
+    <script src="~/js/vue@2.6.0.js"></script>
+    <script src="~/js/axios.min.js"></script>
     <script src="~/js/bootstrap-vue.min.js"></script>
     <script src="~/js/jquery.min.js"></script>
     <script src="~/js/moment.min.js"></script>
@@ -188,7 +191,9 @@
         });
     </script>
     @*alert*@
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
     <script src="~/js/calendar/js/sweetalert.min.js"></script>
+
     @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
 </body>
