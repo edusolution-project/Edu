@@ -1076,23 +1076,23 @@ Lots taken from Flatly (MIT): https://bootswatch.com/4/flatly/bootstrap.css
 .dark-smooke {
   display: none;
 }
-body.open-add-event .dark-smooke {
-  display: block;
-  position: fixed;
-  background: #2125295e;
-  z-index: 10;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+body.open-add-event .dark-smooke, body.open-add-event-class .dark-smooke {
+    display: block;
+    position: fixed;
+    background: #2125295e;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 #schedule{
   height: calc(100vh - 50px);
 }
-.form-event {
+.form-event,.form-event-class {
   position: fixed;
   top: 0;
   left: 0;
@@ -1113,6 +1113,9 @@ body.open-add-event .dark-smooke {
 
 body.open-add-event .form-event{
   display: inline-block;
+}
+body.open-add-event-class .form-event-class {
+    display: inline-block;
 }
 .form-event .header-form-event {
   background: #E8EDEC;

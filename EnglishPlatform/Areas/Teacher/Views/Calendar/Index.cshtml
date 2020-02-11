@@ -1,6 +1,8 @@
-﻿@{
+﻿@using BaseCustomerEntity.Database;
+@{
     ViewData["Title"] = "My Events";
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    var listClass = ViewBag.ClassList as List<ClassEntity>;
 }
 
 <link href="~/css/calendar/core.css" rel="stylesheet" />
@@ -53,6 +55,49 @@
         <button class="btn btn-o btn-delete-event btn-danger" id="btn-delete-event">Xóa</button>
     </div>
 </div>
+
+<div class="form-event form-event-class" id="form-event">
+    <div class="header-form-event">Thêm lớp học trực tuyến</div>
+    <div class="body-form-event">
+        <input type="hidden" name="ID" value="" />
+        <div class="item-event">
+            <label for="Title">Tiêu đề</label>
+            <input type="text" name="Title" class="form-control" placeholder="Nhập tiêu đề">
+        </div>
+        <div class="item-event">
+            <label>Chọn lớp học </label>
+            @if (listClass != null)
+            {
+                <select name="ClassID" class="form-control">
+                    @for(int i = 0; i < listClass.Count; i++)
+                    {
+                        var item = listClass[i];
+                        <option value="@item.ID">
+                            @item.Name
+                        </option>
+                    }
+                </select>
+            }
+        </div>
+        <div class="item-event">
+            <label for="Thời gian">Thời gian</label>
+            <div class="group-input-event">
+                <input type="text" name="Time" class="form-control timepicker" placeholder="Nhập giờ">
+                <input style="margin-left:5px;" type="date" value="" name="Date" class="form-control" placeholder="Nhập tiêu đề">
+            </div>
+        </div>
+        <div class="item-event">
+            <label for="Content">Nội dung</label>
+            <textarea name="Content" id="Content" style="resize: none;" class="form-control"></textarea>
+        </div>
+    </div>
+    <div class="footer-form-event">
+        <button class="btn btn-primary btn-save-event" id="btn-save-event-class">Lưu</button>
+        <button class="btn btn-o btn-cancel-event" id="btn-cancel-event-class">Hủy</button>
+        <button class="btn btn-o btn-delete-event btn-danger" id="btn-delete-event-del">Xóa</button>
+    </div>
+</div>
+
 <div id="dark-smooke" class="dark-smooke" onclick="javascript: document.body.classList.remove('open-add-event');"></div>
 
 @section Scripts{
@@ -82,7 +127,7 @@
     </script>
     <script>
         var EduCalendar = new EduCalendar();
-        EduCalendar.useEduTemplate().loadConfig({
+        EduCalendar.useEduTemplateTeacher().loadConfig({
             url: "@Url.Action("GetList","Calendar")",
             type: "teacher",
             isDev: !1,
