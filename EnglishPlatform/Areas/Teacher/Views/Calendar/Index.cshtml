@@ -392,7 +392,7 @@
         document.getElementById("btn-save-event-class").onclick = function () {
             var formEvent = document.getElementById("form-event-class");
             var bodyEvent = formEvent.querySelector(".body-form-event");
-            var title = "", url = "", startdate = null;
+            var title = "", url = "", startdate = null, classID = "";
             if (bodyEvent != null) {
                 var Title = bodyEvent.querySelector("input[name='Title']");
                 if (Title != null) {
@@ -415,12 +415,16 @@
                     newFormData.append("ID", ID);
                     isUpdate = true;
                 }
+                var group = bodyEvent.querySelector("select[name='ClassID']");
+                if (group != null) {
+                    classID = group.value;
+                }
             newFormData.append("Title", title);
-                newFormData.append("Url", content);
+                newFormData.append("Url", url);
                 newFormData.append("Status", 5);
             newFormData.append("StartDate", `${date.value} ${timeEvent}`);
             newFormData.append("EndDate", `${date.value} ${timeEvent}`);
-            newFormData.append("GroupID", '@User.FindFirst("UserID")?.Value');
+            newFormData.append("GroupID", classID);
             EduCalendar.schedule.Ajax.PostAny("@Url.Action("Create","Calendar")", newFormData).then(function (data) {
                 if (data != null) {
                     var dataJson = JSON.parse(data);
