@@ -10,6 +10,7 @@ var EduCalendar = (function(){
         this.config = config;
         this.renderCalendar = RenderCalendar;
         this.useEduTemplate = UseEduTemplate;
+        this.useEduTemplateTeacher = UseEduTemplateTeacher;
     }
     var groupConfig = function(options){
         if (options == null || typeof (options) == "undefined") return config;
@@ -147,6 +148,70 @@ var EduCalendar = (function(){
         this.config = groupConfig(optionsTemplate);
         return this;
     }
+
+    var UseEduTemplateTeacher = function () {
+        var _self = this;
+        var optionsTemplate = {
+            useTemplate: true,
+            customButtons: {
+                btnAddEvent: {
+                    text: "Thêm sự kiện",
+                    click: function () {
+                        addEvent(_self);
+                    }
+                },
+                btnAddClass: {
+                    text: "Tạo lớp trực tuyến",
+                    click: function () {
+                        addClassOnline(_self);
+                    }
+                },
+                selectMonth: {
+                    text: (new Date().getMonth() + 1),
+                    icon: "icon",
+                    themeIcon: "themeIcon",
+                    bootstrapFontAwesome: "bootstrapFontAwesome",
+                    click: function () { }
+                },
+                selectYear: {
+                    text: (new Date().getFullYear()),
+                    icon: "",
+                    themeIcon: "",
+                    bootstrapFontAwesome: "",
+                    click: function () { }
+                },
+                prevTime: {
+                    text: "<",
+                    //icon: "right-single-arrow",
+                    click: function () {
+                        prev(_self)
+                    }
+                },
+                nextTime: {
+                    text: ">",
+                    //icon: "right-single-arrow",
+                    click: function () {
+                        next(_self);
+                    }
+                },
+                now: {
+                    text: 'Hôm nay',
+                    icon: "",
+                    themeIcon: "",
+                    bootstrapFontAwesome: "",
+                    click: function () {
+                        today(_self);
+                    }
+                }
+            },
+            header: {
+                left: "prevTime,selectMonth,selectYear,nextTime,now",
+                right: "btnAddClass,btnAddEvent"
+            }
+        }
+        this.config = groupConfig(optionsTemplate);
+        return this;
+    }
     var today = function(self){
         self.schedule.EduCalendar.today();
         var root = document.getElementById(self.config.container_id);
@@ -212,6 +277,19 @@ var EduCalendar = (function(){
         else{
             root.querySelector(".fc-now-button").removeAttribute("disabled");
         }
+    }
+    var addClassOnline = function () {
+        var darkbox = document.getElementById("dark-smooke");
+        if (darkbox == null) {
+            darkbox = document.createElement("div");
+            darkbox.id = "dark-smooke";
+            darkbox.classList = "dark-smooke";
+            document.body.appendChild(darkbox);
+        }
+        darkbox.onclick = function () {
+            document.body.classList.remove("open-add-event-class");
+        }
+        document.body.classList.add("open-add-event-class");
     }
     var addEvent = function (self, info) {
         var darkbox = document.getElementById("dark-smooke");

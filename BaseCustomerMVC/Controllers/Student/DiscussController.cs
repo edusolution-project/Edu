@@ -46,9 +46,9 @@ namespace BaseCustomerMVC.Controllers.Student
                     var listAccount = currentClass.Students;
                     var teacherID = currentClass.TeacherID;
                     ViewBag.Students = _studentService.Collection.Find(o => listAccount.Contains(o.ID))?.ToList()?
-                        .Select(x => new MemberInfo (){ Name = x.FullName, Email = x.Email }).ToList();
+                        .Select(x => new MemberInfo (){ Name = x.FullName, Email = x.Email , Skype = x.Skype}).ToList();
                     var teacher = _teacherService.GetItemByID(teacherID);
-                    ViewBag.Teacher = new MemberInfo() { Name = teacher.FullName, Email = teacher.Email };
+                    ViewBag.Teacher = new MemberInfo() { Name = teacher.FullName, Email = teacher.Email, Skype = teacher.Skype };
                 }
             }
             return View();
@@ -65,6 +65,7 @@ namespace BaseCustomerMVC.Controllers.Student
     {
         public string Name { get; set; }
         public string Email { get; set; }
+        public string Skype { get; set; }
     }
     public class ClassInfo
     {
