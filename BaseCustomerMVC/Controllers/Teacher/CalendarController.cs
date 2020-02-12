@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
+using BaseCustomerMVC.Controllers.Student;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -39,6 +40,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Index(DefaultModel model)
         {
+            var userId = User?.FindFirst("UserID").Value;
+            var listClass = _classService.Collection.Find(o => o.Members.Any(t=> t.TeacherID == userId))?.ToList();
+
+            ViewBag.ClassList = listClass;
             ViewBag.Model = model;
             return View();
         }
