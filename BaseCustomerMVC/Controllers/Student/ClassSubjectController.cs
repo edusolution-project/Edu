@@ -148,8 +148,10 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
                           let subject = _subjectService.GetItemByID(r.SubjectID)
+                          let grade = _gradeService.GetItemByID(r.GradeID)
                           let course = _courseService.GetItemByID(r.CourseID)
                           let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
+                          let teacher = _teacherService.GetItemByID(r.TeacherID)
                           select new ClassSubjectViewModel
                           {
                               ID = r.ID,
@@ -159,9 +161,11 @@ namespace BaseCustomerMVC.Controllers.Student
                               SkillImage = skill != null ? skill.Image : "",
                               SubjectName = subject.Name,
                               GradeID = r.GradeID,
+                              GradeName = grade.Name,
                               CourseID = r.CourseID,
                               CourseName = course.Name,
-                              TeacherID = r.TeacherID
+                              TeacherID = r.TeacherID,
+                              TeacherName = teacher.FullName
                           }).ToList()
                 },
             };

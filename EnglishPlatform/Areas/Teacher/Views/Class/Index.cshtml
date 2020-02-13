@@ -37,7 +37,7 @@
             </div>
             @if (isHeadteacher)
             {
-                <b-button clas="btn-addevent" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+            <b-button clas="btn-addevent" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
             }
         </div>
     </div>
@@ -60,13 +60,13 @@
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
                     @if (isHeadteacher)
                     {
-                        <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
-                        <td>
-                            <div class="d-flex btn-group">
-                                <a class="btn-act btn-edit" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
-                                <button class="btn-act btn-trash" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
-                            </div>
-                        </td>
+                    <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
+                    <td>
+                        <div class="d-flex btn-group">
+                            <a class="btn-act btn-edit" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
+                            <button class="btn-act btn-trash" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
+                        </div>
+                    </td>
                     }
                 </tr>
             </tbody>
@@ -81,12 +81,18 @@
                 </select>
             </div>
             <div class="page-control">
-                <div class="inner">
-                    <button v-on:click="goPage(0)"><i class="ti-angle-left"></i></button>
-                    <button v-on:click="goPage(page - 1)"><i class="ti-angle-double-left"></i></button>
-                    <input type="text" v-model="page" v-on:change="getData()" />
-                    <button v-on:click="goPage(page + 1)"><i class="ti-angle-double-right"></i></button>
-                    <button v-on:click="goPage(max_page)"><i class="ti-angle-right"></i></button>
+                @*<div class="inner">
+                        <button v-on:click="goPage(0)"><i class="ti-angle-left"></i></button>
+                        <button v-on:click="goPage(page - 1)"><i class="ti-angle-double-left"></i></button>
+                        <input type="text" v-model="page" v-on:change="getData()" />
+                        <button v-on:click="goPage(page + 1)"><i class="ti-angle-double-right"></i></button>
+                        <button v-on:click="goPage(max_page)"><i class="ti-angle-right"></i></button>
+                    </div>*@
+                <div class="right">
+                    <b-pagination v-model="page"
+                                  :total-rows="totalRec"
+                                  :per-page="view"
+                                  v-on:input="getData()"></b-pagination>
                 </div>
             </div>
         </div>
@@ -165,6 +171,7 @@
                 loaded_teacher: [],
                 loaded_course: [],
                 view: 10,
+                totalRec: 0,
                 page: 1,
                 startdate: moment(),
                 enddate: moment().add(29, 'days'),
@@ -236,14 +243,17 @@
 
                     }
 
-            axios.post(_url, _form)
-                .then(response => {
-                    _that.tableData = response.data.Data;
-                    var tt = response.data.Model.totalRecord;
-                    this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
-                    //console.log(_that.active_course);
-                }).catch(e => { })
-                },
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.tableData = response.data.Data;
+                            this.tableData = _that.tableData
+                            this.totalRec = response.data.Model.totalRecord
+                            console.log(totalRec)
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
+                            //console.log(_that.active_course);
+                        }).catch(e => { })
+                        },
 
                 //Class Action
                 toggleState(obj) {
@@ -427,14 +437,13 @@
                                     var lock = false
                                     var valid_subject = _that.list_subject.filter(c => c.ID == item.SubjectID);
                                     if (valid_subject.length == 0) {
-                                        console.log(_that.list_subject)
                                         _that.list_subject.push({
                                             ID: item.SubjectID,
                                             Name: item.SubjectName,
                                             IsActive: false
                                         });
 
-                                        if (_that.list_grades_full.filter(c => c.ID == item.GradeID).length == 0) {
+                                        if (_that.list_grades_full.findIndex(c => c.ID == item.GradeID) == -1) {
                                             _that.list_grades_full.push({
                                                 ID: item.GradeID,
                                                 SubjectID: item.SubjectID,
@@ -447,7 +456,7 @@
                                     else {
                                         lock = !valid_subject[0].IsActive
                                     }
-
+                                    
                                     _that.class_info.subject.push({
                                         UID: moment().format("DDMMYYYYhhmmssSSS") + k,
                                         ID: item.ID,
@@ -459,20 +468,11 @@
                                         IsLock: lock
                                     })
 
+
                                     _that.changeAddSubject(item)
                                     _that.changeAddGrade(item)
 
-
-                                    //if (_that.teacherSource.filter(c => c.ID == item.TeacherID && c.SubjectID == item.subject).length == 0) {
-                                    //    _that.teacherSource.push({
-                                    //        ID: item.TeacherID,
-                                    //        SubjectID: item.SubjectID,
-                                    //        Name: item.TeacherName,
-                                    //        IsActive: false
-                                    //    })
-                                    //}
-
-                                    if (_that.courseSource.filter(c => c.ID == item.CourseID).length == 0) {
+                                    if (_that.courseSource.findIndex(c => c.ID == item.CourseID) == -1) {
                                         _that.courseSource.push({
                                             ID: item.CourseID,
                                             SkillID: item.SkillID,
@@ -498,9 +498,7 @@
                 },
                 changeAddSubject(obj) {
                     let _that = this;
-                    if (_that.list_grades_full.filter(function (item) {
-                        return obj.GradeID == item.ID && obj.SubjectID == item.SubjectID
-                    }).length == 0) {
+                    if (_that.list_grades_full.findIndex(item => obj.GradeID == item.ID && obj.SubjectID == item.SubjectID) == -1) {
                         _that.class_info.subject.forEach(function (sbj) {
                             //console.log(obj.UID)
                             if (sbj.UID == obj.UID) {
@@ -526,9 +524,7 @@
                             var _data = response.data.Data;
                             _data.forEach(function (item, k)
                             {
-                                if (_that.teacherSource.filter(function (tc) {
-                                    return tc.ID == item.id && tc.SubjectID == obj.SubjectID
-                                }).length == 0)
+                                if (_that.teacherSource.findIndex(tc => tc.ID == item.id && tc.SubjectID == obj.SubjectID) == -1)
                                 _that.teacherSource.push({
                                     ID: item.id,
                                     FullName: item.fullname,
@@ -536,7 +532,7 @@
                                     IsActive: true
                                 })
                             })
-                                console.log(_that.teacherSource)
+                                //console.log(_that.teacherSource)
                             _that.loaded_teacher.push(obj.SubjectID);
                         }).catch(e => { })
                     }
@@ -556,18 +552,23 @@
                             var _data = response.data.Data;
                             _data.forEach(function (item, k)
                             {
-                                if (_that.courseSource.filter(function (item) {
-                                    return obj.CourseID == item.ID && obj.SubjectID == item.SubjectID && obj.GradeID == item.GradeID
-                                }).length == 0)
-                                _that.courseSource.push({
-                                    ID: item.ID,
-                                    Name: item.Name,
-                                    SubjectID: obj.SubjectID,
-                                    GradeID: obj.GradeID,
-                                    SkillID: item.SkillID,
-                                    IsActive: true
-                                })
+                                var oldIdx = _that.courseSource.findIndex(i => i.ID == item.ID)
+                                if (oldIdx == -1) {
+                                    _that.courseSource.push({
+                                        ID: item.ID,
+                                        Name: item.Name,
+                                        SubjectID: obj.SubjectID,
+                                        GradeID: obj.GradeID,
+                                        SkillID: item.SkillID,
+                                        IsActive: true
+                                    })
+                                }
+                                else {
+                                    _that.courseSource[oldIdx].IsActive = true
+                                }
+                                //console.log(_that.courseSource);
                             })
+
                             _that.loaded_course.push(key);
                         }).catch(e => { })
                 },
@@ -619,13 +620,13 @@
                 },
 
                 //nav
-                goPage(pgIdx) {
-                    if (pgIdx < 1) pgIdx = 1;
-                    if (pgIdx > this.max_page)
-                        pgIdx = this.max_page;
-                    this.page = pgIdx;
-                    this.getData();
-                },
+                //goPage(pgIdx) {
+                //    if (pgIdx < 1) pgIdx = 1;
+                //    if (pgIdx > this.max_page)
+                //        pgIdx = this.max_page;
+                //    this.page = pgIdx;
+                //    this.getData();
+                //},
 
                 //support
                 formatShortDate(date) {
@@ -647,6 +648,7 @@
                         && (item.IsActive || item.ID == obj.TeacherID)
                 },
                 matchCourse(obj, item) {
+                    //console.log(this.courseSource)
                     return item.SubjectID == obj.SubjectID && item.GradeID == obj.GradeID && item.SkillID == obj.SkillID && (item.IsActive || (item.ID == obj.CourseID))
                 }
             }

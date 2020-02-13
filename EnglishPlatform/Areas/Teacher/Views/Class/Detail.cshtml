@@ -64,7 +64,7 @@
             <ul class="list ls-pratice">
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title}}</a>
+                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}</a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion" role="tabpanel">
                             <ul class="list">
                                 @*<li class="col-md-12" v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')">
@@ -480,7 +480,8 @@
                                     _that.classSubjects.push({
                                         ID: item.ID,
                                         Title: item.SkillName,
-                                        Image:  item.SkillImage,
+                                        Image: item.SkillImage,
+                                        Teacher: item.TeacherName,
                                         Chapters: [],
                                         Lessons: []
                                     })

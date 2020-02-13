@@ -249,7 +249,12 @@ var ExamReview = (function () {
     var renderDOC = function (data) {
         var title = '<div class="part-box-header col-md-2 d-inline-block part-column"><h5 class="title">' + data.Title + '</h5></div>';
         var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
-        html += '<div class="media-holder ' + data.Type + '"><embed src="' + data.Media.Path + '" style="width: 100%; height: 800px; border:1px solid"></div>';
+
+        if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx")) {
+            html += "<div class='media-holder " + data.Type + "'><iframe src='https://docs.google.com/gview?url=http://" + window.location.hostname + data.Media.Path + "&embedded=true' style='width:100%, height:800px'></iframe></div>";
+        }
+        else
+            html += '<div class="media-holder ' + data.Type + '"><embed src="' + data.Media.Path + '#view=FitH" style="width: 100%; height: 800px; border:1px solid"></div>';
         html += '</div>';
         return html;
     }

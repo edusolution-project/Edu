@@ -238,17 +238,19 @@
                 return !(moment(item.startDate) > now || moment(item.endDate) < now)
             },
             showLockNotify(item) {
-                var start = moment(item.StartDate) > now
+                var now = moment()
+                console.log(item)
+                var start = moment(item.startDate) > now
                 if (start)
                     Swal.fire({
                         title: 'Lưu ý',
-                        html: 'Bài học sẽ mở lúc ' + this.formatTime(item.StartDate),
+                        html: 'Bài học sẽ mở lúc ' + this.formatTime(item.startDate),
                         icon: 'warning'
                     });
                 else
                     Swal.fire({
                         title: 'Lưu ý',
-                        html: 'Bài học đã hết hạn lúc ' + this.formatTime(item.EndDate),
+                        html: 'Bài học đã hết hạn lúc ' + this.formatTime(item.endDate),
                         icon: 'warning'
                     });
             },

@@ -144,16 +144,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             //if (string.IsNullOrEmpty(ClassID))
             //    return null;
-            var teacher = "";
+            var teacherID = "";
             if (User.IsInRole("teacher"))
-                teacher = User.Claims.GetClaimByType("UserID").Value;
+                teacherID = User.Claims.GetClaimByType("UserID").Value;
             var response = new Dictionary<string, object>
             {
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
-                          where string.IsNullOrEmpty(teacher) || r.TeacherID == teacher
+                          where string.IsNullOrEmpty(teacherID) || r.TeacherID == teacherID
                           let subject = _subjectService.GetItemByID(r.SubjectID)
-                          let course = _courseService.GetItemByID(r.CourseID)
                           let grade = _gradeService.GetItemByID(r.GradeID)
+                          let course = _courseService.GetItemByID(r.CourseID)
+                          let teacher = _teacherService.GetItemByID(r.TeacherID)
                           let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
                           select new ClassSubjectViewModel
                           {
@@ -167,7 +168,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               GradeName = grade.Name,
                               CourseID = r.CourseID,
                               CourseName = course.Name,
-                              TeacherID = r.TeacherID
+                              TeacherID = r.TeacherID,
+                              TeacherName = teacher.FullName
                           }).ToList()
                 },
             };

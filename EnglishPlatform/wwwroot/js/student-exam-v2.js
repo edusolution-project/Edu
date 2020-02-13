@@ -410,16 +410,21 @@ var ExamStudent = (function () {
         var title = '';
         if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
         var html = title + '<div class="media-wrapper">';
-        html += '<div class="media-holder VIDEO"><video controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the video tag</video></div>';
+        if (data.Media != null) {
+            html += '<div class="media-holder VIDEO"><video controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the video tag</video></div>';
+        }
         html += '</div>';
         return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
     }
 
     var renderAUDIO = function (data) {
+
         var title = '';
         if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
         var html = title + '<div class="media-wrapper">';
-        html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the audio tag</audio></div>';
+        if (data.Media != null) {
+            html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the audio tag</audio></div>';
+        }
         html += '</div>';
         return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
     }
@@ -428,7 +433,9 @@ var ExamStudent = (function () {
         var title = '';
         if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
         var html = title + '<div class="media-wrapper">';
-        html += '<div class="media-holder ' + data.Type + '"><img src="' + data.Media.Path + '" title="' + data.Title + '" class="img-fluid lazy"></div>';
+        if (data.Media != null) {
+            html += '<div class="media-holder ' + data.Type + '"><img src="' + data.Media.Path + '" title="' + data.Title + '" class="img-fluid lazy"></div>';
+        }
         html += '</div>';
         return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
     }
@@ -437,7 +444,13 @@ var ExamStudent = (function () {
         var title = '';
         if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
         var html = title + '<div class="media-wrapper">';
-        html += '<div class="media-holder ' + data.Type + '"><embed class="mediaContainer scrollbar-outer" src="' + data.Media.Path + '" style="width: 100%; height: 800px; border:1px solid"></div>';
+        if (data.Media != null) {
+            if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx")) {
+                html += "<div class='media-holder " + data.Type + "'><iframe src='https://docs.google.com/gview?url=http://" + window.location.hostname + data.Media.Path + "&embedded=true' style='width:100%, height:800px; border: 1px solid'></iframe></div>";
+            }
+            else
+                html += '<div class="media-holder ' + data.Type + '"><embed src="' + data.Media.Path + '#view=FitH" style="width: 100%; height: 800px; border:1px solid"></div>';
+        }
         html += '</div>';
         return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
     }

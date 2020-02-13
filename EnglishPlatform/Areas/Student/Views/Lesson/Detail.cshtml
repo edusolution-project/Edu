@@ -116,6 +116,7 @@
 
     .QUIZ1 .answer-item {
         max-width: 30%;
+        vertical-align: top;
     }
 </style>
 
@@ -126,15 +127,15 @@
                 "Modules" ,"Course")/@currentClass.ID">@currentClass.Name</a>*@
             @if (currentChapter != null)
             {
-                @*<span>/</span>*@ <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
+            @*<span>/</span>*@  <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
                             "Modules" ,"Course")/@currentClassSubject.ID#@currentChapter.ID">@currentChapter.Name</a>
                         }
             / @currentLesson.Title
         </h2>
         @if (nextLesson != null)
         {
-            <h2 class="col-md-6 p-0 text-right">
-                Bài tiếp > <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
+        <h2 class="col-md-6 p-0 text-right">
+            Bài tiếp > <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
                             "Detail" ,"Lesson")/@nextLesson.ID/@currentClassSubject.ID">@nextLesson.Title</a>
                         </h2>
                     }

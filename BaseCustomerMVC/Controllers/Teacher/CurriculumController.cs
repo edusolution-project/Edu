@@ -249,16 +249,29 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var filter = new List<FilterDefinition<CourseEntity>>();
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.GetItemByID(UserID);
+            if (teacher == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Error", "Bạn không được quyền thực hiện thao tác này"}
+                    });
+            }
 
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
+            else
+            {
+                //lọc các môn được phân công
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
+            }
             if (!string.IsNullOrEmpty(GradeID))
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
-            filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
+            //filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
 
             var data = (filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);
             model.TotalRecord = data.CountDocuments();
@@ -315,8 +328,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
 
-            if (!(cp && CheckPermission(PERMISSION.COURSE_EDIT)))
-                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
+            //if (!(cp && CheckPermission(PERMISSION.COURSE_EDIT)))
+            //    filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
             filter.Add(Builders<CourseEntity>.Filter.Where(o => o.IsActive));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();

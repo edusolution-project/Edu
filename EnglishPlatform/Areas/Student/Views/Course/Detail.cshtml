@@ -57,6 +57,11 @@
                     <div class="inner">
                         <span class="ic ic-headphone" :style="'background-image:url(' + item.Image + ')'"></span>
                         <a :href="'@Url.Action("Modules","Course")/' + item.ID" title="" class="title">{{item.Title}}</a>
+                        <span class="name center">
+                            {{item.Grade}}<br />
+                            GV: {{item.Teacher}}
+                        </span>
+
                         <a :href="'@Url.Action("Modules","Course")/' + item.ID" class="btn-learn">Học ngay</a>
                     </div>
                 </div>
@@ -147,7 +152,9 @@
                                     _that.classSubjects.push({
                                         ID: item.ID,
                                         Title: item.SkillName,
-                                        Image:  item.SkillImage,
+                                        Image: item.SkillImage,
+                                        Teacher: item.TeacherName,
+                                        Grade: item.GradeName,
                                         Chapters: [],
                                         Lessons: []
                                     })

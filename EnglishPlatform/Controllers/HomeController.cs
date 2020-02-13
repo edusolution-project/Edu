@@ -13,6 +13,14 @@ using BaseCustomerMVC.Globals;
 using BaseAccess.Interfaces;
 using Microsoft.Extensions.Options;
 using BaseCustomerMVC.Models;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using Newtonsoft.Json;
 
 namespace EnglishPlatform.Controllers
 {
@@ -393,6 +401,82 @@ namespace EnglishPlatform.Controllers
         public IActionResult ForgotPassword(string Email)
         {
             return View();
+        }
+
+
+        [HttpPost]
+        public IActionResult UploadImage(IFormFile upload, string CKEditorFuncNum, string CKEditor, string langCode)
+        {
+            if (upload.Length <= 0) return null;
+            //if (!upload.IsImage())
+            //{
+            //    var NotImageMessage = "please choose a picture";
+            //    dynamic NotImage = JsonConvert.DeserializeObject("{ 'uploaded': 0, 'error': { 'message': \"" + NotImageMessage + "\"}}");
+            //    return Json(NotImage);
+            //}
+
+            var fileName = Guid.NewGuid() + Path.GetExtension(upload.FileName).ToLower();
+
+            //Image image = .FromStream(upload.OpenReadStream());
+            //int width = image.Width;
+            //int height = image.Height;
+            //if ((width > 750) || (height > 500))
+            //{
+            //    var DimensionErrorMessage = "Custom Message for error"
+            //    dynamic stuff = JsonConvert.DeserializeObject("{ 'uploaded': 0, 'error': { 'message': \"" + DimensionErrorMessage + "\"}}");
+            //    return Json(stuff);
+            //}
+
+            //if (upload.Length > 500 * 1024)
+            //{
+            //    var LengthErrorMessage = "Custom Message for error";
+            //    dynamic stuff = JsonConvert.DeserializeObject("{ 'uploaded': 0, 'error': { 'message': \"" + LengthErrorMessage + "\"}}");
+            //    return Json(stuff);
+            //}
+
+            var path = Path.Combine(
+                Directory.GetCurrentDirectory(), "wwwroot/images/CKEditorImages",
+                fileName);
+
+            //using (var stream = new FileStream(path, FileMode.Create))
+            //{
+            //    upload.CopyTo(stream);
+            //}
+
+            var standardSize = new SixLabors.Primitives.Size(1024, 768);
+
+            using (Stream inputStream = upload.OpenReadStream())
+            {
+                using (var image = Image.Load<Rgba32>(inputStream))
+                {
+                    var imageEncoder = new JpegEncoder()
+                    {
+                        Quality = 90,
+                        Subsample = JpegSubsample.Ratio444
+                    };
+
+                    int width = image.Width;
+                    int height = image.Height;
+                    if ((width > standardSize.Width) || (height > standardSize.Height))
+                    {
+                        ResizeOptions options = new ResizeOptions
+                        {
+                            Mode = ResizeMode.Max,
+                            Size = standardSize,
+                        };
+                        image.Mutate(x => x
+                         .Resize(options));
+
+                        //.Grayscale());
+                    }
+                    image.Save(path, imageEncoder); // Automatic encoder selected based on extension.
+                }
+            }
+
+            var url = $"{"/images/CKEditorImages/"}{fileName}";
+            var successMessage = "image is uploaded successfully";
+            dynamic success = JsonConvert.DeserializeObject("{ 'uploaded': 1,'fileName': \"" + fileName + "\",'url': \"" + url + "\", 'error': { 'message': \"" + successMessage + "\"}}");
+            return Json(success);
         }
     }
 }

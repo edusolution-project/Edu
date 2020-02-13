@@ -36,5 +36,7 @@ namespace BaseCustomerMVC.Models
         public string CourseName { get; set; }
         [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
+        [JsonProperty("TeacherName")]
+        public string TeacherName { get; set; }
     }
 }

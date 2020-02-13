@@ -51,6 +51,26 @@ namespace BaseCustomerMVC.Globals
             return Task.FromResult<CalendarEntity>(null);
         }
 
+        public Task<CalendarEntity> CreateEventClass(CalendarEntity item)
+        {
+            // kiem tra co phai sua event hay ko ?
+            if (!string.IsNullOrEmpty(item.ID))
+            {
+                // update event
+                _calendarService.CreateOrUpdate(item);
+                return Task.FromResult(item);
+            }
+            // check event da ton tai hay chua
+            if (existEvent(item.EndDate, item.StartDate, item.GroupID))
+            {
+                item.Status = 5;
+                _calendarService.CreateOrUpdate(item);
+
+                return Task.FromResult(item);
+            }
+            return Task.FromResult<CalendarEntity>(null);
+        }
+
         public Task<bool> RemoveEvent(string id, string user)
         {
             var delItem = _calendarService.GetItemByID(id);
@@ -103,33 +123,26 @@ namespace BaseCustomerMVC.Globals
                 groupid = o.GroupID,
                 id = o.ID,
                 title = o.Title,
-                url = o.UrlRoom == null ? "" : o.UrlRoom
+                url = o.UrlRoom == null ? "" : o.UrlRoom,
+                Status = o.Status
             }).ToList();
-            var demodata = new CalendarEventModel()
-            {
-                start = DateTime.Now,
-                groupid = "Schedule",
-                id = "Test",
-                title = "Hoang Long",
-                url = "",
-                skype = "live:breakingdawn1235"
-            };
-            DataResponse.Add(demodata);
             return DataResponse;
         }
         [Obsolete]
         public List<CalendarEventModel> GetListEvent(DateTime startDate, DateTime endDate, List<string> classList, string userid)
         {
             bool isTeacher = _teacherService.GetItemByID(userid) != null;
-
+            if (classList == null) classList = new List<string>();
             var filter = new List<FilterDefinition<CalendarEntity>>();
             if (startDate > DateTime.MinValue && endDate > DateTime.MinValue)
             {
                 var _startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
                 var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.StartDate >= _startDate || o.EndDate <= _endDate) || (o.CreateUser == userid)));
+                filter.Add(Builders<CalendarEntity>.Filter.Where(o => ((o.StartDate >= _startDate || o.EndDate <= _endDate)
+                //&& o.Status == 5
+                ) || ((o.StartDate >= _startDate || o.EndDate <= _endDate) && o.CreateUser == userid) || ((o.StartDate >= _startDate || o.EndDate <= _endDate) && classList.Contains(o.GroupID))));
             }
-            filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.IsDel == false));
+            filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.IsDel == false)));
             var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
             var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList().Select(o => new CalendarEventModel()
             {
@@ -138,7 +151,8 @@ namespace BaseCustomerMVC.Globals
                 id = o.ID,
                 title = o.Title,
                 url = o.UrlRoom == null ? "" : o.UrlRoom,
-                skype = isTeacher ? _studentService.GetItemByID(o.StudentID)?.Skype : _teacherService.GetItemByID(o.TeacherID)?.Skype
+                skype = isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype : _teacherService.GetItemByID(o.TeacherID)?.Skype,
+                Status = o.Status
             }).ToList();
             return DataResponse;
         }

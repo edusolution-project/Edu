@@ -5,7 +5,6 @@
     var currentStudent = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
     ViewData["Title"] = currentClass.Name + " / " + currentStudent.FullName;
 }
-}
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
 <script src="/libs/vuejs-datepicker.min.js"></script>
@@ -16,7 +15,7 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex mb-2">
-            <h2 class="title"><a href="@Url.Action("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
+            <h2 class="title"><a href="@Url.Action("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}/@currentStudent.FullName</h2>
             @*<div class="search-box">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
