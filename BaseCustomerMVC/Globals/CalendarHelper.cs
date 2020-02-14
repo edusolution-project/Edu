@@ -44,6 +44,16 @@ namespace BaseCustomerMVC.Globals
             // check event da ton tai hay chua
             if (existEvent(item.EndDate, item.StartDate, item.GroupID))
             {
+                item.Created = DateTime.Now;
+                if (item.Status == 5)
+                {
+                    var teacher = _teacherService.GetItemByID(item.CreateUser);
+                    if (teacher != null)
+                    {
+                        item.TeacherID = teacher.ID;
+                        item.TeacherName = teacher.FullName;
+                    }
+                }
                 _calendarService.CreateOrUpdate(item);
 
                 return Task.FromResult(item);
@@ -123,7 +133,7 @@ namespace BaseCustomerMVC.Globals
                 groupid = o.GroupID,
                 id = o.ID,
                 title = o.Title,
-                url = o.UrlRoom == null ? "" : o.UrlRoom,
+                url = "",
                 Status = o.Status
             }).ToList();
             return DataResponse;
@@ -148,7 +158,7 @@ namespace BaseCustomerMVC.Globals
                 groupid = o.GroupID,
                 id = o.ID,
                 title = o.Title,
-                url = o.UrlRoom == null ? "" : o.UrlRoom,
+                url = "",
                 skype = isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype,
                 Status = o.Status
             }).ToList();

@@ -89,7 +89,7 @@
         </div>
         <div class="item-event">
             <label for="Content">Link lớp học </label>
-            <input type="text" name="Url" class="form-control" placeholder="appear / zoom / skype join">
+            <input type="text" name="UrlRoom" class="form-control" placeholder="appear / zoom / skype join">
         </div>
     </div>
     <div class="footer-form-event">
@@ -99,7 +99,7 @@
     </div>
 </div>
 
-<div id="dark-smooke" class="dark-smooke" onclick="javascript: document.body.classList.remove('open-add-event');"></div>
+<div id="dark-smooke" class="dark-smooke" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');"></div>
 
 @section Scripts{
     @*longht add 2020-01-12*@
@@ -148,8 +148,8 @@
             EduCalendar.schedule.Ajax.PostAny("@Url.Action("GetDetail","Calendar")?id=" + id, null).then(function (data) {
                 if (data != null) {
                     var jsonData = JSON.parse(data);
-                    if (jsonData.CreateUser == "@User.FindFirst("UserID")?.Value") {
-                        if (jsonData.status != 5) {
+                    if (jsonData.CreateUser == "@User.FindFirst("UserID")?.Value" && jsonData.ScheduleID == null) {
+                        if (jsonData.Status != 5) {
                             document.body.classList.add("open-add-event");
                             var startDate = new Date(jsonData.StartDate);
                             var timeEvent = changeTime(startDate);
@@ -186,11 +186,48 @@
                             }
                         } else {
                             //teacher show
+                            document.body.classList.add("open-add-event-class");
+                            var startDate = new Date(jsonData.StartDate);
+                            var timeEvent = changeTime(startDate);
+                            var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
+                            var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
+                            var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
+                            var formEvent = document.getElementById("form-event-class");
+                            var bodyEvent = formEvent.querySelector(".body-form-event");
+                            bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
+                            if (bodyEvent != null) {
+                                var Title = bodyEvent.querySelector("input[name='Title']");
+                                if (Title != null) {
+                                    Title.value = jsonData.Title;
+                                }
+                                var Content = bodyEvent.querySelector("input[name='UrlRoom']");
+                                if (Content != null) {
+                                    Content.value = jsonData.UrlRoom != void 0
+                                        ? jsonData.UrlRoom
+                                        : "";
+                                }
+                                var time = bodyEvent.querySelector("input[name='Time']");
+                                if (time != null) {
+                                    time.value = timeEvent;
+                                }
+                                var date = bodyEvent.querySelector("input[name='Date']");
+                                if (date != null) {
+                                    date.value = dateEvent;
+                                }
+                                formEvent.classList.remove("view-form");
+                                formEvent.classList.add("edit-form");
+                            }
+                            if (checkTime(new Date(jsonData.Created), 0)) {
+                                // cho phép xóa
+                            }
                         }
                     }
                     else {
-                        if (jsonData.status == 5) {
+                        if (jsonData.Status == 5) {
                             // student show
+                            document.body.classList.add("open-add-event-class");
+
+
                         } else {
                             if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != void 0) {
                                 document.body.classList.remove("open-add-event");
@@ -383,6 +420,7 @@
                      swal("Tạo mới!", "thất bại", "warning");
                 }
                 document.body.classList.remove("open-add-event");
+               
             })
             }
 
@@ -398,7 +436,7 @@
                 if (Title != null) {
                     title = Title.value;
                 }
-                var Url = bodyEvent.querySelector("input[name='Url']");
+                var Url = bodyEvent.querySelector("input[name='UrlRoom']");
                 if (Url != null) {
                     url = Url.value;
                 }
@@ -419,47 +457,47 @@
                 if (group != null) {
                     classID = group.value;
                 }
-            newFormData.append("Title", title);
-                newFormData.append("Url", url);
+                newFormData.append("Title", title);
+                newFormData.append("UrlRoom", url);
                 newFormData.append("Status", 5);
-            newFormData.append("StartDate", `${date.value} ${timeEvent}`);
-            newFormData.append("EndDate", `${date.value} ${timeEvent}`);
-            newFormData.append("GroupID", classID);
-            EduCalendar.schedule.Ajax.PostAny("@Url.Action("Create","Calendar")", newFormData).then(function (data) {
-                if (data != null) {
-                    var dataJson = JSON.parse(data);
-                    if (dataJson.code == 201) {
-                        if (isUpdate) {
-                            swal("Update!", "Cập nhật thành công.", "success");
-                            EduCalendar.schedule.EduCalendar.getEventById(dataJson.data.ID).remove();
-                            var event = {
-                                id: dataJson.data.ID,
-                                title: dataJson.data.Title,
-                                groupid: dataJson.data.GroupID,
-                                start: dataJson.data.StartDate,
-                                status: 5
-                            };
-                            EduCalendar.schedule.EduCalendar.addEvent(event);
-                        }
-                        else {
-                            swal("Tạo mới!", "Đã tạo thành công.", "success");
-                            var event = {
-                                id: dataJson.data.ID,
-                                title: dataJson.data.Title,
-                                groupid: dataJson.data.GroupID,
-                                start: dataJson.data.StartDate
-                            };
-                            EduCalendar.schedule.EduCalendar.addEvent(event);
-                        }
+                newFormData.append("StartDate", `${date.value} ${timeEvent}`);
+                newFormData.append("EndDate", `${date.value} ${timeEvent}`);
+                newFormData.append("GroupID", classID);
+                EduCalendar.schedule.Ajax.PostAny("@Url.Action("Create","Calendar")", newFormData).then(function (data) {
+                    if (data != null) {
+                        var dataJson = JSON.parse(data);
+                        if (dataJson.code == 201) {
+                            if (isUpdate) {
+                                swal("Update!", "Cập nhật thành công.", "success");
+                                EduCalendar.schedule.EduCalendar.getEventById(dataJson.data.ID).remove();
+                                var event = {
+                                    id: dataJson.data.ID,
+                                    title: dataJson.data.Title,
+                                    groupid: dataJson.data.GroupID,
+                                    start: dataJson.data.StartDate,
+                                    status: 5
+                                };
+                                EduCalendar.schedule.EduCalendar.addEvent(event);
+                            }
+                            else {
+                                swal("Tạo mới!", "Đã tạo thành công.", "success");
+                                var event = {
+                                    id: dataJson.data.ID,
+                                    title: dataJson.data.Title,
+                                    groupid: dataJson.data.GroupID,
+                                    start: dataJson.data.StartDate
+                                };
+                                EduCalendar.schedule.EduCalendar.addEvent(event);
+                            }
                         
+                        }
+                        else
+                            swal("Tạo mới!", dataJson.msg, "warning");
+                    } else {
+                         swal("Tạo mới!", "thất bại", "warning");
                     }
-                    else
-                        swal("Tạo mới!", dataJson.msg, "warning");
-                } else {
-                     swal("Tạo mới!", "thất bại", "warning");
-                }
-                document.body.classList.remove("open-add-event");
-            })
+                     document.body.classList.remove("open-add-event-class");
+                })
             }
 
         }

@@ -144,11 +144,13 @@
                         var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
                         var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
                         var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
-                        if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != void 0) {
+
+                        if (jsonData.Status == 5) {
                             document.body.classList.remove("open-add-event");
-                            var time = new Date(jsonData.Created);
-                            var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
-                           
+                            var time = new Date(jsonData.StartDate);
+
+                            var Title = `Time : ${timeEvent} \r\n Date : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
+
                             var str = `Giáo viên : ${jsonData.TeacherName}`;
                             swal({
                                 title: Title,
@@ -156,44 +158,68 @@
                                 text: str,
                                 showCancelButton: true,
                                 confirmButtonClass: "btn-sm btn-primary",
-                                confirmButtonText: "Call skype",
-                                cancelButtonClass :"btn-sm",
-                                cancelButtonText:"close",
+                                confirmButtonText: "go to room",
+                                cancelButtonClass: "btn-sm",
+                                cancelButtonText: "close",
                                 closeOnConfirm: false
-                            },function () {
+                            }, function () {
                                 swal.close();
-                                var _skype = jsonData.Skype;
-                                if (jsonData.Skype == null) {
-                                    _skype = skype;
-                                }
-                                window.open(`skype:${_skype}?call`, "_blank");
+                                var _skype = jsonData.UrlRoom;
+                                window.open(`${_skype}`, "_blank");
                             });
                         } else {
-                            document.body.classList.add("open-add-event");
-                            var formEvent = document.getElementById("form-event");
-                            var bodyEvent = formEvent.querySelector(".body-form-event");
-                            bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
-                            if (bodyEvent != null) {
-                                var Title = bodyEvent.querySelector("input[name='Title']");
-                                if (Title != null) {
-                                    Title.value = jsonData.Title;
+
+                            if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != void 0) {
+                                document.body.classList.remove("open-add-event");
+                                var time = new Date(jsonData.Created);
+                                var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
+
+                                var str = `Giáo viên : ${jsonData.TeacherName}`;
+                                swal({
+                                    title: Title,
+                                    type: "info",
+                                    text: str,
+                                    showCancelButton: true,
+                                    confirmButtonClass: "btn-sm btn-primary",
+                                    confirmButtonText: "Call skype",
+                                    cancelButtonClass: "btn-sm",
+                                    cancelButtonText: "close",
+                                    closeOnConfirm: false
+                                }, function () {
+                                    swal.close();
+                                    var _skype = jsonData.Skype;
+                                    if (jsonData.Skype == null) {
+                                        _skype = skype;
+                                    }
+                                    window.open(`skype:${_skype}?call`, "_blank");
+                                });
+                            } else {
+                                document.body.classList.add("open-add-event");
+                                var formEvent = document.getElementById("form-event");
+                                var bodyEvent = formEvent.querySelector(".body-form-event");
+                                bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
+                                if (bodyEvent != null) {
+                                    var Title = bodyEvent.querySelector("input[name='Title']");
+                                    if (Title != null) {
+                                        Title.value = jsonData.Title;
+                                    }
+                                    var Content = bodyEvent.querySelector("textarea[name='Content']");
+                                    if (Content != null) {
+                                        Content.value = jsonData.Content != void 0
+                                            ? jsonData.Content
+                                            : "";
+                                    }
+                                    var time = bodyEvent.querySelector("input[name='Time']");
+                                    if (time != null) {
+                                        time.value = timeEvent;
+                                    }
+                                    var date = bodyEvent.querySelector("input[name='Date']");
+                                    if (date != null) {
+                                        date.value = dateEvent;
+                                    }
+                                    formEvent.classList.add("edit-form");
+                                    formEvent.classList.add("view-form");
                                 }
-                                var Content = bodyEvent.querySelector("textarea[name='Content']");
-                                if (Content != null) {
-                                    Content.value = jsonData.Content != void 0
-                                        ? jsonData.Content
-                                        : "";
-                                }
-                                var time = bodyEvent.querySelector("input[name='Time']");
-                                if (time != null) {
-                                    time.value = timeEvent;
-                                }
-                                var date = bodyEvent.querySelector("input[name='Date']");
-                                if (date != null) {
-                                    date.value = dateEvent;
-                                }
-                                formEvent.classList.add("edit-form");
-                                formEvent.classList.add("view-form");
                             }
                         }
                     }

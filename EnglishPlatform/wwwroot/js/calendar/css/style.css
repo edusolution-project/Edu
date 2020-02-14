@@ -1106,6 +1106,9 @@ body.open-add-event .dark-smooke, body.open-add-event-class .dark-smooke {
   box-shadow: 0 0 10px #ccc;
   display: none;
 }
+.form-event-class{
+    height:390px;
+}
 .group-input-event>input{
   width: 49%;
   display: inline-block;
@@ -1113,6 +1116,9 @@ body.open-add-event .dark-smooke, body.open-add-event-class .dark-smooke {
 
 body.open-add-event .form-event{
   display: inline-block;
+}
+body.open-add-event .form-event-class{
+    display:none;
 }
 body.open-add-event-class .form-event-class {
     display: inline-block;
@@ -1152,19 +1158,19 @@ body.open-add-event-class .form-event-class {
   background-color: #13A6FB;
 }
 
-#btn-update-event, #btn-delete-event, .edit-form #btn-cancel-event {
+.btn-update-event, .btn-delete-event, .edit-form .btn-cancel-event {
     display: none;
 }
-.edit-form #btn-update-event, .edit-form #btn-delete-event, .edit-form #btn-save-event {
+.edit-form .btn-update-event, .edit-form .btn-delete-event, .edit-form .btn-save-event {
     display: inline-block;
 }
-#btn-save-event, #btn-cancel-event{
+.btn-save-event, .btn-cancel-event{
     display:inline-block;
 }
-.view-form #btn-update-event,
-.view-form #btn-delete-event,
-.view-form #btn-cancel-event,
-.view-form #btn-save-event {
+.view-form .btn-update-event,
+.view-form .btn-delete-event,
+.view-form .btn-cancel-event,
+.view-form .btn-save-event {
     display: none;
 }
 button.fc-btnAddEvent-button.fc-button.fc-button-primary {
