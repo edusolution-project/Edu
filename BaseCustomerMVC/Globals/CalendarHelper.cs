@@ -138,7 +138,7 @@ namespace BaseCustomerMVC.Globals
             {
                 var _startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
                 var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => ((o.StartDate >= _startDate || o.EndDate <= _endDate) && o.Status == 5) || ((o.StartDate >= _startDate || o.EndDate <= _endDate) && o.CreateUser == userid) || ((o.StartDate >= _startDate || o.EndDate <= _endDate) && classList.Contains(o.GroupID))));
+                filter.Add(Builders<CalendarEntity>.Filter.Where(o => ((o.StartDate >= _startDate || o.EndDate <= _endDate) && o.CreateUser == userid) || ((o.StartDate >= _startDate || o.EndDate <= _endDate) && classList.Contains(o.GroupID))));
             }
             filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.IsDel == false)));
             var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
