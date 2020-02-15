@@ -37,7 +37,7 @@
             </div>
             @if (isHeadteacher)
             {
-            <b-button clas="btn-addevent" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+                <b-button clas="btn-addevent" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
             }
         </div>
     </div>
@@ -60,13 +60,13 @@
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
                     @if (isHeadteacher)
                     {
-                    <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
-                    <td>
-                        <div class="d-flex btn-group">
-                            <a class="btn-act btn-edit" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
-                            <button class="btn-act btn-trash" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
-                        </div>
-                    </td>
+                        <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
+                        <td>
+                            <div class="d-flex btn-group">
+                                <a class="btn-act btn-edit" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
+                                <button class="btn-act btn-trash" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
+                            </div>
+                        </td>
                     }
                 </tr>
             </tbody>
@@ -100,6 +100,16 @@
 </section>
 
 @section Scripts{
+
+    <style>
+        #modal_class .modal-dialog {
+            max-width: 1100px;
+        }
+
+        #modal_class .vdp-datepicker input {
+            width: 100%;
+        }
+    </style>
     <script>
 
         new Vue({
@@ -456,7 +466,7 @@
                                     else {
                                         lock = !valid_subject[0].IsActive
                                     }
-                                    
+
                                     _that.class_info.subject.push({
                                         UID: moment().format("DDMMYYYYhhmmssSSS") + k,
                                         ID: item.ID,
@@ -665,7 +675,7 @@
                     <input type="text" v-model="class_info.Name" class="form-control" ref="addName">
                 </b-col>
                 <div class="d-flex">
-                    <b-col class="form-group">
+                    <b-col class="form-group mr-2">
                         <label class="label">Ngày bắt đầu*</label>
                         <vuejs-datepicker v-model="class_info.StartDate" format="dd/MM/yyyy" class="form-control" ref="addStartDate"></vuejs-datepicker>
                     </b-col>
@@ -692,42 +702,42 @@
             <div class="col-md-7">
                 <ul class="list list-subject">
                     <li v-for="(sub,k) in class_info.subject" class="flex" :id="sub.UID">
-                        <div class="width-100">
+                        <div class="width-100 mr-2">
                             <label for="">Chương trình</label>
                             <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock">
                                 <option value="">Chọn chương trình</option>
                                 <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
                             </select>
                         </div>
-                        <div class="width-100">
+                        <div class="width-100 mr-2">
                             <label for="">Cấp độ</label>
                             <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock">
                                 <option value="">Chọn cấp độ</option>
                                 <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
-                        <div class="width-100">
+                        <div class="width-100 mr-2">
                             <label for="">Môn học</label>
                             <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
                                 <option value="">Chọn môn học</option>
                                 <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
-                        <div class="width-100">
+                        <div class="width-100 mr-2">
                             <label for="">Bài giảng</label>
                             <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">
                                 <option value="">Chọn bài giảng</option>
                                 <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
-                        <div class="width-100">
+                        <div class="width-100 mr-2">
                             <label for="">Giáo viên</label>
                             <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
                                 <option value="">Chọn giáo viên</option>
                                 <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
                             </select>
                         </div>
-                        <div class="btn-group">
+                        <div class="btn-group mt-4">
                             <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock"><i class="ti-trash"></i></button>
                         </div>
                     </li>

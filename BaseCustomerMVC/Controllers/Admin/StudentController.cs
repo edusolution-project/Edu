@@ -233,13 +233,16 @@ namespace BaseCustomerMVC.Controllers.Admin
                             DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
                                                DateTimeStyles.None,
                                                out birthdate);
+                            var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
+                            var skype = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString();
                             var item = new StudentEntity
                             {
                                 //StudentId = code,
                                 FullName = name,
                                 DateBorn = birthdate,
-                                Email = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString(),
-                                Phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
+                                Email = email,
+                                Phone = phone,
+                                Skype = skype,
                                 CreateDate = DateTime.Now,
                                 UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
                                 IsActive = true
@@ -351,6 +354,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 Ngay_sinh = "dd/mm/yyyy",
                 Email = "email@gmail.com",
                 SDT = "0123456789",
+                SkypeId = "skypeid"
             });
             var stream = new MemoryStream();
 

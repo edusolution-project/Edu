@@ -1430,16 +1430,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
                            where classsubject != null
                            let lesson = _lessonService.GetItemByID(progress.LessonID)
-                           let exam = _examService.CreateQuery().Find(x => x.StudentID == class_student.StudentID && x.LessonID == schedule.LessonID && x.ClassID == currentClass.ID).SortByDescending(x => x.Created).FirstOrDefault()
+                           let lastexam = _examService.CreateQuery().Find(x => x.StudentID == class_student.StudentID && x.LessonID == schedule.LessonID && x.ClassSubjectID == schedule.ClassSubjectID).SortByDescending(x => x.Created).FirstOrDefault()
                            select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
                            {
                                ScheduleID = schedule.ID,
                                ScheduleStart = schedule.StartDate,
                                ScheduleEnd = schedule.EndDate,
                                IsActive = schedule.IsActive,
-                               LearnCount = exam == null ? 0 : exam.Number,
-                               LearnLast = exam == null ? DateTime.MinValue : exam.Updated,
-                               Point = exam == null ? 0 : exam.Point
+                               LearnCount = lastexam == null ? 0 : lastexam.Number,
+                               LearnLast = lastexam == null ? DateTime.MinValue : lastexam.Updated,
+                               Point = lastexam == null ? 0 : lastexam.MaxPoint,
+                               Result = lastexam == null ? 0 : (lastexam.MaxPoint > 0 ? lastexam.Point * 100 / lastexam.MaxPoint : 0),
                            })).OrderBy(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
 
             var response = new Dictionary<string, object>

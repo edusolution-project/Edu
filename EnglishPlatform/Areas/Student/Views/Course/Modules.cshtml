@@ -24,82 +24,34 @@
     <div class="card-body">
         <div class="box">
             <ul class="list ls-pratice">
-                <li class="col-md-12" v-if="list_data.length" v-for="(item,k) in list_data">
-                    <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`prc-${k}`" class="btn-collapse" v-on:click="getSubList(item.ID, k)" :id="item.ID"><i class="ic ic-edit-small"></i>{{item.Name}}<i class="ic ic-collapse"></i></a>
-                        <b-collapse :id="`prc-${k}`" accordion="my-accordion" role="tabpanel">
-                            <b-card-body>
-                                <ul class="list">
-
-                                    <li class="sub-practice" v-if="item.detail.length" v-for="(lesson,j) in item.detail">
-                                        <span class="c c1"> <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'">{{lesson.Title}}</a></span>
-
-                                        @*Exam*@
-                                        <template v-if="lesson.TemplateType === 2">
-                                            <template v-if="isViewed(lesson.LastJoin)">
-                                                <div class="c c2">
-                                                    <span>Làm bài lần cuối</span>
-                                                    <span>{{formatTime(lesson.LastJoin)}}</span>
-                                                </div>
-                                                <div class="c c3">
-                                                    <span v-bind:class="{'bg-danger' : parseInt(lesson.DoPoint)<50}">{{lesson.DoPoint}}</span>%
-                                                </div>
-                                            </template>
-                                            <template v-else>
-                                                <div class="c c2">
-                                                </div>
-                                                <div class="c c3">
-                                                </div>
-                                            </template>
-                                            <div class="c schedule">
-                                                <span>{{formatTime(lesson.StartDate)}}</span><br />
-                                                <span>{{formatTime(lesson.EndDate)}}</span>
-                                            </div>
-                                            <div class="c c4">
-                                                <template v-if="!isValid(lesson)">
-                                                    <a title="Chưa mở" class="btn-act act bg-secondary" v-if="moment(lesson.StartDate) > moment()" v-on:click="lockNotify(lesson,1)">Chưa mở</a>
-                                                    <a title="Hết hạn" class="btn-act act bg-secondary" v-else v-on:click="lockNotify(lesson,0)">Hết hạn</a>
-                                                </template>
-                                                <template v-else-if="lesson.Tried > 0">
-                                                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="lesson.LastExam != null" title="Làm lại" class="btn-act act">Làm lại</a>
-                                                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-else title="Tiếp tục" class="btn-act act">Tiếp tục</a>
-                                                </template>
-                                                <template v-else>
-                                                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="Làm bài" class="btn-act act">Làm bài</a>
-                                                </template>
-                                                <a v-if="lesson.Tried > 0 && lesson.LastExam != null" :href="'@Url.Action("Review", "Lesson")/' + lesson.LastExam" title="Xem đáp án" class="btn-act view">Xem đáp án</a>
-                                            </div>
-                                        </template>
-                                        <template v-else>
-                                            <div class="c c2">
-                                                <template v-if="isViewed(lesson.LastJoin)">
-                                                    <span>Học lần cuối</span>
-                                                    <span>{{formatTime(lesson.LastJoin)}}</span>
-                                                </template>
-                                            </div>
-                                            <div class="c cs">
-                                            </div>
-                                            <div class="c schedule">
-                                                <span>{{formatTime(lesson.StartDate)}}</span><br />
-                                                <span>{{formatTime(lesson.EndDate)}}</span>
-                                            </div>
-                                            <div class="c c4">
-                                                <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'" class="btn-act act">{{isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'}}</a>
-                                            </div>
-                                        </template>
-                                    </li>
-                                </ul>
-                            </b-card-body>
-                        </b-collapse>
-                    </div>
-                </li>
+                <chap-content v-for="(item,k) in filterChap('0', list_data)"
+                              v-bind:data="item"
+                              v-bind:pos="k"
+                              v-bind:subchaps="filterChap(item.ID, list_data)">
+                </chap-content>
             </ul>
         </div>
     </div>
 </section>
 
+
+
 @section Scripts {
     <style>
+        .ls-pratice .list {
+            max-height: none;
+        }
+
+        .ls-pratice li .inner {
+            border: none;
+        }
+
+        .btn-collapse {
+            border-bottom: .5px solid #D0DFE8;
+            margin-bottom: 0;
+            padding: 5px 0 13px;
+        }
+
         .btn-act {
             font-size: 12px;
         }
@@ -109,16 +61,117 @@
         }
     </style>
 
+    <script type="text/x-template" id="chapContentTemp">
+        <li class="col-md-12">
+            <div class="inner">
+                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic ic-edit-small"></i>{{data.Name}}<i class="ic ic-collapse"></i></a>
+                <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.ParentID}`" :title="`my-accordion-${data.ParentID}`" role="tabpanel">
+                    <b-card-body>
+                        <ul class="list">
+                            <chap-content v-for="(item,k) in subchaps"
+                                          v-bind:data="item"
+                                          v-bind:pos="k"
+                                          v-bind:subchaps="filterChap(item.ID, subchaps)"></chap-content>
+                            <lesson-item v-for="lesson in filterLesson(data.ID)" v-bind:lesson="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
+                        </ul>
+                    </b-card-body>
+                </b-collapse>
+            </div>
+        </li>
+    </script>
+
+    <script type="text/x-template" id="lessonItemTemp">
+        <li class="sub-practice">
+            <span class="c c1"> <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'">{{lesson.Title}}</a></span>
+            @*Exam*@
+            <template v-if="lesson.TemplateType === 2">
+                <template v-if="isViewed(lesson.LastJoin)">
+                    <div class="c c2">
+                        <span>Làm bài lần cuối</span>
+                        <span>{{formatTime(lesson.LastJoin)}}</span>
+                    </div>
+                    <div class="c c3">
+                        <span v-bind:class="{'bg-danger' : parseInt(lesson.DoPoint)<50}">{{lesson.DoPoint}}</span>%
+                    </div>
+                </template>
+                <template v-else>
+                    <div class="c c2">
+                    </div>
+                    <div class="c c3">
+                    </div>
+                </template>
+                <div class="c schedule">
+                    <span>{{formatTime(lesson.StartDate)}}</span><br />
+                    <span>{{formatTime(lesson.EndDate)}}</span>
+                </div>
+                <div class="c c4">
+                    <template v-if="!isValid(lesson)">
+                        <a title="Chưa mở" class="btn-act act bg-secondary" v-if="moment(lesson.StartDate) > moment()" v-on:click="lockNotify(lesson,1)">Chưa mở</a>
+                        <a title="Hết hạn" class="btn-act act bg-secondary" v-else v-on:click="lockNotify(lesson,0)">Hết hạn</a>
+                    </template>
+                    <template v-else-if="lesson.Tried > 0">
+                        <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="lesson.LastExam != null" title="Làm lại" class="btn-act act">Làm lại</a>
+                        <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-else title="Tiếp tục" class="btn-act act">Tiếp tục</a>
+                    </template>
+                    <template v-else>
+                        <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="Làm bài" class="btn-act act">Làm bài</a>
+                    </template>
+                    <a v-if="lesson.Tried > 0 && lesson.LastExam != null" :href="'@Url.Action("Review", "Lesson")/' + lesson.LastExam" title="Xem đáp án" class="btn-act view">Xem đáp án</a>
+                </div>
+            </template>
+            <template v-else>
+                <div class="c c2">
+                    <template v-if="isViewed(lesson.LastJoin)">
+                        <span>Học lần cuối</span>
+                        <span>{{formatTime(lesson.LastJoin)}}</span>
+                    </template>
+                </div>
+                <div class="c cs">
+                </div>
+                <div class="c schedule">
+                    <span>{{formatTime(lesson.StartDate)}}</span><br />
+                    <span>{{formatTime(lesson.EndDate)}}</span>
+                </div>
+                <div class="c c4">
+                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'" class="btn-act act">{{isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'}}</a>
+                </div>
+            </template>
+        </li>
+    </script>
+
+
     <script>
+        Vue.component('chap-content', {
+            template: '#chapContentTemp',
+            props: {
+                subchaps: Array,
+                data: Object,
+                pos: String
+            }
+        })
+        Vue.component('lesson-item',{
+            template: '#lessonItemTemp',
+            props: {
+                lesson: Object,
+                classSubject: String
+            }
+        })
 
         new Vue({
         el: "#dashboard_content",
 		mounted(){
             this.getList()
+            window.filterChap = this.filterChap
+            window.getSubList = this.getSubList
+            window.filterLesson = this.filterLesson
+            window.isViewed = this.isViewed
+            window.formatTime = this.formatTime
+            window.isValid = this.isValid
 		},
         data: {
-            list_data : [
-            ],
+            list_data: [],
+            list_lessons: [],
+            load_chapter: [],
             view : 10,
             page : 1
         },
@@ -126,16 +179,14 @@
         },
         methods: {
             getList(){
-
                 let _that = this
                 let _form = new FormData()
                 _form.append('ID', '@currentCs.ID')
                 let _url = '@Url.Action("GetSchedules", "Lesson")'
                 axios.post(_url, _form)
                     .then(response => {
-                        console.log(response.data.Data)
+                        //console.log(response.data.Data)
                         _that.list_data = response.data.Data.Chapters
-
                         if (window.location.hash != "")
                         {
 
@@ -144,21 +195,38 @@
                         //console.log(_that.active_course);
                     }).catch(e => { })
             },
+            filterChap(ID, list) {
+                return list.filter((p) => {
+        	        return p.ParentID == ID
+                })
+            },
+            filterLesson(ID) {
+                //console.log(ID);
+                console.log(this.list_lessons);
+                return this.list_lessons.filter((p) => {
+        	        return p.ChapterID == ID
+                })
+            },
             getSubList(chapterId, pos){
                 let _that = this
-                console.log(_that.list_data[pos].detail);
-                if (_that.list_data[pos].detail == null) {
-                    var name = _that.list_data[pos].Name;
+                if (_that.load_chapter.findIndex(t=> t == chapterId) < 0) {
+                    //var name = _that.list_data[pos].Name;
                     let _form = new FormData()
-                    _that.list_data[pos].Name = _that.list_data[pos].Name + "...";
+                    //_that.list_data[pos].Name = _that.list_data[pos].Name + "...";
                     _form.append('ID', '@currentCs.ID')
                     _form.append('ChapterID', chapterId)
                     let _url = '@Url.Action("GetChapterContent", "Lesson")'
                     axios.post(_url, _form)
                         .then(response => {
-                            //console.log(response.data.Data);
-                            _that.list_data[pos].detail = response.data.Data.Lessons;
-                            _that.list_data[pos].Name = name;
+                            var lessons = response.data.Data.Lessons;
+                            console.log(lessons)
+                            lessons.forEach(function (lesson) {
+                                _that.list_lessons.push(lesson)
+                            })
+                            this.list_lessons = _that.list_lessons;
+                            console.log(that.list_lessons)
+                            this.load_chapter.push(chapterId);
+                            //_that.list_data[pos].Name = name;
                         }).catch(e => { })
                 }
             },

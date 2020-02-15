@@ -19,10 +19,14 @@
     <div class="card-header">
         <div class="flex mb-2">
             <h2 class="title"><a href="@Url.Action("Detail", "Class")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
-            @*<div class="search-box">
-                    <button><i class="ic ic-find"></i></button>
-                    <input type="text" name="" placeholder="Search">
-                </div>*@
+            @*<div class="search-box mr-2" v-if="tab[2]">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" placeholder="Search">
+            </div>
+            <div class="flex" v-if="tab[2]">
+                <b-button class="btn-addevent btn-student" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
+                <b-button class="btn-addevent btn-student" style="margin-left:5px" v-on:click="showStudentUploadModal()"><i class="ti-zip"></i></b-button>
+            </div>*@
         </div>
         <div class="flex j-between border-b">
             <div class="tab bg-none">
@@ -67,34 +71,10 @@
                         <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}</a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion" role="tabpanel">
                             <ul class="list">
-                                @*<li class="col-md-12" v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')">
-                                    <div class="inner">
-                                        <a href="javascript:;" v-b-toggle="`prc-${item.ID}-${k}`" class="btn-collapse" v-on:click="loadContent(item.ClassSubject, item.ID)"><i class="ic ic-edit-small"></i>{{item.Title}}<i class="ic ic-collapse"></i></a>
-                                        <b-collapse :id="`prc-${item.ID}-${k}`" role="tabpanel">
-                                            <b-card-body>
-                                                <ul class="list">
-                                                    <li class="sub-practice" v-if="matchedLesson(data, obj.ID + '-' + item.ID)" v-for="(data,j) in list_lessons">
-                                                        <div class="flex j-between width-100">
-                                                            <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + obj.ID"> <span class="width-100">{{data.Title}}</span></a>
-                                                            <div class="flex width-100 j-end picker-schedule">
-                                                                <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st" v-on:input="updateSchedule(data)"></datepicker>
-                                                                <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed" v-on:input="updateSchedule(data)"></datepicker>
-                                                            </div>
-                                                            <div class="status">
-                                                                <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                </ul>
-                                            </b-card-body>
-                                        </b-collapse>
-                                    </div>
-                                </li>*@
                                 <chap-content v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')"
-                                    v-bind:data="item"
-                                    v-bind:pos="k"
-                                    v-bind:subchaps="filterItem(item, list_chapters)"
-                                    v-bind:lessons="filterItem(item, list_lessons)"></chap-content>
+                                              v-bind:data="item"
+                                              v-bind:pos="k"
+                                              v-bind:subchaps="filterChap(item, list_chapters)"></chap-content>
                             </ul>
                         </b-collapse>
                     </div>
@@ -115,7 +95,7 @@
                         <td>{{item.Email}}</td>
                         <td>{{item.Phone}}</td>
                         @*<td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>*@
-                        <td>{{item.last_update}}</td>
+                        <td>{{formatTime(item.LastJoinDate)}}</td>
                         @*<td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>*@
                     </tr>
                 </tbody>
@@ -179,7 +159,7 @@
         }
 
         .ls-pratice .list {
-            max-height: auto;
+            max-height: none;
             overflow: visible;
         }
 
@@ -214,39 +194,38 @@
 
 
     <script type="text/x-template" id="chapContentTemp">
-            <li class="col-md-12">
-                <div class="inner">
-                    <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic ic-edit-small"></i>{{data.Title}}<i class="ic ic-collapse"></i></a>
-                    <b-collapse :id="`prc-${data.ID}-${pos}`" role="tabpanel">
-                        <b-card-body>
-                            <ul class="list">
-                                <chap-content v-for="(subItem,j) in subchaps"
-                                              v-bind:data="item"
-                                              v-bind:pos="k"
-                                              v-bind:subchaps="filterItem(item, subchaps)"
-                                              v-bind:lessons="filterLesson(item, lessons)"></chap-content>
-                                <lesson-item v-for="lesson in lessons" v-bind:data="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
-                            </ul>
-                        </b-card-body>
-                    </b-collapse>
-                </div>
-            </li>
-        </script>
+        <li class="col-md-12">
+            <div class="inner">
+                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic ic-edit-small"></i>{{data.Title}}<i class="ic ic-collapse"></i></a>
+                <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
+                    <b-card-body>
+                        <ul class="list">
+                            <chap-content v-for="(subItem,j) in subchaps"
+                                          v-bind:data="subItem"
+                                          v-bind:pos="j"
+                                          v-bind:subchaps="filterChap(subItem, subchaps)"></chap-content>
+                            <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
+                        </ul>
+                    </b-card-body>
+                </b-collapse>
+            </div>
+        </li>
+    </script>
 
-        <script type="text/x-template" id="lessonItemTemp">
-            <li class="sub-practice">
-                <div class="flex j-between width-100">
-                    <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject"> <span class="width-100">{{data.Title}}</span></a>
-                    <div class="flex width-100 j-end picker-schedule">
-                        <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st" v-on:input="updateSchedule(data)"></datepicker>
-                        <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed" v-on:input="updateSchedule(data)"></datepicker>
-                    </div>
-                    <div class="status">
-                        <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                    </div>
+    <script type="text/x-template" id="lessonItemTemp">
+        <li class="sub-practice">
+            <div class="flex j-between width-100">
+                <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject"> <span class="width-100">{{data.Title}}</span></a>
+                <div class="flex width-100 j-end picker-schedule">
+                    <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st" v-on:input="updateSchedule(data)"></datepicker>
+                    <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed" v-on:input="updateSchedule(data)"></datepicker>
                 </div>
-            </li>
-        </script>
+                <div class="status">
+                    <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                </div>
+            </div>
+        </li>
+    </script>
 
     <script>
         Vue.component('chap-content', {
@@ -337,6 +316,8 @@
                 this.loadClassDetail()
                 window.loadContent = this.loadContent
                 window.updateSchedule = this.updateSchedule
+                window.filterChap = this.filterChap
+                window.filterLesson = this.filterLesson
                 var hash = window.location.hash;
                 if (hash.startsWith('#')) {
                     hash = hash.split('#')[1]
@@ -512,20 +493,21 @@
                                 //    if (item.ID == subject) {
 
                                 _data.forEach(function (chapter, k) {
-                                    var parent = '';
-                                    if (chapter.Parent)
-                                        parent = chapter.parent;
-                                            _that.list_chapters.push({
-                                                ID: chapter.ID,
-                                                Title: chapter.Name,
-                                                ClassSubject: subject,
-                                                Parent:  parent
-                                            })
-                                        })
+                                    var parent = chapter.ParentID;
+                                    if (parent == "0") { parent = "";}
+                                    _that.list_chapters.push({
+                                        ID: chapter.ID,
+                                        Title: chapter.Name,
+                                        ClassSubject: subject,
+                                        Parent: parent
+                                    })
+                                })
                                 _lesson.forEach(function (lesson, k) {
-                                        var parent = '';
-                                        if (lesson.ChapterID) parent = lesson.ChapterID;
-                                    //var end = moment(lesson.EndDate);
+                                    var parent = '';
+                                    if (lesson.ChapterID) {
+                                        parent = lesson.ChapterID;
+                                    }
+
                                         _that.list_lessons.push({
                                             ID: lesson.ID,
                                             ScheduleID: lesson.ScheduleID,
@@ -537,10 +519,8 @@
                                             IsActive: lesson.IsActive,
                                             IsUpdating: false
                                         })
+
                                 })
-                                        //console.log(item.Lessons)
-                                    //}
-                                //})
                                 this.loaded_chapter.push(key);
                                 this.list_chapters = _that.list_chapters
                                 this.list_lessons = _that.list_lessons
@@ -583,7 +563,6 @@
                     let _url = '@Url.Action("Update", "LessonSchedule")'
                         axios.post(_url, _form)
                             .then(response => {
-                                //console.log(response)
                                 obj.IsUpdating = false
                             }).catch(e => { })
                 },
@@ -591,16 +570,26 @@
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
                 },
+                formatTime(time) {
+                    if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
+                    return moment(time).format("DD/MM/YYYY HH:mm")
+                },
                 matchedChap(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key
                 },
                 matchedLesson(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key
                 },
-                filterItem(obj, list) {
+                filterChap(obj, list) {
                     return list.filter((p) => {
         	            return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
                     })
+                },
+                filterLesson(obj) {
+                    var filter = this.list_lessons.filter((p) => {
+        	            return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
+                    })
+                    return filter;
                 },
                  //Lesson Action
                 toggleLessonState(obj) {

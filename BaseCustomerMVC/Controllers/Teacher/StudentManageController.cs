@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
+using System.Globalization;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -19,6 +20,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
     {
         private readonly GradeService _gradeService;
         private readonly AccountService _accountService;
+        private readonly RoleService _roleService;
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly SkillService _skillService;
@@ -36,6 +38,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public StudentManageController(
             AccountService accountService,
+            RoleService roleService,
             GradeService gradeservice,
             SubjectService subjectService,
             TeacherService teacherService,
@@ -52,6 +55,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             )
         {
             _accountService = accountService;
+            _roleService = roleService;
             _gradeService = gradeservice;
             _subjectService = subjectService;
             _teacherService = teacherService;
@@ -191,7 +195,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                      ClassID = @class.ID,
                      ClassName = @class.Name,
                      ClassStatus = "Đang học",
-                     LastJoinDate = DateTime.Now,
+                     LastJoinDate = progress == null ? DateTime.MinValue : progress.LastDate,
                      Progress = progress,
                      Percent = percent > 100 ? 100 : percent,
                      Score = _scoreStudentService.GetScoreStudentByStudentIdAndClassId(@class.ID, @student.ID)
@@ -299,7 +303,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
                             int totalRows = workSheet.Dimension.Rows;
                             var classStudents = _classStudentService.GetClassStudents(ClassID);
-                            var keyCol = 2;
+                            var keyCol = 4;
+                            var defPass = "Eduso123";
                             for (int i = 1; i <= totalRows; i++)
                             {
                                 if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
@@ -307,7 +312,56 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 if (string.IsNullOrEmpty(studentEmail)) continue;
                                 var student = _studentService.CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
 
+
                                 if (student == null) continue;
+                                //{
+                                    //if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
+                                    //if (workSheet.Cells[i, 4].Value == null) continue; // Email null;
+                                    //                                                   //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                    //string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                    //string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
+                                    //var birthdate = new DateTime();
+                                    //DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
+                                    //                   DateTimeStyles.None,
+                                    //                   out birthdate);
+                                    //var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
+                                    //var skype = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString();
+                                    //student = new StudentEntity
+                                    //{
+                                    //    //StudentId = code,
+                                    //    FullName = name,
+                                    //    DateBorn = birthdate,
+                                    //    Email = studentEmail,
+                                    //    Phone = phone,
+                                    //    Skype = skype,
+                                    //    CreateDate = DateTime.Now,
+                                    //    UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
+                                    //    IsActive = true
+                                    //};
+
+                                    //await _studentService.CreateQuery().InsertOneAsync(student);
+
+                                    //var account = new AccountEntity()
+                                    //{
+                                    //    CreateDate = DateTime.Now,
+                                    //    IsActive = true,
+                                    //    PassTemp = Security.Encrypt(
+                                    //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
+                                    //        defPass
+                                    //        ),
+                                    //    PassWord = Security.Encrypt(
+                                    //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
+                                    //        defPass
+                                    //        ),
+                                    //    UserCreate = student.UserCreate,
+                                    //    Type = ACCOUNT_TYPE.STUDENT,
+                                    //    UserID = student.ID,
+                                    //    UserName = student.Email.ToLower().Trim(),
+                                    //    RoleID = _roleService.GetItemByCode("student").ID
+                                    //};
+                                    //_accountService.CreateQuery().InsertOne(account);
+                                //}
+                                //else 
                                 if (classStudents.Any(t => t.StudentID == student.ID)) continue;
 
                                 _classStudentService.Save(new ClassStudentEntity
@@ -357,9 +411,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var data = list.Select(o => new
             {
                 STT = 1,
+                Ho_ten = "Nguyễn Văn A",
+                Ngay_sinh = "dd/mm/yyyy",
                 Email = "email@gmail.com",
-                Ten = "Nguyễn Văn A",
-                Ngay_sinh = "01/30/1999",
+                SDT = "0123456789",
+                SkypeId = "skypeid",
             });
             var stream = new MemoryStream();
 
