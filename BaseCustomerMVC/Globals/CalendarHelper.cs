@@ -44,6 +44,16 @@ namespace BaseCustomerMVC.Globals
             // check event da ton tai hay chua
             if (existEvent(item.EndDate, item.StartDate, item.GroupID))
             {
+                item.Created = DateTime.Now;
+                if (item.Status == 5)
+                {
+                    var teacher = _teacherService.GetItemByID(item.CreateUser);
+                    if (teacher != null)
+                    {
+                        item.TeacherID = teacher.ID;
+                        item.TeacherName = teacher.FullName;
+                    }
+                }
                 _calendarService.CreateOrUpdate(item);
 
                 return Task.FromResult(item);
@@ -123,7 +133,7 @@ namespace BaseCustomerMVC.Globals
                 groupid = o.GroupID,
                 id = o.ID,
                 title = o.Title,
-                url = o.UrlRoom == null ? "" : o.UrlRoom,
+                url = "",
                 Status = o.Status
             }).ToList();
             return DataResponse;
@@ -138,9 +148,7 @@ namespace BaseCustomerMVC.Globals
             {
                 var _startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
                 var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => ((o.StartDate >= _startDate || o.EndDate <= _endDate)
-                //&& o.Status == 5
-                ) || ((o.StartDate >= _startDate || o.EndDate <= _endDate) && o.CreateUser == userid) || ((o.StartDate >= _startDate || o.EndDate <= _endDate) && classList.Contains(o.GroupID))));
+                filter.Add(Builders<CalendarEntity>.Filter.Where(o => ((o.StartDate >= _startDate || o.EndDate <= _endDate) && o.CreateUser == userid) || ((o.StartDate >= _startDate || o.EndDate <= _endDate) && classList.Contains(o.GroupID))));
             }
             filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.IsDel == false)));
             var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
@@ -150,8 +158,8 @@ namespace BaseCustomerMVC.Globals
                 groupid = o.GroupID,
                 id = o.ID,
                 title = o.Title,
-                url = o.UrlRoom == null ? "" : o.UrlRoom,
-                skype = isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype : _teacherService.GetItemByID(o.TeacherID)?.Skype,
+                url = "",
+                skype = isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype,
                 Status = o.Status
             }).ToList();
             return DataResponse;
