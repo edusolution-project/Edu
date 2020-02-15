@@ -177,13 +177,11 @@ footer {
     }
 
 .QUIZ1 .answer-item, .QUIZ2 .answer-item {
-    /*max-width: 30%;*/
+    max-width: 30%;
     padding-right: 10px;
     display: inline-block;
+    vertical-align: top;
 }
-
-
-
 
 #nav-menu {
     z-index: 2;

@@ -24,6 +24,8 @@
                 <ul class="flex">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Môn học</a></li>
+                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(2)">Tài liệu tham khảo</a></li>
+                    <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(3)">Thảo luận</a></li>
                 </ul>
             </div>
         </div>
@@ -55,6 +57,11 @@
                     <div class="inner">
                         <span class="ic ic-headphone" :style="'background-image:url(' + item.Image + ')'"></span>
                         <a :href="'@Url.Action("Modules","Course")/' + item.ID" title="" class="title">{{item.Title}}</a>
+                        <span class="name center">
+                            {{item.Grade}}<br />
+                            GV: {{item.Teacher}}
+                        </span>
+
                         <a :href="'@Url.Action("Modules","Course")/' + item.ID" class="btn-learn">Học ngay</a>
                     </div>
                 </div>
@@ -101,6 +108,12 @@
                         case 1:
                             this.loadClassSubjects();
                             break;
+                        case 2:
+                            this.loadPreference();
+                            break;
+                        case 3:
+                            this.loadComment();
+                            break;
                     }
                     this.$forceUpdate()
                 },
@@ -139,7 +152,9 @@
                                     _that.classSubjects.push({
                                         ID: item.ID,
                                         Title: item.SkillName,
-                                        Image:  item.SkillImage,
+                                        Image: item.SkillImage,
+                                        Teacher: item.TeacherName,
+                                        Grade: item.GradeName,
                                         Chapters: [],
                                         Lessons: []
                                     })
@@ -149,6 +164,12 @@
 
                                 //_that.$forceUpdate()
                             }).catch(e => { })
+                },
+                loadPreference() {
+                    console.log('preference')
+                },
+                loadComment() {
+                    document.location = '@Url.Action("Index","Discuss", new { id = currentClass.ID })'
                 },
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"

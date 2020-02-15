@@ -13,6 +13,7 @@ using Core_v2.Globals;
 using Microsoft.AspNetCore.Hosting;
 using System.Linq;
 using MongoDB.Bson;
+using System.Globalization;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -219,23 +220,32 @@ namespace BaseCustomerMVC.Controllers.Admin
                         int totalRows = workSheet.Dimension.Rows;
                         studentList = new List<StudentEntity>();
                         Error = new List<StudentEntity>();
+                        var defPass = "Eduso123";
                         for (int i = 1; i <= totalRows; i++)
                         {
                             if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                            string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
-                            string name = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
+                            if (workSheet.Cells[i, 4].Value == null) continue; // Email null;
+                            //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                            string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                            string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
+                            string email = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
+                            var birthdate = new DateTime();
+                            DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
+                                               DateTimeStyles.None,
+                                               out birthdate);
+                            var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
+                            var skype = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString();
                             var item = new StudentEntity
                             {
-                                StudentId = code,
+                                //StudentId = code,
                                 FullName = name,
-                                DateBorn = workSheet.Cells[i, 4].Value == null ? DateTime.MinValue : (DateTime.Parse(workSheet.Cells[i, 4].Value.ToString())),
-                                Email = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
-                                Class = new List<string>() { workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString() },
-                                //Phone = workSheet.Cells[i, 8].Value == null ? "" : workSheet.Cells[i, 8].Value.ToString(),
-                                //Address = workSheet.Cells[i, 9].Value == null ? "" : workSheet.Cells[i, 9].Value.ToString(),
+                                DateBorn = birthdate,
+                                Email = email,
+                                Phone = phone,
+                                Skype = skype,
                                 CreateDate = DateTime.Now,
                                 UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
-                                IsActive = workSheet.Cells[i, 7].Value.ToString() == "Hoạt động"
+                                IsActive = true
                             };
                             if (!ExistEmail(item.Email))
                             {
@@ -245,8 +255,14 @@ namespace BaseCustomerMVC.Controllers.Admin
                                 {
                                     CreateDate = DateTime.Now,
                                     IsActive = true,
-                                    PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                                    PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                                    PassTemp = Security.Encrypt(
+                                        //string.Format("{0:ddMMyyyy}", item.DateBorn)
+                                        defPass
+                                        ),
+                                    PassWord = Security.Encrypt(
+                                        //string.Format("{0:ddMMyyyy}", item.DateBorn)
+                                        defPass
+                                        ),
                                     UserCreate = item.UserCreate,
                                     Type = ACCOUNT_TYPE.STUDENT,
                                     UserID = item.ID,
@@ -334,12 +350,11 @@ namespace BaseCustomerMVC.Controllers.Admin
             var data = list.Select(o => new
             {
                 STT = 1,
-                Ma_HV = "HV01",
                 Ho_ten = "Nguyễn Văn A",
-                Ngay_sinh = "01/30/1999",
+                Ngay_sinh = "dd/mm/yyyy",
                 Email = "email@gmail.com",
-                Lop = "8A1",
-                Trang_thai = "Hoạt động"
+                SDT = "0123456789",
+                SkypeId = "skypeid"
             });
             var stream = new MemoryStream();
 

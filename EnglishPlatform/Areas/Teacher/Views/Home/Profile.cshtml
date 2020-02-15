@@ -26,7 +26,7 @@
             <div class="flex">
                 <div id="avatar_box" v-if="isInfo">
                     <img v-on:error="errorImgUrl()" :src="avatar.src" alt="" v-if="avatar" />
-                    <img v-else src="/images/no-avatar.png"/>
+                    <img v-else src="/images/no-avatar.png" />
                     <label for="in_avatar">Đổi hình đại diện</label>
                     <input type="file" :ref="`avatar`" v-on:change="previewThumb()" id="in_avatar">
                 </div>
@@ -130,13 +130,13 @@
                             _that.isInfo = true
                             break;
                     }
-                    console.log(s);
+                    //console.log(s);
                 },
                 getProfile() {
                      let _url = '@Url.Action("GetProfile","Home")'
                      axios.get(_url)
                          .then(response =>{
-                             console.log(response.data);
+                             //console.log(response.data);
                              if(response.data.StatusCode){
                                  this.profile = response.data.Data
                                  this.avatar.src = this.profile.Avatar
@@ -162,9 +162,11 @@
                     }
                     axios.post(_url, _form, _headers)
                         .then(response => {
-                            if (response.data.StatusCode == 1) {
-                                swal("update success !!", "" ,"success");
+                            if (response.data.Error == null) {
+                                Swal.fire("Đã cập nhật thông tin", "" ,"success");
                             }
+                            else
+                                Swal.fire(response.data.Error, "" ,"error");
                         }).catch(e => { })
                 },
                 updatePassword() {
@@ -174,10 +176,15 @@
                     _form.append("newpass", this.password_new);
                     _form.append("retypepass", this.password_confirm);
                     axios.post(_url, _form)
-                        .them(response => {
-                            if (response.data.StatusCode == 1) {
-                                swal("update success !!", "" ,"success");
+                        .then(response => {
+                            if (response.data.Error == null) {
+                                Swal.fire("Đã cập nhật mật khẩu", "", "success");
+                                this.password_old = ''
+                                this.password_new = ''
+                                this.password_confirm = ''
                             }
+                            else
+                                Swal.fire(response.data.Error, "" ,"error");
                         }).catch(e => { })
                 },
                 errorImgUrl() {
@@ -196,7 +203,7 @@
                     _that.avatar.src = URL.createObjectURL(event.target.files[0])
                     _that.avatar.file = event.target.files[0]
                     var src = URL.createObjectURL(event.target.files[0])
-                    console.log(this.avatar);
+                    //console.log(this.avatar);
                     setTimeout(function () {
                         var imgTesting = new Image();
                         imgTesting.src = src;

@@ -138,7 +138,7 @@
         },
         watch : {
             lesson_week : function(val){
-                console.log(val)
+                //console.log(val)
             }
         },
         methods: {
@@ -183,8 +183,8 @@
 
                 axios.post(_url, _form)
                     .then(response => {
-                        console.log("Week")
-                        console.log(response.data)
+                        //console.log("Week")
+                        //console.log(response.data)
                         _that.lesson_week = response.data.data;
                         //console.log(_that.lesson_week);
                     }).catch(e => { })
@@ -200,18 +200,18 @@
                     }
                 })
                     .then(response => {
-                        console.log(response.data)
+                        //console.log(response.data)
                         _that.discussion = response.data.data
                         //console.log(_that.active_course);
                     }).catch(e => { })
             },
             formatTime(time) {
-                console.log(time);
+                //console.log(time);
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
-                return moment(time).format("DD/MM/YYYY hh:mm")
+                return moment(time).format("DD/MM/YYYY HH:mm")
             },
             formatDate(time) {
-                console.log(time);
+                //console.log(time);
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
                 return moment(time).format("DD/MM/YYYY")
             },

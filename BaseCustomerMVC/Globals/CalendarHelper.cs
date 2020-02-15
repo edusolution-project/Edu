@@ -84,7 +84,7 @@ namespace BaseCustomerMVC.Globals
         public Task<bool> RemoveEvent(string id, string user)
         {
             var delItem = _calendarService.GetItemByID(id);
-            
+
             if (delItem != null)
             {
                 // neu event ko phai cua user hoac da het thoi gian thi ko the huy
@@ -148,7 +148,10 @@ namespace BaseCustomerMVC.Globals
             {
                 var _startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
                 var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => ((o.StartDate >= _startDate || o.EndDate <= _endDate) && o.CreateUser == userid) || ((o.StartDate >= _startDate || o.EndDate <= _endDate) && classList.Contains(o.GroupID))));
+                filter.Add(Builders<CalendarEntity>.Filter.Where(o => 
+                    ((o.StartDate >= _startDate && o.EndDate <= _endDate) && o.CreateUser == userid) || 
+                    ((o.StartDate >= _startDate && o.EndDate <= _endDate) && classList.Contains(o.GroupID)))
+                );
             }
             filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.IsDel == false)));
             var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
@@ -209,6 +212,7 @@ namespace BaseCustomerMVC.Globals
                 Title = lesson.Title,
                 TeacherID = teacher.ID,
                 TeacherName = teacher.FullName,
+                Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
                 Status = 0,
                 LimitNumberUser = 0,
                 UrlRoom = string.Empty,

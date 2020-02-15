@@ -50,6 +50,7 @@
                         </select>
                     </div>*@
             </div>
+
             <div class="flex">
                 <b-button class="btn-addevent btn-student" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
                 <b-button class="btn-addevent btn-student" style="margin-left:5px" v-on:click="showStudentUploadModal()"><i class="ti-zip"></i></b-button>
@@ -70,11 +71,13 @@
                     <td>{{item.ClassName}}</td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
-                    <td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
-                    <td>{{item.last_update}}</td>
-                    <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>
+                    @*<td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
+                        <td>{{item.last_update}}</td>
+                        <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>*@
+
                     <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
                 </tr>
+
             </tbody>
         </table>
         <div class="box margin-t20 flex">
@@ -323,18 +326,18 @@
                         key: 'phone',
                         label: 'SĐT'
                     },
-                    {
-                        key: 'per',
-                        label: 'Tiến độ'
-                    },
-                    {
-                        key: 'last_update',
-                        label: 'Lần học cuối'
-                    },
-                    {
-                        key: 'score',
-                        label: 'Kết quả'
-                    },
+                    //{
+                    //    key: 'per',
+                    //    label: 'Tiến độ'
+                    //},
+                    //{
+                    //    key: 'last_update',
+                    //    label: 'Lần học cuối'
+                    //},
+                    //{
+                    //    key: 'score',
+                    //    label: 'Kết quả'
+                    //},
                     {
                         key: 'actions',
                         label: 'Tác vụ'
@@ -401,7 +404,14 @@
                         let _that = this
                         let _form = new FormData()
                         _form.append('skipActive', false)
-                        let _url = '@Url.Action("GetManageList","Class")'
+                        @if(!User.IsInRole("head-teacher"))
+                        {
+                            @:let _url = '@Url.Action("GetClassList", "Class")'
+                        }
+                        else
+                        {
+                            @:let _url = '@Url.Action("GetManageList", "Class")'
+                        }
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
@@ -457,7 +467,7 @@
                     let _that = this
                     let _form = new FormData()
                     if (_that.add_student.class_id == '') {
-                        alert('Chưa chọn lớp học');
+                        Swal.fire('Chưa chọn lớp học','','warning');
                         return false;
                     }
                     if (_that.add_student.id == '') {

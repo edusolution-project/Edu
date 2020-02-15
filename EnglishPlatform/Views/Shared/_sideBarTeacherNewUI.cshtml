@@ -11,12 +11,15 @@
             <li for="profile">
                 <a href="@Url.Action("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
             </li>
-            <li for="curriculum">
-                <a href="@Url.Action("Index" , "Curriculum")" title="Quản lý bài giảng chung"><i class="ic ic-book"></i>Quản lý bài giảng chung</a>
-            </li>
-            <li for="teacher">
-                <a href="#" title="Quản lý giáo viên"><i class="ic ic-user"></i>Quản lý giáo viên</a>
-            </li>
+            @if (User.IsInRole("head-teacher"))
+            {
+                <li for="curriculum">
+                    <a href="@Url.Action("Index" , "Curriculum")" title="Quản lý bài giảng chung"><i class="ic ic-book"></i>Quản lý bài giảng chung</a>
+                </li>
+                <li for="teacher">
+                    <a href="#" title="Quản lý giáo viên"><i class="ic ic-user"></i>Quản lý giáo viên</a>
+                </li>
+            }
             <li for="student">
                 <a href="@Url.Action("Index" , "StudentManage")" title="Quản lý học viên"><i class="ic ic-user"></i>Quản lý học viên</a>
             </li>

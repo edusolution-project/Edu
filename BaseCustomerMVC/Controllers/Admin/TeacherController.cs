@@ -73,7 +73,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<TeacherEntity>.Filter.And(filter)) : _service.GetAll();
+            var data = (filter.Count > 0 ? _service.Collection.Find(Builders<TeacherEntity>.Filter.And(filter)) : _service.GetAll())
+                .SortByDescending(t => t.ID);
             model.TotalRecord = data.Count();
             var teachers = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data

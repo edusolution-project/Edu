@@ -158,6 +158,9 @@ a{
 .margin-t20{
     margin-top: 20px
 }
+.margin-15l{
+    margin-left: 15px
+}
 .btn-sign{
     border-radius: 36px;
     background: @color-link;
@@ -392,6 +395,9 @@ a{
             .ic-paper{
                 background-image: url(../images/paper_r.png);
             }
+            .ic-multi-user{
+                background-image: url(../images/multi_user_r.png);
+            }
         }
     }
 }
@@ -601,6 +607,11 @@ a{
     background-image: url(../images/award-n.png);
     width: 23px;
     height: 23px;
+}
+.ic-multi-user{
+    background-image: url(../images/multi_user.png);
+    width: 23px;
+    height: 21px;
 }
 .fo{
     -webkit-font-smoothing: antialiased;
@@ -1225,7 +1236,8 @@ a{
             font-weight: 600;
             line-height: 20px;
             text-transform: uppercase;
-            padding: 15px 0
+            margin-top: 20px;
+            margin-bottom: 10px;
         }
         .btn-learn{
             font-size: 12px;
@@ -1237,12 +1249,16 @@ a{
             width: 92px;
             text-align: center;
         }
+        .name{
+            color: #000;
+            margin-bottom: 15px
+        }
     }
     &:nth-child(4n+1){
         &::before{
             border-left: none;
         }
-        span,.title{
+        .ic,.title{
             color: #00BBD4
         }
         .btn-learn{
@@ -1250,7 +1266,7 @@ a{
         }
     }
     &:nth-child(4n+2){
-        span,.title{
+        .ic,.title{
             color: #00D9A5
         }
         .btn-learn{
@@ -1258,7 +1274,7 @@ a{
         }
     }
     &:nth-child(4n+3){
-        span,.title{
+        .ic,.title{
             color: #F7971E
         }
         .btn-learn{
@@ -1266,7 +1282,7 @@ a{
         }
     }
     &:nth-child(4n+4){
-        span,.title{
+        .ic,.title{
             color: #B70058
         }
         .btn-learn{
@@ -1274,7 +1290,7 @@ a{
         }
     }
     &:nth-child(4n+5){
-        span,.title{
+        .ic,.title{
             color: #D03239
         }
         .btn-learn{
@@ -1282,7 +1298,7 @@ a{
         }
     }
     &:nth-child(4n+6){
-        span,.title{
+        .ic,.title{
             color: #007B83
         }
         .btn-learn{
@@ -1319,7 +1335,6 @@ a{
         .inner{
             padding: 10px 0;
             border-bottom: 1px solid #D0DFE8;
-
         }
         &:last-child{
             .inner{
@@ -1367,6 +1382,12 @@ a{
         .btn-group{
             margin-right: 25px
         }
+        .title{
+            color: #000;
+            display: block;
+            font-weight: 600;
+            padding: 10px 0
+        }
     }
     .card-body{
         background: #F0F3F4;
@@ -1403,8 +1424,13 @@ a{
                 margin-right: 5px;
             }
         }
+        .schedule{
+            width: 185px;
+        }
         .c4{
-            width: 250px
+            width: 370px;
+            display: flex;
+            justify-content: flex-start;
         }
         .c2,.c3,.c4,.c5,.c60{
             font-size: 12px;
@@ -1431,6 +1457,7 @@ a{
             text-align: center;
             min-width: 95px;
             color: #fff;
+            font-size: 12px;
             &.act{
                 background-color: #73B0DD
             }
@@ -1446,10 +1473,12 @@ a{
                 padding: 5px 0;
                 min-width: 10px;
                 &.btn-edit{
-                    color: #13A6FB
+                    color: #13A6FB;
+                    font-size: 18px
                 }
                 &.btn-trash{
-                    color: #738B99
+                    color: #738B99;
+                    font-size: 18px
                 }
             }
         }
@@ -1835,6 +1864,10 @@ a{
                 background: #13A6FB;
                 margin-left: 12px
             }
+            .btn-clear{
+                background: #99A1A6;
+                margin-left: 12px
+            }
             .flex{
                 margin-bottom: 5px;
             }
@@ -1848,7 +1881,7 @@ a{
         margin-right: 5px;
     }
 }
-.btn-view,.btn-download{
+.btn-view,.btn-download,.btn-clear{
     color: @white;
     border-radius: 20px;
     width: 80px;
@@ -1974,7 +2007,7 @@ a{
             border-top: 1px solid #D0DFE8;
             .fo{
                 margin-right: 5px;
-                padding: 2px 5px;
+                padding: 4px 5px;
                 border-radius: 100%;
                 color: #fff;
                 font-size: 12px
@@ -2125,8 +2158,18 @@ a{
     background: none;
     outline: none;
     border: none;
-    font-size: 20px;
+    font-size: 18px;
     padding: 5px 8px;
+    &.btn-secondary{
+        color: #13A6FB;
+        font-size: 16px;
+        font-weight: 600;
+        text-transform: uppercase;
+        &:hover,&:focus{
+            background: transparent;
+            border-color: transparent
+        }
+    }
 }
 .btn-group{
     justify-content: center;
@@ -2170,6 +2213,11 @@ a{
             &:first-child{
                 margin-left: 0;
             }
+        }
+    }
+    .flex{
+        .btn-group{
+            margin-top: -5px
         }
     }
 }
@@ -2237,7 +2285,7 @@ a{
 }
 #modal_class{
     .modal-dialog{
-        max-width: 1200px;
+        max-width: 750px;
     }
     .vdp-datepicker{
         input{
@@ -2256,11 +2304,15 @@ a{
         min-width: 90px;
         text-transform: uppercase;
     }
+    label{
+        font-weight: 600
+    }
 }
 #thumb_class{
     position: relative;
-    width: 160px;
-    height: 90px;
+    width: 100%;
+    max-width: 225px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2271,8 +2323,8 @@ a{
     padding: 10px;
     border: 1px solid #eee;
     border-radius: 4px;
-    width: 160px;
-    height: 90px;
+    width: 100%;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2286,19 +2338,29 @@ a{
     }
 }
 .list-subject{
+    padding-top: 15px;
+    border-top: 1px solid #D0DFE8;
     li{
         padding-bottom: 15px;
         margin-bottom: 10px;
         border-bottom: 1px solid #D0DFE8;
-        div ~ div{
-            margin-left: 15px
-        }
+        // div ~ div{
+        //     margin-left: 15px
+        // }
         .btn-act{
-            margin-top: 20px;
+            // margin-top: 20px;
+            color: #839AA6
         }
         &:last-child{
             border-bottom: none;
             margin-bottom: 0
+        }
+        .row{
+            margin-bottom: 15px
+        }
+        label.first{
+            color: #13A6FB;
+            line-height: 2
         }
     }
 }
@@ -2325,5 +2387,61 @@ a{
 td{
     a{
         color: #13A6FB
+    }
+}
+#modal_class_edit{
+    .modal-footer{
+        justify-content: center;
+        .btn{
+            min-width: 100px;
+            text-transform: uppercase;
+        }
+        .btn-success{
+            background-color: #13A6FB;
+            border-color: #13A6FB
+        }
+        .btn-danger{
+            background-color: #839AA6;
+            border-color: #839AA6
+        }
+    }
+    .frm-upload{
+        width: 200px
+    }
+}
+#modal_confirm{
+    .modal-dialog{
+        max-width: 340px
+    }
+}
+#modal_subject{
+    .modal-dialog{
+        max-width: 508px
+    }
+}
+#modal_subject,#modal_confirm,#modal_student{
+    .modal-header{
+        justify-content: center;
+        background: #D0DFE8;
+        .close{
+            position: absolute;
+            right: 14px;
+        }
+    }
+    .modal-footer{
+        justify-content: center;
+        border-top: none;
+        .btn{
+            min-width: 100px;
+            text-transform: uppercase;
+        }
+        .btn-danger{
+            background-color: #839AA6;
+            border-color: #839AA6
+        }
+        .btn-success{
+            background-color: #13A6FB;
+            border-color: #13A6FB
+        }
     }
 }

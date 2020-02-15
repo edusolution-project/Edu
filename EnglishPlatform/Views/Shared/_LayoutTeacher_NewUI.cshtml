@@ -11,15 +11,18 @@
                   asp-fallback-href="~/css/bootstrap.min.css"
                   asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         </environment>*@
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    @*<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />*@
+    <link href="~/css/bootstrap.4.3.1.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Be+Vietnam&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/fonts.css">
     @*longht them*@
     <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
 
     <link rel="stylesheet" href="/css/stylesheet.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    @*<script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>*@
+    <script src="~/js/vue@2.6.0.js"></script>
+    <script src="~/js/axios.min.js"></script>
     <script src="~/js/bootstrap-vue.min.js"></script>
     <script src="~/js/jquery.min.js"></script>
     <script src="~/js/moment.min.js"></script>
@@ -190,8 +193,22 @@
         });
     </script>
     @*alert*@
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
     <script src="~/js/calendar/js/sweetalert.min.js"></script>
     @RenderSection("Scripts", false)
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+        (function () {
+            var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/5ddfa48ad96992700fc9b06d/default';
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+    <!--End of Tawk.to Script-->
 </body>
 </html>
 

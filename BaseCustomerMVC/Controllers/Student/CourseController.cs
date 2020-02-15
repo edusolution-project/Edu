@@ -157,7 +157,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == entity.SubjectID));
             }
 
-            var data = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t=> t.ID);
+            var data = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);
             model.TotalRecord = data.Count();
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
@@ -284,53 +284,55 @@ namespace BaseCustomerMVC.Controllers.Student
             //var classFilter = new List<FilterDefinition<ClassEntity>>();
 
             var classIds = _classStudentService.GetStudentClasses(userId);
-            
+
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
 
-            var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+            //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
 
-            var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
+            //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
 
-            //var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter));
+            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter));
 
-            //var std = (from o in data.ToList()
-            //           //let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
-            //           //where _lesson != null
-            //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-            //           where _class != null
-            //           let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
-            //           where _cs != null
-            //           let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
-            //           where _subject != null
-            //           let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
-            //           select new
-            //           {
-            //               id = o.ID,
-            //               classID = _class.ID,
-            //               className = _class.Name,
-            //               classSubjectID = _cs.ID,
-            //               subjectName = _subject.Name,
-            //               title = _lesson.Title,
-            //               lessonID = _lesson.ID,
-            //               startDate = o.StartDate,
-            //               endDate = o.EndDate,
-            //               isLearnt = isLearnt
-            //           }).ToList();
             var std = (from o in data.ToList()
+                       let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
+                       where _lesson != null
                        let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
                        where _class != null
-                       let skill = _skillService.GetItemByID(o.SkillID)
-                       //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
+                       let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
+                       where _cs != null
+                       let skill = _skillService.GetItemByID(_cs.SkillID)
+                       let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
+                       where _subject != null
+                       let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID, o.ClassSubjectID) != null
                        select new
                        {
                            id = o.ID,
                            classID = _class.ID,
                            className = _class.Name,
+                           classSubjectID = _cs.ID,
+                           subjectName = _subject.Name,
+                           title = _lesson.Title,
+                           lessonID = _lesson.ID,
+                           startDate = o.StartDate,
                            endDate = o.EndDate,
-                           students = _class.Students.Count,
-                           skill = skill
-                           //isLearnt = isLearnt
-                       }).ToList();
+                           skill = skill,
+                           isLearnt = isLearnt
+                       }).OrderBy(t => t.startDate).ToList();
+            //var std = (from o in data.ToList()
+            //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+            //           where _class != null
+            //           let skill = _skillService.GetItemByID(o.SkillID)
+            //           //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
+            //           select new
+            //           {
+            //               id = o.ID,
+            //               classID = _class.ID,
+            //               className = _class.Name,
+            //               endDate = o.EndDate,
+            //               students = _class.Students.Count,
+            //               skill = skill
+            //               //isLearnt = isLearnt
+            //           }).ToList();
             return Json(new { Data = std });
         }
 

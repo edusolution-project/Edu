@@ -4,18 +4,28 @@
     var currentClass = ViewBag.Class as BaseCustomerMVC.Models.ClassViewModel;
     ViewData["Title"] = currentClass.Name;
 }
-<script src="/libs/vuejs-datepicker.min.js"></script>
+@*<script src="/libs/vuejs-datepicker.min.js"></script>*@
+<link href="~/js/lib/datetimepicker/jq.datetimepicker.css" rel="stylesheet" />
+<script src="~/js/lib/datetimepicker/php-date-formatter.min.js"></script>
+<script src="~/js/lib/datetimepicker/jquery.mousewheel.js"></script>
+<script src="~/js/lib/datetimepicker/jquery.datetimepicker.js"></script>
+
 <script>
     setActiveMenu("course");
 </script>
 
 <section class="module" id="dashboard_content">
+
     <div class="card-header">
         <div class="flex mb-2">
             <h2 class="title"><a href="@Url.Action("Detail", "Class")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
-            @*<div class="search-box">
+            @*<div class="search-box mr-2" v-if="tab[2]">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" placeholder="Search">
+            </div>
+            <div class="flex" v-if="tab[2]">
+                <b-button class="btn-addevent btn-student" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
+                <b-button class="btn-addevent btn-student" style="margin-left:5px" v-on:click="showStudentUploadModal()"><i class="ti-zip"></i></b-button>
             </div>*@
         </div>
         <div class="flex j-between border-b">
@@ -58,34 +68,13 @@
             <ul class="list ls-pratice">
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title}}</a>
+                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}</a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion" role="tabpanel">
                             <ul class="list">
-                                <li class="col-md-12" v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')">
-                                    <div class="inner">
-                                        <a href="javascript:;" v-b-toggle="`prc-${item.ID}-${k}`" class="btn-collapse" v-on:click="loadContent(item.ClassSubject, item.ID)"><i class="ic ic-edit-small"></i>{{item.Title}}<i class="ic ic-collapse"></i></a>
-                                        <b-collapse :id="`prc-${item.ID}-${k}`" role="tabpanel">
-                                            <b-card-body>
-                                                <ul class="list">
-                                                    <li class="sub-practice" v-if="matchedLesson(data, obj.ID + '-' + item.ID)" v-for="(data,j) in list_lessons">
-                                                        <div class="flex j-between width-100">
-                                                            <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + obj.ID"> <span class="width-100">{{data.Title}}</span></a>
-                                                            <div class="flex width-100 j-end picker-schedule">
-                                                                <vuejs-datepicker v-model="data.StartDate" format="dd/M/yyyy" class="date st" v-on:input="updateSchedule(data)"></vuejs-datepicker>
-                                                                <vuejs-datepicker v-model="data.EndDate" format="dd/M/yyyy" class="date ed" v-on:input="updateSchedule(data)"></vuejs-datepicker>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                </ul>
-                                            </b-card-body>
-                                        </b-collapse>
-                                    </div>
-                                </li>
-                                @*<chap-content v-for="(item,k) in list_chapters" v-if="matchedItem(item, obj.ID + '-')"
-                                    v-bind:data="item"
-                                    v-bind:pos="k"
-                                    v-bind:subchaps="filterItem(item, list_chapters)"
-                                    v-bind:lessons="filterItem(item, list_lessons)"></chap-content>*@
+                                <chap-content v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')"
+                                              v-bind:data="item"
+                                              v-bind:pos="k"
+                                              v-bind:subchaps="filterChap(item, list_chapters)"></chap-content>
                             </ul>
                         </b-collapse>
                     </div>
@@ -105,9 +94,9 @@
                         <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
                         <td>{{item.Email}}</td>
                         <td>{{item.Phone}}</td>
-                        <td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
-                        <td>{{item.last_update}}</td>
-                        <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>
+                        @*<td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>*@
+                        <td>{{formatTime(item.LastJoinDate)}}</td>
+                        @*<td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>*@
                     </tr>
                 </tbody>
             </table>
@@ -163,19 +152,59 @@
 
 </section>
 @section Scripts{
+
+    <style>
+        .ls-pratice .card-body {
+            overflow: visible;
+        }
+
+        .ls-pratice .list {
+            max-height: none;
+            overflow: visible;
+        }
+
+        .ls-pratice .sub-practice .date {
+            width: 160px;
+            padding: 2px 12px;
+        }
+
+            .ls-pratice .sub-practice .date::after {
+                top: 7px;
+            }
+
+        .ls-pratice .sub-practice .status {
+            padding: 10px
+        }
+
+        .input-group.date input {
+            width: 125px;
+            border: none;
+            padding: 0;
+        }
+
+            .input-group.date input:read-only {
+                background: #FFF;
+            }
+
+            .input-group.date input:focus {
+                outline: none !important;
+            }
+    </style>
+
+
+
     <script type="text/x-template" id="chapContentTemp">
         <li class="col-md-12">
             <div class="inner">
                 <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic ic-edit-small"></i>{{data.Title}}<i class="ic ic-collapse"></i></a>
-                <b-collapse :id="`prc-${data.ID}-${pos}`" role="tabpanel">
+                <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
                     <b-card-body>
                         <ul class="list">
                             <chap-content v-for="(subItem,j) in subchaps"
-                                          v-bind:data="item"
-                                          v-bind:pos="k"
-                                          v-bind:subchaps="filterItem(item, subchaps)"
-                                          v-bind:lessons="filterLesson(item, lessons)"></chap-content>
-                            <lesson-item v-for="lesson in lessons" v-bind:data="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
+                                          v-bind:data="subItem"
+                                          v-bind:pos="j"
+                                          v-bind:subchaps="filterChap(subItem, subchaps)"></chap-content>
+                            <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
                         </ul>
                     </b-card-body>
                 </b-collapse>
@@ -188,23 +217,16 @@
             <div class="flex j-between width-100">
                 <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject"> <span class="width-100">{{data.Title}}</span></a>
                 <div class="flex width-100 j-end picker-schedule">
-                    <vuejs-datepicker v-model="data.StartDate" format="dd/M/yyyy" class="date st"></vuejs-datepicker>
-                    <vuejs-datepicker v-model="data.EndDate" format="dd/M/yyyy" class="date ed"></vuejs-datepicker>
+                    <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st" v-on:input="updateSchedule(data)"></datepicker>
+                    <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed" v-on:input="updateSchedule(data)"></datepicker>
+                </div>
+                <div class="status">
+                    <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
                 </div>
             </div>
         </li>
     </script>
 
-    <style>
-        .ls-pratice .card-body {
-            overflow: visible;
-        }
-
-        .ls-pratice .list {
-            max-height: auto;
-            overflow: visible;
-        }
-    </style>
     <script>
         Vue.component('chap-content', {
             template: '#chapContentTemp',
@@ -222,15 +244,84 @@
                 classSubject: String
             }
         })
+
+        var datepickerComponent = Vue.extend({
+          //v-el:select
+          template: `<div class="input-group date" ref="inputgroup">` +
+            `<input type="text" class="form-control" v-model="dateVal" readonly="readonly"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>` +
+            `</div>`,
+            props: {
+                obj: '',
+                idx: '0',
+                date: '2015-01-01'
+            },
+            data: function () {
+                return {};
+            },
+            computed:
+            {
+                dateVal: {
+                    get() {
+                        return this.date == '' ? '' : moment(this.date).format("DD/MM/YYYY HH:mm");
+                    },
+                    set(value) {
+                        this.date = moment(value,"DD/MM/YYYY HH:mm").format();
+                    }
+                },
+            },
+            mounted: function () {
+                let _that = this
+                Vue.nextTick(function () {
+                    //console.log($(_that.$refs.inputgroup))
+                    $($(_that.$refs.inputgroup).find('input')).datetimepicker({
+                        formatTime: 'H:i',
+                        formatDate: 'd/m/Y',
+                        timepickerScrollbar: true,
+                        scrollMonth: false,
+                        defaultTime: '08:00',
+                        step: 15,
+                        onChangeDateTime: function (dp, $input) {
+                            //console.log($input.val())
+                            _that.dateVal = $input.val()
+                            if (moment($input.val(),"DD/MM/YYYY HH:mm").format() == "Invalid date") {
+                                //console.log('false');
+                                return false;
+                            }
+
+                            if (_that.idx == '0') {
+                                if (_that.obj.StartDate != _that.date) {
+                                    _that.obj.StartDate = _that.date
+                                    //console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
+                                    _that.$emit('input')
+                                }
+                            }
+                            else {
+                                if (_that.obj.EndDate != _that.date) {
+                                    _that.obj.EndDate = _that.date
+                                    //console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
+                                    _that.$emit('input')
+                                }
+                            }
+                        }
+                    })
+                })
+            }
+        })
+
+        Vue.component('datepicker', datepickerComponent);
+
         new Vue({
             el: "#main",
             mounted() {
                 this.loadClassDetail()
                 window.loadContent = this.loadContent
+                window.updateSchedule = this.updateSchedule
+                window.filterChap = this.filterChap
+                window.filterLesson = this.filterLesson
                 var hash = window.location.hash;
                 if (hash.startsWith('#')) {
                     hash = hash.split('#')[1]
-                    console.log(hash)
+                    //console.log(hash)
                     switch (hash) {
                         case 'module':
                             this.tabChange(1);
@@ -247,9 +338,9 @@
                     }
                 }
             },
-            components: {
-                vuejsDatepicker
-            },
+            //components: {
+            //    vuejsDatepicker
+            //},
             data: {
                 classID: '@currentClass.ID',
                 className: '@currentClass.Name',
@@ -285,18 +376,18 @@
                         key: 'phone',
                         label: 'SĐT'
                     },
-                    {
-                        key: 'per',
-                        label: 'Tiến độ'
-                    },
+                    //{
+                    //    key: 'per',
+                    //    label: 'Tiến độ'
+                    //},
                     {
                         key: 'last_update',
                         label: 'Lần học cuối'
                     },
-                    {
-                        key: 'score',
-                        label: 'Kết quả'
-                    }
+                    //{
+                    //    key: 'score',
+                    //    label: 'Kết quả'
+                    //}
                 ],
                 studentData: [
                 ],
@@ -370,7 +461,8 @@
                                     _that.classSubjects.push({
                                         ID: item.ID,
                                         Title: item.SkillName,
-                                        Image:  item.SkillImage,
+                                        Image: item.SkillImage,
+                                        Teacher: item.TeacherName,
                                         Chapters: [],
                                         Lessons: []
                                     })
@@ -401,20 +493,21 @@
                                 //    if (item.ID == subject) {
 
                                 _data.forEach(function (chapter, k) {
-                                    var parent = '';
-                                    if (chapter.Parent)
-                                        parent = chapter.parent;
-                                            _that.list_chapters.push({
-                                                ID: chapter.ID,
-                                                Title: chapter.Name,
-                                                ClassSubject: subject,
-                                                Parent:  parent
-                                            })
-                                        })
+                                    var parent = chapter.ParentID;
+                                    if (parent == "0") { parent = "";}
+                                    _that.list_chapters.push({
+                                        ID: chapter.ID,
+                                        Title: chapter.Name,
+                                        ClassSubject: subject,
+                                        Parent: parent
+                                    })
+                                })
                                 _lesson.forEach(function (lesson, k) {
-                                        var parent = '';
-                                        if (lesson.ChapterID) parent = lesson.ChapterID;
-                                    //var end = moment(lesson.EndDate);
+                                    var parent = '';
+                                    if (lesson.ChapterID) {
+                                        parent = lesson.ChapterID;
+                                    }
+
                                         _that.list_lessons.push({
                                             ID: lesson.ID,
                                             ScheduleID: lesson.ScheduleID,
@@ -426,10 +519,8 @@
                                             IsActive: lesson.IsActive,
                                             IsUpdating: false
                                         })
+
                                 })
-                                        //console.log(item.Lessons)
-                                    //}
-                                //})
                                 this.loaded_chapter.push(key);
                                 this.list_chapters = _that.list_chapters
                                 this.list_lessons = _that.list_lessons
@@ -453,7 +544,7 @@
                         }).catch(e => { })
                 },
                 loadPreference() {
-                    console.log(4)
+                    //console.log(4)
                 },
                 loadComment() {
                     document.location = '@Url.Action("Index","Discuss", new { id = currentClass.ID })'
@@ -461,7 +552,7 @@
                 },
                 updateSchedule(obj) {
                     obj.IsUpdating = true
-                    console.log(obj)
+
                     var startdate = moment(obj.StartDate).format("MM-DD-YYYY HH:mm:ss");
                     var enddate = moment(obj.EndDate).format("MM-DD-YYYY HH:mm:ss");
 
@@ -472,7 +563,6 @@
                     let _url = '@Url.Action("Update", "LessonSchedule")'
                         axios.post(_url, _form)
                             .then(response => {
-                                console.log(response)
                                 obj.IsUpdating = false
                             }).catch(e => { })
                 },
@@ -480,16 +570,44 @@
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
                 },
+                formatTime(time) {
+                    if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
+                    return moment(time).format("DD/MM/YYYY HH:mm")
+                },
                 matchedChap(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key
                 },
                 matchedLesson(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key
                 },
-                filterItem(obj, list) {
+                filterChap(obj, list) {
                     return list.filter((p) => {
         	            return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
                     })
+                },
+                filterLesson(obj) {
+                    var filter = this.list_lessons.filter((p) => {
+        	            return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
+                    })
+                    return filter;
+                },
+                 //Lesson Action
+                toggleLessonState(obj) {
+                    let _that = this;
+                    //console.log(obj)
+                    //_that.tableData.forEach(function (item, k) {
+                        //if (item.ID === obj.ID) {
+                            let _url = obj.IsActive ? '@Url.Action("Unpublish", "LessonSchedule")' : '@Url.Action("Publish", "LessonSchedule")'
+                            let _form = new FormData()
+                            _form.append('ArrID', obj.ScheduleID);
+                            axios.post(_url, _form)
+                                .then(response => {
+                                    console.log('update ok');
+                                    //item.IsActive = !item.IsActive;
+                                    //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
+                                }).catch(e => { })
+                        //}
+                    //})
                 },
                 domDecoder(str) {
                     let parser = new DOMParser();
@@ -500,4 +618,3 @@
         });
     </script>
 }
-

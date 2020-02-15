@@ -2,6 +2,7 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @{
     var avatar = HttpContextAccessor.HttpContext.Session.GetString("userAvatar");
+    var TeacherMenus = BaseCustomerMVC.Globals.StartUp.GetAccessCtrlsByTeacher();
 }
 <!-- Sidebar -->
 <nav class="sidebar collapse position-fixed col p-0 m-0">

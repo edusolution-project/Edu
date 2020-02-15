@@ -356,6 +356,38 @@
                     swal("Hủy!", "Đã hủy thành công.", "success");
                 });
         }
+        document.getElementById("btn-cancel-event-class").onclick = function () {
+             var formEvent = document.getElementById("form-event");
+             var bodyEvent = formEvent.querySelector(".body-form-event");
+            var Title = bodyEvent.querySelector("input[name='Title']");
+            if (Title.value == "" || Title.value == null || Title.value == void 0) {
+                document.body.classList.remove("open-add-event");
+                return;
+            }
+            swal({
+                title: "Bạn muốn hủy thông tin trên?",
+                text: "Dữ liệu bạn đã ghi sẽ bị mất !!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "Đồng ý",
+                cancelButtonText: "Hủy",
+                closeOnConfirm: false
+            },
+                function () {
+                    var inputs = formEvent.querySelectorAll("input");
+                    var textarea = formEvent.querySelector("textarea");
+                    for (var i = 0; i < inputs.length; i++) {
+                        var input = inputs[i];
+                        input.value = "";
+                    }
+                    if (textarea != null) textarea.value = "";
+                    document.body.classList.remove("open-add-event");
+                    document.body.classList.remove("open-add-event-class");
+                    swal("Hủy!", "Đã hủy thành công.", "success");
+                });
+        }
+
         document.getElementById("btn-save-event").onclick = function () {
             var formEvent = document.getElementById("form-event");
             var bodyEvent = formEvent.querySelector(".body-form-event");

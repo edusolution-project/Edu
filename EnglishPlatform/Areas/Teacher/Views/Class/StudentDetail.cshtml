@@ -5,7 +5,6 @@
     var currentStudent = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
     ViewData["Title"] = currentClass.Name + " / " + currentStudent.FullName;
 }
-}
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
 <script src="/libs/vuejs-datepicker.min.js"></script>
@@ -16,7 +15,7 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex mb-2">
-            <h2 class="title"><a href="@Url.Action("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
+            <h2 class="title"><a href="@Url.Action("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}/@currentStudent.FullName</h2>
             @*<div class="search-box">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
@@ -38,8 +37,8 @@
                     </select>
                 </div>
             </div>
-            <div class="flex rate">
-                <span><i class="ic ic-paper-yet"></i>Điểm: 90</span>
+            <div class="flex rate" v-if="tab[1]">
+                <span><i class="ic ic-paper-yet"></i>Điểm: {{avgPoint}}</span>
                 <span><i class="ic ic-award"></i>Xếp hạng: 1</span>
                 <!-- <span><i class="ic ic-award-2"></i>Xếp hạng: 2</span> -->
                 <!-- <span><i class="ic ic-award-3"></i>Xếp hạng: 3</span> -->
@@ -92,7 +91,7 @@
                         <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
                         <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
                         <td>{{formatFullDate(item.LearnLast)}}</td>
-                        <td>{{item.Point}}</td>
+                        <td>{{item.Result}}</td>
                         <td>{{item.LearnCount}}</td>
                     </tr>
                 </tbody>
@@ -169,13 +168,14 @@
                     },
                     {
                         key: 'total',
-                        label: 'Lượt học'
+                        label: 'Lượt làm bài'
                     },
                 ],
                 progressData: [],
                 resultData: [],
                 view: 10,
                 page: 1,
+                avgPoint: 0,
                 startdate: moment(),
                 enddate: moment(),
                 tab: [true, false]
@@ -236,6 +236,15 @@
                     axios.post(_url, _form)
                         .then(response => {
                             _that.resultData = response.data.Data;
+                            _that.avgPoint = 0;
+                            console.log(_that.avgPoint)
+                            if (_that.resultData.length > 0) {
+                                _that.resultData.forEach(function (exam) {
+                                    _that.avgPoint += exam.Result
+                                });
+                                _that.avgPoint = _that.avgPoint / _that.resultData.length
+                                console.log(_that.avgPoint)
+                            }
                         }).catch(e => { })
                 },
                 loadHistory() {

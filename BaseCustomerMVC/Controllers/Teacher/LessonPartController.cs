@@ -154,7 +154,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //try
             //{
             var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID).SingleOrDefault();
-            if (parentLesson != null)//Chỉ add/edit được part trong lesson do mình tạo
+            if (parentLesson != null)
             {
                 if (item.Media != null && item.Media.Name == null) item.Media = null;//valid Media
                 var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
@@ -222,6 +222,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     _lessonPartService.CreateQuery().InsertOne(lessonpart);
                 }
+
+                if (lessonpart.Type == "ESSAY")
+                {
+                    _questionService.CreateQuery().DeleteMany(t => t.ParentID == lessonpart.ID);
+                    var question = new LessonPartQuestionEntity
+                    {
+                        CourseID = lessonpart.CourseID,
+                        Content = "",
+                        Description = "",
+                        ParentID = lessonpart.ID,
+                        CreateUser = User.Claims.GetClaimByType("UserID").Value,
+                        Point = lessonpart.Point,
+                        Created = lessonpart.Created,                        
+                    };
+                    _questionService.Save(question);
+                }
+
                 //_lessonPartService.CreateOrUpdate(lessonpart);
                 item.ID = lessonpart.ID;
 
