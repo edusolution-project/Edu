@@ -162,7 +162,7 @@ namespace BaseCustomerMVC.Globals
                 id = o.ID,
                 title = o.Title,
                 url = "",
-                skype = isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype,
+                skype = "",//isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype,
                 Status = o.Status
             }).ToList();
             return DataResponse;

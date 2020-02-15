@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BaseCustomerEntity.Globals;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
@@ -22,6 +23,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ClassService _classService;
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
+        private readonly LessonScheduleService _scheduleService;
         public CalendarController(
             CalendarService calendarService,
             CalendarLogService calendarLogService,
@@ -29,7 +31,8 @@ namespace BaseCustomerMVC.Controllers.Student
             CalendarHelper calendarHelper,
             ClassService classService,
             TeacherService teacherService,
-            StudentService studentService
+            StudentService studentService,
+            LessonScheduleService scheduleService
             )
         {
             this._calendarService = calendarService;
@@ -39,6 +42,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _classService = classService;
             _teacherService = teacherService;
             _studentService = studentService;
+            _scheduleService = scheduleService;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -60,8 +64,15 @@ namespace BaseCustomerMVC.Controllers.Student
         [Obsolete]
         public Task<JsonResult> GetDetail(string id)
         {
+            var map = new MappingEntity<CalendarEntity, CalendarViewModel>();
             var DataResponse = _calendarService.GetItemByID(id);
-            return Task.FromResult(new JsonResult(DataResponse));
+            var data = new CalendarViewModel();
+            data = map.AutoOrtherType(DataResponse, data);
+            // scheduleId => classID + lesson ID => student/lesson/detail/lessonid/classsubject;
+            var schedule = string.IsNullOrEmpty(DataResponse.ScheduleID) ? null : _scheduleService.GetItemByID(DataResponse.ScheduleID);
+            string url = schedule != null ? Url.Action("Detail", "Lesson", new { id = schedule.LessonID, ClassID = schedule.ClassSubjectID }) : null;
+            data.LinkLesson = url;
+            return Task.FromResult(new JsonResult(data));
         }
         [HttpPost]
         [Obsolete]

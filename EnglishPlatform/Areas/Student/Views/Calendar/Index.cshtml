@@ -169,7 +169,7 @@
                             });
                         } else {
 
-                            if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != void 0) {
+                            if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != "null" && jsonData.Skype != void 0) {
                                 document.body.classList.remove("open-add-event");
                                 var time = new Date(jsonData.Created);
                                 var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
