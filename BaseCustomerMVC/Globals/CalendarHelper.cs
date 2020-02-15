@@ -163,7 +163,8 @@ namespace BaseCustomerMVC.Globals
                 title = o.Title,
                 url = "",
                 skype = "",//isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype,
-                Status = o.Status
+                Status = o.Status,
+                Color = o.Status == 5 ? "#ccc" : ""
             }).ToList();
             return DataResponse;
         }
