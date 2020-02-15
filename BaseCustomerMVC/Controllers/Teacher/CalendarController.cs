@@ -41,7 +41,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult Index(DefaultModel model)
         {
             var userId = User?.FindFirst("UserID").Value;
-            var listClass = _classService.Collection.Find(o => o.Members.Any(t=> t.TeacherID == userId))?.ToList();
+            var listClass = _classService.Collection.Find(o => o.Members.Any(t=> t.TeacherID == userId) && o.IsActive == true)?
+                .SortBy(o=>o.EndDate)
+                .ToList();
 
             ViewBag.ClassList = listClass;
             ViewBag.Model = model;
