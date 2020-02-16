@@ -51,13 +51,25 @@ namespace Core_v2.Globals
             for (int i = 0; oldProps != null && i < oldProps.Count - 1; i++)
             {
                 var item = newProps[i];
-                var type = item.GetType();
                 if (newProps.Contains(item))
                 {
                     var value = item.GetValue(oldItem);
                     if ((newItem[item.Name] == null || item.Name == "IsActive") && value != null)//stupid maping
                     {
-                        newItem[item.Name] = value;
+                        switch (item.PropertyType.Name)
+                        {
+                            case "Boolean":
+                                if (!(bool)newItem[item.Name])
+                                    newItem[item.Name] = value;
+                                break;
+                            case "DateTime":
+                                if ((DateTime)newItem[item.Name] <= DateTime.MinValue && (DateTime)value > DateTime.MinValue)
+                                    newItem[item.Name] = value;
+                                break;
+                            default:
+                                newItem[item.Name] = value;
+                                break;
+                        }
                     }
                 }
             }

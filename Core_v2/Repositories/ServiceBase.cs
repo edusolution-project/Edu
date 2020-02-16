@@ -128,5 +128,10 @@ namespace Core_v2.Repositories
                 return;
             await _collection.DeleteManyAsync(t => t.ID == ID);
         }
+
+        public async Task RemoveAllAsync()
+        {
+            await _collection.DeleteManyAsync(o => true);
+        }
     }
 }

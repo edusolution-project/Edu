@@ -180,8 +180,9 @@ namespace BaseCustomerMVC.Globals
         }
 
         [Obsolete]
-        public Task ScheduleAutoConvertEvent()
+        public async Task ScheduleAutoConvertEvent()
         {
+            await _calendarService.RemoveAllAsync();
             var data = _lessonScheduleService.GetAll()?.ToList();
             for (int i = 0; data != null && i < data.Count(); i++)
             {
@@ -189,7 +190,7 @@ namespace BaseCustomerMVC.Globals
                 if (item.IsActive)
                     ConvertCalendarFromSchedule(item, "");
             }
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
         public bool ConvertCalendarFromSchedule(LessonScheduleEntity item, string userCreate)
@@ -203,29 +204,51 @@ namespace BaseCustomerMVC.Globals
             var teacher = _teacherService.GetItemByID(ourClass.TeacherID);
             if (teacher == null)
                 return false;
-            var calendar = new CalendarEntity()
+            CalendarEntity oldItem = _calendarService.CreateQuery().Find(o => o.ScheduleID == item.ID && o.GroupID == item.ClassID)?.FirstOrDefault();
+            CalendarEntity calendar;
+            if (oldItem == null)
             {
-                Created = DateTime.Now,
-                CreateUser = userCreate,
-                EndDate = item.StartDate,
-                StartDate = item.StartDate,
-                GroupID = item.ClassID,
-                Title = lesson.Title,
-                TeacherID = teacher.ID,
-                TeacherName = teacher.FullName,
-                Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
-                Status = 0,
-                LimitNumberUser = 0,
-                UrlRoom = string.Empty,
-                UserBook = new List<string>(),
-                ScheduleID = item.ID
-            };
-            //if (existEvent(calendar.StartDate, calendar.EndDate, calendar.GroupID))
-            //{
+                calendar = new CalendarEntity()
+                {
+                    Created = DateTime.Now,
+                    CreateUser = userCreate,
+                    EndDate = item.StartDate,
+                    StartDate = item.StartDate,
+                    GroupID = item.ClassID,
+                    Title = lesson.Title,
+                    TeacherID = teacher.ID,
+                    TeacherName = teacher.FullName,
+                    Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
+                    Status = 0,
+                    LimitNumberUser = 0,
+                    UrlRoom = string.Empty,
+                    UserBook = new List<string>(),
+                    ScheduleID = item.ID
+                };
+            }
+            else
+            {
+                calendar = new CalendarEntity()
+                {
+                    ID = oldItem.ID,
+                    Created = oldItem.Created,
+                    CreateUser = userCreate,
+                    EndDate = item.StartDate,
+                    StartDate = item.StartDate,
+                    GroupID = item.ClassID,
+                    Title = lesson.Title,
+                    TeacherID = teacher.ID,
+                    TeacherName = teacher.FullName,
+                    Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
+                    Status = oldItem.Status,
+                    LimitNumberUser = oldItem.LimitNumberUser,
+                    UrlRoom = oldItem.UrlRoom,
+                    UserBook = oldItem.UserBook,
+                    ScheduleID = item.ID
+                };
+            }
             _calendarService.CreateOrUpdate(calendar);
             return true;
-            //}
-            //return false;
         }
     }
 }
