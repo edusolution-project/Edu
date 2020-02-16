@@ -34,6 +34,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
 
         private readonly ClassProgressService _progressService;
+        private readonly ClassSubjectProgressService _classSubjectProgressService;
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
 
@@ -74,6 +75,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
             , LessonPartService lessonPartService
             , ClassProgressService progressService
+            , ClassSubjectProgressService classSubjectProgressService
             , ExamService examService
             , ExamDetailService examDetailService
             , StudentService studentService
@@ -104,6 +106,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
             _lessonPartService = lessonPartService;
             _progressService = progressService;
+            _classSubjectProgressService = classSubjectProgressService;
             _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
             _mappingList = new MappingEntity<ClassEntity, StudentClassViewModel>();
             _lessonPartQuestionService = lessonPartQuestionService;
@@ -170,7 +173,7 @@ namespace BaseCustomerMVC.Controllers.Student
                  let subject = _subjectService.GetItemByID(o.SubjectID)
                  let grade = _gradeService.GetItemByID(o.GradeID)
                  let teacher = _teacherService.GetItemByID(o.TeacherID)
-                 let complete = progress != null && progress.TotalLessons > 0 ? progress.CompletedLessons.Count * 100 / progress.TotalLessons : 0
+                 let complete = progress != null && progress.TotalLessons > 0 ? progress.Completed * 100 / progress.TotalLessons : 0
                  select _mappingList.AutoOrtherType(o, new StudentClassViewModel()
                  {
                      CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
@@ -213,7 +216,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
-                       let percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                       let percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.Completed * 100 / progress.TotalLessons
                        select new
                        {
                            id = o.ID,
@@ -250,7 +253,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std = (from o in DataResponse
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
-                       let per = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                       let per = progress == null || progress.TotalLessons == 0 ? 0 : progress.Completed * 100 / progress.TotalLessons
                        select new
                        {
                            id = o.ID,
@@ -595,10 +598,10 @@ namespace BaseCustomerMVC.Controllers.Student
             var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
             if (classStudent == null)
                 return RedirectToAction("Index");
-            var progress = _progressService.GetItemByClassSubjectID(id, userId);
-            var completePercent = 0;
+            var progress = _classSubjectProgressService.GetItemByClassSubjectID(id, userId);
+            long completePercent = 0;
             if (progress != null && progress.TotalLessons > 0)
-                completePercent = progress.CompletedLessons.Count * 100 / progress.TotalLessons;
+                completePercent = progress.Completed * 100 / progress.TotalLessons;
             var subject = _subjectService.GetItemByID(currentCs.SubjectID);
             if (subject == null)
                 return RedirectToAction("Index");
@@ -680,7 +683,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (progress != null)
                     {
                         viewModel.TotalLessons = progress.TotalLessons;
-                        viewModel.CompletedLessons = progress.CompletedLessons.Count;
+                        viewModel.CompletedLessons = progress.Completed;
                         viewModel.LastDate = progress.LastDate;
                         viewModel.LastLessonID = progress.LastLessonID;
                     }
@@ -706,32 +709,36 @@ namespace BaseCustomerMVC.Controllers.Student
         public JsonResult FixProgress()
         {
             var lhs = _learningHistoryService.Collection.Find(t => true).ToList();
-            while (lhs.Count() > 0)
+            foreach (var lh in lhs)
             {
-                var lh = lhs.First();
-                var lp = _lessonProgressService.GetByClassID_StudentID_LessonID(lh.ClassID, lh.StudentID, lh.LessonID);
-                if (lp == null)
-                {
-                    lp = new LessonProgressEntity
-                    {
-                        ClassID = lh.ClassID,
-                        LessonID = lh.LessonID,
-                        StudentID = lh.StudentID,
-                        FirstDate = lhs.Where(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID).First().Time,
-                        LastDate = DateTime.Now,
-                        //TotalLearnt = 1,
-                        TotalLearnt = lhs.Count(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID)
-                    };
-
-                }
-                else
-                {
-                    lp.FirstDate = lhs.Where(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID).First().Time;
-                    lp.TotalLearnt = lhs.Count(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID);
-                }
-                _lessonProgressService.Save(lp);
-                lhs.RemoveAll(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID);
+                _ = _learningHistoryService.CreateHist(lh);
             }
+            //while (lhs.Count() > 0)
+            //{
+            //    var lh = lhs.First();
+            //    var lp = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(lh.ClassSubjectID, lh.StudentID, lh.LessonID);
+            //    if (lp == null)
+            //    {
+            //        lp = new LessonProgressEntity
+            //        {
+            //            ClassID = lh.ClassID,
+            //            LessonID = lh.LessonID,
+            //            StudentID = lh.StudentID,
+            //            FirstDate = lhs.Where(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID).First().Time,
+            //            LastDate = DateTime.Now,
+            //            //TotalLearnt = 1,
+            //            TotalLearnt = lhs.Count(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID)
+            //        };
+
+            //    }
+            //    else
+            //    {
+            //        lp.FirstDate = lhs.Where(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID).First().Time;
+            //        lp.TotalLearnt = lhs.Count(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID);
+            //    }
+            //    _lessonProgressService.Save(lp);
+            //    lhs.RemoveAll(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID);
+            //}
             return Json("Fixed");
         }
     }

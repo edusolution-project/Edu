@@ -32,17 +32,25 @@ namespace BaseCustomerEntity.Database
     }
     public class LearningHistoryService : ServiceBase<LearningHistoryEntity>
     {
-        private ClassProgressService _classProgressService;
+
         private LessonProgressService _lessonProgressService;
         private ChapterProgressService _chapterProgressService;
+        private ClassSubjectProgressService _classSubjectProgressService;
+        private ClassProgressService _classProgressService;
 
-        public LearningHistoryService(IConfiguration config, ClassProgressService classProgressService,
+        public LearningHistoryService(IConfiguration config,
             LessonProgressService lessonProgressService,
-            ChapterProgressService chapterProgressService) : base(config)
+            ChapterProgressService chapterProgressService,
+            ClassSubjectProgressService classSubjectProgressService,
+            ClassProgressService classProgressService
+            ) : base(config)
         {
-            _classProgressService = classProgressService;
-            _chapterProgressService = chapterProgressService;
+
+
             _lessonProgressService = lessonProgressService;
+            _chapterProgressService = chapterProgressService;
+            _classSubjectProgressService = classSubjectProgressService;
+            _classProgressService = classProgressService;
 
             var indexs = new List<CreateIndexModel<LearningHistoryEntity>>
             {
@@ -76,9 +84,11 @@ namespace BaseCustomerEntity.Database
         {
             List<LearningHistoryEntity> oldItem = null;
             if (!string.IsNullOrEmpty(item.QuestionID))
+            {
                 oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
                     && o.LessonPartID == item.LessonPartID
                     && o.QuestionID == item.QuestionID).ToList();
+            }
             else
                 oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
                 && o.ClassID == item.ClassID
@@ -95,9 +105,12 @@ namespace BaseCustomerEntity.Database
                 item.ViewCount = oldItem.Count;
             }
             CreateOrUpdate(item);
-            await _classProgressService.UpdateLastLearn(item);
             await _lessonProgressService.UpdateLastLearn(item);
-            await _chapterProgressService.UpdateLastLearn(item);
+            var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(item.ClassSubjectID, item.StudentID, item.LessonID);
+
+            await _chapterProgressService.UpdateLastLearn(lessonProgress);
+            await _classSubjectProgressService.UpdateLastLearn(lessonProgress);
+            await _classProgressService.UpdateLastLearn(lessonProgress);
         }
 
         public List<LearningHistoryEntity> SearchHistory(LearningHistoryEntity item)
@@ -146,6 +159,7 @@ namespace BaseCustomerEntity.Database
             _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID);
             _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
             _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
+            _ = _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
             _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
             return Task.CompletedTask;
         }
@@ -155,6 +169,7 @@ namespace BaseCustomerEntity.Database
             _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
+            _ = _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             return Task.CompletedTask;
         }
@@ -162,9 +177,14 @@ namespace BaseCustomerEntity.Database
         public Task RemoveClassSubjectHistory(string ClassSubjectID)
         {
             _ = Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
-            _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            var subjectProgresses = _classSubjectProgressService.GetClassListOfCurrentSubject(ClassSubjectID);
+            foreach (var progress in subjectProgresses)
+                _ = _classProgressService.DecreaseCompleted(progress.ClassID, progress.Completed);
+            _ = _classProgressService.RefreshTotalLessonForSubject(ClassSubjectID);
+            _ = _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+
             return Task.CompletedTask;
         }
 

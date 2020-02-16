@@ -189,7 +189,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  let @student = _studentService.GetItemByID(r.StudentID)
                  where @student != null
                  let progress = _progressService.GetItemByClassID(@class.ID, @student.ID)
-                 let percent = (progress == null || progress.TotalLessons == 0) ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                 let percent = (progress == null || progress.TotalLessons == 0) ? 0 : progress.Completed * 100 / progress.TotalLessons
                  select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
                  {
                      ClassID = @class.ID,

@@ -299,8 +299,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            ).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == currentClass.ID).FirstOrDefault()
                            where schedule != null
-                           let lessonProgress = _lessonProgressService.GetByClassID_StudentID_LessonID(currentClass.ID, student.ID, r.ID)
-                           ?? new LessonProgressEntity()
+                           let lessonProgress = new LessonProgressEntity()
+                           //_lessonProgressService.GetByClassID_StudentID_LessonID(currentClass.ID, student.ID, r.ID)
                            //where lessonProgress != null
                            select _moduleViewMapping.AutoOrtherType(r, new StudentModuleViewModel()
                            {
@@ -707,7 +707,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
-                       let percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                       let percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.Completed * 100 / progress.TotalLessons
                        let totalweek = (o.EndDate.Date - o.StartDate.Date).TotalDays / 7
                        let subject = _subjectService.GetItemByID(o.SubjectID)
                        let studentCount = _classStudentService.GetClassStudents(o.ID).Count
@@ -745,7 +745,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var std = (from o in DataResponse
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
-                       let per = progress == null || progress.TotalLessons == 0 ? 0 : progress.CompletedLessons.Count * 100 / progress.TotalLessons
+                       let per = progress == null || progress.TotalLessons == 0 ? 0 : progress.Completed * 100 / progress.TotalLessons
                        select new
                        {
                            id = o.ID,

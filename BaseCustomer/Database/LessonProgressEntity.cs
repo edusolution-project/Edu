@@ -16,6 +16,8 @@ namespace BaseCustomerEntity.Database
         public string ClassSubjectID { get; set; }
         [JsonProperty("LessonID")]
         public string LessonID { get; set; }
+        [JsonProperty("ChapterID")]
+        public string ChapterID { get; set; }
         [JsonProperty("StudentID")]
         public string StudentID { get; set; }
         [JsonProperty("TotalLearnt")]
@@ -41,19 +43,19 @@ namespace BaseCustomerEntity.Database
 
         public async Task UpdateLastLearn(LearningHistoryEntity item)
         {
-            var currentProgress = GetByClassID_StudentID_LessonID(item.ClassID, item.StudentID, item.LessonID);
+            var currentProgress = GetByClassSubjectID_StudentID_LessonID(item.ClassSubjectID, item.StudentID, item.LessonID);
             if (currentProgress == null)
             {
                 currentProgress = new LessonProgressEntity
                 {
                     ClassID = item.ClassID,
+                    ClassSubjectID = item.ClassSubjectID,
+                    ChapterID = item.ChapterID,
                     LessonID = item.LessonID,
                     StudentID = item.StudentID,
-                    //FirstDate = _learningHistoryService.GetFirstLearnt(item.StudentID, item.LessonID),
                     LastDate = DateTime.Now,
                     FirstDate = DateTime.Now,
                     TotalLearnt = 1,
-                    //TotalLearnt = _learningHistoryService.CountLessonLearnt(item.StudentID, item.LessonID)
                 };
                 await Collection.InsertOneAsync(currentProgress);
             }
@@ -67,9 +69,9 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public LessonProgressEntity GetByClassID_StudentID_LessonID(string ClassID, string StudentID, string LessonID)
+        public LessonProgressEntity GetByClassSubjectID_StudentID_LessonID(string ClassSubjectID, string StudentID, string LessonID)
         {
-            return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID && t.LessonID == LessonID).FirstOrDefault();
+            return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID && t.LessonID == LessonID).FirstOrDefault();
         }
 
 

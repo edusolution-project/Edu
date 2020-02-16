@@ -140,6 +140,7 @@ var ExamStudent = (function () {
             formData.append("ClassID", config.class_id);
             formData.append("ClassSubjectID", config.class_subject_id);
             Ajax(config.url.load, formData, "POST", true).then(function (res) {
+                console.log(data);
                 if (res != "Access Deny" && res != "null" && res != null && res.message != "res is not defined" && res != void 0) {
                     console.log(data);
                     var resData = JSON.parse(res);

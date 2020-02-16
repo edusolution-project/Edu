@@ -11,11 +11,25 @@
 <script>
     setActiveMenu("home");
 </script>
+<style>
+    .height-245 {
+        height: 268px;
+    }
 
+    .thumb {
+        position: relative;
+    }
+
+        .thumb img {
+            position: absolute;
+            top: 50%;
+            margin-top: -50%;
+        }
+</style>
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b padding-b25">
-            <h2 class="title">Welcome to <font>EDUCOO</font></h2>
+            <h2 class="title">Welcome to <font>EDUSO</font></h2>
             @*<div class="search-box">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
@@ -30,15 +44,15 @@
             </div>
             <div class="box bg-1 padding-15">
                 <ul class="box list-scroll">
-                    <li v-for="(item,k) in lesson_week">
+                    <li v-for="(item,k) in lesson_week" v-if="validDate(item)">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <a :href="'@Url.Action("Modules","Course")/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
                                 <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title" v-if="validDate(item)">{{item.title}}</a>
                                 <a v-else href="javascript:;" :title="item.title" class="title" v-on:click="showLockNotify(item)">{{item.title}}</a>
                                 <div class="c-bot">
-                                    <a :href="'@Url.Action("Detail","Course")/' + item.classID" :title="item.className" class="title">{{item.className}}</a>
-                                    <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
+                                    <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.className" class="title">{{item.className}}</a>
+                                    <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
                                     <div class="flex">
                                         <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
                                     </div>
@@ -67,7 +81,7 @@
                                         </div>
                                         <div class="padding-15 inner">
                                             <a :href="'@Url.Action("Detail","Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
-                                            <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
+                                            <p><i class="ti-time"></i>{{formatShortDate(item.endDate)}}</p>
                                             <div class="c-bot">
                                                 <div class="flex reverse">
                                                     <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
@@ -224,6 +238,7 @@
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
                 return moment(time).format("DD/MM/YYYY HH:mm")
             },
+
             shortenString(str, length) {
                 if (str.length <= length)
                     return str;
