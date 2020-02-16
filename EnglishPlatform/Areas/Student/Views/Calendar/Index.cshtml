@@ -48,6 +48,7 @@
         </div>
     </div>
     <div class="footer-form-event">
+        <button class="btn btn-primary btn-goto-event" id="btn-goto-event">Đi đến bài học</button>
         <button class="btn btn-primary btn-save-event" id="btn-save-event">Lưu</button>
         <button class="btn btn-o btn-cancel-event" id="btn-cancel-event">Hủy</button>
         <button class="btn btn-o btn-delete-event btn-danger" id="btn-delete-event">Xóa</button>
@@ -219,6 +220,21 @@
                                     }
                                     formEvent.classList.add("edit-form");
                                     formEvent.classList.add("view-form");
+                                    var btnGoTo = formEvent.querySelector("#btn-goto-event");
+                                    if (btnGoTo != null) {
+                                        if (jsonData.LinkLesson != null && jsonData.LinkLesson != "" && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "null") {
+                                            btnGoTo.style.display = 'inline-block';
+                                            btnGoTo.addEventListener("click", function () {
+                                                window.open(`${jsonData.LinkLesson}`, "_blank");
+                                                document.body.classList.remove("open-add-event");
+                                            });
+                                            
+                                        }
+                                        else {
+                                            btnGoTo.style.display = 'none';
+                                            btnGoTo.removeEventListener("click", function () { });
+                                        }
+                                    } 
                                 }
                             }
                         }
