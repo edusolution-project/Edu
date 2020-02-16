@@ -341,6 +341,10 @@ var EduCalendar = (function(){
             if (formEvent != null) {
                 formEvent.classList.remove("edit-form");
                 formEvent.classList.remove("view-form");
+                var btnGo = formEvent.querySelector("#btn-goto-event");
+                if (btnGo != null) {
+                    btnGo.style.display = 'none';
+                }
                 var bodyEvent = formEvent.querySelector(".body-form-event");
                 if (bodyEvent != null) {
                     bodyEvent.querySelector('input[name="ID"]').value = "";
