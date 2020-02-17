@@ -20,13 +20,13 @@
         <div class="flex mb-2">
             <h2 class="title"><a href="@Url.Action("Detail", "Class")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
             @*<div class="search-box mr-2" v-if="tab[2]">
-                <button><i class="ic ic-find"></i></button>
-                <input type="text" name="" placeholder="Search">
-            </div>
-            <div class="flex" v-if="tab[2]">
-                <b-button class="btn-addevent btn-student" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
-                <b-button class="btn-addevent btn-student" style="margin-left:5px" v-on:click="showStudentUploadModal()"><i class="ti-zip"></i></b-button>
-            </div>*@
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" placeholder="Search">
+                </div>
+                <div class="flex" v-if="tab[2]">
+                    <b-button class="btn-addevent btn-student" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
+                    <b-button class="btn-addevent btn-student" style="margin-left:5px" v-on:click="showStudentUploadModal()"><i class="ti-zip"></i></b-button>
+                </div>*@
         </div>
         <div class="flex j-between border-b">
             <div class="tab bg-none">
@@ -68,7 +68,7 @@
             <ul class="list ls-pratice">
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}</a>
+                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}</a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion" role="tabpanel">
                             <ul class="list">
                                 <chap-content v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')"
@@ -93,7 +93,7 @@
                         <td>{{(k+1)}}</td>
                         <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
                         @*<td>{{item.Email}}</td>
-                        <td>{{item.Phone}}</td>*@
+                            <td>{{item.Phone}}</td>*@
                         <td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
                         <td>{{formatTime(item.LastJoinDate)}}</td>
                         <td v-bind:class="{good : (item.Score > 50)}">{{item.Score == null ? '---' : (item.Score.toFixed(2) + '%')}}</td>
@@ -463,6 +463,7 @@
                                         Title: item.SkillName,
                                         Image: item.SkillImage,
                                         Teacher: item.TeacherName,
+                                        Color: item.Color,
                                         Chapters: [],
                                         Lessons: []
                                     })

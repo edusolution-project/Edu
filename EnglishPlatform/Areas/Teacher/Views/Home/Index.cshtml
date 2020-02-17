@@ -7,16 +7,8 @@
 </script>
 
 <style>
-    .height-245{
-        height:268px;
-    }
-    .thumb{
-        position:relative;
-    }
-    .thumb img{
-        position:absolute;
-        top: 50%;
-        margin-top: -50%;
+    .height-245 {
+        height: 268px;
     }
 </style>
 <section class="module" id="dashboard_content">
@@ -40,7 +32,7 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <a :href="'@Url.Action("Detail","Class")/' + item.classID + '#module'" :title="item.skill.Name" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@Url.Action("Detail","Class")/' + item.classID + '#module'" :title="item.skill.Name" class="title"><h4 class="abc" :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
                                 <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
                                     <a :href="'@Url.Action("Detail","Class")/' + item.classID" :title="item.className" class="title">{{item.className}}</a>
@@ -221,7 +213,7 @@
             formatTime(time) {
                 //console.log(time);
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
-                var options = { weekday: "long", day: "numeric" }; 
+                var options = { weekday: "long", day: "numeric" };
                 var date = new Date(time);
                 return moment(time).format("HH:mm") +  ' ' + date.toLocaleDateString("vi-VN", options).replace("ngày ","")
             },

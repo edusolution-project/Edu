@@ -213,70 +213,71 @@ namespace BaseCustomerMVC.Controllers.Admin
                 stream.Close();
                 try
                 {
-                    var readStream = new FileStream(filePath, FileMode.Open);
-                    using (ExcelPackage package = new ExcelPackage(readStream))
+                    using (var readStream = new FileStream(filePath, FileMode.Open))
                     {
-                        ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
-                        int totalRows = workSheet.Dimension.Rows;
-                        studentList = new List<StudentEntity>();
-                        Error = new List<StudentEntity>();
-                        var defPass = "Eduso123";
-                        for (int i = 1; i <= totalRows; i++)
+                        using (ExcelPackage package = new ExcelPackage(readStream))
                         {
-                            if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                            if (workSheet.Cells[i, 4].Value == null) continue; // Email null;
-                            //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
-                            string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
-                            string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
-                            string email = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
-                            var birthdate = new DateTime();
-                            DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
-                                               DateTimeStyles.None,
-                                               out birthdate);
-                            var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
-                            var skype = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString();
-                            var item = new StudentEntity
+                            ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
+                            int totalRows = workSheet.Dimension.Rows;
+                            studentList = new List<StudentEntity>();
+                            Error = new List<StudentEntity>();
+                            var defPass = "Eduso123";
+                            for (int i = 1; i <= totalRows; i++)
                             {
-                                //StudentId = code,
-                                FullName = name,
-                                DateBorn = birthdate,
-                                Email = email,
-                                Phone = phone,
-                                Skype = skype,
-                                CreateDate = DateTime.Now,
-                                UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
-                                IsActive = true
-                            };
-                            if (!ExistEmail(item.Email))
-                            {
-                                await _service.CreateQuery().InsertOneAsync(item);
-                                studentList.Add(item);
-                                var account = new AccountEntity()
+                                if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
+                                if (workSheet.Cells[i, 4].Value == null) continue; // Email null;
+                                                                                   //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
+                                string email = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
+                                var birthdate = new DateTime();
+                                DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
+                                                   DateTimeStyles.None,
+                                                   out birthdate);
+                                var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
+                                var skype = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString();
+                                var item = new StudentEntity
                                 {
+                                    //StudentId = code,
+                                    FullName = name,
+                                    DateBorn = birthdate,
+                                    Email = email,
+                                    Phone = phone,
+                                    Skype = skype,
                                     CreateDate = DateTime.Now,
-                                    IsActive = true,
-                                    PassTemp = Security.Encrypt(
-                                        //string.Format("{0:ddMMyyyy}", item.DateBorn)
-                                        defPass
-                                        ),
-                                    PassWord = Security.Encrypt(
-                                        //string.Format("{0:ddMMyyyy}", item.DateBorn)
-                                        defPass
-                                        ),
-                                    UserCreate = item.UserCreate,
-                                    Type = ACCOUNT_TYPE.STUDENT,
-                                    UserID = item.ID,
-                                    UserName = item.Email.ToLower().Trim(),
-                                    RoleID = _roleService.GetItemByCode("student").ID
+                                    UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
+                                    IsActive = true
                                 };
-                                _accountService.CreateQuery().InsertOne(account);
-                            }
-                            else
-                            {
-                                Error.Add(item);
+                                if (!ExistEmail(item.Email))
+                                {
+                                    await _service.CreateQuery().InsertOneAsync(item);
+                                    studentList.Add(item);
+                                    var account = new AccountEntity()
+                                    {
+                                        CreateDate = DateTime.Now,
+                                        IsActive = true,
+                                        PassTemp = Security.Encrypt(
+                                            //string.Format("{0:ddMMyyyy}", item.DateBorn)
+                                            defPass
+                                            ),
+                                        PassWord = Security.Encrypt(
+                                            //string.Format("{0:ddMMyyyy}", item.DateBorn)
+                                            defPass
+                                            ),
+                                        UserCreate = item.UserCreate,
+                                        Type = ACCOUNT_TYPE.STUDENT,
+                                        UserID = item.ID,
+                                        UserName = item.Email.ToLower().Trim(),
+                                        RoleID = _roleService.GetItemByCode("student").ID
+                                    };
+                                    _accountService.CreateQuery().InsertOne(account);
+                                }
+                                else
+                                {
+                                    Error.Add(item);
+                                }
                             }
                         }
-
                     }
                     System.IO.File.Delete(filePath);
                 }

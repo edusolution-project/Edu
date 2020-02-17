@@ -15,16 +15,6 @@
     .height-245 {
         height: 268px;
     }
-
-    .thumb {
-        position: relative;
-    }
-
-        .thumb img {
-            position: absolute;
-            top: 50%;
-            margin-top: -50%;
-        }
 </style>
 <section class="module" id="dashboard_content">
     <div class="card-header">
@@ -47,7 +37,7 @@
                     <li v-for="(item,k) in lesson_week" v-if="validDate(item)">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
                                 <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title" v-if="validDate(item)">{{item.title}}</a>
                                 <a v-else href="javascript:;" :title="item.title" class="title" v-on:click="showLockNotify(item)">{{item.title}}</a>
                                 <div class="c-bot">
