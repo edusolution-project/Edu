@@ -806,7 +806,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            students = studentCount,
                            skill = skill
                            //isLearnt = isLearnt
-                       }).ToList();
+                       }).OrderBy(t => t.startDate).ToList();
             //var std = (from o in data.ToList()
             //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
             //           where _class != null
@@ -1165,6 +1165,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             oldData.Members.Add(newMember);
                     }
                 }
+
+                if (fileUpload != null)
+                {
+                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG").Result;
+                    oldData.Image = pathImage;
+                }
+
 
                 //update data
                 _service.Save(oldData);

@@ -22,7 +22,7 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b padding-b25">
-            <h2 class="title">Welcome to <font>EDUCOO</font></h2>
+            <h2 class="title">Welcome to <font>EDUSO</font></h2>
             @*<div class="search-box">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
@@ -45,7 +45,7 @@
                                 <div class="c-bot">
                                     <a :href="'@Url.Action("Detail","Class")/' + item.classID" :title="item.className" class="title">{{item.className}}</a>
                                     @*<p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>*@
-                                    <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
+                                    <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
                                 </div>
                             </div>
                         </div>
@@ -221,7 +221,9 @@
             formatTime(time) {
                 //console.log(time);
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
-                return moment(time).format("DD/MM/YYYY HH:mm")
+                var options = { weekday: "long", day: "numeric" }; 
+                var date = new Date(time);
+                return moment(time).format("HH:mm") +  ' ' + date.toLocaleDateString("vi-VN", options).replace("ngày ","")
             },
             formatDate(time) {
                 //console.log(time);

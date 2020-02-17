@@ -120,6 +120,11 @@
                 max-height: none !important;
                 height: auto !important;
             }
+
+        .frm-upload {
+            border: none;
+            height: auto;
+        }
     </style>
     <script>
 
@@ -704,7 +709,7 @@
                     <div id="thumb_class" v-if="class_info.thumbnail.src">
                         <img v-on:error="errorImgUrl()" :src="class_info.thumbnail.src" alt="" />
                     </div>
-                    <label for="class_thumbnail" class="label frm-upload" v-else>
+                    <label for="class_thumbnail" class="label frm-upload">
                         <i class="ic ic-paper-clip"></i>Tải ảnh lên
                         <input type="file" id="class_thumbnail" :ref="`thumbnail`" v-on:change="previewThumb()">
                     </label>
