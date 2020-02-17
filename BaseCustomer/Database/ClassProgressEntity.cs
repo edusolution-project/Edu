@@ -27,6 +27,8 @@ namespace BaseCustomerEntity.Database
         public string LastLessonID { get; set; }
         [JsonProperty("LastDate")]
         public DateTime LastDate { get; set; }
+        [JsonProperty("ExamDone")]
+        public long ExamDone { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
     }
@@ -37,11 +39,16 @@ namespace BaseCustomerEntity.Database
         private ClassSubjectService _classSubjectService;
         private LessonService _lessonService;
 
-        public ClassProgressService(IConfiguration config, ClassService classService, LessonService lessonService, ClassSubjectService classSubjectService) : base(config)
+        public ClassProgressService(IConfiguration config
+            //, ClassService classService, LessonService lessonService, ClassSubjectService classSubjectService
+            ) : base(config)
         {
-            _classService = classService;
-            _lessonService = lessonService;
-            _classSubjectService = classSubjectService;
+            //_classService = classService;
+            //_lessonService = lessonService;
+            //_classSubjectService = classSubjectService;
+            _classService = new ClassService(config);
+            _lessonService = new LessonService(config);
+            _classSubjectService = new ClassSubjectService(config);
 
             var indexs = new List<CreateIndexModel<ClassProgressEntity>>
             {
@@ -87,9 +94,31 @@ namespace BaseCustomerEntity.Database
                      .Set(t => t.LastDate, DateTime.Now)
                      .Set(t => t.LastLessonID, item.LessonID);
                 if (item.TotalLearnt == 1) //new
-                   update = update.Inc(t => t.Completed, 1);
+                    update = update.Inc(t => t.Completed, 1);
 
                 await Collection.UpdateManyAsync(t => t.ClassID == currentObj.ID && t.StudentID == item.StudentID, update);
+            }
+        }
+
+        public async Task UpdatePoint(LessonProgressEntity item)
+        {
+            var progress = GetItemByClassID(item.ClassID, item.StudentID);
+            if (progress == null)
+            {
+                return;
+            }
+            else
+            {
+                if (item.Tried == 1 || progress.ExamDone == 0)//new
+                {
+                    progress.AvgPoint = (progress.AvgPoint * progress.ExamDone + item.LastPoint) / (progress.ExamDone + 1);
+                    progress.ExamDone++;
+                }
+                else
+                {
+                    progress.AvgPoint = (progress.AvgPoint * progress.ExamDone + item.PointChange) / progress.ExamDone;
+                }
+                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }
 

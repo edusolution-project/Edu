@@ -419,6 +419,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             if (exam.Status)
             {
+                //return new JsonResult(new { Point = exam.Point, MaxPoint = exam.MaxPoint, ID = exam.ID, Number = exam.Number, Limit = 0 });
                 return new JsonResult("Access deny");
             }
             //exam.Status = true;

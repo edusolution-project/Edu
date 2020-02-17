@@ -44,7 +44,7 @@
                                 <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
                                     <a :href="'@Url.Action("Detail","Class")/' + item.classID" :title="item.className" class="title">{{item.className}}</a>
-                                    <p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>
+                                    @*<p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>*@
                                     <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
                                 </div>
                             </div>

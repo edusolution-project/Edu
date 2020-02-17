@@ -216,7 +216,6 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
-                       let percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.Completed * 100 / progress.TotalLessons
                        select new
                        {
                            id = o.ID,
@@ -224,7 +223,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            courseName = o.Name,
                            subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                            endDate = o.EndDate,
-                           percent,
+                           percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.Completed * 100 / progress.TotalLessons,
                            score = progress != null ? progress.AvgPoint : 0,
                            thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                        }).ToList();
@@ -706,6 +705,8 @@ namespace BaseCustomerMVC.Controllers.Student
             }
         }
 
+
+        //TODO: FIX DATA ONLY
         public JsonResult FixProgress()
         {
             var lhs = _learningHistoryService.Collection.Find(t => true).ToList();
@@ -713,32 +714,15 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 _ = _learningHistoryService.CreateHist(lh);
             }
-            //while (lhs.Count() > 0)
-            //{
-            //    var lh = lhs.First();
-            //    var lp = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(lh.ClassSubjectID, lh.StudentID, lh.LessonID);
-            //    if (lp == null)
-            //    {
-            //        lp = new LessonProgressEntity
-            //        {
-            //            ClassID = lh.ClassID,
-            //            LessonID = lh.LessonID,
-            //            StudentID = lh.StudentID,
-            //            FirstDate = lhs.Where(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID).First().Time,
-            //            LastDate = DateTime.Now,
-            //            //TotalLearnt = 1,
-            //            TotalLearnt = lhs.Count(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID)
-            //        };
-
-            //    }
-            //    else
-            //    {
-            //        lp.FirstDate = lhs.Where(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID).First().Time;
-            //        lp.TotalLearnt = lhs.Count(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID);
-            //    }
-            //    _lessonProgressService.Save(lp);
-            //    lhs.RemoveAll(t => t.ClassID == lh.ClassID && t.StudentID == lh.StudentID && t.LessonID == lh.LessonID);
-            //}
+            var exams = _examService.GetAll().ToList();
+            foreach (var exam in exams)
+            {
+                var lesson = _lessonService.GetItemByID(exam.LessonID);
+                if (lesson == null)
+                    _ = _examService.RemoveAsync(exam.ID);
+                else
+                    _ = _examService.Complete(exam, lesson, out _);
+            }
             return Json("Fixed");
         }
     }

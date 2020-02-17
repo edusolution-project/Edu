@@ -15,7 +15,7 @@
             <h2 class="title"><a href="@Url.Action("Detail","Course")/@currentCs.ClassID" title="@currentCs.ClassName"><i class="ti-arrow-left"></i></a>@currentCs.ClassName/<span class="end-break">@currentCs.SkillName</span></h2>
             <div class="c-right bad">
                 <div class="flex">
-                    <b-progress :value="7" :max="10" class="mb-3"></b-progress>
+                    <b-progress :value="@completePercent" :max="100" class="mb-3"></b-progress>
                     <span>@completePercent%</span>
                 </div>
             </div>

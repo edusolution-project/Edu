@@ -7,7 +7,7 @@ var TEMPLATE_TYPE = {
 
 var writeLog = function (name, msg) {
     if (Debug) {
-        console.log(name, msg);
+        //console.log(name, msg);
     }
 }
 
@@ -25,6 +25,7 @@ var ExamStudent = (function () {
         if (time == "" || time == null) return;
         var minutes = parseInt(time.split(":")[0]);
         var second = parseInt(time.split(":")[1]);
+        //console.log(time);
         if (second > 0) {
             second--;
         }
@@ -142,7 +143,6 @@ var ExamStudent = (function () {
             Ajax(config.url.load, formData, "POST", true).then(function (res) {
                 console.log(data);
                 if (res != "Access Deny" && res != "null" && res != null && res.message != "res is not defined" && res != void 0) {
-                    console.log(data);
                     var resData = JSON.parse(res);
                     if (resData.Data.TemplateType != 1) {
                         var exam = resData.Exam;
@@ -212,6 +212,7 @@ var ExamStudent = (function () {
             else {
                 var data = JSON.parse(res);
                 document.querySelector("input[name='ExamID']").value = data.ID;
+                console.log(res)
                 //TODO: currentTimer here;
                 var current = data.CurrentDoTime;
                 var start = data.Created;
@@ -220,7 +221,8 @@ var ExamStudent = (function () {
                 if ((data.Timer > 0) && moment(timer).minutes() >= data.Timer)//Timeout
                 {
                     localStorage.setItem("Timer", "00:00");
-                    ExamComplete(true);
+                    if(!data.Status)
+                        ExamComplete(true);
                 }
                 else {
                     if (data.Timer > 0) {
@@ -987,7 +989,6 @@ var ExamStudent = (function () {
                 else {
                     doButton = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.Redo(this)" style="cursor: pointer;">Thực hiện lại</div></div>';
                 }
-                console.log(lastExam);
                 var review = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="Review(\'' + lastExam.id + '\')" style="cursor: pointer;">Xem đáp án</div></div>';
                 var back = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.GoBack()" style="cursor: pointer;">Về danh sách</div></div>';
 
@@ -1222,7 +1223,7 @@ var ExamStudent = (function () {
         }
         if (quizNavigator != null) {
             if (listQuiz != null && count >= listQuiz.length) {
-                console.log(count, listQuiz.length);
+                //console.log(count, listQuiz.length);
                 var btn = document.getElementById("btn-completed");
                 if (btn != null) btn.style.display = "block";
             } else {

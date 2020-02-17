@@ -28,6 +28,10 @@ namespace BaseCustomerEntity.Database
         public string LastLessonID { get; set; }
         [JsonProperty("LastDate")]
         public DateTime LastDate { get; set; }
+        [JsonProperty("ExamDone")]
+        public long ExamDone { get; set; }
+        [JsonProperty("AvgPoint")]
+        public double AvgPoint { get; set; }
     }
 
     public class ChapterProgressService : ServiceBase<ChapterProgressEntity>
@@ -35,10 +39,14 @@ namespace BaseCustomerEntity.Database
         private ChapterService _chapterService;
         private LessonService _lessonService;
 
-        public ChapterProgressService(IConfiguration config, ChapterService chapterService, LessonService lessonService) : base(config)
+        public ChapterProgressService(IConfiguration config
+            //, ChapterService chapterService, LessonService lessonService
+            ) : base(config)
         {
-            _chapterService = chapterService;
-            _lessonService = lessonService;
+            //_chapterService = chapterService;
+            //_lessonService = lessonService;
+            _chapterService = new ChapterService(config);
+            _lessonService = new LessonService(config);
 
             var indexs = new List<CreateIndexModel<ChapterProgressEntity>>
             {
@@ -88,6 +96,28 @@ namespace BaseCustomerEntity.Database
                     update = update.Inc(t => t.Completed, 1);
 
                 await Collection.UpdateManyAsync(t => t.ChapterID == currentObj.ID && t.StudentID == item.StudentID && t.ClassSubjectID == item.ClassSubjectID, update);
+            }
+        }
+
+        public async Task UpdatePoint(LessonProgressEntity item)
+        {
+            var progress = GetItemByChapterID(item.ChapterID, item.StudentID, item.ClassSubjectID);
+            if (progress == null)
+            {
+                return;
+            }
+            else
+            {
+                if (item.Tried == 1 || progress.ExamDone == 0)//new
+                {
+                    progress.AvgPoint = (progress.AvgPoint * progress.ExamDone + item.LastPoint) / (progress.ExamDone + 1);
+                    progress.ExamDone++;
+                }
+                else
+                {
+                    progress.AvgPoint = (progress.AvgPoint * progress.ExamDone + item.PointChange) / progress.ExamDone;
+                }
+                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }
 

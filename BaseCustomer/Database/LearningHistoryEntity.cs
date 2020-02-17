@@ -85,6 +85,8 @@ namespace BaseCustomerEntity.Database
             List<LearningHistoryEntity> oldItem = null;
             if (!string.IsNullOrEmpty(item.QuestionID))
             {
+                //temporay skip exam history
+                return;
                 oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
                     && o.LessonPartID == item.LessonPartID
                     && o.QuestionID == item.QuestionID).ToList();
@@ -106,8 +108,8 @@ namespace BaseCustomerEntity.Database
             }
             CreateOrUpdate(item);
             await _lessonProgressService.UpdateLastLearn(item);
-            var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(item.ClassSubjectID, item.StudentID, item.LessonID);
 
+            var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(item.ClassSubjectID, item.StudentID, item.LessonID);
             await _chapterProgressService.UpdateLastLearn(lessonProgress);
             await _classSubjectProgressService.UpdateLastLearn(lessonProgress);
             await _classProgressService.UpdateLastLearn(lessonProgress);

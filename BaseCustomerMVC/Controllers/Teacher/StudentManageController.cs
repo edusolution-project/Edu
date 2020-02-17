@@ -29,7 +29,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassSubjectService _classSubjectService;
         private readonly StudentService _studentService;
         private readonly StudentHelper _studentHelper;
-        private readonly ClassProgressService _progressService;
+        private readonly ClassProgressService _classProgressService;
+        private readonly ClassSubjectProgressService _classSubjectProgressService;
         private readonly ScoreStudentService _scoreStudentService;
         private readonly LearningHistoryService _learningHistoryService;
         private readonly ExamService _examService;
@@ -49,6 +50,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassSubjectService classSubjectService,
             LearningHistoryService learningHistoryService,
             ClassProgressService classProgressService,
+            ClassSubjectProgressService classSubjectProgressService,
             ScoreStudentService scoreStudentService,
             StudentService studentService,
             IHostingEnvironment evn
@@ -63,7 +65,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _learningHistoryService = learningHistoryService;
             _classService = classService;
             _skillService = skillService;
-            _progressService = classProgressService;
+            _classProgressService = classProgressService;
+            _classSubjectProgressService = classSubjectProgressService;
             _scoreStudentService = scoreStudentService;
             _classStudentService = classStudentService;
             _classSubjectService = classSubjectService;
@@ -182,24 +185,44 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
 
-            var studentsView =
-                (from r in retStudents
-                 let @class = _classService.GetItemByID(r.ClassID)
-                 where @class != null
-                 let @student = _studentService.GetItemByID(r.StudentID)
-                 where @student != null
-                 let progress = _progressService.GetItemByClassID(@class.ID, @student.ID)
-                 let percent = (progress == null || progress.TotalLessons == 0) ? 0 : progress.Completed * 100 / progress.TotalLessons
-                 select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
-                 {
-                     ClassID = @class.ID,
-                     ClassName = @class.Name,
-                     ClassStatus = "Đang học",
-                     LastJoinDate = progress == null ? DateTime.MinValue : progress.LastDate,
-                     Progress = progress,
-                     Percent = percent > 100 ? 100 : percent,
-                     Score = _scoreStudentService.GetScoreStudentByStudentIdAndClassId(@class.ID, @student.ID)
-                 })).ToList();
+            var studentsView = new List<ClassStudentViewModel>();
+
+            if(string.IsNullOrEmpty(SubjectID))
+            {
+                studentsView = (from r in retStudents
+                                let @class = _classService.GetItemByID(r.ClassID)
+                                where @class != null
+                                let @student = _studentService.GetItemByID(r.StudentID)
+                                where @student != null
+                                let progress = _classProgressService.GetItemByClassID(@class.ID, @student.ID) ?? new ClassProgressEntity()
+                                select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
+                                {
+                                    ClassID = @class.ID,
+                                    ClassName = @class.Name,
+                                    ClassStatus = "Đang học",
+                                    LastJoinDate = progress.LastDate,
+                                    Percent = progress.TotalLessons > 0 ? (progress.Completed * 100 / progress.TotalLessons) : 0,
+                                    Score = progress.AvgPoint
+                                })).ToList();
+            }
+            else
+            {
+                studentsView = (from r in retStudents
+                                let @class = _classService.GetItemByID(r.ClassID)
+                                where @class != null
+                                let @student = _studentService.GetItemByID(r.StudentID)
+                                where @student != null
+                                let progress = _classSubjectProgressService.GetItemByClassSubjectID(SubjectID, @student.ID) ?? new ClassSubjectProgressEntity()
+                                select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
+                                {
+                                    ClassID = @class.ID,
+                                    ClassName = @class.Name,
+                                    ClassStatus = "Đang học",
+                                    LastJoinDate = progress.LastDate,
+                                    Percent = progress.TotalLessons > 0 ? (progress.Completed * 100 / progress.TotalLessons) : 0,
+                                    Score = progress.AvgPoint
+                                })).ToList();
+            }
 
             var response = new Dictionary<string, object>
             {
@@ -315,51 +338,51 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                                 if (student == null) continue;
                                 //{
-                                    //if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                                    //if (workSheet.Cells[i, 4].Value == null) continue; // Email null;
-                                    //                                                   //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
-                                    //string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
-                                    //string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
-                                    //var birthdate = new DateTime();
-                                    //DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
-                                    //                   DateTimeStyles.None,
-                                    //                   out birthdate);
-                                    //var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
-                                    //var skype = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString();
-                                    //student = new StudentEntity
-                                    //{
-                                    //    //StudentId = code,
-                                    //    FullName = name,
-                                    //    DateBorn = birthdate,
-                                    //    Email = studentEmail,
-                                    //    Phone = phone,
-                                    //    Skype = skype,
-                                    //    CreateDate = DateTime.Now,
-                                    //    UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
-                                    //    IsActive = true
-                                    //};
+                                //if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
+                                //if (workSheet.Cells[i, 4].Value == null) continue; // Email null;
+                                //                                                   //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                //string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                //string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
+                                //var birthdate = new DateTime();
+                                //DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
+                                //                   DateTimeStyles.None,
+                                //                   out birthdate);
+                                //var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
+                                //var skype = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString();
+                                //student = new StudentEntity
+                                //{
+                                //    //StudentId = code,
+                                //    FullName = name,
+                                //    DateBorn = birthdate,
+                                //    Email = studentEmail,
+                                //    Phone = phone,
+                                //    Skype = skype,
+                                //    CreateDate = DateTime.Now,
+                                //    UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
+                                //    IsActive = true
+                                //};
 
-                                    //await _studentService.CreateQuery().InsertOneAsync(student);
+                                //await _studentService.CreateQuery().InsertOneAsync(student);
 
-                                    //var account = new AccountEntity()
-                                    //{
-                                    //    CreateDate = DateTime.Now,
-                                    //    IsActive = true,
-                                    //    PassTemp = Security.Encrypt(
-                                    //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
-                                    //        defPass
-                                    //        ),
-                                    //    PassWord = Security.Encrypt(
-                                    //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
-                                    //        defPass
-                                    //        ),
-                                    //    UserCreate = student.UserCreate,
-                                    //    Type = ACCOUNT_TYPE.STUDENT,
-                                    //    UserID = student.ID,
-                                    //    UserName = student.Email.ToLower().Trim(),
-                                    //    RoleID = _roleService.GetItemByCode("student").ID
-                                    //};
-                                    //_accountService.CreateQuery().InsertOne(account);
+                                //var account = new AccountEntity()
+                                //{
+                                //    CreateDate = DateTime.Now,
+                                //    IsActive = true,
+                                //    PassTemp = Security.Encrypt(
+                                //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
+                                //        defPass
+                                //        ),
+                                //    PassWord = Security.Encrypt(
+                                //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
+                                //        defPass
+                                //        ),
+                                //    UserCreate = student.UserCreate,
+                                //    Type = ACCOUNT_TYPE.STUDENT,
+                                //    UserID = student.ID,
+                                //    UserName = student.Email.ToLower().Trim(),
+                                //    RoleID = _roleService.GetItemByCode("student").ID
+                                //};
+                                //_accountService.CreateQuery().InsertOne(account);
                                 //}
                                 //else 
                                 if (classStudents.Any(t => t.StudentID == student.ID)) continue;
