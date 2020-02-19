@@ -146,14 +146,19 @@ namespace BaseCustomerMVC.Globals
             var filter = new List<FilterDefinition<CalendarEntity>>();
             if (startDate > DateTime.MinValue && endDate > DateTime.MinValue)
             {
-                var _startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
+                var _startDate = new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);
                 var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => 
-                    ((o.StartDate >= _startDate && o.EndDate <= _endDate) && o.CreateUser == userid) || 
-                    ((o.StartDate >= _startDate && o.EndDate <= _endDate) && classList.Contains(o.GroupID)))
-                );
+                filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.StartDate >= _startDate && o.EndDate <= _endDate)));
             }
-            filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.IsDel == false)));
+            else
+            {
+                startDate = DateTime.Now;
+                endDate = startDate.AddMonths(1);
+                var _startDate = new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);
+                var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
+                filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.StartDate >= _startDate && o.EndDate <= _endDate)));
+            }
+            filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.IsDel == false) && (o.CreateUser == userid || classList.Contains(o.GroupID))));
             var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
             var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList().Select(o => new CalendarEventModel()
             {
@@ -195,6 +200,7 @@ namespace BaseCustomerMVC.Globals
 
         public bool ConvertCalendarFromSchedule(LessonScheduleEntity item, string userCreate)
         {
+            if (item.StartDate == DateTime.MinValue) return false;
             var lesson = _lessonService.GetItemByID(item.LessonID);
             if (lesson == null)
                 return false;

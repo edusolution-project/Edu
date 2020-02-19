@@ -65,6 +65,12 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(o => o.Type == type && o.UserName == userName && (o.PassWord == pass || o.PassTemp == pass))?.SingleOrDefault();
         }
 
+        public AccountEntity GetAccount(string userName, string passWord)
+        {
+            var pass = passWord;
+            return Collection.Find(o => o.UserName == userName && (o.PassWord == pass || o.PassTemp == pass))?.SingleOrDefault();
+        }
+
         public bool IsAvailable(string userName)
         {
             return Collection.CountDocuments(o => o.UserName == userName) > 0;

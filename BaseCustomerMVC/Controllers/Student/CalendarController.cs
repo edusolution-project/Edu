@@ -21,6 +21,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CalendarReportService _calendarReportService;
         private readonly CalendarHelper _calendarHelper;
         private readonly ClassService _classService;
+        private readonly ClassStudentService _classStudentService;
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly LessonScheduleService _scheduleService;
@@ -29,6 +30,7 @@ namespace BaseCustomerMVC.Controllers.Student
             CalendarLogService calendarLogService,
             CalendarReportService calendarReportService,
             CalendarHelper calendarHelper,
+             ClassStudentService classStudentService,
             ClassService classService,
             TeacherService teacherService,
             StudentService studentService,
@@ -43,6 +45,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _teacherService = teacherService;
             _studentService = studentService;
             _scheduleService = scheduleService;
+            _classStudentService = classStudentService;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -55,9 +58,9 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             if (!User.Identity.IsAuthenticated) return Task.FromResult(new JsonResult(540));
             var userId = User?.FindFirst("UserID").Value;
-            var listClass = _classService.Collection.Find(o => o.Students.Contains(userId))?.ToList();
+            var listClass = _classStudentService.GetStudentClasses(userId);
             if (listClass == null) return Task.FromResult(new JsonResult(null));
-            var data = _calendarHelper.GetListEvent(model.StartDate, model.EndDate, listClass.Select(o => o.ID).ToList(), userId);
+            var data = _calendarHelper.GetListEvent(model.Start, model.End, listClass?.ToList(), userId);
             return Task.FromResult(new JsonResult(data));
         }
         [HttpPost]

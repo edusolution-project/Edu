@@ -36,7 +36,11 @@
             </div>
             @if (isHeadteacher)
             {
-                <b-button clas="btn-addevent" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+                <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+            }
+            else
+            { 
+                <b-button class="btn-addevent btn-sm" v-on:click="Swal.fire({title: 'Lưu ý', html: 'Bạn chưa được phân quyền thực hiện chức năng này',icon: 'warning'});"><i class="ti-plus"></i> Thêm lớp</b-button>
             }
         </div>
     </div>

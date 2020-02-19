@@ -36,6 +36,9 @@ namespace BaseCustomerEntity.Database
 
         [JsonProperty("Description")]
         public string Description { get; set; }
+
+        [JsonProperty("TotalLesssons")]
+        public long TotalLesssons { get; set; }
     }
     public class ChapterService : ServiceBase<ChapterEntity>
     {

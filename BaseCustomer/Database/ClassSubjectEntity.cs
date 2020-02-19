@@ -39,6 +39,8 @@ namespace BaseCustomerEntity.Database
         public string Description { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
+        [JsonProperty("TotalLesssons")]
+        public long TotalLesssons { get; set; }
     }
 
     public class ClassSubjectService : ServiceBase<ClassSubjectEntity>

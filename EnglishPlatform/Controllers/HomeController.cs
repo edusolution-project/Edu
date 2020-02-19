@@ -98,13 +98,13 @@ namespace EnglishPlatform.Controllers
                 return Json(new ReturnJsonModel
                 {
                     StatusCode = ReturnStatus.ERROR,
-                    StatusDesc = "Please fill your information",
+                    StatusDesc = "Vui lòng điền đầy đủ thông tin",
                 });
             }
             else
             {
                 string _sPass = Security.Encrypt(PassWord);
-                var user = _accountService.GetAccount(Type, UserName.ToLower(), _sPass);
+                var user = _accountService.GetAccount(UserName.ToLower(), _sPass);
                 if (user == null)
                 {
                     return Json(new ReturnJsonModel
@@ -119,31 +119,66 @@ namespace EnglishPlatform.Controllers
                     {
                         TempData["success"] = "Hi " + user.UserName;
                         string _token = Guid.NewGuid().ToString();
+                        string FullName, id;
+                        HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
                         var role = _roleService.GetItemByID(user.RoleID);
-                        if (role != null)
+                        if (role == null)
                         {
-                            HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
-                            //_ilogs.WriteLogsInfo(_token);
-                            string FullName, id;
-                            switch (user.Type)
+                            return Json(new ReturnJsonModel
                             {
-                                case ACCOUNT_TYPE.TEACHER:
-                                    var tc = _teacherService.GetItemByID(user.UserID);
-                                    FullName = tc.FullName;
-                                    id = tc.ID;
-                                    break;
-                                case ACCOUNT_TYPE.STUDENT:
-                                    var st = _studentService.GetItemByID(user.UserID);
-                                    FullName = st.FullName;
-                                    id = st.ID;
-                                    break;
-                                default:
-                                    FullName = "admin"; id = "0";
-                                    break;
-                            }
-                            var listAccess = _accessesService.GetAccessByRole(role.ID);
+                                StatusCode = ReturnStatus.ERROR,
+                                StatusDesc = "Có lỗi, không đăng nhập được. Vui lòng liên hệ Admin để được trợ giúp"
+                            });
+                        }
+                        switch (Type)
+                        {
+                            case ACCOUNT_TYPE.TEACHER:
+                                var tc = _teacherService.GetItemByID(user.UserID);
+                                if (tc == null)
+                                    return Json(new ReturnJsonModel
+                                    {
+                                        StatusCode = ReturnStatus.ERROR,
+                                        StatusDesc = "Thông tin tài khoản không đúng",
+                                    });
+                                FullName = tc.FullName;
+                                id = tc.ID;
+                                break;
+                            case ACCOUNT_TYPE.STUDENT:
+                                var st = _studentService.GetItemByID(user.UserID);
+                                if (st == null)
+                                {
+                                    if (role.Type == "teacher")
+                                    {
+                                        //create student account
+                                        st = new StudentEntity()
+                                        {
+                                            FullName = user.Name,
+                                            Email = user.UserName,
+                                            Phone = user.Phone,
+                                            IsActive = true,// active student
+                                            CreateDate = DateTime.Now
+                                        };
+                                        _studentService.CreateQuery().InsertOne(st);
+                                    }
+                                    else
+                                        return Json(new ReturnJsonModel
+                                        {
+                                            StatusCode = ReturnStatus.ERROR,
+                                            StatusDesc = "Thông tin tài khoản không đúng",
+                                        });
+                                }
+                                role = _roleService.GetItemByCode("student");
+                                FullName = st.FullName;
+                                id = st.ID;
+                                break;
+                            default:
+                                FullName = "admin"; id = "0";
+                                break;
+                        }
 
-                            var claims = new List<Claim>
+                        var listAccess = _accessesService.GetAccessByRole(role.ID);
+
+                        var claims = new List<Claim>
                             {
                                 new Claim("UserID",id),
                                 new Claim(ClaimTypes.Email, user.UserName),
@@ -153,62 +188,53 @@ namespace EnglishPlatform.Controllers
                                 new Claim("RoleID", role.ID)
                             };
 
-                            if (listAccess != null && listAccess.Count() > 0)
-                            {
-                                for (int i = 0; i < listAccess.Count(); i++)
-                                {
-                                    var accItem = listAccess.ElementAt(i);
-                                    if (accItem.Type == "admin") claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}*{accItem.ActName}"));
-                                    else claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}"));
-
-                                }
-                            }
-                            var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
-                            _ = new AuthenticationProperties
-                            {
-                                IsPersistent = true,
-                                ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
-                            };
-                            ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
-
-                            AccountLogEntity login = new AccountLogEntity()
-                            {
-                                IP = HttpContext.Connection.RemoteIpAddress.ToString(),
-                                AccountID = user.ID,
-                                Token = _token,
-                                IsRemember = IsRemmember,
-                                CreateDate = DateTime.Now
-                            };
-                            _logService.CreateQuery().InsertOne(login);
-                            await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
-                            //await HttpContext.SignInAsync(Cookies.DefaultLogin, claim, new AuthenticationProperties()
-                            //{
-                            //    ExpiresUtc = !IsRemmember ? DateTime.Now : DateTime.Now.AddMinutes(Cookies.ExpiresLogin),
-                            //    AllowRefresh = true,
-                            //    RedirectUri = user.Type
-                            //});
-                            return Json(new ReturnJsonModel
-                            {
-                                StatusCode = ReturnStatus.SUCCESS,
-                                StatusDesc = "OK",
-                                Location = "/" + user.Type
-                            });
-                        }
-                        else
+                        if (listAccess != null && listAccess.Count() > 0)
                         {
-                            return Json(new ReturnJsonModel
+                            for (int i = 0; i < listAccess.Count(); i++)
                             {
-                                StatusCode = ReturnStatus.ERROR,
-                                StatusDesc = "Có lỗi, không đăng nhập được"
-                            });
+                                var accItem = listAccess.ElementAt(i);
+                                if (accItem.Type == "admin") claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}*{accItem.ActName}"));
+                                else claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}"));
+
+                            }
                         }
+                        var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
+                        _ = new AuthenticationProperties
+                        {
+                            IsPersistent = true,
+                            ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
+                        };
+                        ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
+
+                        AccountLogEntity login = new AccountLogEntity()
+                        {
+                            IP = HttpContext.Connection.RemoteIpAddress.ToString(),
+                            AccountID = user.ID,
+                            Token = _token,
+                            IsRemember = IsRemmember,
+                            CreateDate = DateTime.Now
+                        };
+                        _logService.CreateQuery().InsertOne(login);
+                        await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
+                        //await HttpContext.SignInAsync(Cookies.DefaultLogin, claim, new AuthenticationProperties()
+                        //{
+                        //    ExpiresUtc = !IsRemmember ? DateTime.Now : DateTime.Now.AddMinutes(Cookies.ExpiresLogin),
+                        //    AllowRefresh = true,
+                        //    RedirectUri = user.Type
+                        //});
+                        return Json(new ReturnJsonModel
+                        {
+                            StatusCode = ReturnStatus.SUCCESS,
+                            StatusDesc = "OK",
+                            Location = "/" + Type
+                        });
                     }
                     else
                     {
                         return Json(new ReturnJsonModel
                         {
                             StatusCode = ReturnStatus.ERROR,
-                            StatusDesc = "Tài khoản chưa được mở. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
+                            StatusDesc = "Tài khoản đang bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
                         });
                     }
                 }

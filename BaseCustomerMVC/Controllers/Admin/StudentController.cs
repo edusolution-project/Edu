@@ -118,7 +118,9 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
-                if (!ExistEmail(item.Email) && !ExistStudentId(item.StudentId))
+                if (!ExistEmail(item.Email)
+                    //&& !ExistStudentId(item.StudentId)
+                    )
                 {
                     _service.CreateQuery().InsertOne(item);
                     Dictionary<string, object> response = new Dictionary<string, object>()
@@ -148,7 +150,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {
                         {"Data",null },
                         {"Error",item },
-                        {"Msg","Trùng email hoặc mã sinh viên" }
+                        {"Msg","Email đã được sử dụng" }
                     };
                     return new JsonResult(response);
                 }
@@ -204,7 +206,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
-            var filePath = Path.Combine(_env.WebRootPath, file.FileName);
+            var filePath = Path.Combine(_env.WebRootPath + "\\Temp", file.FileName);
             List<StudentEntity> studentList = null;
             List<StudentEntity> Error = null;
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -236,6 +238,9 @@ namespace BaseCustomerMVC.Controllers.Admin
                                                    out birthdate);
                                 var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
                                 var skype = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString();
+
+
+                                var acc = _accountService.GetAccountByEmail(email);
                                 var item = new StudentEntity
                                 {
                                     //StudentId = code,
@@ -248,7 +253,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
                                     IsActive = true
                                 };
-                                if (!ExistEmail(item.Email))
+                                if (acc == null)
                                 {
                                     await _service.CreateQuery().InsertOneAsync(item);
                                     studentList.Add(item);
@@ -256,14 +261,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     {
                                         CreateDate = DateTime.Now,
                                         IsActive = true,
-                                        PassTemp = Security.Encrypt(
-                                            //string.Format("{0:ddMMyyyy}", item.DateBorn)
-                                            defPass
-                                            ),
-                                        PassWord = Security.Encrypt(
-                                            //string.Format("{0:ddMMyyyy}", item.DateBorn)
-                                            defPass
-                                            ),
+                                        PassTemp = Security.Encrypt(defPass),
+                                        PassWord = Security.Encrypt(defPass),
                                         UserCreate = item.UserCreate,
                                         Type = ACCOUNT_TYPE.STUDENT,
                                         UserID = item.ID,
@@ -274,7 +273,11 @@ namespace BaseCustomerMVC.Controllers.Admin
                                 }
                                 else
                                 {
-                                    Error.Add(item);
+                                    if (acc.Type != ACCOUNT_TYPE.STUDENT && !ExistEmail(email))
+                                    {
+                                        await _service.CreateQuery().InsertOneAsync(item);
+                                        studentList.Add(item);
+                                    }
                                 }
                             }
                         }
@@ -344,7 +347,6 @@ namespace BaseCustomerMVC.Controllers.Admin
         [Obsolete]
         public async Task<IActionResult> ExportTemplate(DefaultModel model)
         {
-
             var list = new List<StudentEntity>() { new StudentEntity() {
                 ID = "undefined"
                 } };

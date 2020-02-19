@@ -46,6 +46,8 @@ namespace BaseCustomerEntity.Database
         public string Outline { get; set; }             // Đề cương môn học
         [JsonProperty("LearningOutcomes")]
         public string LearningOutcomes { get; set; }  // Mục tiêu môn học
+        [JsonProperty("TotalLesssons")]
+        public long TotalLesssons { get; set; }
     }
     public class CourseService : ServiceBase<CourseEntity>
     {

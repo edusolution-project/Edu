@@ -461,7 +461,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                 _teacherHelper.ChangeStatus(model.ArrID, status);
         }
 
-
         [Obsolete]
         private bool ExistEmail(string email)
         {

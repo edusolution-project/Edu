@@ -221,12 +221,11 @@
                             var lessons = response.data.Data.Lessons;
                             console.log(lessons)
                             lessons.forEach(function (lesson) {
-                                _that.list_lessons.push(lesson)
+                                if(_that.list_lessons.findIndex(t=>t.ID == lesson.ID) == -1)
+                                    _that.list_lessons.push(lesson)
                             })
                             this.list_lessons = _that.list_lessons;
-                            console.log(that.list_lessons)
                             this.load_chapter.push(chapterId);
-                            //_that.list_data[pos].Name = name;
                         }).catch(e => { })
                 }
             },

@@ -43,9 +43,10 @@ namespace BaseCustomerMVC.Controllers.Student
                         result = _referenceService.CreateQuery().Find(t => t.Range == REF_RANGE.TEACHER && t.OwnerID == UserID).Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
                         break;
                     case REF_RANGE.CLASS:
-                        result = _referenceService.CreateQuery().Find(t => t.OwnerID == UserID && (t.Range == REF_RANGE.TEACHER) || (t.Range == REF_RANGE.CLASS && t.Target == entity.Target)).Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
+                    case REF_RANGE.CLASSSUBJECT:
+                    case REF_RANGE.STUDENT:
+                        result = _referenceService.CreateQuery().Find(t => t.OwnerID == UserID && (t.Range == REF_RANGE.TEACHER) || (t.Range == entity.Range && t.Target == entity.Target)).Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
                         break;
-                    //case REF_RANGE.ALL:
                     default:
                         result = _referenceService.CreateQuery().Find(t => t.Range == REF_RANGE.ALL).Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
                         break;

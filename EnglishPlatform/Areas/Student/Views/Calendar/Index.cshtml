@@ -138,6 +138,11 @@
                         if (checkTime(new Date(jsonData.Created), 0)) {
                             // cho phép xóa
                         }
+                        var btnGoTo = formEvent.querySelector("#btn-goto-event");
+                        if (btnGoTo != null) {
+                            btnGoTo.style.display = 'none';
+                            btnGoTo.removeAttribute("data-link");
+                        }
                     }
                     else {
                         var startDate = new Date(jsonData.StartDate);
@@ -222,10 +227,13 @@
                                     formEvent.classList.add("view-form");
                                     var btnGoTo = formEvent.querySelector("#btn-goto-event");
                                     if (btnGoTo != null) {
+                                        btnGoTo.removeEventListener("click", function () { });
                                         if (jsonData.LinkLesson != null && jsonData.LinkLesson != "" && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "null") {
+                                            btnGoTo.setAttribute("data-link", jsonData.LinkLesson);
                                             btnGoTo.style.display = 'inline-block';
                                             btnGoTo.addEventListener("click", function () {
-                                                window.open(`${jsonData.LinkLesson}`, "_blank");
+                                                var dataLink = btnGoTo.dataset.link;
+                                                window.open(`${dataLink}`, "_blank");
                                                 document.body.classList.remove("open-add-event");
                                             });
                                             
