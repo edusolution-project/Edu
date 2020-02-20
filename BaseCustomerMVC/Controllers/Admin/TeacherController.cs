@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Core_v2.Globals;
+using System.Globalization;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -261,57 +262,69 @@ namespace BaseCustomerMVC.Controllers.Admin
                 stream.Close();
                 try
                 {
-                    var readStream = new FileStream(filePath, FileMode.Open);
-                    using (ExcelPackage package = new ExcelPackage(readStream))
+                    using (var readStream = new FileStream(filePath, FileMode.Open))
                     {
-                        ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
-                        int totalRows = workSheet.Dimension.Rows;
-                        importlist = new List<TeacherEntity>();
-                        Error = new List<TeacherEntity>();
-                        for (int i = 1; i <= totalRows; i++)
+                        using (ExcelPackage package = new ExcelPackage(readStream))
                         {
-                            if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                            //string ho = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
-                            //string name = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
-                            string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
-                            string name = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
-                            string subjectname = workSheet.Cells[i, 8].Value == null ? "" : workSheet.Cells[i, 8].Value.ToString().Trim();
-                            var subject = _subjectService.CreateQuery().Find(t => subjectname.Split(',').Contains(t.Name.ToLower().Trim())).ToList();
-                            var item = new TeacherEntity
+                            ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
+                            int totalRows = workSheet.Dimension.Rows;
+                            importlist = new List<TeacherEntity>();
+                            Error = new List<TeacherEntity>();
+                            var allSubjects = _subjectService.GetAll().ToList();
+                            for (int i = 1; i <= totalRows; i++)
                             {
-                                FullName = name,
-                                TeacherId = code,
-                                Subjects = (subject != null && subject.Count > 0 ? subject.Select(s => s.ID).ToList() : null),
-                                DateBorn = workSheet.Cells[i, 4].Value == null ? DateTime.MinValue : (DateTime.Parse(workSheet.Cells[i, 4].Value.ToString())),
-                                Email = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
-                                Phone = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString(),
-                                Address = workSheet.Cells[i, 7].Value == null ? "" : workSheet.Cells[i, 7].Value.ToString(),
-                                CreateDate = DateTime.Now,
-                                UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
-                                IsActive = true
-                            };
 
-                            if (!ExistEmail(item.Email))
-                            {
-                                await _service.CreateQuery().InsertOneAsync(item);
-                                importlist.Add(item);
-                                var account = new AccountEntity()
+                                if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
+                                var email = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
+                                //string ho = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
+                                //string name = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
+                                //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                string subjectname = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString().Trim();
+                                var sbjs = subjectname.Split(',').ToList();
+                                string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
+                                var sbjIDs = allSubjects.Where(t => sbjs.Contains(t.Name.ToLower().Trim())).Select(t => t.ID).ToList();
+
+                                var date = DateTime.MinValue;
+                                DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
+                                                    DateTimeStyles.None,
+                                                    out date);
+
+                                var item = new TeacherEntity
                                 {
+                                    FullName = name,
+                                    //TeacherId = code,
+                                    Subjects = sbjIDs,
+                                    DateBorn = date,
+                                    Email = email,
+                                    Phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
                                     CreateDate = DateTime.Now,
-                                    IsActive = true,
-                                    PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                                    PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                                    UserCreate = item.UserCreate,
-                                    Type = ACCOUNT_TYPE.TEACHER,
-                                    UserID = item.ID,
-                                    UserName = item.Email.ToLower().Trim(),
-                                    RoleID = _roleService.GetItemByCode("teacher").ID
+                                    UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
+                                    IsActive = true
                                 };
-                                _accountService.CreateQuery().InsertOne(account);
-                            }
-                            else
-                            {
-                                Error.Add(item);
+
+                                if (!ExistEmail(item.Email))
+                                {
+                                    await _service.CreateQuery().InsertOneAsync(item);
+                                    importlist.Add(item);
+                                    var account = new AccountEntity()
+                                    {
+                                        CreateDate = DateTime.Now,
+                                        IsActive = true,
+                                        PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                                        PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                                        UserCreate = item.UserCreate,
+                                        Type = ACCOUNT_TYPE.TEACHER,
+                                        UserID = item.ID,
+                                        UserName = item.Email.ToLower().Trim(),
+                                        RoleID = _roleService.GetItemByCode("teacher").ID
+                                    };
+                                    _accountService.CreateQuery().InsertOne(account);
+                                }
+                                else
+                                {
+                                    Error.Add(item);
+                                }
                             }
                         }
                     }
@@ -360,7 +373,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var dataResponse = dataview.Select(o => new
             {
                 STT = index++,
-                Ma_GV = o.TeacherId,
+                //Ma_GV = o.TeacherId,
                 Ho_ten = o.FullName,
                 Ngay_sinh = o.DateBorn.ToLocalTime().ToString("MM/dd/yyyy"),
                 o.Email,
@@ -384,6 +397,40 @@ namespace BaseCustomerMVC.Controllers.Admin
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
+
+
+        [HttpGet]
+        [Obsolete]
+        public async Task<IActionResult> ExportTemplate(DefaultModel model)
+        {
+
+            var list = new List<TeacherEntity>() { new TeacherEntity() {
+                ID = "undefined"
+                } };
+            var data = list.Select(o => new
+            {
+                STT = 1,
+                Ho_ten = "Nguyễn Văn A",
+                Ngay_sinh = "dd/mm/yyyy",
+                Email = "email@gmail.com",
+                SDT = "0123456789",
+                Mon_hoc = "Danh sách tên chương trình cách nhau bởi dấu ,"
+            });
+            var stream = new MemoryStream();
+
+            using (var package = new ExcelPackage(stream))
+            {
+                var workSheet = package.Workbook.Worksheets.Add("DS_HV");
+                workSheet.Cells.LoadFromCollection(data, true);
+                package.Save();
+            }
+            stream.Position = 0;
+            string excelName = $"TeacherTemplate.xlsx";
+
+            //return File(stream, "application/octet-stream", excelName);  
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
+        }
+
         [HttpPost]
         [Obsolete]
         public JsonResult Publish(DefaultModel model)

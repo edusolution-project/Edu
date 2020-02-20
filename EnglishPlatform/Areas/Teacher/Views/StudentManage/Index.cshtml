@@ -404,6 +404,7 @@
                         let _that = this
                         let _form = new FormData()
                         _form.append('skipActive', false)
+                        _form.append('PageSize', 500)
                         @if(!User.IsInRole("head-teacher"))
                         {
                             @:let _url = '@Url.Action("GetClassList", "Class")'

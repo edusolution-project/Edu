@@ -56,13 +56,12 @@
                 <div class="box">
                     <div class="inner">
                         <span class="ic ic-headphone" :style="'background-image:url(' + item.Image + ')'"></span>
-                        <a :href="'@Url.Action("Modules","Course")/' + item.ID" title="" class="title">{{item.Title}}</a>
+                        <a :href="'@Url.Action("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">{{item.Title}}</a>
                         <span class="name center">
                             {{item.Grade}}<br />
                             GV: {{item.Teacher}}
                         </span>
-
-                        <a :href="'@Url.Action("Modules","Course")/' + item.ID" class="btn-learn">Học ngay</a>
+                        <a :href="'@Url.Action("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
                     </div>
                 </div>
             </div>
@@ -153,6 +152,7 @@
                                         ID: item.ID,
                                         Title: item.SkillName,
                                         Image: item.SkillImage,
+                                        Color: item.Color,
                                         Teacher: item.TeacherName,
                                         Grade: item.GradeName,
                                         Chapters: [],

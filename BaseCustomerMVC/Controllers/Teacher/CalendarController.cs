@@ -45,8 +45,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult Index(DefaultModel model)
         {
             var userId = User?.FindFirst("UserID").Value;
-            var listClass = _classService.Collection.Find(o => o.Members.Any(t=> t.TeacherID == userId) && o.IsActive == true)?
-                .SortBy(o=>o.EndDate)
+            var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId) && o.IsActive == true)?
+                .SortBy(o => o.EndDate)
                 .ToList();
 
             ViewBag.ClassList = listClass;
@@ -54,13 +54,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [Obsolete]
-        public Task<JsonResult> GetList(DefaultModel model,DateTime start,DateTime end)
+        public Task<JsonResult> GetList(DefaultModel model, DateTime start, DateTime end)
         {
             var userId = User?.FindFirst("UserID").Value;
             var listClass = _classService.Collection.Find(o => o.TeacherID == userId)?.ToList();
             if (listClass == null) return Task.FromResult(new JsonResult(null));
-            var data = _calendarHelper.GetListEvent(start, end, listClass.Select(o=>o.ID).ToList(), userId);
-            if(data == null) return Task.FromResult(new JsonResult(new {}));
+            var data = _calendarHelper.GetListEvent(start, end, listClass.Select(o => o.ID).ToList(), userId);
+            if (data == null) return Task.FromResult(new JsonResult(new { }));
             return Task.FromResult(new JsonResult(data));
         }
 
@@ -115,5 +115,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             return _calendarHelper.RemoveEvent(id, User.FindFirst("UserID").Value).Result;
         }
+
+        public JsonResult FixCalendar()
+        {
+            _calendarHelper.ScheduleAutoConvertEvent();
+            return Json("Fixed");
+        }
+
     }
 }
