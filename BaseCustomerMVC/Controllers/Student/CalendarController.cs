@@ -58,6 +58,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var listClass = _classService.Collection.Find(o => o.Students.Contains(userId))?.ToList();
             if (listClass == null) return Task.FromResult(new JsonResult(null));
             var data = _calendarHelper.GetListEvent(model.StartDate, model.EndDate, listClass.Select(o => o.ID).ToList(), userId);
+            if (data == null) data = new List<CalendarEventModel>();
             return Task.FromResult(new JsonResult(data));
         }
         [HttpPost]
