@@ -57,6 +57,17 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(t => t.ClassID == ClassID).ToList();
         }
 
+        public List<string> GetCourseIdsByClassID(string ClassID)
+        {
+            return Collection.Find(t => t.ClassID == ClassID).Project(t => t.CourseID).ToList();
+        }
+
+        public List<string> GetIdsByClassID(string ClassID)
+        {
+            return Collection.Find(t => t.ClassID == ClassID).Project(t => t.ID).ToList();
+        }
+
+
         public Task RemoveClassSubjects(string ClassID)
         {
             _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID);

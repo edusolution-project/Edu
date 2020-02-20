@@ -92,11 +92,11 @@
                     <tr v-for="(item,k) in studentData">
                         <td>{{(k+1)}}</td>
                         <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
-                        <td>{{item.Email}}</td>
-                        <td>{{item.Phone}}</td>
-                        @*<td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>*@
+                        @*<td>{{item.Email}}</td>
+                        <td>{{item.Phone}}</td>*@
+                        <td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
                         <td>{{formatTime(item.LastJoinDate)}}</td>
-                        @*<td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>*@
+                        <td v-bind:class="{good : (item.Score > 50)}">{{item.Score == null ? '---' : (item.Score.toFixed(2) + '%')}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -368,26 +368,26 @@
                         key: 'name',
                         label: 'Họ tên'
                     },
-                    {
-                        key: 'email',
-                        label: 'Email'
-                    },
-                    {
-                        key: 'phone',
-                        label: 'SĐT'
-                    },
                     //{
-                    //    key: 'per',
-                    //    label: 'Tiến độ'
+                    //    key: 'email',
+                    //    label: 'Email'
                     //},
+                    //{
+                    //    key: 'phone',
+                    //    label: 'SĐT'
+                    //},
+                    {
+                        key: 'per',
+                        label: 'Tiến độ'
+                    },
                     {
                         key: 'last_update',
                         label: 'Lần học cuối'
                     },
-                    //{
-                    //    key: 'score',
-                    //    label: 'Kết quả'
-                    //}
+                    {
+                        key: 'score',
+                        label: 'Điểm trung bình'
+                    }
                 ],
                 studentData: [
                 ],

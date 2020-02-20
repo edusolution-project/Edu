@@ -24,6 +24,6 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("Percent")]
         public double Percent { get; set; }
         [JsonProperty("Score")]
-        public ScoreStudentEntity Score { get; set; }
+        public double Score { get; set; }
     }
 }

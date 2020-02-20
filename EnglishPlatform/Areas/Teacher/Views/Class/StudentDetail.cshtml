@@ -38,7 +38,7 @@
                 </div>
             </div>
             <div class="flex rate" v-if="tab[1]">
-                <span><i class="ic ic-paper-yet"></i>Điểm: {{avgPoint}}</span>
+                <span><i class="ic ic-paper-yet"></i>Điểm: {{avgPoint.toFixed(2)}}%</span>
                 <span><i class="ic ic-award"></i>Xếp hạng: 1</span>
                 <!-- <span><i class="ic ic-award-2"></i>Xếp hạng: 2</span> -->
                 <!-- <span><i class="ic ic-award-3"></i>Xếp hạng: 3</span> -->
@@ -91,7 +91,7 @@
                         <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
                         <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
                         <td>{{formatFullDate(item.LearnLast)}}</td>
-                        <td>{{item.Result}}</td>
+                        <td>{{item.Result.toFixed(2)}}%</td>
                         <td>{{item.LearnCount}}</td>
                     </tr>
                 </tbody>
@@ -243,7 +243,6 @@
                                     _that.avgPoint += exam.Result
                                 });
                                 _that.avgPoint = _that.avgPoint / _that.resultData.length
-                                console.log(_that.avgPoint)
                             }
                         }).catch(e => { })
                 },

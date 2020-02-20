@@ -22,8 +22,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
         private readonly LessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
-        private readonly LessonPartQuestionService _lessonPartQuestionService;
-        private readonly LessonPartAnswerService _lessonPartAnswerService;
+        //private readonly LessonPartQuestionService _lessonPartQuestionService;
+        //private readonly LessonPartAnswerService _lessonPartAnswerService;
 
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
@@ -35,9 +35,9 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _schedulemapping;
-        private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
-        private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
-        private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
+        //private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
+        //private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
+        //private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
 
         public LessonController(
             SubjectService subjectService
@@ -53,8 +53,8 @@ namespace BaseCustomerMVC.Controllers.Student
             , ExamService examService
             , ExamDetailService examDetailService
             , LessonPartService lessonPartService
-            , LessonPartQuestionService lessonPartQuestionService
-            , LessonPartAnswerService lessonPartAnswerService
+            //, LessonPartQuestionService lessonPartQuestionService
+            //, LessonPartAnswerService lessonPartAnswerService
 
             , CloneLessonPartService cloneLessonPartService
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
@@ -426,7 +426,6 @@ namespace BaseCustomerMVC.Controllers.Student
 
             if (lastexam == null)
             {
-
                 var respone = new Dictionary<string, object> { { "Data", dataResponse } };
                 return new JsonResult(respone);
             }

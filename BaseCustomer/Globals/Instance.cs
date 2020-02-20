@@ -53,6 +53,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<ClassSubjectService>();
             services.AddSingleton<ClassStudentService>();
             services.AddSingleton<ClassProgressService>();
+            services.AddSingleton<ClassSubjectProgressService>();
 
             services.AddSingleton<ExamService>();
             services.AddSingleton<ExamDetailService>();

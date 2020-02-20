@@ -51,12 +51,15 @@ namespace BaseCustomerEntity.Database
 
     public class ExamService : ServiceBase<ExamEntity>
     {
-        private ExamDetailService _examDetailService { get; set; }
-        private CloneLessonPartService _cloneLessonPartService { get; set; }
-        private CloneLessonPartQuestionService _cloneLessonPartQuestionService { get; set; }
-        private CloneLessonPartAnswerService _cloneLessonPartAnswerService { get; set; }
+        private ExamDetailService _examDetailService;
+        private CloneLessonPartService _cloneLessonPartService;
+        private CloneLessonPartQuestionService _cloneLessonPartQuestionService;
+        private CloneLessonPartAnswerService _cloneLessonPartAnswerService;
+        private LessonProgressService _lessonProgressService;
+        private ChapterProgressService _chapterProgressService;
+        private ClassSubjectProgressService _classSubjectProgressService;
+        private ClassProgressService _classProgressService;
         //private LessonService _lessonService { get; set; }
-
 
         public ExamService(IConfiguration configuration) : base(configuration)
         {
@@ -77,6 +80,12 @@ namespace BaseCustomerEntity.Database
             _cloneLessonPartService = new CloneLessonPartService(configuration);
             _cloneLessonPartQuestionService = new CloneLessonPartQuestionService(configuration);
             _cloneLessonPartAnswerService = new CloneLessonPartAnswerService(configuration);
+            _lessonProgressService = new LessonProgressService(configuration);
+
+            _chapterProgressService = new ChapterProgressService(configuration);
+            _classSubjectProgressService = new ClassSubjectProgressService(configuration);
+            _classProgressService = new ClassProgressService(configuration);
+
             //_lessonService = new LessonService(configuration);
         }
         /// <summary>
@@ -103,6 +112,7 @@ namespace BaseCustomerEntity.Database
             CreateOrUpdate(exam);
             return Task.CompletedTask;
         }
+
         public ExamEntity Complete(ExamEntity exam, LessonEntity lesson, out double point)
         {
             exam.Status = true;
@@ -181,8 +191,6 @@ namespace BaseCustomerEntity.Database
 
                 examDetail.Updated = DateTime.Now;
                 _examDetailService.CreateOrUpdate(examDetail);
-
-
             }
             exam.Point = point;
             exam.Updated = DateTime.Now;
@@ -190,10 +198,17 @@ namespace BaseCustomerEntity.Database
             exam.QuestionsDone = listDetails.Count();
             //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
             exam.QuestionsTotal =
-                _cloneLessonPartQuestionService.Collection.CountDocuments(t => t.LessonID == lesson.ID) +
-                _cloneLessonPartService.Collection.CountDocuments(t => t.ParentID == lesson.ID && t.Type == "essay");
+                _cloneLessonPartQuestionService.Collection.CountDocuments(t => t.LessonID == lesson.ID);
+            //_cloneLessonPartService.Collection.CountDocuments(t => t.ParentID == lesson.ID && t.Type == "essay");
+            _ = _lessonProgressService.UpdateLastPoint(exam);
+            var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(exam.ClassSubjectID, exam.StudentID, exam.LessonID);
+
+            _ = _chapterProgressService.UpdatePoint(lessonProgress);
+            _ = _classSubjectProgressService.UpdatePoint(lessonProgress);
+            _ = _classProgressService.UpdatePoint(lessonProgress);
 
             CreateOrUpdate(exam);
+
             return exam;
         }
 

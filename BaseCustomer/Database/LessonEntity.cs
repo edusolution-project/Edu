@@ -79,5 +79,15 @@ namespace BaseCustomerEntity.Database
 
             Collection.Indexes.CreateManyAsync(indexs);
         }
+
+        public long CountChapterLesson(string ChapterID)
+        {
+            return Collection.CountDocumentsAsync(t => t.ChapterID == ChapterID).Result;
+        }
+
+        public long CountCourseLesson(string CourseID)
+        {
+            return Collection.CountDocumentsAsync(t => t.CourseID == CourseID).Result;
+        }
     }
 }

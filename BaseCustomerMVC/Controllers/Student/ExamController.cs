@@ -285,16 +285,17 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var exam = _examService.GetItemByID(item.ExamID);
 
-                await _learningHistoryService.CreateHist(new LearningHistoryEntity()
-                {
-                    ClassID = exam.ClassID,
-                    ClassSubjectID = exam.ClassSubjectID,
-                    LessonID = exam.LessonID,
-                    LessonPartID = item.LessonPartID,
-                    QuestionID = item.QuestionID,
-                    Time = DateTime.Now,
-                    StudentID = User.Claims.GetClaimByType("UserID").Value
-                });
+                //TODO: recheck history for doing exam
+                //await _learningHistoryService.CreateHist(new LearningHistoryEntity()
+                //{
+                //    ClassID = exam.ClassID,
+                //    ClassSubjectID = exam.ClassSubjectID,
+                //    LessonID = exam.LessonID,
+                //    LessonPartID = item.LessonPartID,
+                //    QuestionID = item.QuestionID,
+                //    Time = DateTime.Now,
+                //    StudentID = User.Claims.GetClaimByType("UserID").Value
+                //});
                 if (string.IsNullOrEmpty(item.ID) || item.ID == "0" || item.ID == "null")
                 {
                     if (item.AnswerID == null && item.AnswerValue == null)
@@ -379,16 +380,17 @@ namespace BaseCustomerMVC.Controllers.Student
             if (!_examService.IsOverTime(item.ExamID))
             {
                 var exam = _examService.GetItemByID(item.ExamID);
-                await _learningHistoryService.CreateHist(new LearningHistoryEntity()
-                {
-                    ClassID = exam.ClassID,
-                    LessonID = exam.LessonID,
-                    ClassSubjectID = exam.ClassSubjectID,
-                    LessonPartID = item.LessonPartID,
-                    QuestionID = item.QuestionID,
-                    Time = DateTime.Now,
-                    StudentID = User.Claims.GetClaimByType("UserID").Value
-                });
+                //TODO: recheck history for doing exam
+                //await _learningHistoryService.CreateHist(new LearningHistoryEntity()
+                //{
+                //    ClassID = exam.ClassID,
+                //    LessonID = exam.LessonID,
+                //    ClassSubjectID = exam.ClassSubjectID,
+                //    LessonPartID = item.LessonPartID,
+                //    QuestionID = item.QuestionID,
+                //    Time = DateTime.Now,
+                //    StudentID = User.Claims.GetClaimByType("UserID").Value
+                //});
                 var deleted = _examDetailService.CreateQuery().DeleteMany(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).DeletedCount;
 
                 exam.Updated = DateTime.Now;
@@ -417,6 +419,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             if (exam.Status)
             {
+                //return new JsonResult(new { Point = exam.Point, MaxPoint = exam.MaxPoint, ID = exam.ID, Number = exam.Number, Limit = 0 });
                 return new JsonResult("Access deny");
             }
             //exam.Status = true;

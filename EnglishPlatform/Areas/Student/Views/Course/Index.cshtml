@@ -10,6 +10,7 @@
 <script>
     setActiveMenu("class");
 </script>
+
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
 
@@ -80,6 +81,19 @@
 </section>
 
 @section Scripts{
+    <style>
+        .thumb {
+            position: relative;
+        }
+
+            .thumb img {
+                position: absolute;
+                top: 50%;
+                margin-top: -50%;
+                max-height: none !important;
+                height: auto !important;
+            }
+    </style>
     <script>
 
         new Vue({
