@@ -15,6 +15,37 @@ namespace BaseHub
         {
 
         }
+
+        public Task RemoveMessage(string user, string , string messageId)
+        {
+            var listUser = _connections.GetConnections(user);
+            if (listUser != null && user.Length > 0)
+            {
+                IReadOnlyList<string> listUSerReadOnly = listUser as IReadOnlyList<string>;
+                Clients.Users(listUSerReadOnly).SendAsync("RemoveMessage", new { Message = messageId, Time = DateTime.Now, Type = UserType });
+                return Clients.User(Context.ConnectionId).SendAsync("RemoveMessage", new { Message = messageId, Time = DateTime.Now, Type = UserType });
+            }
+            else
+            {
+                return Task.CompletedTask;
+            }
+        }
+
+        public Task SendToUser(string user, string message)
+        {
+            var listUser = _connections.GetConnections(user);
+            if(listUser != null && user.Length > 0)
+            {
+                IReadOnlyList<string> listUSerReadOnly = listUser as IReadOnlyList<string>;
+                return Clients.Users(listUSerReadOnly).SendAsync("ChatToUser", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+            }
+            else
+            {
+                return Task.CompletedTask;
+            }
+            
+        }
+
         public Task GoToClass(string className)
         {
             try
