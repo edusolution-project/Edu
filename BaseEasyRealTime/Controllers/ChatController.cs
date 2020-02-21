@@ -34,7 +34,7 @@ namespace BaseEasyRealTime.Controllers
             {
                 if (User != null && User.Identity.IsAuthenticated)
                 {
-                    string sender = User.FindFirst(ClaimTypes.Email)?.Value;
+                    string sender = User.FindFirst("UserID")?.Value;
                     var groupName = state == 1 ? receiver : _groupService.GetGroupName(sender, receiver);
                     var files = _roxy.UploadNewFeed(User.Identity.Name, HttpContext);
                     List<FileManagerCore.Globals.MediaResponseModel> media = new List<FileManagerCore.Globals.MediaResponseModel>();
@@ -106,7 +106,7 @@ namespace BaseEasyRealTime.Controllers
             {
                 if (User != null && User.Identity.IsAuthenticated)
                 {
-                    string user = User.FindFirst(ClaimTypes.Email).Value;
+                    string user = User.FindFirst("UserID").Value;
                     if (!string.IsNullOrEmpty(receiver))
                     {
                         var groupName = state == 1 ? receiver : _groupService.GetGroupName(user, receiver);

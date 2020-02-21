@@ -23,9 +23,10 @@
     <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
     <script type="text/javascript">
 
-        const g_CurrentUser = {
+        var g_CurrentUser = {
             email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
-            name :  "@User.Identity.Name",
+            name: "@User.Identity.Name",
+            id: "@User.FindFirst("UserID")?.Value"
         }
     </script>
     <script src="~/js/site.js"></script>

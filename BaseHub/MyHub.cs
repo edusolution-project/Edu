@@ -16,34 +16,28 @@ namespace BaseHub
 
         }
 
-        public Task RemoveMessage(string user, string , string messageId)
+        public Task RemoveMessage(string user, string messageId)
         {
             var listUser = _connections.GetConnections(user);
             if (listUser != null && user.Length > 0)
             {
-                IReadOnlyList<string> listUSerReadOnly = listUser as IReadOnlyList<string>;
+                IReadOnlyList<string> listUSerReadOnly = listUser?.ToList()?.AsReadOnly();
                 Clients.Users(listUSerReadOnly).SendAsync("RemoveMessage", new { Message = messageId, Time = DateTime.Now, Type = UserType });
-                return Clients.User(Context.ConnectionId).SendAsync("RemoveMessage", new { Message = messageId, Time = DateTime.Now, Type = UserType });
+                Clients.Caller.SendAsync("RemoveMessage", new { Message = messageId, Time = DateTime.Now, Type = UserType });
             }
-            else
-            {
-                return Task.CompletedTask;
-            }
+            return Task.CompletedTask;
         }
 
-        public Task SendToUser(string user, string message)
+        public async Task SendToUser(string user, string message)
         {
             var listUser = _connections.GetConnections(user);
             if(listUser != null && user.Length > 0)
             {
-                IReadOnlyList<string> listUSerReadOnly = listUser as IReadOnlyList<string>;
-                return Clients.Users(listUSerReadOnly).SendAsync("ChatToUser", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+                IReadOnlyList<string> listUSerReadOnly = listUser?.ToList()?.AsReadOnly();
+                await Clients.Clients(listUSerReadOnly).SendAsync("ChatToUser", new {UserReciver = user , UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+                await Clients.Caller.SendAsync("ChatToUser", new { UserReciver = user, UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
             }
-            else
-            {
-                return Task.CompletedTask;
-            }
-            
+            await Task.CompletedTask;
         }
 
         public Task GoToClass(string className)
