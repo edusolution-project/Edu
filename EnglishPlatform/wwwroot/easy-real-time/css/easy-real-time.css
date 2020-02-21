@@ -506,7 +506,11 @@ ul.nav-news-feed {
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     margin: auto;
+    display:none;
 }
+    .single-chat.open{
+        display:block;
+    }
     .single-chat .body-single-chat {
         height: 255px;
         padding: 0 10px;
