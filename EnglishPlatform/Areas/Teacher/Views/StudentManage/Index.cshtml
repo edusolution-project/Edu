@@ -20,10 +20,7 @@
         <div class="flex border-b padding-b25 justify-content-between">
             <div class="flex width-100">
                 <div class="box filter-box w-152">
-                    <select name="" v-model="search_class_id">
-                        <option value="">Lớp</option>
-                        <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
-                    </select>
+                    <autocomplete v-on:chooseitem="chooseClass" :items="list_ac_class" v-on:input="autocompleteClass" :plhd="'Nhập để tìm lớp'" />
                 </div>
                 <div class="box filter-box w-152">
                     <select name="" v-model="search_subject_id">
@@ -51,7 +48,7 @@
 
             <div class="flex">
                 <b-button class="btn-addevent btn-student btn-sm" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
-                <b-button class="btn-addevent btn-student btn-sm" style="margin-left:5px" v-on:click="showStudentUploadModal()"><i class="ti-zip"></i></b-button>
+                <b-button class="btn-addevent btn-student btn-sm" style="margin-left:5px" v-on:click="showStudentUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
             </div>
         </div>
     </div>
@@ -69,13 +66,8 @@
                     <td>{{item.ClassName}}</td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
-                    @*<td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
-                        <td>{{item.last_update}}</td>
-                        <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>*@
-
                     <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
                 </tr>
-
             </tbody>
         </table>
         <div class="box margin-t20 flex">
@@ -104,13 +96,13 @@
 
     <script type="text/x-template" id="autocomplete">
         <div class="autocomplete">
-            <input type="text" v-on:input="onChange" v-model="search" v-on:keyup.down="onArrowDown" v-on:keyup.up="onArrowUp" v-on:keyup.enter="onEnter" class="form-control" placeholder="Nhập để tìm kiếm (>2 chữ)" />
+            <input type="text" v-on:input="onChange" v-model="search" v-on:keyup.down="onArrowDown" v-on:keyup.up="onArrowUp" v-on:keyup.enter="onEnter" class="form-control" :placeholder="plhd" />
             <ul id="autocomplete-results" v-show="isOpen" class="autocomplete-results">
                 <li class="loading" v-if="isLoading">
                     Loading results...
                 </li>
                 <li v-else v-for="(result, i) in results" :key="i" v-on:click="setResult(result)" class="autocomplete-result" :class="{'is-active': i === arrowCounter }">
-                    {{ result.FullName }}
+                    {{ result.Name }}
                 </li>
             </ul>
 
@@ -169,6 +161,16 @@
                         type: Array,
                         required: false,
                         default: () => []
+                    },
+                    url: {
+                        type: String,
+                        required: false,
+                        default: () => ''
+                    },
+                    plhd: {
+                        type: String,
+                        required: false,
+                        default: () => 'Nhập để tìm kiếm (>2 chữ)'
                     }
                 },
                 data() {
@@ -184,55 +186,25 @@
                 methods: {
                     onChange() {
                         // Let's warn the parent that a change was made
-                        this.$emit("input", this.search);
-                        if (this.search.length >= 2) {
-                            if(this.actimeout != null)
-                                clearTimeout(this.actimeout);
-                            var searchFn = this.searchResult
-                            this.actimeout = setTimeout(function(){
-                                searchFn()
-                                searchFn = null
-                            },500)
-                        }
-                        else {
+                        this.$emit("input", this.search, this.filterResults);
+                        if (this.search.length < 2) {
                             this.isOpen = false
                         }
+                        else {
+                            this.isOpen = true
+                        }
                     },
-                    searchResult()
-                    {
-                        var _that = this
-                            var term = _that.search.toLowerCase()
-                            if (this.loadedTerms.filter(item => item.term.indexOf(term) > -1).length == 0) {
-                                this.isLoading = true;
-                                let _form = new FormData()
-                                _form.append('term', term)
-                                let _url = '@Url.Action("Search","StudentManage")'
-                                axios.post(_url, _form)
-                                    .then(response => {
-                                        this.isLoading = false
-                                        this.items = response.data
-                                        this.loadedTerms.push({
-                                            term: term,
-                                            data: response.data
-                                        })
-                                        this.isOpen = true
-                                        this.$forceUpdate();
-                                    }).catch(e => { })
-                            } else {
-                                this.items = this.loadedTerms.filter(item => item.term.indexOf(term) > -1)[0].data;
-                                this.filterResults();
-                                this.isOpen = true;
-                                this.$forceUpdate();
-                            }
+                    searchResult() {
+                        this.filterResults();
+                        this.isOpen = true;
+                        this.$forceUpdate();
                     },
                     filterResults() {
-                        // first uncapitalize all the things
-                        this.results = this.items.filter(item => {
-                            return item.FullName.toLowerCase().indexOf(this.search.toLowerCase()) > -1;
-                        });
+                        this.results = this.items
+                        this.isOpen = true
                     },
                     setResult(result) {
-                        this.search = result.FullName;
+                        this.search = result.Name;
                         this.isOpen = false;
                         this.arrowCounter = -1;
                         this.$emit("chooseitem", result);
@@ -303,6 +275,8 @@
                     email: "",
                     class_id: ""
                 },
+                list_student: [
+                ],
                 fields: [
                     {
                         key: 'stt',
@@ -349,6 +323,7 @@
                 teacherSource: [],
                 courseSource: [],
                 list_active_class: [],
+                list_ac_class: [],
                 week: '',
                 view: 30,
                 page: 1,
@@ -427,7 +402,6 @@
                             .then(response => {
                                 var _data = response.data.Data;
                                 _data.forEach(function (item, k) {
-                                    console.log(item);
                                     _that.list_active_class.push({
                                         ID: item.ID,
                                         Name: item.Name
@@ -465,6 +439,51 @@
                     this.add_student.class_id = this.search_class_id
                     this.$bvModal.show('modal_event')
                 },
+                autocompleteStudent(term, callback) {
+                    let _that = this
+                    if (term.length >= 2) {
+                        if (this.actimeout != null)
+                            clearTimeout(this.actimeout);
+                        this.actimeout = setTimeout(function () {
+                            if (_that.loadedTermsST == null)
+                                _that.loadedTermsST = []
+
+                            if (_that.loadedTermsST.filter(item => item.term.indexOf(term) > -1).length == 0) {
+                                let _form = new FormData()
+                                _form.append('term', term)
+                                let _url = '@Url.Action("Search","StudentManage")'
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        var data = []
+                                        if (response.data.length > 0) {
+                                            response.data.forEach(function (item) {
+                                                data.push({
+                                                    ID: item.ID,
+                                                    Name: item.FullName,
+                                                    Email: item.Email
+                                                });
+                                            })
+                                        }
+                                        _that.list_student = data
+                                        _that.loadedTermsST.push({
+                                            term: term,
+                                            data: data
+                                        })
+                                        callback()
+                                    }).catch(e => { })
+                            } else {
+                                _that.list_student = _that.loadedTermsST.filter(item => item.term.indexOf(term) > -1)[0].data;
+                                callback()
+                            }
+                        }, 500)
+                    }
+                },
+                autocompleteClass(term, callback) {
+                    let _that = this
+                    term = term.toLowerCase()
+                    _that.list_ac_class = _that.list_active_class.filter(item => item.Name.toLowerCase().indexOf(term) > -1);
+                    callback()
+                },
                 showStudentUploadModal() {
                     this.add_student.class_id = this.search_class_id
                     this.$bvModal.show('modal_upload')
@@ -473,6 +492,9 @@
                     this.add_student.name = student.Name
                     this.add_student.email = student.Email
                     this.add_student.id = student.ID
+                },
+                chooseClass(_class){
+                    this.search_class_id = _class.ID;
                 },
                 createStudent() {
                     let _that = this
@@ -576,6 +598,17 @@
                     console.log(event.target.files[0])
                     this.uploadfile.file = event.target.files[0]
                 },
+                testdata() {
+                    let _that = this
+                    let list = _that.list_student
+                    console.log(list)
+                    list.forEach(function(item) {
+                        _that.list_student.push(item)
+                    })
+                    this.list_student = _that.list_student;
+                    console.log(this.list_student)
+                    this.$forceUpdate()
+                },
                 downloadTemplate() {
                     window.open("@Url.Action("StudentTemplate", "StudentManage")");
                 }
@@ -596,7 +629,7 @@
         </b-col>
         <b-col class="form-group">
             <label for="">Học viên</label>
-            <autocomplete v-on:chooseitem="chooseStudent" />
+            <autocomplete v-on:chooseitem="chooseStudent" :items="list_student" v-on:input="autocompleteStudent" />
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">
