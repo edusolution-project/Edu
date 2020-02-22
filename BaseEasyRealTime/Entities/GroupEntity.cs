@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BaseEasyRealTime.Entities
 {
@@ -25,7 +26,9 @@ namespace BaseEasyRealTime.Entities
         }
         public string GetGroupName(string member1, string member2)
         {
-            var item = Collection.Find(o => o.IsPrivateChat == true && o.Members.Count == 2 && o.Members.Contains(member1) && o.Members.Contains(member2))?.SingleOrDefault();
+            var dataID = Guid.NewGuid().ToString();
+            var listItem = Collection.Find(o => o.IsPrivateChat == true && o.Members.Count == 2 && o.Members.Contains(member1) && o.Members.Contains(member2))?.ToList();
+            var item = listItem == null || listItem.Count == 0 ? null : listItem.FirstOrDefault();
             if(item == null)
             {
                 item = new GroupEntity()
@@ -34,7 +37,7 @@ namespace BaseEasyRealTime.Entities
                     CreateUser = member1,
                     DisplayName = "",
                     Members = new HashSet<string>() { member1, member2 },
-                    Name = new Guid().ToString(),
+                    Name = dataID,
                     Status = true,
                     IsPrivateChat = true
                 };

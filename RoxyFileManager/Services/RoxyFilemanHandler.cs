@@ -120,7 +120,7 @@ namespace FileManagerCore.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                return listUrl;
             }
 
             return listUrl;
