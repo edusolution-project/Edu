@@ -558,10 +558,33 @@ ul.nav-news-feed {
     display: block;
     width: 100%;
     float: left;
+    padding-bottom: 10px;
 }
     .item-single-chat .content-single-chat {
         padding: 5px 15px;
         background: #7cc6f1;
-        margin-top: 10px;
         display: inline-block;
     }
+span.number-unread {
+    height: 20px;
+    width: 17px;
+    background: #cf5a61;
+    border-radius: 50%;
+    color: #fff;
+    display: none;
+    position: relative;
+    top: -30px;
+}
+
+.number-unread.active {
+    display: inline-block;
+}
+
+.old-message, .message-load, .message-unread {
+    width:100%;
+    float: left;
+}
+.info-user > a > svg {
+    width: 100%;
+    height: 100%;
+}

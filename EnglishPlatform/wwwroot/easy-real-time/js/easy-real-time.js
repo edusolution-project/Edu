@@ -364,6 +364,7 @@ var onpenSingleChat = function (userid) {
                         msg.innerHTML += html;
                     }
                 }
+                msg.scrollIntoView({ block: "end" });
             }
         });
     }
@@ -406,16 +407,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 var msg = data.message;
                 var dataJson = JSON.parse(msg);
                 var item = dataJson.data;
-                var _our = "left";
-                if (item.sender == g_CurrentUser.id) {
-                    _our = "right";
+                if(chatBox.classList.contains("open")){
+                    var _our = "left";
+                    if (item.sender == g_CurrentUser.id) {
+                        _our = "right";
+                    }
+                    var html = `<div class="item-single-chat">
+                               <div class="content-single-chat ${_our}">
+                                   ${item.content}
+                               </div>
+                            </div>`;
+                    msgEL.innerHTML += html;
+                    msgEL.scrollIntoView({ block: "end" });
                 }
-                var html = `<div class="item-single-chat">
-                           <div class="content-single-chat ${_our}">
-                               ${item.content}
-                           </div>
-                        </div>`;
-                msgEL.innerHTML += html;
+              else{
+                var ab = document.getElementById("sing-chat-"+data.userReciver);
+                if(ab != null){
+                   var numberNoti = ab.querySelector(".number-unread");
+                    if (numberNoti != null) {
+                        numberNoti.classList.add("active");
+                        var number = numberNoti.innerHTML;
+                        if (number == "") numberNoti.innerHTML = "1";
+                        else {
+                            number = parseInt(numberNoti.innerHTML) + 1;
+                            numberNoti.innerHTML = `${number}`;
+                        }
+                    }
+                }
+              }
             }
         })
     }

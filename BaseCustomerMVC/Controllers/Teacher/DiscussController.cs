@@ -49,8 +49,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var listAccount = currentClass.Students;
                     var teacherID = currentClass.TeacherID;
                     ViewBag.Students = _studentService.Collection.Find(o => listAccount.Contains(o.ID))?.ToList()?
-                        .Select(x => new MemberInfo() { Name = x.FullName, Email = x.Email }).ToList();
-                    ViewBag.Teacher = new MemberInfo() { Name = teacher.FullName, Email = teacher.Email };
+                        .Select(x => new MemberInfo() { ID = x.ID,Name = x.FullName, Email = x.Email }).ToList();
+                    ViewBag.Teacher = new MemberInfo() { ID = teacher.ID, Name = teacher.FullName, Email = teacher.Email };
                 }
             }
             return View();

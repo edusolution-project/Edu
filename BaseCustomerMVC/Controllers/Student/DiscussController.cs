@@ -14,17 +14,20 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
-        public DiscussController(ClassService classService, StudentService studentService, TeacherService teacherService)
+        private readonly ClassStudentService _classStudentService;
+        public DiscussController(ClassService classService, StudentService studentService, TeacherService teacherService, ClassStudentService classStudentService)
         {
             _classService = classService;
             _studentService = studentService;
             _teacherService = teacherService;
+            _classStudentService = classStudentService;
         }
 
         public IActionResult Index(string id,string searchText)
         {
-            var listClass = _classService.Collection.Find(o => o.Students.Contains(User.Claims.GetClaimByType("UserID").Value)).ToList();
-            var listActive = listClass.Select(o => new ClassInfo()
+            var listClassID = _classStudentService.GetStudentClasses(User.Claims.GetClaimByType("UserID")?.Value);
+            var listClass = listClassID != null ? _classService.CreateQuery().Find(o=> listClassID.Contains(o.ID))?.ToList() : null;
+            var listActive = listClass?.Select(o => new ClassInfo()
             {
                 ID = o.ID,
                 IsAllow = o.EndDate >= DateTime.Now && o.StartDate <= DateTime.Now,
