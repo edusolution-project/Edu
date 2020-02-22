@@ -493,3 +493,98 @@ ul.nav-news-feed {
                     margin: 7px 0;
                     min-width: 0;
                 }
+.single-chat {
+    position: fixed;
+    height: 370px;
+    width: 380px;
+    bottom: 4px;
+    right: 0;
+    left: 0;
+    background: #fff;
+    z-index: 2000;
+    box-shadow: 0 0 20px #ccc;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    margin: auto;
+    display:none;
+}
+    .single-chat.open{
+        display:block;
+    }
+    .single-chat .body-single-chat {
+        height: 255px;
+        padding: 0 10px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+    }
+    .single-chat .footer-single-chat {
+        position: relative;
+        height:75px;
+    }
+
+.footer-single-chat > button {
+    position: absolute;
+    top: 0;
+    right: 7px;
+    bottom: 0;
+    height: 76%;
+    margin: auto;
+}
+    .footer-single-chat > textarea {
+        resize: none;
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+        border: 1px solid #c2c2c2;
+    }
+.single-chat .header-single-chat {
+    position: relative;
+    box-shadow: 0px 1px 10px #ccc;
+}
+
+    .header-single-chat .title-single-chat {
+        padding: 10px;
+    }
+
+    .header-single-chat > .btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        padding: 5px 15px;
+    }
+.item-single-chat {
+    display: block;
+    width: 100%;
+    float: left;
+    padding-bottom: 10px;
+}
+    .item-single-chat .content-single-chat {
+        padding: 5px 15px;
+        background: #7cc6f1;
+        display: inline-block;
+    }
+span.number-unread {
+    height: 20px;
+    width: 17px;
+    background: #cf5a61;
+    border-radius: 50%;
+    color: #fff;
+    display: none;
+    position: relative;
+    top: -30px;
+}
+
+.number-unread.active {
+    display: inline-block;
+}
+
+.old-message, .message-load, .message-unread {
+    width:100%;
+    float: left;
+}
+.info-user > a > svg {
+    width: 100%;
+    height: 100%;
+}

@@ -98,6 +98,11 @@ namespace BaseEasyRealTime.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(receivers))
+                {
+                    return new JsonResult(new { code = 200, msg = "Success", data = new List<NewFeedEntity>() }) ;
+                }
+
                 if (User != null && User.Identity.IsAuthenticated)
                 {
                     if (string.IsNullOrEmpty(id))

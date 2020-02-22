@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BaseEasyRealTime.Entities
 {
@@ -25,8 +26,10 @@ namespace BaseEasyRealTime.Entities
         }
         public string GetGroupName(string member1, string member2)
         {
-            var item = Collection.Find(o => o.IsPrivateChat == true && o.Members.Count == 2 && o.Members.Contains(member1) && o.Members.Contains(member2))?.SingleOrDefault();
-            if(item == null)
+            var dataID = Guid.NewGuid().ToString();
+            var listItem = Collection.Find(o => o.IsPrivateChat == true && o.Members.Count == 2 && (o.Members.Contains(member1) && o.Members.Contains(member2)))?.ToList();
+            var item = listItem == null || listItem.Count == 0 ? null : listItem?.LastOrDefault();
+            if (item == null)
             {
                 item = new GroupEntity()
                 {
@@ -34,7 +37,7 @@ namespace BaseEasyRealTime.Entities
                     CreateUser = member1,
                     DisplayName = "",
                     Members = new HashSet<string>() { member1, member2 },
-                    Name = new Guid().ToString(),
+                    Name = dataID,
                     Status = true,
                     IsPrivateChat = true
                 };
@@ -42,7 +45,7 @@ namespace BaseEasyRealTime.Entities
             }
             return item.Name;
         }
-        public GroupEntity Create(string displayName,string name, string userCreated, HashSet<string> memembers, HashSet<string> masterGroup)
+        public GroupEntity Create(string displayName, string name, string userCreated, HashSet<string> memembers, HashSet<string> masterGroup)
         {
             var item = new GroupEntity()
             {
@@ -58,10 +61,10 @@ namespace BaseEasyRealTime.Entities
             Collection.InsertOne(item);
             return item;
         }
-        public GroupEntity ChangeDisplayName(string id,string displayName)
+        public GroupEntity ChangeDisplayName(string id, string displayName)
         {
             var item = GetItemByID(id);
-            if(item != null)
+            if (item != null)
             {
                 item.DisplayName = displayName;
                 CreateOrUpdate(item);

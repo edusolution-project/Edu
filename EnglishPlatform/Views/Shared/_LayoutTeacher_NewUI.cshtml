@@ -16,8 +16,8 @@
     <link href="https://fonts.googleapis.com/css?family=Be+Vietnam&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/fonts.css">
     @*longht them*@
+    <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
     <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
-
     <link rel="stylesheet" href="/css/stylesheet.min.css">
     @*<script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>*@
@@ -39,7 +39,8 @@
         const g_CurrentUser = {
             email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
             name: "@User.Identity.Name",
-            type:'@User.FindFirst("Type")?.Value'
+            type: '@User.FindFirst("Type")?.Value',
+            id: "@User.FindFirst("UserID")?.Value"
         }
     </script>
 </head>
@@ -166,6 +167,33 @@
         </aside>
         @RenderSection("Modals", false)
     </main>
+    <!-- chat--->
+    <div class="single-chat" id="single-chat">
+        <div class="box-single-chat">
+            <div class="header-single-chat">
+                <div class="title-single-chat"></div>
+                <button class="btn btn-close" onclick="javascript: document.getElementById('single-chat').classList.remove('open');">X</button>
+            </div>
+            <div class="body-single-chat">
+                <div class="old-message">old-message</div>
+                <div class="message-load">
+
+                    <div class="item-single-chat">
+                        <div class="sender-name">Hoangf Thai Long</div>
+                        <div class="content-single-chat">
+                            msg.innerHTML +=
+                        </div>
+                    </div>
+
+                </div>
+                <div class="message-unread">message-unread</div>
+            </div>
+            <div class="footer-single-chat">
+                <textarea style="resize:none"></textarea>
+                <button class="btn btn-sm btn-success">Send</button>
+            </div>
+        </div>
+    </div>
     <script>
         new Vue({
             el: ".list-news",
