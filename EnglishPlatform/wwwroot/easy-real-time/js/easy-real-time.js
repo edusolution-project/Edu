@@ -421,19 +421,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     msgEL.scrollIntoView({ block: "end" });
                 }
               else{
-                var ab = document.getElementById("sing-chat-"+data.userReciver);
-                if(ab != null){
-                   var numberNoti = ab.querySelector(".number-unread");
-                    if (numberNoti != null) {
-                        numberNoti.classList.add("active");
-                        var number = numberNoti.innerHTML;
-                        if (number == "") numberNoti.innerHTML = "1";
-                        else {
-                            number = parseInt(numberNoti.innerHTML) + 1;
-                            numberNoti.innerHTML = `${number}`;
+                    var ab = document.getElementById("sing-chat-" + item.sender);
+                    if(ab != null){
+                       var numberNoti = ab.querySelector(".number-unread");
+                        if (numberNoti != null) {
+                            numberNoti.classList.add("active");
+                            var number = numberNoti.innerHTML;
+                            if (number == "") numberNoti.innerHTML = "1";
+                            else {
+                                number = parseInt(numberNoti.innerHTML) + 1;
+                                numberNoti.innerHTML = `${number}`;
+                            }
                         }
                     }
-                }
               }
             }
         })

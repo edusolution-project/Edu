@@ -15,11 +15,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
-        public DiscussController(ClassService classService, StudentService studentService, TeacherService teacherService)
+        private readonly ClassStudentService _classStudentService;
+        public DiscussController(ClassService classService, StudentService studentService, TeacherService teacherService, ClassStudentService classStudentService)
         {
             _classService = classService;
             _studentService = studentService;
             _teacherService = teacherService;
+            _classStudentService = classStudentService;
         }
 
         public IActionResult Index(string id, string searchText)
@@ -46,9 +48,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Name = currentClass.Name,
                         IsAllow = currentClass.StartDate <= DateTime.Now && currentClass.EndDate >= DateTime.Now
                     };
-                    var listAccount = currentClass.Students;
+                    var listAccount = _classStudentService.GetClassStudents(currentClass.ID)?.Select(o => o.ID)?.ToList();
                     var teacherID = currentClass.TeacherID;
-                    ViewBag.Students = _studentService.Collection.Find(o => listAccount.Contains(o.ID))?.ToList()?
+                    ViewBag.Students = _studentService.Collection.Find(o => listAccount.Contains(o.StudentId))?.ToList()?
                         .Select(x => new MemberInfo() { ID = x.ID,Name = x.FullName, Email = x.Email }).ToList();
                     ViewBag.Teacher = new MemberInfo() { ID = teacher.ID, Name = teacher.FullName, Email = teacher.Email };
                 }

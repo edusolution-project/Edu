@@ -35,7 +35,7 @@ namespace BaseHub
             {
                 IReadOnlyList<string> listUSerReadOnly = listUser?.ToList()?.AsReadOnly();
                 await Clients.Clients(listUSerReadOnly).SendAsync("ChatToUser", new {UserReciver = user , UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
-                await Clients.Caller.SendAsync("ChatToUser", new { UserReciver = user, UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+                await Clients.Caller.SendAsync("ChatToUser", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
             }
             await Task.CompletedTask;
         }
