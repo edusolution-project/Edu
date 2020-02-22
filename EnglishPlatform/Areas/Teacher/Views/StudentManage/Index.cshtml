@@ -20,10 +20,11 @@
         <div class="flex border-b padding-b25 justify-content-between">
             <div class="flex width-100">
                 <div class="box filter-box w-152">
-                    <select name="" v-model="search_class_id">
-                        <option value="">Lớp</option>
-                        <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
-                    </select>
+                    @*<select name="" v-model="search_class_id">
+            <option value="">Lớp</option>
+            <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
+        </select>*@
+                    <autocomplete v-on:chooseitem="chooseStudent" :item="this" />
                 </div>
                 <div class="box filter-box w-152">
                     <select name="" v-model="search_subject_id">
@@ -72,10 +73,8 @@
                     @*<td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
                         <td>{{item.last_update}}</td>
                         <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>*@
-
                     <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
                 </tr>
-
             </tbody>
         </table>
         <div class="box margin-t20 flex">
@@ -303,6 +302,12 @@
                     email: "",
                     class_id: ""
                 },
+                
+                studentTest: [
+                    { FullName: "", Email: "", class_id: ""
+                    }
+                ],
+
                 fields: [
                     {
                         key: 'stt',
