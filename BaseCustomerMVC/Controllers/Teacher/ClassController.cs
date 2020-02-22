@@ -925,19 +925,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
 
+
             var data = _classSubjectService.Collection
                 //.AsQueryable().
                 //GroupBy(t => t.ClassID).Select(t => new ClassViewModel(t) {
                 //    CourseName = 
                 //})
                 .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
-            model.TotalRecord = data.Count();
-            var classData = _service.Collection.AsQueryable().Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)).OrderByDescending(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToList();
-            var returndata = from o in classData
-                                 //where o.Skills != null
-                             let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
-                             let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
-                             select new Dictionary<string, object>
+
+            if (data.Count > 0)
+            {
+                var classfilter = new List<FilterDefinition<ClassEntity>>();
+                classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
+                if (!string.IsNullOrEmpty(model.SearchText))
+                    classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
+                var classResult = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classfilter));
+                model.TotalRecord = classResult.CountDocuments();
+                var classData = classResult.SortBy(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+                var returndata = from o in classData
+                                 let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
+                                 let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
+                                 select new Dictionary<string, object>
                              {
                                  { "ID", o.ID },
                                  { "Name", o.Name },
@@ -953,9 +961,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Description", o.Description },
                                  { "SkillName", sname }
                              };
-
-
-            return returndata.ToList();
+                return returndata.ToList();
+            }
+            return null;
         }
 
 

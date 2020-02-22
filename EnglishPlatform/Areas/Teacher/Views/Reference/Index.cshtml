@@ -1,7 +1,16 @@
 ﻿@{
+
     ViewData["Title"] = "Reference - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    var myClasses = ViewBag.AllClass as List<BaseCustomerEntity.Database.ClassEntity>;
+    var owner = ViewBag.User as string;
 }
+
+<script src="../libs/quill-editor/quill.min.js"></script>
+<script src="../libs/quill-editor/quill-vue.min.js"></script>
+<link href="../libs/quill-editor/quill.core.css" rel="stylesheet">
+<link href="../libs/quill-editor/quill.snow.css" rel="stylesheet">
+<link href="../libs/quill-editor/quill.bubble.css" rel="stylesheet">
 <script>
     setActiveMenu("reference");
 </script>
@@ -11,64 +20,80 @@
         <div class="flex border-b padding-b25">
             <div class="width-100 flex">
                 <div class="box filter-box w-152">
-                    <select v-model="course">
-                        <option value="">Khoá học</option>
-                        <option value="all">Tất cả</option>
+                    <select v-model="range">
+                        <option value="">-- Chọn phạm vi chia sẻ --</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Công khai</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
+                        @*<option value="@BaseCustomerEntity.Database.REF_RANGE.CLASSSUBJECT">Môn</option>*@
                     </select>
                 </div>
-                <div class="box filter-box w-152">
-                    <select v-model="level">
-                        <option value="">Cấp độ</option>
-                        <option value="0">Tất cả</option>
+                <div class="box filter-box w-152" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+                    <select v-model="target">
+                        <option value="">-- Chọn lớp --</option>
+                        @if (myClasses != null && myClasses.Count > 0)
+                        {
+                            foreach (var _class in myClasses)
+                            {
+                                <option value="@_class.ID">@_class.Name (@_class.Code)</option>
+                            }
+                        }
                     </select>
                 </div>
+                <div class="search-box mr-2">
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
+                </div>
             </div>
-            <div class="search-box">
-                <button><i class="ic ic-find"></i></button>
-                <input type="text" name="" placeholder="Search">
-            </div>
+
+            <b-button class="btn-addevent" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
         </div>
     </div>
     <div class="card-body">
         <div class="row ls-doc">
-            <div class="col-md-12">
-                <div class="inner">
+            <div class="col-md-12" v-for="data in tableData">
+                <div class="inner flex">
                     <a href="#" title="" class="thumb">
                         <img src="/pictures/doc1.png" alt="">
                     </a>
                     <div class="entry">
-                        <div class="flex j-between">
-                            <div class="c-left">
-                                <a href="#" title="" class="title">IELTS Practice Tests</a>
-                                <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                        <div>
+                            <div>
+                                <a href="#" title="" class="title">{{data.Title}}</a>
                             </div>
-                            <div class="c-right">
-                                <a href="#" title="Xem" class="btn-view">Xem</a>
-                                <a href="#" title="Tải về" class="btn-download">Tải về</a>
+                            <div>
+                                <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
                             </div>
                         </div>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</p>
+                        <div class="pt-2 pb-2">
+                            <p>{{domDecoder(data.Description)}}</p>
+                        </div>
+                        <div>
+                            <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem</a>
+                            <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về</a>
+                            <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'">Xóa</a>
+                            <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'">Sửa</a>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-12">
-                <div class="inner">
-                    <a href="#" title="" class="thumb">
-                        <img src="/pictures/doc2.png" alt="">
-                    </a>
-                    <div class="entry">
-                        <div class="flex j-between">
-                            <div class="c-left">
-                                <a href="#" title="" class="title">IELTS Practice Tests</a>
-                                <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                            </div>
-                            <div class="c-right">
-                                <a href="#" title="Xem" class="btn-view">Xem</a>
-                                <a href="#" title="Tải về" class="btn-download">Tải về</a>
-                            </div>
-                        </div>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</p>
-                    </div>
+        </div>
+        <div class="box margin-t20 flex">
+            <div class="paging-view">
+                Hiển thị:
+                <select v-model="view" v-on:change="getData()">
+                    <option value="10">10 kết quả</option>
+                    <option value="20">20 kết quả</option>
+                    <option value="30">30 kết quả</option>
+                </select>
+            </div>
+            <div class="page-control">
+                <div class="right">
+                    <b-pagination v-model="page"
+                                  :total-rows="totalRec"
+                                  :per-page="view"
+                                  v-on:input="getData()"></b-pagination>
                 </div>
             </div>
         </div>
@@ -77,38 +102,276 @@
 
 @section Scripts{
     <script>
+        Vue.use(VueQuillEditor)
         new Vue({
-            el: ".module",
-            data: {
-            list_news : [
-                {
-                    title : 'Đã đến lúc HLV Park',
-                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                    thumbnail : '/pictures/news1.png'
-                },
-                {
-                    title : 'HLV Park: Có khi p',
-                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                    thumbnail : '/pictures/news2.png'
-                },
-                {
-                    title : 'Tiến Dũng và Văn Toả',
-                    description : 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                    thumbnail : '/pictures/news3.png'
-                }
-            ],
-            week : '',
-            course : 'all',
-            level : 0
-        },
-        watch : {
-        },
-        methods: {
-
-            getNews(){
-                // tương tự như trên
+            el: "#main",
+            mounted() {
+                this.getData()
             },
-        }
+            components: {
+          	    LocalQuillEditor: VueQuillEditor.quillEditor
+            },
+            data: {
+                isLoading: false,
+                editorOption: {
+                    theme: 'snow'
+                },
+                range: '',
+                target: '',
+                searchTerm: '',
+                tableData: [],
+                view: 30,
+                totalRec: 0,
+                page: 1,
+                addItem: {
+                            ID: '',
+                            Title: '',
+                            Range: '',
+                            Link: '',
+                            Target: '',
+                            Description: '',
+                            FileName: '',
+                            file: null,
+                        }
+            },
+            watch : {
+                searchTerm: function(){
+                    if(this.searchTimeout != null)
+                        clearTimeout(this.searchTimeout)
+                    var fn = this.getData
+                    this.searchTimeout = setTimeout(function(){
+                        fn()
+                    }, 500)
+                },
+                range: function(){
+                    this.getData()
+                },
+                target: function(){
+                    this.getData()
+                }
+            },
+            methods: {
+                getData(){
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('SearchText', _that.searchTerm)
+                    _form.append('Range', _that.range)
+                    _form.append('Target', _that.target)
+                    _form.append('PageSize', _that.view)
+                    _form.append('PageIndex', _that.page)
+
+                    let _url = '@Url.Action("GetList", "Reference")'
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.tableData = response.data.Data;
+                            this.tableData = _that.tableData
+                            this.totalRec = response.data.Model.totalRecord
+                            console.log(totalRec)
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
+                            //console.log(_that.active_course);
+                        }).catch(e => { })
+                },
+                showAddModal(obj) {
+                    let _that = this;
+                    if (obj == null) {
+                        _that.addItem.ID = '';
+                        _that.addItem.Title = '';
+                        _that.addItem.Range = '';
+                        _that.addItem.Link = '';
+                        _that.addItem.Target = '';
+                        _that.addItem.Description = '';
+                        _that.addItem.FileName = '';
+                    }
+                    else {
+                        _that.addItem.ID = obj.ID;
+                        _that.addItem.Title = obj.Title;
+                        _that.addItem.Range = obj.Range;
+                        _that.addItem.Link = obj.Link;
+                        _that.addItem.Description = obj.Description;
+                        _that.addItem.Target = obj.Target;
+                        if(obj.Media != null)
+                            _that.addItem.FileName = obj.Media.Name;
+                        else
+                            _that.addItem.FileName = '';
+                    }
+        _that.addItem.file = {};
+                    _that.$bvModal.show('modal_event')
+                },
+        openLink(obj){
+            window.open(obj.Link)
+        },
+            download(obj)
+        {
+            if(obj.Media == null)
+        return false;
+            window.open('@Url.Action("Download", "Reference")/' + obj.ID);
+        },
+            updateData() {
+                    let _that = this
+                    let _form = new FormData()
+
+
+                    if (_that.addItem.Title == '') {
+                        swal.fire({
+                            title: "Có lỗi",
+                            text: "Vui lòng nhập đủ thông tin",
+                            icon: 'warning',
+                        });
+                        this.$refs["addName"].focus();
+                        return false;
+                    }
+                    _form.append('ID', _that.addItem.ID)
+                    _form.append('Title', _that.addItem.Title)
+                    _form.append('Link', _that.addItem.Link)
+                    _form.append('Target', _that.addItem.Target)
+                    _form.append('Name', _that.addItem.Title)
+                    _form.append('Description', _that.addItem.Description)
+                    _form.append('Range', _that.addItem.Range)
+
+                        if (_that.addItem.file) {
+                            _form.append('fileUpload', this.addItem.file)
+                        }
+
+
+                    let _url = '@Url.Action("Save", "Reference")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                if(response.Error == null)
+                                {
+                                    Swal.fire(
+                                      'Đã cập nhât!',
+                                      'Tài liệu đã cập nhật thành công',
+                                      'success'
+                                    )
+        this.hideModal()
+                                    this.getData()
+                                }
+                                else
+                                {
+                                    Swal.fire(
+                                      'Có lỗi!',
+                                      response.Error,
+                                      'error'
+                                    )
+                                }
+
+                            }).catch(e => { })
+            },
+                deleteData(obj){
+                    Swal.fire({
+                      title: 'Chắc chắn xóa?',
+                      text: "Bạn sẽ không thể khôi phục lại dữ liệu này sau khi xóa",
+                      icon: 'warning',
+                      showCancelButton: true,
+                      confirmButtonColor: '#3085d6',
+                      cancelButtonColor: '#d33',
+                      cancelButtonText: 'Hủy',
+                      confirmButtonText: 'Đồng ý'
+                    }).then((result) => {
+                        let _form = new FormData()
+                        _form.append('ID', obj.ID)
+                        let _url = '@Url.Action("Remove", "Reference")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                if(response.Error == null)
+                                {
+                                    Swal.fire(
+                                      'Đã xóa!',
+                                      'Tài liệu của bạn đã được xóa',
+                                      'success'
+                                    )
+                                    this.getData()
+                                }
+                                else
+                                {
+                                    Swal.fire(
+                                      'Có lỗi!',
+                                      response.Error,
+                                      'error'
+                                    )
+                                }
+
+                            }).catch(e => { })
+                    })
+                },
+
+
+                changeFile()
+                {
+
+                    this.addItem.FileName = event.target.files[0].name
+                    this.addItem.file = event.target.files[0]
+                },
+                domDecoder(str) {
+                    let parser = new DOMParser();
+                    let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
+                    return dom.body.textContent;
+                },
+                shortenString(str)
+                {
+                    if(str == null || str.length <= 15)
+                        return "";
+                    return str.substring(0,15) + "..."
+                },
+                hideModal() {
+                    $('.close').click();
+                },
+            }
         });
     </script>
+}
+
+@section Modals{
+    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Cập nhật tài liệu tham khảo">
+        <b-col class="form-group">
+            <label for="">Tên tài liệu</label>
+            <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addItem.Title">
+        </b-col>
+        <b-col class="form-group">
+            <label for="">Mô tả</label>
+            <quill-editor v-model="addItem.Description"
+                          ref="quillEditorA"
+                          :options="editorOption">
+            </quill-editor>
+        </b-col>
+        <b-col class="form-group">
+            <label for="">Link liên kết</label>
+            <input type="text" name="" value="" class="form-control" placeholder="Link liên kết" v-model="addItem.Link">
+        </b-col>
+        <b-col class="form-group">
+            <label class="col-form-label">File đính kèm:</label>
+            <i class="ic ic-paper-clip"></i><label class="p-1" ref="filedsp" v-on:click="$refs.file.click()">{{shortenString(addItem.FileName)}} - (Click để chọn)</label>
+            <input type="file" ref="file" class="d-none" v-on:change="changeFile()">
+        </b-col>
+        <b-col class="form-group">
+            <label class="col-form-label">Phạm vi chia sẻ:</label>
+            <select name="range" onchange="ChooseRange()" id="refRange" class="form-control d-inline w-25" v-model="addItem.Range">
+                <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Công khai</option>
+                <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
+                <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
+            </select>
+            <select name="target" id="refTarget" v-model="addItem.Target" class="form-control d-inline w-25" v-if="addItem.Range == '@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+                <option value="">-- Chọn lớp --</option>
+                @if (myClasses != null && myClasses.Count > 0)
+                {
+                    foreach (var _class in myClasses)
+                    {
+                        <option value="@_class.ID">@_class.Name (@_class.Code)</option>
+                    }
+                }
+            </select>
+        </b-col>
+
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="updateData()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
 }

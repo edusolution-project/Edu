@@ -45,7 +45,7 @@ namespace BaseCustomerEntity.Database
         public string SubjectID { get; set; }
         [JsonProperty("CourseID")]
         public string CourseID { get; set; }
-        [JsonProperty("TeacherID")] 
+        [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
         [JsonProperty("Syllabus")]
         public string Syllabus { get; set; }
@@ -81,7 +81,10 @@ namespace BaseCustomerEntity.Database
                     new IndexKeysDefinitionBuilder<ClassEntity>()
                     .Ascending(t=> t.TeacherID)
                     .Ascending(t => t.SubjectID)
-                    .Ascending(t=> t.GradeID))
+                    .Ascending(t=> t.GradeID)),
+                new CreateIndexModel<ClassEntity>(
+                    new IndexKeysDefinitionBuilder<ClassEntity>()
+                    .Text(t=> t.Name))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

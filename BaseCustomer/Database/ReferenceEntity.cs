@@ -41,9 +41,9 @@ namespace BaseCustomerEntity.Database
 
     public class REF_RANGE
     {
-        public const string 
-            ALL = "all", 
-            TEACHER = "teacher", 
+        public const string
+            ALL = "all",
+            TEACHER = "teacher",
             CLASS = "class",
             CLASSSUBJECT = "classsubject",
             COURSE = "course",
@@ -72,7 +72,10 @@ namespace BaseCustomerEntity.Database
                     new IndexKeysDefinitionBuilder<ReferenceEntity>()
                     .Ascending(t => t.Range)
                     .Ascending(t=> t.Target)
-                    .Descending(t=> t.CreateTime))
+                    .Descending(t=> t.CreateTime)),
+                new CreateIndexModel<ReferenceEntity>(
+                    new IndexKeysDefinitionBuilder<ReferenceEntity>().Text(t=> t.Title)
+                )
             };
             Collection.Indexes.CreateManyAsync(indexs);
         }

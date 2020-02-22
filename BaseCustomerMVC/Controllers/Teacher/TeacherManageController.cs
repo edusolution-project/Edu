@@ -16,7 +16,7 @@ using System.Globalization;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
-    public class StudentManageController : TeacherController
+    public class TeacherManageController : TeacherController
     {
         private readonly GradeService _gradeService;
         private readonly AccountService _accountService;
@@ -37,7 +37,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly IHostingEnvironment _env;
 
 
-        public StudentManageController(
+        public TeacherManageController(
             AccountService accountService,
             RoleService roleService,
             GradeService gradeservice,
@@ -162,6 +162,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (!string.IsNullOrEmpty(GradeID))
                 filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
 
+
             var classids = (filterCs.Count > 0 ? _classSubjectService.Collection
                 .Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs))
                 //.Find(Builders<ClassSubjectEntity>.Filter.And(filterCs))
@@ -172,24 +173,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     { "Model", model }
                 });
-            var retStudents = new List<ClassStudentEntity>();
 
-            if (!string.IsNullOrEmpty(model.SearchText))
-            {
-                var studentids = _studentService.Collection.Find(Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")).Project(t => t.ID).ToList();
-                //TODO: Lưu ý chỗ này, khi lượng sinh viên lớn thì tương đối nặng
-                var list = _classStudentService.Collection.Find(t => classids.Contains(t.ClassID) && studentids.Contains(t.StudentID)).SortByDescending(t => t.ID);
-                model.TotalRecord = list.CountDocuments();
-                //var filter = new List<FilterDefinition<StudentEntity>>();
-                retStudents = list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
-            }
-            else
-            {
-                var studentList = _classStudentService.Collection.Find(t => classids.Contains(t.ClassID)).SortByDescending(t => t.ID);
-                model.TotalRecord = studentList.CountDocuments();
-                //var filter = new List<FilterDefinition<StudentEntity>>();
-                retStudents = studentList.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
-            }
+            var studentids = _classStudentService.Collection.Find(t => classids.Contains(t.ClassID)).SortByDescending(t => t.ID);
+            model.TotalRecord = studentids.CountDocuments();
+            var filter = new List<FilterDefinition<StudentEntity>>();
+
+            var retStudents = studentids.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+
             //filter.Add(Builders<StudentEntity>.Filter.Where(o => retStudents.Contains(o.ID)));
             //var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
 
@@ -197,7 +187,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var studentsView = new List<ClassStudentViewModel>();
 
-            if (string.IsNullOrEmpty(SubjectID))
+            if(string.IsNullOrEmpty(SubjectID))
             {
                 studentsView = (from r in retStudents
                                 let @class = _classService.GetItemByID(r.ClassID)

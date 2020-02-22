@@ -31,17 +31,12 @@
                 </div>
                 <div class="search-box">
                     <button><i class="ic ic-find"></i></button>
-                    <input type="text" name="" placeholder="Search">
+                    <input type="text" name="" v-model="searchTerm" placeholder="Tên lớp cần tìm">
                 </div>
             </div>
-            @if (isHeadteacher)
-            {
-                <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
-            }
-            else
-            { 
-                <b-button class="btn-addevent btn-sm" v-on:click="Swal.fire({title: 'Lưu ý', html: 'Bạn chưa được phân quyền thực hiện chức năng này',icon: 'warning'});"><i class="ti-plus"></i> Thêm lớp</b-button>
-            }
+
+
+            <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
         </div>
     </div>
     <div class="card-body">
@@ -147,6 +142,7 @@
                     RepDate(s, e);
                     GetData();
                 });
+                this.view = 30
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.list_skill = @Html.Raw(Json.Serialize(skills));
@@ -200,13 +196,14 @@
                 courseSource: [],
                 loaded_teacher: [],
                 loaded_course: [],
-                view: 10,
+                view: 20,
                 totalRec: 0,
                 page: 1,
+                searchTerm: '',
                 startdate: moment(),
                 enddate: moment().add(29, 'days'),
                 class_info: {
-                            ID: '',
+                    ID: '',
                     Name: '',
                     StartDate: '',
                     EndDate: '',
@@ -251,7 +248,16 @@
             watch: {
                 subject: function () {
                     this.getData()
-                }
+                },
+                searchTerm: function(){
+                    if(this.searchTimeout != null)
+                        clearTimeout(this.searchTimeout)
+                    var fn = this.getData
+                    this.searchTimeout = setTimeout(function(){
+                        fn()
+                        fn = null
+                    }, 500)
+                },
             },
             methods: {
                 getData() {
@@ -262,6 +268,7 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('StartDate', _that.sDate)
                     _form.append('EndDate', _that.eDate)
+                    _form.append('SearchText', _that.searchTerm)
 
                     @if(!User.IsInRole("head-teacher"))
                     {
@@ -546,25 +553,38 @@
                         //console.log(_that.loaded_teacher);
                         if (_that.loaded_teacher.includes(obj.SubjectID)) return;
                         //_that.loaded_teacher.push(obj.SubjectID);
-                        let _form = new FormData()
-                        _form.append('SubjectID', obj.SubjectID)
-                        let _url = '@Url.Action("GetListTeacher", "Class")'
-                        axios.post(_url, _form)
-                            .then(response => {
-                            var _data = response.data.Data;
-                            _data.forEach(function (item, k)
-                            {
-                                if (_that.teacherSource.findIndex(tc => tc.ID == item.id && tc.SubjectID == obj.SubjectID) == -1)
-                                _that.teacherSource.push({
-                                    ID: item.id,
-                                    FullName: item.fullname,
-                                    SubjectID: obj.SubjectID,
-                                    IsActive: true
-                                })
-                            })
-                                //console.log(_that.teacherSource)
-                            _that.loaded_teacher.push(obj.SubjectID);
-                        }).catch(e => { })
+                        @if(isHeadteacher)
+                        {
+                            @:let _form = new FormData()
+                            @:  _form.append('SubjectID', obj.SubjectID)
+                            @:  let _url = '@Url.Action("GetListTeacher", "Class")'
+                            @:  axios.post(_url, _form)
+                            @:      .then(response => {
+                            @:          var _data = response.data.Data;
+                            @:          _data.forEach(function (item, k)
+                            @:          {
+                            @:              if (_that.teacherSource.findIndex(tc => tc.ID == item.id && tc.SubjectID == obj.SubjectID) == -1)
+                            @:                  _that.teacherSource.push({
+                            @:                      ID: item.id,
+                            @:                      FullName: item.fullname,
+                            @:                      SubjectID: obj.SubjectID,
+                            @:                      IsActive: true
+                            @:                  })
+                            @:          })
+                            @:          _that.loaded_teacher.push(obj.SubjectID);
+                            @:          }).catch(e => { })
+
+                        }
+                        else
+                        {
+                            @: _that.teacherSource.push({
+                            @:      ID: '@User.Claims.FirstOrDefault(t=> t.Type=="UserID").Value',
+                            @:      FullName: '@User.Identity.Name',
+                            @:      SubjectID: obj.SubjectID,
+                            @:      IsActive: true
+                            @: })
+                            @: _that.loaded_teacher.push(obj.SubjectID);
+                        }
                     }
                 },
                 changeAddGrade(obj) {

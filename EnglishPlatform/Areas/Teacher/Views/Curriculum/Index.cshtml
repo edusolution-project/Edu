@@ -31,6 +31,10 @@
                         <option v-for="(item,k) in list_grades" :value="item.ID">{{item.Name}}</option>
                     </select>
                 </div>
+                <div class="search-box">
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" v-model="searchTerm" placeholder="Tên bài giảng cần tìm">
+                </div>
             </div>
             <b-button class="btn-addevent" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
         </div>
@@ -144,6 +148,7 @@
                         label: 'Tác vụ'
                     }
                 ],
+                searchTerm: '',
                 list_skills: [],
                 list_data: [],
                 list_subject: [],
@@ -191,7 +196,15 @@
                 },
                 add_subject: function () {
                     this.changeAddSubject();
-                }
+                },
+                searchTerm: function(){
+                    if(this.searchTimeout != null)
+                        clearTimeout(this.searchTimeout)
+                    var fn = this.getData
+                    this.searchTimeout = setTimeout(function(){
+                        fn()
+                    }, 500)
+                },
             },
             methods: {
                 getData() {
@@ -201,6 +214,8 @@
                     _form.append('SubjectID', _that.subject)
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
+                    _form.append('SearchText', _that.searchTerm)
+
                     let _url = '@Url.Action("GetList", "Curriculum")'
                     axios.post(_url, _form)
                         .then(response => {

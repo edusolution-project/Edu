@@ -68,6 +68,10 @@ namespace BaseCustomerEntity.Database
                     new IndexKeysDefinitionBuilder<CourseEntity>()
                     .Ascending(t => t.SubjectID)
                     .Ascending(t=> t.GradeID)
+                    ),
+                new CreateIndexModel<CourseEntity>(
+                    new IndexKeysDefinitionBuilder<CourseEntity>()
+                    .Text(t=> t.Name)
                     )
             };
 

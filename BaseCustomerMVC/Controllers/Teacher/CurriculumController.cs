@@ -274,6 +274,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (User.Claims.GetClaimByType(ClaimTypes.Role).Value == "teacher")
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
 
+            if (!string.IsNullOrEmpty(model.SearchText))
+                filter.Add(Builders<CourseEntity>.Filter.Text("\"" + model.SearchText + "\""));
+
+
             var data = (filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);
             model.TotalRecord = data.CountDocuments();
 
@@ -329,8 +333,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
 
-            //if (!(cp && CheckPermission(PERMISSION.COURSE_EDIT)))
-            //    filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
+            if (User.Claims.GetClaimByType(ClaimTypes.Role).Value == "teacher")
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
+
             filter.Add(Builders<CourseEntity>.Filter.Where(o => o.IsActive));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
