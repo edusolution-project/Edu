@@ -27,23 +27,46 @@ namespace BaseEasyRealTime.Entities
         public string GetGroupName(string member1, string member2)
         {
             var dataID = Guid.NewGuid().ToString();
-            var listItem = Collection.Find(o => o.IsPrivateChat == true && o.Members.Count == 2 && (o.Members.Contains(member1) && o.Members.Contains(member2)))?.ToList();
-            var item = listItem == null || listItem.Count == 0 ? null : listItem?.LastOrDefault();
-            if (item == null)
+            if (member1 == member2)
             {
-                item = new GroupEntity()
+                var listItem = Collection.Find(o => o.IsPrivateChat == true && o.Members.Count == 1 && o.Members.Contains(member1))?.ToList();
+                var item = listItem == null || listItem.Count == 0 ? null : listItem?.LastOrDefault();
+                if (item == null)
                 {
-                    Created = DateTime.Now,
-                    CreateUser = member1,
-                    DisplayName = "",
-                    Members = new HashSet<string>() { member1, member2 },
-                    Name = dataID,
-                    Status = true,
-                    IsPrivateChat = true
-                };
-                Collection.InsertOne(item);
+                    item = new GroupEntity()
+                    {
+                        Created = DateTime.Now,
+                        CreateUser = member1,
+                        DisplayName = "",
+                        Members = new HashSet<string>() { member1},
+                        Name = dataID,
+                        Status = true,
+                        IsPrivateChat = true
+                    };
+                    Collection.InsertOne(item);
+                }
+                return item.Name;
             }
-            return item.Name;
+            else
+            {
+                var listItem = Collection.Find(o => o.IsPrivateChat == true && o.Members.Count == 2 && (o.Members.Contains(member1) && o.Members.Contains(member2)))?.ToList();
+                var item = listItem == null || listItem.Count == 0 ? null : listItem?.LastOrDefault();
+                if (item == null)
+                {
+                    item = new GroupEntity()
+                    {
+                        Created = DateTime.Now,
+                        CreateUser = member1,
+                        DisplayName = "",
+                        Members = new HashSet<string>() { member1, member2 },
+                        Name = dataID,
+                        Status = true,
+                        IsPrivateChat = true
+                    };
+                    Collection.InsertOne(item);
+                }
+                return item.Name;
+            }
         }
         public GroupEntity Create(string displayName, string name, string userCreated, HashSet<string> memembers, HashSet<string> masterGroup)
         {
