@@ -50,11 +50,11 @@ namespace BaseEasyRealTime.Controllers
                         Views = new HashSet<string>()
                     };
                     _service.CreateOrUpdate(item);
-                    return new JsonResult(new { code = 200, msg = "Đăng bài thành công", data = item });
+                    return new JsonResult(new { code = 200, msg = "Đăng bài thành công", data = item , receiver = receiver});
                 }
                 else
                 {
-                    return new JsonResult(new { code = 201, msg = "Đăng nhập đển viết bài !!! " });
+                    return new JsonResult(new { code = 201, msg = "Đăng nhập để viết bài !!! " });
                 }
             }
             catch (Exception ex)
@@ -116,7 +116,7 @@ namespace BaseEasyRealTime.Controllers
                             .Limit((int)pageSize)?
                             .SortBy(o=>o.Created)?
                             .ToList();
-                        return new JsonResult(new { code = listItem == null ? 404 : 200, msg = listItem == null ? "Không tìm thấy bài đăng" : "Đã tìm thấy bài viết", data = listItem });
+                        return new JsonResult(new { code = listItem == null ? 404 : 200, msg = listItem == null ? "Không tìm thấy bài đăng" : "Đã tìm thấy bài viết", data = listItem, receiver = receiver });
                     }
                     else
                     {
@@ -148,13 +148,13 @@ namespace BaseEasyRealTime.Controllers
                     else
                     {
                         var item = _service.GetItemByID(id);
-                        if (item.Views.Contains(User.FindFirst(ClaimTypes.Email).Value))
+                        if (item.Views.Contains(User.FindFirst("UserID").Value))
                         {
                             return new JsonResult(new { code = 301, msg = "Đã xem" });
                         }
                         else
                         {
-                            item.Views.Add(User.FindFirst(ClaimTypes.Email).Value);
+                            item.Views.Add(User.FindFirst("UserID").Value);
                             item.Updated = DateTime.Now;
                             _service.CreateOrUpdate(item);
                         }
@@ -164,6 +164,45 @@ namespace BaseEasyRealTime.Controllers
                 else
                 {
                     return new JsonResult(new { code = 201, msg = "Bạn không có quyền xóa bài !!! " });
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { code = 500, msg = ex.Message, data = ex });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult UpdateViews(string[] ids)
+        {
+            try
+            {
+                if (User != null && User.Identity.IsAuthenticated)
+                {
+                    if (ids.Length == 0)
+                    {
+                        return new JsonResult(new { code = 404, msg = "không tồn tại bài viết" });
+                    }
+                    else
+                    {
+                        var listItem = new List<MessageEntity>();
+                        foreach (string id in ids)
+                        {
+                            var item = _service.GetItemByID(id);
+                            if (!item.Views.Contains(User.FindFirst("UserID").Value))
+                            {
+                                item.Views.Add(User.FindFirst("UserID").Value);
+                                item.Updated = DateTime.Now;
+                                _service.CreateOrUpdate(item);
+                                listItem.Add(item);
+                            }
+                        }
+                        return new JsonResult(new { code = listItem == null && listItem.Count > 0 ? 404 : 200, msg = listItem == null && listItem.Count > 0 ? "Không tìm thấy bài đăng" : "Đã xem bài viết", data = listItem });
+                    }
+                }
+                else
+                {
+                    return new JsonResult(new { code = 201, msg = "Bạn không có quyền xem bài !!! " });
                 }
             }
             catch (Exception ex)

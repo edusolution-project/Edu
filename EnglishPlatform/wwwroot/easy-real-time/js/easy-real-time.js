@@ -312,6 +312,96 @@ var easyRealTime = (function () {
 var SINGLE_CHAT_ID = "single-chat";
 var URL_GET_CHAT = "/Chat/get";
 var URL_POST_CHAT = "/Chat/create";
+
+
+var updateViewMessage = function (elRoot) {
+
+    if (elRoot != null) {
+        var id = elRoot.id;
+        var fd = new FormData();
+        fd.append("id", id);
+        var url = "/Chat/UpdateView";
+        _ajax.proccess("POST", url, fd).then(function (data) {
+            var dataJson = JSON.parse(data);
+            if (dataJson.code == 200) {
+                elRoot.classList.remove("no-seem");
+                elRoot.removeAttribute("onmouseover");
+
+                var ab = document.getElementById("sing-chat-" + dataJson.data.sender);
+                if (ab != null) {
+                    var numberNoti = ab.querySelector(".number-unread");
+                    if (numberNoti != null) {
+                        var number = numberNoti.innerHTML;
+                        if (number == "") return;
+                        else {
+                            number = parseInt(numberNoti.innerHTML) - 1;
+                            if (number == 0) {
+                                numberNoti.classList.remove("active");
+                                numberNoti.innerHTML = "";
+                            } else {
+                                numberNoti.innerHTML = `${number}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+    }
+}
+var updateViewMessages = function () {
+    var fd = new FormData();
+
+    var chatBox = document.getElementById(SINGLE_CHAT_ID);
+    var body = chatBox != null ? chatBox.querySelector(".body-single-chat") : null;
+    var msg = body != null && body.children.length > 2 ? body.children[1] : "";
+
+    if (msg != null) {
+        var listElement = msg.querySelectorAll(".no-seem");
+        for (var i = 0; i < listElement.length; i++) {
+            var item = listElement[i];
+            if (item.id != null && item.id != void 0 && item.id != "") {
+                fd.append("ids", item.id);
+            }
+        }
+    }
+    var url = "/Chat/UpdateViews";
+    _ajax.proccess("POST", url, fd).then(function (data) {
+        var dataJson = JSON.parse(data);
+        if (dataJson.code == 200) {
+            if (dataJson.data.length > 0) {
+                var sender = dataJson.data[0].sender;
+                var ab = document.getElementById("sing-chat-" + sender);
+                if (ab != null) {
+                    var numberNoti = ab.querySelector(".number-unread");
+                    if (numberNoti != null) {
+                        numberNoti.classList.remove("active");
+                        numberNoti.innerHTML = "";
+                    }
+                }
+            }
+        }
+        for (var i = 0; i < listElement.length; i++) {
+            var item = listElement[i];
+            item.classList.remove("no-seem");
+            item.removeAttribute("onmouseover");
+        }
+    });
+}
+var formatTen = function (n) {
+    if (n < 10) return `0${n}`;
+    return `${n}`;
+}
+var formatTimeChat = function (dt) {
+    var current = new Date(dt);
+    var year = current.getFullYear();
+    var month = formatTen((current.getMonth() + 1));
+    var day = formatTen(current.getDate());
+    var hour = formatTen(current.getHours());
+    var min = formatTen(current.getMinutes());
+
+    return `${day}-${month}-${year}`;
+}
 var onpenSingleChat = function (userid) {
     var elementID = `sing-chat-${userid}`;
     var chatBox = document.getElementById(SINGLE_CHAT_ID);
@@ -330,6 +420,9 @@ var onpenSingleChat = function (userid) {
         var textarea = chatBox.querySelector(".footer-single-chat > textarea");
         if (textarea != null) {
             textarea.setAttribute("data-reciever", userid);
+            textarea.onfocus = function () {
+                updateViewMessages();
+            }
         }
         var body = chatBox.querySelector(".body-single-chat");
         if (body != null) {
@@ -349,6 +442,7 @@ var onpenSingleChat = function (userid) {
             var dataJson = JSON.parse(data);
             if (dataJson.data != null && dataJson.data != void 0 && dataJson.data != []) {
                 var msg = body.children.length > 2 ? body.children[1] : "";
+                var msgNEl = body.children.length > 2 ? body.children[2] : "";
                 for (var i = 0; i < dataJson.data.length; i++) {
                     var item = dataJson.data[i];
                     if (msg != "") {
@@ -356,19 +450,35 @@ var onpenSingleChat = function (userid) {
                         if (item.sender == g_CurrentUser.id) {
                             _our = "right";
                         }
-                        var html = `<div class="item-single-chat">
-                           <div class="content-single-chat ${_our}">
-                               ${item.content}
-                           </div>
-                        </div>`;
+                        var html = `<div class="item-single-chat"><span class="time  text-${_our}">${formatTimeChat(item.created)}</span>`;
+                        //chưa xem
+                        if ((item.views.length == 0 || item.views[0] != g_CurrentUser.id) && g_CurrentUser.id != item.sender) {
+                            html += `<div class="no-seem content-single-chat ${_our}" id="${item.ID}" onmouseover="updateViewMessage(this)">
+                                   ${item.content}
+                               </div>`;
+                        } else {
+                            html += `<div class="content-single-chat ${_our}">
+                                   ${item.content}
+                               </div>`;
+                        }
+                        html += `</div>`;
                         msg.innerHTML += html;
+                        msg.scrollIntoView({ block: "end" });
+                        
                     }
+                    //end if
                 }
-                msg.scrollIntoView({ block: "end" });
+                //end for
+
+                //msgNEl.onmouseover = function () {
+                //    updateViewMessage(this);
+                //}
             }
         });
     }
 }
+
+
 var currentValue = "";
 document.addEventListener('DOMContentLoaded', function () {
     var boxSingleChat = document.getElementById(SINGLE_CHAT_ID);
@@ -404,33 +514,43 @@ document.addEventListener('DOMContentLoaded', function () {
             if (chatBox != null) {
                 var body = chatBox.querySelector(".body-single-chat");
                 var msgEL = body.children.length > 2 ? body.children[1] : "";
+                var msgNEl = body.children.length > 2 ? body.children[2] : "";
                 var msg = data.message;
                 var dataJson = JSON.parse(msg);
                 var item = dataJson.data;
-                if(chatBox.classList.contains("open")){
+                var textBox = chatBox.querySelector("textarea");
+                if (chatBox.classList.contains("open") && (textBox.dataset.reciever == item.sender || g_CurrentUser.id == item.sender)) {
                     var _our = "left";
                     if (item.sender == g_CurrentUser.id) {
                         _our = "right";
                     }
-                    var html = `<div class="item-single-chat">
-                               <div class="content-single-chat ${_our}">
+                    var html = `<div class="item-single-chat"><span class="time text-${_our}">${formatTimeChat(item.created)}</span>`;
+                    if ((item.views.length == 0 || item.views[0] != g_CurrentUser.id) && g_CurrentUser.id != item.sender) {
+                        html += `<div class="no-seem content-single-chat ${_our}" id="${item.ID}" onmouseover="updateViewMessage(this)">
                                    ${item.content}
-                               </div>
-                            </div>`;
+                               </div>`;
+                    } else {
+                        html += `<div class="content-single-chat ${_our}">
+                                   ${item.content}
+                               </div>`;
+                    }
+                    html += `</div>`;
                     msgEL.innerHTML += html;
                     msgEL.scrollIntoView({ block: "end" });
                 }
-              else{
-                    var ab = document.getElementById("sing-chat-" + item.sender);
-                    if(ab != null){
-                       var numberNoti = ab.querySelector(".number-unread");
-                        if (numberNoti != null) {
-                            numberNoti.classList.add("active");
-                            var number = numberNoti.innerHTML;
-                            if (number == "") numberNoti.innerHTML = "1";
-                            else {
-                                number = parseInt(numberNoti.innerHTML) + 1;
-                                numberNoti.innerHTML = `${number}`;
+                else {
+                    if (g_CurrentUser.id != item.sender) {
+                        var ab = document.getElementById("sing-chat-" + item.sender);
+                        if (ab != null) {
+                            var numberNoti = ab.querySelector(".number-unread");
+                            if (numberNoti != null) {
+                                numberNoti.classList.add("active");
+                                var number = numberNoti.innerHTML;
+                                if (number == "") numberNoti.innerHTML = "1";
+                                else {
+                                    number = parseInt(numberNoti.innerHTML) + 1;
+                                    numberNoti.innerHTML = `${number}`;
+                                }
                             }
                         }
                     }
