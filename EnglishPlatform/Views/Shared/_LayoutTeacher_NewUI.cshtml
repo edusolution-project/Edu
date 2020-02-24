@@ -223,6 +223,69 @@
     @*alert*@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
     <script src="~/js/calendar/js/sweetalert.min.js"></script>
+
+    <script>
+        var formatTwoNumber = function (n) {
+            if (n < 10) return `0${n}`;
+            return `${n}`;
+        }
+        var formatDateTime = function (dt) {
+            var current = dt;
+            var year = current.getFullYear();
+            var month = formatTwoNumber((current.getMonth() + 1));
+            var day = formatTwoNumber(current.getDate());
+            return `${day}/${month}/${year}`;
+        }
+        var caculatorDate = function (dt, number) {
+            dt.setDate(dt.getDate() - number)
+            return dt;
+        }
+        var loadCalendar = function (start, end) {
+            if (start == void 0) {
+                start = caculatorDate(new Date(), (new Date().getDay() - 1));
+                var temp =  caculatorDate(new Date(), (new Date().getDay() - 1));
+                end = caculatorDate(temp, -7);
+            }
+            var plan_box = document.getElementById("plan_box");
+            if (plan_box != null) {
+                var week = plan_box.querySelector(".week");
+                if (week != null) {
+                    week.innerHTML = formatDateTime(start) + " - " + formatDateTime(end);
+                }
+            }
+            var tableDetail = plan_box.querySelector(".table-detail");
+            if (tableDetail != null) {
+                tableDetail.children[0].children[1].innerHTML = "";
+                tableDetail.children[1].children[1].innerHTML = "";
+                tableDetail.children[2].children[1].innerHTML = "";
+                tableDetail.children[3].children[1].innerHTML = "";
+                tableDetail.children[4].children[1].innerHTML = "";
+                tableDetail.children[5].children[1].innerHTML = "";
+                tableDetail.children[6].children[1].innerHTML = "";
+                _ajax.proccess("GET", "@Url.Action("GetList","Calendar")?start=" + formatDateTime(start) + "&end=" + formatDateTime(end), {}).then(function (data) {
+                    if (data != null) {
+                        var dataJson = JSON.parse(data);
+                        if (dataJson != {} && dataJson.length > 0) {
+                            for (var i = 0; i < dataJson.length; i++) {
+                                var item = dataJson[i];
+                                var startDate = new Date(item.start);
+                                var index = startDate.getDay() - 1;
+                                if (index == -1) index = 6;
+                                var html = `<div class="flex">
+                                            <span class="time">${formatTwoNumber(startDate.getHours())}:${formatTwoNumber(startDate.getMinutes())}</span>
+                                            <span class="title">${item.title}</span>
+                                        </div>`;
+                                tableDetail.children[index].children[1].innerHTML += html;
+                            }
+                        }
+                    }
+                })
+            }
+
+        }
+        loadCalendar();
+    </script>
+
     @RenderSection("Scripts", false)
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
