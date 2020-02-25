@@ -264,9 +264,9 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.NextLesson = nextLesson;
             ViewBag.Chapter = chapter;
             ViewBag.Type = lesson.TemplateType;
-            if (newui == 1)
+            //if (newui == 1)
                 return View("Detail_new");
-            return View();
+            //return View();
         }
 
         public IActionResult Review(DefaultModel model)

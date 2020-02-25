@@ -302,6 +302,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         item.Order = maxItem.Order + 1;
                     }
                     _lessonService.CreateQuery().InsertOne(item);
+                    //update total lesson to parent chapter
+                    if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
+                        _ = _chapterService.IncreaseLessonCount(item.ChapterID, 1);
+                    else
+                        _ = _courseService.IncreaseLessonCount(item.CourseID, 1);
                 }
                 else
                 {
@@ -381,6 +386,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     ChangeLessonPosition(lesson, int.MaxValue);//chuyển lesson xuống cuối của đối tượng chứa
                     _lessonService.Remove(ID);
+                    _ = _chapterService.IncreaseLessonCount(lesson.ChapterID, -1);
                     return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", "Remove OK" },

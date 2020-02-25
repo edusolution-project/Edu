@@ -656,7 +656,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
-                var data = _chapterService.CreateQuery().Find(o => o.ID == item.ID).SingleOrDefault();
+                var data = _chapterService.GetItemByID(item.ID);
                 if (data == null)
                 {
                     item.Created = DateTime.Now;
@@ -677,6 +677,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.Created = data.Created;
                     item.CreateUser = data.CreateUser;
                     _chapterService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                    if (item.ParentID != data.ParentID)
+                    {
+                        if (item.TotalLessons > 0)
+                        {
+                            //decrease old parent chapter total lesson
+                            if (string.IsNullOrEmpty(data.ParentID) || data.ParentID == "0")
+                            {
+                                _ = _service.IncreaseLessonCount(item.CourseID, 0 - data.TotalLessons);
+                            }
+                            //increase new parent chapter total lesson
+                            if (string.IsNullOrEmpty(item.ParentID) || item.ParentID == "0")
+                            {
+                                _ = _chapterService.IncreaseLessonCount(item.ParentID, data.TotalLessons);
+                            }
+                        }
+                    }
                 }
 
                 return new JsonResult(new Dictionary<string, object>
@@ -1034,6 +1050,84 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             }
             return new JsonResult("OK");
+        }
+
+        [HttpGet]
+        public JsonResult FixResourcesV2()
+        {
+            var chapters = _chapterService.GetAll().ToList();
+            foreach (var chapter in chapters)
+            {
+                chapter.TotalLessons = 0;
+                _chapterService.Save(chapter);
+            }
+            var courses = _service.GetAll().ToList();
+            foreach (var course in courses)
+            {
+                course.TotalLessons = 0;
+                _service.Save(course);
+            }
+            var subjects = _classSubjectService.GetAll().ToList();
+            foreach(var sbj in subjects)
+            {
+                sbj.TotalLessons = 0;
+                _classSubjectService.Save(sbj);
+            }
+            var allclass = _classService.GetAll().ToList();
+            foreach(var @class in allclass)
+            {
+                @class.TotalLessons = 0;
+                _classService.Save(@class);
+            }
+            var alllessons = _lessonService.GetAll().ToList();
+            foreach(var lesson in alllessons)
+            {
+                var course = _service.GetItemByID(lesson.CourseID);
+                if(course == null)
+                {
+                    _lessonService.Remove(lesson.ID);
+                }
+            }
+            int count = 0;
+            foreach (var chapter in chapters)
+            {
+                count++;
+                var course = _service.GetItemByID(chapter.CourseID);
+                if (course == null)//not valid
+                    _chapterService.Remove(chapter.ID);
+                chapter.TotalLessons = _lessonService.CountChapterLesson(chapter.ID);
+                if (chapter.TotalLessons > 0)
+                {
+                    _chapterService.Save(chapter);
+                    if (string.IsNullOrEmpty(chapter.ParentID) || chapter.ParentID == "0")
+                    {
+                        _ = _service.IncreaseLessonCount(chapter.CourseID, chapter.TotalLessons);
+                    }
+                    else
+                    {
+                        _ = _chapterService.IncreaseLessonCount(chapter.ParentID, chapter.TotalLessons);
+                    }
+                }
+            }
+            //update classsubject && class
+            var classes = _classService.GetAll().ToList();
+            foreach (var @class in classes)
+            {
+                @class.TotalLessons = 0;
+                var sbjs = _classSubjectService.GetByClassID(@class.ID);
+                foreach (var sbj in sbjs)
+                {
+                    var course = _service.GetItemByID(sbj.CourseID);
+                    if (course != null)
+                    {
+                        sbj.TotalLessons = course.TotalLessons;
+                        @class.TotalLessons += course.TotalLessons;
+                        _classSubjectService.Save(sbj);
+                    }
+                }
+                _classService.Save(@class);
+            }
+            return new JsonResult("Update " + count + " chapter");
         }
     }
 }

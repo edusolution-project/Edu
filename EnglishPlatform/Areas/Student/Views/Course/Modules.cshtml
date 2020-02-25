@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var currentCs = ViewBag.ClassSubject as BaseCustomerMVC.Models.ClassSubjectViewModel;
-    var completePercent = (int)ViewBag.CompletePercent;
+    //var completePercent = (int)ViewBag.CompletePercent;
     ViewData["Title"] = currentCs.SkillName + " - " + currentCs.ClassName;
 }
 
@@ -12,11 +12,21 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b padding-b25">
-            <h2 class="title"><a href="@Url.Action("Detail","Course")/@currentCs.ClassID" title="@currentCs.ClassName"><i class="ti-arrow-left"></i></a>@currentCs.ClassName/<span class="end-break">@currentCs.SkillName</span></h2>
+            <h2 class="title"><a href="@Url.Action("Detail", "Course")/@currentCs.ClassID" title="@currentCs.ClassName"><i class="ti-arrow-left"></i></a>@currentCs.ClassName/<span class="end-break">@currentCs.SkillName (@currentCs.CompletedLesssons/@currentCs.TotalLessons)</span></h2>
             <div class="c-right bad">
                 <div class="flex">
-                    <b-progress :value="@completePercent" :max="100" class="mb-3"></b-progress>
-                    <span>@completePercent%</span>
+                    <b-progress :value="@currentCs.CompletedLesssons" :max="@currentCs.TotalLessons" class="mb-3"></b-progress>
+                    <span>
+                        @if (currentCs.TotalLessons > 0) 
+                        {
+                            var complete = currentCs.CompletedLesssons * 100.00 / currentCs.TotalLessons;
+                            @: @complete.ToString("0.00")% 
+                        }
+                        else
+                        {
+                            @:0%
+                        }
+                    </span>
                 </div>
             </div>
         </div>
@@ -64,7 +74,7 @@
     <script type="text/x-template" id="chapContentTemp">
         <li class="col-md-12">
             <div class="inner">
-                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic ic-edit-small"></i>{{data.Name}}<i class="ic ic-collapse"></i></a>
+                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic ic-edit-small"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}<i class="ic ic-collapse"></i></a>
                 <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.ParentID}`" :title="`my-accordion-${data.ParentID}`" role="tabpanel">
                     <b-card-body>
                         <ul class="list">

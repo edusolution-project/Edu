@@ -89,6 +89,7 @@ var Lesson = (function () {
                 renderStudentReview();
                 break;
         }
+        window.getLocalData = getLocalData
     }
 
     var reloadData = function () {
@@ -100,17 +101,17 @@ var Lesson = (function () {
     //local storage function
     var setLocalData = function (key, data) {
         var enData = b64EncodeUnicode(JSON.stringify(data));
-        localStorage.setItem(config.lesson_id + "_" + config.class_id + "_" + key, enData);
+        localStorage.setItem(config.lesson_id + "_" + config.class_subject_id + "_" + key, enData);
     }
 
     var getLocalData = function (key) {
-        var data = localStorage.getItem(config.lesson_id + "_" + config.class_id + "_" + key)
+        var data = localStorage.getItem(config.lesson_id + "_" + config.class_subject_id + "_" + key)
         if (data == null) return null;
         return JSON.parse(b64DecodeUnicode(data));
     }
 
     var removeLocalData = function (key) {
-        return localStorage.removeItem(config.lesson_id + "_" + config.class_id + "_" + key);
+        return localStorage.removeItem(config.lesson_id + "_" + config.class_subject_id + "_" + key);
     }
 
     //function
@@ -191,7 +192,7 @@ var Lesson = (function () {
 
     //render content
 
-    var renderStandardLayout = function () {
+    var renderStandardLayout = function (hideHeader) {
         var container = $('#' + config.container);
         container.empty();
 
@@ -200,7 +201,7 @@ var Lesson = (function () {
 
         var lessonContainer = $("<div>", { "class": "lesson-container h-100" });
         lessonBox.append(lessonContainer);
-        var lessonContent = $("<div>", { "class": "card h-100" });
+        var lessonContent = $("<div>", { "class": "card h-100 border-0" });
         lessonContainer.append(lessonContent);
 
         //header row (contain title; lesson action - default hide)
@@ -208,7 +209,7 @@ var Lesson = (function () {
         lessonContent.append(lessonHeader);
 
         //main content (lesson content; part list...., 2 cols interface)
-        var cardBody = $("<div>", { "class": "card-body position-absolute", "style": "top: 56px; bottom: 0; left: 0; right: 0" });
+        var cardBody = $("<div>", { "class": "card-body position-absolute", "style": "top: " + (hideHeader ? "56" : "0") + "px; bottom: 0; left: 0; right: 0" });
         lessonContent.append(cardBody);
 
         var lessonBody = $("<div>", { "class": "lesson-body h-100", "id": config.lesson_id });
@@ -229,6 +230,7 @@ var Lesson = (function () {
     }
 
     var renderLessonData = function () {
+
         if (isNull(_data)) {
             throw "No data";
         }
@@ -472,9 +474,9 @@ var Lesson = (function () {
                 if (_UImode == UIMode.EXAM_ONLY) {
                     var nav_bottom = $('<div>', { "class": "row" });
 
-                    var prevtab = $("<button>", { "class": "prevtab btn btn-primary mr-2", "title": "Prev", "onclick": "PrevPart()" });
+                    var prevtab = $("<button>", { "class": "prevtab btn btn-primary mr-2", "title": "Câu trước", "onclick": "PrevPart()" });
                     var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
-                    var nexttab = $("<button>", { "class": "nexttab btn btn-primary", "title": "Next", "onclick": "NextPart()" });
+                    var nexttab = $("<button>", { "class": "nexttab btn btn-primary", "title": "Câu tiếp", "onclick": "NextPart()" });
                     var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
                     prevtab.append(iconprev);
                     nexttab.append(iconnext);
@@ -507,9 +509,9 @@ var Lesson = (function () {
                 //if (_UImode == UIMode.EXAM_ONLY) {
                 var nav_bottom = $('<div>', { "class": "row" });
 
-                var prevtab = $("<button>", { "class": "prevtab btn btn-primary mr-2", "title": "Prev", "onclick": "PrevPart()" });
+                var prevtab = $("<button>", { "class": "prevtab btn btn-primary mr-2", "title": "Câu trước", "onclick": "PrevPart()" });
                 var iconprev = $("<i>", { "class": "fas fa-arrow-left" });
-                var nexttab = $("<button>", { "class": "nexttab btn btn-primary", "title": "Next", "onclick": "NextPart()" });
+                var nexttab = $("<button>", { "class": "nexttab btn btn-primary", "title": "Câu tiếp", "onclick": "NextPart()" });
                 var iconnext = $("<i>", { "class": "fas fa-arrow-right" });
                 prevtab.append(iconprev);
                 nexttab.append(iconnext);
@@ -536,8 +538,8 @@ var Lesson = (function () {
                 var quiz_counter = $('<div>', { id: 'quiz-counter-holder', class: "d-inline-block text-white font-weight-bold align-middle pl-3" });
                 $(_footerLeft).append(quiz_counter);
 
-                var complete_btn = $('<button>', { class: "btn btn-primary pl-3 pr-3", onclick: "CompleteExam()", text: "Submit" });
-                var timer = $('<div>', { id: 'bottom-counter', class: "d-inline-block time-counter text-primary font-weight-bold align-middle pr-3" });
+                var complete_btn = $('<button>', { class: "btn btn-success pl-3 pr-3", onclick: "CompleteExam()", text: "Nộp bài" });
+                var timer = $('<div>', { id: 'bottom-counter', class: "d-inline-block time-counter text-white font-weight-bold align-middle pr-3" });
                 _footerCenter.append(timer).append(complete_btn);
 
                 renderQuizCounter();
@@ -1748,6 +1750,7 @@ var Lesson = (function () {
         //load lastest exam state from server
         var dataform = new FormData();
         dataform.append("ClassID", config.class_id);
+        dataform.append("ClassSubjectID", config.class_subject_id);
         dataform.append("LessonID", config.lesson_id);
         if ($('#' + config.container).find("#ExamID").length == 0)
             $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID" }));
@@ -1756,50 +1759,75 @@ var Lesson = (function () {
         }
         //get lastest exam data from server
         Ajax(config.url.current, dataform, "POST", true).then(function (res) {
+            var exam, schedule, limit = 0;
+            try {
+                var data = JSON.parse(res);
+                exam = data.exam
+                schedule = data.schedule
+                limit = data.limit
+            } catch (e) {
+                console.log(e)
+            }
+            //console.log(exam.ID);
+            //console.log(getLocalData("CurrentExam"));
             //if no data is found => new attempt => clear all local storage
-            if (res == null || res == "null") {
+            if (exam == null) {
                 localStorage.clear();
                 console.log("New Fresh Exam");
-                renderNewExam();
+                renderNewExam(null, res.schedule);
             }
             else {
                 //
-                var data = JSON.parse(res);
                 if (isNull(getLocalData("CurrentExam"))) //display last result & render new exam
                 {
                     //console.log(data);
                     localStorage.clear();
                     console.log("New Exam");
-                    renderNewExam(data);
+                    //console.log(getLocalData("CurrentExam"))
+                    renderNewExam(exam, schedule, limit);
                 }
                 else {
-                    if (getLocalData("CurrentExam") != data.ID) //unmatched id => complete exam
+                    if (getLocalData("CurrentExam") != exam.ID) //unmatched id => complete exam
                     {
+                        console.log(getLocalData("CurrentExam"))
+                        console.log(exam.ID)
+                        console.log("Unmatched Exam");
                         localStorage.clear();
                         setLocalData("Timer", "00:00");
+                        $('#ExamID').val(exam.ID);
                         CompleteExam(true);
-                        console.log("Complete Exam")
+                        //console.log("Complete Exam")
                     }
                     else {
-                        console.log("Continue Exam")
-                        $("input[name='ExamID']").value = data.ID;
-                        var current = data.CurrentDoTime;
-                        var start = data.Created;
-                        var timer = moment(current) - moment(start);
-                        if (moment(timer).minutes() >= data.Timer)//Timeout
-                        {
-                            setLocalData("Timer", "00:00");
-                            CompleteExam(true);
+                        if (exam.Status) {
+                            localStorage.clear();
+                            console.log("New Exam");
+                            //console.log(getLocalData("CurrentExam"))
+                            renderNewExam(exam, schedule, limit);
                         }
                         else {
-                            setLocalData("CurrentExam", data.ID);
-                            //render Exam
-                            var _sec = 59 - moment(timer).second();
-                            var _minutes = data.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
-                            var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
-                            setLocalData("Timer", timer);
-                            renderExamDetail();
-                            countdown();
+                            $('#ExamID').val(exam.ID);
+                            var current = exam.CurrentDoTime;
+                            var start = exam.Created;
+                            var timer = moment(current) - moment(start);
+                            if (moment(timer).minutes() >= exam.Timer)//Timeout
+                            {
+                                console.log("Exam Timeout")
+                                setLocalData("Timer", "00:00");
+                                CompleteExam(true);
+                            }
+                            else {
+                                console.log("Exam Continue")
+                                setLocalData("CurrentExam", exam.ID);
+                                $('#ExamID').val(exam.ID);
+                                //render Exam
+                                var _sec = 59 - moment(timer).second();
+                                var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
+                                var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
+                                setLocalData("Timer", timer);
+                                renderExamDetail();
+                                countdown();
+                            }
                         }
                     }
                 }
@@ -1807,28 +1835,61 @@ var Lesson = (function () {
         });
     }
 
-    var renderNewExam = function (data, limit) {
+    var renderNewExam = function (data, schedule, limit) {
+        console.log(schedule);
         var wrapper = $("<div>", { "class": "m-3 col-md-12 text-center" });
         $('#' + config.container).append($(wrapper));
-        if (isNull(data)) {
-            var doButton = $('<div>', {
-                "class": "btn btn-primary m-3",
-                "onclick": "BeginExam(this)",
+
+        var doButton;
+        var endDate = moment(schedule.EndDate);
+        var startDate = moment(schedule.StartDate);
+        var now = moment();
+
+        if (endDate > new Date(1900, 1, 1) && endDate <= now) {
+            console.log("Over due")
+            doButton = $('<div>', {
+                "class": "btn btn-danger m-3",
+                "onclick": "#",
                 "style": "cursor: pointer",
-                "text": "Begin Exam"
+                "text": "Hết hạn",
+                "disabled": "disabled"
             });
+        }
+        else {
+            if (startDate >= now) {
+                console.log("Early")
+                doButton = $('<div>', {
+                    "class": "btn btn-danger m-3",
+                    "onclick": "#",
+                    "style": "cursor: pointer",
+                    "text": "Bài chưa được mở",
+                    "disabled": "disabled"
+                });
+            }
+            else {
+                console.log("In due")
+                doButton = $('<div>', {
+                    "class": "btn btn-primary m-3",
+                    "onclick": "BeginExam(this)",
+                    "style": "cursor: pointer",
+                    "text": "Làm bài"
+                });
+            }
+        }
+
+        if (isNull(data)) {
             var backButton = $('<div>', {
                 "class": "btn btn-primary m-3",
                 "onclick": "GoBack()",
                 "style": "cursor: pointer",
-                "text": "Back to List"
+                "text": "Về danh sách"
             });
             wrapper.append(doButton);
             wrapper.append(backButton);
         }
         else {
             var lastExam = data;
-
+            this.exam_id = lastExam.ID;
             var tried = lastExam.Number;
             var doable = true;
             var lastpoint = (lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0);
@@ -1836,45 +1897,46 @@ var Lesson = (function () {
             var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm:ss A");
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
-                    .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Last Attempt (" + tried + " tried) finished at " + lastdate }))
-                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Last Score: " + lastpoint.toFixed(0) + "%" })).html();
+                    .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Điểm lần cuối: " + lastpoint.toFixed(0) + "%" })).html();
             wrapper.append(lastExamResult);
 
             tryleft = limit - tried;
-            var doButton = null;
+            //var doButton = null;
             var backButton = $('<div>', {
                 "class": "btn btn-primary m-3",
                 "onclick": "GoBack()",
                 "style": "cursor: pointer",
-                "text": "Back to List"
+                "text": "Về danh sách"
             });
             var reviewButton = $('<div>', {
                 "class": "btn btn-primary m-3",
                 "onclick": 'Review(\'' + lastExam.ID + '\')',
                 "style": "cursor: pointer",
-                "text": "Review answer"
+                "text": "Xem đáp án"
             });
             if (limit > 0) {
+                alert(limit);
                 tryleft = limit - tried;
                 if (tryleft > 0) {
-                    var doButton = $('<div>', {
+                    doButton = $('<div>', {
                         "class": "btn btn-primary m-3",
                         "onclick": "BeginExam(this)",
                         "style": "cursor: pointer",
-                        "text": 'You have <b>' + tryleft + '</b> tries left. Retry?'
+                        "html": 'Bạn còn <b>' + tryleft + '</b> lượt làm lại bài. Thực hiện lại?'
                     });
                 }
                 else {
-                    doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Attempt limit reached</div></div>';
+                    doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Hết lượt làm bài</div></div>';
                     doable = false;
                 }
             }
             else {
                 var doButton = $('<div>', {
                     "class": "btn btn-primary m-3",
-                    "onclick": "Redo(this)",
+                    "onclick": "$(this).prop('disabled',true); Redo(this); ",
                     "style": "cursor: pointer",
-                    "text": 'Do it again'
+                    "text": 'Làm lại bài'
                 });
             }
             wrapper.append(doButton)
@@ -1888,24 +1950,25 @@ var Lesson = (function () {
 
         var dataform = new FormData();
         dataform.append("LessonID", config.lesson_id);
+        dataform.append("ClassSubjectID", config.class_subject_id);
         dataform.append("ClassID", config.class_id);
         Ajax(config.url.start, dataform, "POST", false)
             .then(function (res) {
                 var data = JSON.parse(res);
                 if (data.Error == null) {
                     notification("success", "Start", 3000);
-                    $("input[name='ExamID']").value = data.Data.ID;
+                    console.log("NewID: " + data.Data.ID);
+                    $("#ExamID").val(data.Data.ID);
                     setLocalData("CurrentExam", data.Data.ID);
                     renderExamDetail();
 
                     //console.log(data);
                     if (data.Data.Timer > 0) {
                         var _minutes = data.Data.Timer;
-                        console.log(_minutes);
+                        //console.log(_minutes);
                         var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
                         setLocalData("Timer", timer);
-                        console.log($(".time-counter"));
-
+                        //console.log($(".time-counter"));
                     }
 
                 } else {
@@ -1918,10 +1981,11 @@ var Lesson = (function () {
     }
 
     var renderExamDetail = function () {
-        renderStandardLayout();
+        renderStandardLayout(true);
         $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", value: getLocalData("CurrentExam") }));
         loadLesssonData({
             "LessonID": config.lesson_id,
+            "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
         }, renderLessonData);
     }
@@ -2282,17 +2346,19 @@ var Lesson = (function () {
 
     var completeExam = function (isOvertime) {
         if (isOvertime || true) {
-            var exam = document.querySelector("input[name='ExamID']");
+            //var exam = document.querySelector("input[name='ExamID']");
+            //var exam = getLocalData("CurrentExam");
             var dataform = new FormData();
-            dataform.append("ExamID", exam.value);
+            console.log("Complete :" + $('#ExamID').val());
+            dataform.append("ExamID", $('#ExamID').val());
             Ajax(config.url.end, dataform, "POST", true)
                 .then(function (res) {
                     stopCountdown();
                     var data = JSON.parse(res);
                     if (isOvertime)
-                        notification("success", "Timeout! Exam Submited", 3000);
+                        notification("success", "Thời gian làm bài đã hết", 3000);
                     else
-                        notification("success", "Submit successfully", 3000);
+                        notification("success", "Đã nộp bài", 3000);
                     localStorage.clear();
                     renderCompleteExam(data);
 
@@ -2310,15 +2376,15 @@ var Lesson = (function () {
         if (isNull(data)) {
             var doButton = $('<div>', {
                 "class": "btn btn-primary m-3",
-                "onclick": "BeginExam(this)",
+                "onclick": "$(this).prop('disabled',true); BeginExam(this);",
                 "style": "cursor: pointer",
-                "text": "Begin Exam"
+                "text": "Làm bài"
             });
             var backButton = $('<div>', {
                 "class": "btn btn-primary m-3",
-                "onclick": "GoBack()",
+                "onclick": "$(this).prop('disabled',true); GoBack();",
                 "style": "cursor: pointer",
-                "text": "Back to List"
+                "text": "Về danh sách"
             });
             wrapper.append(doButton);
             wrapper.append(backButton);
@@ -2333,8 +2399,8 @@ var Lesson = (function () {
 
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
-                    .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Congratulation! You have complete your " + tried + " attempts!" }))
-                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Your score: " + lastpoint.toFixed(0) + "%" }));
+                    .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Điểm của bạn: " + lastpoint.toFixed(0) + "%" }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -2345,35 +2411,35 @@ var Lesson = (function () {
                 "class": "btn btn-primary m-3",
                 "onclick": "GoBack()",
                 "style": "cursor: pointer",
-                "text": "Back to List"
+                "text": "Về danh sách"
             });
             var reviewButton = $('<div>', {
                 "class": "btn btn-primary m-3",
-                "onclick": 'Review(\'' + lastExam.id + '\')',
+                "onclick": 'Review(\'' + lastExam.id + '\'); $(this).prop(\'disabled\',true)',
                 "style": "cursor: pointer",
-                "text": "Review answer"
+                "text": "Xem đáp án"
             });
             if (limit > 0) {
                 tryleft = limit - tried;
                 if (tryleft > 0) {
                     var doButton = $('<div>', {
                         "class": "btn btn-primary m-3",
-                        "onclick": "BeginExam(this)",
+                        "onclick": "$(this).prop('disabled',true); BeginExam(this);",
                         "style": "cursor: pointer",
-                        "text": 'You have <b>' + tryleft + '</b> tries left. Retry?'
+                        "html": 'Bạn còn <b>' + tryleft + '</b> lượt làm lại bài. Thực hiện lại?'
                     });
                 }
                 else {
-                    doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Attempt limit reached</div></div>';
+                    doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Hết lượt làm bài</div></div>';
                     doable = false;
                 }
             }
             else {
                 var doButton = $('<div>', {
                     "class": "btn btn-primary m-3",
-                    "onclick": "Redo(this)",
+                    "onclick": "$(this).prop('disabled',true); Redo(this);",
                     "style": "cursor: pointer",
-                    "text": 'Do it again'
+                    "text": 'Làm lại bài'
                 });
             }
             wrapper.append(doButton)
@@ -2394,11 +2460,10 @@ var Lesson = (function () {
     var renderLecture = function () {
         loadLesssonData({
             "LessonID": config.lesson_id,
+            "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
         }, renderLessonData);
     }
-
-
 
     var goBack = function () {
         document.location = "/student/Course/Modules/" + config.class_id;
@@ -2610,7 +2675,7 @@ var Lesson = (function () {
         for (var i = 0; listQuiz != null && i < listQuiz.length; i++) {
             var item = listQuiz[i];
             var answer = getLocalData(item.id);
-            console.log(item.id);
+            //console.log(item.id);
             var completed = "";
             if (answer != null && answer != void 0 && answer != "") {
                 //console.log(answer);
@@ -2629,7 +2694,7 @@ var Lesson = (function () {
         } else {
             quiz_number_holder.append($("<button>", {
                 id: "quiz_number_counter",
-                class: "quizNumber btn btn-primary font-weight-bold"
+                class: "quizNumber btn btn-success font-weight-bold"
                 //,
                 //onclick: "toggleNav()"
             })

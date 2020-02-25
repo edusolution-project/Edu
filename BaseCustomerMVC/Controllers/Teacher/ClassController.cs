@@ -987,6 +987,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.Skills = new List<string>();
                 item.Subjects = new List<string>();
                 item.Members = new List<ClassMemberEntity>();
+                item.TotalLessons = 0;
                 item.IsActive = true;
 
                 if (fileUpload != null)
@@ -1002,59 +1003,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     foreach (var csubject in classSubjects)
                     {
-                        //var subject = _subjectService.GetItemByID(csubject.SubjectID);
-                        //if (subject == null)
-                        //{
-                        //    //throw new Exception("Subject " + csubject.SubjectID + " is not avaiable");
-                        //    continue;
-                        //}
-                        //var course = _courseService.GetItemByID(csubject.CourseID);
-                        //if (course == null || !course.IsActive)
-                        //{
-                        //    //throw new Exception("Course " + csubject.CourseID + " is not avaiable");
-                        //    continue;
-                        //}
-
-                        //var teacher = _teacherService.GetItemByID(csubject.TeacherID);
-                        //if (teacher == null || !teacher.IsActive || !teacher.Skills.Contains(csubject.SubjectID))
-                        //{
-                        //    //throw new Exception("Teacher " + csubject.TeacherID + " is not avaiable");
-                        //    continue;
-                        //}
-
-                        //csubject.ClassID = item.ID;
-                        //csubject.Description = course.Description;
-                        //csubject.LearningOutcomes = course.LearningOutcomes;
-                        //csubject.StartDate = item.StartDate;
-                        //csubject.EndDate = item.EndDate;
-                        ////subject.Image = course.Image;
-                        //_classSubjectService.CreateOrUpdate(csubject);
-                        //item.Skills.Add(subject.ID);
-                        //item.Members.Add(new ClassMemberEntity
-                        //{
-                        //    Name = teacher.FullName,
-                        //    TeacherID = teacher.ID,
-                        //    Type = ClassMemberType.TEACHER
-                        //});
-                        ////Create Class => Create Lesson Schedule & Clone all lesson
-                        //var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == csubject.CourseID).ToList();
-
-                        //var schedules = new List<LessonScheduleEntity>();
-                        //if (lessons != null)
-                        //    foreach (LessonEntity lesson in lessons)
-                        //    {
-                        //        _lessonScheduleService.CreateQuery().InsertOne(new LessonScheduleEntity
-                        //        {
-                        //            ClassID = item.ID,
-                        //            ClassSubjectID = csubject.ID,
-                        //            LessonID = lesson.ID,
-                        //            IsActive = true
-                        //        });
-                        //        _lessonHelper.CloneLessonForClass(lesson, csubject);
-                        //    }
-                        //_courseService.Collection.UpdateOneAsync(t => t.ID == csubject.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
+                        
                         var newMember = new ClassMemberEntity();
-                        var nID = CreateNewClassSubject(csubject, item, out newMember);
+                        long lessoncount = 0;
+                        var nID = CreateNewClassSubject(csubject, item, out newMember, out lessoncount);
                         if (!item.Skills.Contains(csubject.SkillID))
                             item.Skills.Add(csubject.SkillID);
                         if (!item.Subjects.Contains(csubject.SubjectID))
@@ -1088,12 +1040,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldData.StartDate = item.StartDate;
                 oldData.EndDate = item.EndDate;
                 oldData.Description = item.Description;
-                _service.Save(oldData);
+                //_service.Save(oldData);
 
                 oldData.Skills = new List<string>();
                 oldData.Subjects = new List<string>();
                 oldData.Members = new List<ClassMemberEntity>();
+                oldData.TotalLessons = 0;
+
+
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
+                
                 if (oldSubjects != null)
                 {
                     foreach (var oSbj in oldSubjects)
@@ -1117,9 +1073,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (nSbj != null)
                         {
                             var newMember = new ClassMemberEntity();
+                            long lessoncount = 0;
                             if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                             {
-                                nSbj.ID = CreateNewClassSubject(nSbj, item, out newMember);
+                                nSbj.ID = CreateNewClassSubject(nSbj, item, out newMember, out lessoncount);
                                 if (string.IsNullOrEmpty(nSbj.ID))//Error
                                     continue;
                             }
@@ -1147,11 +1104,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 oldData.Subjects.Add(nSbj.SubjectID);
                             if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                                 oldData.Members.Add(newMember);
+                            oldData.TotalLessons += lessoncount;
 
                         }
                     }
                 }
-
 
                 if (classSubjects != null && classSubjects.Count > 0)
                 {
@@ -1161,7 +1118,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             continue;
                         //create new subject
                         var newMember = new ClassMemberEntity();
-                        var nID = CreateNewClassSubject(nSbj, item, out newMember);
+                        long lessoncount = 0;
+                        var nID = CreateNewClassSubject(nSbj, item, out newMember, out lessoncount);
                         if (string.IsNullOrEmpty(nSbj.ID))//Error
                             continue;
 
@@ -1171,6 +1129,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             oldData.Subjects.Add(nSbj.SubjectID);
                         if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             oldData.Members.Add(newMember);
+                        oldData.TotalLessons += lessoncount;
                     }
                 }
 
@@ -1196,9 +1155,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member)
+        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount)
         {
             member = new ClassMemberEntity();
+            lessoncount = 0;
             try
             {
                 var subject = _subjectService.GetItemByID(nSbj.SubjectID);
@@ -1211,13 +1171,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     throw new Exception("Course " + nSbj.CourseID + " is not avaiable");
                 }
+                lessoncount = course.TotalLessons;
 
                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
                 if (teacher == null || !teacher.IsActive || !teacher.Subjects.Contains(nSbj.SubjectID))
                 {
                     throw new Exception("Teacher " + nSbj.TeacherID + " is not avaiable");
                 }
-
 
                 nSbj.ClassID = @class.ID;
                 nSbj.StartDate = @class.StartDate;
@@ -1226,6 +1186,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 nSbj.SkillID = course.SkillID;
                 nSbj.Description = course.Description;
                 nSbj.LearningOutcomes = course.LearningOutcomes;
+                nSbj.TotalLessons = course.TotalLessons;
 
                 _classSubjectService.Save(nSbj);
 
