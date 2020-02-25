@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -37,13 +38,18 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Description")]
         public string Description { get; set; }
 
-        [JsonProperty("TotalLesssons")]
-        public long TotalLesssons { get; set; }
+        [JsonProperty("TotalLessons")]
+        public long TotalLessons { get; set; }
     }
     public class ChapterService : ServiceBase<ChapterEntity>
     {
+
+        private CourseService _courseService;
+
         public ChapterService(IConfiguration config) : base(config)
         {
+            _courseService = new CourseService(config);
+
             var indexs = new List<CreateIndexModel<ChapterEntity>>
             {
                 //SubjectID_1_ParentID_1
@@ -62,6 +68,34 @@ namespace BaseCustomerEntity.Database
         public object GetByCode(string code)
         {
             return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();
+        }
+
+        public async Task IncreaseLessonCount(string ID, long increment, List<string> listid = null)//prevent circular ref
+        {
+            var r = await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ChapterEntity>().Inc(t => t.TotalLessons, increment));
+            if (r.ModifiedCount > 0)
+            {
+                if (listid == null)
+                    listid = new List<string> { ID };
+                else
+                    listid.Add(ID);
+                var current = GetItemByID(ID);
+                if (current != null)
+                {
+                    if (!string.IsNullOrEmpty(current.ParentID) && (current.ParentID != "0"))
+                    {
+                        if (listid.IndexOf(current.ParentID) < 0)
+                            _ = IncreaseLessonCount(current.ParentID, increment, listid);
+                        else
+                        {
+                            var e = 1;
+                        }
+                    }
+                    else
+                        _ = _courseService.IncreaseLessonCount(current.CourseID, increment);
+                }
+
+            }
         }
     }
 }

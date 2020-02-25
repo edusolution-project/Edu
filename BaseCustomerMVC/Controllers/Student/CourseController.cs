@@ -223,7 +223,9 @@ namespace BaseCustomerMVC.Controllers.Student
                            courseName = o.Name,
                            subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                            endDate = o.EndDate,
-                           percent = progress == null || progress.TotalLessons == 0 ? 0 : progress.Completed * 100 / progress.TotalLessons,
+                           percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
+                           max = o.TotalLessons,
+                           min = progress != null ? progress.Completed : 0,
                            score = progress != null ? progress.AvgPoint : 0,
                            thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                        }).ToList();
@@ -252,7 +254,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std = (from o in DataResponse
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
-                       let per = progress == null || progress.TotalLessons == 0 ? 0 : progress.Completed * 100 / progress.TotalLessons
+                       let per = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons
                        select new
                        {
                            id = o.ID,
@@ -260,6 +262,8 @@ namespace BaseCustomerMVC.Controllers.Student
                            title = o.Name,
                            endDate = o.EndDate,
                            per,
+                           max = o.TotalLessons,
+                           min = progress != null ? progress.Completed : 0,
                            score = progress != null ? progress.AvgPoint : 0
                        }).ToList();
             return Json(new { Data = std });
@@ -598,13 +602,13 @@ namespace BaseCustomerMVC.Controllers.Student
             if (classStudent == null)
                 return RedirectToAction("Index");
             var progress = _classSubjectProgressService.GetItemByClassSubjectID(id, userId);
-            long completePercent = 0;
-            if (progress != null && progress.TotalLessons > 0)
-                completePercent = progress.Completed * 100 / progress.TotalLessons;
+            //long completed = 0;
+            //if (progress != null && progress.TotalLessons > 0)
+            //    completed = progress.Completed;
             var subject = _subjectService.GetItemByID(currentCs.SubjectID);
             if (subject == null)
                 return RedirectToAction("Index");
-            ViewBag.CompletePercent = completePercent;
+            //ViewBag.Completed = completed;
             ViewBag.ClassSubject = new ClassSubjectViewModel()
             {
                 ID = currentCs.ID,
@@ -612,7 +616,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 CourseID = currentCs.CourseID,
                 ClassID = currentClass.ID,
                 ClassName = currentClass.Name,
-                SkillName = _skillService.GetItemByID(currentCs.SkillID).Name
+                SkillName = _skillService.GetItemByID(currentCs.SkillID).Name,
+                CompletedLesssons = progress == null ? 0 : progress.Completed,
+                TotalLessons = currentCs.TotalLessons,
             };
             if (old == 1) return View("Modules_o");
             return View();

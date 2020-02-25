@@ -47,10 +47,10 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public LessonScheduleEntity GetItemByLessonID(string lessonid)
+        public LessonScheduleEntity GetItemByLessonID_ClassSubjectID(string lessonid, string classsubjectid)
         {
-            if (string.IsNullOrEmpty(lessonid) || lessonid == "0") return null;
-            return Collection.Find(o => o.LessonID == lessonid)?.SingleOrDefault();
+            if (string.IsNullOrEmpty(lessonid) || lessonid == "0" || string.IsNullOrEmpty(classsubjectid)) return null;
+            return Collection.Find(o => o.LessonID == lessonid && o.ClassSubjectID == classsubjectid)?.SingleOrDefault();
         }
 
         public async Task UpdateClassSubject(ClassSubjectEntity classSubject)

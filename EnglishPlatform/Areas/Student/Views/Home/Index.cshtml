@@ -29,7 +29,7 @@
     <div class="card-body">
         <div class="box mb-3">
             <div class="heading flex mb-2">
-                <h4 class="box-head">Bài học tuần này</h4>
+                <h4 class="box-head">Bài học hôm nay ({{lesson_week.length}})</h4>
                 @*<a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
             </div>
             <div class="box bg-1 padding-15">
@@ -76,7 +76,7 @@
                                                 <div class="flex reverse">
                                                     <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
                                                     <div class="flex justify-content-between">
-                                                        <span>{{item.percent}}%</span>
+                                                        <span>{{item.min}}/{{item.max}}</span>
                                                         <span>{{item.score.toFixed(2)}}%</span>
                                                     </div>
                                                 </div>
@@ -239,8 +239,8 @@
                     return moment(date).format("DD/MM/YYYY")
             },
             validDate(item) {
-                var now = moment()
-                return !(moment(item.startDate) > now || moment(item.endDate) < now)
+                var now = moment().Date
+                return !(moment(item.startDate).Date > now || moment(item.endDate).Date < now)
             },
             showLockNotify(item) {
                 var now = moment()

@@ -40,5 +40,9 @@ namespace BaseCustomerMVC.Models
         public string TeacherID { get; set; }
         [JsonProperty("TeacherName")]
         public string TeacherName { get; set; }
+        [JsonProperty("CompletedLesssons")]
+        public long CompletedLesssons { get; set; }
+        [JsonProperty("TotalLessons")]
+        public long TotalLessons { get; set; }
     }
 }

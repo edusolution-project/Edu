@@ -160,7 +160,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
-                       { "Error", "No Class for Student" }
+                       { "Error", "Thông tin không đúng" }
                     });
                 }
 
@@ -169,7 +169,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
-                       { "Error", "No Schedule for Class" }
+                       { "Error", "Thông tin không đúng" }
                     });
                 }
 
@@ -178,7 +178,33 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
-                       { "Error", "This exam has been marked!" }
+                       { "Error", "Bài kiểm tra đã chấm, không thực hiện lại được!" }
+                    });
+                }
+
+                item.StudentID = userid;
+                item.Number = (int)_examService.CreateQuery().CountDocuments(o => o.LessonScheduleID == _schedule.ID && o.StudentID == item.StudentID) + 1;
+                if (_lesson.Limit > 0 && item.Number > _lesson.Limit)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Bạn đã hết lượt làm bài!" }
+                    });
+                }
+
+                if (_schedule.StartDate > DateTime.Now)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Bài kiểm tra chưa được mở!" }
+                    });
+                }
+
+                if (_schedule.EndDate > new DateTime(1900, 1, 1) && _schedule.EndDate <= DateTime.Now)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Bài kiểm tra đã quá hạn!" }
                     });
                 }
 
@@ -186,13 +212,13 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.Timer = _lesson.Timer;
                 item.Point = 0;
                 item.MaxPoint = _lesson.Point;
-                item.StudentID = userid;
+
                 item.TeacherID = _class.TeacherID;
                 item.ID = null;
                 item.Created = DateTime.Now;
                 item.CurrentDoTime = DateTime.Now;
                 item.Status = false;
-                item.Number = (int)_examService.CreateQuery().CountDocuments(o => o.LessonScheduleID == item.LessonScheduleID && o.StudentID == item.StudentID) + 1;
+
                 item.QuestionsTotal = _cloneLessonPartQuestionService.CreateQuery().CountDocuments(o => o.LessonID == item.LessonID);
                 item.QuestionsDone = 0;
                 item.Marked = false;
@@ -206,15 +232,28 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult GetCurrentExam(string ClassID, string LessonID)
+        public JsonResult GetCurrentExam(string ClassSubjectID, string LessonID)
         {
             var userID = User.Claims.GetClaimByType("UserID").Value;
-            var x = _examService.CreateQuery().Find(o => o.ClassID == ClassID && o.LessonID == LessonID &&
+            var lesson = _lessonService.GetItemByID(LessonID);
+            if (lesson == null)
+                return new JsonResult(new { Error = "Bài học không đúng" });
+            var x = _examService.CreateQuery().Find(o => o.ClassSubjectID == ClassSubjectID && o.LessonID == LessonID &&
             //o.Status == false && 
-            o.StudentID == userID).FirstOrDefault();
-            if (x != null)
+            o.StudentID == userID).SortByDescending(o => o.ID).FirstOrDefault();
+            //hết hạn => đóng luôn
+            var schedule = _lessonScheduleService.GetItemByLessonID_ClassSubjectID(LessonID, ClassSubjectID);
+            if (x != null && !x.Status)
+            {
+                if (schedule != null && schedule.EndDate > new DateTime(1900, 1, 1) && schedule.EndDate <= DateTime.Now)
+                {
+                    x.Status = true;
+                    x.Updated = schedule.EndDate;
+                    _examService.Save(x);
+                }
                 x.CurrentDoTime = DateTime.Now;
-            return new JsonResult(x);
+            }
+            return new JsonResult(new { exam = x, schedule, limit = lesson.Limit });
         }
 
         [HttpPost]
