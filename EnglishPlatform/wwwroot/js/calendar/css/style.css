@@ -1189,15 +1189,16 @@ button.fc-btnAddEvent-button.fc-button.fc-button-primary {
 .td.cl-load-more{
     position:relative;
 }
-.td.cl-load-more > .btn {
+.td > .btn {
     padding: 0;
-    height: 25px;
+    height: 20px;
     width: 100%;
     display: block;
+    font-size:10px;
 }
 .td.cl-load-more>.btn:hover{
     color:#D03239;
 }
-.td.cl-load-more .cl-hidden {
+.td.cl-load-more >.cl-hidden {
     display: none;
 }
