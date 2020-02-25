@@ -48,7 +48,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Name = currentClass.Name,
                         IsAllow = currentClass.StartDate <= DateTime.Now && currentClass.EndDate >= DateTime.Now
                     };
-                    var listAccount = _classStudentService.GetClassStudents(currentClass.ID)?.Select(o => o.ID)?.ToList();
+                    var listAccount = _classStudentService.GetClassStudents(currentClass.ID)?.Select(o => o.StudentID)?.ToList();
                     var teacherID = currentClass.TeacherID;
                     ViewBag.Students = _studentService.Collection.Find(o => listAccount.Contains(o.StudentId))?.ToList()?
                         .Select(x => new MemberInfo() { ID = x.ID,Name = x.FullName, Email = x.Email }).ToList();
