@@ -213,9 +213,14 @@
         var loadCalendar = function (start, end) {
             if (start == void 0) {
                 start = caculatorDate(new Date(), (new Date().getDay() - 1));
-                var temp =  caculatorDate(new Date(), (new Date().getDay() - 1));
-                end = caculatorDate(temp, -6);
+            } else {
+                var cpStart = new Date(start.getTime());
+                start = caculatorDate(cpStart, (cpStart.getDay() - 1));
             }
+            var temp = new Date(start.getTime());
+            var end = caculatorDate(temp, -6);
+
+            currentDateCalendar = start;
             var plan_box = document.getElementById("plan_box");
             if (plan_box != null) {
                 var week = plan_box.querySelector(".week");
