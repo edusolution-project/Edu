@@ -56,11 +56,12 @@ namespace BaseCustomerMVC.Controllers.Student
         [Obsolete]
         public Task<JsonResult> GetList(DefaultModel model)
         {
-            if (!User.Identity.IsAuthenticated) return Task.FromResult(new JsonResult(540));
+            if (!User.Identity.IsAuthenticated) return Task.FromResult(new JsonResult(new { code = 540}));
             var userId = User?.FindFirst("UserID").Value;
             var listClass = _classStudentService.GetStudentClasses(userId);
-            if (listClass == null) return Task.FromResult(new JsonResult(null));
+            if (listClass == null) return Task.FromResult(new JsonResult(new { }));
             var data = _calendarHelper.GetListEvent(model.Start, model.End, listClass?.ToList(), userId);
+            if(data == null) return Task.FromResult(new JsonResult(new { }));
             return Task.FromResult(new JsonResult(data));
         }
         [HttpPost]

@@ -25,13 +25,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CalendarHelper _calendarHelper;
         private readonly ClassService _classService;
         private readonly LessonScheduleService _scheduleService;
+        private readonly TeacherService _teacherService;
         public CalendarController(
             CalendarService calendarService,
             CalendarLogService calendarLogService,
             CalendarReportService calendarReportService,
             CalendarHelper calendarHelper,
             ClassService classService,
-            LessonScheduleService scheduleService
+            LessonScheduleService scheduleService,
+            TeacherService teacherService
             )
         {
             this._calendarService = calendarService;
@@ -40,6 +42,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _calendarHelper = calendarHelper;
             _classService = classService;
             _scheduleService = scheduleService;
+            _teacherService = teacherService;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -48,7 +51,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId) && o.IsActive == true)?
                 .SortBy(o => o.EndDate)
                 .ToList();
-
+            ViewBag.CurrentTeacher = _teacherService.GetItemByID(userId);
             ViewBag.ClassList = listClass;
             ViewBag.Model = model;
             return View();

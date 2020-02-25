@@ -1146,7 +1146,7 @@ button, input, a {
         }
 
         #plan_box .table-detail .tr .c-cl {
-            width: 50%;
+            width: 100%;
             display: flex;
             flex-direction: column;
             padding: 5px

@@ -88,6 +88,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             acc.FullName = entity.FullName;
             acc.Phone = entity.Phone;
             acc.Skype = entity.Skype;
+            acc.ZoomID = entity.ZoomID;
             _teacherService.CreateOrUpdate(acc);
             ViewBag.avatar = acc.Avatar ?? _default.defaultAvatar;
             ViewBag.Description = "Lưu thành công!";
@@ -202,7 +203,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
         [HttpPost]
-        public JsonResult SaveProfile(StudentEntity entity, IFormFile fileUpload)
+        public JsonResult SaveProfile(TeacherEntity entity, IFormFile fileUpload)
         {
             try
             {
@@ -211,6 +212,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 account.FullName = entity.FullName;
                 account.Phone = entity.Phone;
                 account.Skype = entity.Skype;
+                account.ZoomID = entity.ZoomID;
                 if (fileUpload != null)
                 {
                     var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
