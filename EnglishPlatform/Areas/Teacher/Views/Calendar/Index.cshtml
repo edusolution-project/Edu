@@ -3,6 +3,8 @@
     ViewData["Title"] = "My Events";
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var listClass = ViewBag.ClassList as List<ClassEntity>;
+    var currentTeacher = ViewBag.CurrentTeacher as TeacherEntity;
+    string ZoomUrl = "";
 }
 
 <link href="~/css/calendar/core.css" rel="stylesheet" />
@@ -89,7 +91,11 @@
         </div>
         <div class="item-event">
             <label for="Content">Link lớp học </label>
-            <input type="text" name="UrlRoom" class="form-control" placeholder="appear / zoom / skype join">
+            @if(currentTeacher != null)
+            {
+                ZoomUrl = string.IsNullOrEmpty(currentTeacher.ZoomID) ? "" : "https://zoom.us/wc/"+currentTeacher.ZoomID.Replace("-","")+"/join";
+            }
+            <input type="text" name="UrlRoom" value="@ZoomUrl" class="form-control" placeholder="appear / zoom / skype join">
         </div>
     </div>
     <div class="footer-form-event">

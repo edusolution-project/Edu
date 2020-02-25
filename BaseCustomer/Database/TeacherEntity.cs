@@ -33,6 +33,8 @@ namespace BaseCustomerEntity.Database
         public DateTime CreateDate { get; set; }
         [JsonProperty("Skype")]
         public string Skype { get; set; }
+        [JsonProperty("ZoomID")]
+        public string ZoomID { get; set; }
     }
     public class TeacherService : ServiceBase<TeacherEntity>
     {

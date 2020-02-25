@@ -303,10 +303,10 @@ var EduCalendar = (function(){
                     if (Title != null) {
                         Title.value = '';
                     }
-                    var Content = bodyEvent.querySelector("input[name='UrlRoom']");
-                    if (Content != null) {
-                        Content.value = "";
-                    }
+                    //var Content = bodyEvent.querySelector("input[name='UrlRoom']");
+                    //if (Content != null) {
+                    //    Content.value = "";
+                    //}
                     var time = bodyEvent.querySelector("input[name='Time']");
                     if (time != null) {
                         time.value = "09:00 AM";
