@@ -1774,7 +1774,7 @@ var Lesson = (function () {
             if (exam == null) {
                 localStorage.clear();
                 console.log("New Fresh Exam");
-                renderNewExam(null, res.schedule);
+                renderNewExam(null, schedule);
             }
             else {
                 //
@@ -1844,27 +1844,27 @@ var Lesson = (function () {
         var endDate = moment(schedule.EndDate);
         var startDate = moment(schedule.StartDate);
         var now = moment();
-
-        if (endDate > new Date(1900, 1, 1) && endDate <= now) {
+        var isOverdue = false;
+        if (endDate > moment(new Date(1900, 1, 1)) && endDate <= now) {
             console.log("Over due")
             doButton = $('<div>', {
                 "class": "btn btn-danger m-3",
-                "onclick": "#",
                 "style": "cursor: pointer",
                 "text": "Hết hạn",
                 "disabled": "disabled"
             });
+            isOverdue = true;
         }
         else {
             if (startDate >= now) {
                 console.log("Early")
                 doButton = $('<div>', {
                     "class": "btn btn-danger m-3",
-                    "onclick": "#",
                     "style": "cursor: pointer",
                     "text": "Bài chưa được mở",
                     "disabled": "disabled"
                 });
+                isOverdue = true
             }
             else {
                 console.log("In due")
@@ -1915,30 +1915,30 @@ var Lesson = (function () {
                 "style": "cursor: pointer",
                 "text": "Xem đáp án"
             });
-            if (limit > 0) {
-                alert(limit);
-                tryleft = limit - tried;
-                if (tryleft > 0) {
-                    doButton = $('<div>', {
-                        "class": "btn btn-primary m-3",
-                        "onclick": "BeginExam(this)",
-                        "style": "cursor: pointer",
-                        "html": 'Bạn còn <b>' + tryleft + '</b> lượt làm lại bài. Thực hiện lại?'
-                    });
+            if (!isOverdue)
+                if (limit > 0) {
+                    tryleft = limit - tried;
+                    if (tryleft > 0) {
+                        doButton = $('<div>', {
+                            "class": "btn btn-primary m-3",
+                            "onclick": "BeginExam(this)",
+                            "style": "cursor: pointer",
+                            "html": 'Bạn còn <b>' + tryleft + '</b> lượt làm lại bài. Thực hiện lại?'
+                        });
+                    }
+                    else {
+                        doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Hết lượt làm bài</div></div>';
+                        doable = false;
+                    }
                 }
                 else {
-                    doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Hết lượt làm bài</div></div>';
-                    doable = false;
+                    var doButton = $('<div>', {
+                        "class": "btn btn-primary m-3",
+                        "onclick": "$(this).prop('disabled',true); Redo(this); ",
+                        "style": "cursor: pointer",
+                        "text": 'Làm lại bài'
+                    });
                 }
-            }
-            else {
-                var doButton = $('<div>', {
-                    "class": "btn btn-primary m-3",
-                    "onclick": "$(this).prop('disabled',true); Redo(this); ",
-                    "style": "cursor: pointer",
-                    "text": 'Làm lại bài'
-                });
-            }
             wrapper.append(doButton)
                 .append(reviewButton)
                 .append(backButton);

@@ -183,7 +183,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var classSchedule = new ClassScheduleViewModel(course)
             {
-                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID 
+                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID
                            //&& o.Etype > 0
                            ).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ClassID).FirstOrDefault()
@@ -514,6 +514,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             if (entity == null || string.IsNullOrEmpty(entity.ID))
             {
+                entity.StartDate = entity.StartDate.ToUniversalTime();
+                entity.EndDate = entity.EndDate.ToUniversalTime();
                 return new JsonResult(new Dictionary<string, object> {
                         {"Data",null },
                         {"Error", "Không tìm thấy lịch học" }
@@ -528,8 +530,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {"Error", "Không tìm thấy lịch học" }
                     });
 
-                oldItem.StartDate = entity.StartDate;
-                oldItem.EndDate = entity.EndDate;
+                oldItem.StartDate = entity.StartDate.ToUniversalTime();
+                oldItem.EndDate = entity.EndDate.ToUniversalTime();
                 UpdateCalendar(oldItem, UserID);
                 _lessonScheduleService.CreateOrUpdate(oldItem);
 
@@ -555,7 +557,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _calendarHelper.ScheduleAutoConvertEvent();
             return new JsonResult("OK");
         }
-        
+
         private string GetMarkText(int type)
         {
             switch (type)
