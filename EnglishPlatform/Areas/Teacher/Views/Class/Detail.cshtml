@@ -409,15 +409,19 @@
                     this.tab[a] = true
                     switch (a) {
                         case 0:
+                            history.replaceState({ tab: a }, this.className + " - Tổng quan");
                             this.loadClassDetail();
                             break;
                         case 1:
+                            history.replaceState({ tab: a }, this.className + " - Môn học", "#module");
                             this.loadClassSubjects();
                             break;
                         case 2:
+                            history.replaceState({ tab: a }, this.className + " - Danh sách học viên", "#student");
                             this.loadClassStudent();
                             break;
                         case 3:
+                            history.replaceState({ tab: a }, this.className + " - Tài liệu tham khảo", "#reference");
                             this.loadPreference();
                             break;
                         case 4:

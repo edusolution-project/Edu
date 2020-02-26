@@ -209,7 +209,7 @@ var Lesson = (function () {
         lessonContent.append(lessonHeader);
 
         //main content (lesson content; part list...., 2 cols interface)
-        var cardBody = $("<div>", { "class": "card-body position-absolute", "style": "top: " + (hideHeader ? "56" : "0") + "px; bottom: 0; left: 0; right: 0" });
+        var cardBody = $("<div>", { "class": "card-body position-absolute", "style": "top: " + (hideHeader ? "0" : "56") + "px; bottom: 0; left: 0; right: 0" });
         lessonContent.append(cardBody);
 
         var lessonBody = $("<div>", { "class": "lesson-body h-100", "id": config.lesson_id });
@@ -1850,7 +1850,7 @@ var Lesson = (function () {
             doButton = $('<div>', {
                 "class": "btn btn-danger m-3",
                 "style": "cursor: pointer",
-                "text": "Hết hạn",
+                "text": "Quá hạn (" + endDate.format("DD/MM/YYYY hh:mm A") + ")",
                 "disabled": "disabled"
             });
             isOverdue = true;
@@ -1861,7 +1861,7 @@ var Lesson = (function () {
                 doButton = $('<div>', {
                     "class": "btn btn-danger m-3",
                     "style": "cursor: pointer",
-                    "text": "Bài chưa được mở",
+                    "text": "Bài chưa được mở (" + startDate.format("DD/MM/YYYY hh:mm A") + ")",
                     "disabled": "disabled"
                 });
                 isOverdue = true
@@ -1894,7 +1894,7 @@ var Lesson = (function () {
             var doable = true;
             var lastpoint = (lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0);
 
-            var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm:ss A");
+            var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
