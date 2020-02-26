@@ -213,9 +213,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (!string.IsNullOrEmpty(ID))
             {
                 var item = _referenceService.GetItemByID(ID);
+                _ = _referenceService.IncDownload(ID, 1);
+                //TODO: create download log
                 if (item.Media != null)
                 {
-                    var filePath = Path.Combine(_env.WebRootPath, item.Media.Path);
+                    var filePath = Path.Combine(_env.WebRootPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
                     var stream = System.IO.File.OpenRead(filePath);
                     return File(stream, "application/octet-stream", item.Media.Name);
                 }

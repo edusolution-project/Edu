@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -78,6 +79,13 @@ namespace BaseCustomerEntity.Database
                 )
             };
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public async Task IncDownload(string ID, int increment)
+        {
+            _ = Collection.UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ReferenceEntity>()
+                .Inc(t => t.Downloaded, 1)
+                .Set(t => t.LastDownload, DateTime.Now));
         }
     }
 }
