@@ -98,11 +98,6 @@ namespace BaseEasyRealTime.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(receivers))
-                {
-                    return new JsonResult(new { code = 200, msg = "Success", data = new List<NewFeedEntity>() }) ;
-                }
-
                 if (User != null && User.Identity.IsAuthenticated)
                 {
                     if (string.IsNullOrEmpty(id))
@@ -129,6 +124,57 @@ namespace BaseEasyRealTime.Controllers
                         else
                         {
                             return new JsonResult(new { code = 200, msg = "Success", data = data.Find(_ => true && _.State == state && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false)?.ToList() });
+                        }
+                    }
+                    else
+                    {
+                        var item = _service.GetItemByID(id);
+                        return new JsonResult(new { code = item == null ? 404 : 200, msg = item == null ? "Không tìm thấy bài đăng" : "Đã tìm thấy bài viết", data = item });
+                    }
+                }
+                else
+                {
+                    return new JsonResult(new { code = 201, msg = "Bạn không có quyền xem bài !!! " });
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { code = 500, msg = ex.Message, data = ex });
+            }
+        }
+
+        [HttpGet]
+        [Obsolete]
+        public JsonResult GetList(string id, int state, HashSet<string> receivers, long pageIndex = 0, long pageSize = 5)
+        {
+            try
+            {
+                if (User != null && User.Identity.IsAuthenticated)
+                {
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        var data = _service.CreateQuery();
+                        if (state == 0)
+                        {
+                            if (data.Count(_ => true && _.State > 0 && (_.Receivers.Intersect(receivers).Count() > 0 || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false) >= 5)
+                            {
+                                var realData = data.Find(_ => true && _.State > 0 && (_.Receivers.Intersect(receivers).Count() > 0 || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false)
+                                    ?.SortByDescending(_ => _.Created)
+                                    ?.Skip(0)
+                                    ?.Limit(5)
+                                    ?.ToList();
+                                return new JsonResult(new { code = 200, msg = "Success", data = realData?.OrderByDescending(o => o.Created)?.ToList() });
+                            }
+                        }
+
+                        if (data.Count(_ => true && _.State == state && (_.Receivers.Intersect(receivers).Count() > 0 || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false) >= pageSize)
+                        {
+                            var realData = data.Find(_ => true && _.State == state && (_.Receivers.Intersect(receivers).Count() > 0 || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false)?.Skip((int)(pageSize * pageIndex)).Limit((int)pageSize)?.ToList();
+                            return new JsonResult(new { code = 200, msg = "Success", data = realData });
+                        }
+                        else
+                        {
+                            return new JsonResult(new { code = 200, msg = "Success", data = data.Find(_ => true && _.State == state && (_.Receivers.Intersect(receivers).Count() > 0 || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false)?.ToList() });
                         }
                     }
                     else
