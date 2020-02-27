@@ -153,29 +153,15 @@ namespace BaseEasyRealTime.Controllers
                 {
                     if (string.IsNullOrEmpty(id))
                     {
-                        var data = _service.CreateQuery();
-                        if (state == 0)
+                        var filter = new List<FilterDefinition<NewFeedEntity>>
                         {
-                            if (data.Count(_ => true && _.State > 0 && (_.Receivers.Intersect(receivers).Count() > 0 || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false) >= 5)
-                            {
-                                var realData = data.Find(_ => true && _.State > 0 && (_.Receivers.Intersect(receivers).Count() > 0 || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false)
-                                    ?.SortByDescending(_ => _.Created)
-                                    ?.Skip(0)
-                                    ?.Limit(5)
-                                    ?.ToList();
-                                return new JsonResult(new { code = 200, msg = "Success", data = realData?.OrderByDescending(o => o.Created)?.ToList() });
-                            }
-                        }
+                            Builders<NewFeedEntity>.Filter.AnyIn(o=>o.Receivers,receivers)
+                        };
 
-                        if (data.Count(_ => true && _.State == state && (_.Receivers.Intersect(receivers).Count() > 0 || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false) >= pageSize)
-                        {
-                            var realData = data.Find(_ => true && _.State == state && (_.Receivers.Intersect(receivers).Count() > 0 || _.Sender == User.FindFirst(ClaimTypes.Email).Value) && _.RemoveByAdmin == false)?.Skip((int)(pageSize * pageIndex)).Limit((int)pageSize)?.ToList();
-                            return new JsonResult(new { code = 200, msg = "Success", data = realData });
-                        }
-                        else
-                        {
-                            return new JsonResult(new { code = 200, msg = "Success", data = data.Find(_ => true && _.State == state && (_.Receivers.Intersect(receivers).Count() > 0 || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false)?.ToList() });
-                        }
+
+
+                        var data = _service.CreateQuery().Find(Builders<NewFeedEntity>.Filter.And(filter))?.ToList();
+                        return new JsonResult(new { code = 200, msg = "Success", data = data?.OrderByDescending(o => o.Created)?.ToList() });
                     }
                     else
                     {
