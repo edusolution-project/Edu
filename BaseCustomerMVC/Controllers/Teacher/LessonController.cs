@@ -473,7 +473,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var parts = new List<LessonEntity>();
             parts = item.IsParentCourse
-                ? _lessonService.CreateQuery().Find(o => o.CourseID == item.ID && o.IsParentCourse == true)
+                ? _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID && o.IsParentCourse == true)
                 .SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
                 : _lessonService.CreateQuery().Find(o => o.ChapterID == item.ChapterID)
                 .SortBy(o => o.Order).ThenBy(o => o.ID).ToList();

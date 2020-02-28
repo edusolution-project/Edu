@@ -6,6 +6,7 @@
     var user = ViewBag.User as string;
     var subject = ViewBag.Subject as BaseCustomerEntity.Database.SubjectEntity;
     var grade = ViewBag.Grade as BaseCustomerEntity.Database.GradeEntity;
+    var isLock = Data.IsActive || Data.IsUsed;
 }
 
 <script>
@@ -15,7 +16,7 @@
 
 <div class="left-col">
     <div class="page-title">
-        <h1><a href="@Url.Action("Index","Curriculum")">Curriculum</a> / @ViewData["Title"]</h1>
+        <h1><a href="@Url.Action("Index","Curriculum")">Bài giảng</a> / @ViewData["Title"]</h1>
     </div>
     <div class="main-container">
         <div class="sub-sidebar">
@@ -49,10 +50,13 @@
                         }
                     </div>
                 </div>
-                <div class="col-md-2 text-right">
-                    <button type="button" class="btn btn-success save-info float-right" for="dsp" onclick="toggleEdit(true)">Sửa</button>
-                    <button type="button" class="btn btn-success save-info float-right" for="edit" style="display:none" onclick="toggleEdit(false)">Đóng</button>
-                </div>
+                @if (!isLock)
+                {
+                    <div class="col-md-2 text-right">
+                        <button type="button" class="btn btn-success save-info float-right" for="dsp" onclick="toggleEdit(true)">Sửa</button>
+                        <button type="button" class="btn btn-success save-info float-right" for="edit" style="display:none" onclick="toggleEdit(false)">Đóng</button>
+                    </div>
+                }
             </div>
             <div class="banner p-2 mb-3 row" style="background: #e60028;border-radius: 5px;color:#FFF;">
                 <div class="banner-img col-sm-2 align-top" style="">
@@ -91,27 +95,27 @@
                 </script>
             </div>
             @*<div class="row pb-3">
-                <label class="col-sm-2 form-label align-top" for="courseContent"><b style="color:#e60028">Learning Outcomes</b></label>
-                <div class="col-sm-10 align-top">
-                    <div for="edit" style="display:none">
-                        <textarea name="courseTarget" id="courseTarget">@Data?.LearningOutcomes</textarea>
+                    <label class="col-sm-2 form-label align-top" for="courseContent"><b style="color:#e60028">Learning Outcomes</b></label>
+                    <div class="col-sm-10 align-top">
+                        <div for="edit" style="display:none">
+                            <textarea name="courseTarget" id="courseTarget">@Data?.LearningOutcomes</textarea>
+                        </div>
+                        <div for="dsp">
+                            @Html.Raw(Data?.LearningOutcomes)
+                        </div>
                     </div>
-                    <div for="dsp">
-                        @Html.Raw(Data?.LearningOutcomes)
-                    </div>
-                </div>
-                <script>
-                    CKEDITOR.replace("courseTarget",
-                        {
-                            extraPlugins: 'embed,autoembed,image2',
-                            embed_provider: '//ckeditor.iframe.ly/api/oembed?url={url}&callback={callback}',
-                            image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],
-                            image2_disableResizer: true
-                        }
-                    );
-                    //CKEDITOR.instances.courseContent.setData($('#courseContent').siblings('.d-none').html());
-                </script>
-            </div>*@
+                    <script>
+                        CKEDITOR.replace("courseTarget",
+                            {
+                                extraPlugins: 'embed,autoembed,image2',
+                                embed_provider: '//ckeditor.iframe.ly/api/oembed?url={url}&callback={callback}',
+                                image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],
+                                image2_disableResizer: true
+                            }
+                        );
+                        //CKEDITOR.instances.courseContent.setData($('#courseContent').siblings('.d-none').html());
+                    </script>
+                </div>*@
             <div for="edit" style="display:none">
                 <div class="banner__save">
                     <button type="button" class="btn btn-success save-info float-right" onclick="SaveCurriculum('@Data.ID')">Lưu</button>

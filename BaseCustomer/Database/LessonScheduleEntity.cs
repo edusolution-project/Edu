@@ -68,5 +68,11 @@ namespace BaseCustomerEntity.Database
         {
             await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<LessonScheduleEntity>.Update.Set("ClassSubjectID", classSubject.ID));
         }
+
+        public long CountClassExam(string ClassID, DateTime time)
+        {
+            var validTime = new DateTime(1900, 1, 1);
+            return Collection.CountDocuments(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate > time || t.StartDate < validTime));
+        }
     }
 }

@@ -2293,7 +2293,7 @@ var Lesson = (function () {
                         "class": "input-text answer-text form-control",
                         "onfocusout": "AnswerQuestion(this)",
                         "id": "inputQZ2-" + data.ParentID,
-                        "data-id": data.ID,
+                        //"data-id": data.ID,
                         "data-part-id": partid,
                         "data-lesson-id": config.lesson_id,
                         "data-question-id": data.ParentID,
@@ -2570,7 +2570,7 @@ var Lesson = (function () {
             case "QUIZ2":
                 partID = dataset.partId;
                 questionId = dataset.questionId;
-                answerID = dataset.id;
+                //answerID = dataset.id;
                 // value là data động tự điền
                 value = _this.value;
                 break;

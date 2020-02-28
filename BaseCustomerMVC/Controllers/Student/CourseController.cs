@@ -142,11 +142,11 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
             }
-            if (model.StartDate > new DateTime(2000,1,1))
+            if (model.StartDate > new DateTime(2000, 1, 1))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
             }
-            if (model.EndDate > new DateTime(2000,1,1))
+            if (model.EndDate > new DateTime(2000, 1, 1))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
@@ -217,6 +217,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
+                       let scheduleCount = _lessonScheduleService.CountClassExam(o.ID, DateTime.Now)
                        select new
                        {
                            id = o.ID,
@@ -227,7 +228,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
                            min = progress != null ? progress.Completed : 0,
-                           score = progress != null ? progress.AvgPoint : 0,
+                           score = (progress != null || scheduleCount <= 0) ? progress.TotalPoint / scheduleCount : 0,
                            thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                        }).ToList();
             return Json(new { Data = std });

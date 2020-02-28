@@ -2,8 +2,8 @@
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseEntity;
-    var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.ChapterEntity>
-        ;
+    var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.ChapterEntity>;
+    var isLock = Data.IsActive || Data.IsUsed;
     var user = ViewBag.User as string;
 }
 
@@ -21,6 +21,34 @@
             @await Html.PartialAsync("_subSidebarTeacher-Curriculum")
         </div>
         <div class="main-content">
+            <div class="detail pb-3 row">
+                <div class="text-left col-md-10">
+                    <div class="lession-label d-inline-block">Ngày tạo: <b>@Data.Created.ToString("dd/MM/yyyy")</b></div> -
+                    <div class="lession-label d-inline-block">
+                        Trạng thái:
+                        @if (Data.IsActive)
+                        {
+                            <b>Đang hoạt động</b>
+                        }
+                        else
+                        {
+                            <b>Không hoạt động</b>
+                        }
+                    </div>
+                    -
+                    <div class="lession-label d-inline-block">
+                        Tình trạng sử dụng:
+                        @if (Data.IsUsed)
+                        {
+                            <b>Đã sử dụng</b>
+                        }
+                        else
+                        {
+                            <b>Chưa sử dụng</b>
+                        }
+                    </div>
+                </div>
+            </div>
             <div class="modules-wrapper">
                 <div class="p-3">
                     <i class="fas fa-circle-notch fa-spin"></i> Loading ...
@@ -65,6 +93,12 @@
                         <div class="form-group">
                             <label class="col-form-label">Mô tả:</label>
                             <textarea class="form-control" name="Description" rows="3"></textarea>
+                        </div>
+                        <div class="row chooseOrder">
+                            <div class="form-group col-md-12">
+                                <label class="col-form-label">Thứ tự:</label>
+                                <input type="text" class="form-control" name="Order" placeholder="Thứ tự hiển thị" value="---">
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -258,14 +292,19 @@
                                 "onclick": "toggleCollapse(this, '" + chapter.ID + "')"
                             }));
                         title_cPart.append($("<input>", { "type": "hidden", "name": "Description", "value": chapter.Description }));
+                        title_cPart.append($("<input>", { "type": "hidden", "name": "Order", "value": chapter.Order + 1 }));
                         title_ePart.append($("<i>", { "class": "far fa-folder", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương", "onclick": "AddChapter('" + chapter.ID + "'); return false;" }));
                         title_ePart.append($("<i>", { "class": "far fa-file", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài", "onclick": "AddLesson('" + chapter.ID + "');" }));
                         //title_ePart.append($("<i>", { "class": "fas fa-sort", "title": "Sắp xếp", "onclick": "Sort('" + chapter.ID + "'); return false;" }));
                         title_ePart.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Sửa", "pid": chapter.ParentID, "onclick": "EditChapter(this, '" + chapter.ID + "'); return false;" }));
                         title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
                         title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }));
-
-                        chapTitle.append(title_cPart).append(title_ePart);
+                        chapTitle.append(title_cPart);
+                        @if(!isLock)
+                        {
+                            @: chapTitle.append(title_ePart);
+                        }
+                        
                         chapContent.append(chapTitle);
                         chapContent.append($("<div>", { "class": "modules-content collapse show" }));
 
@@ -285,7 +324,11 @@
                     var title_ePart = $("<div>", { "class": "col-md-2 text-right row-action d-block" })
                     title_cPart.append($("<span>", {text: "Add chapter", "onclick": "AddChapter('0'); return false;","data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Add Chapter"}));
                     title_ePart.append($("<i>", { "class": "fas fa-plus-square", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Add Chapter", "onclick": "AddChapter('0'); return false;" }));
-                    chapTitle.append(title_cPart).append(title_ePart);
+                    chapTitle.append(title_cPart)
+                    @if(!isLock)
+                    {
+                        @:chapTitle.append(title_ePart);
+                    }
                     chapContent.append(chapTitle);
                     modulesBody.append(chapContent);
                 }
@@ -332,9 +375,13 @@
                         rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
                         rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
 
+                        rowData.append(leftPart);
+                        @if(!isLock)
+                        { 
+                            @: rowData.append(rightPart);
+                        }
 
-
-                        rowData.append(leftPart).append(rightPart);
+                        
 
                         if (item.ChapterID == null) {
                             modulesBody.append(rowData);
@@ -410,10 +457,14 @@
         modalTitle.text("Cập nhật nội dung");
         var name = $(obj).parent().parent().find("[name=Name]").text().trim();
         var description = $(obj).parent().parent().find("[name=Description]").val().trim();
+        var order = $(obj).parent().parent().find("[name=Order]").val().trim();
         var parent = $(obj).attr("pid");
+        
+        console.log(obj);
         modal.find("[name=Name]").val(name);
         modal.find("[name=Description]").val(description);
         modal.find("[name=ParentID]").val(parent);
+        modal.find("[name=Order]").val(order);
         modal.find("[name=ID]").val(ID);
     }
 
@@ -423,6 +474,7 @@
         modalTitle.text("Add chapter");
         modal.find("[name=Name]").val("");
         modal.find("[name=ID]").val("");
+        modal.find("[name=Order]").val("---");
         modal.find("[name=ParentID]").val(parentchap);
     }
 

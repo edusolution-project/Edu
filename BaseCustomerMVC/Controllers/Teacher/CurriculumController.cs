@@ -665,15 +665,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.IsAdmin = true;
                     item.IsActive = false;
                     item.Updated = DateTime.Now;
-                    var max = _chapterService.CreateQuery()
-                             .CountDocuments(o => o.ParentID == item.ParentID);
-                    item.Order = (int)max;
-
+                    item.Order = int.MaxValue - 1;
                     _chapterService.CreateQuery().InsertOne(item);
+                    ChangeChapterPosition(item, int.MaxValue);//reorder
                 }
                 else
                 {
                     item.Updated = DateTime.Now;
+                    var newOrder = item.Order - 1;
                     item.Order = data.Order;
                     item.Created = data.Created;
                     item.CreateUser = data.CreateUser;
@@ -693,6 +692,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 _ = _chapterService.IncreaseLessonCount(item.ParentID, data.TotalLessons);
                             }
                         }
+                        ChangeChapterPosition(item, int.MaxValue);
                     }
                 }
 
@@ -735,7 +735,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {"Error", "Permisson Error" }
                             });
 
-                await RemoveChapter(chapter.ID);
+                await RemoveChapter(chapter);
                 return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", "Remove OK" },
@@ -752,16 +752,46 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private async Task RemoveChapter(string chapid)
+        private async Task RemoveChapter(ChapterEntity chap)
         {
-            _lessonService.CreateQuery().DeleteMany(o => o.ChapterID == chapid);
-            var subchapters = _chapterService.CreateQuery().Find(o => o.ParentID == chapid).ToList();
+            _lessonService.CreateQuery().DeleteMany(o => o.ChapterID == chap.ID);
+            var subchapters = _chapterService.CreateQuery().Find(o => o.ParentID == chap.ID).ToList();
             if (subchapters != null && subchapters.Count > 0)
                 foreach (var chapter in subchapters)
-                    await RemoveChapter(chapter.ID);
-            await _chapterService.RemoveAsync(chapid);
+                    await RemoveChapter(chapter);
+            ChangeChapterPosition(chap, int.MaxValue);
+            await _chapterService.RemoveAsync(chap.ID);
         }
 
+        private int ChangeChapterPosition(ChapterEntity item, int pos)
+        {
+            var parts = new List<ChapterEntity>();
+            parts = _chapterService.CreateQuery().Find(o => o.CourseID == item.CourseID && o.ParentID == item.ParentID)
+                .SortBy(o => o.Order).ThenBy(o => o.ID).ToList();
+
+            var ids = parts.Select(o => o.ID).ToList();
+
+            var oldPos = ids.IndexOf(item.ID);
+            if (oldPos == pos)
+                return oldPos;
+
+            if (pos > parts.Count())
+                pos = parts.Count() - 1;
+            item.Order = pos;
+
+            _chapterService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+            int entry = -1;
+            foreach (var part in parts)
+            {
+                if (part.ID == item.ID) continue;
+                if (entry == pos - 1)
+                    entry++;
+                entry++;
+                part.Order = entry;
+                _chapterService.CreateQuery().ReplaceOne(o => o.ID == part.ID, part);
+            }
+            return pos;
+        }
         #endregion Chapter
 
         [Obsolete]
@@ -1069,22 +1099,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _service.Save(course);
             }
             var subjects = _classSubjectService.GetAll().ToList();
-            foreach(var sbj in subjects)
+            foreach (var sbj in subjects)
             {
                 sbj.TotalLessons = 0;
                 _classSubjectService.Save(sbj);
             }
             var allclass = _classService.GetAll().ToList();
-            foreach(var @class in allclass)
+            foreach (var @class in allclass)
             {
                 @class.TotalLessons = 0;
                 _classService.Save(@class);
             }
             var alllessons = _lessonService.GetAll().ToList();
-            foreach(var lesson in alllessons)
+            foreach (var lesson in alllessons)
             {
                 var course = _service.GetItemByID(lesson.CourseID);
-                if(course == null)
+                if (course == null)
                 {
                     _lessonService.Remove(lesson.ID);
                 }
