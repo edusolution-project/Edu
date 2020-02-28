@@ -43,8 +43,12 @@
 </div>
 @section Footer{}
 @section Scripts{
-
-    <script src="~/js/content-render.js?20200225"></script>
+    <style>
+        .expand ~ .card-body {
+            padding-bottom: 100px !important;
+        }
+    </style>
+    <script src="~/js/content-render.js?20200228"></script>
     <script>
             var config = {
                 container: "exam-student",

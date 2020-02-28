@@ -14,7 +14,7 @@
 
 <div class="left-col">
     <div class="page-title">
-        <h1><a href="@Url.Action("Index","Curriculum")">Curriculum</a> / @ViewData["Title"]</h1>
+        <h1><a href="@Url.Action("Index","Curriculum")">Bài giảng</a> / @ViewData["Title"]</h1>
     </div>
     <div class="main-container">
         <div class="sub-sidebar">
@@ -37,7 +37,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Add Chapter</h5>
+                    <h5 class="modal-title" id="modalTitle">Thêm chương</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -47,11 +47,11 @@
                         <input type="hidden" name="ID" />
                         <input type="hidden" name="CourseID" value="@Data.ID" />
                         <div class="form-group">
-                            <label class="col-form-label">Chapter name:</label>
+                            <label class="col-form-label">Tên chương:</label>
                             <input type="text" class="form-control" name="Name" required>
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label">Parent Chapter:</label>
+                            <label class="col-form-label">Chương gốc:</label>
                             <select name="ParentID" class="form-control">
                                 <option value="0">------</option>
                                 @{
@@ -63,14 +63,14 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label">Description:</label>
+                            <label class="col-form-label">Mô tả:</label>
                             <textarea class="form-control" name="Description" rows="3"></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("CreateOrUpdateChapter","Curriculum")','update' , ReloadCourse)">Save</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@Url.Action("CreateOrUpdateChapter","Curriculum")','update' , ReloadCourse)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -80,7 +80,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Add Chapter</h5>
+                    <h5 class="modal-title" id="modalTitle">Thêm chương</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -92,42 +92,42 @@
                         <input type="hidden" name="ChapterID" value="" />
                         <div class="row">
                             <div class="form-group col-md-12">
-                                <label class="col-form-label">Lesson Type:</label>
+                                <label class="col-form-label">Kiểu bài:</label>
                                 <select name="TemplateType" class="form-control" onchange="SelectTemplate()">
-                                    <option value="1">Lecture</option>
-                                    <option value="2">Exam</option>
+                                    <option value="1">Bài giảng</option>
+                                    <option value="2">Bài kiểm tra </option>
                                 </select>
                             </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-md-12">
-                                <label class="col-form-label">Title:</label>
+                                <label class="col-form-label">Tiêu đề:</label>
                                 <input type="text" class="form-control" name="Title" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Duration (minutes):</label>
-                                <input type="text" class="form-control" name="Timer" placeholder="0 = unlimited" required>
+                                <label class="col-form-label">Thời gian (phút):</label>
+                                <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required>
                             </div>
                             <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Attempt limit:</label>
-                                <input type="text" class="form-control" name="Limit" placeholder="0 = unlimited" required>
+                                <label class="col-form-label">Giới hạn số lượt làm bài:</label>
+                                <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Point:</label>
+                                <label class="col-form-label">Điểm :</label>
                                 <input type="text" class="form-control" name="Point" placeholder="0" required>
                             </div>
                             <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Multiple:</label>
+                                <label class="col-form-label">Hệ số:</label>
                                 <input type="text" class="form-control" name="Multiple" placeholder="> 0" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Exam type:</label>
+                                <label class="col-form-label">Kiểu bài kiểm tra:</label>
                                 <select name="Etype" class="form-control" required>
                                     <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Practice</option>
                                     <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Weekly Exam</option>
@@ -138,11 +138,17 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="row chooseOrder" style="display:none">
+                            <div class="form-group col-md-12">
+                                <label class="col-form-label">Thứ tự:</label>
+                                <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng">
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@Url.Action("CreateOrUpdate","Lesson")','update' , ReloadCourse)">Save</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@Url.Action("CreateOrUpdate","Lesson")','update' , ReloadCourse)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -152,7 +158,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Merge Content</h5>
+                    <h5 class="modal-title" id="modalTitle">Ghép nội dung</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -162,16 +168,16 @@
                         <input type="hidden" name="ID" />
                         <input type="hidden" name="ChapterID" value="" />
                         <div class="form-group">
-                            <label class="col-form-label">Merge lesson:</label><br />
+                            <label class="col-form-label">Ghép bài: </label><br />
                             <label name="rootItem"></label><br />
-                            <label class="col-form-label">with:</label>
+                            <label class="col-form-label"> với: </label>
                             <select name="JoinLesson" class="form-control" required></select>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@Url.Action("Join","Lesson")','join' , ReloadCourse)">Save</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@Url.Action("Join","Lesson")','join' , ReloadCourse)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -181,7 +187,7 @@
         <div class="modal-dialog modal-lg" style="max-width:95%; height: 90%; display: flex">
             <div class="modal-content">
                 <div class="modal-header p-2">
-                    <h5 class="modal-title" id="modalTitle">Edit Lesson</h5>
+                    <h5 class="modal-title" id="modalTitle">Sửa bài</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -190,7 +196,7 @@
                     <iframe width="100%" height="100%" style="display: flex; border:none;" src=""></iframe>
                 </div>
                 <div class="modal-footer p-2">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                 </div>
             </div>
         </div>
@@ -252,12 +258,12 @@
                                 "onclick": "toggleCollapse(this, '" + chapter.ID + "')"
                             }));
                         title_cPart.append($("<input>", { "type": "hidden", "name": "Description", "value": chapter.Description }));
-                        title_ePart.append($("<i>", { "class": "far fa-folder", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Add Chapter", "onclick": "AddChapter('" + chapter.ID + "'); return false;" }));
-                        title_ePart.append($("<i>", { "class": "far fa-file", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Add Lesson", "onclick": "AddLesson('" + chapter.ID + "');" }));
+                        title_ePart.append($("<i>", { "class": "far fa-folder", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương", "onclick": "AddChapter('" + chapter.ID + "'); return false;" }));
+                        title_ePart.append($("<i>", { "class": "far fa-file", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài", "onclick": "AddLesson('" + chapter.ID + "');" }));
                         //title_ePart.append($("<i>", { "class": "fas fa-sort", "title": "Sắp xếp", "onclick": "Sort('" + chapter.ID + "'); return false;" }));
-                        title_ePart.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Edit", "pid": chapter.ParentID, "onclick": "EditChapter(this, '" + chapter.ID + "'); return false;" }));
-                        title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Remove", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
-                        title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Collapse", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }));
+                        title_ePart.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Sửa", "pid": chapter.ParentID, "onclick": "EditChapter(this, '" + chapter.ID + "'); return false;" }));
+                        title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
+                        title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }));
 
                         chapTitle.append(title_cPart).append(title_ePart);
                         chapContent.append(chapTitle);
@@ -313,16 +319,18 @@
 
                         leftPart.append(itemData);
 
-                        rightPart.append($("<i>", { "class": "far fa-edit", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Edit", "onclick" : "return EditLesson(this,'" + item.ID + "'); return false;",
+                        rightPart.append($("<i>", { "class": "far fa-edit", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Sửa", "onclick" : "return EditLesson(this,'" + item.ID + "'); return false;",
                             "cid": item.ChapterID,
                             "type": item.TemplateType,
                             "point": item.Point,
                             "timer": item.Timer,
                             "etype": item.Etype,
                             "mul": item.Multiple,
-                            "limit": item.Limit}));
-                        rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Remove", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
-                        rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Merge", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
+                            "limit": item.Limit,
+                            "order": item.Order + 1
+                        }));
+                        rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
+                        rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
 
 
 
@@ -359,7 +367,7 @@
         var modal = $("#courseModal");
         var modalTitle = modal.find("#modalTitle");
         var ID = '@Data.ID';
-        modalTitle.text("Update Info");
+        modalTitle.text("Cập nhật nội dung");
         var name = '@Data.Name';
         modal.find("[name=Name]").val(name);
         var subject = '@Data.SubjectID'
@@ -399,7 +407,7 @@
     function EditChapter(obj, ID) {
         var modal = $("#chapterModal");
         var modalTitle = modal.find("#modalTitle");
-        modalTitle.text("Update Chapter");
+        modalTitle.text("Cập nhật nội dung");
         var name = $(obj).parent().parent().find("[name=Name]").text().trim();
         var description = $(obj).parent().parent().find("[name=Description]").val().trim();
         var parent = $(obj).attr("pid");
@@ -431,7 +439,7 @@
         var modal = $("#lessonModal");
         var modalTitle = modal.find("#modalTitle");
         modalTitle.text("Add Lesson");
-
+        modal.find(".chooseOrder").hide();
         modal.find("[name=Title]").val("");
         modal.find("[name=ChapterID]").val(ID);
         modal.find("[name=ID]").val("");
@@ -445,7 +453,8 @@
     {
         var modal = $("#lessonModal");
         var modalTitle = modal.find("#modalTitle");
-        modalTitle.text("Update lesson");
+        modal.find(".chooseOrder").show();
+        modalTitle.text("Cập nhật thông tin");
         var title = $(obj).parent().parent().find("[name=Title]").text().trim();
         var chapter = $(obj).attr("cid");
         var type = $(obj).attr("type");
@@ -454,6 +463,7 @@
         var limit = $(obj).attr("limit");
         var multiple = $(obj).attr("mul");
         var etype = $(obj).attr("etype");
+        var order = $(obj).attr("order");
 
         modal.find("[name=Title]").val(title);
         modal.find("[name=ChapterID]").val(chapter);
@@ -463,6 +473,7 @@
         modal.find("[name=Limit]").val(limit);
         modal.find("[name=Multiple]").val(multiple);
         modal.find("[name=Etype]").val(etype);
+        modal.find("[name=Order]").val(order);
 
         SelectTemplate(type);
         return false;

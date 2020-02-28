@@ -208,17 +208,16 @@ var Lesson = (function () {
         var lessonHeader = $("<div>", { "class": "card-header", style: "display:none" });
         lessonContent.append(lessonHeader);
 
+        //footer row (part navigation, question navigation... - default: hide)
+        var lessonFooter = $('<div>', { "class": "card-footer", "style": "display:none" });
+        lessonContent.append(lessonFooter);
+
         //main content (lesson content; part list...., 2 cols interface)
         var cardBody = $("<div>", { "class": "card-body position-absolute", "style": "top: " + (hideHeader ? "0" : "56") + "px; bottom: 0; left: 0; right: 0" });
         lessonContent.append(cardBody);
 
         var lessonBody = $("<div>", { "class": "lesson-body h-100", "id": config.lesson_id });
         cardBody.append(lessonBody);
-
-        //footer row (part navigation, question navigation... - default: hide)
-        var lessonFooter = $('<div>', { "class": "card-footer", "style": "display:none" });
-        lessonContent.append(lessonFooter);
-
 
         var partsHolder = $("<div>", { "id": "pills-tabContent", "class": "tab-content h-100 row" });
         //render 2 columns layout
@@ -533,7 +532,7 @@ var Lesson = (function () {
                 nav_bottom.append(_footerRight);
                 lessonFooter.show().append(nav_bottom);
                 lessonFooter.append($('<div>', { id: 'quizIdx_holder' }));
-
+                lessonFooter.addClass('expand');
 
                 var quiz_counter = $('<div>', { id: 'quiz-counter-holder', class: "d-inline-block text-white font-weight-bold align-middle pl-3" });
                 $(_footerLeft).append(quiz_counter);
@@ -1742,6 +1741,10 @@ var Lesson = (function () {
 
     var toggleNav = function (obj) {
         $('#quizIdx_holder').toggle();
+        if ($('#quizIdx_holder:visible').length > 0)
+            $('.card-footer').addClass("expand");
+        else
+            $('.card-footer').removeClass("expand");
         $(obj).toggleClass('btn-warning');
     }
 

@@ -29,19 +29,29 @@
     <div class="card-body">
         <div class="box mb-3">
             <div class="heading flex mb-2">
-                <h4 class="box-head">Bài học hôm nay ({{lesson_week.length}})</h4>
+                <h4 class="box-head">Bài học tuần này ({{lesson_week.length}})</h4>
                 @*<a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
             </div>
             <div class="box bg-1 padding-15">
                 <ul class="box list-scroll">
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
-                            <div class="padding-15 inner">
+                            <div class="padding-15 inner" v-if="validDate(item)">
                                 <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
-                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title" v-if="validDate(item)">{{item.title}}</a>
-                                <a v-else href="javascript:;" :title="item.title" class="title" v-on:click="showLockNotify(item)">{{item.title}}</a>
+                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
                                     <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.className" class="title">{{item.className}}</a>
+                                    <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
+                                    <div class="flex">
+                                        <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="padding-15 inner bg-light" v-else>
+                                <a href="javascript:;" :title="item.skill.Name" v-on:click="showLockNotify(item)" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a href="javascript:;" :title="item.title" class="title" v-on:click="showLockNotify(item)">{{item.title}}</a>
+                                <div class="c-bot">
+                                    <a href="javascript:;" :title="item.className" class="title" v-on:click="showLockNotify(item)">{{item.className}}</a>
                                     <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
                                     <div class="flex">
                                         <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
@@ -239,25 +249,32 @@
                     return moment(date).format("DD/MM/YYYY")
             },
             validDate(item) {
-                var now = moment().Date
-                return !(moment(item.startDate).Date > now || moment(item.endDate).Date < now)
+                var now = moment().toDate();
+                var start = moment(item.startDate).toDate()
+                var end = moment(item.endDate).toDate();
+                var invalid = start > now || end < now
+                console.log(invalid);
+                return !invalid
             },
             showLockNotify(item) {
-                var now = moment()
-                console.log(item)
-                var start = moment(item.startDate) > now
-                if (start)
+                var now = moment().toDate()
+                if (moment(item.startDate).toDate() > now)
                     Swal.fire({
                         title: 'Lưu ý',
                         html: 'Bài học sẽ mở lúc ' + this.formatTime(item.startDate),
                         icon: 'warning'
                     });
-                else
+                else if (moment(item.endDate).toDate() < now)
+                {
                     Swal.fire({
                         title: 'Lưu ý',
                         html: 'Bài học đã hết hạn lúc ' + this.formatTime(item.endDate),
                         icon: 'warning'
                     });
+                }
+                else {
+                    document.location = '@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID
+                }
             },
         }
     });

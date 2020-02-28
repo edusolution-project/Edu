@@ -24,34 +24,34 @@
         <div class="main-content">
             <div class="detail pb-3 row">
                 <div class="text-left col-md-10">
-                    <div class="lession-label d-inline-block">Created Date: <b>@Data.Created.ToString("dd/MM/yyyy")</b></div> -
+                    <div class="lession-label d-inline-block">Ngày tạo: <b>@Data.Created.ToString("dd/MM/yyyy")</b></div> -
                     <div class="lession-label d-inline-block">
-                        Status:
+                        Trạng thái:
                         @if (Data.IsActive)
                         {
-                            <b>Active</b>
+                            <b>Đang hoạt động</b>
                         }
                         else
                         {
-                            <b>Inactive</b>
+                            <b>Không hoạt động</b>
                         }
                     </div>
                     -
                     <div class="lession-label d-inline-block">
-                        Usage status:
+                        Tình trạng sử dụng:
                         @if (Data.IsUsed)
                         {
-                            <b>Used</b>
+                            <b>Đã sử dụng</b>
                         }
                         else
                         {
-                            <b>Unused</b>
+                            <b>Chưa sử dụng</b>
                         }
                     </div>
                 </div>
                 <div class="col-md-2 text-right">
-                    <button type="button" class="btn btn-success save-info float-right" for="dsp" onclick="toggleEdit(true)">Edit</button>
-                    <button type="button" class="btn btn-success save-info float-right" for="edit" style="display:none" onclick="toggleEdit(false)">Cancel</button>
+                    <button type="button" class="btn btn-success save-info float-right" for="dsp" onclick="toggleEdit(true)">Sửa</button>
+                    <button type="button" class="btn btn-success save-info float-right" for="edit" style="display:none" onclick="toggleEdit(false)">Đóng</button>
                 </div>
             </div>
             <div class="banner p-2 mb-3 row" style="background: #e60028;border-radius: 5px;color:#FFF;">
@@ -59,17 +59,17 @@
                     <div>
                         <img id="imgCourseAvatar" src="@(string.IsNullOrEmpty(Data.Image) ? "/img/default.jpg":Data.Image)" style="width:auto; height:100px; color:#000; max-width:100%;" />
                         <input type="file" name="classAvatarEdit" class="d-none" id="inputCourseAvatar" onchange="displayMedia(this)" accept="image/*">
-                        <button for="edit" style="display:none;" type="button" class="btn btn-success save-info mt-2" onclick="chooseFile(this)">Choose Image</button>
+                        <button for="edit" style="display:none;" type="button" class="btn btn-success save-info mt-2" onclick="chooseFile(this)">Chọn ảnh</button>
                     </div>
                 </div>
                 <div class="banner__info col-sm-10 pl-2">
-                    <div class="lession-label">Code: <b>@Data.Code?.ToUpper()</b></div>
-                    <div class="lession-label">Subject: <b>@subject.Name</b></div>
-                    <div class="lession-label">Grade: <b>@grade.Name</b></div>
+                    @*<div class="lession-label">Code: <b>@Data.Code?.ToUpper()</b></div>*@
+                    <div class="lession-label">Chương trình: <b>@subject.Name</b></div>
+                    <div class="lession-label">Cấp độ: <b>@grade.Name</b></div>
                 </div>
             </div>
             <div class="row pb-3">
-                <label class="col-sm-2 form-label align-top" for="courseTarget"><b style="color:#e60028">Description</b></label>
+                <label class="col-sm-2 form-label align-top" for="courseTarget"><b style="color:#e60028">Mô tả</b></label>
                 <div class="col-sm-10 align-top">
                     <div for="edit" style="display:none">
                         <textarea name="courseContent" id="courseContent">@Data?.Description</textarea>
@@ -90,7 +90,7 @@
                     //CKEDITOR.instances.courseTarget.setData($('#courseTarget').siblings('.d-none').html());
                 </script>
             </div>
-            <div class="row pb-3">
+            @*<div class="row pb-3">
                 <label class="col-sm-2 form-label align-top" for="courseContent"><b style="color:#e60028">Learning Outcomes</b></label>
                 <div class="col-sm-10 align-top">
                     <div for="edit" style="display:none">
@@ -111,10 +111,10 @@
                     );
                     //CKEDITOR.instances.courseContent.setData($('#courseContent').siblings('.d-none').html());
                 </script>
-            </div>
+            </div>*@
             <div for="edit" style="display:none">
                 <div class="banner__save">
-                    <button type="button" class="btn btn-success save-info float-right" onclick="SaveCurriculum('@Data.ID')">Save</button>
+                    <button type="button" class="btn btn-success save-info float-right" onclick="SaveCurriculum('@Data.ID')">Lưu</button>
                 </div>
             </div>
         </div>

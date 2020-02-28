@@ -142,11 +142,11 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
             }
-            if (model.StartDate > DateTime.MinValue)
+            if (model.StartDate > new DateTime(2000,1,1))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
             }
-            if (model.EndDate > DateTime.MinValue)
+            if (model.EndDate > new DateTime(2000,1,1))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
@@ -273,6 +273,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult GetThisWeekLesson(DateTime today)
         {
+            if (today < new DateTime(1900, 1, 1))
+                return null;
             today = today.ToUniversalTime();
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);

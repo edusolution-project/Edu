@@ -310,9 +310,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
+
+
                     item.Updated = DateTime.Now;
+                    var newOrder = item.Order - 1;
                     item.Order = data.Order;
                     _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                    
+                    if (item.Order != newOrder)//change Position
+                    {
+                        ChangeLessonPosition(item, newOrder);
+                    }
                 }
 
                 return new JsonResult(new Dictionary<string, object>
