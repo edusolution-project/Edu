@@ -34,7 +34,7 @@
             </div>
             <div class="box bg-1 padding-15">
                 <ul class="box list-scroll">
-                    <li v-for="(item,k) in lesson_week" v-if="validDate(item)">
+                    <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
                                 <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
