@@ -29,6 +29,8 @@ namespace BaseCustomerEntity.Database
         public long ExamDone { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
+        [JsonProperty("TotalPoint")]
+        public double TotalPoint { get; set; }
     }
 
     public class ClassSubjectProgressService : ServiceBase<ClassSubjectProgressEntity>
@@ -101,14 +103,11 @@ namespace BaseCustomerEntity.Database
             else
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
-                {
-                    progress.AvgPoint = (progress.AvgPoint * progress.ExamDone + item.LastPoint) / (progress.ExamDone + 1);
                     progress.ExamDone++;
-                }
-                else
-                {
-                    progress.AvgPoint = (progress.AvgPoint * progress.ExamDone + item.PointChange) / progress.ExamDone;
-                }
+
+                progress.TotalPoint += item.PointChange;
+                progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }

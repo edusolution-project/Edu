@@ -12,6 +12,9 @@ namespace BaseCustomerEntity.Database
     {
         [JsonProperty("LessonID")]
         public string LessonID { get; set; }
+        [JsonProperty("Type")]
+        public int? Type { get; set; }
+
         [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]
@@ -23,6 +26,14 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("ClassSubjectID")]
         public string ClassSubjectID { get; set; }
     }
+
+    public class SCHEDULE_TYPE
+    {
+        public const int LECTURE = LESSON_TEMPLATE.LECTURE,
+            EXAM = LESSON_TEMPLATE.EXAM,
+            WEBINAR = 3;
+    }
+
     public class LessonScheduleService : ServiceBase<LessonScheduleEntity>
     {
         public LessonScheduleService(IConfiguration config) : base(config)

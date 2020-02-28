@@ -206,7 +206,12 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
-            var filePath = Path.Combine(_env.WebRootPath + "\\Temp", file.FileName);
+            var dirPath = _env.WebRootPath + "\\Temp";
+            if (!System.IO.Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+
+            var filePath = Path.Combine(dirPath, file.FileName);
+
             List<StudentEntity> studentList = null;
             List<StudentEntity> Error = null;
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -286,7 +291,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
                 catch (Exception ex)
                 {
-                    return new JsonResult(ex);
+                    return new JsonResult(ex.Message);
                 }
             }
             Dictionary<string, object> response = new Dictionary<string, object>()

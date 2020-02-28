@@ -415,6 +415,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     olditem.SubjectID = item.SubjectID;
                     olditem.GradeID = item.GradeID;
                     olditem.SkillID = item.SkillID;
+                    olditem.Name = item.Name;
                     _service.Save(olditem);
                     //update class subject using this course, temporary use
                     _classSubjectService.UpdateCourseSkill(olditem.ID, olditem.SkillID);

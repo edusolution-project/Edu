@@ -144,6 +144,7 @@
             return false;
         $(indicator).addClass("fas fa-spinner fa-spin");
         history.replaceState({ chapter: chapterid });
+        console.log("state update")
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetChapterContent", "Lesson")',

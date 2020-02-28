@@ -2165,7 +2165,7 @@ button, input, a {
 .btn-view, .btn-download, .btn-clear {
     color: #fff;
     border-radius: 20px;
-    width: 80px;
+    min-width: 80px;
     text-align: center;
     padding: 3px 15px;
     font-size: 12px;
