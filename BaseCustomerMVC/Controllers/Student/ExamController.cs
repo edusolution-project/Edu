@@ -192,7 +192,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
                 }
 
-                if (_schedule.StartDate > DateTime.Now)
+                if (_schedule.StartDate.ToLocalTime() > DateTime.Now)
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
@@ -200,7 +200,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
                 }
 
-                if (_schedule.EndDate > new DateTime(1900, 1, 1) && _schedule.EndDate <= DateTime.Now)
+                if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {

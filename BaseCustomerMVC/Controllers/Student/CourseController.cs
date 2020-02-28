@@ -196,6 +196,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult GetActiveList(DateTime today)
         {
+            today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -234,6 +235,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult GetFinishList(DefaultModel model, DateTime today)
         {
+            today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -271,6 +273,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult GetThisWeekLesson(DateTime today)
         {
+            today = today.ToUniversalTime();
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 

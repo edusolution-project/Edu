@@ -692,6 +692,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Homepage
         public JsonResult GetActiveList(DateTime today)
         {
+            today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -728,6 +729,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult GetFinishList(DefaultModel model, DateTime today)
         {
+            today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -757,6 +759,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult GetThisWeekLesson(DateTime today)
         {
+            today = today.ToUniversalTime();
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
@@ -989,6 +992,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.Members = new List<ClassMemberEntity>();
                 item.TotalLessons = 0;
                 item.IsActive = true;
+                item.StartDate = item.StartDate.ToUniversalTime();
+                item.EndDate = item.EndDate.ToUniversalTime();
 
                 if (fileUpload != null)
                 {
@@ -1003,7 +1008,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     foreach (var csubject in classSubjects)
                     {
-                        
+
                         var newMember = new ClassMemberEntity();
                         long lessoncount = 0;
                         var nID = CreateNewClassSubject(csubject, item, out newMember, out lessoncount);
@@ -1037,8 +1042,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldData.Updated = DateTime.Now;
                 oldData.Name = item.Name;
                 oldData.Code = item.Code;
-                oldData.StartDate = item.StartDate;
-                oldData.EndDate = item.EndDate;
+                oldData.StartDate = item.StartDate.ToUniversalTime();
+                oldData.EndDate = item.EndDate.ToUniversalTime();
                 oldData.Description = item.Description;
                 //_service.Save(oldData);
 
@@ -1049,7 +1054,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
-                
+
                 if (oldSubjects != null)
                 {
                     foreach (var oSbj in oldSubjects)
@@ -1083,8 +1088,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             else //Not change
                             {
                                 //update period
-                                oSbj.StartDate = item.StartDate;
-                                oSbj.EndDate = item.EndDate;
+                                oSbj.StartDate = item.StartDate.ToUniversalTime();
+                                oSbj.EndDate = item.EndDate.ToUniversalTime();
                                 oSbj.TeacherID = nSbj.TeacherID;
                                 _classSubjectService.Save(oSbj);
 
