@@ -217,7 +217,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
-                       let scheduleCount = _lessonScheduleService.CountClassExam(o.ID, DateTime.Now)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end:DateTime.Now)
                        select new
                        {
                            id = o.ID,
@@ -228,7 +228,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
                            min = progress != null ? progress.Completed : 0,
-                           score = (progress != null || scheduleCount <= 0) ? progress.TotalPoint / scheduleCount : 0,
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
                            thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                        }).ToList();
             return Json(new { Data = std });
@@ -258,6 +258,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var std = (from o in DataResponse
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
                        let per = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID)
                        select new
                        {
                            id = o.ID,
@@ -267,7 +268,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            per,
                            max = o.TotalLessons,
                            min = progress != null ? progress.Completed : 0,
-                           score = progress != null ? progress.AvgPoint : 0
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
                        }).ToList();
             return Json(new { Data = std });
         }

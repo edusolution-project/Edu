@@ -91,7 +91,7 @@
                         <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
                         <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
                         <td>{{formatFullDate(item.LearnLast)}}</td>
-                        <td>{{item.Result.toFixed(2)}}%</td>
+                        <td v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (item.Result.toFixed(2) + '%')}}</td>
                         <td>{{item.LearnCount}}</td>
                     </tr>
                 </tbody>
@@ -106,8 +106,8 @@
             el: "#main",
             mounted() {
                 this.loadClassSubjects()
-                var start = moment().add(-29, 'days');
-                var end = moment();
+                var start = moment('@currentClass.StartDate.ToLocalTime().ToString("MM/dd/yyyy")');
+                var end = moment('@currentClass.EndDate.ToLocalTime().ToString("MM/dd/yyyy")');
                 $('input[name="dates"]').daterangepicker({
                     startDate: start,
                     endDate: end,
@@ -152,11 +152,11 @@
                 resultFields: [
                     {
                         key: 'lesson',
-                        label: 'Bài học'
+                        label: 'Bài kiểm tra'
                     },
                     {
                         key: 'schedule',
-                        label: 'Lịch học'
+                        label: 'Lịch kiểm tra'
                     },
                     {
                         key: 'last_update',
@@ -176,8 +176,8 @@
                 view: 10,
                 page: 1,
                 avgPoint: 0,
-                startdate: moment(),
-                enddate: moment(),
+                startdate: moment('@currentClass.StartDate.ToLocalTime().ToString("MM/dd/yyyy")'),
+                enddate: moment('@currentClass.EndDate.ToLocalTime().ToString("MM/dd/yyyy")'),
                 tab: [true, false]
             },
             watch: {

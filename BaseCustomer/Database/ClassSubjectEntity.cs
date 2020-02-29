@@ -61,6 +61,11 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(t => t.ClassID == ClassID).ToList();
         }
 
+        public List<string> GetIDsByClassID_Subject(string ClassID, string SubjectID)
+        {
+            return Collection.Find(t => t.ClassID == ClassID && t.SubjectID == SubjectID).Project(t => t.ID).ToList();
+        }
+
         public List<string> GetCourseIdsByClassID(string ClassID)
         {
             return Collection.Find(t => t.ClassID == ClassID).Project(t => t.CourseID).ToList();

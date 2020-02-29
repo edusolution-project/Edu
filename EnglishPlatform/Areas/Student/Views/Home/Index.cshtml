@@ -253,7 +253,6 @@
                 var start = moment(item.startDate).toDate()
                 var end = moment(item.endDate).toDate();
                 var invalid = start > now || end < now
-                console.log(invalid);
                 return !invalid
             },
             showLockNotify(item) {

@@ -1348,20 +1348,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //var course = _courseService.GetItemByID(courseid);
 
             List<LessonProgressEntity> data;
+            List<LessonScheduleEntity> passExams;
             if (string.IsNullOrEmpty(ClassSubjectID))
+            {
+                passExams = _lessonScheduleService.GetClassExam(ClassID, model.StartDate, model.EndDate);
                 data = _lessonProgressService.GetByClassID_StudentID(ClassID, class_student.StudentID);
+            }
             else
+            {
+                passExams = _lessonScheduleService.GetClassSubjectExam(ClassSubjectID, model.StartDate, model.EndDate);
                 data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, class_student.StudentID);
+            }
 
             var subjects = _classSubjectService.GetByClassID(ClassID);
 
-            var lessons = (from progress in data
-                           where progress.Tried > 0
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
-                           where schedule != null
-                           let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
-                           where classsubject != null
-                           let lesson = _lessonService.GetItemByID(progress.LessonID)
+            var lessons = (
+                            from schedule in passExams
+                            let progress = data.FirstOrDefault(t=> t.StudentID == model.ID && t.ClassSubjectID == schedule.ClassSubjectID && t.LessonID == schedule.LessonID) ?? new LessonProgressEntity()    
+                           //from progress in data
+                           //where progress.Tried > 0
+                           //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           //where schedule != null
+                           //let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
+                           //where classsubject != null
+                           let lesson = _lessonService.GetItemByID(schedule.LessonID)
                            select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
                            {
                                ScheduleID = schedule.ID,
@@ -1371,7 +1381,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                LearnCount = progress.Tried,
                                LearnLast = progress.LastTry,
                                Result = progress.LastPoint,
-                           })).OrderBy(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+                           })).OrderByDescending(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
 
             var response = new Dictionary<string, object>
             {
