@@ -15,6 +15,7 @@
     <ProjectReference Include="..\BaseCustomer\BaseCustomerEntity.csproj" />
     <ProjectReference Include="..\BaseEasyRealTime\BaseEasyRealTime.csproj" />
     <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
+    <ProjectReference Include="..\EasyZoom\EasyZoom.csproj" />
   </ItemGroup>
 
   <ItemGroup>

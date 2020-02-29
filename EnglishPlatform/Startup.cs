@@ -8,6 +8,7 @@ using BaseCustomerMVC.Globals;
 using BaseEasyRealTime.Globals;
 using BaseHub;
 using Core_v2.Globals;
+using EasyZoom;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -58,6 +59,7 @@ namespace EnglishPlatform
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddDistributedMemoryCache();
             services.AddSignalR();
+            services.AddEasyZoom(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

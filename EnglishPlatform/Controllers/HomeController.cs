@@ -103,7 +103,7 @@ namespace EnglishPlatform.Controllers
             }
             else
             {
-                string _sPass = Security.Encrypt(PassWord);
+                string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
                 var user = _accountService.GetAccount(UserName.ToLower(), _sPass);
                 if (user == null)
                 {
@@ -254,7 +254,7 @@ namespace EnglishPlatform.Controllers
             }
             else
             {
-                string _sPass = Security.Encrypt(PassWord);
+                string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
                 if (_accountService.IsAvailable(_username))
                 {
                     return Json(new ReturnJsonModel
@@ -399,8 +399,8 @@ namespace EnglishPlatform.Controllers
                 IsActive = true,
                 Type = ACCOUNT_TYPE.ADMIN,
                 UserName = "supperadmin@gmail.com",
-                PassTemp = Security.Encrypt("123"),
-                PassWord = Security.Encrypt("123"),
+                PassTemp = Core_v2.Globals.Security.Encrypt("123"),
+                PassWord = Core_v2.Globals.Security.Encrypt("123"),
                 UserID = "0", // admin
                 RoleID = superadminRole.ID
             };

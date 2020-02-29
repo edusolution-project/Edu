@@ -10,9 +10,10 @@ namespace EasyZoom
 {
     public static class Startup
     {
-        public static void AddEasyZoom(this IServiceCollection services)
+        public static void AddEasyZoom(this IServiceCollection services, IConfiguration config)
         {
-            services.AddOptions<ZoomConfig>();
+            services.AddOptions();
+            services.Configure<ZoomConfig>(config.GetSection("ZoomConfig"));
             services.AddSingleton<IZoomHelpers, ZoomHelpers>();
         }
         public static void UseEasyZoom(this IApplicationBuilder app)

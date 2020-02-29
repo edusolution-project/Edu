@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using BaseCustomerMVC.Controllers.Student;
 using BaseCustomerEntity.Globals;
+using EasyZoom.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -119,9 +120,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return _calendarHelper.RemoveEvent(id, User.FindFirst("UserID").Value).Result;
         }
 
+        [Obsolete]
         public JsonResult FixCalendar()
         {
-            _calendarHelper.ScheduleAutoConvertEvent();
+            _ = _calendarHelper.ScheduleAutoConvertEvent();
             return Json("Fixed");
         }
 
