@@ -192,7 +192,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             AccountEntity user = _accountService.GetAccountByEmail(acc.Email);
 
-            if (!Security.Encrypt(oldpass).Equals(user.PassWord))
+            if (!Core_v2.Globals.Security.Encrypt(oldpass).Equals(user.PassWord))
             {
                 return new JsonResult(
                 new Dictionary<string, object>
@@ -202,7 +202,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
 
-            if (Security.Encrypt(newpass).Equals(user.PassWord))
+            if (Core_v2.Globals.Security.Encrypt(newpass).Equals(user.PassWord))
             {
                 return new JsonResult(
                 new Dictionary<string, object>
@@ -211,7 +211,7 @@ namespace BaseCustomerMVC.Controllers.Student
                  });
             }
 
-            user.PassWord = Security.Encrypt(newpass);
+            user.PassWord = Core_v2.Globals.Security.Encrypt(newpass);
             _accountService.CreateOrUpdate(user);
             return new JsonResult(
             new Dictionary<string, object>
