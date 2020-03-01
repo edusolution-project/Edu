@@ -182,8 +182,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             //try
             //{
-            var currentClass = _classSubjectService.GetItemByID(ID);
-            if (currentClass == null)
+            var currentCs = _classSubjectService.GetItemByID(ID);
+            if (currentCs == null)
                 return new JsonResult(new Dictionary<string, object>
                     {
                         {"Error", "Không tìm thấy lớp học" }
@@ -192,7 +192,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (string.IsNullOrEmpty(Parent))
                 Parent = "0";
 
-            var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == Parent).ToList();
+            var chapters = _chapterService.GetSubChapters(currentCs.CourseID, Parent);
             //var chapterExtends = _chapterExtendService.Search(currentClass.ID);
 
             //foreach (var chapter in chapters)
@@ -201,7 +201,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //    if (extend != null) chapter.Description = extend.Description;
             //}
 
-            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == currentClass.CourseID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
+            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == currentCs.CourseID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
                            where schedule != null
                            select _lessonMapping.AutoOrtherType(r, new LessonScheduleViewModel()

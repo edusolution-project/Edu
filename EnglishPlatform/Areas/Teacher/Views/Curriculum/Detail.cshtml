@@ -2,8 +2,8 @@
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher_noChat.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseEntity;
-    var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.ChapterEntity>;
-    var user = ViewBag.User as string;
+    //var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.ChapterEntity>;
+    //var user = ViewBag.User as string;
     var subject = ViewBag.Subject as BaseCustomerEntity.Database.SubjectEntity;
     var grade = ViewBag.Grade as BaseCustomerEntity.Database.GradeEntity;
     var isLock = Data.IsActive || Data.IsUsed;

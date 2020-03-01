@@ -161,9 +161,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Title = data.Name;
             var UserID = User.Claims.GetClaimByType("UserID").Value;
 
-            var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
+            //var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
 
-            ViewBag.Chapter = chapters;
+            //ViewBag.Chapter = chapters;
             ViewBag.User = UserID;
             ViewBag.Course = data;
             ViewBag.Subject = _subjectService.GetItemByID(data.SubjectID);
@@ -673,27 +673,36 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     item.Updated = DateTime.Now;
                     var newOrder = item.Order - 1;
-                    item.Order = data.Order;
-                    item.Created = data.Created;
-                    item.CreateUser = data.CreateUser;
-                    _chapterService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
-                    if (item.ParentID != data.ParentID)
+                    var oldParent = data.ParentID;
+                    //item.Order = data.Order;
+                    //item.Created = data.Created;
+                    //item.CreateUser = data.CreateUser;
+                    //item.TotalExams = data.TotalExams;
+                    //item.TotalLessons = data.TotalLessons;
+                    data.Name = item.Name;
+                    data.ParentID = item.ParentID;
+                    data.Description = item.Description;
+
+                    _chapterService.CreateQuery().ReplaceOne(o => o.ID == data.ID, data);
+                    if (oldParent != item.ParentID)
                     {
-                        if (item.TotalLessons > 0)
+                        if (data.TotalLessons > 0)
                         {
                             //decrease old parent chapter total lesson
-                            if (string.IsNullOrEmpty(data.ParentID) || data.ParentID == "0")
+                            if (string.IsNullOrEmpty(oldParent) || oldParent == "0")
                             {
                                 _ = _service.IncreaseLessonCount(item.CourseID, 0 - data.TotalLessons);
                             }
                             //increase new parent chapter total lesson
-                            if (string.IsNullOrEmpty(item.ParentID) || item.ParentID == "0")
+                            if (string.IsNullOrEmpty(data.ParentID) || data.ParentID == "0")
                             {
                                 _ = _chapterService.IncreaseLessonCount(item.ParentID, data.TotalLessons);
                             }
                         }
-                        ChangeChapterPosition(item, int.MaxValue);
+                        ChangeChapterPosition(data, int.MaxValue);
                     }
+                    else
+                        ChangeChapterPosition(item, newOrder);
                 }
 
                 return new JsonResult(new Dictionary<string, object>
@@ -772,7 +781,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var ids = parts.Select(o => o.ID).ToList();
 
             var oldPos = ids.IndexOf(item.ID);
-            if (oldPos == pos)
+            if (oldPos == pos && (item.Order == pos))
                 return oldPos;
 
             if (pos > parts.Count())

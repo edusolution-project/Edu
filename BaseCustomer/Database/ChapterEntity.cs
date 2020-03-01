@@ -67,10 +67,6 @@ namespace BaseCustomerEntity.Database
 
             Collection.Indexes.CreateManyAsync(indexs);
         }
-        public object GetByCode(string code)
-        {
-            return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();
-        }
 
         public async Task IncreaseLessonCount(string ID, long increment, List<string> listid = null)//prevent circular ref
         {
@@ -98,6 +94,11 @@ namespace BaseCustomerEntity.Database
                 }
 
             }
+        }
+
+        public List<ChapterEntity> GetSubChapters(string CourseID, string ParentID)
+        {
+            return CreateQuery().Find(c => c.CourseID == CourseID && c.ParentID == ParentID).SortBy(t => t.Order).ToList();
         }
     }
 }

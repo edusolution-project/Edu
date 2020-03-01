@@ -76,11 +76,13 @@
                         <input type="hidden" name="CourseID" value="@Data.ID" />
                         <div class="form-group">
                             <label class="col-form-label">Tên chương:</label>
-                            <input type="text" class="form-control" name="Name" required>
+                            <input type="text" class="form-control" name="Name" required @if (isLock) { @: readonly="true"
+                                   }>
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Chương gốc:</label>
-                            <select name="ParentID" class="form-control">
+                            <select name="ParentID" class="form-control" @if (isLock) { @: readonly="true"
+                                    }>
                                 <option value="0">------</option>
                                 @{
                                     for (int i = 0; listChapter != null && i < listChapter.Count; i++)
@@ -92,7 +94,8 @@
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Mô tả:</label>
-                            <textarea class="form-control" name="Description" rows="3"></textarea>
+                            <textarea class="form-control" name="Description" rows="3" @if (isLock) { @: readonly="true"
+                                      }></textarea>
                         </div>
                         <div class="row chooseOrder">
                             <div class="form-group col-md-12">
@@ -127,7 +130,8 @@
                         <div class="row">
                             <div class="form-group col-md-12">
                                 <label class="col-form-label">Kiểu bài:</label>
-                                <select name="TemplateType" class="form-control" onchange="SelectTemplate()">
+                                <select name="TemplateType" class="form-control" onchange="SelectTemplate()" @if (isLock) { @: readonly="true"
+                                        }>
                                     <option value="1">Bài giảng</option>
                                     <option value="2">Bài kiểm tra </option>
                                 </select>
@@ -136,33 +140,39 @@
                         <div class="row">
                             <div class="form-group col-md-12">
                                 <label class="col-form-label">Tiêu đề:</label>
-                                <input type="text" class="form-control" name="Title" required>
+                                <input type="text" class="form-control" name="Title" required @if (isLock) { @: readonly="true"
+                                       }>
                             </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-md-6" for="examOnly">
                                 <label class="col-form-label">Thời gian (phút):</label>
-                                <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required>
+                                <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required @if (isLock) { @: readonly="true"
+                                       }>
                             </div>
                             <div class="form-group col-md-6" for="examOnly">
                                 <label class="col-form-label">Giới hạn số lượt làm bài:</label>
-                                <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required>
+                                <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required @if (isLock) { @: readonly="true"
+                                       }>
                             </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-md-6" for="examOnly">
                                 <label class="col-form-label">Điểm :</label>
-                                <input type="text" class="form-control" name="Point" placeholder="0" required>
+                                <input type="text" class="form-control" name="Point" placeholder="0" required @if (isLock) { @: readonly="true"
+                                       }>
                             </div>
                             <div class="form-group col-md-6" for="examOnly">
                                 <label class="col-form-label">Hệ số:</label>
-                                <input type="text" class="form-control" name="Multiple" placeholder="> 0" required>
+                                <input type="text" class="form-control" name="Multiple" placeholder="> 0" required @if (isLock) { @: readonly="true"
+                                       }>
                             </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-md-6" for="examOnly">
                                 <label class="col-form-label">Kiểu bài kiểm tra:</label>
-                                <select name="Etype" class="form-control" required>
+                                <select name="Etype" class="form-control" required @if (isLock) { @: readonly="true"
+                                        }>
                                     <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Practice</option>
                                     <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Weekly Exam</option>
                                     <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Checkpoint Exam</option>
@@ -293,18 +303,20 @@
                             }));
                         title_cPart.append($("<input>", { "type": "hidden", "name": "Description", "value": chapter.Description }));
                         title_cPart.append($("<input>", { "type": "hidden", "name": "Order", "value": chapter.Order + 1 }));
-                        title_ePart.append($("<i>", { "class": "far fa-folder", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương", "onclick": "AddChapter('" + chapter.ID + "'); return false;" }));
-                        title_ePart.append($("<i>", { "class": "far fa-file", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài", "onclick": "AddLesson('" + chapter.ID + "');" }));
-                        //title_ePart.append($("<i>", { "class": "fas fa-sort", "title": "Sắp xếp", "onclick": "Sort('" + chapter.ID + "'); return false;" }));
+                        @if (!isLock)
+                         {
+                            @:title_ePart.append($("<i>", { "class": "far fa-folder", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương", "onclick": "AddChapter('" + chapter.ID + "'); return false;" }));
+                             @:title_ePart.append($("<i>", { "class": "far fa-file", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài", "onclick": "AddLesson('" + chapter.ID + "');" }));
+                             //title_ePart.append($("<i>", { "class": "fas fa-sort", "title": "Sắp xếp", "onclick": "Sort('" + chapter.ID + "'); return false;" }));
+                         }
                         title_ePart.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Sửa", "pid": chapter.ParentID, "onclick": "EditChapter(this, '" + chapter.ID + "'); return false;" }));
-                        title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
+                         @if (!isLock)
+                         {
+                             @:title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
+                         }
                         title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }));
                         chapTitle.append(title_cPart);
-                        @if(!isLock)
-                        {
-                            @: chapTitle.append(title_ePart);
-                        }
-                        
+                        chapTitle.append(title_ePart);
                         chapContent.append(chapTitle);
                         chapContent.append($("<div>", { "class": "modules-content collapse show" }));
 
@@ -372,16 +384,13 @@
                             "limit": item.Limit,
                             "order": item.Order + 1
                         }));
-                        rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
-                        rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
-
-                        rowData.append(leftPart);
                         @if(!isLock)
-                        { 
-                            @: rowData.append(rightPart);
+                        {
+                        @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
+                        @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
                         }
-
-                        
+                        rowData.append(leftPart);
+                        rowData.append(rightPart);
 
                         if (item.ChapterID == null) {
                             modulesBody.append(rowData);
@@ -459,11 +468,12 @@
         var description = $(obj).parent().parent().find("[name=Description]").val().trim();
         var order = $(obj).parent().parent().find("[name=Order]").val().trim();
         var parent = $(obj).attr("pid");
-        
+
         console.log(obj);
         modal.find("[name=Name]").val(name);
         modal.find("[name=Description]").val(description);
         modal.find("[name=ParentID]").val(parent);
+        modal.find("[name=ParentID] option[value=" +  ID + "]").hide();
         modal.find("[name=Order]").val(order);
         modal.find("[name=ID]").val(ID);
     }

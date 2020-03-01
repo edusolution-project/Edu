@@ -217,7 +217,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
-                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end:DateTime.Now)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
                        select new
                        {
                            id = o.ID,
@@ -670,26 +670,28 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult GetMainChapters(string ID, string UserID)
+        public JsonResult GetMainChapters(string ID)
         {
             try
             {
-                var currentClass = _service.GetItemByID(ID);
-                if (currentClass == null)
+                var userId = User.Claims.GetClaimByType("UserID").Value;
+
+                var currentCs = _classSubjectService.GetItemByID(ID);
+                if (currentCs == null)
                     return new JsonResult(new Dictionary<string, object>
                     {
-                        {"Error", "Không tìm thấy lớp học" }
+                        {"Error", "Không tìm thấy môn học" }
                     });
 
-                var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == "0").ToList();
-                var chapterExtends = _chapterExtendService.Search(currentClass.ID);
+                var chapters = _chapterService.GetSubChapters(currentCs.CourseID, "0");
+                var chapterExtends = _chapterExtendService.Search(currentCs.ID);
 
                 var listProgress = new List<ChapterProgressViewModel>();
 
                 foreach (var chapter in chapters)
                 {
                     var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
-                    var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, UserID, currentClass.ID);
+                    var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, userId, currentCs.ID);
                     if (extend != null) chapter.Description = extend.Description;
                     var viewModel = new MappingEntity<ChapterEntity, ChapterProgressViewModel>().AutoOrtherType(chapter, new ChapterProgressViewModel());
                     if (progress != null)

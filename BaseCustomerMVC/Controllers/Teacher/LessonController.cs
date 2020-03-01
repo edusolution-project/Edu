@@ -219,6 +219,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
+
         [Obsolete]
         [HttpPost]
         public JsonResult GetChapterContent(DefaultModel model, string ChapterID)

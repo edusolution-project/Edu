@@ -17,10 +17,10 @@
                 <div class="flex">
                     <b-progress :value="@currentCs.CompletedLesssons" :max="@currentCs.TotalLessons" class="mb-3"></b-progress>
                     <span>
-                        @if (currentCs.TotalLessons > 0) 
+                        @if (currentCs.TotalLessons > 0)
                         {
                             var complete = currentCs.CompletedLesssons * 100.00 / currentCs.TotalLessons;
-                            @: @complete.ToString("0.00")% 
+                            @: @complete.ToString("0.00")%
                         }
                         else
                         {
@@ -101,7 +101,7 @@
                         <span>{{formatTime(lesson.LastJoin)}}</span>
                     </div>
                     <div class="c c3">
-                        <span v-bind:class="{'bg-danger' : parseInt(lesson.DoPoint)<50}">{{lesson.DoPoint}}</span>%
+                        <span class="bg-transparent text-primary font-weight-bold" v-bind:class="{'text-danger' : parseInt(lesson.DoPoint) < 50, 'text-success' : parseInt(lesson.DoPoint) > 70}">{{lesson.DoPoint.toFixed(2)}}%</span>
                     </div>
                 </template>
                 <template v-else>
@@ -192,11 +192,11 @@
                 let _that = this
                 let _form = new FormData()
                 _form.append('ID', '@currentCs.ID')
-                let _url = '@Url.Action("GetSchedules", "Lesson")'
+                let _url = '@Url.Action("GetMainChapters", "Course")'
                 axios.post(_url, _form)
                     .then(response => {
                         //console.log(response.data.Data)
-                        _that.list_data = response.data.Data.Chapters
+                        _that.list_data = response.data.Data
                         if (window.location.hash != "")
                         {
 
@@ -212,7 +212,7 @@
             },
             filterLesson(ID) {
                 //console.log(ID);
-                console.log(this.list_lessons);
+                //console.log(this.list_lessons);
                 return this.list_lessons.filter((p) => {
         	        return p.ChapterID == ID
                 })
@@ -228,8 +228,11 @@
                     let _url = '@Url.Action("GetChapterContent", "Lesson")'
                     axios.post(_url, _form)
                         .then(response => {
+                            var chapters = response.data.Data.Chapters;
+                            if (chapters != null && chapters.length > 0)
+                                _that.list_data.push(chapters);
                             var lessons = response.data.Data.Lessons;
-                            console.log(lessons)
+                            //console.log(lessons)
                             lessons.forEach(function (lesson) {
                                 if(_that.list_lessons.findIndex(t=>t.ID == lesson.ID) == -1)
                                     _that.list_lessons.push(lesson)
