@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -37,6 +38,8 @@ namespace BaseCustomerEntity.Database
         public string Range { get; set; }
         [JsonProperty("Target")]
         public string Target { get; set; }
+        [JsonProperty("Image")]
+        public string Image { get; set; }
     }
 
     public class REF_RANGE
@@ -78,6 +81,20 @@ namespace BaseCustomerEntity.Database
                 )
             };
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public async Task IncDownload(string ID, int increment)
+        {
+            _ = Collection.UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ReferenceEntity>()
+                .Inc(t => t.Downloaded, 1)
+                .Set(t => t.LastDownload, DateTime.Now));
+        }
+
+        public async Task IncView(string ID, int increment)
+        {
+            _ = Collection.UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ReferenceEntity>()
+                .Inc(t => t.Viewed, 1)
+                .Set(t => t.LastView, DateTime.Now));
         }
     }
 }

@@ -692,6 +692,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Homepage
         public JsonResult GetActiveList(DateTime today)
         {
+            today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -728,6 +729,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult GetFinishList(DefaultModel model, DateTime today)
         {
+            today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -757,6 +759,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult GetThisWeekLesson(DateTime today)
         {
+            today = today.ToUniversalTime();
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
@@ -829,65 +832,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Manage
         public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
-            //var filter = new List<FilterDefinition<ClassSubjectEntity>>();
-            //if (!string.IsNullOrEmpty(SubjectID))
-            //{
-            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            //}
-            //if (!string.IsNullOrEmpty(GradeID))
-            //{
-            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
-            //}
-            //if (!string.IsNullOrEmpty(TeacherID))
-            //{
-            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
-            //}
-            //if (model.StartDate > new DateTime(1900, 1, 1))
-            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
-            //if (model.StartDate > new DateTime(1900, 1, 1))
-            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
-
-            //var data = _classSubjectService.Collection
-            //    //.AsQueryable().
-            //    //GroupBy(t => t.ClassID).Select(t => new ClassViewModel(t) {
-            //    //    CourseName = 
-            //    //})
-            //    .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
-            //model.TotalRecord = data.Count();
-            //var classData = _service.Collection.AsQueryable().Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)).OrderByDescending(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToList();
-            //var returndata = from o in classData
-            //                     //where o.Skills != null
-            //                 let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
-            //                 let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
-            //                 select new Dictionary<string, object>
-            //                 {
-            //                     { "ID", o.ID },
-            //                     { "Name", o.Name },
-            //                     { "Students", _classStudentService.GetClassStudents(o.ID).Count },
-            //                     { "Created", o.Created },
-            //                     { "IsActive", o.IsActive },
-            //                     { "Image", o.Image },
-            //                     { "StartDate", o.StartDate },
-            //                     { "EndDate", o.EndDate },
-            //                     { "Order", o.Order },
-            //                     { "Skills", o.Skills },
-            //                     { "Members", o.Members },
-            //                     { "Description", o.Description },
-            //                     { "SkillName", sname }
-            //                 };
-
-            //var response = new Dictionary<string, object>
-            //    {
-            //        { "Data", returndata.ToList()},
-            //        { "Model", model }
-            //    };
-
-            //return new JsonResult(response);
             var returndata = FilterClass(model, SubjectID, GradeID, TeacherID, skipActive);
 
             var response = new Dictionary<string, object>
                 {
-                    { "Data", returndata.ToList()},
+                    { "Data", returndata},
                     { "Model", model }
                 };
             return new JsonResult(response);
@@ -899,7 +848,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var response = new Dictionary<string, object>
                 {
-                    { "Data", returndata.ToList()},
+                    { "Data", returndata},
                     { "Model", model }
                 };
             return new JsonResult(response);
@@ -911,6 +860,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+            }
+            else
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var teacher = _teacherService.GetItemByID(UserID);
+                if (teacher == null)
+                    return null;
+                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
             }
             if (!string.IsNullOrEmpty(GradeID))
             {
@@ -927,10 +884,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
             var data = _classSubjectService.Collection
-                //.AsQueryable().
-                //GroupBy(t => t.ClassID).Select(t => new ClassViewModel(t) {
-                //    CourseName = 
-                //})
                 .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
 
             if (data.Count > 0)
@@ -941,7 +894,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
                 var classResult = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classfilter));
                 model.TotalRecord = classResult.CountDocuments();
-                var classData = classResult.SortBy(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+                var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
                 var returndata = from o in classData
                                  let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
                                  let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
@@ -959,7 +912,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Skills", o.Skills },
                                  { "Members", o.Members },
                                  { "Description", o.Description },
-                                 { "SkillName", sname }
+                                 { "SkillName", sname },
+                                 { "Creator", o.TeacherID }
+
                              };
                 return returndata.ToList();
             }
@@ -989,6 +944,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.Members = new List<ClassMemberEntity>();
                 item.TotalLessons = 0;
                 item.IsActive = true;
+                item.StartDate = item.StartDate.ToUniversalTime();
+                item.EndDate = item.EndDate.ToUniversalTime();
 
                 if (fileUpload != null)
                 {
@@ -1003,7 +960,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     foreach (var csubject in classSubjects)
                     {
-                        
+
                         var newMember = new ClassMemberEntity();
                         long lessoncount = 0;
                         var nID = CreateNewClassSubject(csubject, item, out newMember, out lessoncount);
@@ -1037,8 +994,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldData.Updated = DateTime.Now;
                 oldData.Name = item.Name;
                 oldData.Code = item.Code;
-                oldData.StartDate = item.StartDate;
-                oldData.EndDate = item.EndDate;
+                oldData.StartDate = item.StartDate.ToUniversalTime();
+                oldData.EndDate = item.EndDate.ToUniversalTime();
                 oldData.Description = item.Description;
                 //_service.Save(oldData);
 
@@ -1049,7 +1006,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
-                
+
                 if (oldSubjects != null)
                 {
                     foreach (var oSbj in oldSubjects)
@@ -1083,8 +1040,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             else //Not change
                             {
                                 //update period
-                                oSbj.StartDate = item.StartDate;
-                                oSbj.EndDate = item.EndDate;
+                                oSbj.StartDate = item.StartDate.ToUniversalTime();
+                                oSbj.EndDate = item.EndDate.ToUniversalTime();
                                 oSbj.TeacherID = nSbj.TeacherID;
                                 _classSubjectService.Save(oSbj);
 
@@ -1201,6 +1158,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             ClassID = @class.ID,
                             ClassSubjectID = nSbj.ID,
                             LessonID = lesson.ID,
+                            Type = lesson.TemplateType,
                             IsActive = true
                         };
                         _lessonScheduleService.Save(schedule);
@@ -1390,20 +1348,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //var course = _courseService.GetItemByID(courseid);
 
             List<LessonProgressEntity> data;
+            List<LessonScheduleEntity> passExams;
             if (string.IsNullOrEmpty(ClassSubjectID))
+            {
+                passExams = _lessonScheduleService.GetClassExam(ClassID, model.StartDate, model.EndDate);
                 data = _lessonProgressService.GetByClassID_StudentID(ClassID, class_student.StudentID);
+            }
             else
+            {
+                passExams = _lessonScheduleService.GetClassSubjectExam(ClassSubjectID, model.StartDate, model.EndDate);
                 data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, class_student.StudentID);
+            }
 
             var subjects = _classSubjectService.GetByClassID(ClassID);
 
-            var lessons = (from progress in data
-                           where progress.Tried > 0
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
-                           where schedule != null
-                           let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
-                           where classsubject != null
-                           let lesson = _lessonService.GetItemByID(progress.LessonID)
+            var lessons = (
+                            from schedule in passExams
+                            let progress = data.FirstOrDefault(t=> t.StudentID == model.ID && t.ClassSubjectID == schedule.ClassSubjectID && t.LessonID == schedule.LessonID) ?? new LessonProgressEntity()    
+                           //from progress in data
+                           //where progress.Tried > 0
+                           //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           //where schedule != null
+                           //let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
+                           //where classsubject != null
+                           let lesson = _lessonService.GetItemByID(schedule.LessonID)
                            select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
                            {
                                ScheduleID = schedule.ID,
@@ -1413,7 +1381,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                LearnCount = progress.Tried,
                                LearnLast = progress.LastTry,
                                Result = progress.LastPoint,
-                           })).OrderBy(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+                           })).OrderByDescending(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
 
             var response = new Dictionary<string, object>
             {
@@ -1427,129 +1395,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
         #region Fix Data
-        public IActionResult ConvertMultiSubject()
-        {
-            var allClass = _service.GetAll().ToList();
-            foreach (var @class in allClass)
-            {
-                if (@class.Skills == null || @class.Skills.Count == 0)
-                {
-                    //create class subject:
-                    var teacher = _teacherService.GetItemByID(@class.TeacherID);
-                    if (teacher == null)
-                    {
-                        //Delete Class
-                        _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == @class.ID);
-                        _lessonHelper.RemoveClone(@class.ID);
-                        _examService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        _examDetailService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        var delete = _service.Collection.DeleteMany(o => o.ID == @class.ID);
-                    }
-                    @class.Members = new List<ClassMemberEntity>
-                    {
-                        new ClassMemberEntity
-                        {
-                            TeacherID = teacher.ID,
-                            Name = teacher.FullName,
-                            Type = ClassMemberType.TEACHER
-                        }
-                    };
-                    var subject = _subjectService.GetItemByID(@class.SubjectID);
-                    if (subject == null)
-                    {
-                        //Delete Class
-                        _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == @class.ID);
-                        _lessonHelper.RemoveClone(@class.ID);
-                        _examService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        _examDetailService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        var delete = _service.Collection.DeleteMany(o => o.ID == @class.ID);
-                    }
-                    var course = _courseService.GetItemByID(@class.CourseID);
-                    if (course == null)
-                    {
-                        //Delete Class
-                        _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == @class.ID);
-                        _lessonHelper.RemoveClone(@class.ID);
-                        _examService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        _examDetailService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        var delete = _service.Collection.DeleteMany(o => o.ID == @class.ID);
-                    }
-                    //create classSubject
-                    var classSubject = new ClassSubjectEntity
-                    {
-                        ClassID = @class.ID,
-                        CourseID = course.ID,
-                        GradeID = @class.GradeID,
-                        TeacherID = @class.TeacherID,
-                        EndDate = @class.EndDate,
-                        StartDate = @class.StartDate,
-                        Image = course.Image,
-                        LearningOutcomes = course.LearningOutcomes,
-                        Description = course.Description,
-                        SubjectID = subject.ID
-                    };
-                    _classSubjectService.Save(classSubject);
-                    //Save Class
-                    _service.Save(@class);
-                    //Convert Progress
-                    _ = _chapterProgressService.UpdateClassSubject(classSubject);
-                    _ = _learningHistoryService.UpdateClassSubject(classSubject);
-                    _ = _lessonProgressService.UpdateClassSubject(classSubject);
-                    //Convert Schedule
-                    _ = _lessonScheduleService.UpdateClassSubject(classSubject);
-                    //Convert Clone Part
-                    _ = _lessonHelper.ConvertClassSubject(classSubject);
-                    //Convert Exam
-                    _ = _examService.ConvertClassSubject(classSubject);
-                    _ = _examDetailService.ConvertClassSubject(classSubject);
-                    //Convert Score
-                    _ = _scoreStudentService.UpdateClassSubject(classSubject);
-                }
-            }
-            return null;
-        }
-
-        public IActionResult ConvertSkills()
-        {
-            var courses = _courseService.GetAll().ToList();
-            foreach (var course in courses)
-            {
-                if (course.SkillID == null)
-                {
-                    var name = course.Name.ToLower();
-                    if (name.IndexOf("listen") >= 0 || name.IndexOf("nghe") >= 0)
-                    {
-                        course.SkillID = "1";
-                    }
-                    else if (name.IndexOf("speak") >= 0)
-                    {
-                        course.SkillID = "2";
-                    }
-                    else if (name.IndexOf("read") >= 0)
-                    {
-                        course.SkillID = "3";
-                    }
-                    else if (name.IndexOf("writ") >= 0)
-                    {
-                        course.SkillID = "4";
-                    }
-                    else if (name.IndexOf("voca") >= 0)
-                    {
-                        course.SkillID = "5";
-                    }
-                    else if (name.IndexOf("gramma") >= 0)
-                    {
-                        course.SkillID = "6";
-                    }
-                    else
-                        course.SkillID = "7";
-                }
-                _courseService.Save(course);
-                _classSubjectService.UpdateCourseSkill(course.ID, course.SkillID);
-            }
-            return null;
-        }
-
         public IActionResult FixClassStudent()
         {
             var classids = _classStudentService.GetAll().ToList().Select(t => t.ClassID).Distinct();

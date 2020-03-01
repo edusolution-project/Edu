@@ -368,11 +368,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //{
                                 //    CreateDate = DateTime.Now,
                                 //    IsActive = true,
-                                //    PassTemp = Security.Encrypt(
+                                //    PassTemp = Core_v2.Globals.Security.Encrypt
                                 //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
                                 //        defPass
                                 //        ),
-                                //    PassWord = Security.Encrypt(
+                                //    PassWord = Core_v2.Globals.Security.Encrypt
                                 //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
                                 //        defPass
                                 //        ),

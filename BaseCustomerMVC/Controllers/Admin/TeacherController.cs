@@ -14,7 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Core_v2.Globals;
 using System.Globalization;
 
 namespace BaseCustomerMVC.Controllers.Admin
@@ -170,8 +169,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {
                         CreateDate = DateTime.Now,
                         IsActive = true,
-                        PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                        PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                        PassTemp = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                        PassWord = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                         UserCreate = item.UserCreate,
                         Type = ACCOUNT_TYPE.TEACHER,
                         UserID = item.ID,
@@ -311,8 +310,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     {
                                         CreateDate = DateTime.Now,
                                         IsActive = true,
-                                        PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                                        PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                                        PassTemp = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                                        PassWord = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                                         UserCreate = item.UserCreate,
                                         Type = ACCOUNT_TYPE.TEACHER,
                                         UserID = item.ID,

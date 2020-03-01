@@ -41,6 +41,8 @@ namespace BaseCustomerEntity.Database
         public string Image { get; set; }
         [JsonProperty("TotalLessons")]
         public long TotalLessons { get; set; }
+        [JsonProperty("TotalExams")]
+        public long TotalExams { get; set; }
     }
 
     public class ClassSubjectService : ServiceBase<ClassSubjectEntity>
@@ -57,6 +59,11 @@ namespace BaseCustomerEntity.Database
         public List<ClassSubjectEntity> GetByClassID(string ClassID)
         {
             return Collection.Find(t => t.ClassID == ClassID).ToList();
+        }
+
+        public List<string> GetIDsByClassID_Subject(string ClassID, string SubjectID)
+        {
+            return Collection.Find(t => t.ClassID == ClassID && t.SubjectID == SubjectID).Project(t => t.ID).ToList();
         }
 
         public List<string> GetCourseIdsByClassID(string ClassID)

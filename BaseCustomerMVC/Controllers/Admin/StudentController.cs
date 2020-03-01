@@ -133,8 +133,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {
                         CreateDate = DateTime.Now,
                         IsActive = true,
-                        PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                        PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                        PassTemp = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                        PassWord = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
                         UserCreate = item.UserCreate,
                         Type = ACCOUNT_TYPE.STUDENT,
                         UserID = item.ID,
@@ -206,7 +206,12 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
-            var filePath = Path.Combine(_env.WebRootPath + "\\Temp", file.FileName);
+            var dirPath = _env.WebRootPath + "\\Temp";
+            if (!System.IO.Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+
+            var filePath = Path.Combine(dirPath, file.FileName);
+
             List<StudentEntity> studentList = null;
             List<StudentEntity> Error = null;
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -261,8 +266,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     {
                                         CreateDate = DateTime.Now,
                                         IsActive = true,
-                                        PassTemp = Security.Encrypt(defPass),
-                                        PassWord = Security.Encrypt(defPass),
+                                        PassTemp = Core_v2.Globals.Security.Encrypt(defPass),
+                                        PassWord = Core_v2.Globals.Security.Encrypt(defPass),
                                         UserCreate = item.UserCreate,
                                         Type = ACCOUNT_TYPE.STUDENT,
                                         UserID = item.ID,
@@ -286,7 +291,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
                 catch (Exception ex)
                 {
-                    return new JsonResult(ex);
+                    return new JsonResult(ex.Message);
                 }
             }
             Dictionary<string, object> response = new Dictionary<string, object>()

@@ -142,11 +142,11 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
             }
-            if (model.StartDate > DateTime.MinValue)
+            if (model.StartDate > new DateTime(2000, 1, 1))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
             }
-            if (model.EndDate > DateTime.MinValue)
+            if (model.EndDate > new DateTime(2000, 1, 1))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
@@ -196,6 +196,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult GetActiveList(DateTime today)
         {
+            today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -216,6 +217,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end:DateTime.Now)
                        select new
                        {
                            id = o.ID,
@@ -226,7 +228,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
                            min = progress != null ? progress.Completed : 0,
-                           score = progress != null ? progress.AvgPoint : 0,
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
                            thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                        }).ToList();
             return Json(new { Data = std });
@@ -234,6 +236,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult GetFinishList(DefaultModel model, DateTime today)
         {
+            today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -255,6 +258,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var std = (from o in DataResponse
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
                        let per = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID)
                        select new
                        {
                            id = o.ID,
@@ -264,13 +268,16 @@ namespace BaseCustomerMVC.Controllers.Student
                            per,
                            max = o.TotalLessons,
                            min = progress != null ? progress.Completed : 0,
-                           score = progress != null ? progress.AvgPoint : 0
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
                        }).ToList();
             return Json(new { Data = std });
         }
 
         public JsonResult GetThisWeekLesson(DateTime today)
         {
+            if (today < new DateTime(1900, 1, 1))
+                return null;
+            today = today.ToUniversalTime();
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 

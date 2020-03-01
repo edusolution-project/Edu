@@ -157,7 +157,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             AccountEntity user = _accountService.GetAccountByEmail(acc.Email);
 
-            if (!Security.Encrypt(oldpass).Equals(user.PassWord))
+            if (!Core_v2.Globals.Security.Encrypt(oldpass).Equals(user.PassWord))
             {
                 return new JsonResult(
                 new Dictionary<string, object>
@@ -167,7 +167,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
 
-            if (Security.Encrypt(newpass).Equals(user.PassWord))
+            if (Core_v2.Globals.Security.Encrypt(newpass).Equals(user.PassWord))
             {
                 return new JsonResult(
                 new Dictionary<string, object>
@@ -176,7 +176,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  });
             }
 
-            user.PassWord = Security.Encrypt(newpass);
+            user.PassWord = Core_v2.Globals.Security.Encrypt(newpass);
             _accountService.CreateOrUpdate(user);
             return new JsonResult(
             new Dictionary<string, object>
@@ -280,7 +280,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         //    AccountEntity user = _accountService.GetAccountByEmail(te.Email);
 
-        //    if (Security.Encrypt(newpass).Equals(user.PassWord))
+        //    if (Core_v2.Globals.Security.Encryptnewpass).Equals(user.PassWord))
         //    {
         //        return new JsonResult(
         //        new Dictionary<string, object>
@@ -289,7 +289,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //         });
         //    }
 
-        //    user.PassWord = Security.Encrypt(newpass);
+        //    user.PassWord = Core_v2.Globals.Security.Encryptnewpass);
         //    _accountService.CreateOrUpdate(user);
         //    return new JsonResult(
         //    new Dictionary<string, object>

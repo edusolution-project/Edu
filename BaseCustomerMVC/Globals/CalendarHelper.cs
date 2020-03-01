@@ -1,5 +1,6 @@
 ﻿using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Models;
+using EasyZoom.Interfaces;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -16,13 +17,17 @@ namespace BaseCustomerMVC.Globals
         private readonly TeacherService _teacherService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
+
+        private readonly IZoomHelpers _zoomHelpers;
+
         public CalendarHelper(
             CalendarService calendarService,
             LessonScheduleService lessonScheduleService,
             LessonService lessonService,
             ClassService classService,
             TeacherService teacherService,
-            StudentService studentService
+            StudentService studentService,
+            IZoomHelpers zoomHelpers
             )
         {
             _calendarService = calendarService;
@@ -31,6 +36,7 @@ namespace BaseCustomerMVC.Globals
             _teacherService = teacherService;
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
+            _zoomHelpers = zoomHelpers;
         }
         public Task<CalendarEntity> CreateEvent(CalendarEntity item)
         {
@@ -38,6 +44,12 @@ namespace BaseCustomerMVC.Globals
             if (!string.IsNullOrEmpty(item.ID))
             {
                 // update event
+                if (string.IsNullOrEmpty(item.UrlRoom) && item.Status == 5)
+                {
+                    var zoomScheduled = _zoomHelpers.CreateScheduled(item.Title, item.StartDate, 60);
+                    item.UrlRoom = zoomScheduled.Id;
+                }
+
                 _calendarService.CreateOrUpdate(item);
                 return Task.FromResult(item);
             }

@@ -12,6 +12,9 @@ namespace BaseCustomerEntity.Database
     {
         [JsonProperty("LessonID")]
         public string LessonID { get; set; }
+        [JsonProperty("Type")]
+        public int? Type { get; set; }
+
         [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]
@@ -23,6 +26,14 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("ClassSubjectID")]
         public string ClassSubjectID { get; set; }
     }
+
+    public class SCHEDULE_TYPE
+    {
+        public const int LECTURE = LESSON_TEMPLATE.LECTURE,
+            EXAM = LESSON_TEMPLATE.EXAM,
+            WEBINAR = 3;
+    }
+
     public class LessonScheduleService : ServiceBase<LessonScheduleEntity>
     {
         public LessonScheduleService(IConfiguration config) : base(config)
@@ -56,6 +67,67 @@ namespace BaseCustomerEntity.Database
         public async Task UpdateClassSubject(ClassSubjectEntity classSubject)
         {
             await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<LessonScheduleEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+        }
+
+        public long CountClassExam(string ClassID, DateTime? start = null, DateTime? end = null)
+        {
+            var validTime = new DateTime(1900, 1, 1);
+            if (start == null && end == null)
+                return Collection.CountDocuments(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM);
+            else if (start == null)
+                return Collection.CountDocuments(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= end));
+            else if (end == null)
+                return Collection.CountDocuments(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || t.StartDate >= start));
+            else
+                return Collection.CountDocuments(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || (t.StartDate >= start && t.StartDate <= end)));
+        }
+
+        public List<LessonScheduleEntity> GetClassExam(string ClassID, DateTime? start = null, DateTime? end = null)
+        {
+            var validTime = new DateTime(1900, 1, 1);
+            IFindFluent<LessonScheduleEntity,LessonScheduleEntity> data;
+            if (start == null && end == null)
+                data = Collection.Find(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM);
+            else if (start == null)
+                data = Collection.Find(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= end));
+            else if (end == null)
+                data =  Collection.Find(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || t.StartDate >= start));
+            else
+                data =  Collection.Find(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || (t.StartDate >= start && t.StartDate <= end)));
+            return data.SortByDescending(t => t.StartDate).ToList();
+        }
+
+
+        public long CountClassSubjectExam(List<string> ClassSubjectIDs, DateTime? start= null, DateTime? end = null)
+        {
+            //var validTime = new DateTime(1900, 1, 1);
+            //return Collection.CountDocuments(t => ClassSubjectIDs.Contains(t.ClassSubjectID) && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= time));
+            var validTime = new DateTime(1900, 1, 1);
+            if (start == null && end == null)
+                return Collection.CountDocuments(t => ClassSubjectIDs.Contains(t.ClassSubjectID) && t.Type == SCHEDULE_TYPE.EXAM);
+            else if (start == null)
+                return Collection.CountDocuments(t => ClassSubjectIDs.Contains(t.ClassSubjectID) && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= end));
+            else if (end == null)
+                return Collection.CountDocuments(t => ClassSubjectIDs.Contains(t.ClassSubjectID) && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || t.StartDate >= start));
+            else
+                return Collection.CountDocuments(t => ClassSubjectIDs.Contains(t.ClassSubjectID) && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || (t.StartDate >= start && t.StartDate <= end)));
+        }
+
+        public List<LessonScheduleEntity> GetClassSubjectExam(string ClassSubjectID, DateTime? start = null, DateTime? end = null)
+        {
+            //var validTime = new DateTime(1900, 1, 1);
+            //return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= time)).SortByDescending(t => t.StartDate).ToList();
+            var validTime = new DateTime(1900, 1, 1);
+            IFindFluent<LessonScheduleEntity, LessonScheduleEntity> data;
+            if (start == null && end == null)
+                data = Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.Type == SCHEDULE_TYPE.EXAM);
+            else if (start == null)
+                data = Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= end));
+            else if (end == null)
+                data = Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || t.StartDate >= start));
+            else
+                data = Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || (t.StartDate >= start && t.StartDate <= end)));
+            return data.SortByDescending(t => t.StartDate).ToList();
         }
     }
 }

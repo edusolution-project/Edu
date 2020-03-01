@@ -2,11 +2,12 @@
 
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
-    ViewData["Title"] = "My Courses - " + DateTime.Now.ToString("D");
+    ViewData["Title"] = "Quản lý lớp học";
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
     var isHeadteacher = User.IsInRole("head-teacher");
+    var userid = User.Claims.Single(t => t.Type == "UserID").Value;
 }
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
@@ -20,8 +21,8 @@
         <div class="flex border-b padding-b25 justify-content-between">
             <div class="flex">
                 <div class="box filter-box">
-                    <input type="text" value="01/08/2019 - 30/09/2019" name="dates">
-                    <span class="ic ic-picker"></span>
+                    <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
+                    <span class="ic ic-picker inactive"></span>
                 </div>
                 <div class="box filter-box w-152">
                     <select v-model="subject">
@@ -33,9 +34,13 @@
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" v-model="searchTerm" placeholder="Tên lớp cần tìm">
                 </div>
+                @if (isHeadteacher)
+                {
+                    <div class="box private_box">
+                        <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
+                    </div>
+                }
             </div>
-
-
             <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
         </div>
     </div>
@@ -52,20 +57,24 @@
                 </tr>
                 <tr v-else v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
-                    <td><a :href="'@Url.Action("Detail","Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
+                    <td><a :href="'@Url.Action("Detail", "Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
                     <td>{{item.SkillName}}</td>
                     <td>{{item.Students}}</td>
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
-                    @if (isHeadteacher)
-                    {
-                        <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
-                        <td>
-                            <div class="d-flex btn-group">
-                                <a class="btn-act btn-edit" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
-                                <button class="btn-act btn-trash" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
-                            </div>
-                        </td>
-                    }
+                    @*<td> {{ item.IsActive? 'Hoạt động' : 'Tạm dừng'}} </td>*@
+                    <td>
+                        <b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)" class="mt-2" @if (!isHeadteacher) { @: v-if="item.Creator == '@userid'"
+                                         }>
+                        </b-form-checkbox>
+                    </td>
+                    <td>
+                        <div class="d-flex btn-group" @if (!isHeadteacher) { @: v-if="item.Creator == '@userid'"
+                             }>
+                            @*<b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)" class="mt-2"></b-form-checkbox>*@
+                            <a class="btn-act btn-edit" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
+                            <button class="btn-act btn-trash" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
+                        </div>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -100,6 +109,30 @@
 @section Scripts{
 
     <style>
+        .private_box {
+            padding: 5px 0;
+            width: 200px;
+        }
+
+            .private_box input {
+                width: 20px;
+                height: 20px;
+                vertical-align: middle;
+            }
+
+            .private_box span {
+                vertical-align: middle;
+            }
+
+
+        .ic-picker {
+            cursor: pointer;
+        }
+
+            .ic-picker.inactive {
+                background-image: url('../images/pickerdate-1.png');
+            }
+
         #modal_class .modal-dialog {
             max-width: 1100px;
         }
@@ -126,31 +159,28 @@
         }
     </style>
     <script>
-
+        var isSearchDate = false;
         new Vue({
             el: "#main",
             mounted() {
-                var start = moment();
-                var end = moment().add(29, 'days');
-                $('input[name="dates"]').daterangepicker({
-                    startDate: start,
-                    endDate: end,
-                    locale: {
-                        format: "DD/MM/YYYY",
-                    }
-                }, function (s, e, label) {
-                    RepDate(s, e);
-                    GetData();
-                });
                 this.view = 30
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.list_skill = @Html.Raw(Json.Serialize(skills));
-                window.ChooseCalendar = this.chooseCalendar
                 window.changeAddSubject = this.changeAddSubject
+                window.InitDate = this.initDate
+                window.DestroyDate = this.destroyDate
                 window.GetData = this.getData
                 window.RepDate = this.repDate
-                $('input[name=dates]').siblings('.ic-picker').click(function () { ChooseCalendar() });
+                $('input[name=dates]').siblings('.ic-picker').click(function () {
+                    if (isSearchDate)
+                    {
+                        DestroyDate(this)
+                    }
+                    else {
+                        InitDate();
+                    }
+                });
                 this.getData()
 
             },
@@ -158,6 +188,7 @@
           	    vuejsDatepicker
             },
             data: {
+                isPrivate: false,
                 isLoading: false,
                 list_subject: [],
                 tableData: [
@@ -183,9 +214,13 @@
                         key: 'date',
                         label: 'Thời gian'
                     },
-                    @if (isHeadteacher)
                     {
-                        @Html.Raw("{ key: 'status', label: 'Trạng thái' }, { key: 'actions', label: 'Tác vụ' }");
+                        key: 'status',
+                        label: 'Trạng thái'
+                    },
+                    {
+                        key: 'actions',
+                        label: 'Tác vụ'
                     }
                 ],
                 subject: '',
@@ -200,8 +235,8 @@
                 totalRec: 0,
                 page: 1,
                 searchTerm: '',
-                startdate: moment(),
-                enddate: moment().add(29, 'days'),
+                startdate: moment(new Date(1800,1,1)),
+                enddate: moment(new Date(1800,1,1)),
                 class_info: {
                     ID: '',
                     Name: '',
@@ -209,14 +244,14 @@
                     EndDate: '',
                     Description: '',
                     thumbnail: {
-                                src: '',
+                        src: '',
                         file: null,
                         height: 90,
                         width: 160
                     },
                     subject: [
                         {
-                                ID: '',
+                            ID: '',
                             SubjectID: '',
                             GradeID: '',
                             SkillID: '',
@@ -249,6 +284,9 @@
                 subject: function () {
                     this.getData()
                 },
+                isPrivate: function () {
+                    this.getData()
+                },
                 searchTerm: function(){
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
@@ -273,11 +311,12 @@
                     @if(!User.IsInRole("head-teacher"))
                     {
                         @:let _url = '@Url.Action("GetClassList", "Class")'
+
                     }
                     else
                     {
                         @:let _url = '@Url.Action("GetManageList", "Class")'
-
+                        @:if( this.isPrivate) _url = '@Url.Action("GetClassList", "Class")'
                     }
 
                     axios.post(_url, _form)
@@ -290,8 +329,7 @@
                             //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
                             //console.log(_that.active_course);
                         }).catch(e => { })
-                        },
-
+                },
                 //Class Action
                 toggleState(obj) {
                     //let _that = this;
@@ -668,16 +706,42 @@
                         }, 1000);
                     }, 1000);
                 },
+                initDate() {
+                    console.log(isSearchDate);
+                    if (isSearchDate) return;
+                    let _that = this
+                    var start = moment();
+                    var end = moment().add(29, 'days');
+                    $('input[name="dates"]').daterangepicker({
+                        startDate: start,
+                        endDate: end,
+                        locale: {
+                            format: "DD/MM/YYYY",
+                        }
+                    }, function (s, e, label) {
+                        RepDate(s, e);
+                        GetData();
+                    });
+                    $('input[name="dates"]').siblings().removeClass('inactive');
+                    isSearchDate = true;
+                    $('input[name="dates"]').focus().click();
+                    _that.startdate = start;
+                    _that.enddate = end;
+                    GetData()
+                },
+                destroyDate() {
+                    let _that = this
+                    if (!isSearchDate) return false;
+                    //$('input[name="dates"]').daterangepicker().destroy()
+                    $('input[name="dates"]').data('daterangepicker').remove();
+                    $('input[name="dates"]').val('-- Chọn thời gian --');
+                    $('input[name="dates"]').siblings().addClass('inactive');
+                    isSearchDate = false;
+                    _that.startdate = moment(new Date(1800,1,1)),
+                    _that.enddate = moment(new Date(1800,1,1)),
+                    GetData();
 
-                //nav
-                //goPage(pgIdx) {
-                //    if (pgIdx < 1) pgIdx = 1;
-                //    if (pgIdx > this.max_page)
-                //        pgIdx = this.max_page;
-                //    this.page = pgIdx;
-                //    this.getData();
-                //},
-
+                },
                 //support
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
@@ -794,7 +858,6 @@
                 <b-button variant="success" v-on:click="createClass()">Lưu</b-button>
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
             </template>
-
         </template>
     </b-modal>
 }

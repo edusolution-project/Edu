@@ -208,17 +208,16 @@ var Lesson = (function () {
         var lessonHeader = $("<div>", { "class": "card-header", style: "display:none" });
         lessonContent.append(lessonHeader);
 
-        //main content (lesson content; part list...., 2 cols interface)
-        var cardBody = $("<div>", { "class": "card-body position-absolute", "style": "top: " + (hideHeader ? "56" : "0") + "px; bottom: 0; left: 0; right: 0" });
-        lessonContent.append(cardBody);
-
-        var lessonBody = $("<div>", { "class": "lesson-body h-100", "id": config.lesson_id });
-        cardBody.append(lessonBody);
-
         //footer row (part navigation, question navigation... - default: hide)
         var lessonFooter = $('<div>', { "class": "card-footer", "style": "display:none" });
         lessonContent.append(lessonFooter);
 
+        //main content (lesson content; part list...., 2 cols interface)
+        var cardBody = $("<div>", { "class": "card-body position-absolute", "style": "top: " + (hideHeader ? "0" : "56") + "px; bottom: 0; left: 0; right: 0" });
+        lessonContent.append(cardBody);
+
+        var lessonBody = $("<div>", { "class": "lesson-body h-100", "id": config.lesson_id });
+        cardBody.append(lessonBody);
 
         var partsHolder = $("<div>", { "id": "pills-tabContent", "class": "tab-content h-100 row" });
         //render 2 columns layout
@@ -533,7 +532,7 @@ var Lesson = (function () {
                 nav_bottom.append(_footerRight);
                 lessonFooter.show().append(nav_bottom);
                 lessonFooter.append($('<div>', { id: 'quizIdx_holder' }));
-
+                lessonFooter.addClass('expand');
 
                 var quiz_counter = $('<div>', { id: 'quiz-counter-holder', class: "d-inline-block text-white font-weight-bold align-middle pl-3" });
                 $(_footerLeft).append(quiz_counter);
@@ -1742,6 +1741,10 @@ var Lesson = (function () {
 
     var toggleNav = function (obj) {
         $('#quizIdx_holder').toggle();
+        if ($('#quizIdx_holder:visible').length > 0)
+            $('.card-footer').addClass("expand");
+        else
+            $('.card-footer').removeClass("expand");
         $(obj).toggleClass('btn-warning');
     }
 
@@ -1774,7 +1777,7 @@ var Lesson = (function () {
             if (exam == null) {
                 localStorage.clear();
                 console.log("New Fresh Exam");
-                renderNewExam(null, res.schedule);
+                renderNewExam(null, schedule);
             }
             else {
                 //
@@ -1844,27 +1847,27 @@ var Lesson = (function () {
         var endDate = moment(schedule.EndDate);
         var startDate = moment(schedule.StartDate);
         var now = moment();
-
-        if (endDate > new Date(1900, 1, 1) && endDate <= now) {
+        var isOverdue = false;
+        if (endDate > moment(new Date(1900, 1, 1)) && endDate <= now) {
             console.log("Over due")
             doButton = $('<div>', {
                 "class": "btn btn-danger m-3",
-                "onclick": "#",
                 "style": "cursor: pointer",
-                "text": "Hết hạn",
+                "text": "Quá hạn (" + endDate.format("DD/MM/YYYY hh:mm A") + ")",
                 "disabled": "disabled"
             });
+            isOverdue = true;
         }
         else {
             if (startDate >= now) {
                 console.log("Early")
                 doButton = $('<div>', {
                     "class": "btn btn-danger m-3",
-                    "onclick": "#",
                     "style": "cursor: pointer",
-                    "text": "Bài chưa được mở",
+                    "text": "Bài chưa được mở (" + startDate.format("DD/MM/YYYY hh:mm A") + ")",
                     "disabled": "disabled"
                 });
+                isOverdue = true
             }
             else {
                 console.log("In due")
@@ -1894,7 +1897,7 @@ var Lesson = (function () {
             var doable = true;
             var lastpoint = (lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0);
 
-            var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm:ss A");
+            var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
@@ -1915,30 +1918,30 @@ var Lesson = (function () {
                 "style": "cursor: pointer",
                 "text": "Xem đáp án"
             });
-            if (limit > 0) {
-                alert(limit);
-                tryleft = limit - tried;
-                if (tryleft > 0) {
-                    doButton = $('<div>', {
-                        "class": "btn btn-primary m-3",
-                        "onclick": "BeginExam(this)",
-                        "style": "cursor: pointer",
-                        "html": 'Bạn còn <b>' + tryleft + '</b> lượt làm lại bài. Thực hiện lại?'
-                    });
+            if (!isOverdue)
+                if (limit > 0) {
+                    tryleft = limit - tried;
+                    if (tryleft > 0) {
+                        doButton = $('<div>', {
+                            "class": "btn btn-primary m-3",
+                            "onclick": "BeginExam(this)",
+                            "style": "cursor: pointer",
+                            "html": 'Bạn còn <b>' + tryleft + '</b> lượt làm lại bài. Thực hiện lại?'
+                        });
+                    }
+                    else {
+                        doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Hết lượt làm bài</div></div>';
+                        doable = false;
+                    }
                 }
                 else {
-                    doButton = '<div class="p-3 d-inline"><div class="btn btn-danger">Hết lượt làm bài</div></div>';
-                    doable = false;
+                    var doButton = $('<div>', {
+                        "class": "btn btn-primary m-3",
+                        "onclick": "$(this).prop('disabled',true); Redo(this); ",
+                        "style": "cursor: pointer",
+                        "text": 'Làm lại bài'
+                    });
                 }
-            }
-            else {
-                var doButton = $('<div>', {
-                    "class": "btn btn-primary m-3",
-                    "onclick": "$(this).prop('disabled',true); Redo(this); ",
-                    "style": "cursor: pointer",
-                    "text": 'Làm lại bài'
-                });
-            }
             wrapper.append(doButton)
                 .append(reviewButton)
                 .append(backButton);
@@ -2290,7 +2293,7 @@ var Lesson = (function () {
                         "class": "input-text answer-text form-control",
                         "onfocusout": "AnswerQuestion(this)",
                         "id": "inputQZ2-" + data.ParentID,
-                        "data-id": data.ID,
+                        //"data-id": data.ID,
                         "data-part-id": partid,
                         "data-lesson-id": config.lesson_id,
                         "data-question-id": data.ParentID,
@@ -2567,7 +2570,7 @@ var Lesson = (function () {
             case "QUIZ2":
                 partID = dataset.partId;
                 questionId = dataset.questionId;
-                answerID = dataset.id;
+                //answerID = dataset.id;
                 // value là data động tự điền
                 value = _this.value;
                 break;
