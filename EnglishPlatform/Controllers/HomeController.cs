@@ -504,5 +504,10 @@ namespace EnglishPlatform.Controllers
             dynamic success = JsonConvert.DeserializeObject("{ 'uploaded': 1,'fileName': \"" + fileName + "\",'url': \"" + url + "\", 'error': { 'message': \"" + successMessage + "\"}}");
             return Json(success);
         }
+
+        public IActionResult OnlineClass()
+        {
+            return View();
+        }
     }
 }
