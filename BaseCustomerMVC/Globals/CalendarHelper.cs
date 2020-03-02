@@ -62,6 +62,8 @@ namespace BaseCustomerMVC.Globals
             item.Created = DateTime.Now;
             if (item.Status == 5)
             {
+                var zoomScheduled = _zoomHelpers.CreateScheduled(item.Title, item.StartDate, 60);
+                item.UrlRoom = zoomScheduled.Id;
                 var teacher = _teacherService.GetItemByID(item.CreateUser);
                 if (teacher != null)
                 {
@@ -91,6 +93,10 @@ namespace BaseCustomerMVC.Globals
             }
 
             item.Status = 5;
+
+            var zoomScheduled = _zoomHelpers.CreateScheduled(item.Title, item.StartDate, 60);
+            item.UrlRoom = zoomScheduled.Id;
+
             _calendarService.CreateOrUpdate(item);
 
             return Task.FromResult(item);
