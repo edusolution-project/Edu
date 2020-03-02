@@ -28,7 +28,7 @@
 
 </div>
 <div class="form-event" id="form-event">
-    <div class="header-form-event">Sự kiện</div>
+    <div class="header-form-event">Sự kiện<button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button></div>
     <div class="body-form-event">
         <input type="hidden" name="ID" value="" />
         <div class="item-event">
@@ -320,6 +320,9 @@
                 var Title = bodyEvent.querySelector("input[name='Title']");
                 if (Title != null) {
                     title = Title.value;
+                    if (title.length < 5) {
+                        return swal("", "Tiêu đề không thể bỏ trống.", "warning");
+                    }
                 }
                 var Content = bodyEvent.querySelector("textarea[name='Content']");
                 if (Content != null) {

@@ -98,11 +98,6 @@ namespace BaseEasyRealTime.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(receivers))
-                {
-                    return new JsonResult(new { code = 200, msg = "Success", data = new List<NewFeedEntity>() }) ;
-                }
-
                 if (User != null && User.Identity.IsAuthenticated)
                 {
                     if (string.IsNullOrEmpty(id))
@@ -130,6 +125,43 @@ namespace BaseEasyRealTime.Controllers
                         {
                             return new JsonResult(new { code = 200, msg = "Success", data = data.Find(_ => true && _.State == state && (_.Receivers.Contains(receivers) || _.Sender == User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value) && _.RemoveByAdmin == false)?.ToList() });
                         }
+                    }
+                    else
+                    {
+                        var item = _service.GetItemByID(id);
+                        return new JsonResult(new { code = item == null ? 404 : 200, msg = item == null ? "Không tìm thấy bài đăng" : "Đã tìm thấy bài viết", data = item });
+                    }
+                }
+                else
+                {
+                    return new JsonResult(new { code = 201, msg = "Bạn không có quyền xem bài !!! " });
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { code = 500, msg = ex.Message, data = ex });
+            }
+        }
+
+        [HttpGet]
+        [Obsolete]
+        public JsonResult GetList(string id, int state, HashSet<string> receivers, long pageIndex = 0, long pageSize = 5)
+        {
+            try
+            {
+                if (User != null && User.Identity.IsAuthenticated)
+                {
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        var filter = new List<FilterDefinition<NewFeedEntity>>
+                        {
+                            Builders<NewFeedEntity>.Filter.AnyIn(o=>o.Receivers,receivers)
+                        };
+
+
+
+                        var data = _service.CreateQuery().Find(Builders<NewFeedEntity>.Filter.And(filter))?.ToList();
+                        return new JsonResult(new { code = 200, msg = "Success", data = data?.OrderByDescending(o => o.Created)?.ToList() });
                     }
                     else
                     {
