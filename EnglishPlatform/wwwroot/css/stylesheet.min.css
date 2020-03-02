@@ -233,7 +233,7 @@ button, input, a {
 }
 
 .good {
-    color: #00D085;
+    color: #00D085 !important;
     font-weight: 600
 }
 

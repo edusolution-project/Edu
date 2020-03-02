@@ -194,6 +194,11 @@ namespace BaseCustomerMVC.Globals
             return _calendarService.CreateQuery().Find(t => t.ScheduleID == scheduleID).SingleOrDefault();
         }
 
+        public CalendarEntity GetByEventID(string eventID)
+        {
+            return _calendarService.CreateQuery().Find(t => t.ID == eventID).SingleOrDefault();
+        }
+
         public long Remove(string ID)
         {
             return _calendarService.CreateQuery().DeleteMany(t => t.ID == ID).DeletedCount;

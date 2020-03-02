@@ -63,7 +63,7 @@ namespace Admin_Customer.Controllers
             }
             else
             {
-                string _sPass = Security.Encrypt(entity.PassWord);
+                string _sPass = Core_v2.Globals.Security.Encrypt(entity.PassWord);
                 if (_accountService.IsAvailable(entity.UserName))
                 {
                     ViewBag.MessageError = "Tài khoản đã tồn tại";
@@ -202,8 +202,8 @@ namespace Admin_Customer.Controllers
                 IsActive = true,
                 Type = ACCOUNT_TYPE.ADMIN,
                 UserName = "supperadmin@gmail.com",
-                PassTemp = Security.Encrypt("123"),
-                PassWord = Security.Encrypt("123"),
+                PassTemp = Core_v2.Globals.Security.Encrypt("123"),
+                PassWord = Core_v2.Globals.Security.Encrypt("123"),
                 UserID = "0", // admin
                 RoleID = superadminRole.ID
             };
@@ -229,7 +229,7 @@ namespace Admin_Customer.Controllers
             }
             else
             {
-                string _sPass = Security.Encrypt(PassWord);
+                string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
                 var user = _accountService.GetAccount(Type, UserName.ToLower(), _sPass);
                 if (user == null)
                 {

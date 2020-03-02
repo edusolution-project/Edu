@@ -36,6 +36,8 @@ namespace EnglishPlatform.Controllers
         private readonly ILog _log;
         private readonly ClassService _classService;
         private readonly StudentHelper _studentHelper;
+        private readonly CalendarHelper _calendarHelper;
+
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -45,6 +47,7 @@ namespace EnglishPlatform.Controllers
             , AccessesService accessesService
             , ClassService classService
             , IOptions<DefaultConfigs> defaultvalue
+            , CalendarHelper calendarHelper
             , ILog log)
         {
             _accessesService = accessesService;
@@ -56,6 +59,7 @@ namespace EnglishPlatform.Controllers
             _studentService = studentService;
             _classService = classService;
             _studentHelper = new StudentHelper(studentService, accountService);
+            _calendarHelper = calendarHelper;
             _log = log;
             _default = defaultvalue.Value;
         }
@@ -505,8 +509,44 @@ namespace EnglishPlatform.Controllers
             return Json(success);
         }
 
-        public IActionResult OnlineClass()
+        public IActionResult OnlineClass(string eventID)
         {
+            if (string.IsNullOrEmpty(eventID))
+                eventID = "5e5c740e9cc8252dfcbc001d";
+            var @event = _calendarHelper.GetByEventID(eventID);
+            if (@event != null)
+            {
+                @event.UrlRoom = "6725744943";
+
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var type = User.Claims.GetClaimByType("Type").Value;
+                if (type == "teacher")
+                {
+                    //ViewBag.Role = "1";
+                    var teacher = _teacherService.GetItemByID(UserID);
+                    //if (!string.IsNullOrEmpty(teacher.ZoomID))
+                    teacher.ZoomID = "6725744943";
+                    if (teacher.ZoomID == @event.UrlRoom)
+                    {
+                        var roomID = "6725744943";//test
+                                                  //ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "") +  "/join";
+                        ViewBag.URL = Url.Action("ZoomClass", "Home", new { roomID });
+                    }
+                    else
+                        ViewBag.URL = @event.UrlRoom;
+                }
+                else
+                {
+                    //ViewBag.Role = "0";
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom });
+                }
+            }
+            return View();
+        }
+
+        public IActionResult ZoomClass(string roomID)
+        {
+            ViewBag.RoomID = roomID;
             return View();
         }
     }
