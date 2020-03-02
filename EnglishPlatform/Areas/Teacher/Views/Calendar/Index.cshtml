@@ -32,7 +32,8 @@
 
 </div>
 <div class="form-event" id="form-event">
-    <div class="header-form-event">Sự kiện</div>
+    <div class="header-form-event">Sự kiện 
+    <button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button></div>
     <div class="body-form-event">
         <input type="hidden" name="ID" value="" />
         <div class="item-event">
@@ -59,7 +60,7 @@
 </div>
 
 <div class="form-event form-event-class" id="form-event-class">
-    <div class="header-form-event">Thêm lớp học trực tuyến</div>
+    <div class="header-form-event">Thêm lớp học trực tuyến  <button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button></div>
     <div class="body-form-event">
         <input type="hidden" name="ID" value="" />
         <input type="hidden" name="Status" value="5" />
@@ -420,6 +421,11 @@
                     newFormData.append("ID", ID);
                     isUpdate = true;
                 }
+
+                if (title.length < 5) {
+                    return swal("", "Tiêu đề không thể bỏ trống.", "warning");
+                }
+
             newFormData.append("Title", title);
             newFormData.append("Content", content);
             newFormData.append("StartDate", `${date.value} ${timeEvent}`);
@@ -495,6 +501,11 @@
                 if (group != null) {
                     classID = group.value;
                 }
+
+                if (title.length < 5) {
+                    return swal("", "Tiêu đề không thể bỏ trống.", "warning");
+                }
+
                 newFormData.append("Title", title);
                 newFormData.append("UrlRoom", url);
                 newFormData.append("Status", 5);
