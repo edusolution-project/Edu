@@ -32,8 +32,10 @@
 
 </div>
 <div class="form-event" id="form-event">
-    <div class="header-form-event">Sự kiện 
-    <button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button></div>
+    <div class="header-form-event">
+        Sự kiện
+        <button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button>
+    </div>
     <div class="body-form-event">
         <input type="hidden" name="ID" value="" />
         <div class="item-event">
@@ -73,7 +75,7 @@
             @if (listClass != null)
             {
                 <select name="ClassID" class="form-control">
-                    @for(int i = 0; i < listClass.Count; i++)
+                    @for (int i = 0; i < listClass.Count; i++)
                     {
                         var item = listClass[i];
                         <option value="@item.ID">
@@ -92,9 +94,9 @@
         </div>
         <div class="item-event">
             <label for="Content">Link lớp học </label>
-            @if(currentTeacher != null)
+            @if (currentTeacher != null)
             {
-                ZoomUrl = string.IsNullOrEmpty(currentTeacher.ZoomID) ? "" : "https://zoom.us/wc/"+currentTeacher.ZoomID.Replace("-","")+"/join";
+                ZoomUrl = string.IsNullOrEmpty(currentTeacher.ZoomID) ? "" : "https://zoom.us/wc/" + currentTeacher.ZoomID.Replace("-", "") + "/start";
             }
             <input type="text" name="UrlRoom" value="@ZoomUrl" class="form-control" placeholder="appear / zoom / skype join">
         </div>
@@ -456,7 +458,7 @@
                             };
                             EduCalendar.schedule.EduCalendar.addEvent(event);
                         }
-                        
+
                     }
                     else
                         swal("Tạo mới!", dataJson.msg, "warning");
@@ -464,7 +466,7 @@
                      swal("Tạo mới!", "thất bại", "warning");
                 }
                 document.body.classList.remove("open-add-event");
-               
+
             })
             }
 
@@ -538,7 +540,7 @@
                                 };
                                 EduCalendar.schedule.EduCalendar.addEvent(event);
                             }
-                        
+
                         }
                         else
                             swal("Tạo mới!", dataJson.msg, "warning");

@@ -283,7 +283,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             try
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var data = _lessonService.CreateQuery().Find(o => o.ID == item.ID).SingleOrDefault();
+                var data = _lessonService.GetItemByID(item.ID);
                 if (data == null)
                 {
                     item.Created = DateTime.Now;
@@ -311,13 +311,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-
-
                     item.Updated = DateTime.Now;
                     var newOrder = item.Order - 1;
                     item.Order = data.Order;
                     _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
-                    
+
                     if (item.Order != newOrder)//change Position
                     {
                         ChangeLessonPosition(item, newOrder);

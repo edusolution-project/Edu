@@ -15,11 +15,15 @@
     .footer__leave-btn {
         display: none;
     }
-    #nav-tool{
-        display:none !important;
+
+    #nav-tool {
+        display: none !important;
     }
 </style>
 
+<div id="stuName" style="display:none">
+    @User.Identity.Name
+</div>
 <nav id="nav-tool" class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
@@ -71,14 +75,15 @@
                         return false;
                     }
                 }
-                   
 
+                name = document.getElementById("stuName").innerHTML;
+                console.log(name);
                 var meetConfig = {
                     apiKey: API_KEY,
                     apiSecret: API_SECRET,
                     // tên zoom mặc định của longht (ZOOMID = 9083792841) = 1 host
                     meetingNumber: @roomid,
-                    userName: '@User.Identity.Name',//document.getElementById('display_name').value,
+                    userName: name,//document.getElementById('display_name').value,
                     passWord: "",
                     leaveUrl: "https://zoom.us",
                     role: 0 // 0 member - 1 admin

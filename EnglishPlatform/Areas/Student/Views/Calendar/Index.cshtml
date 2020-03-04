@@ -164,14 +164,20 @@
                                 text: str,
                                 showCancelButton: true,
                                 confirmButtonClass: "btn-sm btn-primary",
-                                confirmButtonText: "go to room",
+                                confirmButtonText: "Đến lớp",
                                 cancelButtonClass: "btn-sm",
                                 cancelButtonText: "close",
                                 closeOnConfirm: false
                             }, function () {
-                                swal.close();
-                                var _skype = jsonData.UrlRoom;
-                                window.open(`${_skype}`, "_blank");
+                                    swal.close();
+                                    var _skype = jsonData.UrlRoom;
+                                    console.log(jsonData);
+                                    if (_skype.startsWith('http'))
+                                        window.open(`${_skype}`, "_blank");
+                                    else {
+                                        var link = '@Url.Action("OnlineClass","Home")/' + jsonData.ID
+                                        window.open(`${link}`, "_blank");
+                                    }
                             });
                         } else {
 
@@ -232,7 +238,10 @@
                                             btnGoTo.style.display = 'inline-block';
                                             btnGoTo.onclick = function () {
                                                 var dataLink = btnGoTo.dataset.link;
+
+                                                //TODO: check here
                                                 window.open(`${dataLink}`, "_blank");
+                                                console.log(jsonData);
                                                 document.body.classList.remove("open-add-event");
                                             }
                                         }

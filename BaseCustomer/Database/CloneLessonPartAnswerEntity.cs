@@ -4,12 +4,13 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
     public class CloneLessonPartAnswerEntity : LessonPartAnswerEntity
     {
-        
+
         [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
         [JsonProperty("ClassID")]
@@ -34,6 +35,16 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public async Task RemoveByParentAsync(string ParentID)
+        {
+            _ = Collection.DeleteManyAsync(t => t.ParentID == ParentID);
+        }
+
+        public async Task RemoveManyAsync(List<string> IDs)
+        {
+            _ = Collection.DeleteManyAsync(t => IDs.Contains(t.ID));
         }
     }
 }

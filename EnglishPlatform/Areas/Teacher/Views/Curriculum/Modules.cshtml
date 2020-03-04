@@ -3,7 +3,7 @@
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseEntity;
     var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.ChapterEntity>;
-    var isLock = Data.IsActive || Data.IsUsed;
+    var isLock = Data.IsActive;// || Data.IsUsed;
     var user = ViewBag.User as string;
 }
 

@@ -154,8 +154,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //    return Redirect("/");
 
             var data = _service.GetItemByID(ID);
+
             if (data == null)
                 return RedirectToAction("Index");
+
+            var usedClass = _classSubjectService.CountByCourseID(data.ID);
+            //Cap nhat IsUsed
+            if (data.IsUsed != (usedClass == 0))
+            {
+                data.IsUsed = usedClass == 0;
+                _service.Save(data);
+            }
 
             ViewBag.Data = data;
             ViewBag.Title = data.Name;
@@ -182,6 +191,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var data = _service.GetItemByID(ID);
             if (data == null)
                 return RedirectToAction("Index");
+
+            var usedClass = _classSubjectService.CountByCourseID(data.ID);
+            //Cap nhat IsUsed
+            if (data.IsUsed != (usedClass == 0))
+            {
+                data.IsUsed = usedClass == 0;
+                _service.Save(data);
+            }
 
             ViewBag.Data = data;
             ViewBag.Title = data.Name;

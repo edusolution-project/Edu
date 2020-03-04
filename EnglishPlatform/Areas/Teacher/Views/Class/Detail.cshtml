@@ -235,8 +235,9 @@
             <div class="flex j-between width-100">
                 <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject"> <span class="width-100">{{data.Title}}</span></a>
                 <div class="flex width-100 j-end picker-schedule" v-if="owner == '@currentuser'">
-                    <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st" v-on:input="updateSchedule(data)" ></datepicker>
+                    <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed" v-on:input="updateSchedule(data)"></datepicker>
+                    <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" v-on:click="toggleOnlineClass(data)"></i>
                 </div>
                 <div class="flex width-100 j-end picker-schedule" v-else>
                     <div class="input-group date date st bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
@@ -343,6 +344,8 @@
                 this.loadClassDetail()
                 window.loadContent = this.loadContent
                 window.updateSchedule = this.updateSchedule
+                window.toggleLessonState = this.toggleLessonState
+                window.toggleOnlineClass = this.toggleOnlineClass
                 window.filterChap = this.filterChap
                 window.filterLesson = this.filterLesson
                 window.formatTime = this.formatTime
@@ -570,7 +573,8 @@
                                     StartDate: moment(lesson.StartDate) > moment(new Date(1900, 1, 1)) ? lesson.StartDate : "",
                                     EndDate: moment(lesson.EndDate) > moment(new Date(1900, 1, 1)) ? lesson.EndDate : "",
                                     IsActive: lesson.IsActive,
-                                    IsUpdating: false
+                                    IsUpdating: false,
+                                    IsOnline: lesson.IsOnline
                                 })
 
                             })
@@ -657,6 +661,7 @@
                     })
                     return filter;
                 },
+
                 //Lesson Action
                 toggleLessonState(obj) {
                     let _that = this;
@@ -675,7 +680,41 @@
                     //}
                     //})
                 },
+                toggleOnlineClass(obj) {
+                    let _url = '@Url.Action("ToggleOnline", "LessonSchedule")'
+                    let _form = new FormData()
+                    _form.append('ID', obj.ScheduleID);
+                    axios.post(_url, _form)
+                        .then(response => {
+                            if (response.data.error == null) {
+                                obj.IsOnline = response.data.isOnline;
+                                if (response.data.isOnline == true) {
+                                    Swal.fire({
+                                        title: "Mở lớp thành công",
+                                        text: "Đã mở lớp trực tuyến cho bài học",
+                                        icon: 'success',
+                                    });
+                                }
+                                else {
+                                    Swal.fire({
+                                        title: "Thông báo",
+                                        text: "Đã hủy lớp trực tuyến",
+                                        icon: 'warning',
+                                    });
+                                }
+                            }
+                            else {
+                                Swal.fire({
+                                    title: "Có lỗi",
+                                    text: response.error,
+                                    icon: 'warning',
+                                });
+                            }
 
+                            //item.IsActive = !item.IsActive;
+                            //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
+                        }).catch(e => { })
+                },
                 //REF
                 showRefModal(obj) {
                     let _that = this;
