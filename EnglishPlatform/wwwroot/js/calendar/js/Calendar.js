@@ -324,6 +324,20 @@ var EduCalendar = (function(){
         }
     }
     var addEvent = function (self, info) {
+        var formEventxxx = document.getElementById("form-event-class");
+        if (formEventxxx != null) {
+            formEventxxx.classList.remove("show_go_to_class");
+            var btnMo = formEvent.querySelector("button#btn-mo-bai-hoc");
+            var btnOnline = formEvent.querySelector("button#btn-vao-lop-online");
+            if (btnMo != null) {
+                btnMo.removeAttribute("data-url");
+                btnMo.style.display = "none";
+            }
+            if (btnOnline != null) {
+                btnOnline.removeAttribute("data-url");
+                btnOnline.style.display = "none";
+            }
+        }
         var darkbox = document.getElementById("dark-smooke");
         if (darkbox == null) {
             darkbox = document.createElement("div");

@@ -509,14 +509,12 @@ namespace EnglishPlatform.Controllers
             return Json(success);
         }
 
-        public IActionResult OnlineClass(string eventID)
+        public IActionResult OnlineClass(string ID)
         {
-            if (string.IsNullOrEmpty(eventID))
-                eventID = "5e5c740e9cc8252dfcbc001d";
-            var @event = _calendarHelper.GetByEventID(eventID);
+            var @event = _calendarHelper.GetByEventID(ID);
             if (@event != null)
             {
-                @event.UrlRoom = "6725744943";
+                //@event.UrlRoom = "6725744943";
 
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
                 var type = User.Claims.GetClaimByType("Type").Value;
@@ -525,12 +523,11 @@ namespace EnglishPlatform.Controllers
                     //ViewBag.Role = "1";
                     var teacher = _teacherService.GetItemByID(UserID);
                     //if (!string.IsNullOrEmpty(teacher.ZoomID))
-                    teacher.ZoomID = "6725744943";
                     if (teacher.ZoomID == @event.UrlRoom)
                     {
-                        var roomID = "6725744943";//test
-                                                  //ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "") +  "/join";
-                        ViewBag.URL = Url.Action("ZoomClass", "Home", new { roomID });
+                        //var roomID = "6725744943";//test
+                        ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "") + "/join";
+                        //ViewBag.URL = Url.Action("ZoomClass", "Home", new { roomID });
                     }
                     else
                         ViewBag.URL = @event.UrlRoom;
@@ -538,7 +535,7 @@ namespace EnglishPlatform.Controllers
                 else
                 {
                     //ViewBag.Role = "0";
-                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom });
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-","") });
                 }
             }
             return View();

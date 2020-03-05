@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -35,6 +36,11 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public async Task RemoveManyAsync(List<string> Ids)
+        {
+            _ = Collection.DeleteManyAsync(t => Ids.Contains(t.ID));
         }
     }
 

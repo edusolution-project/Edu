@@ -251,9 +251,9 @@ namespace BaseCustomerMVC.Globals
                     TeacherID = teacher.ID,
                     TeacherName = teacher.FullName,
                     Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
-                    Status = 0,
+                    Status = item.IsOnline ? 5 : 0,
                     LimitNumberUser = 0,
-                    UrlRoom = string.Empty,
+                    UrlRoom = item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(lesson.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-","")) : "",
                     UserBook = new List<string>(),
                     ScheduleID = item.ID
                 };
@@ -272,9 +272,10 @@ namespace BaseCustomerMVC.Globals
                     TeacherID = teacher.ID,
                     TeacherName = teacher.FullName,
                     Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
-                    Status = oldItem.Status,
+                    Status = item.IsOnline ? 5 : 0,
                     LimitNumberUser = oldItem.LimitNumberUser,
-                    UrlRoom = oldItem.UrlRoom,
+                    UrlRoom = (item.IsOnline && oldItem.Status == 5) ? oldItem.UrlRoom : //not change => keep event
+                        item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(lesson.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
                     UserBook = oldItem.UserBook,
                     ScheduleID = item.ID
                 };

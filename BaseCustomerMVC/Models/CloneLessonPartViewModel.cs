@@ -34,6 +34,8 @@ namespace BaseCustomerMVC.Models
             return new CloneLessonPartEntity
             {
                 ClassID = this.ClassID,
+                ClassSubjectID = this.ClassSubjectID,
+                CourseID = this.CourseID,
                 OriginID = this.OriginID,
                 Created = this.Created,
                 Description = this.Description,

@@ -6,7 +6,7 @@
     //var user = ViewBag.User as string;
     var subject = ViewBag.Subject as BaseCustomerEntity.Database.SubjectEntity;
     var grade = ViewBag.Grade as BaseCustomerEntity.Database.GradeEntity;
-    var isLock = Data.IsActive || Data.IsUsed;
+    var isLock = Data.IsActive;// || Data.IsUsed;
 }
 
 <script>

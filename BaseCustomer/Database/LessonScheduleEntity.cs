@@ -25,6 +25,8 @@ namespace BaseCustomerEntity.Database
         public string ClassID { get; set; }
         [JsonProperty("ClassSubjectID")]
         public string ClassSubjectID { get; set; }
+        [JsonProperty("IsOnline")]
+        public bool IsOnline { get; set; }
     }
 
     public class SCHEDULE_TYPE
@@ -85,20 +87,20 @@ namespace BaseCustomerEntity.Database
         public List<LessonScheduleEntity> GetClassExam(string ClassID, DateTime? start = null, DateTime? end = null)
         {
             var validTime = new DateTime(1900, 1, 1);
-            IFindFluent<LessonScheduleEntity,LessonScheduleEntity> data;
+            IFindFluent<LessonScheduleEntity, LessonScheduleEntity> data;
             if (start == null && end == null)
                 data = Collection.Find(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM);
             else if (start == null)
                 data = Collection.Find(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= end));
             else if (end == null)
-                data =  Collection.Find(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || t.StartDate >= start));
+                data = Collection.Find(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || t.StartDate >= start));
             else
-                data =  Collection.Find(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || (t.StartDate >= start && t.StartDate <= end)));
+                data = Collection.Find(t => t.ClassID == ClassID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || (t.StartDate >= start && t.StartDate <= end)));
             return data.SortByDescending(t => t.StartDate).ToList();
         }
 
 
-        public long CountClassSubjectExam(List<string> ClassSubjectIDs, DateTime? start= null, DateTime? end = null)
+        public long CountClassSubjectExam(List<string> ClassSubjectIDs, DateTime? start = null, DateTime? end = null)
         {
             //var validTime = new DateTime(1900, 1, 1);
             //return Collection.CountDocuments(t => ClassSubjectIDs.Contains(t.ClassSubjectID) && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= time));

@@ -511,6 +511,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
+        public JsonResult ToggleOnline(string ID)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var schedule = _lessonScheduleService.GetItemByID(ID);
+            if (schedule == null)
+            {
+                return Json(new { error = "Thông tin không đúng" });
+            }
+
+            schedule.IsOnline = !schedule.IsOnline;
+            _lessonScheduleService.Save(schedule);
+            UpdateCalendar(schedule, UserID);
+            return Json(new { isOnline = schedule.IsOnline });
+        }
+
+        [HttpPost]
+        [Obsolete]
         public JsonResult Update(LessonScheduleEntity entity)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;

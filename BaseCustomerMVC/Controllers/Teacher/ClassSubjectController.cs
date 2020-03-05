@@ -209,7 +209,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                ScheduleID = schedule.ID,
                                StartDate = schedule.StartDate,
                                EndDate = schedule.EndDate,
-                               IsActive = schedule.IsActive
+                               IsActive = schedule.IsActive,
+                               IsOnline = schedule.IsOnline
                            })).ToList();
 
             var response = new Dictionary<string, object>

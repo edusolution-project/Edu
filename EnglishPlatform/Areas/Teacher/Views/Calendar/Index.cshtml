@@ -32,8 +32,10 @@
 
 </div>
 <div class="form-event" id="form-event">
-    <div class="header-form-event">Sự kiện 
-    <button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button></div>
+    <div class="header-form-event">
+        Sự kiện
+        <button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button>
+    </div>
     <div class="body-form-event">
         <input type="hidden" name="ID" value="" />
         <div class="item-event">
@@ -73,7 +75,7 @@
             @if (listClass != null)
             {
                 <select name="ClassID" class="form-control">
-                    @for(int i = 0; i < listClass.Count; i++)
+                    @for (int i = 0; i < listClass.Count; i++)
                     {
                         var item = listClass[i];
                         <option value="@item.ID">
@@ -92,14 +94,16 @@
         </div>
         <div class="item-event">
             <label for="Content">Link lớp học </label>
-            @if(currentTeacher != null)
+            @if (currentTeacher != null)
             {
-                ZoomUrl = string.IsNullOrEmpty(currentTeacher.ZoomID) ? "" : "https://zoom.us/wc/"+currentTeacher.ZoomID.Replace("-","")+"/join";
+                ZoomUrl = string.IsNullOrEmpty(currentTeacher.ZoomID) ? "" : "https://zoom.us/wc/" + currentTeacher.ZoomID.Replace("-", "") + "/start";
             }
             <input type="text" name="UrlRoom" value="@ZoomUrl" class="form-control" placeholder="appear / zoom / skype join">
         </div>
     </div>
     <div class="footer-form-event">
+        <button style="display:none" onclick="openWindow(this)" class="btn btn-primary btn-show-class-event" id="btn-mo-bai-hoc">Mở bài học</button>
+        <button style="display:none" onclick="openWindow(this)" class="btn btn-primary btn-show-class-event" id="btn-vao-lop-online">Vào lớp</button>
         <button class="btn btn-primary btn-save-event" id="btn-save-event-class">Lưu</button>
         <button class="btn btn-o btn-cancel-event" id="btn-cancel-event-class">Hủy</button>
         <button class="btn btn-o btn-delete-event btn-danger" id="btn-delete-event-class">Xóa</button>
@@ -115,6 +119,14 @@
     <script src="~/js/lib/schedule.js"></script>
     <script src="/js/calendar/js/Calendar.js"></script>
     <script>
+        var openWindow = function (self) {
+            console.log(self);
+            if (self.dataset.url == void 0 || self.dataset.url == null) {
+                return;
+            } else {
+                window.open(self.dataset.url,"_blank");
+            }
+        }
         var changeTime = function (date) {
             var hours = date.getHours();
             var minute = date.getMinutes();
@@ -155,7 +167,25 @@
             EduCalendar.schedule.Ajax.PostAny("@Url.Action("GetDetail","Calendar")?id=" + id, null).then(function (data) {
                 if (data != null) {
                     var jsonData = JSON.parse(data);
-                    if (jsonData.CreateUser == "@User.FindFirst("UserID")?.Value" && jsonData.ScheduleID == null) {
+
+                    var formEventxxx = document.getElementById("form-event-class");
+                    if (formEventxxx != null) {
+                        formEventxxx.classList.remove("show_go_to_class");
+                        var btnMo = formEventxxx.querySelector("button#btn-mo-bai-hoc");
+                        var btnOnline = formEventxxx.querySelector("button#btn-vao-lop-online");
+
+                        if (btnMo != null) {
+                            btnMo.removeAttribute("data-url");
+                            btnMo.style.display = "none";
+                        }
+                        if (btnOnline != null) {
+                            btnOnline.removeAttribute("data-url");
+                            btnOnline.style.display = "none";
+                        }
+                    }
+
+                    if ((jsonData.CreateUser == "@User.FindFirst("UserID")?.Value" && jsonData.ScheduleID == null) ||
+                        (jsonData.TeacherID == "@User.FindFirst("UserID")?.Value" && jsonData.ScheduleID != null)) {
                         if (jsonData.Status != 5) {
                             document.body.classList.add("open-add-event");
                             var startDate = new Date(jsonData.StartDate);
@@ -165,6 +195,7 @@
                             var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
                             var formEvent = document.getElementById("form-event");
                             var bodyEvent = formEvent.querySelector(".body-form-event");
+                            
                             bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
                             if (bodyEvent != null) {
                                 var Title = bodyEvent.querySelector("input[name='Title']");
@@ -173,6 +204,7 @@
                                 }
                                 var Content = bodyEvent.querySelector("textarea[name='Content']");
                                 if (Content != null) {
+
                                     Content.value = jsonData.Content != void 0
                                         ? jsonData.Content
                                         : "";
@@ -192,6 +224,7 @@
                                 // cho phép xóa
                             }
                         } else {
+
                             //teacher show
                             document.body.classList.add("open-add-event-class");
                             var startDate = new Date(jsonData.StartDate);
@@ -201,6 +234,31 @@
                             var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
                             var formEvent = document.getElementById("form-event-class");
                             var bodyEvent = formEvent.querySelector(".body-form-event");
+                            //longht them
+                            var btnMo = formEvent.querySelector("button#btn-mo-bai-hoc");
+                            var btnOnline = formEvent.querySelector("button#btn-vao-lop-online");
+                            if (jsonData.LinkLesson != null && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "" && jsonData.LinkLesson != "null") {
+                                if (btnMo != null) {
+                                    btnMo.setAttribute("data-url", jsonData.LinkLesson);
+                                    btnMo.removeAttribute("style");
+                                }
+                            } else {
+                                if (btnMo != null) {
+                                    btnMo.removeAttribute("data-url");
+                                    btnMo.style.display = "none";
+                                }
+                            }
+                            if (jsonData.UrlRoom != null && jsonData.UrlRoom != void 0 && jsonData.UrlRoom != "" && jsonData.UrlRoom != "null") {
+                                if (btnOnline != null) {
+                                    btnOnline.setAttribute("data-url", jsonData.UrlRoom.startsWith("https") ? jsonData.UrlRoom : "@ZoomUrl");
+                                    btnOnline.removeAttribute("style");
+                                }
+                            } else {
+                                if (btnOnline != null) {
+                                    btnOnline.removeAttribute("data-url");
+                                    btnOnline.style.display = "none";
+                                }
+                            }
                             bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
                             if (bodyEvent != null) {
                                 var Title = bodyEvent.querySelector("input[name='Title']");
@@ -211,7 +269,7 @@
                                 if (Content != null) {
                                     Content.value = jsonData.UrlRoom != void 0
                                         ? jsonData.UrlRoom
-                                        : "";
+                                        : "@ZoomUrl";
                                 }
                                 var time = bodyEvent.querySelector("input[name='Time']");
                                 if (time != null) {
@@ -221,6 +279,12 @@
                                 if (date != null) {
                                     date.value = dateEvent;
                                 }
+                                var select = bodyEvent.querySelector("select[name='ClassID']");
+                                if (select != null) {
+                                    select.value = jsonData.GroupID;
+                                }
+                               
+
                                 formEvent.classList.remove("view-form");
                                 formEvent.classList.add("edit-form");
                             }
@@ -233,7 +297,31 @@
                         if (jsonData.Status == 5) {
                             // student show
                             document.body.classList.add("open-add-event-class");
+                            var title = jsonData.Title;
+                            var classID = jsonData.GroupID;
+                            var time = new Date(jsonData.StartDate);
 
+                            console.log(title, classID, time);
+                            //Title: "Exercise 4"
+                            //GroupID: "5e5e1216f7d700160cac885e"
+                            //StartDate: "2020-03-04T01:00:00Z"
+                            //EndDate: "2020-03-04T01:00:00Z"
+                            //TeacherID: "5db11841b5433109d4533cae"
+                            //TeacherName: "Quynh Dan"
+                            //StudentID: null
+                            //StudentName: null
+                            //UrlRoom: "2132160662"
+                            //LimitNumberUser: 0
+                            //UserBook: []
+                            //CreateUser: "5e5e00b215a5472720d17593"
+                            //Status: 5
+                            //IsDel: false
+                            //Created: "2020-03-03T08:21:06.364Z"
+                            //ScheduleID: "5e5e1216f7d700160cac89a0"
+                            //Skype: "live:engcoo"
+                            //Content: null
+                            //ID: "5e5e1372f7d700160cacab18"
+                            //LinkLesson: "/teacher/
 
                         } else {
                             if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != void 0) {
@@ -456,7 +544,7 @@
                             };
                             EduCalendar.schedule.EduCalendar.addEvent(event);
                         }
-                        
+
                     }
                     else
                         swal("Tạo mới!", dataJson.msg, "warning");
@@ -464,7 +552,7 @@
                      swal("Tạo mới!", "thất bại", "warning");
                 }
                 document.body.classList.remove("open-add-event");
-               
+
             })
             }
 
@@ -538,7 +626,7 @@
                                 };
                                 EduCalendar.schedule.EduCalendar.addEvent(event);
                             }
-                        
+
                         }
                         else
                             swal("Tạo mới!", dataJson.msg, "warning");

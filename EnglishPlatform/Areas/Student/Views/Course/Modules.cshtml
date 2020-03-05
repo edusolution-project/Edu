@@ -230,13 +230,21 @@
                         .then(response => {
                             var chapters = response.data.Data.Chapters;
                             if (chapters != null && chapters.length > 0)
-                                _that.list_data.push(chapters);
+                            {
+                                chapters.forEach(function(chapter)
+                                {
+                                    _that.list_data.push(chapter);
+                                })
+                            }
+                                
                             var lessons = response.data.Data.Lessons;
                             //console.log(lessons)
                             lessons.forEach(function (lesson) {
                                 if(_that.list_lessons.findIndex(t=>t.ID == lesson.ID) == -1)
                                     _that.list_lessons.push(lesson)
                             })
+                            this.list_data = _that.list_data;
+                            console.log(this.list_data);
                             this.list_lessons = _that.list_lessons;
                             this.load_chapter.push(chapterId);
                         }).catch(e => { })
