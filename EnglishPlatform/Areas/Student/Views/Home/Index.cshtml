@@ -253,7 +253,7 @@
                 var start = moment(item.startDate).toDate()
                 var end = moment(item.endDate).toDate();
                 var invalid = start > now || end < now
-                return !invalid
+                return (item.type == @BaseCustomerEntity.Database.LESSON_TEMPLATE.LECTURE) || !invalid 
             },
             showLockNotify(item) {
                 var now = moment().toDate()

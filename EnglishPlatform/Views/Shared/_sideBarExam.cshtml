@@ -1,0 +1,224 @@
+﻿@{
+    var Data = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
+    var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var ClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
+}
+<script>
+    $(document).ready(function () {
+        var menu = $("<i>", {
+            class: "fas fa-bars list_menu top_nav_menu mr-2 active",
+            style: "cursor: pointer",
+        }).click(function () {
+            toggleMenu(this,'.path_menu');
+        });
+        var questiontrack = $("<i>", {
+            class: "far fa-question-circle top_nav_menu",
+            style: "cursor: pointer",
+        }).click(function () {
+            toggleMenu(this, '.question_menu');
+        });
+        renderMenu(currentLesson.ChapterID, true);
+        //$('.page-title h1').prepend(questiontrack);
+        $('.page-title h1').prepend(menu);
+        //menu.click();
+        
+    });
+
+    var dataUrl = '@Url.Action("GetContents","ClassSubject")';
+
+    var renderMenu = function (parentID, init) {
+
+        var parentPath = root_nav;
+
+        if (parentID != null && parentID.length > 1) {
+            parentPath = $('#chap_nav_' + parentID);
+            if (parentPath.length == 0) {
+                parentPath = $("<ul>", {id: 'chap_nav_' + parentID, class: 'p_chap_nav'});
+                parentPath
+                    .append($("<div>", { class: "chap_nav_title", text: "" }))
+                    .append($("<ul>", { class: "chap_content" }));
+                parentPath.find("> .chap_nav_title").click(function () {toggleChap(this)})
+                root_nav.append(parentPath);
+            }
+            if (init) {
+                parentPath.addClass('plus');
+                parentPath.find(" > .chap_nav_title").addClass('current')
+            }
+
+        }
+
+        $.ajax({
+            type: "POST",
+            url: dataUrl,
+            data: { ID: '@ClassSubject.ID', Parent: parentID },
+            success: function (data) {
+                var rootID = data.RootID;
+                var chapters = data.Data;
+                var lessons = data.Lesson;
+                if (chapters != null && chapters.length > 0) {
+                    $.each(chapters, function (i, chapter) {
+                        var chapterPath = $('#chap_nav_' + chapter.ID);
+                        if (chapterPath.length == 0) {
+                            chapterPath = $("<ul>", {
+                                id: 'chap_nav_' + chapter.ID,
+                                class: 'p_chap_nav',
+                                href: '#'
+                            });
+                            chapterPath.append($("<div>", { class: "chap_nav_title" }))
+                                .append($("<ul>", { class: "chap_content" }));
+                            chapterPath.find("> .chap_nav_title").click(function () { toggleChap(this) });
+                        }
+                        chapterPath.find('> .chap_nav_title').text(chapter.Name).prepend($("<i>", { class: "far fa-folder mr-1" }));;
+                        parentPath.find('> .chap_content').append(chapterPath);
+                    })
+                }
+                if (lessons != null && lessons.length > 0) {
+                    $.each(lessons, function (i, lesson) {
+                        lessonPath = $("<li>", {
+                            id: 'les_nav_' + lesson.ID,
+                            class: 'les_nav',
+                        }).append($("<i>", { class: "far fa-file-alt mr-1" }))
+                            .append($("<a>", {text: lesson.Title, href: '@Url.Action("Detail","Lesson")/' + lesson.ID + '/' + '@ClassSubject.ID'}));
+                        if (lesson.ID == currentLesson.ID)
+                            lessonPath.addClass('current');
+                        parentPath.find('.chap_content').append(lessonPath);
+                    })
+                }
+                parentPath.attr('loaded', 1);
+                if(parentID != null && parentID.length > 1)
+                    renderMenu(rootID, init);
+            },
+        });
+    }
+
+    var currentLesson = @Html.Raw(Json.Serialize(Data))
+        console.log(currentLesson);
+
+    var toggleChap = function (obj) {
+        $(obj).parent().toggleClass('plus');
+        var loaded = $(obj).parent().attr('loaded');
+        if (loaded == 1)
+            return false;
+        var id = $(obj).parent().attr('id').replace('chap_nav_', '');
+        renderMenu(id, false);
+    }
+</script>
+
+<style>
+    .list_menu {
+        margin-left: -15px;
+    }
+    .top_nav_menu{
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+    }
+
+    .top_nav_menu.active{
+        border:solid 1px #e60028;
+    }
+
+    .right_sidebar {
+        width: 300px;
+        background: lightgoldenrodyellow;
+        border: none;
+        transition: left 1s;
+        position: absolute;
+        top: 55px;
+        left: -302px;
+        bottom: 100px;
+        border-radius: 0 10px 10px 0;
+        z-index: 1;
+        box-shadow: 3px 1px 6px #999;
+        overflow: hidden;
+        line-height: 1.7rem;
+    }
+
+        .right_sidebar.expand {
+            left: 0;
+        }
+
+
+    .path_menu .current,
+    .path_menu .current a
+    {
+        font-weight: 600;
+        color: #e60028;
+    }
+
+    .path_menu li,
+    .path_menu ul {
+        cursor: pointer;
+    }
+
+    .path_menu a{
+        color: #333;
+    }
+
+    .chap_nav_title:hover,
+    .les_nav:hover {
+        text-decoration: underline;
+    }
+
+    .right_sidebar > div {
+        height: 100%;
+        padding: 10px;
+        overflow-y: auto;
+    }
+
+    .chap_content, .p_chap_nav {
+        margin-left: 0px;
+        padding-left: 5px;
+    }
+
+        .chap_content li {
+            list-style: none;
+            padding-left: 10px;
+        }
+
+        .p_chap_nav > .chap_content {
+            display: none;
+        }
+
+        .p_chap_nav.plus > .chap_content {
+            display: block;
+        }
+</style>
+
+<nav class="right_sidebar expand">
+    @*<button class="sidebar-toggler" type="button" data-toggle="collapse" data-target=".sidebar" aria-controls="sidebar-content" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="sidebar-toggler-icon"></i>
+        </button>*@
+    <div class="path_menu">
+        <ul class="chap_content"></ul>
+    </div>
+    <div class="question_menu">
+        Question
+    </div>
+</nav>
+<!-- End of Sidebar -->
+<script>
+    var root_nav = $('.path_menu');
+
+    var toggleMenu = function (trigger, menu) {
+        $('.top_nav_menu').removeClass('active');
+        if ($('.right_sidebar').hasClass("expand")) {
+            if ($(menu).is(":visible")) {
+                $('.right_sidebar').removeClass("expand");
+            }
+            else {
+                $(trigger).addClass('active')
+                $('.right_sidebar > div').hide();                
+                $(menu).show()
+            }
+            
+        }
+        else {
+            $(trigger).addClass('active')
+            $('.right_sidebar > div').hide();
+            $(menu).show()
+            $('.right_sidebar').addClass("expand");
+        }
+    }
+
+</script>

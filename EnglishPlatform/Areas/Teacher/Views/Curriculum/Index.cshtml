@@ -62,8 +62,9 @@
                     <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
                     <td>
                         <div class="d-flex btn-group">
-                            <a class="btn-act btn-edit" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
-                            <button class="btn-act btn-trash" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
+                            <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
+                            <a class="btn-act btn-edit" title="Sao chép" href="javascript:;" v-on:click="showCloneItem(item)"><i class="ti-layers"></i></a>
+                            <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -163,6 +164,14 @@
                     SkillID: '',
                     Description: '',
                     Init: false
+                },
+                cloneItem: {
+                    OriginID: '',
+                    Name: '',
+                    SubjectID: '',
+                    GradeID: '',
+                    SkillID: '',
+                    Description: ''
                 },
                 subject: '',
                 grade: '',
@@ -295,6 +304,23 @@
                         _that.addItem.Description = '';
                         _that.addItem.Name = '';
                         _that.addItem.SkillID = '';
+                    }
+                    else {
+                        console.log(obj.GradeID)
+                        _that.addItem.ID = obj.ID;
+                        _that.addItem.SubjectID = obj.SubjectID;
+                        _that.addItem.Init = true;
+                        _that.addItem.GradeID = obj.GradeID;
+                        _that.addItem.Description = obj.Description;
+                        _that.addItem.Name = obj.Name;
+                        _that.addItem.SkillID = obj.SkillID == null ? '': obj.SkillID;
+                    }
+                    _that.$bvModal.show('modal_event')
+                },
+                showCloneItem(obj) {
+                    let _that = this;
+                    if (obj == null) {
+                        return false;
                     }
                     else {
                         console.log(obj.GradeID)
@@ -446,4 +472,136 @@
             </template>
         </template>
     </b-modal>
+
+    <b-modal id="clone_event" centered v-bind:title="Sao chép bài giảng">
+        <input type="hidden" name="OriginID" v-model="cloneItem.OriginID" />
+        <div>
+            <div class="form-group">
+                <label class="col-form-label">Bài giảng gốc:</label>
+                <input type="text" class="form-control lock" id="rootCourseName" :value="cloneItem.OriginName" readonly>
+            </div>
+        </div>
+        <b-col class="form-group">
+            <label for="">Tên bài giảng *</label>
+            <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng" v-model="addItem.Name" ref="addName">
+        </b-col>
+        <div class="d-flex">
+            <b-col class="form-group">
+                <label for="">Chương trình</label>
+                <select class="form-control" v-model="addItem.SubjectID">
+                    <option value="">Chọn chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </b-col>
+            <b-col class="form-group">
+                <label for="">Cấp độ</label>
+                <select class="form-control" v-model="addItem.GradeID">
+                    <option value="">Chọn cấp độ</option>
+                    <option v-for="(item,k) in list_add_grades" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </b-col>
+            <b-col class="form-group">
+                <label for="">Môn học</label>
+                <select class="form-control" v-model="addItem.SkillID">
+                    <option value="">Chọn môn học</option>
+                    <option v-for="(item,k) in list_skills" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </b-col>
+        </div>
+        <b-col class="form-group">
+            <label for="">Mô tả</label>
+            <quill-editor v-model="addItem.Description"
+                          ref="quillEditorA"
+                          :options="editorOption">
+            </quill-editor>
+            @*<textarea name="name" rows="3" class="form-control" v-model="addItem.description"></textarea>*@
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="addData()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
+
+
+    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="cloneModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Get curriculum</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="@Url.Action("Clone","Curriculum")" id="modal-body" name="modalForm" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="CourseID" id="rootCourseID" />
+                        <input type="hidden" name="CreateUser" value="@user" />
+                        <input type="hidden" name="IsActive" value="false" />
+                        <div>
+                            <div class="form-group">
+                                <label class="col-form-label">Original:</label>
+                                <input type="text" class="form-control lock" id="rootCourseName" readonly>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Title:</label>
+                            <input type="text" class="form-control" name="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Subject:</label>
+                            <select name="SubjectID" class="form-control" onchange="ChangeGrade(this, 'select[name=GradeID]')" required>
+                                <option value="">--- Choose subject ---</option>
+                                @{
+                                    for (int i = 0; listSubject != null && i < listSubject.Count; i++)
+                                    {
+                                        <option value="@listSubject[i].ID">@listSubject[i].Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Grade:</label>
+                            <select name="GradeID" class="form-control" required>
+                                <option value="">--- Choose grade ---</option>
+                                @{
+                                    for (int i = 0; listGrade != null && i < listGrade.Count; i++)
+                                    {
+                                        <option value="@listGrade[i].ID" for="@listGrade[i].SubjectID" style="display:none">@listGrade[i].Name</option>
+                                    }
+
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Skill:</label>
+                            <select name="SkillID" class="form-control" required>
+                                <option value="">--- Choose skill ---</option>
+                                @{
+                                    for (int i = 0; listSkill != null && i < listSkill.Count; i++)
+                                    {
+                                        <option value="@listSkill[i].ID">@listSkill[i].Name</option>
+                                    }
+
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="col-form-label">Description:</label>
+                            <textarea class="form-control" name="Description"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('modalForm', '@Url.Action("Clone","Curriculum")','update' , ReloadCourse)">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 }

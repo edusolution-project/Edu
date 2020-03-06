@@ -42,6 +42,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ChapterService _chapterService;
         private readonly ChapterProgressService _chapterProgressService;
         private readonly ChapterExtendService _chapterExtendService;
+        private readonly CalendarHelper _calendarHelper;
         private readonly LearningHistoryService _learningHistoryService;
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
@@ -81,6 +82,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , StudentService studentService
             , LessonProgressService lessonProgressService
             , LearningHistoryService learningHistoryService
+            , CalendarHelper calendarHelper
             )
         {
             _lessonProgressService = lessonProgressService;
@@ -113,7 +115,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _lessonPartAnswerService = lessonPartAnswerService;
             _studentMapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
-
+            _calendarHelper = calendarHelper;
 
 
             _lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
@@ -317,8 +319,9 @@ namespace BaseCustomerMVC.Controllers.Student
                        let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
                        where _subject != null
                        let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID, o.ClassSubjectID) != null
+                       let onlineUrl = o.IsOnline ? _calendarHelper.GetByScheduleId(o.ID).UrlRoom : ""
                        select new
-                       {
+                       {                           
                            id = o.ID,
                            classID = _class.ID,
                            className = _class.Name,
@@ -329,7 +332,9 @@ namespace BaseCustomerMVC.Controllers.Student
                            startDate = o.StartDate,
                            endDate = o.EndDate,
                            skill = skill,
-                           isLearnt = isLearnt
+                           isLearnt = isLearnt,
+                           type = _lesson.TemplateType,
+                           onlineUrl = o.IsOnline ? onlineUrl : ""
                        }).OrderBy(t => t.startDate).ToList();
             //var std = (from o in data.ToList()
             //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()

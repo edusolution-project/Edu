@@ -73,7 +73,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return RedirectToAction("Index", "Class");
             ViewBag.Class = currentClass;
             ViewBag.Subject = currentClassSubject;
-            ViewBag.Data = Data;
+            ViewBag.Lesson = Data;
             ViewBag.Title = Data.Title;
 
             if (frameview == 1)

@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher_noChat.cshtml";
-    var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
+    var Data = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     var ClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
 }
@@ -21,9 +21,13 @@
     <input type="hidden" id="ChapterID" value="@Data.ChapterID" />
     <input type="hidden" id="CourseID" value="@Data.CourseID" />
 </div>
+@section Sidebar
+{
+    @await Html.PartialAsync("_sidebarExam")
+}
 
 @section Scripts{
-    <script src="~/js/content-render.js?20200304"></script>
+    <script src="~/js/content-render.js?20200305"></script>
     <script>
     var config = {
         container: "lessonContainer",

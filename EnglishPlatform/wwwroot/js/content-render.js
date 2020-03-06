@@ -1215,20 +1215,20 @@ var Lesson = (function () {
         var selectTemplate = $("<select>", { "class": "templatetype form-control", "name": "Type", "required": "required" }).bind("change", chooseTemplate);
         $(modalForm).append(selectTemplate);
         $(selectTemplate).append("<option value=''>--- Chọn kiểu nội dung ---</option>");
-        if (type == TEMPLATE_TYPE.LESSON) {
+            //if (type == TEMPLATE_TYPE.LESSON) {
             $(selectTemplate).append("<option value='TEXT'>Văn bản</option>")
                 .append("<option value='VIDEO'>Video</option>")
                 .append("<option value='AUDIO'>Audio</option>")
                 .append("<option value='IMG'>Hình ảnh</option>")
                 .append("<option value='DOC'>File văn bản (PDF, DOC, PPT)</option>")
             //.append("<option value='VOCAB'>Vocabulary</option>")
-        }
-        else {
+        //}
+        //else {
             $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn đáp án đúng</option>")
                 .append("<option value='QUIZ2'>QUIZ: Điền từ</option>")
                 .append("<option value='QUIZ3'>QUIZ: Nối đáp án</option>")
             //.append("<option value='ESSAY'>QUIZ: Essay</option>");
-        }
+        //}
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
         $(modalForm).append($("<div>", { "class": "question_template hide" }));
         $(modalForm).append($("<div>", { "class": "answer_template hide" }));

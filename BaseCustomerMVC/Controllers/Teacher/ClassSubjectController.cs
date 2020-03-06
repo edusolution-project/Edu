@@ -192,14 +192,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (string.IsNullOrEmpty(Parent))
                 Parent = "0";
 
-            var chapters = _chapterService.GetSubChapters(currentCs.CourseID, Parent);
-            //var chapterExtends = _chapterExtendService.Search(currentClass.ID);
+            var TopID = "";
+            if (Parent != "0")
+            {
+                var top = _chapterService.GetItemByID(Parent);
+                if (top == null)
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy chương" }
+                    });
+                TopID = top.ParentID;
+            }
 
-            //foreach (var chapter in chapters)
-            //{
-            //    var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
-            //    if (extend != null) chapter.Description = extend.Description;
-            //}
+            var chapters = _chapterService.GetSubChapters(currentCs.CourseID, Parent);
+
+
 
             var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == currentCs.CourseID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
@@ -215,6 +222,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var response = new Dictionary<string, object>
                 {
+                    { "RootID", TopID },
                     { "Data", chapters },
                     { "Lesson", lessons }
                 };

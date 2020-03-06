@@ -216,8 +216,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     ClassName = @class.Name,
                                     ClassStatus = "Đang học",
                                     LastJoinDate = progress.LastDate,
-                                    Percent = (progress == null || progress.TotalLessons == 0) ? 0 : (progress.Completed * 100 / progress.TotalLessons),
-                                    Score = (progress == null) || examCount == 0 ? 0 : progress.TotalPoint / examCount
+                                    Percent = (progress.TotalLessons == 0) ? 0 : (progress.Completed * 100 / progress.TotalLessons),
+                                    Score = examCount == 0 ? 0 : progress.TotalPoint / examCount
                                 })).ToList();
             }
             else
@@ -229,15 +229,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 let examCount = _lessonScheduleService.CountClassSubjectExam(classusbjectIds, end: DateTime.Now)
                                 let @student = _studentService.GetItemByID(r.StudentID)
                                 where @student != null
-                                let progress = _classSubjectProgressService.GetItemByClassSubjectID(SubjectID, @student.ID) //TODO: Multiple class subject ???? - Too complicated
+                                let progress = _classSubjectProgressService.GetItemByClassSubjectID(SubjectID, @student.ID) ?? new ClassSubjectProgressEntity() //TODO: Multiple class subject ???? - Too complicated
                                 select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
                                 {
                                     ClassID = @class.ID,
                                     ClassName = @class.Name,
                                     ClassStatus = "Đang học",
                                     LastJoinDate = progress.LastDate,
-                                    Percent = (progress == null || progress.TotalLessons == 0) ? 0 : (progress.Completed * 100 / progress.TotalLessons),
-                                    Score = (progress == null) || examCount == 0 ? 0 : progress.TotalPoint / examCount
+                                    Percent = (progress.TotalLessons == 0) ? 0 : (progress.Completed * 100 / progress.TotalLessons),
+                                    Score = examCount == 0 ? 0 : progress.TotalPoint / examCount
                                 })).ToList();
             }
 
