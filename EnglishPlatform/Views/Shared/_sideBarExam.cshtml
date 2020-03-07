@@ -21,7 +21,7 @@
         //$('.page-title h1').prepend(questiontrack);
         $('.page-title h1').prepend(menu);
         //menu.click();
-        
+
     });
 
     var dataUrl = '@Url.Action("GetContents","ClassSubject")';
@@ -74,14 +74,17 @@
                 }
                 if (lessons != null && lessons.length > 0) {
                     $.each(lessons, function (i, lesson) {
-                        lessonPath = $("<li>", {
-                            id: 'les_nav_' + lesson.ID,
-                            class: 'les_nav',
-                        }).append($("<i>", { class: "far fa-file-alt mr-1" }))
-                            .append($("<a>", {text: lesson.Title, href: '@Url.Action("Detail","Lesson")/' + lesson.ID + '/' + '@ClassSubject.ID'}));
-                        if (lesson.ID == currentLesson.ID)
-                            lessonPath.addClass('current');
-                        parentPath.find('.chap_content').append(lessonPath);
+                        var lessonPath = $('#les_nav_' + lesson.ID);
+                        if (lessonPath.length == 0) {
+                            lessonPath = $("<li>", {
+                                id: 'les_nav_' + lesson.ID,
+                                class: 'les_nav',
+                            }).append($("<i>", { class: "far fa-file-alt mr-1" }))
+                                .append($("<a>", {text: lesson.Title, href: '@Url.Action("Detail","Lesson")/' + lesson.ID + '/' + '@ClassSubject.ID'}));
+                            if (lesson.ID == currentLesson.ID)
+                                lessonPath.addClass('current');
+                        }
+                        parentPath.find('> .chap_content').append(lessonPath);
                     })
                 }
                 parentPath.attr('loaded', 1);
@@ -92,7 +95,7 @@
     }
 
     var currentLesson = @Html.Raw(Json.Serialize(Data))
-        console.log(currentLesson);
+        //console.log(currentLesson);
 
     var toggleChap = function (obj) {
         $(obj).parent().toggleClass('plus');
@@ -108,15 +111,16 @@
     .list_menu {
         margin-left: -15px;
     }
-    .top_nav_menu{
+
+    .top_nav_menu {
         padding: 5px 10px;
         border: none;
         border-radius: 5px;
     }
 
-    .top_nav_menu.active{
-        border:solid 1px #e60028;
-    }
+        .top_nav_menu.active {
+            border: solid 1px #e60028;
+        }
 
     .right_sidebar {
         width: 300px;
@@ -140,8 +144,7 @@
 
 
     .path_menu .current,
-    .path_menu .current a
-    {
+    .path_menu .current a {
         font-weight: 600;
         color: #e60028;
     }
@@ -151,7 +154,7 @@
         cursor: pointer;
     }
 
-    .path_menu a{
+    .path_menu a {
         color: #333;
     }
 
@@ -208,10 +211,10 @@
             }
             else {
                 $(trigger).addClass('active')
-                $('.right_sidebar > div').hide();                
+                $('.right_sidebar > div').hide();
                 $(menu).show()
             }
-            
+
         }
         else {
             $(trigger).addClass('active')

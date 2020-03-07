@@ -745,7 +745,7 @@ var Lesson = (function () {
                 var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 renderMediaContent(data, ItemRow, "");
-                console.log(ItemRow);
+                //console.log(ItemRow);
                 ItemRow.append(itemBody);
                 if (data.Description != null) {
                     ItemRow.append($("<div>", { "class": "part-description" }).html(data.Description));
@@ -764,7 +764,7 @@ var Lesson = (function () {
                         $(this).append($(ui.draggable));
                     }
                 });
-                console.log(itemBody);
+                //console.log(itemBody);
                 //console.log(tabsitem);
                 //console.log(container);
                 container.append(tabsitem);
@@ -995,13 +995,13 @@ var Lesson = (function () {
             var mediaHolder = $("<div>", { "class": "media-holder mt-2 mb-2 " + type });
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path }));
+                    mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") }));
                     break;
                 case "VIDEO":
-                    mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                    mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                     break;
                 case "AUDIO":
-                    mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                    mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn","https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                     break;
                 case "DOC":
                     if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") || data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx")) {
@@ -1013,13 +1013,13 @@ var Lesson = (function () {
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path }));
+                            mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
-                            mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                            mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
-                            mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                            mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else
-                            mediaHolder.append($("<embed>", { "src": data.Media.Path + "#view=FitH" }));
+                            mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "#view=FitH" }));
                     break;
             }
             wrapper.append(mediaHolder);
