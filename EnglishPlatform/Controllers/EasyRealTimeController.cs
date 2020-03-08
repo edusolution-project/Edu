@@ -61,6 +61,7 @@ namespace EnglishPlatform.Controllers
             _messageService = messageService;
             _hubContent = hubContent;
         }
+        #region group
         /// <summary>
         /// laays danh sach group can
         /// </summary>
@@ -127,7 +128,7 @@ namespace EnglishPlatform.Controllers
                                 }
                                 var newGroup = new GroupEntity()
                                 {
-                                    IsPrivateChat = true,
+                                    IsPrivateChat = false,
                                     DisplayName = itemClass.Name,
                                     Name = itemClass.ID,
                                     Status = true,
@@ -139,34 +140,104 @@ namespace EnglishPlatform.Controllers
                             }
                         }
                     }
-                    groupList = _groupService.CreateQuery().Find(o => o.IsPrivateChat == true && listClassID.Contains(o.Name))?.ToList();
+                    groupList = _groupService.CreateQuery().Find(o => o.IsPrivateChat == false && listClassID.Contains(o.Name))?.ToList();
                     return Success(new { Group = groupList, Student = listMembers, Teacher = listMemberTeacher });
                 }
             }
 
             return NotFoundData();
         }
-
-        /// <summary>
-        /// lay danh sach member trong group
-        /// </summary>
-        /// <param name="searchText"></param>
-        /// <returns></returns>
-        [HttpGet]
-        public JsonResult GetMemberFromList(string groupName)
+        [HttpPut]
+        public JsonResult UpdateGroup(string searchText)
         {
             if (IsAuthenticated())
             {
-                var group = _groupService.CreateQuery().Find(o => o.Name == groupName)?.FirstOrDefault();
-                if(group != null)
+                if (!string.IsNullOrEmpty(searchText))
                 {
-                    return Success(new { group.Members });
+
+                }
+                else
+                {
+
                 }
             }
 
             return NotFoundData();
         }
 
+        [HttpDelete]
+        public JsonResult RemoveGroup(string groupName)
+        {
+            if (IsAuthenticated())
+            {
+                var group = _groupService.CreateQuery().Find(o => o.Name == groupName)?.FirstOrDefault();
+                if (group != null)
+                {
+                    if (group.MasterGroup.Contains(new MemberGroupInfo(_userID, _email, _name, _typeUser == Teacher)))
+                    {
+                        _groupService.Remove(group.ID);
+                        return Success(group.ID);
+                    }
+                    else
+                    {
+                        return ResponseApi(405, "You are not the master group !!!");
+                    }
+                }
+            }
+
+            return NotFoundData();
+        }
+
+        [HttpPost]
+        public JsonResult CreateGroup(string groupName, string groupParent, List<MemberGroupInfo> members)
+        {
+            if (IsAuthenticated())
+            {
+                if (members != null)
+                {
+                    var newGroupName = Guid.NewGuid().ToString();
+                    bool IsPrivate = string.IsNullOrEmpty(groupParent); // user to user / group
+                    var group = new GroupEntity()
+                    {
+                        Created = DateTime.Now,
+                        Name = newGroupName,
+                        CreateUser = _userID,
+                        DisplayName = groupName,
+                        Members = members.ToHashSet(),
+                        IsPrivateChat = IsPrivate,
+                        
+                    };
+                    // user to user
+                    if (!IsPrivate)
+                    {
+                        group.ParentID = groupParent;
+                        group.MasterGroup = new HashSet<MemberGroupInfo>() { new MemberGroupInfo(_userID,_email,_name, _typeUser == Teacher)};
+                    }
+                    // taoj ra la sub cua lop
+                    else
+                    {
+                        var master = members.Where(o => o.IsTeacher)?.ToHashSet();
+                        if(master == null)
+                        {
+                            var _groupParent = _groupService.CreateQuery().Find(o => o.Name == groupParent)?.FirstOrDefault();
+
+                            if (_groupParent == null) return ResponseApi(404, "Not Found group parent");
+
+                            master = _groupParent.MasterGroup;
+                        }
+
+                        if(master == null) return ResponseApi(404,"Not Found group master");
+
+                        group.MasterGroup = master;
+                    }
+                    _groupService.CreateOrUpdate(group);
+
+                    return Success(group);
+                }
+            }
+
+            return NotFoundData();
+        }
         [HttpPost]
         public JsonResult AddMemberToGroup(string memberID,string groupName)
         {
@@ -201,7 +272,27 @@ namespace EnglishPlatform.Controllers
 
             return NotFoundData();
         }
+        /// <summary>
+        /// lay danh sach member trong group
+        /// </summary>
+        /// <param name="searchText"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public JsonResult GetMemberFromList(string groupName)
+        {
+            if (IsAuthenticated())
+            {
+                var group = _groupService.CreateQuery().Find(o => o.Name == groupName)?.FirstOrDefault();
+                if (group != null)
+                {
+                    return Success(new { group.Members });
+                }
+            }
 
+            return NotFoundData();
+        }
+        #endregion
+        #region Message
         [HttpGet]
         public JsonResult GetListMessage(string searchText)
         {
@@ -273,54 +364,8 @@ namespace EnglishPlatform.Controllers
             return NotFoundData();
         }
 
-
-        [HttpPost]
-        public JsonResult CreateGroup(string groupName, string groupParent, List<string> members)
-        {
-            if (IsAuthenticated())
-            {
-                
-            }
-
-            return NotFoundData();
-        }
-        [HttpPut]
-        public JsonResult UpdateGroup(string searchText)
-        {
-            if (IsAuthenticated())
-            {
-                if (!string.IsNullOrEmpty(searchText))
-                {
-
-                }
-                else
-                {
-
-                }
-            }
-
-            return NotFoundData();
-        }
-
-        [HttpDelete]
-        public JsonResult RemoveGroup(string searchText)
-        {
-            if (IsAuthenticated())
-            {
-                if (!string.IsNullOrEmpty(searchText))
-                {
-
-                }
-                else
-                {
-
-                }
-            }
-
-            return NotFoundData();
-        }
-
-
+        #endregion
+        
 
         #region Protect Func
         protected bool IsAuthenticated()
