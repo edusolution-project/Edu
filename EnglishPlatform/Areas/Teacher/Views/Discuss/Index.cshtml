@@ -292,18 +292,20 @@
                             </div>
                             @{ if (currentClass != null && currentClass.IsAllow)
                                 {
-                                    <div id="form-post">
-                                        <div class="media-preview"></div>
-                                        <div class="header-form-post">
-                                            <input class="form-control" name="Title" placeholder="Nội dung chủ đề" tabindex="1" required />
-                                        </div>
-                                        <br />
-                                        <textarea tabindex="2" rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
-                                        <input type="file" name="NewFeedMedia" style="display:none" />
-                                        <button class="file-media"><img src="~/images/jpg.png" /></button>
-                                    </div>
+
                                 }
                             }
+
+                            <div id="form-post">
+                                <div class="media-preview"></div>
+                                <div class="header-form-post">
+                                    <input class="form-control" name="Title" placeholder="Nội dung chủ đề" tabindex="1" required />
+                                </div>
+                                <br />
+                                <textarea tabindex="2" rows="3" class="form-control" placeholder="Nội dung thảo luận" style="border-radius: 3px;resize: none;background: #F0F3F4;"></textarea>
+                                <input type="file" name="NewFeedMedia" style="display:none" />
+                                <button class="file-media"><img src="~/images/jpg.png" /></button>
+                            </div>
 
                         </div>
                     </div>
@@ -649,7 +651,10 @@
         </script>
         @{ if (currentClass != null && currentClass.IsAllow)
             {
-                <script>
+                
+            }
+        }
+<script>
                     var filesListComment = {};
                     var filesList = {};
                     var formComment = document.getElementById("form-comment");
@@ -688,7 +693,7 @@
                 var formPost = document.getElementById("form-post");
                 if (formPost != null) {
                     var previewMedia = formPost.querySelector('.media-preview');
-                    
+
                     var inputFile = formPost.querySelector("input[type='file']");
                     if (inputFile != null) {
                         inputFile.onchange = function () {
@@ -730,7 +735,7 @@
                             dataForm.append("file", filesList[key]);
                         }
                         if (_ajax != void 0) {
-                            _ajax.proccess("POST", "@Url.Action("CREATE", "NewFeed")", dataForm).then(function (res) {
+                            _ajax.proccess("POST", "@Url.Action("CreateMessage", "EasyRealTime")", dataForm).then(function (res) {
                                 var data = JSON.parse(res);
                                 if (connection != void 0) {
                                     var item = data.data;
@@ -803,7 +808,5 @@
                         }
                     }
                 });
-                </script>
-            }
-        }
+</script>
     }

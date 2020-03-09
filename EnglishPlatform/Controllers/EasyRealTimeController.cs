@@ -6,6 +6,7 @@ using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Controllers.Student;
 using BaseCustomerMVC.Globals;
 using BaseEasyRealTime.Entities;
+using FileManagerCore.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -28,7 +29,7 @@ namespace EnglishPlatform.Controllers
         public string _name { get; set; }
         public string _email { get; set; }
         #endregion
-
+        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
         private readonly StudentService _studentService;
         private readonly TeacherService _teacherService;
         private readonly SubjectService _subjectService;
@@ -48,7 +49,8 @@ namespace EnglishPlatform.Controllers
             LessonScheduleService lessonScheduleService,
             GroupService groupService,
             MessageService messageService,
-            IHubContext<ChatHub> hubContent
+            IHubContext<ChatHub> hubContent,
+            IRoxyFilemanHandler roxyFilemanHandler
         )
         {
             _studentService = studentService;
@@ -60,6 +62,7 @@ namespace EnglishPlatform.Controllers
             _groupService = groupService;
             _messageService = messageService;
             _hubContent = hubContent;
+            _roxyFilemanHandler = roxyFilemanHandler;
         }
         #region group
         /// <summary>
@@ -148,17 +151,18 @@ namespace EnglishPlatform.Controllers
             return NotFoundData();
         }
         [HttpPut]
-        public JsonResult UpdateGroup(string searchText)
+        public JsonResult UpdateGroup(GroupEntity group)
         {
             if (IsAuthenticated())
             {
-                if (!string.IsNullOrEmpty(searchText))
+                if (!string.IsNullOrEmpty(group.ID))
                 {
-
-                }
-                else
-                {
-
+                    var oldGroup = _groupService.GetItemByID(group.ID);
+                    if(oldGroup != null)
+                    {
+                        _groupService.CreateOrUpdate(group);
+                        return Success(group);
+                    }
                 }
             }
 
@@ -294,35 +298,60 @@ namespace EnglishPlatform.Controllers
         #endregion
         #region Message
         [HttpGet]
-        public JsonResult GetListMessage(string searchText)
+        public JsonResult GetListMessage(string groupName , DateTime startDate , DateTime endDate , long skip, long take)
         {
             if (IsAuthenticated())
             {
-                if (!string.IsNullOrEmpty(searchText))
-                {
+                var filter = new List<FilterDefinition<MessageEntity>>();
 
-                }
-                else
-                {
+                var group = _groupService.CreateQuery().Find(o => o.Name == groupName)?.FirstOrDefault();
+                if (group != null) {
 
+                    var message = _messageService.GetMessageList(groupName, startDate, endDate);
+                    return Success(new { messages= message});
                 }
             }
 
             return NotFoundData();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupName"> name group </param>
+        /// <param name="reply">Code messsage rep</param>
+        /// <param name="state"> 0 => user chat , 1 => group  </param>
+        /// <param name="title"> null / string</param>
+        /// <param name="content"> null/ string </param>
+        /// <returns></returns>
         [HttpPost]
-        public JsonResult CreateMessage(string searchText)
+        public JsonResult Create([FromForm]string groupName,[FromForm] string reply, [FromForm] int state, [FromForm] string title,[FromForm] string content)
         {
             if (IsAuthenticated())
             {
-                if (!string.IsNullOrEmpty(searchText))
+                var listFile = _roxyFilemanHandler.UploadNewFeed(_userID, HttpContext);
+                List<FileManagerCore.Globals.MediaResponseModel> media = new List<FileManagerCore.Globals.MediaResponseModel>();
+                listFile?.TryGetValue("success", out media);
+                var item = new MessageEntity()
                 {
-
-                }
-                else
+                    State = state,
+                    Content = content,
+                    Created = DateTime.Now,
+                    Receiver = groupName,
+                    RemoveByAdmin = false,
+                    Medias = media,
+                    Sender = new MemberGroupInfo(_userID,_email,_name,_typeUser == Teacher)
+                };
+                if (string.IsNullOrEmpty(title))
                 {
-
+                    item.Title = title;
                 }
+                if (string.IsNullOrEmpty(reply))
+                {
+                    item.ReplyTo = reply;
+                }
+                _messageService.CreateMessage(item);
+
+                return Success(new { message = item });
             }
 
             return NotFoundData();
@@ -347,17 +376,23 @@ namespace EnglishPlatform.Controllers
         }
 
         [HttpDelete]
-        public JsonResult RemoveMessage(string searchText)
+        public JsonResult RemoveMessage(string code)
         {
             if (IsAuthenticated())
             {
-                if (!string.IsNullOrEmpty(searchText))
+                var item = _messageService.GetItemByCode(code);
+                if(item != null)
                 {
+                    if(item.Sender == new MemberGroupInfo(_userID, _email, _name, _typeUser == Teacher))
+                    {
+                        _messageService.Remove(item.ID);
 
-                }
-                else
-                {
-
+                        return Success(new { message = item });
+                    }
+                    else
+                    {
+                        return ResponseApi(405, "Not permission");
+                    }
                 }
             }
 
@@ -368,6 +403,8 @@ namespace EnglishPlatform.Controllers
         
 
         #region Protect Func
+         
+
         protected bool IsAuthenticated()
         {
             if (User == null) return false;
