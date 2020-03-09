@@ -1,16 +1,215 @@
-﻿
-<div id="easy-real-time-app">
+﻿<style>
+    #easy-real-time-app .box-real-time-app, #easy-real-time-app .context-data-tab {
+        width: 100%;
+        height: 100%;
+        float: left;
+    }
 
+    #easy-real-time-app .context-data-tab {
+        height: auto;
+    }
+    #easy-real-time-app .slider-bar-left {
+        min-width: 300px;
+        width: 15%;
+        padding: 20px 10px;
+        float: left;
+        height: 100%;
+        border: 1px solid #ccc;
+    }
+    #easy-real-time-app .ul-slider-bar-left {margin: 0;}
+    #easy-real-time-app .ul-slider-bar-left > li {
+        width: 50%;
+        float: left;
+        list-style: none;
+    }
+    #easy-real-time-app .ul-slider-bar-left > li > a {
+        display: block;
+        padding: 5px 10px;
+        color:#000;
+        border:1px solid #fff;
+    }
+    #easy-real-time-app .ul-slider-bar-left > li.active > a{background:#ccc;border:1px solid #ccc}
+    #easy-real-time-app .ul-slider-bar-left > li:hover > a{border:1px solid #ccc;}
+    #easy-real-time-app .context-data-tab > .search-text {
+        margin-top: 10px;
+    }
+    #easy-real-time-app .Item-group {
+        border-bottom: 1px solid #ccc;
+    }
+    #easy-real-time-app .Item-group>a{
+         padding: 5px 10px;
+         display:inline-block;
+         width:90%;
+    }
+</style>
+
+<div id="easy-real-time-app" style="position:absolute; top:0;left:0;right:0; bottom:0; background:#fff; z-index:99999">
+    <div class="box-real-time-app">
+        <div class="slider-bar-left">
+            <ul class="ul-slider-bar-left">
+                <li class="active">
+                    <a href="#" data-tab="tab-group">Topic</a>
+                </li>
+                <li>
+                    <a href="#" data-tab="tab-user">Chat</a>
+                </li>
+            </ul>
+            <div class="context-data-tab">
+                <div class="search-text">
+                    <div class="form-group">
+                        <input type="text" name="search-text" value="" class="form-control" placeholder="Group Name / user name"/>
+                    </div>
+                </div>
+                <div class="show-tab-chat float-left w-100 text-center">
+                    <ul class="ul-slider-bar-left w-50" style="margin:auto">
+                        <li class="active text-center"><a href="#">Group</a></li>
+                        <li class="text-center"><a href="#">User</a></li>
+                    </ul>
+                </div>
+                <div class="w-100 float-left padding-10">
+                    <div id="tab-group" data-type="new-feed">
+
+                    </div>
+                    <div id="tab-user">
+                        <div class="student"></div>
+                        <div class="teacher"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slider-bar-right">
+            <ul class="ul-slider-bar-right">
+                
+            </ul>
+        </div>
+    </div>
 </div>
 
+<script src="~/lib/signalr/signalr.js"></script>
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("/hub").build();
+    var onstart = function (success, error) {
+        connection.start().then(success).catch(error);
+    }
+    var isConnected = false;
+    var successConnect = function () {
+        isConnected = true;
+    }
+    var errorConnect = function (err) {
+        setTimeout(function () {
+            onstart(successConnect, errorConnect);
+        }, 1000);
+    }
+    onstart(successConnect, errorConnect);
+    connection.onclose(function () {
+        onstart(successConnect, errorConnect);
+    });
+
+</script>
 <script type="text/javascript">
+    var localStoredKey = {
+        group: "Group",
+        student: "Student",
+        teacher : "Teacher"
+    };
+    var saveDataFromLocalStored = function (data) {
+        localStorage.setItem(localStoredKey.group, JSON.stringify(data.group));
+        localStorage.setItem(localStoredKey.student, JSON.stringify(data.student));
+        localStorage.setItem(localStoredKey.teacher, JSON.stringify(data.teacher));
+    }
+    var removeAllLocalStored = function () {
+        localStorage.removeItem("time");
+        localStorage.removeItem(localStoredKey.group);
+        localStorage.removeItem(localStoredKey.student);
+        localStorage.removeItem(localStoredKey.teacher);
+    }
+    var getDataFromLocalStored = function () {
+        if (localStorage.getItem("time") == null || localStorage.getItem("time") == "" || localStorage.getItem("time") == void 0) {
+            return false;
+        } else {
+            var date = new Date(localStorage.getItem("time"));
+            var now = new Date();
+            console.log((now - date) >= 86400000);
+            if ((now - date) >= 86400000) {
+                removeAllLocalStored();
+            }
+        }
+
+        if (localStorage.getItem(localStoredKey.group) == null || localStorage.getItem(localStoredKey.group) == "" || localStorage.getItem(localStoredKey.group) == void 0) {
+            return false;
+        }
+        var data = {
+            group: JSON.parse(localStorage.getItem(localStoredKey.group)),
+            student: JSON.parse(localStorage.getItem(localStoredKey.student)),
+            teacher: JSON.parse(localStorage.getItem(localStoredKey.teacher))
+        }
+        return data;
+    }
     var getRootElement = function () {
         return document.getElementById("easy-real-time-app");
     }
+    var loadDataGroup = function () {
+        var dataStored = getDataFromLocalStored();
+        if (dataStored == false) {
+            _ajax.proccess("GET", "@Url.Action("GetGroupList","EasyRealTime")", null).then(function (data) {
+                var dataJson = JSON.parse(data);
+                switch (dataJson.code) {
+                    case 200:
+                        localStorage.setItem("time", new Date());
+                        saveDataFromLocalStored(dataJson.data);
+                        renderDataEasyRealTime(dataJson.data);
+                        break;
+                    default:
+                        swal({ text: dataJson.message });
+                        break;
+                }
+            });
+        } else {
+            renderDataEasyRealTime(dataStored);
+        }
+    }
     document.addEventListener("DOMContentLoaded", function () {
-        var EL_EasyRealtimeApp = getRootElement();
-        _ajax.proccess("GET", "@Url.Action("GetGroupList","EasyRealTime")", null).then(function (data) {
-            console.log(data);
-        });
+        loadDataGroup();
     });
+    var renderDataEasyRealTime = function (data) {
+        var group = data.group;
+        var student = data.student;
+        var teacher = data.teacher;
+        renderDataGroup(group);
+        renderDataStudent(student);
+        renderDataTeacher(teacher);
+    }
+    var renderDataGroup = function (data) {
+        var rootElemet = getRootElement();
+        var tabGroup = rootElemet.querySelector("div#tab-group");
+        for (var i = 0; data != null && i < data.length; i++) {
+            var item = data[i];
+            if (tabGroup != null) {
+                tabGroup.innerHTML += renderItemGroup(item.name, item.displayName);
+            }
+        }
+    }
+    var renderItemGroup = function (id,name) {
+        return `<div class="Item-group" data-item-id="${id}"><a href="#">${name}</a><button class="btn btn-sm float-right"> i </button></div>`;
+    }
+    var renderDataStudent = function (data) {
+        var rootElemet = getRootElement();
+        var tabUser = rootElemet.querySelector("div#tab-user");
+        for (var i = 0; data != null && i < data.length; i++) {
+            var item = data[i];
+            if (tabUser != null) {
+                 tabUser.querySelector(".student").innerHTML += renderItemGroup(item.id, item.name);
+            }
+        }
+    }
+    var renderDataTeacher = function (data) {
+        var rootElemet = getRootElement();
+        var tabUser = rootElemet.querySelector("div#tab-user");
+        for (var i = 0; data != null && i < data.length; i++) {
+            var item = data[i];
+            if (tabUser != null) {
+                tabUser.querySelector(".teacher").innerHTML += renderItemGroup(item.id, item.name);
+            }
+        }
+    }
 </script>
