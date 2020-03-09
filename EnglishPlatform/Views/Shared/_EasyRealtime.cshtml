@@ -1,0 +1,16 @@
+﻿
+<div id="easy-real-time-app">
+
+</div>
+
+<script type="text/javascript">
+    var getRootElement = function () {
+        return document.getElementById("easy-real-time-app");
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        var EL_EasyRealtimeApp = getRootElement();
+        _ajax.proccess("GET", "@Url.Action("GetGroupList","EasyRealTime")", null).then(function (data) {
+            console.log(data);
+        });
+    });
+</script>

@@ -160,6 +160,7 @@
             </div>
         </div>
     </div>
+    @await Html.PartialAsync("_EasyRealtime")
     <script>
         new Vue({
             el: ".list-news",
@@ -263,12 +264,12 @@
                                     if (!tableDetail.children[index].children[1].classList.contains(clLoadMore)) {
                                         tableDetail.children[index].children[1].classList.add(clLoadMore);
                                     }
-                                } 
+                                }
                                 var html = `<div class="flex ${_hidden}">
                                             <span class="time">${formatTwoNumber(startDate.getHours())}:${formatTwoNumber(startDate.getMinutes())}</span>
                                             <span class="title">${item.title}</span>
                                         </div>`;
-                                
+
                                 tableDetail.children[index].children[1].innerHTML += html;
                             }
 
