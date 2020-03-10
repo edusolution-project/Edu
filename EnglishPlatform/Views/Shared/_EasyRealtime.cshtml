@@ -76,8 +76,12 @@
         height: 75%;
         overflow-x: hidden;
         overflow-y: scroll;
-        margin-top:60px;
         background:#ccc;
+    }
+    #easy-real-time-app .easy-main-app .header-easy-main-app {
+         height: 60px;
+         max-height:60px;
+         overflow:hidden;
     }
     .composer {
         display: flex;
@@ -263,6 +267,9 @@
             </div>
         </div>
         <div class="easy-main-app">
+            <div class="header-easy-main-app">
+                <h4 class="title p-2">Thông tin chung</h4>
+            </div>
             <div class="content-easy-main-app">
 
             </div>
@@ -339,6 +346,7 @@
             }
             form.querySelector('input[name="Title"]').style.display = 'none';
             form.querySelector('hr').style.display = 'none';
+            form.querySelector("div#preview-files-easy-realtime-app").style.display='none';
             
         } else {
             form.querySelector('input[name="Title"]').style.display = 'block';
@@ -346,6 +354,7 @@
             document.getElementById("tab-chat-btn").style.display = 'none';
             document.getElementById("tab-user").style.display = 'none';
             document.getElementById("tab-group").style.display = 'block';
+            form.querySelector("div#preview-files-easy-realtime-app").style.display='block';
         }
     }
     var gotoView = function (el) {
@@ -466,7 +475,7 @@
         })
     }
     var renderItemGroup = function (id,name) {
-        return `<div class="Item-group" data-item-id="${id}"><a href="#">${name}</a><button class="btn btn-sm float-right"> i </button></div>`;
+        return `<div class="Item-group" data-item-id="${id}"><a href="#" onclick="OpenGroup('')">${name}</a><button class="btn btn-sm float-right"> i </button></div>`;
     }
     var renderDataStudent = function (data) {
         var rootElemet = getRootElement();
@@ -615,7 +624,7 @@
         if (li == null)
             return 1;
         else
-            return li.dataset.tab == "tab-user" ? 0 : 1;
+            return li.dataset.type == "Chat" ? 0 : 1;
     }
     var openPreviewFile = function () {
         var form = getFormRealTimeApp();
@@ -673,7 +682,7 @@
         setNumberFile();
     }
     var MessageFile = function () {
-        var html = `<div class="ca-received__msgwrapper">
+        return `<div class="ca-received__msgwrapper">
             <div class="ca-received__msg">
                 <div class="ca__file">
                     <div class="ca__fileicon">
