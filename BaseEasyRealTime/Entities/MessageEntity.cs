@@ -58,21 +58,54 @@ namespace BaseEasyRealTime.Entities
 
         public IEnumerable<MessageEntity> GetMessageList(string GroupName, DateTime StartDate, DateTime EndDate)
         {
-            return CreateQuery().Find(o => 
+            var data = CreateQuery().Find(o =>
             o.State == 0 &&
             (o.Receiver == GroupName && o.Created >= StartDate)
             ||
             (o.Receiver == GroupName && o.Created <= EndDate)
             )?.ToList();
+
+            if (data == null || data.Count == 0)
+            {
+                var itemLast = CreateQuery().Find(o => o.State == 0 && o.Receiver == GroupName)?.SortByDescending(o => o.Created)?.Limit(1)?.FirstOrDefault();
+                if (itemLast != null)
+                {
+                    EndDate = itemLast.Created.Value;
+                    StartDate = EndDate.AddDays(-7);
+                    data = CreateQuery().Find(o => o.State == 0 && (o.Receiver == GroupName && o.Created >= StartDate) || (o.Receiver == GroupName && o.Created <= EndDate))?.ToList();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return data;
         }
         public IEnumerable<MessageEntity> GetNewFeedList(string GroupName, DateTime StartDate, DateTime EndDate)
         {
-            return CreateQuery().Find(o =>
+            var data = CreateQuery().Find(o =>
             o.State == 1 &&
             (o.Receiver == GroupName && o.Created >= StartDate)
             ||
             (o.Receiver == GroupName && o.Created <= EndDate)
             )?.ToList();
+
+            if (data == null || data.Count == 0) {
+                var itemLast = CreateQuery().Find(o => o.State == 1 && o.Receiver == GroupName)?.SortByDescending(o => o.Created)?.Limit(1)?.FirstOrDefault();
+                if (itemLast != null)
+                {
+                    EndDate = itemLast.Created.Value;
+                    StartDate = EndDate.AddDays(-7);
+                    data = CreateQuery().Find(o =>o.State == 1 &&(o.Receiver == GroupName && o.Created >= StartDate)||(o.Receiver == GroupName && o.Created <= EndDate))?.ToList();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return data;
         }
     }
 }

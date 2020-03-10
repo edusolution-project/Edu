@@ -76,7 +76,7 @@ namespace EnglishPlatform.Controllers
                 if (IsAuthenticated())
                 {
                     Dictionary<string, bool> req = new Dictionary<string, bool>();
-                    var listClass = _typeUser == "student" ? _classStudentService.GetStudentClasses(_userID) : null;
+                    var listClass = !_typeUser.Contains(Teacher) ? _classStudentService.GetStudentClasses(_userID) : null;
                     var realClass = listClass != null
                         ? _classService.CreateQuery().Find(o => listClass.Contains(o.ID))?.ToList()
                         : _classService.CreateQuery().Find(o => o.TeacherID == _userID)?.ToList();
@@ -112,7 +112,7 @@ namespace EnglishPlatform.Controllers
             {
                 if (IsAuthenticated())
                 {
-                    var listClass = _typeUser == "student" ? _classStudentService.GetStudentClasses(_userID) : null;
+                    var listClass = !_typeUser.Contains(Teacher) ? _classStudentService.GetStudentClasses(_userID) : null;
                     var realClass = listClass != null
                         ? _classService.CreateQuery().Find(o => listClass.Contains(o.ID))?.ToList()
                         : _classService.CreateQuery().Find(o => o.TeacherID == _userID)?.ToList();
@@ -218,7 +218,7 @@ namespace EnglishPlatform.Controllers
                 var group = _groupService.CreateQuery().Find(o => o.Name == groupName)?.FirstOrDefault();
                 if (group != null)
                 {
-                    if (group.MasterGroup.Contains(new MemberGroupInfo(_userID, _email, _name, _typeUser == Teacher)))
+                    if (group.MasterGroup.Contains(new MemberGroupInfo(_userID, _email, _name, _typeUser.Contains(Teacher))))
                     {
                         _groupService.Remove(group.ID);
                         return Success(group.ID);
@@ -256,7 +256,7 @@ namespace EnglishPlatform.Controllers
                     if (!IsPrivate)
                     {
                         group.ParentID = groupParent;
-                        group.MasterGroup = new HashSet<MemberGroupInfo>() { new MemberGroupInfo(_userID,_email,_name, _typeUser == Teacher)};
+                        group.MasterGroup = new HashSet<MemberGroupInfo>() { new MemberGroupInfo(_userID,_email,_name, _typeUser.Contains(Teacher)) };
                     }
                     // taoj ra la sub cua lop
                     else
@@ -339,16 +339,36 @@ namespace EnglishPlatform.Controllers
         #endregion
         #region Message
         [HttpGet]
-        public JsonResult GetListMessage(string groupName , DateTime startDate , DateTime endDate , long skip, long take)
+        public JsonResult GetListMessage(string groupName, int state , DateTime startDate , DateTime endDate, bool IsUser, bool IsTeacher)
         {
             if (IsAuthenticated())
             {
-                var filter = new List<FilterDefinition<MessageEntity>>();
-
                 var group = _groupService.CreateQuery().Find(o => o.Name == groupName)?.FirstOrDefault();
+                if (IsUser)
+                {
+                    var sender = new MemberGroupInfo(_userID, _email, _name, _typeUser.Contains(Teacher));
+                    if (IsTeacher)
+                    {
+                        var teacher = _teacherService.GetItemByID(groupName);
+                        if(teacher != null)
+                        {
+                            var receiver = new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, IsTeacher);
+                            group = _groupService.CreateNewGroup(sender, receiver);
+                        }
+                    }
+                    else
+                    {
+                        var student = _studentService.GetItemByID(groupName);
+                        if (student != null)
+                        {
+                            var receiver = new MemberGroupInfo(student.ID, student.Email, student.FullName, IsTeacher);
+                            group = _groupService.CreateNewGroup(sender, receiver);
+                        }
+                    }
+                }
                 if (group != null) {
 
-                    var message = _messageService.GetMessageList(groupName, startDate, endDate);
+                    var message = state == 0 ? _messageService.GetMessageList(group.Name, startDate, endDate) : _messageService.GetNewFeedList(group.Name, startDate, endDate);
                     return Success(new { messages= message});
                 }
             }
@@ -360,7 +380,7 @@ namespace EnglishPlatform.Controllers
         /// </summary>
         /// <param name="groupName"> name group </param>
         /// <param name="reply">Code messsage rep</param>
-        /// <param name="state"> 0 => user chat , 1 => group  </param>
+        /// <param name="state"> 0 => chat , 1 => newfeed  </param>
         /// <param name="title"> null / string</param>
         /// <param name="content"> null/ string </param>
         /// <returns></returns>
@@ -369,30 +389,61 @@ namespace EnglishPlatform.Controllers
         {
             if (IsAuthenticated())
             {
-                var listFile = _roxyFilemanHandler.UploadNewFeed(_userID, HttpContext);
-                List<FileManagerCore.Globals.MediaResponseModel> media = new List<FileManagerCore.Globals.MediaResponseModel>();
-                listFile?.TryGetValue("success", out media);
-                var item = new MessageEntity()
-                {
-                    State = state,
-                    Content = content,
-                    Created = DateTime.Now,
-                    Receiver = groupName,
-                    RemoveByAdmin = false,
-                    Medias = media,
-                    Sender = new MemberGroupInfo(_userID,_email,_name,_typeUser == Teacher)
-                };
-                if (string.IsNullOrEmpty(title))
-                {
-                    item.Title = title;
-                }
-                if (string.IsNullOrEmpty(reply))
-                {
-                    item.ReplyTo = reply;
-                }
-                _messageService.CreateMessage(item);
+                var sender = new MemberGroupInfo(_userID, _email, _name, _typeUser.Contains(Teacher));
+                var group = _groupService.CreateQuery().Find(o => o.Name == groupName)?.FirstOrDefault();
 
-                return Success(new { message = item });
+                if(group == null)
+                {
+                    
+                    MemberGroupInfo receiver = null;
+                    var teacher = _teacherService.GetItemByID(groupName);
+                    if (teacher != null)
+                    {
+                        receiver = new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true);
+                    }
+                    else
+                    {
+                        var student = _studentService.GetItemByID(groupName);
+                        if (student != null)
+                        {
+                            receiver = new MemberGroupInfo(student.ID, student.Email, student.FullName, false);
+                        }
+                    }
+
+                    if(receiver != null)
+                    {
+                        group = _groupService.CreateNewGroup(sender, receiver);
+                    }
+
+                }
+                if (group != null)
+                {
+
+                    var listFile = _roxyFilemanHandler.UploadNewFeed(_userID, HttpContext);
+                    List<FileManagerCore.Globals.MediaResponseModel> media = new List<FileManagerCore.Globals.MediaResponseModel>();
+                    listFile?.TryGetValue("success", out media);
+                    var item = new MessageEntity()
+                    {
+                        State = state,
+                        Content = content,
+                        Created = DateTime.Now,
+                        Receiver = group.Name,
+                        RemoveByAdmin = false,
+                        Medias = media,
+                        Sender = sender
+                    };
+                    if (!string.IsNullOrEmpty(title))
+                    {
+                        item.Title = title;
+                    }
+                    if (!string.IsNullOrEmpty(reply))
+                    {
+                        item.ReplyTo = reply;
+                    }
+                    _messageService.CreateMessage(item);
+
+                    return Success(new { message = item });
+                }
             }
 
             return NotFoundData();
@@ -424,7 +475,7 @@ namespace EnglishPlatform.Controllers
                 var item = _messageService.GetItemByCode(code);
                 if(item != null)
                 {
-                    if(item.Sender == new MemberGroupInfo(_userID, _email, _name, _typeUser == Teacher))
+                    if(item.Sender == new MemberGroupInfo(_userID, _email, _name, _typeUser.Contains(Teacher)))
                     {
                         _messageService.Remove(item.ID);
 

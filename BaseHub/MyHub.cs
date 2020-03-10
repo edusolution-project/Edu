@@ -49,7 +49,7 @@ namespace BaseHub
                     _groups.Add(Context.ConnectionId, className);
                     Groups.AddToGroupAsync(Context.ConnectionId, className);
                     string message = UserName + " đã vào lớp có tên là : "+className;
-                    return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+                    return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, ID = UserID });
                 }
                 else
                 {
@@ -80,12 +80,14 @@ namespace BaseHub
             // offline
             RemoveAllGroup();
             _connections.Remove(UserID, Context.ConnectionId);
+            Clients.All.SendAsync("Offline", UserID);
             return base.OnDisconnectedAsync(exception);
         }
         public override Task OnConnectedAsync()
         {
             //online
             _connections.Add(UserID, Context.ConnectionId);
+            Clients.All.SendAsync("Online", UserID);
             return base.OnConnectedAsync();
         }
         protected string KeyUser

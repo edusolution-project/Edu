@@ -1,6 +1,6 @@
-﻿
-<link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/5.0.45/css/materialdesignicons.min.css" rel="stylesheet" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css" rel="stylesheet" />
+﻿<link href="~/css/materialdesignicons.min.css" rel="stylesheet" />
+@*<link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/5.0.45/css/materialdesignicons.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css" rel="stylesheet" />*@
 <style>
     #easy-real-time-app .box-real-time-app, #easy-real-time-app .context-data-tab {
         width: 100%;
@@ -228,7 +228,7 @@
     }
 </style>
 
-<div id="easy-real-time-app" style="position:absolute; top:0;left:0;right:0; bottom:0; background:#fff; z-index:99999;border: 1px solid #ccc;box-shadow: 0 0 20px;">
+<div id="easy-real-time-app" style="position:absolute; top:0;left:0;right:0; bottom:0; background:#fff; z-index:9999;border: 1px solid #ccc;box-shadow: 0 0 20px;">
     <div class="box-real-time-app">
         <div class="slider-bar-left">
             <ul class="ul-slider-bar-left" data-ul-id="ul-slider-bar-left">
@@ -275,13 +275,15 @@
             <div class="content-easy-main-app">
 
             </div>
-            <div class="form-easy-main-app">
+            <div class="form-easy-main-app" id="form-easy-main-app" style="display:none">
                 <div class="conversation-panel__footer">
                     <div class="composer" id="form-realtime-app">
                         <div class="composer__middle">
-                            <input type="text" class="form-control" style="width:90%" name="Title" value="" placeholder="Tiêu đề .... " required/>
-                            <hr style="margin:5px 0"/>
-                            <input type="file" name="files" style="display:none" onchange="AddFiles(this)" multiple/>
+                            <input type="text" class="form-control" style="width:90%" name="Title" value="" placeholder="Tiêu đề .... " required />
+                            <hr style="margin:5px 0" />
+                            <input type="hidden" name="replyto" value="" />
+                            <input type="hidden" name="groupName" value="" />
+                            <input type="file" name="files" style="display:none" onchange="AddFiles(this)" multiple />
                             <textarea class="form-control" rows="2" placeholder="Type a message..."></textarea>
                             <div class="composer__middle--photo mt-2" onclick="openImage()">
                                 <i class="mdi mdi-camera"></i>
@@ -297,7 +299,7 @@
                                             <h4 style="text-align:center; width:80%; float:left">Danh sách file</h4>
                                             <button class="btn btn-sm btn-danger" onclick="closePreviewFile()">Close</button>
                                         </div>
-                                        <hr style="margin:2px"/>
+                                        <hr style="margin:2px" />
                                         <div id="list-preview-files">
 
                                         </div>
@@ -329,6 +331,10 @@
     var getFormRealTimeApp = function () {
         var getRoot = getRootElement();
         return getRoot.querySelector("#form-realtime-app");
+    }
+    var getFormEasyRealTimeApp = function () {
+        var getRoot = getRootElement();
+        return getRoot.querySelector("#form-easy-main-app");
     }
     var onActiveThis = function (self) {
         var form = getFormRealTimeApp();
@@ -382,7 +388,31 @@
     connection.onclose(function () {
         onstart(successConnect, errorConnect);
     });
+    connection.on("JoinGroup", function (data) {
+        var user = document.querySelector("div[data-item-id='" + data.id + "']");
+        if (user != null) {
+            if (!user.classList.contains("true")) {
+                user.classList.add("true");
+                user.setAttribute("data-active", true);
+            }
+        }
 
+    });
+    connection.on("Online", function (data) {
+        var user = document.querySelector("div[data-item-id='" + data + "']");
+        if (user != null) {
+            if (!user.classList.contains("true")) {
+                user.classList.add("true");
+                user.setAttribute("data-active", true);
+            }
+        }
+    });
+    connection.on("Offline", function (data) {
+        var user = document.querySelector("div[data-item-id='" + data + "']");
+        if (user != null) {
+            user.classList.remove("true");
+        }
+    });
 </script>
 <script type="text/javascript">
     var localStoredKey = {
@@ -407,7 +437,6 @@
         } else {
             var date = new Date(localStorage.getItem("time"));
             var now = new Date();
-            console.log((now - date) >= 86400000);
             if ((now - date) >= 86400000) {
                 removeAllLocalStored();
             }
@@ -477,7 +506,7 @@
         })
     }
     var renderItemGroup = function (id,name) {
-        return `<div class="Item-group" data-item-id="${id}"><a href="#" onclick="OpenGroup('')">${name}</a><button class="btn btn-sm float-right"> i </button></div>`;
+        return `<div class="Item-group" data-item-id="${id}"><a href="#" onclick="OpenGroup('${id}','${name}')">${name}</a><button class="btn btn-sm float-right"> i </button></div>`;
     }
     var renderDataStudent = function (data) {
         var rootElemet = getRootElement();
@@ -485,7 +514,12 @@
         for (var i = 0; data != null && i < data.length; i++) {
             var item = data[i];
             if (tabUser != null) {
-                 tabUser.querySelector(".student").innerHTML += renderItemGroup(item.id, item.name);
+                tabUser.querySelector(".student").innerHTML += renderItemGroup(item.id, item.name);
+                var itemEL = tabUser.querySelector("div[data-item-id='" + item.id + "']");
+                if (itemEL != null) {
+                    itemEL.setAttribute("data-active-user", true);
+                    itemEL.setAttribute("data-teacher", false);
+                }
             }
         }
     }
@@ -496,6 +530,11 @@
             var item = data[i];
             if (tabUser != null) {
                 tabUser.querySelector(".teacher").innerHTML += renderItemGroup(item.id, item.name);
+                var itemEL = tabUser.querySelector("div[data-item-id='" + item.id + "']");
+                if (itemEL != null) {
+                    itemEL.setAttribute("data-active-user", true);
+                    itemEL.setAttribute("data-teacher", true);
+                }
             }
         }
     }
@@ -511,10 +550,11 @@
                 item.setAttribute("data-active", true);
                 var _true = rootElement.querySelectorAll("div.true");
                 var count = _true == null ? 0 : _true.length;
-                console.log(_true, list[count]);
-                item.parentNode.insertBefore(item, list[0]);
+                item.parentNode.insertBefore(item, list[count]);
                 item.classList.add("true");
                 item.setAttribute("Title", "Lớp đang hoạt động");
+                /// join to class
+                connection.invoke("GoToClass", item.dataset.itemId);
             } else {
                 item.setAttribute("data-active", false);
                 item.setAttribute("Title", "Lớp đã hoàn thành");
@@ -530,22 +570,158 @@
         3: "/images/icon/powerpoint.svg",
         4: "/images/icon/pdf.svg",
     };
-    var filesList ={};
+    var filesList = {};
+    var cacheDateTime = {};
+    var OpenGroup = function (groupName, title) {
+        var rootElement = getRootElement();
+        var formEasy = getFormEasyRealTimeApp();
+        var form = getFormRealTimeApp();
+        var _groupName = form.querySelector("input[name='groupName']");
+        _groupName.value = groupName;
+        var Item = rootElement.querySelector(`div[data-item-id='${groupName}']`);
+        var ItemActive = rootElement.querySelector("div.Item-group.active");
+        if (ItemActive != null) {
+            ItemActive.classList.remove("active");
+        }
+        if (Item != null) {
+            if (!Item.classList.contains("active")) Item.classList.add("active");
+            if (Item.dataset.active == true || Item.dataset.active == "true") {
+                formEasy.style.display = 'block';
+            } else {
+                if (Item.dataset.activeUser == true || Item.dataset.activeUser == "true") {
+                     formEasy.style.display = 'block';
+                } else {
+                    formEasy.style.display = 'none';
+                    swal({ text: "lớp đã hoàn thành , ko thể trao đổi thêm " });
+                }
+            }
+            var header = rootElement.querySelector(".header-easy-main-app>h4");
+            if (header != null) {
+                header.innerHTML = title;
+            }
+            var now = new Date();
+            loadMessage(groupName, now);
+        }
+    }
+    var scrollViewMore = function () {
+
+    }
+    var subDate = function (dt, number) {
+        dt.setDate(dt.getDate() - number)
+        return dt;
+    }
+
+    var formatNumberTwo = function (n) {
+        if (n < 10) return `0${n}`;
+        return `${n}`;
+    }
+    var formatDateTimeQR = function (dt,qr) {
+        var current = dt;
+        var year = current.getFullYear();
+        var month = formatNumberTwo((current.getMonth() + 1));
+        var day = formatNumberTwo(current.getDate());
+        return (qr == void 0)
+            ? `${day}/${month}/${year}`
+            : `${year}-${month}-${day}`;
+    }
+
+    var loadMessage = function (groupName, endDate) {
+        var tempEndDate = new Date(endDate.getTime());
+        var startDate = subDate(tempEndDate, 7);
+
+        var Item = document.querySelector("div[data-item-id='" + groupName + "']");
+
+        var IsUser = false, IsTeacher = false;
+        if (Item != null) {
+            IsUser = Item.dataset.activeUser;
+            IsTeacher = Item.dataset.teacher;
+        }
+
+        var url = `@Url.Action("GetListMessage","EasyRealTime")?groupName=${groupName}&startDate=${formatDateTimeQR(startDate, true)}&endDate=${formatDateTimeQR(endDate, true)}&state=${getState()}&IsUser=${IsUser}&IsTeacher=${IsTeacher}`;
+        _ajax.proccess("GET", url, null).then(function (data) {
+            var dataJson = JSON.parse(data);
+            if (dataJson.code == 200) {
+                var messages = dataJson.data.messages;
+                if (messages != null && messages.length == 0) {
+
+                } else {
+
+                }
+                console.log(messages);
+            }
+        });
+    }
 
     var sendData = function () {
+        debugger;
         var form = getFormRealTimeApp();
         var content = form.querySelector("textarea");
         var title = form.querySelector("input[name='Title']");
+        var replyto = form.querySelector("input[name='replyto']");
+        var groupName = form.querySelector("input[name='groupName']");
+
         var state = getState();
-        switch (state) {
-            case 1:
-                break;
-            default:
-                break;
+        var formData = new FormData();
+        if (validate()) {
+            //[FromForm]string groupName,[FromForm] string reply, [FromForm] int state, [FromForm] string title,[FromForm] string content
+            formData.append("groupName", groupName.value);
+            formData.append("reply", replyto.value);
+            formData.append("state", state);
+            formData.append("content", content.value);
+            switch (state) {
+                case 1: //newfeed
+                    formData.append("title", title.value);
+                    addFileFromListFile(formData);
+                    break;
+                default: // chat
+                    break;
+            }
+
+            _ajax.proccess("POST", "@Url.Action("CREATE","EASYREALTIME")", formData).then(function (data) {
+                console.log(data);
+            });
         }
 
     }
+    var validate = function () {
+        var form = getFormRealTimeApp();
+        var content = form.querySelector("textarea");
+        var title = form.querySelector("input[name='Title']");
+        var replyto = form.querySelector("input[name='replyto']");
+        var groupName = form.querySelector("input[name='groupName']");
 
+        if (content.value.trim().length == 0) {
+            content.value = "";
+            swal({ text: "nội dung không thể bỏ trống !!!" }).then(function () { content.focus(); });
+            return false;
+        }
+        if (title.value.trim().length == 0 && getState() == 1) {
+            title.value = "";
+            swal({ text: "Tiêu đều không thể bỏ trống !!!" }).then(function () { title.focus(); });
+            return false;
+        }
+        if (groupName.value.trim().length == 0) {
+            return swal({ text: "Bạn chưa chọn group !!!" });
+        }
+        if (replyto.value.trim().length > 0) {
+            var itemReply = document.getElementById(replyto);
+            if (itemReply == null) {
+                swal({ text: "Tin trả lời không tồn tại !!!" });
+                return false;
+            }
+        }
+        return true;
+    }
+    var addFileFromListFile = function (frmData) {
+        var keys = Object.keys(filesList);
+        if (keys.length > 0) {
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                var file = filesList[key];
+                frmData.append("file", file);
+            }
+        }
+    }
     var resetForm = function () {
         filesList = {};
         closePreviewFile();
@@ -556,6 +732,10 @@
         var listHmtlFile = preview.querySelector("div#list-preview-files");
         var content = form.querySelector("textarea");
         var title = form.querySelector("input[name='Title']");
+        var reply = form.querySelector("input[name='replyto']");
+        var group = form.querySelector("input[name='groupName']");
+        group.value = "";
+        reply.value = "";
         title.value = "";
         content.value = "";
         files.onchange();
@@ -649,7 +829,7 @@
     var openAttach = function () {
         var form = getFormRealTimeApp();
         var inputFile = form.querySelector("input[type='file']");
-        inputFile.setAttribute("accept", "*");
+        inputFile.setAttribute("accept", "application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint,application/pdf,application/x-zip-compressed");
         inputFile.click();
     }
     
@@ -676,9 +856,9 @@
         if (item != null) {
             item.classList.add("disabled");
             setTimeout(function () { item.remove(); }, 300);
-            var file = filesList[id];
+            var file = filesList[id.replace("file_","")];
             if (file != null) {
-                delete filesList[id];
+                delete filesList[id.replace("file_","")];
             }
         }
         setNumberFile();
