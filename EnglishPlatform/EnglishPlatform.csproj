@@ -95,6 +95,16 @@
     <None Include="wwwroot\fonts\Simple-Line-Icons.svg" />
     <None Include="wwwroot\fonts\Simple-Line-Icons.woff2" />
     <None Include="wwwroot\fonts\themify.svg" />
+    <None Include="wwwroot\images\icon\excel.svg" />
+    <None Include="wwwroot\images\icon\happy.svg" />
+    <None Include="wwwroot\images\icon\pdf.svg" />
+    <None Include="wwwroot\images\icon\powerpoint.svg" />
+    <None Include="wwwroot\images\icon\tick-delivered.svg" />
+    <None Include="wwwroot\images\icon\tick-read.svg" />
+    <None Include="wwwroot\images\icon\tick-send.svg" />
+    <None Include="wwwroot\images\icon\typing-01.svg" />
+    <None Include="wwwroot\images\icon\typing-02.svg" />
+    <None Include="wwwroot\images\icon\word.svg" />
     <None Include="wwwroot\js\bootstrap-tagsinput.js" />
     <None Include="wwwroot\js\bootstrap-vue.min.js" />
     <None Include="wwwroot\js\calendar\js\Calendar.js" />

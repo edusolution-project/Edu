@@ -64,6 +64,38 @@ namespace EnglishPlatform.Controllers
             _hubContent = hubContent;
             _roxyFilemanHandler = roxyFilemanHandler;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public JsonResult GetClassStatus()
+        {
+            try
+            {
+                if (IsAuthenticated())
+                {
+                    Dictionary<string, bool> req = new Dictionary<string, bool>();
+                    var listClass = _typeUser == "student" ? _classStudentService.GetStudentClasses(_userID) : null;
+                    var realClass = listClass != null
+                        ? _classService.CreateQuery().Find(o => listClass.Contains(o.ID))?.ToList()
+                        : _classService.CreateQuery().Find(o => o.TeacherID == _userID)?.ToList();
+                    for (int i = 0; realClass != null && i < realClass.Count; i++)
+                    {
+                        var item = realClass[i];
+                        var isActive = item.StartDate <= DateTime.Now.ToUniversalTime() && item.EndDate >= DateTime.Now.ToUniversalTime();
+                        req.Add(item.ID, isActive);
+                    }
+                    return Success(req);
+                }
+                return NotFoundData();
+            }
+            catch(Exception ex)
+            {
+                return Error(ex);
+            }
+        }
+
         #region group
         /// <summary>
         /// laays danh sach group can

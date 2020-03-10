@@ -1,4 +1,5 @@
-﻿<style>
+﻿<link href="~/css/materialdesignicons.min.css" rel="stylesheet" />
+<style>
     #easy-real-time-app .box-real-time-app, #easy-real-time-app .context-data-tab {
         width: 100%;
         height: 100%;
@@ -6,11 +7,10 @@
     }
 
     #easy-real-time-app .context-data-tab {
-        height: auto;
+       
     }
     #easy-real-time-app .slider-bar-left {
-        min-width: 300px;
-        width: 15%;
+        width: 300px;
         padding: 20px 10px;
         float: left;
         height: 100%;
@@ -41,16 +41,195 @@
          display:inline-block;
          width:90%;
     }
+    #easy-real-time-app .Item-group.active>a{
+         color:darkred;
+    }
+    #easy-real-time-app .Item-group>a:hover {
+        text-shadow: -10px 3px 10px #0f3e5f;
+        font-weight: 600;
+    }
+    [data-active=true] > a::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #00ff90;
+        display:inline-block;
+        margin-right:10px;
+    }
+
+    [data-active=false] > a::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: darkred;
+        display: inline-block;
+        margin-right:10px;
+    }
+    #easy-real-time-app .easy-main-app {
+        float: right;
+        height: 100%;
+        width: calc(100% - 300px);
+    }
+    #easy-real-time-app .easy-main-app .content-easy-main-app {
+        height: 75%;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        margin-top:60px;
+        background:#ccc;
+    }
+    .composer {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .composer__left {
+        display: flex;
+        align-items: center;
+    }
+
+    .composer__right, .composer__right--send {
+        display: flex;
+        align-items: center;
+    }
+    .composer__right{
+        border:1px solid #ccc;
+    }
+    .composer__right--send {Ơ: none;
+        border-radius: 6.25rem;
+        height: 2.8125rem;
+        width: 2.8125rem;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .composer__middle {
+        flex: 1 1 auto;
+        position: relative;
+        padding-left: 1rem;
+        margin-right: 1rem;
+    }
+    .composer__middle .form-control {
+        border-radius: 6.25rem;
+        overflow: hidden;
+        resize: none;
+        padding: .9rem 8rem .9rem 1.5rem;
+    }
+    .composer__middle--microphone {
+        position: absolute;
+        top: .625rem;
+        right: 1.25rem;
+        cursor: pointer;
+    }
+
+    .composer__middle--photo {
+        position: absolute;
+        top: 1.025rem;
+        right: 1.5rem;
+        cursor: pointer;
+    }
+
+    .composer__middle--attachment {
+        position: absolute;
+        top: 1.025rem;
+        right: 3.75rem;
+        cursor: pointer;
+    }
+    .conversation-panel__footer {
+        padding: 1rem;
+        border-bottom: none !important;
+    }
+
+    .information-panel {
+        width: 23.79rem;
+        display: none;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+    }
+    .composer__left--sticker {
+        cursor: pointer;
+        border-radius: .5rem;
+        padding: 0 .5rem;
+    }
+    .preview-files {
+        background: #fff;
+        position: absolute;
+        top: -55px;
+        width: 100%;
+        height: 50px;
+        margin: auto;
+    }
+    .ca-received__msgwrapper {
+        display: flex;
+        flex: 1 1 auto;
+        width: 90%;
+        justify-content: flex-start;
+        align-items: center;
+        border-bottom:1px solid #ccc;
+    }
+
+    .ca-received__msg {
+        border-radius: .8rem .8rem .8rem 0;
+        position: relative;
+        padding: 1rem;
+        font-weight: 500;
+        min-width: 15.625rem;
+        width:90%;
+    }
+    .ca__file {
+        display: flex;
+        align-items: center;
+    }
+    .ca__filename{
+        margin-left:10px;
+    }
+    .ca__filename--title {
+        font-weight: 600;
+    }
+    .ca__filename--size {
+        font-weight: 400;
+        font-size: .6875rem;
+    }
+    .ca__fileicon>img{
+        width:42px;
+        height:42px;
+        margin-right:10px;
+    }
+    .preview-files > .box-preview-file > .list-preview-files {
+        position: fixed;
+        z-index: 900000;
+        width: 700px;
+        max-width: 100%;
+        background: #fff;
+        max-height: 350px;
+        margin: auto;
+        top: 10%;
+        padding:10px;
+        border:1px solid;
+    }
+    #list-preview-files{
+        max-height: 300px;
+        overflow-x:hidden;
+        overflow-y:scroll;
+    }
+    .disabled{
+        opacity:0.5;
+        cursor:not-allowed;
+    }
 </style>
 
-<div id="easy-real-time-app" style="position:absolute; top:0;left:0;right:0; bottom:0; background:#fff; z-index:99999">
+<div id="easy-real-time-app" style="position:absolute; top:0;left:0;right:0; bottom:0; background:#fff; z-index:99999;border: 1px solid #ccc;box-shadow: 0 0 20px;">
     <div class="box-real-time-app">
         <div class="slider-bar-left">
-            <ul class="ul-slider-bar-left">
-                <li class="active">
+            <ul class="ul-slider-bar-left" data-ul-id="ul-slider-bar-left">
+                <li class="active" data-type="NewFeed" onclick="onActiveThis(this)">
                     <a href="#" data-tab="tab-group">Topic</a>
                 </li>
-                <li>
+                <li data-type="Chat" onclick="onActiveThis(this)">
                     <a href="#" data-tab="tab-user">Chat</a>
                 </li>
             </ul>
@@ -60,19 +239,69 @@
                         <input type="text" name="search-text" value="" class="form-control" placeholder="Group Name / user name"/>
                     </div>
                 </div>
-                <div class="show-tab-chat float-left w-100 text-center">
+                <div id="tab-chat-btn" class="show-tab-chat float-left w-100 text-center" style="display:none">
                     <ul class="ul-slider-bar-left w-50" style="margin:auto">
-                        <li class="active text-center"><a href="#">Group</a></li>
-                        <li class="text-center"><a href="#">User</a></li>
+                        <li class="active text-center" data-type="Group" onclick="onActiveThis(this)"><a href="#">Group</a></li>
+                        <li class="text-center" data-type="User" onclick="onActiveThis(this)"><a href="#">User</a></li>
                     </ul>
                 </div>
-                <div class="w-100 float-left padding-10">
+                <div class="w-100 padding-10" style="max-height: 75%;overflow: auto;">
                     <div id="tab-group" data-type="new-feed">
 
                     </div>
-                    <div id="tab-user">
-                        <div class="student"></div>
-                        <div class="teacher"></div>
+                    <div id="tab-user" style="display:none">
+                        <div class="form-group">
+                            <label>Hoc vien :</label>
+                            <div class="student"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Giao vien :</label>
+                            <div class="teacher"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="easy-main-app">
+            <div class="content-easy-main-app">
+
+            </div>
+            <div class="form-easy-main-app">
+                <div class="conversation-panel__footer">
+                    <div class="composer" id="form-realtime-app">
+                        <div class="composer__middle">
+                            <input type="text" class="form-control" style="width:90%" name="Title" value="" placeholder="Tiêu đề .... " required/>
+                            <hr style="margin:5px 0"/>
+                            <input type="file" name="files" style="display:none" onchange="AddFiles(this)" multiple/>
+                            <textarea class="form-control" rows="2" placeholder="Type a message..."></textarea>
+                            <div class="composer__middle--photo mt-2" onclick="openImage()">
+                                <i class="mdi mdi-camera"></i>
+                            </div>
+                            <div class="composer__middle--attachment mt-2" onclick="openAttach()">
+                                <i class="mdi mdi-attachment"></i>
+                            </div>
+                            <div class="preview-files" id="preview-files-easy-realtime-app">
+                                <div class="box-preview-file">
+                                    <div class="text-list-file padding-10"><span class="number-files">0</span> Files <button class="btn btn-sm btn-secondary float-right" onclick="openPreviewFile()">Views</button></div>
+                                    <div class="list-preview-files" style="display:none">
+                                        <div class="w-100 text-right">
+                                            <h4 style="text-align:center; width:80%; float:left">Danh sách file</h4>
+                                            <button class="btn btn-sm btn-danger" onclick="closePreviewFile()">Close</button>
+                                        </div>
+                                        <hr style="margin:2px"/>
+                                        <div id="list-preview-files">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="composer__right" onclick="sendData()">
+                            <div class="composer__right--send">
+                                <i class="mdi mdi-send"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -84,7 +313,45 @@
         </div>
     </div>
 </div>
-
+<script type="text/javascript">
+    var getRootElement = function () {
+        return document.getElementById("easy-real-time-app");
+    }
+    var getFormRealTimeApp = function () {
+        var getRoot = getRootElement();
+        return getRoot.querySelector("#form-realtime-app");
+    }
+    var onActiveThis = function (self) {
+        var form = getFormRealTimeApp();
+        var itemRoot = self.parentElement;
+        var active = itemRoot.querySelector(".active");
+        if (active != null) active.classList.remove("active");
+        self.classList.add("active");
+        if (self.dataset.type == "Chat" || self.dataset.type == "Group" || self.dataset.type=="User") {
+            document.getElementById("tab-chat-btn").style.display = 'block';
+            if (self.dataset.type == "User") {
+                document.getElementById("tab-user").style.display = 'block';
+                document.getElementById("tab-group").style.display = 'none';
+            }
+            if (self.dataset.type == "Group") {
+                document.getElementById("tab-user").style.display = 'none';
+                document.getElementById("tab-group").style.display = 'block';
+            }
+            form.querySelector('input[name="Title"]').style.display = 'none';
+            form.querySelector('hr').style.display = 'none';
+            
+        } else {
+            form.querySelector('input[name="Title"]').style.display = 'block';
+            form.querySelector('hr').style.display = 'block';
+            document.getElementById("tab-chat-btn").style.display = 'none';
+            document.getElementById("tab-user").style.display = 'none';
+            document.getElementById("tab-group").style.display = 'block';
+        }
+    }
+    var gotoView = function (el) {
+        el.scrollIntoView();
+    }
+</script>
 <script src="~/lib/signalr/signalr.js"></script>
 <script>
     var connection = new signalR.HubConnectionBuilder().withUrl("/hub").build();
@@ -145,9 +412,6 @@
         }
         return data;
     }
-    var getRootElement = function () {
-        return document.getElementById("easy-real-time-app");
-    }
     var loadDataGroup = function () {
         var dataStored = getDataFromLocalStored();
         if (dataStored == false) {
@@ -188,6 +452,18 @@
                 tabGroup.innerHTML += renderItemGroup(item.name, item.displayName);
             }
         }
+        //update status class
+        _ajax.proccess("GET", "@Url.Action("GetClassStatus","EasyRealTime")", null).then(function (data) {
+            var dataJson = JSON.parse(data);
+            switch (dataJson.code) {
+                case 200:
+                    updateGroupStatus(dataJson.data);
+                    break;
+                default:
+                    swal({ text: dataJson.message });
+                    break;
+            }
+        })
     }
     var renderItemGroup = function (id,name) {
         return `<div class="Item-group" data-item-id="${id}"><a href="#">${name}</a><button class="btn btn-sm float-right"> i </button></div>`;
@@ -212,4 +488,233 @@
             }
         }
     }
+    var updateGroupStatus = function (data) {
+        var rootElemt = getRootElement();
+        sortHtml(rootElemt.querySelector("div#tab-group"),".Item-group", data);
+    }
+    var sortHtml = function (rootElement,target,keys) {
+        var list = rootElement.querySelectorAll(target);
+        for (var i = 0; i < list.length; i++) {
+            var item = list[i];
+            if (keys[item.dataset.itemId] == true) {
+                item.setAttribute("data-active", true);
+                var _true = rootElement.querySelectorAll("div.true");
+                var count = _true == null ? 0 : _true.length;
+                console.log(_true, list[count]);
+                item.parentNode.insertBefore(item, list[0]);
+                item.classList.add("true");
+                item.setAttribute("Title", "Lớp đang hoạt động");
+            } else {
+                item.setAttribute("data-active", false);
+                item.setAttribute("Title", "Lớp đã hoàn thành");
+            }
+        }
+    }
+</script>
+<script type="text/javascript">
+    var arrIconFiles = {
+        0: "/images/icon/image_available.svg",
+        1: "/images/icon/word.svg",
+        2: "/images/icon/excel.svg",
+        3: "/images/icon/powerpoint.svg",
+        4: "/images/icon/pdf.svg",
+    };
+    var filesList ={};
+
+    var sendData = function () {
+        var form = getFormRealTimeApp();
+        var content = form.querySelector("textarea");
+        var title = form.querySelector("input[name='Title']");
+        var state = getState();
+        switch (state) {
+            case 1:
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    var resetForm = function () {
+        filesList = {};
+        closePreviewFile();
+        var form = getFormRealTimeApp();
+        var files = form.querySelector('input[type="file"]');
+        var preview = form.querySelector("div#preview-files-easy-realtime-app");
+        var previewNumber = preview.querySelector("span.number-files");
+        var listHmtlFile = preview.querySelector("div#list-preview-files");
+        var content = form.querySelector("textarea");
+        var title = form.querySelector("input[name='Title']");
+        title.value = "";
+        content.value = "";
+        files.onchange();
+        previewNumber.innerHTML = 0;
+        listHmtlFile.innerHTML = "No File";
+    }
+    var setNumberFile = function () {
+        var form = getFormRealTimeApp();
+        var preview = form.querySelector("div#preview-files-easy-realtime-app");
+        var previewNumber = preview.querySelector("span.number-files");
+        previewNumber.innerHTML = `${Object.keys(filesList).length}`;
+    }
+    var AddFiles = function (self) {
+        if (getState() == 1) {
+            var form = getFormRealTimeApp();
+            var preview = form.querySelector("div#preview-files-easy-realtime-app");
+            var listHmtlFile = preview.querySelector("div#list-preview-files");
+            var files = self.files;
+            if (files.length > 0) {
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    if (file != null) {
+                        var id = generateId();
+                        var url = createBlodUrl(file);
+
+                        var iconImage = 0;
+
+                        if (file.type.startsWith("image")) {
+                            var html = CreatePreviewFile(url, file.name, file.size / 1024, id);
+                            listHmtlFile.innerHTML += html;
+                        }
+                        else {
+                            if (file.type.startsWith("application/vnd.openxmlformats-officedocument.wordprocessingml.document") || file.type.startsWith("application/msword")) {
+                                //dox
+                                iconImage = 1;
+                            }
+                            if (file.type.startsWith("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") || file.type.startsWith("application/vnd.ms-excel")) {
+                                //excel
+                                iconImage = 2;
+                            }
+                            if (file.type.startsWith("application/vnd.openxmlformats-officedocument.presentationml.presentatio") || file.type.startsWith("application/vnd.ms-powerpoint")) {
+                                //ppt
+                                iconImage = 3;
+                            }
+                            if (file.type.startsWith("application/pdf")) {
+                                //pdf
+                                iconImage = 4;
+                            }
+                            var html = CreatePreviewFile(arrIconFiles[iconImage], file.name, file.size / 1000, id);
+                            listHmtlFile.innerHTML += html;
+                        }
+                        filesList[id] = file;
+
+                    }
+                    setNumberFile();
+                }
+            }
+        } else {
+            var files = self.files;
+            alert("update lên luôn");
+        }
+    }
+    // tra ve 1 chat group va 0 chat user
+    var getState = function () {
+        var rootElement = getRootElement();
+        var ul = rootElement.querySelector("ul[data-ul-id='ul-slider-bar-left']");
+        var li = ul.querySelector("li.active");
+        if (li == null)
+            return 1;
+        else
+            return li.dataset.tab == "tab-user" ? 0 : 1;
+    }
+    var openPreviewFile = function () {
+        var form = getFormRealTimeApp();
+        var preview = form.querySelector("div#preview-files-easy-realtime-app");
+        var listHmtlFile = preview.querySelector("div.list-preview-files");
+        listHmtlFile.style.display = 'block';
+    }
+    var closePreviewFile = function () {
+        var form = getFormRealTimeApp();
+        var preview = form.querySelector("div#preview-files-easy-realtime-app");
+        var listHmtlFile = preview.querySelector("div.list-preview-files");
+        listHmtlFile.style.display = 'none';
+    }
+    var openImage = function () {
+        var form = getFormRealTimeApp();
+        var inputFile = form.querySelector("input[type='file']");
+        inputFile.setAttribute("accept", "image/*");
+        inputFile.click();
+    }
+    var openAttach = function () {
+        var form = getFormRealTimeApp();
+        var inputFile = form.querySelector("input[type='file']");
+        inputFile.setAttribute("accept", "*");
+        inputFile.click();
+    }
+    
+    var CreatePreviewFile = function (fileIcon,fileName,fileSize,id) {
+        return `<div class="ca-received__msgwrapper" id="file_${id}"><div class="ca-received__msg">
+                    <div class="ca__file">
+                        <div class="ca__fileicon">
+                            <img src="${fileIcon}" alt="${fileName}">
+                        </div>
+                        <div class="ca__filename">
+                            <span class="ca__filename--title">${fileName}</span>
+                            <span class="ca__filename--size">${fileSize} kb</span>
+                        </div>
+                    </div>                                              
+                </div>
+                <a class="btn btn-sm btn-danger float-right" href="#" onclick="RemoveFile('file_${id}')"><span><i class="mdi mdi-trash-can-outline"></i></span></a>
+            </div></div>`;
+    }
+    var RemoveFile = function (id) {
+        var form = getFormRealTimeApp();
+        var preview = form.querySelector("div#preview-files-easy-realtime-app");
+        var listHmtlFile = preview.querySelector("div#list-preview-files");
+        var item = listHmtlFile.querySelector("div#" + id);
+        if (item != null) {
+            item.classList.add("disabled");
+            setTimeout(function () { item.remove(); }, 300);
+            var file = filesList[id];
+            if (file != null) {
+                delete filesList[id];
+            }
+        }
+        setNumberFile();
+    }
+    var MessageFile = function () {
+        var html = `<div class="ca-received__msgwrapper">
+            <div class="ca-received__msg">
+                <div class="ca__file">
+                    <div class="ca__fileicon">
+                        <img src="./assets/images/icon/pdf.svg" alt="">
+                    </div>
+                    <div class="ca__filename">
+                        <span class="ca__filename--title">example.pdf</span>
+                        <span class="ca__filename--size">21Kb</span>
+                    </div>
+                </div>
+                                                                
+            </div>
+            <div class="ca-msg-actions">
+                <div class="iconbox-dropdown dropdown">
+                    <div class="iconbox btn-hovered-light" id="dropdownMenuButtonsr7" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="iconbox__icon mdi mdi-dots-horizontal"></i>
+                    </div>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonsr7">
+                        <a class="dropdown-item" href="javascript:;">
+                            <span><i class="mdi mdi-download-outline"></i></span> 
+                            <span>Download</span>
+                        </a>
+                        <a class="dropdown-item" href="javascript:;">
+                            <span><i class="mdi mdi-share-outline"></i></span> 
+                            <span>Forward</span>
+                        </a>
+                        <a class="dropdown-item" href="javascript:;">
+                            <span><i class="mdi mdi-content-copy"></i></span> 
+                            <span>Copy</span>
+                        </a>
+                        <a class="dropdown-item" href="javascript:;">
+                            <span><i class="mdi mdi-star-outline"></i></span> 
+                            <span>Add Star</span>
+                        </a>
+                        <a class="dropdown-item" href="javascript:;">
+                            <span><i class="mdi mdi-trash-can-outline"></i></span> 
+                            <span>Delete</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+}
 </script>
