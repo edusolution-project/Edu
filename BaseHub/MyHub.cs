@@ -28,14 +28,14 @@ namespace BaseHub
             return Task.CompletedTask;
         }
 
-        public async Task SendToUser(string user, string message)
+        public async Task SendToUser(string user, object message)
         {
             var listUser = _connections.GetConnections(user);
             if(listUser != null && user.Length > 0)
             {
                 IReadOnlyList<string> listUSerReadOnly = listUser?.ToList()?.AsReadOnly();
-                await Clients.Clients(listUSerReadOnly).SendAsync("ChatToUser", new {UserReciver = user , UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
-                await Clients.Caller.SendAsync("ChatToUser", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+                await Clients.Clients(listUSerReadOnly).SendAsync("ChatToUser", new {UserReciver = user , UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, Receiver = user, Sender = UserID });
+                await Clients.Caller.SendAsync("ChatToUser", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, Receiver = user, Sender = UserID });
             }
             await Task.CompletedTask;
         }
@@ -49,7 +49,7 @@ namespace BaseHub
                     _groups.Add(Context.ConnectionId, className);
                     Groups.AddToGroupAsync(Context.ConnectionId, className);
                     string message = UserName + " đã vào lớp có tên là : "+className;
-                    return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, ID = UserID });
+                    return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, Sender = UserID });
                 }
                 else
                 {
@@ -64,7 +64,7 @@ namespace BaseHub
 
         public Task SendToGroup(object content, string groupName)
         {
-            return Clients.Group(groupName).SendAsync("ReceiveGroup", new { UserSend = UserName, Message = content, Time = DateTime.Now, Type = UserType });
+            return Clients.Group(groupName).SendAsync("ReceiveGroup", new { UserSend = UserName, Message = content, Time = DateTime.Now, Type = UserType , Sender = UserID });
         }
 
         public async Task OutOfTheClassroom(string className)
