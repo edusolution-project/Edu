@@ -147,40 +147,41 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Detail(string ID)
         {
+            return Redirect(Url.Action("Modules", "Curriculum") + "/" + ID);
             if (string.IsNullOrEmpty("ID"))
                 return RedirectToAction("Index");
 
             //if (!User.IsInRole("head-teacher"))
             //    return Redirect("/");
 
-            var data = _service.GetItemByID(ID);
+            //var data = _service.GetItemByID(ID);
 
-            if (data == null)
-                return RedirectToAction("Index");
+            //if (data == null)
+            //    return RedirectToAction("Index");
 
-            var usedClass = _classSubjectService.CountByCourseID(data.ID);
-            //Cap nhat IsUsed
-            if (data.IsUsed != (usedClass > 0))
-            {
-                data.IsUsed = usedClass > 0;
-                _service.Save(data);
-            }
+            //var usedClass = _classSubjectService.CountByCourseID(data.ID);
+            ////Cap nhat IsUsed
+            //if (data.IsUsed != (usedClass > 0))
+            //{
+            //    data.IsUsed = usedClass > 0;
+            //    _service.Save(data);
+            //}
 
-            ViewBag.Data = data;
-            ViewBag.Title = data.Name;
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            //ViewBag.Data = data;
+            //ViewBag.Title = data.Name;
+            //var UserID = User.Claims.GetClaimByType("UserID").Value;
 
-            //var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
+            ////var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
 
-            //ViewBag.Chapter = chapters;
-            ViewBag.User = UserID;
-            ViewBag.Course = data;
-            ViewBag.Subject = _subjectService.GetItemByID(data.SubjectID);
-            ViewBag.Grade = _gradeService.GetItemByID(data.GradeID);
+            ////ViewBag.Chapter = chapters;
+            //ViewBag.User = UserID;
+            //ViewBag.Course = data;
+            //ViewBag.Subject = _subjectService.GetItemByID(data.SubjectID);
+            //ViewBag.Grade = _gradeService.GetItemByID(data.GradeID);
 
-            //ViewBag.RoleCode = "head-teacher";
+            ////ViewBag.RoleCode = "head-teacher";
 
-            return View();
+            //return View();
         }
 
         public IActionResult Modules(string ID)
@@ -192,11 +193,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (data == null)
                 return RedirectToAction("Index");
 
-            var usedClass = _classSubjectService.CountByCourseID(data.ID);
+            var isUsed = isCourseUsed(data.ID);
             //Cap nhat IsUsed
-            if (data.IsUsed != (usedClass > 0))
+            if (data.IsUsed != isUsed)
             {
-                data.IsUsed = usedClass > 0;
+                data.IsUsed = isUsed;
                 _service.Save(data);
             }
 
@@ -427,15 +428,29 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
+
+
                     olditem.Updated = DateTime.Now;
                     olditem.Description = item.Description;
+                    //check before update
+                    if (olditem.SubjectID != item.SubjectID || olditem.GradeID != item.GradeID || olditem.SkillID != item.SkillID)
+                    {
+                        var used = CountUsedClassSubject(olditem.ID);
+                        if (used > 0)
+                        {
+                            return new JsonResult(new Dictionary<string, object>
+                            {
+                                {"Error", "Thao tác không thực hiện được! Bài giảng đang được sử dụng trong " + used + " lớp học." }
+                            });
+                        }
+                    }
                     olditem.SubjectID = item.SubjectID;
                     olditem.GradeID = item.GradeID;
                     olditem.SkillID = item.SkillID;
                     olditem.Name = item.Name;
                     _service.Save(olditem);
                     //update class subject using this course, temporary use
-                    _classSubjectService.UpdateCourseSkill(olditem.ID, olditem.SkillID);
+                    //_classSubjectService.UpdateCourseSkill(olditem.ID, olditem.SkillID);
                 }
 
                 return new JsonResult(new Dictionary<string, object>
@@ -464,7 +479,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     return new JsonResult(new Dictionary<string, object>
                             {
-                                { "Data", "Nothing to remove" },
+                                { "Data", "Bài giảng đã xóa" },
                                 {"Error", null }
                             });
                 }
@@ -474,7 +489,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     return new JsonResult(new Dictionary<string, object>
                             {
-                                { "Data", "Already removed" },
+                                { "Data", "Bài giảng đã bị xóa" },
                                 {"Error", null }
                             });
                 }
@@ -482,14 +497,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
-                                {"Error", "Permisson Error" }
+                                {"Error", "Bạn không có quyền thực hiện thao tác này" }
                             });
-                var learningClass = _classService.CreateQuery().CountDocuments(o => o.CourseID == course.ID);
-                if (learningClass > 0)
+                var used = CountUsedClassSubject(ID);
+                if (used > 0)
                     return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
-                                {"Error", "Course in use" }
+                                {"Error", "Thao tác không thực hiện được! Bài giảng đang được sử dụng trong " + used + " lớp học." }
                             });
 
                 _chapterService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
@@ -521,7 +536,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 await _service.RemoveAsync(ID);
                 return new JsonResult(new Dictionary<string, object>
                             {
-                                { "Data", "Remove OK" },
+                                { "Data", "Đã xóa bài giảng" },
                                 {"Error", null }
                             });
             }
@@ -591,6 +606,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+
+        private bool isCourseUsed(string CourseID)
+        {
+            return CountUsedClassSubject(CourseID) > 0;
+        }
+
+        private long CountUsedClassSubject(string CourseID)
+        {
+            return _classSubjectService.CountByCourseID(CourseID);
+        }
 
         [HttpPost]
         [DisableRequestSizeLimit]
@@ -848,6 +873,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 { "Data", courseDetail },
                 { "Model", model }
             };
+            return new JsonResult(response);
+        }
+
+        public JsonResult GetContents(string ID, string Parent)
+        {
+            var currentClass = _service.GetItemByID(ID);
+            if (currentClass == null)
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy lớp học" }
+                    });
+
+            if (string.IsNullOrEmpty(Parent))
+                Parent = "0";
+
+            var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.ID && c.ParentID == Parent).ToList();
+
+            var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == currentClass.ID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList();
+
+            var response = new Dictionary<string, object>
+                {
+                    { "Data", chapters },
+                    { "Lesson", lessons }
+                };
+
             return new JsonResult(response);
         }
 
@@ -1301,7 +1351,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             await _lessonPartAnswerService.Collection.InsertOneAsync(item);
         }
-
 
         [HttpGet]
         public JsonResult FixResources()

@@ -7,19 +7,24 @@
     var user = ViewBag.User as string;
 }
 
-<script>
+
+    <script>
+        setActiveMenu("curriculum");
+    </script>
+
+@*<script>
     activeTab = "curriculum";
     activeSub = "modules";
-</script>
+</script>*@
 
 <div class="left-col">
     <div class="page-title">
         <h1><a href="@Url.Action("Index","Curriculum")">Bài giảng</a> / @ViewData["Title"]</h1>
     </div>
     <div class="main-container">
-        <div class="sub-sidebar">
+        @*<div class="sub-sidebar">
             @await Html.PartialAsync("_subSidebarTeacher-Curriculum")
-        </div>
+        </div>*@
         <div class="main-content">
             <div class="detail pb-3 row">
                 <div class="text-left col-md-10">

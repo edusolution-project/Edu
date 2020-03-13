@@ -113,10 +113,10 @@ namespace BaseCustomerEntity.Database
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
                     progress.ExamDone++;
-                
+
                 progress.TotalPoint += item.PointChange;
                 progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
-                
+
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }
@@ -153,6 +153,29 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID).FirstOrDefault();
         }
 
+        public async Task DecreaseClassSubject(ClassSubjectProgressEntity clssbj)
+        {
+            //var classProgress = GetItemByClassID(clssbj.ClassID, clssbj.StudentID);
+            //if (classProgress != null)
+            //{
+            //    classProgress.Completed -= clssbj.Completed;
+            //    if (classProgress.Completed < 0) classProgress.Completed = 0;
+            //    classProgress.ExamDone -= clssbj.ExamDone;
+            //    if (classProgress.ExamDone < 0) classProgress.ExamDone = 0;
+            //    classProgress.TotalPoint -= clssbj.TotalPoint;
+            //    if (classProgress.TotalPoint < 0) classProgress.TotalPoint = 0;
+            //    classProgress.TotalLessons -= clssbj.TotalLessons;
+            //    if (classProgress.TotalLessons < 0) classProgress.TotalLessons = 0;
+            //}
 
+
+            var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
+                     //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
+                     .Inc(t => t.Completed, 0 - clssbj.Completed)
+                     .Inc(t => t.ExamDone, 0 - clssbj.ExamDone)
+                     .Inc(t => t.TotalPoint, 0 - clssbj.TotalPoint)
+                     .Inc(t => t.TotalLessons, 0 - clssbj.TotalLessons);
+            await Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID, update);
+        }
     }
 }

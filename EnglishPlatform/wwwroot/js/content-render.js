@@ -716,7 +716,7 @@ var Lesson = (function () {
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "part-description" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
                 renderMediaContent(data, itemBody, "DOC");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
                 itembox.append(itemBody);
@@ -1001,14 +1001,19 @@ var Lesson = (function () {
                     mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                     break;
                 case "AUDIO":
-                    mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn","https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                    mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                     break;
                 case "DOC":
-                    if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") || data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx")) {
-                        mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=http://" + window.location.hostname + data.Media.Path + "", "style": "min-width:800px", "height": "600px", "frameborder": "0" }));
+                    if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
+                        data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
+                        data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
+                    ) {
+                        mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path + "", "style": "width:100%; min-height: 800px", "frameborder": "0" }));
                     }
-                    else
-                        mediaHolder.append($("<embed>", { "src": data.Media.Path + "#view=FitH", "style": "min-width:800px", "height": "600px" }));
+                    else {
+                        if (data.Media != null)
+                            mediaHolder.append($("<embed>", { "src": data.Media.Path + "#view=FitH", "style": "width:100%; min-height: 800px" }));
+                    }
                     break;
                 default:
                     if (data.Media.Extension != null)
@@ -1211,23 +1216,24 @@ var Lesson = (function () {
         $('#partModal #modalTitle').html("Thêm nội dung");
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": lessonID }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassID", "value": config.class_id }));
+        $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassSubjectID", "value": config.class_subject_id }));
         $('#action').val(config.url.save_part);
         var selectTemplate = $("<select>", { "class": "templatetype form-control", "name": "Type", "required": "required" }).bind("change", chooseTemplate);
         $(modalForm).append(selectTemplate);
         $(selectTemplate).append("<option value=''>--- Chọn kiểu nội dung ---</option>");
-            //if (type == TEMPLATE_TYPE.LESSON) {
-            $(selectTemplate).append("<option value='TEXT'>Văn bản</option>")
-                .append("<option value='VIDEO'>Video</option>")
-                .append("<option value='AUDIO'>Audio</option>")
-                .append("<option value='IMG'>Hình ảnh</option>")
-                .append("<option value='DOC'>File văn bản (PDF, DOC, PPT)</option>")
-            //.append("<option value='VOCAB'>Vocabulary</option>")
+        //if (type == TEMPLATE_TYPE.LESSON) {
+        $(selectTemplate).append("<option value='TEXT'>Văn bản</option>")
+            .append("<option value='VIDEO'>Video</option>")
+            .append("<option value='AUDIO'>Audio</option>")
+            .append("<option value='IMG'>Hình ảnh</option>")
+            .append("<option value='DOC'>File văn bản (PDF, DOC, PPT, XLS)</option>")
+        //.append("<option value='VOCAB'>Vocabulary</option>")
         //}
         //else {
-            $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn đáp án đúng</option>")
-                .append("<option value='QUIZ2'>QUIZ: Điền từ</option>")
-                .append("<option value='QUIZ3'>QUIZ: Nối đáp án</option>")
-            //.append("<option value='ESSAY'>QUIZ: Essay</option>");
+        $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn đáp án đúng</option>")
+            .append("<option value='QUIZ2'>QUIZ: Điền từ</option>")
+            .append("<option value='QUIZ3'>QUIZ: Nối đáp án</option>")
+        //.append("<option value='ESSAY'>QUIZ: Essay</option>");
         //}
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
         $(modalForm).append($("<div>", { "class": "question_template hide" }));
@@ -1360,7 +1366,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 break;
             case "DOC":
-                contentholder.append($("<label>", { "class": "title", "text": "Chọn văn bản (pdf, doc, ppt)" }));
+                contentholder.append($("<label>", { "class": "title", "text": "Chọn văn bản (pdf, doc, ppt, xls)" }));
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(contentholder.find(".media_holder"), "", "DOC", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
@@ -1679,7 +1685,7 @@ var Lesson = (function () {
                 wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": "audio/*" }));
                 break;
             case "DOC":
-                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": ".pdf, .doc, .docx, .ppt, .pptx" }));
+                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": ".pdf, .doc, .docx, .ppt, .pptx, .xls, .xlsx" }));
                 break;
             default:
                 wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide" }));
@@ -2011,6 +2017,7 @@ var Lesson = (function () {
     }
 
     var renderStudentPart = function (data) {
+        
         var mainContainer = $('#' + config.container);
         var leftCol = mainContainer.find('#leftCol');
         var rightCol = mainContainer.find('#rightCol');
@@ -2080,7 +2087,7 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 break;
             case "IMG":
-                boxHeader.append(collapseSwitch);
+                boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
@@ -2091,7 +2098,7 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 break;
             case "AUDIO":
-                boxHeader.append(collapseSwitch);
+                boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
@@ -2101,7 +2108,7 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 break;
             case "VIDEO":
-                boxHeader.append(collapseSwitch);
+                boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
@@ -2111,10 +2118,11 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 break;
             case "DOC":
-                boxHeader.append(collapseSwitch);
+                boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    wrapper.append($("<div>", { "class": "part-description" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                
                 renderMediaContent(data, itemBody, "DOC");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
                 itembox.append(itemBody);
@@ -2188,6 +2196,7 @@ var Lesson = (function () {
                 }
                 break;
         }
+
 
         if (listPartContainer.find(".nav-item").length == 1) {
             itemtitle.addClass("active");
@@ -2879,7 +2888,7 @@ var hideModal = function (modalId) {
 
 var submitForm = function (event, modalId, callback) {
     event.preventDefault();
-    $('.btnSaveForm').hide();
+    $('.btnSaveForm').hide().after($("<div>", {class: "pending", text: "Đang gửi dữ liệu, vui lòng đợi..." }));
 
     var form = $(modalId).find('form');
     var Form = form.length > 0 ? form[0] : window.partForm;
@@ -2910,6 +2919,7 @@ var submitForm = function (event, modalId, callback) {
     if (form.length > 0)
         actionUrl = form.attr('action');
 
+    $('.btnSaveForm').after($("<div>", { class: "pending", text: "Đang gửi dữ liệu, vui lòng đợi..." }));
     xhr.open('POST', actionUrl);
     xhr.send(formdata);
     xhr.onreadystatechange = function () {
@@ -2941,16 +2951,26 @@ var submitForm = function (event, modalId, callback) {
                 alert(data.Error);
             }
         }
+        $('.btnSaveForm').siblings('.pending').remove();
         $('.btnSaveForm').show();
     }
 }
 
 var toggleExpand = function (obj) {
     $('.collapsable').addClass('collapse');
-    $(obj).removeClass("fa-caret-up");
     if (!$(obj).hasClass("fa-caret-up"))//expand
     {
+        $('.title > .fa-caret-up').removeClass("fa-caret-up");
         $(obj).addClass("fa-caret-up");
         $(obj).parent().parent().siblings('.collapse').removeClass("collapse");
+
+
+        $('#leftCol').animate({
+            scrollTop: $(obj).parent().parent().parent().parent().offset().top - 60
+        }, 500);
     }
+    else {
+        $(obj).removeClass("fa-caret-up");
+    }
+        
 }

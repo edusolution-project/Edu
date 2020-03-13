@@ -181,7 +181,7 @@ namespace BaseCustomerEntity.Database
             _ = Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             var subjectProgresses = _classSubjectProgressService.GetClassListOfCurrentSubject(ClassSubjectID);
             foreach (var progress in subjectProgresses)
-                _ = _classProgressService.DecreaseCompleted(progress.ClassID, progress.Completed);
+                _ = _classProgressService.DecreaseClassSubject(progress);
             _ = _classProgressService.RefreshTotalLessonForSubject(ClassSubjectID);
             _ = _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);

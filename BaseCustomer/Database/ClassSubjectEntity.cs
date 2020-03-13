@@ -83,11 +83,12 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
-        public Task UpdateCourseSkill(string CourseID, string SkillID)
-        {
-            _ = Collection.UpdateManyAsync(t => t.CourseID == CourseID, Builders<ClassSubjectEntity>.Update.Set("SkillID", SkillID));
-            return Task.CompletedTask;
-        }
+        //Prevent this action
+        //public Task UpdateCourseSkill(string CourseID, string SkillID)
+        //{
+        //    _ = Collection.UpdateManyAsync(t => t.CourseID == CourseID, Builders<ClassSubjectEntity>.Update.Set("SkillID", SkillID));
+        //    return Task.CompletedTask;
+        //}
 
         public long CountByCourseID(string CourseID)
         {

@@ -119,7 +119,7 @@
 
 <div class="left-col">
     <div class="page-title row">
-        <h2 class="col-md-6 p-0">
+        <h2 class="col-md-12 p-0">
             @*<a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
                 "Modules" ,"Course")/@currentClass.ID">@currentClass.Name</a>*@
                 @if (currentChapter != null)
@@ -129,13 +129,13 @@
                         }
                 / @currentLesson.Title
             </h2>
-            @if (nextLesson != null)
+            @*@if (nextLesson != null)
             {
                 <h2 class="col-md-6 p-0 text-right">
                     Bài tiếp > <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
                             "Detail" ,"Lesson")/@nextLesson.ID/@currentClassSubject.ID">@nextLesson.Title</a>
                         </h2>
-                    }
+                    }*@
         </div>
 
         <div class="main-container">

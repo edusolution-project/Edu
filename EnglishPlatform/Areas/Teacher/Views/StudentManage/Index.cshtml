@@ -599,17 +599,6 @@
                     console.log(event.target.files[0])
                     this.uploadfile.file = event.target.files[0]
                 },
-                testdata() {
-                    let _that = this
-                    let list = _that.list_student
-                    console.log(list)
-                    list.forEach(function(item) {
-                        _that.list_student.push(item)
-                    })
-                    this.list_student = _that.list_student;
-                    console.log(this.list_student)
-                    this.$forceUpdate()
-                },
                 downloadTemplate() {
                     window.open("@Url.Action("StudentTemplate", "StudentManage")");
                 }

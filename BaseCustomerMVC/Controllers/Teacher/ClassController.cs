@@ -522,49 +522,49 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        public JsonResult GetListMember(DefaultModel model)
-        {
-            if (string.IsNullOrEmpty(model.ID))
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không tìm thấy thông tin lớp" }
-                    });
-            var currentClass = _service.GetItemByID(model.ID);
-            if (currentClass == null)
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không tìm thấy thông tin lớp" }
-                    });
-            var teacher = _teacherService.GetItemByID(currentClass.TeacherID);
+        //public JsonResult GetListMember(DefaultModel model)
+        //{
+        //    if (string.IsNullOrEmpty(model.ID))
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",model },
+        //                {"Msg","Không tìm thấy thông tin lớp" }
+        //            });
+        //    var currentClass = _service.GetItemByID(model.ID);
+        //    if (currentClass == null)
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",model },
+        //                {"Msg","Không tìm thấy thông tin lớp" }
+        //            });
+        //    var teacher = _teacherService.GetItemByID(currentClass.TeacherID);
 
-            var filter = new List<FilterDefinition<StudentEntity>>();
-            filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
-            var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
-            var studentsView =
-                (from r in students.ToList()
-                 let progress = _classProgressService.GetItemByClassID(currentClass.ID, r.ID) ?? new ClassProgressEntity()
-                 select _mapping.AutoOrtherType(r, new ClassStudentViewModel()
-                 {
-                     ClassName = currentClass.Name,
-                     ClassStatus = "Đang học",
-                     LastJoinDate = DateTime.Now,
-                     Percent = progress.TotalLessons > 0 ? (progress.Completed * 100 / progress.TotalLessons) : 0,
-                     Score = progress.AvgPoint
-                 })).ToList();
+        //    var filter = new List<FilterDefinition<StudentEntity>>();
+        //    filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
+        //    var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
+        //    var studentsView =
+        //        (from r in students.ToList()
+        //         let progress = _classProgressService.GetItemByClassID(currentClass.ID, r.ID) ?? new ClassProgressEntity()
+        //         select _mapping.AutoOrtherType(r, new ClassStudentViewModel()
+        //         {
+        //             ClassName = currentClass.Name,
+        //             ClassStatus = "Đang học",
+        //             LastJoinDate = DateTime.Now,
+        //             Percent = progress.TotalLessons > 0 ? (progress.Completed * 100 / progress.TotalLessons) : 0,
+        //             Score = progress.AvgPoint
+        //         })).ToList();
 
-            var response = new Dictionary<string, object>
-            {
-                { "Data",new Dictionary<string, object> {
-                        {"Teacher",teacher },
-                        {"Students",studentsView }
-                    }
-                },
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data",new Dictionary<string, object> {
+        //                {"Teacher",teacher },
+        //                {"Students",studentsView }
+        //            }
+        //        },
+        //        { "Model", model }
+        //    };
+        //    return new JsonResult(response);
+        //}
 
         public JsonResult GetListTeacher(string SubjectID = "")
         {
@@ -857,6 +857,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private List<Dictionary<string, object>> FilterClass(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
+            var classfilter = new List<FilterDefinition<ClassEntity>>();
+            FilterDefinition<ClassEntity> ownerfilter = null;
+
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
@@ -876,6 +879,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (!string.IsNullOrEmpty(TeacherID))
             {
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                if (string.IsNullOrEmpty(SubjectID) && string.IsNullOrEmpty(GradeID))
+                    ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == TeacherID);
             }
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
@@ -885,21 +890,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var data = _classSubjectService.Collection
                 .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
-
+            //filter by classsubject
             if (data.Count > 0)
             {
-                var classfilter = new List<FilterDefinition<ClassEntity>>();
-                classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
-                if (!string.IsNullOrEmpty(model.SearchText))
-                    classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
-                var classResult = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classfilter));
-                model.TotalRecord = classResult.CountDocuments();
-                var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
-                var returndata = from o in classData
-                                 let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
-                                 let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
-                                 select new Dictionary<string, object>
-                             {
+                if (ownerfilter != null)
+                    classfilter.Add(
+                        Builders<ClassEntity>.Filter.Or(ownerfilter,
+                        Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive))));
+                else
+                    classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
+            }
+
+            if (!string.IsNullOrEmpty(model.SearchText))
+                classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
+
+
+            var classResult = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classfilter));
+            model.TotalRecord = classResult.CountDocuments();
+            var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+            var returndata = from o in classData
+                             let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
+                             let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
+                             let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
+                             select new Dictionary<string, object>
+                                {
                                  { "ID", o.ID },
                                  { "Name", o.Name },
                                  { "Students", _classStudentService.GetClassStudents(o.ID).Count },
@@ -913,12 +927,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Members", o.Members },
                                  { "Description", o.Description },
                                  { "SkillName", sname },
-                                 { "Creator", o.TeacherID }
-
+                                 { "Creator", o.TeacherID },
+                                 { "CreatorName", creator.FullName }
                              };
-                return returndata.ToList();
-            }
-            return null;
+            return returndata.ToList();
         }
 
 
@@ -935,9 +947,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     return new JsonResult(new Dictionary<string, object>()
                         {
-                            {"Error", "Permission Error" }
+                            {"Error", "Vui lòng đăng nhập lại" }
                         });
                 }
+
+                if (classSubjects == null || classSubjects.Count == 0)
+                {
+                    return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Cần chọn ít nhất một môn học" }
+                        });
+                }
+
                 item.TeacherID = userId; // creator
                 item.Skills = new List<string>();
                 item.Subjects = new List<string>();
@@ -973,6 +994,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                     _service.Save(item);
                 }
+
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -1023,6 +1045,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             _learningHistoryService.RemoveClassSubjectHistory(oSbj.ID);
                             //resest exam
                             _examService.RemoveClassSubjectExam(oSbj.ID);
+                            
+
                             if (nSbj == null)
                                 _classSubjectService.Remove(oSbj.ID);
                         }
@@ -1364,24 +1388,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var lessons = (
                             from schedule in passExams
-                            let progress = data.FirstOrDefault(t=> t.StudentID == model.ID && t.ClassSubjectID == schedule.ClassSubjectID && t.LessonID == schedule.LessonID) ?? new LessonProgressEntity()    
-                           //from progress in data
-                           //where progress.Tried > 0
-                           //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
-                           //where schedule != null
-                           //let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
-                           //where classsubject != null
-                           let lesson = _lessonService.GetItemByID(schedule.LessonID)
-                           select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
-                           {
-                               ScheduleID = schedule.ID,
-                               ScheduleStart = schedule.StartDate,
-                               ScheduleEnd = schedule.EndDate,
-                               IsActive = schedule.IsActive,
-                               LearnCount = progress.Tried,
-                               LearnLast = progress.LastTry,
-                               Result = progress.LastPoint,
-                           })).OrderByDescending(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+                            let progress = data.FirstOrDefault(t => t.StudentID == model.ID && t.ClassSubjectID == schedule.ClassSubjectID && t.LessonID == schedule.LessonID) ?? new LessonProgressEntity()
+                            //from progress in data
+                            //where progress.Tried > 0
+                            //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                            //where schedule != null
+                            //let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
+                            //where classsubject != null
+                            let lesson = _lessonService.GetItemByID(schedule.LessonID)
+                            select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
+                            {
+                                ScheduleID = schedule.ID,
+                                ScheduleStart = schedule.StartDate,
+                                ScheduleEnd = schedule.EndDate,
+                                IsActive = schedule.IsActive,
+                                LearnCount = progress.Tried,
+                                LearnLast = progress.LastTry,
+                                Result = progress.LastPoint,
+                            })).OrderByDescending(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
 
             var response = new Dictionary<string, object>
             {

@@ -1,7 +1,6 @@
 ﻿@{
-    var Data = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
-    var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
-    var ClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
+    var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
+    var Course = ViewBag.Course as BaseCustomerEntity.Database.CourseEntity;
 }
 <script>
     $(document).ready(function () {
@@ -36,7 +35,7 @@
 
     });
 
-    var dataUrl = '@Url.Action("GetContents","ClassSubject")';
+    var dataUrl = '@Url.Action("GetContents","Curriculum")';
 
     var renderMenu = function (parentID, init) {
 
@@ -62,7 +61,7 @@
         $.ajax({
             type: "POST",
             url: dataUrl,
-            data: { ID: '@ClassSubject.ID', Parent: parentID },
+            data: { ID: '@Course.ID', Parent: parentID },
             success: function (data) {
                 var rootID = data.RootID;
                 var chapters = data.Data;
@@ -92,7 +91,7 @@
                                 id: 'les_nav_' + lesson.ID,
                                 class: 'les_nav',
                             }).append($("<i>", { class: "far fa-file-alt mr-1" }))
-                                .append($("<a>", {text: lesson.Title, href: '@Url.Action("Detail","Lesson")/' + lesson.ID + '/' + '@ClassSubject.ID'}));
+                                .append($("<a>", {text: lesson.Title, href: '@Url.Action("Lesson","Curriculum")/' + lesson.ID + '?CourseID=' + '@Course.ID'}));
                             if (lesson.ID == currentLesson.ID)
                                 lessonPath.addClass('current');
                         }
@@ -107,6 +106,9 @@
     }
 
     var currentLesson = @Html.Raw(Json.Serialize(Data))
+
+        console.log(currentLesson);
+
         //console.log(currentLesson);
 
     var toggleChap = function (obj) {

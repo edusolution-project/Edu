@@ -154,21 +154,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 TeacherID = User.Claims.GetClaimByType("UserID").Value;
             }
+            var classids = new List<string>();
             if (!string.IsNullOrEmpty(ClassID))
-                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.ClassID == ClassID));
-            if (!string.IsNullOrEmpty(SubjectID))
-                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            if (!string.IsNullOrEmpty(TeacherID))
-                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
-            if (!string.IsNullOrEmpty(SkillID))
-                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SkillID == SkillID));
-            if (!string.IsNullOrEmpty(GradeID))
-                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+            {
+                classids.Add(ClassID);
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(SubjectID))
+                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+                if (!string.IsNullOrEmpty(TeacherID))
+                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                if (!string.IsNullOrEmpty(SkillID))
+                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SkillID == SkillID));
+                if (!string.IsNullOrEmpty(GradeID))
+                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+                classids =
+                    filterCs.Count > 0 ? _classSubjectService.Collection.Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs)).ToList()
+                : _classService.Collection.Find(t => true).Project(t => t.ID).ToList();
+            }
 
-            var classids = (filterCs.Count > 0 ? _classSubjectService.Collection
-                .Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs))
-                //.Find(Builders<ClassSubjectEntity>.Filter.And(filterCs))
-                : _classSubjectService.Collection.Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.Empty)).ToList();
 
             if (classids == null || classids.Count() == 0)
                 return new JsonResult(new Dictionary<string, object>

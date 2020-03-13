@@ -70,7 +70,7 @@
             </ul>
             <div class="box info-practice">
                 <h4>Chi tiết lớp học</h4>
-                <p>{{domDecoder(classDescription)}}</p>
+                <p>{{replaceBrkLine(domDecoder(classDescription))}}</p>
             </div>
         </div>
         <div class="box" v-if="tab[1]">
@@ -129,7 +129,7 @@
                                 </div>
                             </div>
                             <div class="pt-2 pb-2">
-                                <p>{{domDecoder(data.Description)}}</p>
+                                <p>{{domDecoder(replaceBrkLine(data.Description))}}</p>
                             </div>
                             <div>
                                 <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
@@ -859,6 +859,9 @@
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
+                },
+                replaceBrkLine(str) {
+                    return str.replace(/\n/gi, "<br/>")
                 },
                 shortenString(str, max = 15) {
                     if (str == null || str.length <= max)

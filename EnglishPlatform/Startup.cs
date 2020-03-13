@@ -12,6 +12,7 @@ using EasyZoom;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -57,6 +58,11 @@ namespace EnglishPlatform
             //}).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddSession();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.Configure<FormOptions>(x =>
+            {
+                x.ValueLengthLimit = int.MaxValue;
+                x.MultipartBodyLengthLimit = int.MaxValue; // In case of multipart
+            });
             services.AddDistributedMemoryCache();
             services.AddSignalR();
             services.AddEasyZoom(Configuration);

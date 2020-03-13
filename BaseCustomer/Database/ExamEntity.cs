@@ -228,6 +228,7 @@ namespace BaseCustomerEntity.Database
 
         public Task RemoveClassSubjectExam(string ClassSubjectID)
         {
+
             Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             _examDetailService.Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             return Task.CompletedTask;
