@@ -230,6 +230,79 @@
         opacity:0.5;
         cursor:not-allowed;
     }
+    .box-newfeed-item--avatar {
+        width: 40px;
+        height: 40px;
+        display: inline-block;
+        border: 1px solid;
+        border-radius: 50%;
+        overflow: hidden;
+        position: absolute;
+        left: 5px;
+        top: 5px;
+    }
+
+    .box-newfeed-item {
+        padding-left: 50px;
+        width: 98%;
+        overflow: hidden;
+        position: relative;
+        margin-top: 10px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 40px;
+    }
+
+    .box-newfeed-item--header {
+        padding: 5px;
+    }
+
+    .box-newfeed-item--header .name {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .box-newfeed-item--header .time {
+        color: #757070;
+        font-size: 13px;
+    }
+    .box-newfeed-item--avatar {
+        width: 40px;
+        height: 40px;
+        display: inline-block;
+        border: 1px solid;
+        border-radius: 50%;
+        overflow: hidden;
+        position: absolute;
+        left: 5px;
+        top: 5px;
+    }
+    .box-newfeed-item--main{
+        padding:10px;
+        background:#fff;
+    }
+    .box-newfeed-item--main__metadata{
+        height : 160px;
+        overflow:hidden;
+    }
+    .box-newfeed-item--main__metadata img {
+        width:calc(100%/4 - 10px);
+        text-align: center;
+        float:left;
+        margin:5px;
+    }
+
+    .box-metadata-item {
+        text-align: center;
+    }
+    .box-newfeed-item--main__content__title {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .box-newfeed-item--main__content__text {
+        text-align: justify;
+    }
 </style>
 
 <div id="easy-real-time-app" style="position:absolute; top:0;left:0;right:0; bottom:0; background:#fff; z-index:9999;border: 1px solid #ccc;box-shadow: 0 0 20px;">
@@ -255,7 +328,7 @@
                         <li class="text-center" data-type="User" onclick="onActiveThis(this)"><a href="javascript:void 0;">User</a></li>
                     </ul>
                 </div>
-                <div class="w-100 padding-10" style="max-height: 75%;overflow: auto;">
+                <div class="w-100 padding-10" style="max-height: 75%; overflow: auto; ">
                     <div id="tab-group" data-type="new-feed">
 
                     </div>
@@ -277,7 +350,110 @@
                 <h4 class="title p-2">Thông tin chung</h4>
             </div>
             <div class="content-easy-main-app">
+                <div class="easy-main-new-feed">
+                    <div class="box-newfeed-item">
+                        <div class="box-newfeed-item--avatar">
+                            <img src="~/images/icon/image_available.svg" alt="Hoang long" />
+                        </div>
+                        <div class="box-newfeed-item--header">
+                            <h4><span class="name">Hoang Thai Long </span><span class="time">3-2-2019 14:00 </span></h4>
+                        </div>
+                        <div class="box-newfeed-item--main">
+                            <div class="box-newfeed-item--main__content">
+                                <div class="box-newfeed-item--main__content__title">
+                                    What is Lorem Ipsum?
+                                </div>
+                                <div class="box-newfeed-item--main__content__text">
+                                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                                </div>
+                            </div>
+                            <div class="box-newfeed-item--main__metadata">
+                                <div class="box-metadata">
+                                    <div class="box-metadata-item">
+                                        <img src="~/img/2.png" />
+                                    </div>
+                                    <div class="box-metadata-item">
+                                        <img src="~/img/2.png" />
+                                    </div>
+                                    <div class="box-metadata-item">
+                                        <img src="~/img/2.png" />
+                                    </div>
+                                    <div class="box-metadata-item">
+                                        <img src="~/img/2.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-newfeed-item--footer">
 
+                        </div>
+
+                    </div>
+                    <div class="box-newfeed-item">
+                        <div class="box-newfeed-item--avatar">
+                            <img src="~/images/icon/image_available.svg" alt="Hoang long" />
+                        </div>
+                        <div class="box-newfeed-item--header">
+                            <h4><span class="name">Hoang Thai Long </span><span class="time">3-2-2019 14:00 </span></h4>
+                        </div>
+                        <div class="box-newfeed-item--main">
+                            <div class="box-newfeed-item--main__content">
+                                <div class="box-newfeed-item--main__content__title">
+                                    What is Lorem Ipsum?
+                                </div>
+                                <div class="box-newfeed-item--main__content__text">
+                                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                                </div>
+                            </div>
+                            <div class="box-newfeed-item--main__metadata">
+                                <div class="box-metadata">
+                                    <div class="box-metadata-item">
+                                        <img src="~/img/2.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-newfeed-item--footer">
+
+                        </div>
+
+                    </div>
+                    <div class="box-newfeed-item">
+                        <div class="box-newfeed-item--avatar">
+                            <img src="~/images/icon/image_available.svg" alt="Hoang long" />
+                        </div>
+                        <div class="box-newfeed-item--header">
+                            <h4><span class="name">Hoang Thai Long </span><span class="time">3-2-2019 14:00 </span></h4>
+                        </div>
+                        <div class="box-newfeed-item--main">
+                            <div class="box-newfeed-item--main__content">
+                                <div class="box-newfeed-item--main__content__title">
+                                    What is Lorem Ipsum?
+                                </div>
+                                <div class="box-newfeed-item--main__content__text">
+                                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                                </div>
+                            </div>
+                            <div class="box-newfeed-item--main__metadata">
+                                <div class="box-metadata">
+                                    <div class="box-metadata-item">
+                                        <img src="~/img/2.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-newfeed-item--footer">
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="easy-main-chat-user">
+
+                </div>
+                <div class="easy-main-chat-group">
+
+                </div>
             </div>
             <div class="form-easy-main-app" id="form-easy-main-app" style="display:none">
                 <div class="conversation-panel__footer">
