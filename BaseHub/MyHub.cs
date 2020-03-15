@@ -64,7 +64,7 @@ namespace BaseHub
 
         public Task SendToGroup(object content, string groupName)
         {
-            return Clients.Group(groupName).SendAsync("ReceiveGroup", new { UserSend = UserName, Message = content, Time = DateTime.Now, Type = UserType , Sender = UserID });
+            return Clients.Group(groupName).SendAsync("ReceiveGroup", new { UserSend = UserName, Message = content, Time = DateTime.Now, Type = UserType , Sender = UserID ,Receiver = groupName });
         }
 
         public async Task OutOfTheClassroom(string className)
@@ -80,7 +80,10 @@ namespace BaseHub
             // offline
             RemoveAllGroup();
             _connections.Remove(UserID, Context.ConnectionId);
-            Clients.All.SendAsync("Offline", UserID);
+           if(_connections.GetConnections(UserID) == null || _connections.GetConnections(UserID).Count() == 0)
+            {
+                Clients.All.SendAsync("Offline", UserID);
+            }
             return base.OnDisconnectedAsync(exception);
         }
         public override Task OnConnectedAsync()
@@ -88,6 +91,7 @@ namespace BaseHub
             //online
             _connections.Add(UserID, Context.ConnectionId);
             Clients.All.SendAsync("Online", UserID);
+            Clients.Caller.SendAsync("Online", _connections.GetKeys());
             return base.OnConnectedAsync();
         }
         protected string KeyUser
@@ -144,6 +148,11 @@ namespace BaseHub
             {
                 return _connections.Count;
             }
+        }
+
+        public IEnumerable<T> GetKeys()
+        {
+            return _connections.Keys?.ToList();
         }
 
         public void Add(T key, string connectionId)

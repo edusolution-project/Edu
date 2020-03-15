@@ -29,6 +29,8 @@ namespace EnglishPlatform.Controllers
         public string _name { get; set; }
         public string _email { get; set; }
         #endregion
+        private readonly CommentService _commentService;
+        private readonly NotificationService _notificationService;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
         private readonly StudentService _studentService;
         private readonly TeacherService _teacherService;
@@ -41,6 +43,8 @@ namespace EnglishPlatform.Controllers
         private readonly IHubContext<ChatHub> _hubContent;
 
         public EasyRealTimeController(
+            CommentService commentService,
+            NotificationService notificationService,
             StudentService studentService,
             TeacherService teacherService,
             SubjectService subjectService,
@@ -63,6 +67,8 @@ namespace EnglishPlatform.Controllers
             _messageService = messageService;
             _hubContent = hubContent;
             _roxyFilemanHandler = roxyFilemanHandler;
+            _notificationService = notificationService;
+            _commentService = commentService;
         }
         /// <summary>
         /// 
@@ -416,6 +422,7 @@ namespace EnglishPlatform.Controllers
                     }
 
                 }
+
                 if (group != null)
                 {
 
@@ -441,6 +448,19 @@ namespace EnglishPlatform.Controllers
                         item.ReplyTo = reply;
                     }
                     _messageService.CreateMessage(item);
+
+                    var needViews = group.Members.Select(o => o.ID)?.ToHashSet();
+                    needViews.Remove(_userID);
+
+                    var notification = new NotificationEntity()
+                    {
+                        GroupName = group.Name,
+                        MessageCode = item.Code,
+                        UserViews = needViews,
+                        IsPrivated = group.IsPrivateChat
+                    };
+
+                    _notificationService.Create(notification);
 
                     return Success(new { message = item });
                 }
@@ -492,10 +512,93 @@ namespace EnglishPlatform.Controllers
         }
 
         #endregion
-        
+        #region Comment
+        [HttpPost]
+        public JsonResult CreateReply([FromForm]string groupName, [FromForm] string code, [FromForm] string content)
+        {
+            try
+            {
+                if (IsAuthenticated())
+                {
+
+                    var sender = new MemberGroupInfo(_userID, _email, _name, _typeUser.Contains(Teacher));
+                    var group = _groupService.CreateQuery().Find(o => o.Name == groupName)?.FirstOrDefault();
+
+                    if (group == null)
+                    {
+
+                        MemberGroupInfo receiver = null;
+                        var teacher = _teacherService.GetItemByID(groupName);
+                        if (teacher != null)
+                        {
+                            receiver = new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true);
+                        }
+                        else
+                        {
+                            var student = _studentService.GetItemByID(groupName);
+                            if (student != null)
+                            {
+                                receiver = new MemberGroupInfo(student.ID, student.Email, student.FullName, false);
+                            }
+                        }
+
+                        if (receiver != null)
+                        {
+                            group = _groupService.CreateNewGroup(sender, receiver);
+                        }
+
+                    }
+
+                    var listFile = _roxyFilemanHandler.UploadNewFeed(_userID, HttpContext);
+                    List<FileManagerCore.Globals.MediaResponseModel> media = new List<FileManagerCore.Globals.MediaResponseModel>();
+                    listFile?.TryGetValue("success", out media);
+                    var item = new CommentEntity()
+                    {
+                        Content = content,
+                        Created = DateTime.Now,
+                        Medias = media,
+                        Sender = sender,
+                        ParentID = code
+                    };
+                    _commentService.CreateOrUpdate(item);
+
+                    return Success(item);
+                }
+                else
+                {
+                    return NotFoundData();
+                }
+            }
+            catch(Exception ex)
+            {
+                return Error(ex);
+            }
+        }
+        [HttpGet]
+        public async Task<JsonResult> GetReply(string code)
+        {
+            try
+            {
+                if (IsAuthenticated())
+                {
+                    var data = await _commentService.CreateQuery().FindAsync(o => o.ParentID == code);
+
+                    return Success(data?.ToList());
+                }
+                else
+                {
+                    return NotFoundData();
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error(ex);
+            }
+        }
+        #endregion
 
         #region Protect Func
-         
+
 
         protected bool IsAuthenticated()
         {
@@ -526,6 +629,64 @@ namespace EnglishPlatform.Controllers
             return ResponseApi(200,"Success",Data);
         }
         #endregion
+
+        #region notification
+        [HttpGet]
+        public JsonResult GetListNotification()
+        {
+            try
+            {
+                if (IsAuthenticated())
+                {
+                    var data = _notificationService.GetListNoViews(_userID);
+                    if(data == null)
+                    {
+                        return NotFoundData();
+                    }
+                    else
+                    {
+                        return Success(data);
+                    }
+                }
+                else
+                {
+                    return NotFoundData();
+                }
+            }
+            catch(Exception ex)
+            {
+                return Error(ex);
+            }
+
+        }
+        [HttpPost]
+        public JsonResult UpdateViews(string groupName, string messageCode)
+        {
+            try
+            {
+                if (IsAuthenticated())
+                {
+                    var data = _notificationService.UpdateView(groupName,messageCode,_userID);
+                    if (data == null)
+                    {
+                        return NotFoundData();
+                    }
+                    else
+                    {
+                        return Success(data);
+                    }
+                }
+                else
+                {
+                    return NotFoundData();
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error(ex);
+            }
+        }
+        #endregion
     }
-    
+
 }
