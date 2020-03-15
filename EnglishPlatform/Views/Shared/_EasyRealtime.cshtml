@@ -112,12 +112,18 @@
          height: 60px;
          max-height:60px;
          overflow:hidden;
+         position: absolute;
+         top: 0;
+        right: 0;
+        left: 0;
+        background: #fff;
+        z-index: 99999;
     }
    #easy-real-time-app .easy-main-app .form-easy-main-app {
         left: 0;
         right: 0;
         position: absolute;
-        bottom: 0;
+        bottom: 40px;
         background: #fff;
     }
     .composer {
@@ -391,110 +397,148 @@
         margin: 0;
     }
 </style>
-
+<style>
+    .box-chat-eduso{
+        position: fixed;
+        width: 200px;
+        height: 50px;
+        bottom: 8px;
+        right: 50px;
+        z-index: 9999;
+        background: #00304b;
+        border-radius: 13px;
+        box-shadow: 0 0 10px #ccc;
+    }
+    .box-chat-eduso.open{
+        height:900px;
+        width:1200px;
+        max-width:100%;
+    }
+    .box-chat-eduso .box-chat-eduso--container-app{
+        display:none;
+    }
+    .box-chat-eduso.open .box-chat-eduso--container-app{
+        display:block;
+    }
+</style>
 <div class="box-chat-eduso">
-    <div id="easy-real-time-app" style="position:absolute; top:0;left:0;right:0; bottom:0; background:#fff; z-index:9999;border: 1px solid #ccc;box-shadow: 0 0 20px;overflow:hidden">
-        <div class="box-real-time-app">
-            <div class="slider-bar-left">
-                <ul class="ul-slider-bar-left" data-ul-id="ul-slider-bar-left">
-                    <li class="active" data-type="NewFeed" onclick="onActiveThis(this)">
-                        <a href="javascript:void 0;" data-tab="tab-group">Topic</a>
-                        <span></span>
-                    </li>
-                    <li data-type="Chat" onclick="onActiveThis(this)">
-                        <a href="javascript:void 0;" data-tab="tab-user">Chat</a>
-                        <span></span>
-                    </li>
-                </ul>
-                <div class="context-data-tab">
-                    <div class="search-text">
-                        <div class="form-group">
-                            <input type="text" name="search-text" value="" class="form-control" placeholder="Group Name / user name" />
-                        </div>
-                    </div>
-                    <div id="tab-chat-btn" class="show-tab-chat float-left w-100 text-center" style="display:none">
-                        <ul class="ul-slider-bar-left w-50" style="margin:auto">
-                            <li class="active text-center" data-type="Group" onclick="onActiveThis(this)"><a href="javascript:void 0;">Group</a><span></span></li>
-                            <li class="text-center" data-type="User" onclick="onActiveThis(this)"><a href="javascript:void 0;">User</a><span></span></li>
-                        </ul>
-                    </div>
-                    <div class="w-100 padding-10" style="max-height: 75%; overflow: auto; ">
-                        <div id="tab-group" data-type="new-feed">
-
-                        </div>
-                        <div id="tab-user" style="display:none">
+    <div class="fn-box-chat-eduso" style="height:50px;color: #fff;text-align: center;padding-top: 15px;" onclick="javascript: this.parentElement.classList.toggle('open'); this.scrollIntoView(true);">
+        Chat
+    </div>
+    <div class="box-chat-eduso--container-app" style="position:relative;width:100%;height:100%">
+        <div id="easy-real-time-app" style="        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        z-index: 9999;
+        border: 1px solid #ccc;
+        box-shadow: 0 0 20px;
+        overflow: hidden
+">
+            <div class="box-real-time-app">
+                <div class="slider-bar-left">
+                    <ul class="ul-slider-bar-left" data-ul-id="ul-slider-bar-left">
+                        <li class="active" data-type="NewFeed" onclick="onActiveThis(this)">
+                            <a href="javascript:void 0;" data-tab="tab-group">Topic</a>
+                            <span></span>
+                        </li>
+                        <li data-type="Chat" onclick="onActiveThis(this)">
+                            <a href="javascript:void 0;" data-tab="tab-user">Chat</a>
+                            <span></span>
+                        </li>
+                    </ul>
+                    <div class="context-data-tab">
+                        <div class="search-text">
                             <div class="form-group">
-                                <label>Hoc vien :</label>
-                                <div class="student"></div>
-                            </div>
-                            <div class="form-group">
-                                <label>Giao vien :</label>
-                                <div class="teacher"></div>
+                                <input type="text" name="search-text" value="" class="form-control" placeholder="Group Name / user name" />
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="easy-main-app">
-                <div class="header-easy-main-app">
-                    <h4 class="title p-2">Thông tin chung</h4>
-                </div>
-                <div class="content-easy-main-app" id="content-easy-main-app">
-                    <div class="easy-main-new-feed">
-                        
-                    </div>
-                    <div class="easy-main-chat-user">
-                        <div class="container">
-                            <div class="chatstyle-01"></div>
+                        <div id="tab-chat-btn" class="show-tab-chat float-left w-100 text-center" style="display: none ">
+                            <ul class="ul-slider-bar-left w-50" style="margin:auto">
+                                <li class="active text-center" data-type="Group" onclick="onActiveThis(this)"><a href="javascript:void 0;">Group</a><span></span></li>
+                                <li class="text-center" data-type="User" onclick="onActiveThis(this)"><a href="javascript:void 0;">User</a><span></span></li>
+                            </ul>
+                        </div>
+                        <div class="w-100 padding-10" style="max-height: 75%; overflow: auto; ">
+                            <div id="tab-group" data-type="new-feed">
+
+                            </div>
+                            <div id="tab-user" style="display:none">
+                                <div class="form-group">
+                                    <label>Hoc vien :</label>
+                                    <div class="student"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Giao vien :</label>
+                                    <div class="teacher"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="easy-main-chat-group">
-
-                    </div>
                 </div>
-                <div class="form-easy-main-app" id="form-easy-main-app" style="display:none">
-                    <div class="conversation-panel__footer" style="position:static">
-                        <div class="composer" id="form-realtime-app">
-                            <div class="composer__middle">
-                                <input type="text" class="form-control" style="width:80%" name="Title" value="" placeholder="Tiêu đề .... " required />
-                                <hr style="margin:5px 0" />
-                                <input type="hidden" name="replyto" value="" />
-                                <input type="hidden" name="groupName" value="" />
-                                <input type="file" name="files" style="display:none" onchange="AddFiles(this)" multiple />
-                                <textarea class="form-control" rows="2" placeholder="Type a message..."></textarea>
-                                <div class="composer__middle--photo mt-2" onclick="openImage()">
-                                    <i class="mdi mdi-camera"></i>
-                                </div>
-                                <div class="composer__middle--attachment mt-2" onclick="openAttach()">
-                                    <i class="mdi mdi-attachment"></i>
-                                </div>
-                                <div class="preview-files" id="preview-files-easy-realtime-app">
-                                    <div class="box-preview-file">
-                                        <div class="text-list-file padding-10"><span class="number-files">0</span> Files <button class="btn btn-sm btn-secondary float-right" onclick="openPreviewFile()">Views</button></div>
-                                        <div class="list-preview-files" style="display:none">
-                                            <div class="w-100 text-right">
-                                                <h4 style="text-align:center; width:80%; float:left">Danh sách file</h4>
-                                                <button class="btn btn-sm btn-danger" onclick="closePreviewFile()">Close</button>
+                <div class="easy-main-app">
+                    <div class="header-easy-main-app">
+                        <h4 class="title p-2">Thông tin chung</h4>
+                    </div>
+                    <div class="content-easy-main-app" id="content-easy-main-app">
+                        <div class="easy-main-new-feed">
+
+                        </div>
+                        <div class="easy-main-chat-user">
+                            <div class="container" style="max-width:90%;">
+                                <div class="chatstyle-01"></div>
+                            </div>
+                        </div>
+                        <div class="easy-main-chat-group">
+
+                        </div>
+                    </div>
+                    <div class="form-easy-main-app" id="form-easy-main-app" style="display:none">
+                        <div class="conversation-panel__footer" style="position:static">
+                            <div class="composer" id="form-realtime-app">
+                                <div class="composer__middle">
+                                    <input type="text" class="form-control" style="width:80%" name="Title" value="" placeholder="Tiêu đề .... " required />
+                                    <hr style="margin:5px 0" />
+                                    <input type="hidden" name="replyto" value="" />
+                                    <input type="hidden" name="groupName" value="" />
+                                    <input type="file" name="files" style="display:none" onchange="AddFiles(this)" multiple />
+                                    <textarea class="form-control" rows="2" placeholder="Type a message..."></textarea>
+                                    <div class="composer__middle--photo mt-2" onclick="openImage()">
+                                        <i class="mdi mdi-camera"></i>
+                                    </div>
+                                    <div class="composer__middle--attachment mt-2" onclick="openAttach()">
+                                        <i class="mdi mdi-attachment"></i>
+                                    </div>
+                                    <div class="preview-files" id="preview-files-easy-realtime-app">
+                                        <div class="box-preview-file">
+                                            <div class="text-list-file padding-10"><span class="number-files">0</span> Files <button class="btn btn-sm btn-secondary float-right" onclick="openPreviewFile()">Views</button></div>
+                                            <div class="list-preview-files" style="display:none">
+                                                <div class="w-100 text-right">
+                                                    <h4 style="text-align:center; width:80%; float:left">Danh sách file</h4>
+                                                    <button class="btn btn-sm btn-danger" onclick="closePreviewFile()">Close</button>
+                                                </div>
+                                                <hr style="margin:2px" />
+                                                <div id="list-preview-files"></div>
                                             </div>
-                                            <hr style="margin:2px" />
-                                            <div id="list-preview-files"></div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="composer__right" onclick="sendData()">
-                                <div class="composer__right--send">
-                                    <i class="mdi mdi-send"></i>
+                                <div class="composer__right" onclick="sendData()">
+                                    <div class="composer__right--send">
+                                        <i class="mdi mdi-send"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="slider-bar-right">
-                <ul class="ul-slider-bar-right">
-                </ul>
+                <div class="slider-bar-right">
+                    <ul class="ul-slider-bar-right">
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -564,7 +608,10 @@
         chat.querySelector('div.chatstyle-01').innerHTML = "";
     }
     var gotoView = function (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+        //el.parentElement.scrollTop =  el.parentElement.offsetHeight;
+        setTimeout(function () {
+            el.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+        }, 3000);
     }
 </script>
 <script src="~/lib/signalr/signalr.js"></script>
@@ -1117,6 +1164,13 @@
                         if (message.state == 1) {
                             var html = createNewFeedItem(message);
                             newFeed.innerHTML += html;
+
+                            if (i == messages.length - 1) {
+
+                                var el = newFeed.querySelector("div#new_feed_item_" + message.ID);
+                                gotoView(el);
+                            }
+
                             loadReply(message.code);
                         } else {
                             var className = "ca-received";
@@ -1126,7 +1180,13 @@
                             var time = new Date(message.created);
                             var html = CreateMessage(className, '/images/icon/image_available.svg', message.sender.name, message.content, `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`, message.code, message.medias);
                             chat.querySelector('div.chatstyle-01').innerHTML += html;
+                            if (i == messages.length - 1) {
+                                var el = chat.querySelector('div.chatstyle-01').querySelector("div#message_chat_item_"+message.code);
+                                gotoView(el);
+                            }
                         }
+
+                        
                     }
                 } else {
                     newFeed.innerHTML = "";
@@ -1153,7 +1213,7 @@
         var time = new Date(data.created);
         var metadata = createMetaData(data.medias);
         var form = createFormReply(data.code, data.receiver);
-        var html = `<div class="box-newfeed-item">
+        var html = `<div class="box-newfeed-item" id="new_feed_item_${data.ID}">
                         <div class="box-newfeed-item--avatar">
                             <img src="/images/icon/image_available.svg" alt="Hoang long">
                         </div>
@@ -1733,7 +1793,7 @@
         var avatar1 = className != "ca-received" ? "" : `<div class="user-avatar user-avatar-sm user-avatar-rounded online"><img src="${avatar}" alt="${name}" title="${name}"></div>`;
         var avatar2 = className == "ca-received" ? "" : `<div class="user-avatar user-avatar-sm user-avatar-rounded online"><img src="${avatar}" alt="${name}" title="${name}"></div>`;
 
-        return `<div class="${className}">
+        return `<div class="${className}" id="message_chat_item_${code}">
             ${avatar1}
             <div class="${className}__msg-group">
                 ${CreateMessageWrapper(className, sender, receiver, code,media)}
