@@ -30,16 +30,19 @@ namespace BaseCustomerEntity.Globals
 
             services.AddSingleton<ProgramService>();
             services.AddSingleton<CourseService>();
+            services.AddSingleton<CourseChapterService>();
+            services.AddSingleton<CourseLessonService>();
+
             services.AddSingleton<ChapterService>();
             services.AddSingleton<ChapterProgressService>();
-
             services.AddSingleton<ChapterExtendService>();
+
             services.AddSingleton<SubjectService>();
             services.AddSingleton<SkillService>();
             services.AddSingleton<GradeService>();
             services.AddSingleton<LessonService>();
             services.AddSingleton<LessonPartService>();
-            services.AddSingleton<LessonExtendService>();
+            //services.AddSingleton<LessonExtendService>();
             services.AddSingleton<LessonPartAnswerService>();
             services.AddSingleton<LessonPartQuestionService>();
             services.AddSingleton<LessonScheduleService>();

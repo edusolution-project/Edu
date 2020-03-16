@@ -21,15 +21,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CourseService _service;
         //private readonly ProgramService _programService;
         private readonly SubjectService _subjectService;
-        private readonly ChapterService _chapterService;
+        private readonly CourseChapterService _chapterService;
         private readonly GradeService _gradeService;
-        private readonly LessonService _lessonService;
+        private readonly CourseLessonService _lessonService;
         private readonly SkillService _skillService;
         private readonly LessonPartService _lessonPartService;
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
-        private readonly LessonExtendService _lessonExtendService;
+        //private readonly LessonExtendService _lessonExtendService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
         private readonly ClassSubjectService _classSubjectService;
@@ -50,18 +50,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly MappingEntity<CourseEntity, CourseViewModel> _courseViewMapping;
 
+
+        //fixing data
+        private readonly ChapterService _newchapterService;
+        private readonly LessonService _newlessonService;
+        private readonly MappingEntity<ChapterEntity, CourseChapterEntity> _chapterMappingRev = new MappingEntity<ChapterEntity, CourseChapterEntity>();
+        private readonly MappingEntity<LessonEntity, CourseLessonEntity> _lessonMappingRev = new MappingEntity<LessonEntity, CourseLessonEntity>();
+
         public CurriculumController(CourseService service,
-                 ProgramService programService,
                  SubjectService subjectService,
-                 ChapterService chapterService,
+                 CourseChapterService chapterService,
                  GradeService gradeService,
-                 LessonService lessonService,
+                 CourseLessonService lessonService,
                  SkillService skillService,
                  LessonPartService lessonPartService,
                  CloneLessonPartService cloneLessonPartService,
                  LessonPartAnswerService lessonPartAnswerService,
                  LessonPartQuestionService lessonPartQuestionService,
-                 LessonExtendService lessonExtendService,
+                 //LessonExtendService lessonExtendService,
                  TeacherService teacherService,
                  ModCourseService modservice,
                  ClassService classService,
@@ -78,6 +84,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 , ModLessonExtendService modlessonExtendService
                 , IHostingEnvironment evn
                 , FileProcess fileProcess
+
+
+
+            //use for fixing data
+            , ChapterService newchapterService
+            , LessonService newlessonService
+
                  )
         {
             _service = service;
@@ -91,7 +104,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _cloneLessonPartService = cloneLessonPartService;
             _lessonPartAnswerService = lessonPartAnswerService;
             _lessonPartQuestionService = lessonPartQuestionService;
-            _lessonExtendService = lessonExtendService;
+            //_lessonExtendService = lessonExtendService;
             _teacherService = teacherService;
             _modservice = modservice;
             _classService = classService;
@@ -105,6 +118,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _modlessonPartAnswerService = modlessonPartAnswerService;
             _modlessonPartQuestionService = modlessonPartQuestionService;
             _modlessonExtendService = modlessonExtendService;
+
+            _newchapterService = newchapterService;
+            _newlessonService = newlessonService;
 
             _courseViewMapping = new MappingEntity<CourseEntity, CourseViewModel>();
             _env = evn;
@@ -428,8 +444,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-
-
                     olditem.Updated = DateTime.Now;
                     olditem.Description = item.Description;
                     //check before update
@@ -703,7 +717,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (data == null)
                 {
                     item.Created = DateTime.Now;
-                    item.CreateUser = UserID;
+
                     item.IsAdmin = true;
                     item.IsActive = false;
                     item.Updated = DateTime.Now;
@@ -786,7 +800,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {"Error", "Permisson Error" }
                             });
 
-                await RemoveChapter(chapter);
+                await RemoveCourseChapter(chapter);
                 return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", "Remove OK" },
@@ -803,20 +817,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private async Task RemoveChapter(ChapterEntity chap)
+        private async Task RemoveCourseChapter(CourseChapterEntity chap)
         {
             _lessonService.CreateQuery().DeleteMany(o => o.ChapterID == chap.ID);
             var subchapters = _chapterService.CreateQuery().Find(o => o.ParentID == chap.ID).ToList();
             if (subchapters != null && subchapters.Count > 0)
                 foreach (var chapter in subchapters)
-                    await RemoveChapter(chapter);
+                    await RemoveCourseChapter(chapter);
             ChangeChapterPosition(chap, int.MaxValue);
             await _chapterService.RemoveAsync(chap.ID);
         }
 
-        private int ChangeChapterPosition(ChapterEntity item, int pos)
+        private int ChangeChapterPosition(CourseChapterEntity item, int pos)
         {
-            var parts = new List<ChapterEntity>();
+            var parts = new List<CourseChapterEntity>();
             parts = _chapterService.CreateQuery().Find(o => o.CourseID == item.CourseID && o.ParentID == item.ParentID)
                 .SortBy(o => o.Order).ThenBy(o => o.ID).ToList();
 
@@ -843,6 +857,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             return pos;
         }
+
         #endregion Chapter
 
         [Obsolete]
@@ -1353,38 +1368,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpGet]
-        public JsonResult FixResources()
-        {
-            var parts = _lessonPartService.GetAll().ToList();
-            foreach (var item in parts)
-            {
-                if (item.Description != null)
-                {
-                    if (item.Description.IndexOf("src=") > 0)
-                        if (item.Description.IndexOf("src=\"/") > 0)
-                        {
-                            item.Description = item.Description.Replace("src=\"/", "src=\"http://publisher.edusolution.vn/");
-                            _lessonPartService.CreateOrUpdate(item);
-                        }
-                }
-            }
-            var cloneparts = _cloneLessonPartService.GetAll().ToList();
-            foreach (var item in cloneparts)
-            {
-                if (item.Description != null)
-                {
-                    if (item.Description.IndexOf("src=") > 0)
-                        if (item.Description.IndexOf("src=\"/") > 0)
-                        {
-                            item.Description = item.Description.Replace("src=\"/", "src=\"http://publisher.edusolution.vn/");
-                            _cloneLessonPartService.CreateOrUpdate(item);
-                        }
-                }
-            }
-            return new JsonResult("OK");
-        }
-
-        [HttpGet]
         public JsonResult FixResourcesV2()
         {
             var chapters = _chapterService.GetAll().ToList();
@@ -1460,6 +1443,40 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _classService.Save(@class);
             }
             return new JsonResult("Update " + count + " chapter");
+        }
+
+        public JsonResult FixResourcesV3()
+        {
+
+            //Run once
+
+            //copy to coursechapter collection
+            var unfixchapters = _newchapterService.GetAll().ToEnumerable();
+            foreach (var unfix in unfixchapters)
+            {
+                var sourcechapter = _chapterMappingRev.AutoOrtherType(unfix, new CourseChapterEntity());
+                _chapterService.Collection.InsertOne(sourcechapter);
+               
+            }
+            //clear old chapter
+            _ = _newchapterService.RemoveAllAsync();
+
+            //copy to courselesson collection
+            var unfixlessons = _newlessonService.GetAll().ToEnumerable();
+            foreach (var unfix in unfixlessons)
+            {
+                var sourcelesson = _lessonMappingRev.AutoOrtherType(unfix, new CourseLessonEntity());
+                _lessonService.Collection.InsertOne(sourcelesson);
+            }
+            //clear old lesson
+            _ = _newlessonService.RemoveAllAsync();
+
+
+
+            //Fix Chapter => Clone Chapter => Fix Chapter Progress
+            //Fix Lesson => Clone Lesson => Fix lesson progress Fix Schedule => Fix Calendar, 
+            //Refix Chapter Counter, ClassSubject Counter, Class Counter
+            return new JsonResult("Update done");
         }
     }
 }

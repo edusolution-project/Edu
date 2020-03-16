@@ -159,6 +159,7 @@
                 background-color: #4aae9b;
                 color: white;
             }
+
     </style>
 
     <script>
@@ -620,7 +621,7 @@
                     if (!valid) return false
 
                     if (notify) {
-                        if (!confirm("Lưu ý: thay đổi thông tin môn học sẽ khởi tạo lại toàn bộ thông tin liên quan đến học tập của môn học. Tiếp tục?"))
+                        if (!confirm("Lưu ý: thay đổi thông tin môn học / cập nhật phiên bản sẽ khởi tạo lại toàn bộ thông tin liên quan đến học tập của môn học. Tiếp tục?"))
                             return false;
                     }
                      _that.isLoading = true
@@ -889,6 +890,19 @@
                 },
                 removeSubject(k) {
                     this.class_info.subject.splice(k, 1);
+                },
+                refreshSubject(k, obj) {
+                    if (this.class_info.subject[k].ID != "") {
+                        $(obj.target).attr('oldID', this.class_info.subject[k].ID);
+                        $(obj.target).addClass('text-danger')
+                        this.class_info.subject[k].ID = "";
+                    }
+                    else {
+                        var oldId = $(obj.target).attr('oldID');
+                        this.class_info.subject[k].ID = oldId;
+                        $(obj.target).removeClass('text-danger');
+                    }
+                    
                 },
                 errorImgUrl() {
                     this.class_info.thumbnail.src = null;
@@ -1241,7 +1255,8 @@
                             </select>
                         </div>
                         <div class="btn-group mt-4">
-                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock"><i class="ti-trash"></i></button>
+                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học"><i class="ti-trash"></i></button>
+                            <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
                         </div>
                     </li>
                 </ul>

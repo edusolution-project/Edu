@@ -160,7 +160,8 @@ namespace EnglishPlatform.Controllers
                                             Email = user.UserName,
                                             Phone = user.Phone,
                                             IsActive = true,// active student
-                                            CreateDate = DateTime.Now
+                                            CreateDate = DateTime.Now,
+                                            ID = user.UserID
                                         };
                                         _studentService.CreateQuery().InsertOne(st);
                                     }
@@ -188,7 +189,7 @@ namespace EnglishPlatform.Controllers
                                 new Claim(ClaimTypes.Email, user.UserName),
                                 new Claim(ClaimTypes.Name, FullName),
                                 new Claim(ClaimTypes.Role, role.Code),
-                                new Claim("Type", user.Type),
+                                new Claim("Type", role.Type),
                                 new Claim("RoleID", role.ID)
                             };
 
@@ -535,7 +536,7 @@ namespace EnglishPlatform.Controllers
                 else
                 {
                     //ViewBag.Role = "0";
-                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-","") });
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "") });
                 }
             }
             return View();
@@ -545,6 +546,14 @@ namespace EnglishPlatform.Controllers
         {
             ViewBag.RoomID = roomID;
             return View();
+        }
+
+
+        //Fix Data
+        public JsonResult FixStudentNull()
+        {
+            //var students = _studentService.Collection.f
+            return Json("OK");
         }
     }
 }

@@ -8,9 +8,9 @@
 }
 
 
-    <script>
+    @*<script>
         setActiveMenu("curriculum");
-    </script>
+    </script>*@
 
 @*<script>
     activeTab = "curriculum";
@@ -286,6 +286,19 @@
                 chapters = data.Data.Chapters;
                 lessons = data.Data.Lessons;
 
+                @if(!isLock)
+                {
+                    @:var chapContent = $("<div>", { "id": "0", "pid": "0", "class": "modules" });
+                    @:var chapTitle = $("<div>", { "class": "modules-title row item-row" });
+                    @:title_cPart = $("<div>", { "class": "col-md-12" });
+                    @:title_cPart.append($("<i>", { "class": "fas fa-plus-square mr-1 mt-1", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm Chương", "onclick": "AddChapter('0'); return false;" }));
+                    @:title_cPart.append($("<span>", { "class": "align-top", "text": "Thêm chương", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm Chương", "onclick": "AddChapter('0'); return false;" }));
+                    @:chapTitle.append(title_cPart);
+                    @:chapContent.append(chapTitle);
+                    @:modulesBody.append(chapContent);
+                }
+
+
                 if (chapters.length > 0) {
                     for (i = 0; i < chapters.length; ++i) {
                         var chapter = chapters[i];
@@ -334,7 +347,7 @@
                         }
                     }
                 }
-                else {
+                @*//else {
                     var chapContent = $("<div>", { "id": "0", "pid": "0", "class": "modules" });
                     var chapTitle = $("<div>", { "class": "modules-title row item-row" });
                     var title_cPart = $("<div>", { "class": "col-md-10" });
@@ -348,7 +361,7 @@
                     }
                     chapContent.append(chapTitle);
                     modulesBody.append(chapContent);
-                }
+                //}*@
 
                 if (lessons.length > 0) {
                     for (j = 0; j < lessons.length; j++) {
@@ -486,7 +499,7 @@
     function AddChapter(parentchap) {
         var modal = $("#chapterModal");
         var modalTitle = modal.find("#modalTitle");
-        modalTitle.text("Add chapter");
+        modalTitle.text("Thêm Chương");
         modal.find("[name=Name]").val("");
         modal.find("[name=ID]").val("");
         modal.find("[name=Order]").val("---");

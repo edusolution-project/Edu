@@ -206,8 +206,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var chapters = _chapterService.GetSubChapters(currentCs.CourseID, Parent);
 
-
-
             var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == currentCs.CourseID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
                            where schedule != null

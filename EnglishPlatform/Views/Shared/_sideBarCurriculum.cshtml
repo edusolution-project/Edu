@@ -20,17 +20,10 @@
             toggleMenu(this,'.path_menu');
         });
 
-
-        var questiontrack = $("<i>", {
-            class: "far fa-question-circle top_nav_menu",
-            style: "cursor: pointer",
-        }).click(function () {
-            toggleMenu(this, '.question_menu');
-        });
         renderMenu(currentLesson.ChapterID, true);
         //$('.page-title h1').prepend(questiontrack);
-        $('.page-title h1').prepend(menu);
-        $('.page-title h1').prepend(home);
+        //$('.page-title h1').prepend(menu);
+        $('.right_sidebar').prepend(home);
         //menu.click();
 
     });
@@ -79,7 +72,7 @@
                                 .append($("<ul>", { class: "chap_content" }));
                             chapterPath.find("> .chap_nav_title").click(function () { toggleChap(this) });
                         }
-                        chapterPath.find('> .chap_nav_title').text(chapter.Name).prepend($("<i>", { class: "far fa-folder mr-1" }));;
+                        chapterPath.find('> .chap_nav_title').text(chapter.Name).attr('title',chapter.Name).prepend($("<i>", { class: "far fa-folder mr-1" }));;
                         parentPath.find('> .chap_content').append(chapterPath);
                     })
                 }
@@ -87,13 +80,14 @@
                     $.each(lessons, function (i, lesson) {
                         var lessonPath = $('#les_nav_' + lesson.ID);
                         if (lessonPath.length == 0) {
-                            lessonPath = $("<li>", {
-                                id: 'les_nav_' + lesson.ID,
-                                class: 'les_nav',
-                            }).append($("<i>", { class: "far fa-file-alt mr-1" }))
-                                .append($("<a>", {text: lesson.Title, href: '@Url.Action("Lesson","Curriculum")/' + lesson.ID + '?CourseID=' + '@Course.ID'}));
+                            lessonPath =
+                                $("<a>", { id: 'les_nav_' + lesson.ID, title: lesson.Title, href: '@Url.Action("Lesson","Curriculum")/' + lesson.ID + '?CourseID=' + '@Course.ID' })
+                                .append($("<li>", { class: 'les_nav', })
+                                    .append($("<i>", { class: "far fa-file-alt mr-1" }))
+                                        .append($("<span>", { text: lesson.Title}))
+                                    );
                             if (lesson.ID == currentLesson.ID)
-                                lessonPath.addClass('current');
+                                lessonPath.find('li').addClass('current');
                         }
                         parentPath.find('> .chap_content').append(lessonPath);
                     })
@@ -107,10 +101,6 @@
 
     var currentLesson = @Html.Raw(Json.Serialize(Data))
 
-        console.log(currentLesson);
-
-        //console.log(currentLesson);
-
     var toggleChap = function (obj) {
         $(obj).parent().toggleClass('plus');
         var loaded = $(obj).parent().attr('loaded');
@@ -122,121 +112,182 @@
 </script>
 
 <style>
-    .list_menu {
-        margin-left: -15px;
-    }
-
     .top_nav_menu {
         padding: 5px 10px;
         border: none;
         border-radius: 5px;
+        height: 26px;
+        opacity: 0.7;
+        background: #FFF;
+        position: fixed;
+        left: 5px;
+        top: 7px;
     }
 
+        .top_nav_menu:hover,
         .top_nav_menu.active {
-            border: solid 1px #e60028;
+            opacity: 1;
         }
 
     .right_sidebar {
         width: 300px;
-        background: lightgoldenrodyellow;
+        background: #FFF;
         border: none;
-        transition: left 1s;
+        /*transition: left 2s;*/
+        border: solid 1px #bac3f5;
+        border-left: none;
         position: absolute;
-        top: 55px;
-        left: -302px;
-        bottom: 100px;
-        border-radius: 0 10px 10px 0;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        color: #333;
         z-index: 1;
-        box-shadow: 3px 1px 6px #999;
-        overflow: hidden;
+        overflow-x: visible;
         line-height: 1.7rem;
     }
 
-        .right_sidebar.expand {
-            left: 0;
+    .right_sidebar {
+        left: 0;
+    }
+
+
+    .right-content.expandMenu {
+        left: 300px !important;
+    }
+
+    @@media (max-width : 1200px) {
+        .right_sidebar {
+            width: 200px;
+            font-size: 90%;
         }
 
+        .right-content.expandMenu {
+            left: 200px !important;
+        }
+    }
 
     .path_menu .current,
     .path_menu .current a {
-        font-weight: 600;
-        color: #e60028;
+    }
+
+    .les_nav.current {
+        background: rgb(85,230,191);
     }
 
     .path_menu li,
+    .path_menu .chap_nav_title,
     .path_menu ul {
         cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .path_menu a {
         color: #333;
     }
 
-    .chap_nav_title:hover,
+    /*.chap_nav_title:hover,
     .les_nav:hover {
         text-decoration: underline;
-    }
+    }*/
 
     .right_sidebar > div {
         height: 100%;
-        padding: 10px;
+        /*padding: 10px;*/
         overflow-y: auto;
     }
 
     .chap_content, .p_chap_nav {
         margin-left: 0px;
-        padding-left: 5px;
+        padding: 5px 0 5px 0;
+        border-top: solid 1px #CCC;
     }
 
-        .chap_content li {
-            list-style: none;
-            padding-left: 10px;
+    .chap_nav_title {
+        margin-left: 0px;
+        padding: 5px 0 5px 5px;
+    }
+
+    .chap_content li {
+        list-style: circle inside;
+        padding: 5px 5px 5px 15px;
+    }
+
+
+    ul > :first-child,
+    ul > a:first-child > li {
+        margin-top: -5px;
+    }
+
+
+    ul > ul {
+        margin-bottom: -5px;
+    }
+
+    .p_chap_nav .chap_nav_title {
+        margin-bottom: 0;
+    }
+
+    .chap_nav_title:hover, li:hover {
+        background: #CCC;
+    }
+        
+       .chap_content a:hover {
+            text-decoration: none;
         }
 
-        .p_chap_nav > .chap_content {
-            display: none;
-        }
+    .p_chap_nav > .chap_content {
+        display: none;
+    }
 
-        .p_chap_nav.plus > .chap_content {
-            display: block;
-        }
+    .p_chap_nav.plus > .chap_content {
+        display: block;
+    }
 
     .path_menu .toggle_row {
         text-align: right;
-        margin-bottom: 10px;
-        border-bottom: solid 1px #999;
-        padding-bottom: 5px;
+        /*margin-bottom: 10px;*/
+        /*border-bottom: solid 1px #999;*/
+        padding: 7px;
+        color: #000;
+        height: 40px;
+        background: #999;
     }
 
     .path_menu .content-holder {
         position: absolute;
-        top: 47px;
+        top: 40px;
         left: 0;
-        right: 0;
-        bottom: 10px;
+        right: 0px;
+        bottom: 0px;
         overflow-y: auto;
     }
 
     .path_menu .collapse_menu {
         cursor: pointer;
     }
+    .embed-frame{
+        width:100%;
+        min-height: 800px;
+    }
+     @@media (max-width : 1200px) {
+           .embed-frame{
+            width:100%;
+            max-height: 600px;
+        }
+    }
 </style>
 
 <nav class="right_sidebar expand">
     <div class="path_menu">
         <div class="toggle_row">
-            <i class="far fa-arrow-alt-circle-left collapse_menu">
-                Thu gọn
-            </i>
         </div>
         <div class="content-holder">
             <ul class="chap_content"></ul>
         </div>
     </div>
-    <div class="question_menu">
-        Question
-    </div>
-</nav>
+  </nav>
 <!-- End of Sidebar -->
 <script>
     var root_nav = $('.path_menu .content-holder');
@@ -246,11 +297,13 @@
     })
 
     $(document).ready(function () {
-        $('.main-container').click(function () {
-            hideMenu();
-        })
+        //$('.right-content').click(function () {
+        //    hideMenu();
+        //})
 
-        var timeout = setTimeout(function () { hideMenu() }, 1500);
+        $('.right-content').addClass('expandMenu');
+
+        //var timeout = setTimeout(function () { hideMenu() }, 1500);
     })
 
     function hideMenu() {
@@ -262,6 +315,7 @@
         if ($('.right_sidebar').hasClass("expand")) {
             if ($(menu).is(":visible")) {
                 $('.right_sidebar').removeClass("expand");
+                $('.right-content').removeClass('expandMenu');
             }
             else {
                 $(trigger).addClass('active')
@@ -274,7 +328,9 @@
             $('.right_sidebar > div').hide();
             $(menu).show()
             $('.right_sidebar').addClass("expand");
+            $('.right-content').addClass('expandMenu');
         }
     }
+
 
 </script>

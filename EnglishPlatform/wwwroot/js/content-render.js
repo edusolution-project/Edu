@@ -213,7 +213,7 @@ var Lesson = (function () {
         lessonContent.append(lessonFooter);
 
         //main content (lesson content; part list...., 2 cols interface)
-        var cardBody = $("<div>", { "class": "card-body position-absolute", "style": "top: " + (hideHeader ? "0" : "56") + "px; bottom: 0; left: 0; right: 0" });
+        var cardBody = $("<div>", { "class": "card-body position-absolute", "style": "top: " + (hideHeader ? "0" : "43") + "px; bottom: 0; left: 0; right: 0" });
         lessonContent.append(cardBody);
 
         var lessonBody = $("<div>", { "class": "lesson-body h-100", "id": config.lesson_id });
@@ -245,10 +245,10 @@ var Lesson = (function () {
         //header
         switch (config.mod) {
             case mod.PREVIEW:
-                var headerRow = $("<div>", { "class": "row" });
+                var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
                 lessonHeader.show().append(headerRow);
 
-                var title_wrapper = $("<div>", { "class": "lesson-header-title col-md-9 col-sm-12" });
+                var title_wrapper = $("<div>", { "class": "lesson-header-title" });
                 var title = $("<h5>");
                 var titleText = $("<span>", { "class": "title-text", "text": data.Title })
                 title.append(titleText);
@@ -266,7 +266,7 @@ var Lesson = (function () {
                     }
                 }
 
-                var lessonButton = $("<div>", { "class": "lesson-button col-md-3 col-sm-12 text-right" });
+                var lessonButton = $("<div>", { "class": "lesson-button" });
                 var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sắp xếp", "onclick": "SortPart()" });
                 var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Sửa", "data-toggle": "modal", "data-target": "#lessonModal", "onclick": "EditLesson('" + data.ID + "')" });
                 var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Thêm", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "','" + data.TemplateType + "')" });
@@ -297,10 +297,10 @@ var Lesson = (function () {
                 headerRow.append(lessonButton);
                 break;
             case mod.TEACHERVIEW:
-                var headerRow = $("<div>", { "class": "row" });
+                var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
                 lessonHeader.show().append(headerRow);
 
-                var title_wrapper = $("<div>", { "class": "lesson-header-title col-md-9 col-sm-12" });
+                var title_wrapper = $("<div>", { "class": "lesson-header-title" });
                 var title = $("<h5>");
                 var titleText = $("<span>", { "class": "title-text", "text": data.Title })
                 title.append(titleText);
@@ -309,7 +309,7 @@ var Lesson = (function () {
 
                 if (data.TemplateType == TEMPLATE_TYPE.EXAM) {
                     if (data.Timer > 0) {
-                        var titleTimer = $("<span>", { "class": "title-timer", "text": " - duration: " + data.Timer + "m" });
+                        var titleTimer = $("<span>", { "class": "title-timer", "text": " - thời lượng: " + data.Timer + "m" });
                         title.append(titleTimer);
                     }
                     if (data.Point > 1) {
@@ -318,8 +318,8 @@ var Lesson = (function () {
                     }
                 }
 
-                var lessonButton = $("<div>", { "class": "lesson-button col-md-3 col-sm-12 text-right" });
-                var toggleMode = $("<button>", { "class": "btn btn-primary btn-add", "title": "Switch mode", "onclick": "SwitchMode('" + mod.TEACHEREDIT + "')", "text": "Switch to edit mode" });
+                var lessonButton = $("<div>", { "class": "lesson-button" });
+                var toggleMode = $("<button>", { "class": "btn btn-primary btn-add", "title": "Bật chế đô sửa", "onclick": "SwitchMode('" + mod.TEACHEREDIT + "')", "text": "Sửa" });
                 var iconToggle = $("<i>", { "class": "fas fa-edit ml-2" });
 
                 lessonButton.append(toggleMode);
@@ -327,10 +327,10 @@ var Lesson = (function () {
                 headerRow.append(lessonButton);
                 break;
             case mod.TEACHEREDIT:
-                var headerRow = $("<div>", { "class": "row" });
+                var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
                 lessonHeader.show().append(headerRow);
 
-                var title_wrapper = $("<div>", { "class": "lesson-header-title col-md-9 col-sm-12" });
+                var title_wrapper = $("<div>", { "class": "lesson-header-title" });
                 var title = $("<h5>");
                 var titleText = $("<span>", { "class": "title-text", "text": data.Title })
                 title.append(titleText);
@@ -343,15 +343,15 @@ var Lesson = (function () {
                         title.append(titleTimer);
                     }
                     if (data.Point > 0) {
-                        var titlePoint = $("<span>", { "class": "title-point", "text": " (" + data.Point + "p)" });
+                        var titlePoint = $("<span>", { "class": "title-point", "text": " (" + data.Point + "đ)" });
                         title.append(titlePoint);
                     }
                 }
 
-                var lessonButton = $("<div>", { "class": "lesson-button col-md-3 col-sm-12 text-right" });
+                var lessonButton = $("<div>", { "class": "lesson-button" });
                 var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sort", "onclick": "SortPart()" });
                 var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "','" + data.TemplateType + "')" });
-                var toggleMode = $("<button>", { "class": "btn btn-primary btn-add", "title": "Switch mode", "onclick": "SwitchMode('" + mod.TEACHERVIEW + "')", "text": "Switch to view mode" });
+                var toggleMode = $("<button>", { "class": "btn btn-primary btn-add", "title": "Về chế độ xem", "onclick": "SwitchMode('" + mod.TEACHERVIEW + "')", "text": "Xem" });
 
                 var iconSort = $("<i>", { "class": "fas fa-sort" });
                 var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
@@ -492,7 +492,7 @@ var Lesson = (function () {
                     var _footerRight = $('<div>', { "class": "col-md-2 text-right" });
                     _footerRight.append(nexttab);
                     var _footerCenter = $('<div>', { "class": "col-md-8 text-center" });
-                    _footerCenter.append($("<button>", { "class": "btn btn-primary", "title": "Toggle Explanation", "text": "Toggle Explanation", "onclick": "ToggleExplanation(this)" }));
+                    _footerCenter.append($("<button>", { "class": "btn btn-primary", "title": "Bật/tắt giải thích", "text": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }));
 
                     nav_bottom.append(_footerLeft);
                     nav_bottom.append(_footerCenter);
@@ -652,8 +652,8 @@ var Lesson = (function () {
                 var iconTrash = $("<i>", { "class": "fas fa-trash" });
 
                 var boxButton = $("<div>", { "class": "text-right col-md-2" });
-                boxButton.append($("<button>", { "class": "btn btn-primary btn-sm mr-1 ml-1", "title": "Edit", "data-toggle": "modal", "data-target": "#partModal", "onclick": "EditPart('" + data.ID + "')" }).append(iconEdit))
-                boxButton.append($("<button>", { "class": "btn btn-danger btn-sm mr-1 ml-1", "title": "Remove", "onclick": "RemovePart('" + data.ID + "')" }).append(iconTrash));
+                boxButton.append($("<button>", { "class": "btn btn-primary btn-sm mr-1 ml-1", "style": "width: 40px", "title": "Sửa", "data-toggle": "modal", "data-target": "#partModal", "onclick": "EditPart('" + data.ID + "')" }).append(iconEdit))
+                boxButton.append($("<button>", { "class": "btn btn-danger btn-sm mr-1 ml-1", "style": "width: 40px", "title": "Xóa", "onclick": "RemovePart('" + data.ID + "')" }).append(iconTrash));
                 boxHeader.append(boxButton);
                 break;
             default:
@@ -1008,11 +1008,11 @@ var Lesson = (function () {
                         data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
                         data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
                     ) {
-                        mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path + "", "style": "width:100%; min-height: 800px", "frameborder": "0" }));
+                        mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path + "", "class": "embed-frame", "frameborder": "0" }));
                     }
                     else {
                         if (data.Media != null)
-                            mediaHolder.append($("<embed>", { "src": data.Media.Path + "#view=FitH", "style": "width:100%; min-height: 800px" }));
+                            mediaHolder.append($("<embed>", { "src": data.Media.Path + "#view=FitH", "class": "embed-frame" }));
                     }
                     break;
                 default:
@@ -2888,7 +2888,7 @@ var hideModal = function (modalId) {
 
 var submitForm = function (event, modalId, callback) {
     event.preventDefault();
-    $('.btnSaveForm').hide().after($("<div>", {class: "pending", text: "Đang gửi dữ liệu, vui lòng đợi..." }));
+    $('.btnSaveForm').hide();
 
     var form = $(modalId).find('form');
     var Form = form.length > 0 ? form[0] : window.partForm;

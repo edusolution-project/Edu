@@ -50,8 +50,10 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("TotalLessons")]
         public long TotalLessons { get; set; }
     }
+
     public class CourseService : ServiceBase<CourseEntity>
     {
+
         public CourseService(IConfiguration config) : base(config)
         {
             var indexs = new List<CreateIndexModel<CourseEntity>>

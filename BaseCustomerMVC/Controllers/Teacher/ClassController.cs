@@ -27,6 +27,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SkillService _skillService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
+        private readonly CourseHelper _courseHelper;
         private readonly ClassProgressService _classProgressService;
 
         private readonly ChapterService _chapterService;
@@ -50,14 +51,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
 
-        //private readonly CloneLessonPartService _cloneLessonPartService;
-        //private readonly CloneLessonPartAnswerService _cloneAnswerService;
-        //private readonly CloneLessonPartQuestionService _cloneQuestionService;
-
-        //private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
-        //private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
-        //private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
-
         private readonly FileProcess _fileProcess;
         private readonly StudentHelper _studentHelper;
         private readonly LessonHelper _lessonHelper;
@@ -75,6 +68,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassService service,
             SkillService skillService,
             CourseService courseService,
+            CourseHelper courseHelper,
             ClassProgressService classProgressService,
 
             ChapterService chapterService,
@@ -86,18 +80,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LearningHistoryService learningHistoryService,
 
             ScoreStudentService scoreStudentService,
-            LessonPartService lessonPartService,
-            LessonPartQuestionService lessonPartQuestionService,
-            LessonPartAnswerService lessonPartAnswerService,
             LessonProgressService lessonProgressService,
-
-            CloneLessonPartService cloneLessonPartService,
-            CloneLessonPartAnswerService cloneLessonPartAnswerService,
-            CloneLessonPartQuestionService cloneLessonPartQuestionService,
 
             StudentService studentService, IHostingEnvironment evn,
 
             FileProcess fileProcess,
+            LessonHelper lessonHelper,
+            StudentHelper studentHelper,
 
             ChapterProgressService chapterProgressService
 
@@ -108,6 +97,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _subjectService = subjectService;
             _teacherService = teacherService;
             _courseService = courseService;
+            _courseHelper = courseHelper;
             _service = service;
             _skillService = skillService;
             _classSubjectService = classSubjectService;
@@ -131,16 +121,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _env = evn;
             _fileProcess = fileProcess;
 
-            _studentHelper = new StudentHelper(studentService, accountService);
-            _lessonHelper = new LessonHelper(
-                lessonService,
-                lessonPartService,
-                lessonPartQuestionService,
-                lessonPartAnswerService,
-                cloneLessonPartService,
-                cloneLessonPartAnswerService,
-                cloneLessonPartQuestionService
-                );
+            _studentHelper = studentHelper;
+
+            _lessonHelper = lessonHelper;
+
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
 
@@ -352,7 +336,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-
         //Class Detail Management
         [HttpPost]
         public JsonResult GetDetail(string ID)
@@ -379,187 +362,145 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        [HttpPost]
-        public JsonResult GetMainChapters(string ID)
-        {
-            try
-            {
-                var currentClass = _service.GetItemByID(ID);
-                if (currentClass == null)
-                    return new JsonResult(new Dictionary<string, object>
-                    {
-                        {"Error", "Không tìm thấy lớp học" }
-                    });
-
-                var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == "0").ToList();
-                var chapterExtends = _chapterExtendService.Search(currentClass.ID);
-
-                foreach (var chapter in chapters)
-                {
-                    var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
-                    if (extend != null) chapter.Description = extend.Description;
-                }
-                var response = new Dictionary<string, object>
-                {
-                    { "Data", chapters }
-                };
-
-                return new JsonResult(response);
-            }
-            catch (Exception ex)
-            {
-                return new JsonResult(new Dictionary<string, object>
-                {
-                    { "Data", null },
-                    {"Error", ex.Message }
-                });
-            }
-        }
-
-        [HttpPost]
-        public JsonResult UpdateChapterInfo(string ClassID, ChapterEntity chapter)
-        {
-            try
-            {
-                var currentClass = _service.GetItemByID(ClassID);
-                if (currentClass == null)
-                    return new JsonResult(new Dictionary<string, object>
-                    {
-                        {"Error", "Không tìm thấy lớp học" }
-                    });
-
-                var currentChapter = _chapterService.CreateQuery().Find(c => c.ID == chapter.ID).FirstOrDefault();
-                if (currentChapter == null)
-                    return new JsonResult(new Dictionary<string, object>
-                    {
-                        {"Error", "Không tìm thấy chương" }
-                    });
-
-                var chapterExtend = _chapterExtendService.Search(ClassID, chapter.ID).SingleOrDefault();
-                if (chapterExtend == null)
-                {
-                    chapterExtend = new ChapterExtendEntity
-                    {
-                        ChapterID = chapter.ID,
-                        ClassID = ClassID
-                    };
-                }
-                chapterExtend.Description = chapter.Description;
-                _chapterExtendService.Save(chapterExtend);
-
-                currentChapter.Description = chapter.Description;
-
-                var response = new Dictionary<string, object>
-                {
-                    { "Data", currentChapter }
-                };
-
-                return new JsonResult(response);
-            }
-            catch (Exception ex)
-            {
-                return new JsonResult(new Dictionary<string, object>
-                {
-                    { "Data", null },
-                    {"Error", ex.Message }
-                });
-            }
-        }
-
-        [Obsolete]
-        [HttpPost]
-        public JsonResult GetDetailsLesson(DefaultModel model, string SubjectID = "", string GradeID = "", string UserID = "")
-        {
-            var filter = new List<FilterDefinition<ClassEntity>>();
-            TeacherEntity teacher = null;
-            if (string.IsNullOrEmpty(UserID))
-                UserID = User.Claims.GetClaimByType("UserID").Value;
-            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
-            {
-                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
-                if (teacher == null)
-                {
-                    return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin giảng viên" }
-                    });
-                }
-            }
-            if (teacher != null)
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID));
-
-            if (!string.IsNullOrEmpty(model.SearchText))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
-            }
-            if (!string.IsNullOrEmpty(SubjectID))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            }
-            if (!string.IsNullOrEmpty(GradeID))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == GradeID));
-            }
-
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
-            model.TotalRecord = data.Count();
-            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-                ? data
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
-
-            var response = new Dictionary<string, object>
-            {
-                { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
-                        CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
-                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                        SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
-                        TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
-                    })
-                },
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
-
-        //public JsonResult GetListMember(DefaultModel model)
+        //TODO: Check Usage
+        //[HttpPost]
+        //public JsonResult GetMainChapters(string ID)
         //{
-        //    if (string.IsNullOrEmpty(model.ID))
-        //        return new JsonResult(new Dictionary<string, object> {
-        //                {"Data",null },
-        //                {"Error",model },
-        //                {"Msg","Không tìm thấy thông tin lớp" }
+        //    try
+        //    {
+        //        var currentClass = _service.GetItemByID(ID);
+        //        if (currentClass == null)
+        //            return new JsonResult(new Dictionary<string, object>
+        //            {
+        //                {"Error", "Không tìm thấy lớp học" }
         //            });
-        //    var currentClass = _service.GetItemByID(model.ID);
-        //    if (currentClass == null)
-        //        return new JsonResult(new Dictionary<string, object> {
-        //                {"Data",null },
-        //                {"Error",model },
-        //                {"Msg","Không tìm thấy thông tin lớp" }
-        //            });
-        //    var teacher = _teacherService.GetItemByID(currentClass.TeacherID);
 
-        //    var filter = new List<FilterDefinition<StudentEntity>>();
-        //    filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
-        //    var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
-        //    var studentsView =
-        //        (from r in students.ToList()
-        //         let progress = _classProgressService.GetItemByClassID(currentClass.ID, r.ID) ?? new ClassProgressEntity()
-        //         select _mapping.AutoOrtherType(r, new ClassStudentViewModel()
-        //         {
-        //             ClassName = currentClass.Name,
-        //             ClassStatus = "Đang học",
-        //             LastJoinDate = DateTime.Now,
-        //             Percent = progress.TotalLessons > 0 ? (progress.Completed * 100 / progress.TotalLessons) : 0,
-        //             Score = progress.AvgPoint
-        //         })).ToList();
+        //        var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == "0").ToList();
+        //        var chapterExtends = _chapterExtendService.Search(currentClass.ID);
+
+        //        foreach (var chapter in chapters)
+        //        {
+        //            var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
+        //            if (extend != null) chapter.Description = extend.Description;
+        //        }
+        //        var response = new Dictionary<string, object>
+        //        {
+        //            { "Data", chapters }
+        //        };
+
+        //        return new JsonResult(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object>
+        //        {
+        //            { "Data", null },
+        //            {"Error", ex.Message }
+        //        });
+        //    }
+        //}
+
+        //[HttpPost]
+        //public JsonResult UpdateChapterInfo(string ClassID, ChapterEntity chapter)
+        //{
+        //    try
+        //    {
+        //        var currentClass = _service.GetItemByID(ClassID);
+        //        if (currentClass == null)
+        //            return new JsonResult(new Dictionary<string, object>
+        //            {
+        //                {"Error", "Không tìm thấy lớp học" }
+        //            });
+
+        //        var currentChapter = _chapterService.CreateQuery().Find(c => c.ID == chapter.ID).FirstOrDefault();
+        //        if (currentChapter == null)
+        //            return new JsonResult(new Dictionary<string, object>
+        //            {
+        //                {"Error", "Không tìm thấy chương" }
+        //            });
+
+        //        var chapterExtend = _chapterExtendService.Search(ClassID, chapter.ID).SingleOrDefault();
+        //        if (chapterExtend == null)
+        //        {
+        //            chapterExtend = new ChapterExtendEntity
+        //            {
+        //                ChapterID = chapter.ID,
+        //                ClassID = ClassID
+        //            };
+        //        }
+        //        chapterExtend.Description = chapter.Description;
+        //        _chapterExtendService.Save(chapterExtend);
+
+        //        currentChapter.Description = chapter.Description;
+
+        //        var response = new Dictionary<string, object>
+        //        {
+        //            { "Data", currentChapter }
+        //        };
+
+        //        return new JsonResult(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object>
+        //        {
+        //            { "Data", null },
+        //            {"Error", ex.Message }
+        //        });
+        //    }
+        //}
+
+        //TODO: CHECK USAGE
+        //[Obsolete]
+        //[HttpPost]
+        //public JsonResult GetDetailsLesson(DefaultModel model, string SubjectID = "", string GradeID = "", string UserID = "")
+        //{
+        //    var filter = new List<FilterDefinition<ClassEntity>>();
+        //    TeacherEntity teacher = null;
+        //    if (string.IsNullOrEmpty(UserID))
+        //        UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+        //    {
+        //        teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+        //        if (teacher == null)
+        //        {
+        //            return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",model },
+        //                {"Msg","Không có thông tin giảng viên" }
+        //            });
+        //        }
+        //    }
+        //    if (teacher != null)
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID));
+
+        //    if (!string.IsNullOrEmpty(model.SearchText))
+        //    {
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
+        //    }
+        //    if (!string.IsNullOrEmpty(SubjectID))
+        //    {
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+        //    }
+        //    if (!string.IsNullOrEmpty(GradeID))
+        //    {
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == GradeID));
+        //    }
+
+        //    var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+        //    model.TotalRecord = data.Count();
+        //    var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+        //        ? data
+        //        : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
 
         //    var response = new Dictionary<string, object>
         //    {
-        //        { "Data",new Dictionary<string, object> {
-        //                {"Teacher",teacher },
-        //                {"Students",studentsView }
-        //            }
+        //        { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
+        //                CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
+        //                GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+        //                SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
+        //                TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
+        //            })
         //        },
         //        { "Model", model }
         //    };
@@ -795,7 +736,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        let _sbj = _classSubjectService.GetItemByID(o.ClassSubjectID)
                        let skill = _skillService.GetItemByID(_sbj.SkillID)
                        let studentCount = _classStudentService.GetClassStudents(_class.ID).Count
-                       //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
                        select new
                        {
                            id = o.ID,
@@ -833,6 +773,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
             var returndata = FilterClass(model, SubjectID, GradeID, TeacherID, skipActive);
+            //model.TotalRecord = totalrec;
 
             var response = new Dictionary<string, object>
                 {
@@ -845,6 +786,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public JsonResult GetClassList(DefaultModel model, string SubjectID = "", string GradeID = "")
         {
             var returndata = FilterClass(model, SubjectID, GradeID, User.Claims.GetClaimByType("UserID").Value, true);
+            //model.TotalRecord = totalrec;
 
             var response = new Dictionary<string, object>
                 {
@@ -856,6 +798,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private List<Dictionary<string, object>> FilterClass(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
+            model.TotalRecord = 0;
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
             var classfilter = new List<FilterDefinition<ClassEntity>>();
             FilterDefinition<ClassEntity> ownerfilter = null;
@@ -884,9 +827,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
+
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
-
 
             var data = _classSubjectService.Collection
                 .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
@@ -901,12 +844,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
             }
 
+            if (ownerfilter != null && filter.Count <= 1)//no filter
+                classfilter.Add(ownerfilter);
+
             if (!string.IsNullOrEmpty(model.SearchText))
                 classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
 
+            
+
+            if (classfilter.Count == 0)
+                return null;
 
             var classResult = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classfilter));
+
             model.TotalRecord = classResult.CountDocuments();
+
             var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
             var returndata = from o in classData
                              let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
@@ -1045,7 +997,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             _learningHistoryService.RemoveClassSubjectHistory(oSbj.ID);
                             //resest exam
                             _examService.RemoveClassSubjectExam(oSbj.ID);
-                            
+
 
                             if (nSbj == null)
                                 _classSubjectService.Remove(oSbj.ID);
@@ -1086,7 +1038,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                                 oldData.Members.Add(newMember);
                             oldData.TotalLessons += lessoncount;
-
                         }
                     }
                 }
@@ -1120,7 +1071,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     oldData.Image = pathImage;
                 }
 
-
                 //update data
                 _service.Save(oldData);
 
@@ -1152,6 +1102,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     throw new Exception("Course " + nSbj.CourseID + " is not avaiable");
                 }
+
                 lessoncount = course.TotalLessons;
 
                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
@@ -1171,27 +1122,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 _classSubjectService.Save(nSbj);
 
-                //Clone Lesson
-                var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == nSbj.CourseID).ToList();
-
-                if (lessons != null)
-                    foreach (LessonEntity lesson in lessons)
-                    {
-                        var schedule = new LessonScheduleEntity
-                        {
-                            ClassID = @class.ID,
-                            ClassSubjectID = nSbj.ID,
-                            LessonID = lesson.ID,
-                            Type = lesson.TemplateType,
-                            IsActive = true
-                        };
-                        _lessonScheduleService.Save(schedule);
-                        //_calendarHelper.ConvertCalendarFromSchedule(schedule, "");
-
-                        _lessonHelper.CloneLessonForClass(lesson, nSbj);
-                    }
-
-                _courseService.Collection.UpdateOneAsync(t => t.ID == nSbj.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
+                //Clone Course
+                _courseHelper.CloneForClassSubject(nSbj);
 
                 member = new ClassMemberEntity
                 {

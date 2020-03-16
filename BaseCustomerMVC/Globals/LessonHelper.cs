@@ -75,23 +75,23 @@ namespace BaseCustomerMVC.Globals
 
         //Clone Lesson
         //Clone Lesson
-        public void CloneLessonForClass(LessonEntity lesson, ClassSubjectEntity @class)
+        public void CloneLessonForClassSubject(LessonEntity lesson, ClassSubjectEntity classSubject)
         {
             var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (listLessonPart != null && listLessonPart.Count > 0)
             {
                 if (_cloneLessonPartService.CreateQuery().CountDocuments(
                     o => o.ParentID == lesson.ID &&
-                    o.TeacherID == @class.TeacherID && o.ClassID == @class.ID) == 0)
+                    o.TeacherID == classSubject.TeacherID && o.ClassID == classSubject.ID) == 0)
                 {
                     foreach (var lessonpart in listLessonPart)
                     {
                         var clonepart = _lessonPartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity());
                         clonepart.ID = null;
                         clonepart.OriginID = lessonpart.ID;
-                        clonepart.TeacherID = @class.TeacherID;
-                        clonepart.ClassID = @class.ClassID;
-                        clonepart.ClassSubjectID = @class.ID;
+                        clonepart.TeacherID = classSubject.TeacherID;
+                        clonepart.ClassID = classSubject.ClassID;
+                        clonepart.ClassSubjectID = classSubject.ID;
                         CloneLessonPart(clonepart);
                     }
                 }

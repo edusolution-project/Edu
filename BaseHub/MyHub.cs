@@ -31,10 +31,10 @@ namespace BaseHub
         public async Task SendToUser(string user, string message)
         {
             var listUser = _connections.GetConnections(user);
-            if(listUser != null && user.Length > 0)
+            if (listUser != null && user.Length > 0)
             {
                 IReadOnlyList<string> listUSerReadOnly = listUser?.ToList()?.AsReadOnly();
-                await Clients.Clients(listUSerReadOnly).SendAsync("ChatToUser", new {UserReciver = user , UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+                await Clients.Clients(listUSerReadOnly).SendAsync("ChatToUser", new { UserReciver = user, UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
                 await Clients.Caller.SendAsync("ChatToUser", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
             }
             await Task.CompletedTask;
@@ -48,7 +48,7 @@ namespace BaseHub
                 {
                     _groups.Add(Context.ConnectionId, className);
                     Groups.AddToGroupAsync(Context.ConnectionId, className);
-                    string message = UserName + " đã vào lớp có tên là : "+className;
+                    string message = UserName + " đã vào lớp có tên là : " + className;
                     return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
                 }
                 else
@@ -148,15 +148,18 @@ namespace BaseHub
         {
             lock (_connections)
             {
-                if (!_connections.TryGetValue(key, out HashSet<string> connections))
+                if (key != null)
                 {
-                    connections = new HashSet<string>();
-                    _connections.Add(key, connections);
-                }
+                    if (!_connections.TryGetValue(key, out HashSet<string> connections))
+                    {
+                        connections = new HashSet<string>();
+                        _connections.Add(key, connections);
+                    }
 
-                lock (connections)
-                {
-                    connections.Add(connectionId);
+                    lock (connections)
+                    {
+                        connections.Add(connectionId);
+                    }
                 }
             }
         }
@@ -175,18 +178,21 @@ namespace BaseHub
         {
             lock (_connections)
             {
-                if (!_connections.TryGetValue(key, out HashSet<string> connections))
+                if (key != null)
                 {
-                    return;
-                }
-
-                lock (connections)
-                {
-                    connections.Remove(connectionId);
-
-                    if (connections.Count == 0)
+                    if (!_connections.TryGetValue(key, out HashSet<string> connections))
                     {
-                        _connections.Remove(key);
+                        return;
+                    }
+
+                    lock (connections)
+                    {
+                        connections.Remove(connectionId);
+
+                        if (connections.Count == 0)
+                        {
+                            _connections.Remove(key);
+                        }
                     }
                 }
             }

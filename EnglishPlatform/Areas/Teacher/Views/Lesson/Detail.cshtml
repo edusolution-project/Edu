@@ -9,9 +9,9 @@
     activeTab = "course";
 </script>
 <div class="left-col">
-    <div class="page-title">
+    @*<div class="page-title">
         <h1><a href="@Url.Action("Detail","Class")/@Class.ID#module">@Class.Name</a> / @Data.Title</h1>
-    </div>
+    </div>*@
     <div class="main-container">
         <div id="lessonContainer" class="h-100">
         </div>
@@ -27,7 +27,7 @@
 }
 
 @section Scripts{
-    <script src="~/js/content-render.js?20200311"></script>
+    <script src="~/js/content-render.js?20200315"></script>
     <script>
     var config = {
         container: "lessonContainer",

@@ -8,40 +8,12 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
-    public class ChapterEntity : EntityBase
+    public class ChapterEntity : CourseChapterEntity
     {
-        [JsonProperty("OriginID")]
-        public string OriginID { get; set; }
-        [JsonProperty("Name")]
-        public string Name { get; set; }
-        [JsonProperty("Code")]
-        public string Code { get; set; }
-        [JsonProperty("CourseID")]
-        public string CourseID { get; set; }
-        [JsonProperty("ParentID")]
-        public string ParentID { get; set; }
-        [JsonProperty("ParentType")]
-        public int ParentType { get; set; }
-        [JsonProperty("CreateUser")]
-        public string CreateUser { get; set; }
-        [JsonProperty("Created")]
-        public DateTime Created { get; set; }
-        [JsonProperty("Updated")]
-        public DateTime Updated { get; set; }
-        [JsonProperty("IsAdmin")]
-        public bool IsAdmin { get; set; }
-        [JsonProperty("IsActive")]
-        public bool IsActive { get; set; }
-        [JsonProperty("Order")]
-        public int Order { get; set; }
-
-        [JsonProperty("Description")]
-        public string Description { get; set; }
-
-        [JsonProperty("TotalLessons")]
-        public long TotalLessons { get; set; }
-        [JsonProperty("TotalExams")]
-        public long TotalExams { get; set; }
+        [JsonProperty("ClassID")]
+        public string ClassID { get; set; }
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
     }
     public class ChapterService : ServiceBase<ChapterEntity>
     {
