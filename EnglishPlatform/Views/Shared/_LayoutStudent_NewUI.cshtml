@@ -31,10 +31,7 @@
     <script src="~/js/lib/config.url.base.js"></script>
     <script src="~/js/lib/notification/notification.js"></script>
     <script src="~/js/lib/xhr.js"></script>
-    <script src="~/easy-real-time/js/easy-real-time.js"></script>
     <script src="~/js/hubs/render.html.js"></script>
-    <script src="~/lib/signalr/signalr.js"></script>
-    <script src="~/js/hubs/connection.js"></script>
     <script type="text/javascript">
 
         const g_CurrentUser = {
@@ -62,43 +59,43 @@
                     <div class="tr">
                         <div class="c-d td">T2</div>
                         <div class="c-cl td">
-                            
+
                         </div>
                     </div>
                     <div class="tr">
                         <div class="c-d td">T3</div>
                         <div class="c-cl td">
-                            
+
                         </div>
                     </div>
                     <div class="tr">
                         <div class="c-d td">T4</div>
                         <div class="c-cl td">
-                            
+
                         </div>
                     </div>
                     <div class="tr">
                         <div class="c-d td">T5</div>
                         <div class="c-cl td">
-                            
+
                         </div>
                     </div>
                     <div class="tr">
                         <div class="c-d td">T6</div>
                         <div class="c-cl td">
-                            
+
                         </div>
                     </div>
                     <div class="tr">
                         <div class="c-d td">T7</div>
                         <div class="c-cl td">
-                            
+
                         </div>
                     </div>
                     <div class="tr">
                         <div class="c-d td">CN</div>
                         <div class="c-cl td">
-                            
+
                         </div>
                     </div>
                 </div>
@@ -124,32 +121,7 @@
         </aside>
     </main>
     <!-- chat--->
-    <div class="single-chat" id="single-chat">
-        <div class="box-single-chat">
-            <div class="header-single-chat">
-                <div class="title-single-chat"></div>
-                <button class="btn btn-close" onclick="javascript: document.getElementById('single-chat').classList.remove('open');">X</button>
-            </div>
-            <div class="body-single-chat">
-                <div class="old-message">old-message</div>
-                <div class="message-load">
 
-                    <div class="item-single-chat">
-                       <div class="sender-name">Hoangf Thai Long</div>
-                       <div class="content-single-chat">
-                           msg.innerHTML +=
-                       </div>
-                    </div>
-
-                </div>
-                <div class="message-unread">message-unread</div>
-            </div>
-            <div class="footer-single-chat">
-                <textarea style="resize:none"></textarea>
-                <button class="btn btn-sm btn-success">Send</button>
-            </div>
-        </div>
-    </div>
     <script>
         new Vue({
             el: ".list-news",
@@ -179,7 +151,7 @@
     @*alert*@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
     <script src="~/js/calendar/js/sweetalert.min.js"></script>
-
+    @await Html.PartialAsync("_EasyRealtime")
     <script>
         var currentDateCalendar = '';
         var clLoadMore = "cl-load-more";
@@ -194,7 +166,7 @@
             var day = formatTwoNumber(current.getDate());
             return (qr == void 0)
                 ? `${day}/${month}/${year}`
-                : `${year}-${month}-${day}`;;
+                : `${year}-${month}-${day}`;
         }
         var caculatorDate = function (dt, number) {
             dt.setDate(dt.getDate() - number)
@@ -255,12 +227,12 @@
                                     if (!tableDetail.children[index].children[1].classList.contains(clLoadMore)) {
                                         tableDetail.children[index].children[1].classList.add(clLoadMore);
                                     }
-                                } 
+                                }
                                 var html = `<div class="flex ${_hidden}">
                                             <span class="time">${formatTwoNumber(startDate.getHours())}:${formatTwoNumber(startDate.getMinutes())}</span>
                                             <span class="title">${item.title}</span>
                                         </div>`;
-                                
+
                                 tableDetail.children[index].children[1].innerHTML += html;
                             }
 

@@ -1,0 +1,1916 @@
+﻿<link href="~/css/materialdesignicons.min.css" rel="stylesheet" />
+@*<link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/5.0.45/css/materialdesignicons.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css" rel="stylesheet" />*@
+<link href="~/css/NewChat/app.css" rel="stylesheet" />
+<link href="~/css/NewChat/default.css" rel="stylesheet" />
+<style>
+    #easy-real-time-app .list-reply__item {
+        background: #ffffff;
+    }
+    #easy-real-time-app .box-real-time-app, #easy-real-time-app .context-data-tab {
+        width: 100%;
+        height: 100%;
+        float: left;
+    }
+
+    #easy-real-time-app .context-data-tab {
+       
+    }
+    #easy-real-time-app .slider-bar-left {
+        width: 300px;
+        padding: 20px 10px;
+        float: left;
+        height: 100%;
+        border: 1px solid #ccc;
+    }
+
+    #easy-real-time-app .ul-slider-bar-left {
+        margin: 0;
+    }
+    #easy-real-time-app .ul-slider-bar-left > li {
+        width: 50%;
+        float: left;
+        list-style: none;
+    }
+    #easy-real-time-app .ul-slider-bar-left > li > a {
+        display: block;
+        padding: 5px 10px;
+        color:#000;
+        border:1px solid #fff;
+    }
+    #easy-real-time-app .ul-slider-bar-left > li.active > a{background:#ccc;border:1px solid #ccc}
+    #easy-real-time-app .ul-slider-bar-left > li:hover > a{border:1px solid #ccc;}
+    #easy-real-time-app .context-data-tab > .search-text {
+        margin-top: 10px;
+    }
+    #easy-real-time-app .Item-group {
+        border-bottom: 1px solid #ccc;
+        position:relative;
+    }
+    #easy-real-time-app .Item-group>a{
+         padding: 5px 10px;
+         display:inline-block;
+         width:90%;
+    }
+    #easy-real-time-app .Item-group > span{
+        display:none;
+    }
+    #easy-real-time-app .Item-group > span.active {
+        display:inline-block;
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: red;
+        border-radius: 50%;
+        color: #fff;
+        padding: 0px 5px;
+        font-weight: bold;
+        right: 0;
+        top: 0;
+    }
+    #easy-real-time-app .Item-group.active>a{
+         color:darkred;
+    }
+        #easy-real-time-app .Item-group > a:hover {
+            text-shadow: -10px 3px 10px #0f3e5f;
+            font-weight: 600;
+        }
+
+    [data-active=true] > a::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #00ff90;
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    [data-active=false] > a::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: darkred;
+        display: inline-block;
+        margin-right: 10px;
+    }
+    #easy-real-time-app .easy-main-app {
+        float: right;
+        height: 100%;
+        width: calc(100% - 300px);
+        position:relative;
+    }
+    #easy-real-time-app .easy-main-app .content-easy-main-app {
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        background:#ccc;
+        padding-bottom:300px;
+        padding-top:60px;
+    }
+    #easy-real-time-app .easy-main-app .header-easy-main-app {
+         height: 60px;
+         max-height:60px;
+         overflow:hidden;
+         position: absolute;
+         top: 0;
+        right: 0;
+        left: 0;
+        background: #fff;
+        z-index: 99999;
+    }
+   #easy-real-time-app .easy-main-app .form-easy-main-app {
+        left: 0;
+        right: 0;
+        position: absolute;
+        bottom: 40px;
+        background: #fff;
+    }
+    .composer {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .composer__left {
+        display: flex;
+        align-items: center;
+    }
+
+    .composer__right, .composer__right--send {
+        display: flex;
+        align-items: center;
+    }
+    .composer__right {
+        border: 1px solid #ccc;
+    }
+
+    .composer__right--send {
+        border: none;
+        border-radius: 6.25rem;
+        height: 2.8125rem;
+        width: 2.8125rem;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .composer__middle {
+        flex: 1 1 auto;
+        position: relative;
+        padding-left: 1rem;
+        margin-right: 1rem;
+    }
+        .composer__middle .form-control {
+            border-radius: 6.25rem;
+            overflow: hidden;
+            resize: none;
+            padding: .9rem 8rem .9rem 1.5rem;
+        }
+    .composer__middle--microphone {
+        position: absolute;
+        top: .625rem;
+        right: 1.25rem;
+        cursor: pointer;
+    }
+
+    .composer__middle--photo {
+        position: absolute;
+        top: 1.025rem;
+        right: 1.5rem;
+        cursor: pointer;
+    }
+
+    .composer__middle--attachment {
+        position: absolute;
+        top: 1.025rem;
+        right: 3.75rem;
+        cursor: pointer;
+    }
+    .conversation-panel__footer {
+        padding: 1rem;
+        border-bottom: none !important;
+    }
+
+    .information-panel {
+        width: 23.79rem;
+        display: none;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+    }
+    .composer__left--sticker {
+        cursor: pointer;
+        border-radius: .5rem;
+        padding: 0 .5rem;
+    }
+    .preview-files {
+        background: #fff;
+        position: absolute;
+        top: -55px;
+        width: 100%;
+        height: 50px;
+        margin: auto;
+    }
+    .ca-received__msgwrapper {
+        display: flex;
+        flex: 1 1 auto;
+        width: 90%;
+        justify-content: flex-start;
+        align-items: center;
+        border-bottom:1px solid #ccc;
+    }
+
+    .ca-received__msg {
+        border-radius: .8rem .8rem .8rem 0;
+        position: relative;
+        padding: 1rem;
+        font-weight: 500;
+        min-width: 15.625rem;
+        width:90%;
+    }
+    .ca__file {
+        display: flex;
+        align-items: center;
+    }
+    .ca__filename{
+        margin-left:10px;
+    }
+    .ca__filename--title {
+        font-weight: 600;
+    }
+    .ca__filename--size {
+        font-weight: 400;
+        font-size: .6875rem;
+    }
+    .ca__fileicon>img{
+        width:42px;
+        height:42px;
+        margin-right:10px;
+    }
+    .preview-files > .box-preview-file > .list-preview-files {
+        position: fixed;
+        z-index: 900000;
+        width: 700px;
+        max-width: 100%;
+        background: #fff;
+        max-height: 350px;
+        margin: auto;
+        top: 10%;
+        padding:10px;
+        border:1px solid;
+    }
+    #list-preview-files{
+        max-height: 300px;
+        overflow-x:hidden;
+        overflow-y:scroll;
+    }
+    .disabled{
+        opacity:0.5;
+        cursor:not-allowed;
+    }
+    .box-newfeed-item--avatar {
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        border: 1px solid;
+        border-radius: 50%;
+        overflow: hidden;
+        position: absolute;
+        left: 5px;
+        top: 5px;
+    }
+
+    .box-newfeed-item {
+        max-width:100%;
+        padding-left: 50px;
+        width: 1200px;
+        overflow: hidden;
+        position: relative;
+        margin-top: 10px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .box-newfeed-item--header {
+        padding: 5px;
+    }
+
+    .box-newfeed-item--header .name {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .box-newfeed-item--header .time {
+        color: #757070;
+        font-size: 13px;
+    }
+    .box-newfeed-item--main{
+        padding:10px;
+        background:#fff;
+        margin-bottom:1px;
+        border-bottom:1px solid #ccc;
+    }
+    .box-newfeed-item.view .box-newfeed-item--main,.box-newfeed-item.view{
+        background:#eeef97;
+    }
+    .box-newfeed-item--main__metadata{
+        overflow:hidden;
+        margin-top:30px;
+    }
+    .box-newfeed-item--main__metadata img {
+        width:calc(100%/4 - 10px);
+        text-align: center;
+        float:left;
+        margin:5px;
+    }
+
+    .box-metadata-item {
+        text-align: center;
+    }
+    .box-newfeed-item--main__content__title {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .box-newfeed-item--main__content__text {
+        text-align: justify;
+    }
+    ul.ul-box-form__reply>li {
+        float: left;
+        padding: 5px 10px;
+        list-style: none;
+    }
+
+    ul.ul-box-form__reply {
+        display: block;
+        background: #fff;
+        float: left;
+        width: 100%;
+        box-shadow: -3px 5px 10px;
+    }
+    .box-form__reply--form {
+        padding: 10px;
+        background: #f2f2f2;
+    }
+    .box-list-reply__item{
+        display:none;
+    }
+    .box-list-reply__item.open{
+        display:block;
+    }
+    .chatstyle-01 .ca-received__msg {
+        background: #263238;
+        box-shadow: 0 5px 20px rgba(0,0,0,.1);
+    }
+    .chatstyle-01 .ca-received__msg:not(:last-of-type) {
+        margin: .3125rem 0;
+    }
+    .chatstyle-01 .ca-received__msg {
+        border-radius: .8rem .8rem .8rem 0;
+        position: relative;
+        padding: 1rem;
+        font-weight: 500;
+        min-width: 15.625rem;
+        color:#fff;
+    }
+    .chatstyle-01 .ca-send__msg {
+        background: #007bff;
+        color: #fff;
+        box-shadow: 0 5px 20px rgba(0,0,0,.1);
+        width:100%;
+    }
+    .chatstyle-01 .ca-send__msg {
+        border-radius: .8rem .8rem 0 .8rem;
+        position: relative;
+        padding: 1rem;
+        font-weight: 500;
+        min-width: 15.625rem;
+    }
+    .ca-send__msg .box-newfeed-item--main__metadata a {
+        color: #fff;
+        text-align: left;
+        display: block;
+    }
+    .ca-send__msg .box-newfeed-item--main__metadata, .ca-received__msg .box-newfeed-item--main__metadata{
+        padding: 0;
+        margin: 0;
+    }
+</style>
+<style>
+    .box-chat-eduso{
+        position: fixed;
+        width: 200px;
+        height: 50px;
+        bottom: 8px;
+        right: 50px;
+        z-index: 9999;
+        background: #00304b;
+        border-radius: 13px;
+        box-shadow: 0 0 10px #ccc;
+    }
+    .box-chat-eduso.open{
+        height:900px;
+        width:1200px;
+        max-height:90vh;
+        max-width:100%;
+    }
+    .box-chat-eduso .box-chat-eduso--container-app{
+        display:none;
+    }
+    .box-chat-eduso.open .box-chat-eduso--container-app{
+        display:block;
+    }
+    .chatstyle-01{
+        margin-top:60px;
+    }
+</style>
+<div class="box-chat-eduso">
+    <div class="fn-box-chat-eduso" style="height:50px;color: #fff;text-align: center;padding-top: 15px;" onclick="javascript: this.parentElement.classList.toggle('open'); this.scrollIntoView(true);">
+        Chat
+    </div>
+    <div class="box-chat-eduso--container-app" style="position:relative;width:100%;height:100%">
+        <div id="easy-real-time-app" style="    position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        z-index: 9999;
+        border: 1px solid #ccc;
+        box-shadow: 0 0 20px;
+        overflow: hidden
+    ">
+            <div class="box-real-time-app">
+                <div class="slider-bar-left">
+                    <ul class="ul-slider-bar-left" data-ul-id="ul-slider-bar-left">
+                        <li class="active" data-type="NewFeed" onclick="onActiveThis(this)">
+                            <a href="javascript:void 0;" data-tab="tab-group">Topic</a>
+                            <span></span>
+                        </li>
+                        <li data-type="Chat" onclick="onActiveThis(this)">
+                            <a href="javascript:void 0;" data-tab="tab-user">Chat</a>
+                            <span></span>
+                        </li>
+                    </ul>
+                    <div class="context-data-tab">
+                        <div class="search-text">
+                            <div class="form-group">
+                                <input type="text" name="search-text" value="" class="form-control" placeholder="Group Name / user name" />
+                            </div>
+                        </div>
+                        <div id="tab-chat-btn" class="show-tab-chat float-left w-100 text-center" style="display: none ">
+                            <ul class="ul-slider-bar-left w-50" style="margin:auto">
+                                <li class="active text-center" data-type="Group" onclick="onActiveThis(this)"><a href="javascript:void 0;">Group</a><span></span></li>
+                                <li class="text-center" data-type="User" onclick="onActiveThis(this)"><a href="javascript:void 0;">User</a><span></span></li>
+                            </ul>
+                        </div>
+                        <div class="w-100 padding-10" style="max-height: 75%; overflow: auto; ">
+                            <div id="tab-group" data-type="new-feed">
+
+                            </div>
+                            <div id="tab-user" style="display:none">
+                                <div class="form-group">
+                                    <label>Hoc vien :</label>
+                                    <div class="student"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Giao vien :</label>
+                                    <div class="teacher"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="easy-main-app">
+                    <div class="header-easy-main-app">
+                        <h4 class="title p-2">Thông tin chung</h4>
+                    </div>
+                    <div class="content-easy-main-app" id="content-easy-main-app">
+                        <div class="easy-main-new-feed">
+
+                        </div>
+                        <div class="easy-main-chat-user">
+                            <div class="container" style="max-width:90%;">
+                                <div class="chatstyle-01"></div>
+                            </div>
+                        </div>
+                        <div class="easy-main-chat-group">
+
+                        </div>
+                    </div>
+                    <div class="form-easy-main-app" id="form-easy-main-app" style="display:none">
+                        <div class="conversation-panel__footer" style="position:static">
+                            <div class="composer" id="form-realtime-app">
+                                <div class="composer__middle">
+                                    <input type="text" class="form-control" style="width:80%" name="Title" value="" placeholder="Tiêu đề .... " required />
+                                    <hr style="margin:5px 0" />
+                                    <input type="hidden" name="replyto" value="" />
+                                    <input type="hidden" name="groupName" value="" />
+                                    <input type="file" name="files" style="display:none" onchange="AddFiles(this)" multiple />
+                                    <textarea class="form-control" rows="2" placeholder="Type a message..."></textarea>
+                                    <div class="composer__middle--photo mt-2" onclick="openImage()">
+                                        <i class="mdi mdi-camera"></i>
+                                    </div>
+                                    <div class="composer__middle--attachment mt-2" onclick="openAttach()">
+                                        <i class="mdi mdi-attachment"></i>
+                                    </div>
+                                    <div class="preview-files" id="preview-files-easy-realtime-app">
+                                        <div class="box-preview-file">
+                                            <div class="text-list-file padding-10"><span class="number-files">0</span> Files <button class="btn btn-sm btn-secondary float-right" onclick="openPreviewFile()">Views</button></div>
+                                            <div class="list-preview-files" style="display:none">
+                                                <div class="w-100 text-right">
+                                                    <h4 style="text-align:center; width:80%; float:left">Danh sách file</h4>
+                                                    <button class="btn btn-sm btn-danger" onclick="closePreviewFile()">Close</button>
+                                                </div>
+                                                <hr style="margin:2px" />
+                                                <div id="list-preview-files"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="composer__right" onclick="sendData()">
+                                    <div class="composer__right--send">
+                                        <i class="mdi mdi-send"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-bar-right">
+                    <ul class="ul-slider-bar-right">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var messageCache = {};
+
+    var getRootElement = function () {
+        return document.getElementById("easy-real-time-app");
+    }
+    var getFormRealTimeApp = function () {
+        var getRoot = getRootElement();
+        return getRoot.querySelector("#form-realtime-app");
+    }
+    var getFormEasyRealTimeApp = function () {
+        var getRoot = getRootElement();
+        return getRoot.querySelector("#form-easy-main-app");
+    }
+    var onActiveThis = function (self) {
+        resetForm(false);
+        resetHeader();
+        getFormEasyRealTimeApp().style.display = 'none';
+        var form = getFormRealTimeApp();
+        var itemRoot = self.parentElement;
+        var active = itemRoot.querySelector(".active");
+        if (active != null) active.classList.remove("active");
+        self.classList.add("active");
+        if (self.dataset.type == "Chat" || self.dataset.type == "Group" || self.dataset.type=="User") {
+            document.getElementById("tab-chat-btn").style.display = 'block';
+            if (self.dataset.type == "Chat") {
+                if (document.querySelector("ul>li[data-type='User']").classList.contains("active")) {
+                    document.getElementById("tab-user").style.display = 'block';
+                    document.getElementById("tab-group").style.display = 'none';
+                }
+                else {
+                    document.getElementById("tab-user").style.display = 'none';
+                    document.getElementById("tab-group").style.display = 'block';
+                }
+            }
+            if (self.dataset.type == "User") {
+                document.getElementById("tab-user").style.display = 'block';
+                document.getElementById("tab-group").style.display = 'none';
+            }
+            if (self.dataset.type == "Group") {
+                document.getElementById("tab-user").style.display = 'none';
+                document.getElementById("tab-group").style.display = 'block';
+            }
+            form.querySelector('input[name="Title"]').style.display = 'none';
+            form.querySelector('hr').style.display = 'none';
+            form.querySelector("div#preview-files-easy-realtime-app").style.display='none';
+            
+        } else {
+            form.querySelector('input[name="Title"]').style.display = 'block';
+            form.querySelector('hr').style.display = 'block';
+            document.getElementById("tab-chat-btn").style.display = 'none';
+            document.getElementById("tab-user").style.display = 'none';
+            document.getElementById("tab-group").style.display = 'block';
+            form.querySelector("div#preview-files-easy-realtime-app").style.display='block';
+        }
+        var rootEl = getRootElement();
+        var mainApp = rootEl.querySelector("div.content-easy-main-app");
+        var subMainApp = mainApp.children;
+
+        var newFeed = subMainApp[0];
+        var chat = subMainApp[1];
+        newFeed.innerHTML = "";
+        chat.querySelector('div.chatstyle-01').innerHTML = "";
+    }
+    var gotoView = function (el) {
+        //el.parentElement.scrollTop =  el.parentElement.offsetHeight;
+        setTimeout(function () {
+            el.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+        }, 3000);
+    }
+</script>
+<script src="~/lib/signalr/signalr.js"></script>
+<script>
+
+    var toggleReplyItem = function (self,isRead) {
+        var parent = self.parentElement;
+        if (parent != null) {
+            var root = parent.parentElement;
+            if (root != null) {
+                var item = root.querySelector(".box-list-reply__item");
+                if (item != null) {
+                    if (isRead == void 0) {
+                        item.classList.toggle("open");
+                        if (item.classList.contains("open")) {
+                            self.innerHTML = "thu gọn";
+                        }
+                        else {
+                            self.innerHTML = "xem thêm";
+                        }
+                    } else {
+                        if (!item.classList.contains("open")) {
+                            item.classList.add("open");
+                            self.innerHTML = "thu gọn";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    var connection = new signalR.HubConnectionBuilder().withUrl("/hub").build();
+    var onstart = function (success, error) {
+        connection.start().then(success).catch(error);
+    }
+    var isConnected = false;
+    var successConnect = function () {
+        isConnected = true;
+    }
+    var errorConnect = function (err) {
+        setTimeout(function () {
+            onstart(successConnect, errorConnect);
+        }, 1000);
+    }
+    onstart(successConnect, errorConnect);
+    connection.onclose(function () {
+        onstart(successConnect, errorConnect);
+    });
+    connection.on("JoinGroup", function (data) {
+        var user = document.querySelector("div[data-item-id='" + data.id + "']");
+        if (user != null) {
+            if (!user.classList.contains("true")) {
+                user.classList.add("true");
+                user.setAttribute("data-active", true);
+            }
+        }
+
+    });
+    connection.on("Online", function (data) {
+        if (typeof(data) == "object" && data.length != void 0) {
+            for (var i = 0; i < data.length; i++) {
+                var item = data[i];
+                var user = document.querySelector("div[data-item-id='" + item + "']");
+                if (user != null) {
+                    if (!user.classList.contains("true")) {
+                        user.classList.add("true");
+                        user.setAttribute("data-active", true);
+                    }
+                }
+            }
+        } else {
+            var user = document.querySelector("div[data-item-id='" + data + "']");
+            if (user != null) {
+                if (!user.classList.contains("true")) {
+                    user.classList.add("true");
+                    user.setAttribute("data-active", true);
+                }
+            }
+        }
+    });
+    connection.on("Offline", function (data) {
+        var user = document.querySelector("div[data-item-id='" + data + "']");
+        if (user != null) {
+            user.classList.remove("true");
+            user.setAttribute("data-active", false);
+        }
+    });
+    connection.on("ReceiveGroup", function (data) {
+        //UserSend = UserName, Message = content, Time = DateTime.Now, Type = UserType , Sender = UserID
+        var senderID = data.sender;
+        var message = data.message;
+        var receiver = data.receiver; // group
+
+        var code = message.code, // dùng như id
+            sender = message.sender, // thông tin người gửi
+            title = message.title,
+            content = message.content,
+            replyTo = message.replyTo,
+            created = message.created,
+            messageCode = message.parentID,
+            state = message.state,
+            groupName = message.receiver;
+        //ca-send / ca-received 
+        var className = senderID == g_CurrentUser.id ? "ca-send" : "ca-received";
+
+        var rootElement = getRootElement();
+        var ulTab = rootElement.querySelector('ul[data-ul-id="ul-slider-bar-left"]');
+        var liTopic = ulTab.children[0];
+        var liChat = ulTab.children[1];
+        if (sender.id != g_CurrentUser.id) {
+            if (code == void 0 || code == null || code == "") {
+                if (getState() == 0) {
+                    var span = liTopic.querySelector("span");
+                    span.classList.add("active");
+                    if (span.innerHTML == "") {
+                        span.innerHTML = "1";
+                    }
+                    else {
+                        var number = parseInt(span.innerHTML) + 1;
+                        span.innerHTML = number.toString();
+                    }
+                } else {
+                    //reply
+                    var itemMessage = document.getElementById("box-reply__form_" + messageCode);
+                    if (itemMessage != null) {
+                        var btn = itemMessage.parentElement.querySelector("div.cospan-list-reply__item > a");
+                        if (btn != null) {
+                            toggleReplyItem(btn, false);
+                            renderReply(message);
+                        }
+                    } else {
+                        var group = rootElement.querySelector("div.Item-group[data-item-id='" + receiver + "']");
+                        var spanG = group.querySelector("span");
+                        spanG.classList.add("active");
+                        if (spanG.innerHTML == "") {
+                            spanG.innerHTML = "1";
+                        }
+                        else {
+                            var number = parseInt(spanG.innerHTML) + 1;
+                            spanG.innerHTML = number.toString();
+                        }
+                    }
+                }
+            }
+            else {
+                // chat group
+                if (state == 0) {
+                    // new feed active
+                    if (getState() == 1) {
+                        //tab user active
+                        if (checkStateNotification() == 1) {
+                            var span = liChat.querySelector("span");
+                            span.classList.add("active");
+                            if (span.innerHTML == "") {
+                                span.innerHTML = "1";
+                            }
+                            else {
+                                var number = parseInt(span.innerHTML) + 1;
+                                span.innerHTML = number.toString();
+                            }
+                        } else {
+
+                        }
+                    } else {
+                        //chat to user
+                        if (checkStateNotification() == 1 || checkStateNotification() == 2) {
+                            var group = rootElement.querySelector("div.Item-group[data-item-id='" + receiver + "']");
+                            if (group.classList.contains("active")) {
+                                var time = new Date(message.created);
+                                var html = CreateMessage(className, '', sender.name, content, `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`, receiver, message.medias);
+
+                                var mainApp = rootElement.querySelector("div.content-easy-main-app");
+                                var subMainApp = mainApp.children;
+
+                                var newFeed = subMainApp[0];
+                                var chat = subMainApp[1];
+
+                                chat.querySelector('div.chatstyle-01').innerHTML += html
+                            } else {
+                                var spanG = group.querySelector("span");
+                                if (spanG.innerHTML == "") {
+                                    spanG.innerHTML = "1";
+                                }
+                                else {
+                                    var number = parseInt(spanG.innerHTML) + 1;
+                                    spanG.innerHTML = number.toString();
+                                }
+                            }
+                        }
+                    }
+                }
+                // new feed
+                if (state == 1) {
+                    // tab chat active
+                    if (getState() == 0) {
+                        var span = liTopic.querySelector("span");
+                        span.classList.add("active");
+                        if (span.innerHTML == "") {
+                            span.innerHTML = "1";
+                        }
+                        else {
+                            var number = parseInt(span.innerHTML) + 1;
+                            span.innerHTML = number.toString();
+                        }
+                    } else {
+                        var group = rootElement.querySelector("div.Item-group[data-item-id='" + receiver + "']");
+                        if (group.classList.contains("active")) {
+                            createNewFeedItem(message);
+                        } else {
+                            var spanG = group.querySelector("span");
+                            if (spanG.innerHTML == "") {
+                                spanG.innerHTML = "1";
+                            }
+                            else {
+                                var number = parseInt(spanG.innerHTML) + 1;
+                                spanG.innerHTML = number.toString();
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+        else {
+            
+        }
+
+
+        //sender: {id: "5db11841b5433109d4533cae", email: "quynhdan1894@gmail.com", name: "Quynh Dan", isTeacher: true}
+        //content: "này yêu nhau không ?"
+        //medias: []
+        //parentID: "80305716-82a7-47b7-9d7c-dcf4cfb164f8"
+        //created: "2020-03-16T00:52:42.1077513+07:00"
+        //updated: "2020-03-16T00:52:42.1077508+07:00"
+        //ID: "5e6e6b6a052e7a43504b7819"
+
+        //code: "90fbbbea-333a-41e1-ae5e-9a2a760e2cd7"
+        //sender: {id: "5db11841b5433109d4533cae", email: "quynhdan1894@gmail.com", name: "Quynh Dan", isTeacher: true}
+        //receiver: "5e411f54fce9522790cc909c"
+        //title: "over view"
+        //content: "test"
+        //medias: (2) [{…}, {…}]
+        //state: 1
+        //views: null
+        //replyTo: null
+        //removeByAdmin: false
+        //created: "2020-03-11T04:02:46.843Z"
+        //updated: "2020-03-11T04:02:46.843Z"
+        //ID: "5e6862e6419ce17658dc9c9a"
+    })
+    connection.on("ChatToUser", function (data) {
+        var senderID = data.sender;
+        var message = data.message;
+        var receiver = data.receiver;
+
+        var code = message.code, // dùng như id
+            sender = message.sender, // thông tin người gửi
+            title = message.title,
+            content = message.content,
+            replyTo = message.replyTo,
+            created = message.created,
+            state = message.state,
+            groupName = message.receiver;
+        //ca-send / ca-received 
+        var className = senderID == sender.id ? "ca-send" : "ca-received";
+
+        var rootElement = getRootElement();
+        var ulTab = rootElement.querySelector('ul[data-ul-id="ul-slider-bar-left"]');
+        var liTopic = ulTab.children[0];
+        var liChat = ulTab.children[1];
+        if (state == 0) {
+            var span = liTopic.querySelector("span");
+            if (span.innerHTML == "") {
+                span.innerHTML = "1";
+            }
+            else {
+                var number = parseInt(span.innerHTML) + 1;
+                span.innerHTML = number.toString();
+            }
+        }
+        if (state == 1) {
+            var span = liChat.querySelector("span");
+            if (span.innerHTML == "") {
+                span.innerHTML = "1";
+            }
+            else {
+                var number = parseInt(span.innerHTML) + 1;
+                span.innerHTML = number.toString();
+            }
+        }
+
+
+    })
+</script>
+<script type="text/javascript">
+    var localStoredKey = {
+        group: "Group",
+        student: "Student",
+        teacher: "Teacher",
+        user : "Token"
+    };
+    //khoi tạo
+    var tokenUser = localStorage.getItem(localStoredKey.user);
+    if (tokenUser == null || tokenUser == "" || tokenUser == void 0) {
+        localStorage.setItem(localStoredKey.user, g_CurrentUser.id);
+        removeAllLocalStored();
+    } else {
+        if (tokenUser != g_CurrentUser.id) {
+            removeAllLocalStored();
+            localStorage.setItem(localStoredKey.user, g_CurrentUser.id);
+        }
+    }
+
+    var saveDataFromLocalStored = function (data) {
+        localStorage.setItem(localStoredKey.group, JSON.stringify(data.group));
+        localStorage.setItem(localStoredKey.student, JSON.stringify(data.student));
+        localStorage.setItem(localStoredKey.teacher, JSON.stringify(data.teacher));
+    }
+    var removeAllLocalStored = function () {
+        localStorage.removeItem("time");
+        localStorage.removeItem(localStoredKey.group);
+        localStorage.removeItem(localStoredKey.student);
+        localStorage.removeItem(localStoredKey.teacher);
+    }
+    var getDataFromLocalStored = function () {
+        if (localStorage.getItem("time") == null || localStorage.getItem("time") == "" || localStorage.getItem("time") == void 0) {
+            return false;
+        } else {
+            var date = new Date(localStorage.getItem("time"));
+            var now = new Date();
+            if ((now - date) >= 86400000) {
+                removeAllLocalStored();
+            }
+        }
+
+        if (localStorage.getItem(localStoredKey.group) == null || localStorage.getItem(localStoredKey.group) == "" || localStorage.getItem(localStoredKey.group) == void 0) {
+            return false;
+        }
+        var data = {
+            group: JSON.parse(localStorage.getItem(localStoredKey.group)),
+            student: JSON.parse(localStorage.getItem(localStoredKey.student)),
+            teacher: JSON.parse(localStorage.getItem(localStoredKey.teacher))
+        }
+        return data;
+    }
+    var loadDataGroup = function () {
+        var dataStored = getDataFromLocalStored();
+        if (dataStored == false) {
+            new MyAjax().proccess("GET", "@Url.Action("GetGroupList","EasyRealTime")", null).then(function (data) {
+                var dataJson = JSON.parse(data);
+                switch (dataJson.code) {
+                    case 200:
+                        localStorage.setItem("time", new Date());
+                        saveDataFromLocalStored(dataJson.data);
+                        renderDataEasyRealTime(dataJson.data);
+                        break;
+                    default:
+                        swal({ text: dataJson.message });
+                        break;
+                }
+            });
+        } else {
+            renderDataEasyRealTime(dataStored);
+        }
+    }
+    var renderDataEasyRealTime = function (data) {
+        var group = data.group;
+        var student = data.student;
+        var teacher = data.teacher;
+        renderDataGroup(group);
+        renderDataStudent(student);
+        renderDataTeacher(teacher);
+    }
+    var renderDataGroup = function (data) {
+        var rootElemet = getRootElement();
+        var tabGroup = rootElemet.querySelector("div#tab-group");
+        for (var i = 0; data != null && i < data.length; i++) {
+            var item = data[i];
+            if (tabGroup != null) {
+                tabGroup.innerHTML += renderItemGroup(item.name, item.displayName);
+            }
+        }
+        //update status class
+        UpdateStatusAll();
+    }
+
+    var UpdateStatusAll = function () {
+        if (connection.state == 1) {
+            new MyAjax().proccess("GET", "@Url.Action("GetClassStatus","EasyRealTime")", null).then(function (data) {
+                var dataJson = JSON.parse(data);
+                switch (dataJson.code) {
+                    case 200:
+                        updateGroupStatus(dataJson.data);
+                        break;
+                    default:
+                        swal({ text: dataJson.message });
+                        break;
+                }
+            });
+            return;
+        } else {
+            setTimeout(function () { UpdateStatusAll(); }, 1000);
+        }
+    }
+
+    var renderItemGroup = function (id,name) {
+        return `<div class="Item-group" data-item-id="${id}"><a href="javascript:void 0;" onclick="OpenGroup('${id}','${name}')">${name}</a><span></span><button class="btn btn-sm float-right"> i </button></div>`;
+    }
+    var renderDataStudent = function (data) {
+        var rootElemet = getRootElement();
+        var tabUser = rootElemet.querySelector("div#tab-user");
+        for (var i = 0; data != null && i < data.length; i++) {
+            var item = data[i];
+            if (tabUser != null) {
+                tabUser.querySelector(".student").innerHTML += renderItemGroup(item.id, item.name);
+                var itemEL = tabUser.querySelector("div[data-item-id='" + item.id + "']");
+                if (itemEL != null) {
+                    itemEL.setAttribute("data-active-user", true);
+                    itemEL.setAttribute("data-teacher", false);
+                }
+            }
+        }
+    }
+    var renderDataTeacher = function (data) {
+        var rootElemet = getRootElement();
+        var tabUser = rootElemet.querySelector("div#tab-user");
+        for (var i = 0; data != null && i < data.length; i++) {
+            var item = data[i];
+            if (tabUser != null) {
+                tabUser.querySelector(".teacher").innerHTML += renderItemGroup(item.id, item.name);
+                var itemEL = tabUser.querySelector("div[data-item-id='" + item.id + "']");
+                if (itemEL != null) {
+                    itemEL.setAttribute("data-active-user", true);
+                    itemEL.setAttribute("data-teacher", true);
+                }
+            }
+        }
+    }
+    var updateGroupStatus = function (data) {
+        var rootElemt = getRootElement();
+        sortHtml(rootElemt.querySelector("div#tab-group"),".Item-group", data);
+    }
+    var sortHtml = function (rootElement,target,keys) {
+        var list = rootElement.querySelectorAll(target);
+        for (var i = 0; i < list.length; i++) {
+            var item = list[i];
+            if (keys[item.dataset.itemId] == true) {
+                item.setAttribute("data-active", true);
+                var _true = rootElement.querySelectorAll("div.true");
+                var count = _true == null ? 0 : _true.length;
+                item.parentNode.insertBefore(item, list[count]);
+                item.classList.add("true");
+                item.setAttribute("Title", "Lớp đang hoạt động");
+                /// join to class
+                connection.invoke("GoToClass", item.dataset.itemId);
+            } else {
+                item.setAttribute("data-active", false);
+                item.setAttribute("Title", "Lớp đã hoàn thành");
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        loadDataGroup();
+        LoadNotification();
+    });
+</script>
+<script type="text/javascript">
+    var arrIconFiles = {
+        0: "/images/icon/image_available.svg",
+        1: "/images/icon/word.svg",
+        2: "/images/icon/excel.svg",
+        3: "/images/icon/powerpoint.svg",
+        4: "/images/icon/pdf.svg",
+    };
+    var filesList = {};
+    var cacheDateTime = {};
+    var OpenGroup = function (groupName, title) {
+        var rootElement = getRootElement();
+        var formEasy = getFormEasyRealTimeApp();
+        var form = getFormRealTimeApp();
+        var _groupName = form.querySelector("input[name='groupName']");
+        _groupName.value = groupName;
+        var Item = rootElement.querySelector(`div[data-item-id='${groupName}']`);
+        var ItemActive = rootElement.querySelector("div.Item-group.active");
+        if (ItemActive != null) {
+            ItemActive.classList.remove("active");
+        }
+        if (Item != null) {
+            if (!Item.classList.contains("active")) Item.classList.add("active");
+            if (Item.dataset.active == true || Item.dataset.active == "true") {
+                formEasy.style.display = 'block';
+            } else {
+                if (Item.dataset.activeUser == true || Item.dataset.activeUser == "true") {
+                     formEasy.style.display = 'block';
+                } else {
+                    formEasy.style.display = 'none';
+                    swal({ text: "lớp đã hoàn thành , ko thể trao đổi thêm " });
+                }
+            }
+            var header = rootElement.querySelector(".header-easy-main-app>h4");
+            if (header != null) {
+                header.innerHTML = title;
+            }
+            var now = new Date();
+            loadMessage(groupName, now);
+        }
+    }
+    var scrollViewMore = function () {
+
+    }
+    var subDate = function (dt, number) {
+        dt.setDate(dt.getDate() - number)
+        return dt;
+    }
+
+    var formatNumberTwo = function (n) {
+        if (n < 10) return `0${n}`;
+        return `${n}`;
+    }
+    var formatDateTimeQR = function (dt,qr) {
+        var current = dt;
+        var year = current.getFullYear();
+        var month = formatNumberTwo((current.getMonth() + 1));
+        var day = formatNumberTwo(current.getDate());
+        return (qr == void 0)
+            ? `${day}/${month}/${year}`
+            : `${year}-${month}-${day}`;
+    }
+
+    var loadMessage = function (groupName, endDate) {
+        var tempEndDate = new Date(endDate.getTime());
+        var startDate = subDate(tempEndDate, 7);
+
+        var Item = document.querySelector("div[data-item-id='" + groupName + "']");
+
+        var IsUser = false, IsTeacher = false;
+        if (Item != null) {
+            IsUser = Item.dataset.activeUser;
+            IsTeacher = Item.dataset.teacher;
+
+            if (IsUser == void 0 || IsUser == null) IsUser = false;
+            if (IsTeacher == void 0 || IsTeacher == null) IsTeacher = false;
+        }
+        var rootEl = getRootElement();
+        var mainApp = rootEl.querySelector("div.content-easy-main-app");
+        var subMainApp = mainApp.children;
+
+        var newFeed = subMainApp[0];
+        var chat = subMainApp[1];
+
+        newFeed.innerHTML = "";
+        chat.querySelector('div.chatstyle-01').innerHTML = "";
+
+        var url = `@Url.Action("GetListMessage","EasyRealTime")?groupName=${groupName}&startDate=${formatDateTimeQR(startDate, true)}&endDate=${formatDateTimeQR(endDate, true)}&state=${getState()}&IsUser=${IsUser}&IsTeacher=${IsTeacher}`;
+        new MyAjax().proccess("GET", url, null).then(function (data) {
+            var dataJson = JSON.parse(data);
+            if (dataJson.code == 200) {
+                var messages = dataJson.data.messages;
+                if (messages != null && messages.length > 0) {
+                    for (var i = 0; i < messages.length; i++) {
+                        var message = messages[i];
+                        if (message.state == 1) {
+                            var html = createNewFeedItem(message);
+                            newFeed.innerHTML += html;
+
+                            if (i == messages.length - 1) {
+
+                                var el = newFeed.querySelector("div#new_feed_item_" + message.ID);
+                                gotoView(el);
+                            }
+
+                            loadReply(message.code);
+                        } else {
+                            var className = "ca-received";
+                            if (message.sender.id == g_CurrentUser.id) {
+                                className = "ca-send";
+                            }
+                            var time = new Date(message.created);
+                            var html = CreateMessage(className, '/images/icon/image_available.svg', message.sender.name, message.content, `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`, message.code, message.medias);
+                            chat.querySelector('div.chatstyle-01').innerHTML += html;
+                            if (i == messages.length - 1) {
+                                var el = chat.querySelector('div.chatstyle-01').querySelector("div#message_chat_item_"+message.code);
+                                gotoView(el);
+                            }
+                        }
+
+                        
+                    }
+                } else {
+                    newFeed.innerHTML = "";
+                    chat.querySelector('div.chatstyle-01').innerHTML = "";
+                }
+                console.log(messages);
+            }
+        });
+    }
+    //code: "c3e9567c-ac7f-4dee-a07a-56e422c0ff64"
+    //sender: {id: "5db11841b5433109d4533cae", email: "quynhdan1894@gmail.com", name: "Quynh Dan", isTeacher: true}
+    //receiver: "5e411f54fce9522790cc909c"
+    //title: "longht"
+    //content: "sdfsdfgdfghfgh"
+    //medias: [{…}]
+    //state: 1
+    //views: null
+    //replyTo: null
+    //removeByAdmin: false
+    //created: "2020-03-15T15:27:04.248Z"
+    //updated: "2020-03-15T15:27:04.248Z"
+    //ID: "5e6e4948d4d32c25bc2d5bb0"
+    var createNewFeedItem = function (data) {
+        var time = new Date(data.created);
+        var metadata = createMetaData(data.medias);
+        var form = createFormReply(data.code, data.receiver);
+        var html = `<div class="box-newfeed-item" id="new_feed_item_${data.ID}">
+                        <div class="box-newfeed-item--avatar">
+                            <img src="/images/icon/image_available.svg" alt="Hoang long">
+                        </div>
+                        <div class="box-newfeed-item--header">
+                            <h4><span class="name"> ${data.sender.name} </span><span class="time">${time.toLocaleDateString()} ${time.toLocaleTimeString()}</span></h4>
+                        </div>
+                        <div class="box-newfeed-item--main">
+                            <div class="box-newfeed-item--main__content">
+                                <div class="box-newfeed-item--main__content__title">
+                                   ${data.title}
+                                </div>
+                                <div class="box-newfeed-item--main__content__text">
+                                    ${data.content}
+                                </div>
+                            </div>
+                            ${metadata}
+                        </div>
+                        <div class="box-newfeed-item--footer">${form}
+                            <div class="list-reply__item"><div class="cospan-list-reply__item"><a class="btn btn-sm btn-blue" onclick="toggleReplyItem(this)" style="color:#00a7ff" href="#">xem thêm</a></div>
+                            <div class="box-list-reply__item"></div></div>
+                        </div>
+                    </div>`;
+        return html;
+    }
+    var createFormReply = function (code, group) {
+        return `<div class="box-reply__form" id="box-reply__form_${code}">
+            <div class="box-form__reply--form">
+                <div class="box-form__reply--form__preview_metadata">
+                </div>
+                <input type="file" name="reply-file" value="" style="display:none" accept="" onchange="ReplyAddFile(this,'${code}','${group}')">
+                <textarea rows="1" style="resize:none" class="form-control" placeholder="Tra loi"></textarea>
+                <div class="box-form__reply--item">
+                    <ul class="ul-box-form__reply">
+                        <li onclick="OpenAttack('${code}',1)"><a href="#"><i class="mdi mdi-camera"></i></a></li>
+                        <li onclick="OpenAttack('${code}',2)"><a href="#"><i class="mdi mdi-attachment"></i></a></li>
+                        <li onclick="SendDataReply('${code}','${group}')" class="float-lg-right"><a href="#"><i class="mdi mdi-send"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>`;
+    }
+    var loadReply = function (code) {
+        new MyAjax().proccess("GET", "@Url.Action("GetReply","EasyRealTime")?code=" + code, null).then(function (data) {
+            var dataJson = JSON.parse(data);
+            if (dataJson.data != null && dataJson.data.length > 0) {
+                for (var i = 0; i < dataJson.data.length; i++) {
+                    var item = dataJson.data[i];
+                    renderReply(item, false);
+                }
+            }
+        });
+    }
+    var SendDataReply = function (code, group) {
+        var _code = code, _group = group;
+        var id = `box-reply__form_${code}`;
+        var rootForm = document.getElementById(id);
+
+        var content = rootForm.querySelector("textarea").value;
+
+        var dataForm = new FormData();
+        dataForm.append("code", _code);
+        dataForm.append("groupName", _group);
+        dataForm.append("content", content);
+        if (fileReply[code] != void 0) {
+            if (fileReply[code][group] != void 0) {
+                var keys = Object.keys(fileReply[code][group]);
+                if (keys.length > 0) {
+                    for (var i = 0; i < keys.length; i++) {
+                        var key = keys[i];
+                        var file = fileReply[code][group][key];
+                        dataForm.append("file", file);
+                    }
+                }
+            }
+        }
+        if (content.trim().length > 0 || (fileReply[code] != void 0 && fileReply[code][group] != void 0)) {
+            var url = '@Url.Action("CreateReply","EasyRealTime")';
+            new MyAjax().proccess("POST", url, dataForm).then(function (data) {
+                var dataJson = JSON.parse(data);
+                if (dataJson.data != null) {
+                    var reply = dataJson.data;
+                    renderReply(reply);
+                    if (connection && connection.state == 1) {
+                        connection.invoke("SendToGroup",reply,group);
+                    }
+                }
+            });
+        }
+        else {
+            swal({ text: "nội dung không thể bỏ trống !!!" }).then(function () { rootForm.querySelector("textarea").focus(); });
+        }
+        resetFormReply(_code, _group);
+    }
+    var resetFormReply = function (code,group) {
+        var id = `box-reply__form_${code}`;
+        var rootForm = document.getElementById(id);
+        if (rootForm != null) {
+            rootForm.querySelector("textarea").value = "";
+        }
+        rootForm.querySelector("div.box-form__reply--form__preview_metadata").innerHTML = "";
+        if (fileReply[code] != void 0) {
+            if (fileReply[code][group] != void 0) {
+                fileReply[code][group] = {};
+            }
+        }
+    }
+    //sender: {id: "5db11841b5433109d4533cae", email: "quynhdan1894@gmail.com", name: "Quynh Dan", isTeacher: true}
+    //content: "uniu"
+    //medias: [{path: "/uploads/newfeed/5db11841b5433109d4533cae/u.ini", extends: "file"}]
+    //0: {path: "/uploads/newfeed/5db11841b5433109d4533cae/u.ini", extends: "file"}
+    //path: "/uploads/newfeed/5db11841b5433109d4533cae/u.ini"
+    //extends: "file"
+    //parentID: "c3e9567c-ac7f-4dee-a07a-56e422c0ff64"
+    //created: "2020-03-15T23:52:21.5565694+07:00"
+    //updated: "2020-03-15T23:52:21.5565073+07:00"
+    //ID: "5e6e5d4590683d0484a513f0"
+    var renderReply = function (data, isGoto) {
+        if (isGoto == void 0) isGoto == true;
+
+        var id = `box-reply__form_${data.parentID}`;
+        var rootForm = document.getElementById(id);
+        if (rootForm != null) {
+            var footer = rootForm.parentElement;
+            var listFooterReply = footer.querySelector("div.box-list-reply__item");
+            var item = renderReplyHTML(data);
+            listFooterReply.innerHTML += item;
+            var elItem = listFooterReply.querySelector(`div#reply_${data.ID}`);
+            listFooterReply.insertBefore(elItem, listFooterReply.childNodes[0]);
+            if (isGoto) {
+                gotoView(elItem);
+            }
+        }
+        
+    }
+
+    var renderReplyHTML = function (data) {
+        var time = new Date(data.created);
+        var metaData = createMetaData(data.medias);
+        var boxMeta = metaData.trim() == "" ? "" : `<div class="box-newfeed-item--main__metadata"><div class="box-metadata">${metaData}</div></div>`;
+
+        var html = `<div class="box-newfeed-item" id="reply_${data.ID}">
+            <div class="box-newfeed-item--avatar">
+                <img src="/images/icon/image_available.svg" alt="Hoang long">
+            </div>
+            <div class="box-newfeed-item--header">
+                <h4><span class="name">${data.sender.name} </span><span class="time"> ${time.toLocaleDateString()} ${time.toLocaleTimeString()}</span></h4>
+            </div>
+            <div class="box-newfeed-item--main">
+                <div class="box-newfeed-item--main__content">
+                    <div class="box-newfeed-item--main__content__text">
+                        ${data.content}
+                    </div>
+                </div>
+                ${boxMeta}
+            </div>
+        </div>`;
+
+        return html;
+    }
+
+    var OpenAttack = function (code,id) {
+        var id = `box-reply__form_${code}`;
+        var rootForm = document.getElementById(id);
+        if (rootForm != null) {
+            rootForm.querySelector('input[type="file"]').click();
+        }
+    }
+    var fileReply = {};
+    var ReplyAddFile = function (self, code, group) {
+        if(fileReply[code] == void 0) fileReply[code] = {};
+        if (fileReply[code][group] == void 0); fileReply[code][group] = {};
+        var listFilesRelpy = fileReply[code][group];
+        var parent = self.parentElement;
+        var metaHtml = parent.querySelector("div.box-form__reply--form__preview_metadata");
+        var files = self.files;
+        if (files.length > 0) {
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                if (file != null) {
+                    var id = generateId();
+                    var url = createBlodUrl(file);
+                    var iconImage = 0;
+                    if (file.type.startsWith("image")) {
+                        var html = CreatePreviewFileReply(url, file.name, file.size / 1024, id,code,group);
+                        metaHtml.innerHTML += html;
+                    }
+                    else {
+                        if (file.type.startsWith("application/vnd.openxmlformats-officedocument.wordprocessingml.document") || file.type.startsWith("application/msword")) {
+                            //dox
+                            iconImage = 1;
+                        }
+                        if (file.type.startsWith("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") || file.type.startsWith("application/vnd.ms-excel")) {
+                            //excel
+                            iconImage = 2;
+                        }
+                        if (file.type.startsWith("application/vnd.openxmlformats-officedocument.presentationml.presentatio") || file.type.startsWith("application/vnd.ms-powerpoint")) {
+                            //ppt
+                            iconImage = 3;
+                        }
+                        if (file.type.startsWith("application/pdf")) {
+                            //pdf
+                            iconImage = 4;
+                        }
+                        var html = CreatePreviewFileReply(arrIconFiles[iconImage], file.name, file.size / 1024, id,code,group);
+                        metaHtml.innerHTML += html;
+                    }
+                    listFilesRelpy[id] = file;
+                }
+            }
+        }
+    }
+    var RemoveFileReply = function (id, self,code,group) {
+        var item = self.parentElement;
+        if (item != null) {
+            item.classList.add("disabled");
+            setTimeout(function () { item.remove(); }, 300);
+            if (fileReply[code] != void 0) {
+                if (fileReply[code][group] != void 0)
+                var file = fileReply[code][group][id.replace("file_", "")];
+                if (file != null) {
+                    delete fileReply[code][group][id.replace("file_", "")];
+                }
+            }
+        }
+    } 
+    
+    var createMetaData = function (data) {
+        var listItem = "";
+        for (var i = 0; i < data.length; i++) {
+            var item = data[i];
+            switch (item.extends) {
+                case "video":
+                    listItem += `<div class="box-metadata-item"><video width="400" controls>
+                                    <source src="${item.path}" type="video/mp4">
+                                    <source src="${item.path}" type="video/ogg">
+                                  Your browser does not support HTML5 video.
+                                </video></div>`;
+                    break;
+                case "audio":
+                    listItem += `<div class="box-metadata-item"><audio controls>
+                                  <source src="${item.path}" type="audio/*">
+                                Your browser does not support the audio element.
+                                </audio></div>`;
+                    break;
+                case "image":
+                    listItem += `<div class="box-metadata-item"><img src="${item.path}"></div>`;
+                    break;
+                default:
+                    var name = item.path.split('/');
+                    listItem += `<div class="box-metadata-item"><a href="${item.path}" target="_blank">${name[name.length-1]}</a></div>`;
+                    break;
+            }
+        }
+        var html = `<div class="box-newfeed-item--main__metadata">
+            <div class="box-metadata">
+                ${listItem}
+            </div>
+        </div>`;
+        return listItem == "" ? "" : html;
+    }
+
+    var CacheMessage = function (key,end,start,messages) {
+
+    }
+    var renderMessage = function () {
+
+    }
+    var sendData = function (isUpMedia) {
+        if (isUpMedia == void 0) isUpMedia = false;
+        var form = getFormRealTimeApp();
+        var content = form.querySelector("textarea");
+        var title = form.querySelector("input[name='Title']");
+        var replyto = form.querySelector("input[name='replyto']");
+        var groupName = form.querySelector("input[name='groupName']");
+
+        var state = getState();
+        var formData = new FormData();
+        if (validate(isUpMedia)) {
+            //[FromForm]string groupName,[FromForm] string reply, [FromForm] int state, [FromForm] string title,[FromForm] string content
+            formData.append("groupName", groupName.value);
+            formData.append("reply", replyto.value);
+            formData.append("state", state);
+            formData.append("content", content.value);
+            addFileFromListFile(formData);
+            switch (state) {
+                case 1: //newfeed
+                    formData.append("title", title.value);
+                    break;
+                default:
+                    // chat
+                    break;
+            }
+
+            new MyAjax().proccess("POST", "@Url.Action("CREATE","EASYREALTIME")", formData).then(function (data) {
+                var dataJson = JSON.parse(data);
+                if (dataJson.code == 200) {
+                    if (connection.state == 1) {
+                        var message = dataJson.data.message;
+                        if (message != null) {
+                            if (getState() == 1) {
+                                connection.invoke("SendToGroup", message, message.receiver);
+                                var rootEl = getRootElement();
+                                var mainApp = rootEl.querySelector("div.content-easy-main-app");
+                                var subMainApp = mainApp.children;
+                                var chat = subMainApp[1];
+                                var newFeed = subMainApp[0];
+                                var html = createNewFeedItem(message);
+                                newFeed.innerHTML += html;
+                                gotoView(newFeed.lastElementChild);
+                            }
+                            if (getState() == 0) {
+                                var rootElement = getRootElement();
+                                var tab = rootElement.querySelector("div#tab-chat-btn");
+
+                                var rootEl = getRootElement();
+                                var mainApp = rootEl.querySelector("div.content-easy-main-app");
+                                var subMainApp = mainApp.children;
+                                var chat = subMainApp[1];
+
+                                var time = new Date(message.created);
+                                var html = CreateMessage("ca-send", '', message.sender.name, message.content, `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`, message.code, message.medias);
+                                chat.querySelector('div.chatstyle-01').innerHTML += html
+
+                                if (tab.querySelector("ul>li.active").dataset.type == "User") {
+                                    connection.invoke("SendToUser", groupName.value, message);
+                                } else {
+                                    connection.invoke("SendToGroup", message,  groupName.value);
+                                }
+                            }
+
+                            resetForm(true);
+                        }
+                    } else {
+                        //connect lại
+                    }
+                } else {
+                    swal({ text: "Có lỗi xảy ra" });
+                }
+            });
+        }
+
+    }
+
+    var validate = function (isTrue) {
+        if (isTrue == void 0) isTrue = false;
+        if (isTrue) return true;
+        var form = getFormRealTimeApp();
+        var content = form.querySelector("textarea");
+        var title = form.querySelector("input[name='Title']");
+        var replyto = form.querySelector("input[name='replyto']");
+        var groupName = form.querySelector("input[name='groupName']");
+
+        if (content.value.trim().length == 0) {
+            content.value = "";
+            swal({ text: "nội dung không thể bỏ trống !!!" }).then(function () { content.focus(); });
+            return false;
+        }
+        if (title.value.trim().length == 0 && getState() == 1) {
+            title.value = "";
+            swal({ text: "Tiêu đều không thể bỏ trống !!!" }).then(function () { title.focus(); });
+            return false;
+        }
+        if (groupName.value.trim().length == 0) {
+            return swal({ text: "Bạn chưa chọn group !!!" });
+        }
+        if (replyto.value.trim().length > 0) {
+            var itemReply = document.getElementById(replyto);
+            if (itemReply == null) {
+                swal({ text: "Tin trả lời không tồn tại !!!" });
+                return false;
+            }
+        }
+        return true;
+    }
+    var addFileFromListFile = function (frmData) {
+        var keys = Object.keys(filesList);
+        if (keys.length > 0) {
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                var file = filesList[key];
+                frmData.append("file", file);
+            }
+        }
+    }
+    var resetHeader = function () {
+        var rootElement = getRootElement();
+        rootElement.querySelector(".header-easy-main-app>h4").innerHTML = "";
+        var liactive = document.querySelector("#tab-group>.active");
+        if(liactive != null)
+        liactive.classList.remove("active");
+    }
+    var resetForm = function (isPost) {
+        filesList = {};
+        closePreviewFile();
+        var form = getFormRealTimeApp();
+        var files = form.querySelector('input[type="file"]');
+        var preview = form.querySelector("div#preview-files-easy-realtime-app");
+        var previewNumber = preview.querySelector("span.number-files");
+        var listHmtlFile = preview.querySelector("div#list-preview-files");
+        var content = form.querySelector("textarea");
+        var title = form.querySelector("input[name='Title']");
+        var reply = form.querySelector("input[name='replyto']");
+        if (!isPost) {
+            var group = form.querySelector("input[name='groupName']");
+            group.value = "";
+        }
+        reply.value = "";
+        title.value = "";
+        content.value = "";
+        files.value = "";
+        previewNumber.innerHTML = 0;
+        listHmtlFile.innerHTML = "No File";
+    }
+    var setNumberFile = function () {
+        var form = getFormRealTimeApp();
+        var preview = form.querySelector("div#preview-files-easy-realtime-app");
+        var previewNumber = preview.querySelector("span.number-files");
+        previewNumber.innerHTML = `${Object.keys(filesList).length}`;
+    }
+    var AddFiles = function (self) {
+        if (getState() == 1) {
+            var form = getFormRealTimeApp();
+            var preview = form.querySelector("div#preview-files-easy-realtime-app");
+            var listHmtlFile = preview.querySelector("div#list-preview-files");
+            var files = self.files;
+            if (files.length > 0) {
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    if (file != null) {
+                        var id = generateId();
+                        var url = createBlodUrl(file);
+
+                        var iconImage = 0;
+
+                        if (file.type.startsWith("image")) {
+                            var html = CreatePreviewFile(url, file.name, file.size / 1024, id);
+                            listHmtlFile.innerHTML += html;
+                        }
+                        else {
+                            if (file.type.startsWith("application/vnd.openxmlformats-officedocument.wordprocessingml.document") || file.type.startsWith("application/msword")) {
+                                //dox
+                                iconImage = 1;
+                            }
+                            if (file.type.startsWith("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") || file.type.startsWith("application/vnd.ms-excel")) {
+                                //excel
+                                iconImage = 2;
+                            }
+                            if (file.type.startsWith("application/vnd.openxmlformats-officedocument.presentationml.presentatio") || file.type.startsWith("application/vnd.ms-powerpoint")) {
+                                //ppt
+                                iconImage = 3;
+                            }
+                            if (file.type.startsWith("application/pdf")) {
+                                //pdf
+                                iconImage = 4;
+                            }
+                            var html = CreatePreviewFile(arrIconFiles[iconImage], file.name, file.size / 1000, id);
+                            listHmtlFile.innerHTML += html;
+                        }
+                        filesList[id] = file;
+
+                    }
+                    setNumberFile();
+                }
+            }
+        } else {
+            var files = self.files;
+            if (files.length > 0) {
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    if (file != null) {
+                        var id = generateId();
+                        var url = createBlodUrl(file);
+                        filesList[id] = file;
+                    }
+                }
+                sendData(true);
+            }
+        }
+    }
+    // tra ve 1 newfeed va 0 chat user
+    var getState = function () {
+        var rootElement = getRootElement();
+        var ul = rootElement.querySelector("ul[data-ul-id='ul-slider-bar-left']");
+        var li = ul.querySelector("li.active");
+        if (li == null)
+            return 1;
+        else
+            return li.dataset.type == "Chat" ? 0 : 1;
+    }
+    var openPreviewFile = function () {
+        var form = getFormRealTimeApp();
+        var preview = form.querySelector("div#preview-files-easy-realtime-app");
+        var listHmtlFile = preview.querySelector("div.list-preview-files");
+        listHmtlFile.style.display = 'block';
+    }
+    var closePreviewFile = function () {
+        var form = getFormRealTimeApp();
+        var preview = form.querySelector("div#preview-files-easy-realtime-app");
+        var listHmtlFile = preview.querySelector("div.list-preview-files");
+        listHmtlFile.style.display = 'none';
+    }
+    var openImage = function () {
+        var form = getFormRealTimeApp();
+        var inputFile = form.querySelector("input[type='file']");
+        inputFile.setAttribute("accept", "image/*");
+        inputFile.click();
+    }
+    var openAttach = function () {
+        var form = getFormRealTimeApp();
+        var inputFile = form.querySelector("input[type='file']");
+        inputFile.setAttribute("accept", "application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint,application/pdf,application/x-zip-compressed");
+        inputFile.click();
+    }
+    
+    var CreatePreviewFile = function (fileIcon, fileName, fileSize, id, noRemvove) {
+        if (noRemvove == void 0) noRemvove = true;
+        var btn = noRemvove ? ` <a class="btn btn-sm btn-danger float-right" href="javascript:void 0;" onclick="RemoveFile('file_${id}')"><span><i class="mdi mdi-trash-can-outline"></i></span></a>` : "";
+        return `<div class="ca-received__msgwrapper" id="file_${id}"><div class="ca-received__msg">
+                    <div class="ca__file">
+                        <div class="ca__fileicon">
+                            <img src="${fileIcon}" alt="${fileName}">
+                        </div>
+                        <div class="ca__filename">
+                            <span class="ca__filename--title">${fileName}</span>
+                            <span class="ca__filename--size">${fileSize} kb</span>
+                        </div>
+                    </div>                                              
+                </div>
+               ${btn}
+            </div></div>`;
+    }
+    var CreatePreviewFileReply = function (fileIcon,fileName,fileSize,id,code,group) {
+        return `<div class="ca-received__msgwrapper" id="file_${id}"><div class="ca-received__msg">
+                    <div class="ca__file">
+                        <div class="ca__fileicon">
+                            <img src="${fileIcon}" alt="${fileName}">
+                        </div>
+                        <div class="ca__filename">
+                            <span class="ca__filename--title">${fileName}</span>
+                            <span class="ca__filename--size">${fileSize} kb</span>
+                        </div>
+                    </div>                                              
+                </div>
+                <a class="btn btn-sm btn-danger float-right" href="javascript:void 0;" onclick="RemoveFileReply('file_${id}',this,'${code}', '${group}')"><span><i class="mdi mdi-trash-can-outline"></i></span></a>
+            </div></div>`;
+    }
+    var RemoveFile = function (id) {
+        var form = getFormRealTimeApp();
+        var preview = form.querySelector("div#preview-files-easy-realtime-app");
+        var listHmtlFile = preview.querySelector("div#list-preview-files");
+        var item = listHmtlFile.querySelector("div#" + id);
+        if (item != null) {
+            item.classList.add("disabled");
+            setTimeout(function () { item.remove(); }, 300);
+            var file = filesList[id.replace("file_","")];
+            if (file != null) {
+                delete filesList[id.replace("file_","")];
+            }
+        }
+        setNumberFile();
+    }
+    /// className = ca-send / ca-received 
+    var CreateMessage = function (className, avatar, name, content, time, code, medias) {
+        if (avatar == "") avatar = "/images/icon/image_available.svg";
+        var media = "";
+        if (medias != null && medias != void 0 && medias.length > 0) {
+            media = createMetaData(medias);
+        }
+        if ((content == "null" || content == null) && media == "") { return ""; }
+
+        if ((content == "null" || content == null) && media != "") {
+            content = "";
+        }
+
+        var receiver = className == "ca-received" ? `<div class="${className}__msg">${content}${media}</div>` : "";
+        var sender = className == "ca-received" ? "" : `<div class="${className}__msg">${content}${media}</div>`;
+
+        var avatar1 = className != "ca-received" ? "" : `<div class="user-avatar user-avatar-sm user-avatar-rounded online"><img src="${avatar}" alt="${name}" title="${name}"></div>`;
+        var avatar2 = className == "ca-received" ? "" : `<div class="user-avatar user-avatar-sm user-avatar-rounded online"><img src="${avatar}" alt="${name}" title="${name}"></div>`;
+
+        return `<div class="${className}" id="message_chat_item_${code}">
+            ${avatar1}
+            <div class="${className}__msg-group">
+                ${CreateMessageWrapper(className, sender, receiver, code,media)}
+                <div class="metadata">
+                    <span class="time">${time}</span>
+                </div>
+            </div>${avatar2}
+        </div>`;
+    }
+    var CreateMessageWrapper = function (className,sender,receiver, code) {
+        var classxxx = `${className}__msgwrapper`;
+        var action = receiver == "" ? "" : `<div class="ca-msg-actions">
+                    <div class="iconbox-dropdown dropdown">
+                        <div class="iconbox btn-hovered-light" id="dropdownMenuButtonsr1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="iconbox__icon mdi mdi-dots-horizontal"></i>
+                        </div>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonsr1" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 37px, 0px);">
+                            <a class="dropdown-item" href="javascript:void 0;" onclick="ReplyMessage('${code}')">
+                                <span><i class="mdi mdi-share-outline"></i></span> 
+                                <span>Forward</span>
+                            </a>
+                            <a class="dropdown-item" href="javascript:void 0;" onclick="DeleteMessage('${code}')>
+                                <span><i class="mdi mdi-trash-can-outline"></i></span> 
+                                <span>Delete</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+        return `<div id="_msg_${code}" class="${classxxx}">${receiver}${action}${sender}</div>`;
+    }
+</script>
+<script>
+    var checkStateNotification = function () {
+        var liActiveLeft = document.querySelector('ul[data-ul-id="ul-slider-bar-left"]>li.active');
+        if (liActiveLeft != null) {
+            if (liActiveLeft.dataset.type == "Chat") {
+                var btnTab = document.getElementById("tab-chat-btn");
+                if (btnTab != null) {
+                    var liActiveSubLeft = btnTab.querySelector("ul>li.active");
+                    if (liActiveSubLeft.dataset.type == "Group") {
+                        return 2; // group
+                    } else {
+                        return 1; // user
+                    }
+                }
+            } 
+            if (liActiveLeft.dataset.type == "NewFeed") {
+                return 0; // new feed
+            }
+        }
+        return -1;
+
+    }
+    var LoadNotification = function () {
+        new MyAjax().proccess("GET", "@Url.Action("GetListNotification","EasyRealTime")", null).then(function (data) {
+            var dataJson = JSON.parse(data);
+            if (dataJson.data != null && dataJson.data.length > 0) {
+                RenderNotification(dataJson.data);
+            }
+        })
+    }
+    var RenderNotification = function (data) {
+        var liLeft = document.querySelectorAll('ul[data-ul-id="ul-slider-bar-left"]>li');
+        var liSubLeft = document.querySelectorAll('div#tab-chat-btn>ul>li');
+
+        var newFeed = liLeft[0];
+        var chat = liLeft[1];
+        var group = liSubLeft[0];
+        var user = liSubLeft[1];
+
+        for (var i = 0; data != null && i < data.length; i++) {
+            var item = data[i];
+            if (item.isPrivated) {
+                
+            } else {
+
+            }
+
+        }
+
+        if (checkStateNotification() == 0) {
+
+
+            return;
+        }
+        if (checkStateNotification() == 1) {
+
+
+            return;
+        }
+        if (checkStateNotification() == 2) {
+
+
+            return;
+        }
+    }
+    var UpdateNotification = function () {
+
+    }
+
+</script>

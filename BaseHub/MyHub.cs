@@ -28,14 +28,14 @@ namespace BaseHub
             return Task.CompletedTask;
         }
 
-        public async Task SendToUser(string user, string message)
+        public async Task SendToUser(string user, object message)
         {
             var listUser = _connections.GetConnections(user);
-            if (listUser != null && user.Length > 0)
+            if(listUser != null && user.Length > 0)
             {
                 IReadOnlyList<string> listUSerReadOnly = listUser?.ToList()?.AsReadOnly();
-                await Clients.Clients(listUSerReadOnly).SendAsync("ChatToUser", new { UserReciver = user, UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
-                await Clients.Caller.SendAsync("ChatToUser", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+                await Clients.Clients(listUSerReadOnly).SendAsync("ChatToUser", new {UserReciver = user , UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, Receiver = user, Sender = UserID });
+                await Clients.Caller.SendAsync("ChatToUser", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, Receiver = user, Sender = UserID });
             }
             await Task.CompletedTask;
         }
@@ -48,8 +48,8 @@ namespace BaseHub
                 {
                     _groups.Add(Context.ConnectionId, className);
                     Groups.AddToGroupAsync(Context.ConnectionId, className);
-                    string message = UserName + " đã vào lớp có tên là : " + className;
-                    return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+                    string message = UserName + " đã vào lớp có tên là : "+className;
+                    return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, Sender = UserID });
                 }
                 else
                 {
@@ -64,7 +64,7 @@ namespace BaseHub
 
         public Task SendToGroup(object content, string groupName)
         {
-            return Clients.Group(groupName).SendAsync("ReceiveGroup", new { UserSend = UserName, Message = content, Time = DateTime.Now, Type = UserType });
+            return Clients.Group(groupName).SendAsync("ReceiveGroup", new { UserSend = UserName, Message = content, Time = DateTime.Now, Type = UserType , Sender = UserID ,Receiver = groupName });
         }
 
         public async Task OutOfTheClassroom(string className)
@@ -80,12 +80,18 @@ namespace BaseHub
             // offline
             RemoveAllGroup();
             _connections.Remove(UserID, Context.ConnectionId);
+           if(_connections.GetConnections(UserID) == null || _connections.GetConnections(UserID).Count() == 0)
+            {
+                Clients.All.SendAsync("Offline", UserID);
+            }
             return base.OnDisconnectedAsync(exception);
         }
         public override Task OnConnectedAsync()
         {
             //online
             _connections.Add(UserID, Context.ConnectionId);
+            Clients.All.SendAsync("Online", UserID);
+            Clients.Caller.SendAsync("Online", _connections.GetKeys());
             return base.OnConnectedAsync();
         }
         protected string KeyUser
@@ -144,22 +150,24 @@ namespace BaseHub
             }
         }
 
+        public IEnumerable<T> GetKeys()
+        {
+            return _connections.Keys?.ToList();
+        }
+
         public void Add(T key, string connectionId)
         {
             lock (_connections)
             {
-                if (key != null)
+                if (!_connections.TryGetValue(key, out HashSet<string> connections))
                 {
-                    if (!_connections.TryGetValue(key, out HashSet<string> connections))
-                    {
-                        connections = new HashSet<string>();
-                        _connections.Add(key, connections);
-                    }
+                    connections = new HashSet<string>();
+                    _connections.Add(key, connections);
+                }
 
-                    lock (connections)
-                    {
-                        connections.Add(connectionId);
-                    }
+                lock (connections)
+                {
+                    connections.Add(connectionId);
                 }
             }
         }
@@ -178,21 +186,18 @@ namespace BaseHub
         {
             lock (_connections)
             {
-                if (key != null)
+                if (!_connections.TryGetValue(key, out HashSet<string> connections))
                 {
-                    if (!_connections.TryGetValue(key, out HashSet<string> connections))
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    lock (connections)
-                    {
-                        connections.Remove(connectionId);
+                lock (connections)
+                {
+                    connections.Remove(connectionId);
 
-                        if (connections.Count == 0)
-                        {
-                            _connections.Remove(key);
-                        }
+                    if (connections.Count == 0)
+                    {
+                        _connections.Remove(key);
                     }
                 }
             }

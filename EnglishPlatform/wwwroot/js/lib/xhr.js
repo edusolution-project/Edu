@@ -171,3 +171,5 @@ var MyAjax = (function () {
     }
     return MyAjax;
 }());
+
+var _ajax = new MyAjax();

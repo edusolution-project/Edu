@@ -139,7 +139,14 @@ namespace BaseCustomerEntity.Database
 
         public ClassProgressEntity GetItemByClassID(string ClassID, string StudentID)
         {
-            return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID).FirstOrDefault();
+            try
+            {
+                return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID)?.FirstOrDefault();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task DecreaseClassSubject(ClassSubjectProgressEntity clssbj)
