@@ -915,8 +915,21 @@
     var localStoredKey = {
         group: "Group",
         student: "Student",
-        teacher : "Teacher"
+        teacher: "Teacher",
+        user : "Token"
     };
+    //khoi tạo
+    var tokenUser = localStorage.getItem(localStoredKey.user);
+    if (tokenUser == null || tokenUser == "" || tokenUser == void 0) {
+        localStorage.setItem(localStoredKey.user, g_CurrentUser.id);
+        removeAllLocalStored();
+    } else {
+        if (tokenUser != g_CurrentUser.id) {
+            removeAllLocalStored();
+            localStorage.setItem(localStoredKey.user, g_CurrentUser.id);
+        }
+    }
+
     var saveDataFromLocalStored = function (data) {
         localStorage.setItem(localStoredKey.group, JSON.stringify(data.group));
         localStorage.setItem(localStoredKey.student, JSON.stringify(data.student));
