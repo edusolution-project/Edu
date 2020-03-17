@@ -52,6 +52,9 @@ namespace EnglishPlatform
             services.AddServiceBase();
             services.AddScoped<FileProcess>();
             services.AddSingleton<CalendarHelper>();
+            services.AddSingleton<CourseHelper>();
+            services.AddSingleton<StudentHelper>();
+            services.AddSingleton<LessonHelper>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             //services.AddMvc(options=> {
             //    options.Filters.Add<PermissionAttribute>();
