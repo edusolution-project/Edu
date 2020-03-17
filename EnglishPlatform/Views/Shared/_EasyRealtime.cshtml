@@ -1465,7 +1465,8 @@
             switch (item.extends) {
                 case "video":
                     listItem += `<div class="box-metadata-item"><video width="400" controls>
-                                  <source src="${item.path}" type="video/*">
+                                    <source src="${item.path}" type="video/mp4">
+                                    <source src="${item.path}" type="video/ogg">
                                   Your browser does not support HTML5 video.
                                 </video></div>`;
                     break;
@@ -1746,7 +1747,7 @@
     }
     
     var CreatePreviewFile = function (fileIcon, fileName, fileSize, id, noRemvove) {
-        if (noRemvove == void 0) noRemvove = false;
+        if (noRemvove == void 0) noRemvove = true;
         var btn = noRemvove ? ` <a class="btn btn-sm btn-danger float-right" href="javascript:void 0;" onclick="RemoveFile('file_${id}')"><span><i class="mdi mdi-trash-can-outline"></i></span></a>` : "";
         return `<div class="ca-received__msgwrapper" id="file_${id}"><div class="ca-received__msg">
                     <div class="ca__file">
