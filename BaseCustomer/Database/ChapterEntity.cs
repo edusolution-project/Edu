@@ -72,5 +72,10 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(c => c.CourseID == CourseID && c.ParentID == ParentID).SortBy(t => t.Order).ToList();
         }
+
+        public async Task RemoveClassSubjectChapter(string ClassSubjectID)
+        {
+            await Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+        }
     }
 }

@@ -850,7 +850,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (!string.IsNullOrEmpty(model.SearchText))
                 classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
 
-            
+
 
             if (classfilter.Count == 0)
                 return null;
@@ -946,8 +946,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                     _service.Save(item);
                 }
-
-
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
                     {"Data",item },
@@ -989,18 +987,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (nSbj == null || (nSbj.CourseID != oSbj.CourseID))
                         //delete oldSubject
                         {
-                            ////remove old schedule
-                            _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassSubjectID == oSbj.ID);
-                            //remove clone lesson part
-                            _lessonHelper.RemoveCloneClassSubject(oSbj.ID);
-                            //remove progress: learning history => class progress, chapter progress, lesson progress
-                            _learningHistoryService.RemoveClassSubjectHistory(oSbj.ID);
-                            //resest exam
-                            _examService.RemoveClassSubjectExam(oSbj.ID);
-
-
-                            if (nSbj == null)
-                                _classSubjectService.Remove(oSbj.ID);
+                            _ = RemoveClassSubject(oSbj);
+                            if (nSbj != null)
+                                nSbj.ID = null;//remove ID to create new
                         }
 
                         if (nSbj != null)
@@ -1073,8 +1062,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 //update data
                 _service.Save(oldData);
-
-                //_courseService.Collection.UpdateOneAsync(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
+                //refresh class total lesson
+                _ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -1085,6 +1074,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(response);
             }
         }
+
+        private async Task RemoveClassSubject(ClassSubjectEntity cs)
+        {
+            ////remove old schedule
+            await _lessonScheduleService.RemoveClassSubject(cs.ID);
+            //remove chapter
+            await _chapterService.RemoveClassSubjectChapter(cs.ID);
+            //remove clone lesson
+            await _lessonHelper.RemoveClassSubjectLesson(cs.ID);
+            //remove progress: learning history => class progress, chapter progress, lesson progress
+            await _learningHistoryService.RemoveClassSubjectHistory(cs.ID);
+            //remove exam
+            await _examService.RemoveClassSubjectExam(cs.ID);
+            //remove classSubject
+            _classSubjectService.Remove(cs.ID);
+        }
+
 
         private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount)
         {
@@ -1160,10 +1166,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     //Remove Class Student
                     _classStudentService.RemoveManyClass(ids);
-                    //remove Schedule, Part, Question, Answer
-                    _lessonScheduleService.CreateQuery().DeleteMany(o => ids.Contains(o.ClassID));
+                    //remove ClassSubject
+                    _classSubjectService.RemoveClassSubjects(ids);
+                    //remove Lesson, Part, Question, Answer
                     _lessonHelper.RemoveClone(ids);
+                    //remove Schedule
+                    _ = _lessonScheduleService.RemoveManyClass(ids);
+                    //remove History
+                    _ = _learningHistoryService.RemoveClassHistory(ids);
+                    //remove Exam
                     _examService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    //remove Exam Detail
                     _examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     var delete = _service.Collection.DeleteMany(o => ids.Contains(o.ID));
                     return new JsonResult(delete);

@@ -67,7 +67,7 @@ namespace BaseCustomerEntity.Database
             if (progress == null)
             {
 
-                var totalLessons = _lessonService.CountCourseLesson(currentObj.CourseID);
+                var totalLessons = _lessonService.CountClassSubjectLesson(item.ClassSubjectID);
 
                 //create new progress
                 await Collection.InsertOneAsync(new ClassSubjectProgressEntity

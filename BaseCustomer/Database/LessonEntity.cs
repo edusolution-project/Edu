@@ -56,5 +56,15 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.CountDocumentsAsync(t => t.CourseID == CourseID).Result;
         }
+
+        public long CountClassLesson(string ClassID)
+        {
+            return Collection.CountDocumentsAsync(t => t.ClassID == ClassID).Result;
+        }
+
+        public long CountClassSubjectLesson(string ClassSubjectID)
+        {
+            return Collection.CountDocumentsAsync(t => t.ClassSubjectID == ClassSubjectID).Result;
+        }
     }
 }

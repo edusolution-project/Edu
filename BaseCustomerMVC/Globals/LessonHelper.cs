@@ -59,18 +59,20 @@ namespace BaseCustomerMVC.Globals
             _cloneAnswerService.Collection.DeleteMany(o => o.ClassID == id);
         }
 
-        public void RemoveCloneClassSubject(string id)
+        public async Task RemoveClassSubjectLesson(string ClassSubjectID)
         {
-            _cloneLessonPartService.Collection.DeleteMany(o => o.ClassSubjectID == id);
-            _cloneQuestionService.Collection.DeleteMany(o => o.ClassSubjectID == id);
-            _cloneAnswerService.Collection.DeleteMany(o => o.ClassSubjectID == id);
+            _ = _lessonService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
+            _ = _cloneLessonPartService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
+            _ = _cloneQuestionService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
+            _ = _cloneAnswerService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
         }
 
         public void RemoveClone(string[] ids)
         {
-            _cloneLessonPartService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
-            _cloneQuestionService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
-            _cloneAnswerService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+            _ = _lessonService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
+            _ = _cloneLessonPartService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
+            _ = _cloneQuestionService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
+            _ = _cloneAnswerService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
         }
 
         //Clone Lesson

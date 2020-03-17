@@ -70,12 +70,7 @@ namespace BaseCustomerEntity.Database
             var progress = GetItemByClassID(item.ClassID, item.StudentID);
             if (progress == null)
             {
-                var courseIds = _classSubjectService.GetCourseIdsByClassID(item.ClassID);
-                long totalLessons = 0;
-                foreach (var courseID in courseIds)
-                {
-                    totalLessons += _lessonService.CountCourseLesson(courseID);
-                }
+                var totalLessons = _lessonService.CountClassLesson(item.ClassID);
 
                 //create new progress
                 await Collection.InsertOneAsync(new ClassProgressEntity
@@ -121,22 +116,16 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public async Task RefreshTotalLessonForSubject(string ClassSubjectID)
+        public async Task<long> RefreshTotalLessonForClass(string ClassID)
         {
-            var subject = _classSubjectService.GetItemByID(ClassSubjectID);
-            if (subject == null) return;
+            var totalLessons = _lessonService.CountClassLesson(ClassID);
 
-            var courseIds = _classSubjectService.GetCourseIdsByClassID(subject.ClassID);
-            long totalLessons = 0;
-            foreach (var courseID in courseIds)
-            {
-                totalLessons += _lessonService.CountCourseLesson(courseID);
-            }
             var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
                      //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
                      .Set(t => t.TotalLessons, totalLessons);
 
-            await Collection.UpdateManyAsync(t => t.ClassID == subject.ClassID, update);
+            await Collection.UpdateManyAsync(t => t.ClassID == ClassID, update);
+            return totalLessons;
         }
 
         public async Task DecreaseCompleted(string ClassID, long decrease)
@@ -155,20 +144,6 @@ namespace BaseCustomerEntity.Database
 
         public async Task DecreaseClassSubject(ClassSubjectProgressEntity clssbj)
         {
-            //var classProgress = GetItemByClassID(clssbj.ClassID, clssbj.StudentID);
-            //if (classProgress != null)
-            //{
-            //    classProgress.Completed -= clssbj.Completed;
-            //    if (classProgress.Completed < 0) classProgress.Completed = 0;
-            //    classProgress.ExamDone -= clssbj.ExamDone;
-            //    if (classProgress.ExamDone < 0) classProgress.ExamDone = 0;
-            //    classProgress.TotalPoint -= clssbj.TotalPoint;
-            //    if (classProgress.TotalPoint < 0) classProgress.TotalPoint = 0;
-            //    classProgress.TotalLessons -= clssbj.TotalLessons;
-            //    if (classProgress.TotalLessons < 0) classProgress.TotalLessons = 0;
-            //}
-
-
             var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
                      //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
                      .Inc(t => t.Completed, 0 - clssbj.Completed)

@@ -83,6 +83,13 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
+        public Task RemoveClassSubjects(string[] ClassIDs)
+        {
+            _ = Collection.DeleteManyAsync(t=> ClassIDs.Contains(t.ClassID));
+            return Task.CompletedTask;
+        }
+
+
         //Prevent this action
         //public Task UpdateCourseSkill(string CourseID, string SkillID)
         //{
@@ -93,6 +100,11 @@ namespace BaseCustomerEntity.Database
         public long CountByCourseID(string CourseID)
         {
             return Collection.CountDocuments(t => t.CourseID == CourseID);
+        }
+
+        public List<ClassSubjectEntity> GetByCourseID(string CourseID)
+        {
+            return Collection.Find(t => t.CourseID == CourseID).ToList();
         }
     }
 

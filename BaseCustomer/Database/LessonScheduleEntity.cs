@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace BaseCustomerEntity.Database
 {
@@ -130,6 +131,16 @@ namespace BaseCustomerEntity.Database
             else
                 data = Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || (t.StartDate >= start && t.StartDate <= end)));
             return data.SortByDescending(t => t.StartDate).ToList();
+        }
+
+        public async Task RemoveClassSubject(string ClassSubjectID)
+        {
+            await Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
+        }
+
+        public async Task RemoveManyClass(string[] ids)
+        {
+            await Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
         }
     }
 }

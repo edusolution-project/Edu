@@ -35,7 +35,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassSubjectService _classSubjectService;
 
         private readonly ModCourseService _modservice;
-        private readonly ModProgramService _modprogramService;
+        //private readonly ModProgramService _modprogramService;
         private readonly ModSubjectService _modsubjectService;
         private readonly ModChapterService _modchapterService;
         private readonly ModGradeService _modgradeService;
@@ -54,8 +54,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //fixing data
         private readonly ChapterService _newchapterService;
         private readonly LessonService _newlessonService;
+
+        private readonly ClassProgressService _classProgressService;
+        private readonly ClassSubjectProgressService _classSubjectProgressService;
+        private readonly ChapterProgressService _chapterProgressService;
+        private readonly LessonProgressService _lessonProgressService;
+        private readonly ExamService _examService;
+        //private readonly ExamDetailService _examDetailService;
+        private readonly LessonScheduleService _lessonScheduleService;
+
         private readonly MappingEntity<ChapterEntity, CourseChapterEntity> _chapterMappingRev = new MappingEntity<ChapterEntity, CourseChapterEntity>();
+        private readonly MappingEntity<CourseChapterEntity, ChapterEntity> _chapterMapping = new MappingEntity<CourseChapterEntity, ChapterEntity>();
         private readonly MappingEntity<LessonEntity, CourseLessonEntity> _lessonMappingRev = new MappingEntity<LessonEntity, CourseLessonEntity>();
+        private readonly MappingEntity<CourseLessonEntity, LessonEntity> _lessonMapping = new MappingEntity<CourseLessonEntity, LessonEntity>();
+
 
         public CurriculumController(CourseService service,
                  SubjectService subjectService,
@@ -70,10 +82,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  //LessonExtendService lessonExtendService,
                  TeacherService teacherService,
                  ModCourseService modservice,
-                 ClassService classService,
+                 //ClassService classService,
                  ClassSubjectService classSubjectService
 
-                , ModProgramService modprogramService
                 , ModSubjectService modsubjectService
                 , ModChapterService modchapterService
                 , ModGradeService modgradeService
@@ -90,7 +101,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //use for fixing data
             , ChapterService newchapterService
             , LessonService newlessonService
-
+            , ChapterProgressService chapterProgressService
+            , ClassSubjectProgressService classSubjectProgressService
+            , ClassProgressService classProgressService
+            , LessonProgressService lessonProgressService
+            , ExamService examService
+            , ClassService classService
+            , LessonScheduleService lessonScheduleService
                  )
         {
             _service = service;
@@ -107,8 +124,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //_lessonExtendService = lessonExtendService;
             _teacherService = teacherService;
             _modservice = modservice;
-            _classService = classService;
-            _classSubjectService = classSubjectService;
+
             //_modprogramService = modprogramService;
             _modsubjectService = modsubjectService;
             _modchapterService = modchapterService;
@@ -119,12 +135,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _modlessonPartQuestionService = modlessonPartQuestionService;
             _modlessonExtendService = modlessonExtendService;
 
-            _newchapterService = newchapterService;
-            _newlessonService = newlessonService;
-
             _courseViewMapping = new MappingEntity<CourseEntity, CourseViewModel>();
             _env = evn;
             _fileProcess = new FileProcess(evn);
+
+            //fix
+            _classService = classService;
+            _classSubjectService = classSubjectService;
+            _newchapterService = newchapterService;
+            _newlessonService = newlessonService;
+            _chapterProgressService = chapterProgressService;
+            _classProgressService = classProgressService;
+            _classSubjectProgressService = classSubjectProgressService;
+            _lessonProgressService = lessonProgressService;
+            _examService = examService;
+            _lessonScheduleService = lessonScheduleService;
         }
 
         public IActionResult Index(DefaultModel model, int old = 0)
@@ -1445,19 +1470,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult("Update " + count + " chapter");
         }
 
-        public JsonResult FixResourcesV3()
+        public async Task<JsonResult> FixResourcesV3()
         {
-
+            Console.WriteLine("start");
+            var start = DateTime.Now;
             //Run once
-
+            //_chapterService.Collection.DeleteMany(t => true);
+            //_lessonService.Collection.DeleteMany(t => true);
             //copy to coursechapter collection
             var unfixchapters = _newchapterService.GetAll().ToEnumerable();
             foreach (var unfix in unfixchapters)
             {
                 var sourcechapter = _chapterMappingRev.AutoOrtherType(unfix, new CourseChapterEntity());
                 _chapterService.Collection.InsertOne(sourcechapter);
-               
             }
+
             //clear old chapter
             _ = _newchapterService.RemoveAllAsync();
 
@@ -1471,12 +1498,135 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //clear old lesson
             _ = _newlessonService.RemoveAllAsync();
 
+            //clone chapter
+            var courses = _service.GetAll().ToList();
+            foreach (var course in courses)
+            {
+                var classsubjects = _classSubjectService.GetByCourseID(course.ID);
 
+                if (classsubjects != null && classsubjects.Count > 0)
+                {
+                    foreach (var subject in classsubjects)
+                    {
+                        _ = FixClassSubject(subject, course.ID);
+                    }
+                }
+            }
+            Console.WriteLine("Complete All subject : " + (start - DateTime.Now).TotalSeconds);
 
-            //Fix Chapter => Clone Chapter => Fix Chapter Progress
-            //Fix Lesson => Clone Lesson => Fix lesson progress Fix Schedule => Fix Calendar, 
-            //Refix Chapter Counter, ClassSubject Counter, Class Counter
+             var classes = _classService.GetAll().ToList();
+            foreach (var @class in classes)
+            {
+                @class.TotalLessons = await _classProgressService.RefreshTotalLessonForClass(@class.ID);
+                _classService.Save(@class);
+            }
+            Console.WriteLine("Complete All : " + (start - DateTime.Now).TotalSeconds);
             return new JsonResult("Update done");
         }
+
+        private async Task FixClassSubject(ClassSubjectEntity subject, string CourseID)
+        {
+            var counter = await FixChapter(subject, null, CourseID);
+            subject.TotalExams = counter.Exam;
+            subject.TotalLessons = counter.Lesson;
+            _classSubjectService.Save(subject);
+            await _classSubjectProgressService.CreateQuery().UpdateManyAsync(t => t.ClassSubjectID == subject.ID,
+                    Builders<ClassSubjectProgressEntity>.Update.Set(t => t.TotalLessons, subject.TotalLessons)
+                );
+        }
+
+        private async Task<Counter> FixChapter(ClassSubjectEntity subject, CourseChapterEntity rootchapter, string courseID)
+        {
+            var rootid = "0";
+            var newid = "0";
+            var counter = new Counter { Exam = 0, Lesson = 0 };
+            if (rootchapter != null)
+            {
+                //chapter
+                ChapterEntity newchapter = _chapterMapping.AutoOrtherType(rootchapter, new ChapterEntity()
+                {
+                    OriginID = rootchapter.ID,
+                    ClassID = subject.ClassID,
+                    ClassSubjectID = subject.ID,
+                    TotalLessons = 0,
+                    TotalExams = 0,
+                });
+                newchapter.ID = "";
+                await _newchapterService.CreateQuery().InsertOneAsync(newchapter);
+
+                //chapter progress
+                _ = _chapterProgressService.CreateQuery()
+                     .UpdateManyAsync(t => t.ClassSubjectID == subject.ID && t.ChapterID == newchapter.OriginID,
+                     Builders<ChapterProgressEntity>.Update.Set(t => t.ChapterID, newchapter.ID).Set(t => t.ParentID, rootchapter.ParentID));
+                rootid = rootchapter.ID;
+                newid = newchapter.ID;
+            }
+
+            var lessons = _lessonService.Collection.Find(t => t.ChapterID == rootid && t.CourseID == courseID).ToEnumerable();
+            if (lessons != null && lessons.Count() > 0)
+            {
+                foreach (var rootlesson in lessons)
+                {
+                    //lesson
+                    LessonEntity newlesson = _lessonMapping.AutoOrtherType(rootlesson, new LessonEntity()
+                    {
+                        OriginID = rootlesson.ID,
+                        ChapterID = newid,
+                        ClassID = subject.ClassID,
+                        ClassSubjectID = subject.ID
+                    });
+                    if (newlesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                        counter.Exam++;
+                    else
+                        counter.Lesson++;
+                    newlesson.ID = "";
+
+                    await _newlessonService.CreateQuery().InsertOneAsync(newlesson);
+                    //lesson part
+                    _ = _cloneLessonPartService.CreateQuery()
+                        .UpdateManyAsync(t => t.ClassSubjectID == subject.ID && t.ParentID == newlesson.OriginID,
+                        Builders<CloneLessonPartEntity>.Update.Set(t => t.ParentID, newlesson.ID));
+                    //lesson progress
+                    _ = _lessonProgressService.CreateQuery()
+                        .UpdateManyAsync(t => t.ClassSubjectID == subject.ID && t.LessonID == newlesson.OriginID,
+                        Builders<LessonProgressEntity>.Update.Set(t => t.LessonID, newlesson.ID).Set(t => t.ChapterID, newid));
+                    //exam
+                    _ = _examService.CreateQuery()
+                        .UpdateManyAsync(t => t.ClassSubjectID == subject.ID && t.LessonID == newlesson.OriginID,
+                        Builders<ExamEntity>.Update.Set(t => t.LessonID, newlesson.ID));
+                    //schedule
+                    _ = _lessonScheduleService.CreateQuery()
+                        .UpdateManyAsync(t => t.LessonID == newlesson.OriginID && t.ClassSubjectID == subject.ID,
+                        Builders<LessonScheduleEntity>.Update.Set(t => t.LessonID, newlesson.ID));
+                }
+            }
+
+            var subchaps = _chapterService.GetSubChapters(courseID, rootid);
+            if (subchaps != null && subchaps.Count > 0)
+            {
+                foreach (var subchap in subchaps)
+                {
+                    subchap.ParentID = newid;
+                    var subCounter = await FixChapter(subject, subchap, courseID);
+                    counter.Exam += subCounter.Exam;
+                    counter.Lesson += subCounter.Lesson;
+                }
+            }
+
+            if (newid != "0")
+            {
+                await _newchapterService.Collection.UpdateManyAsync(t => t.ID == newid,
+                    Builders<ChapterEntity>.Update.Set(t => t.TotalLessons, counter.Lesson).Set(t => t.TotalExams, counter.Exam));
+            }
+            return counter;
+        }
+
+
+    }
+
+    public class Counter
+    {
+        public int Exam { get; set; }
+        public int Lesson { get; set; }
     }
 }

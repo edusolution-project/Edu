@@ -38,6 +38,32 @@ namespace Core_v2.Globals
             }
             return newItem;
         }
+
+        public T Clone(T oldItem, T newItem)
+        {
+            if (oldItem == null) return newItem;
+            //lay typeOldItem
+            Type oldType = oldItem.GetType();
+            IList<PropertyInfo> oldProps = new List<PropertyInfo>(oldType.GetProperties());
+            //lay typenewItem
+            Type newType = oldItem.GetType();
+            IList<PropertyInfo> newProps = new List<PropertyInfo>(newType.GetProperties());
+
+            for (int i = 0; oldProps != null && i < oldProps.Count - 1; i++)
+            {
+                var item = newProps[i];
+                if (item.Name == "ID" || item.Name == "id" || item.Name == "_id") continue;
+                if (newProps.Contains(item))
+                {
+                    var value = item.GetValue(oldItem);
+                    var type = item.GetType();
+                    newItem[item.Name] = value;
+                }
+            }
+            return newItem;
+        }
+
+
         public T Auto(T oldItem, T newItem)
         {
             if (oldItem == null) return newItem;
@@ -93,17 +119,17 @@ namespace Core_v2.Globals
                 if (newProps.Contains(item))
                 {
                     var value = item.GetValue(oldItem);
-                    if(newItem[item.Name] == null) newItem[item.Name] = value;
+                    if (newItem[item.Name] == null) newItem[item.Name] = value;
                     else
                     {
                         switch (item.PropertyType.Name)
                         {
                             case "Boolean":
-                                if (!(bool) newItem[item.Name])
+                                if (!(bool)newItem[item.Name])
                                     newItem[item.Name] = value;
                                 break;
                             case "DateTime":
-                                if ((DateTime) newItem[item.Name] <= DateTime.MinValue)
+                                if ((DateTime)newItem[item.Name] <= DateTime.MinValue)
                                     newItem[item.Name] = value;
                                 break;
                             default:
