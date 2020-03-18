@@ -68,9 +68,9 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public List<ChapterEntity> GetSubChapters(string CourseID, string ParentID)
+        public List<ChapterEntity> GetSubChapters(string ClassSubjectID, string ParentID)
         {
-            return CreateQuery().Find(c => c.CourseID == CourseID && c.ParentID == ParentID).SortBy(t => t.Order).ToList();
+            return CreateQuery().Find(c => c.ClassSubjectID == ClassSubjectID && c.ParentID == ParentID).SortBy(t => t.Order).ToList();
         }
 
         public async Task RemoveClassSubjectChapter(string ClassSubjectID)

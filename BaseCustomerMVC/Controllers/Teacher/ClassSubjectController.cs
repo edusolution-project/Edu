@@ -204,9 +204,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 TopID = top.ParentID;
             }
 
-            var chapters = _chapterService.GetSubChapters(currentCs.CourseID, Parent);
+            var chapters = _chapterService.GetSubChapters(currentCs.ID, Parent);
 
-            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == currentCs.CourseID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
+            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
                            where schedule != null
                            select _lessonMapping.AutoOrtherType(r, new LessonScheduleViewModel()

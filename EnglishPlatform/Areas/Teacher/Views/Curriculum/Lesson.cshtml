@@ -1,6 +1,6 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutTeacher_noChat.cshtml";
-    var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
+    var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseLessonEntity;
     var Course = ViewBag.Course as BaseCustomerEntity.Database.CourseEntity;
     ViewData["Title"] = Data.Title;
 }
@@ -35,7 +35,7 @@
         container: "lessonContainer",
         mod: mod.PREVIEW,
         url: {
-            load: '@Url.Action("GetDetailsLesson", "Lesson")',
+            load: '@Url.Action("GetDetailsLesson", "Curriculum")',
             list_part: '@Url.Action("GetList", "LessonPart")',
             load_part: '@Url.Action("GetDetail", "LessonPart")',
             save_part: '@Url.Action("CreateOrUpdate", "LessonPart")',
@@ -44,7 +44,6 @@
         },
         type: @Data.TemplateType,
         lesson_id: '@Data.ID',
-        class_id: '@Data.ID',
         chap_id: '@Data.ChapterID'
     }
     var widget = new Lesson.onReady(config);

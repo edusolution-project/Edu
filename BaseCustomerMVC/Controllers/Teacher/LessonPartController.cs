@@ -13,43 +13,46 @@ namespace BaseCustomerMVC.Controllers.Teacher
 {
     public class LessonPartController : TeacherController
     {
-        private readonly GradeService _gradeService;
-        private readonly SubjectService _subjectService;
-        private readonly TeacherService _teacherService;
-        private readonly ClassService _classService;
-        private readonly CourseService _courseService;
-        private readonly ChapterService _chapterService;
-        private readonly LessonService _lessonService;
+        //private readonly GradeService _gradeService;
+        //private readonly SubjectService _subjectService;
+        //private readonly TeacherService _teacherService;
+        //private readonly ClassService _classService;
+        //private readonly CourseService _courseService;
+        //private readonly ChapterService _chapterService;
+        //private readonly LessonScheduleService _lessonScheduleService;
+
+        private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
         private readonly LessonPartQuestionService _questionService;
         private readonly LessonPartAnswerService _answerService;
-        private readonly LessonScheduleService _lessonScheduleService;
         private readonly FileProcess _fileProcess;
 
         public LessonPartController(
-            GradeService gradeservice,
-            SubjectService subjectService,
-            TeacherService teacherService,
-            ClassService classService,
-            CourseService courseService,
-            ChapterService chapterService,
-            LessonService lessonService,
+            //GradeService gradeservice,
+            //SubjectService subjectService,
+            //TeacherService teacherService,
+            //ClassService classService,
+            //CourseService courseService,
+            //ChapterService chapterService,
+            //LessonScheduleService lessonScheduleService,
+
+            CourseLessonService lessonService,
             LessonPartService lessonPartService,
-            LessonScheduleService lessonScheduleService,
             LessonPartQuestionService questionService,
             LessonPartAnswerService answerService,
             FileProcess fileProcess
             )
         {
-            _gradeService = gradeservice;
-            _subjectService = subjectService;
-            _teacherService = teacherService;
-            _courseService = courseService;
-            _classService = classService;
-            _chapterService = chapterService;
+            //_gradeService = gradeservice;
+            //_subjectService = subjectService;
+            //_teacherService = teacherService;
+            //_courseService = courseService;
+            //_classService = classService;
+            //_chapterService = chapterService;
+            //_lessonScheduleService = lessonScheduleService;
+
             _lessonService = lessonService;
             _lessonPartService = lessonPartService;
-            _lessonScheduleService = lessonScheduleService;
             _questionService = questionService;
             _answerService = answerService;
             _fileProcess = fileProcess;
@@ -234,7 +237,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         ParentID = lessonpart.ID,
                         CreateUser = User.Claims.GetClaimByType("UserID").Value,
                         Point = lessonpart.Point,
-                        Created = lessonpart.Created,                        
+                        Created = lessonpart.Created,
                     };
                     _questionService.Save(question);
                 }

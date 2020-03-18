@@ -885,6 +885,32 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #endregion Chapter
 
+        #region Lesson
+        [HttpPost]
+        public JsonResult GetDetailsLesson(string ID)
+        {
+            try
+            {
+                var lesson = _lessonService.CreateQuery().Find(o => o.ID == ID).FirstOrDefault();
+
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", lesson }
+                };
+                return new JsonResult(response);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message }
+                });
+            }
+        }
+
+        #endregion
+
         [Obsolete]
         [HttpPost]
         public JsonResult GetCourseDetail(DefaultModel model)
@@ -1477,7 +1503,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //Run once
             //_chapterService.Collection.DeleteMany(t => true);
             //_lessonService.Collection.DeleteMany(t => true);
+
             //copy to coursechapter collection
+            //Fixed
             var unfixchapters = _newchapterService.GetAll().ToEnumerable();
             foreach (var unfix in unfixchapters)
             {
@@ -1488,7 +1516,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //clear old chapter
             _ = _newchapterService.RemoveAllAsync();
 
+
             //copy to courselesson collection
+            //Fixed
             var unfixlessons = _newlessonService.GetAll().ToEnumerable();
             foreach (var unfix in unfixlessons)
             {
@@ -1499,6 +1529,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _ = _newlessonService.RemoveAllAsync();
 
             //clone chapter
+            //var courses = _service.Collection.Find(t=> t.ID == "5e6524b7fd6d8e01304cd66e").ToList();
             var courses = _service.GetAll().ToList();
             foreach (var course in courses)
             {
@@ -1514,7 +1545,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             Console.WriteLine("Complete All subject : " + (start - DateTime.Now).TotalSeconds);
 
-             var classes = _classService.GetAll().ToList();
+            var classes = _classService.GetAll().ToList();
             foreach (var @class in classes)
             {
                 @class.TotalLessons = await _classProgressService.RefreshTotalLessonForClass(@class.ID);
@@ -1543,38 +1574,35 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (rootchapter != null)
             {
                 //chapter
-                ChapterEntity newchapter = _chapterMapping.AutoOrtherType(rootchapter, new ChapterEntity()
-                {
-                    OriginID = rootchapter.ID,
-                    ClassID = subject.ClassID,
-                    ClassSubjectID = subject.ID,
-                    TotalLessons = 0,
-                    TotalExams = 0,
-                });
+                ChapterEntity newchapter = _chapterMapping.AutoOrtherType(rootchapter, new ChapterEntity());
+
+                newchapter.OriginID = rootchapter.ID;
+                newchapter.ClassID = subject.ClassID;
+                newchapter.ClassSubjectID = subject.ID;
+                newchapter.TotalLessons = 0;
+                newchapter.TotalExams = 0;
                 newchapter.ID = "";
                 await _newchapterService.CreateQuery().InsertOneAsync(newchapter);
 
                 //chapter progress
-                _ = _chapterProgressService.CreateQuery()
+                await _chapterProgressService.CreateQuery()
                      .UpdateManyAsync(t => t.ClassSubjectID == subject.ID && t.ChapterID == newchapter.OriginID,
                      Builders<ChapterProgressEntity>.Update.Set(t => t.ChapterID, newchapter.ID).Set(t => t.ParentID, rootchapter.ParentID));
                 rootid = rootchapter.ID;
                 newid = newchapter.ID;
             }
 
-            var lessons = _lessonService.Collection.Find(t => t.ChapterID == rootid && t.CourseID == courseID).ToEnumerable();
+            var lessons = _lessonService.Collection.Find(t => t.ChapterID == rootid && t.CourseID == courseID).ToList();
             if (lessons != null && lessons.Count() > 0)
             {
                 foreach (var rootlesson in lessons)
                 {
                     //lesson
-                    LessonEntity newlesson = _lessonMapping.AutoOrtherType(rootlesson, new LessonEntity()
-                    {
-                        OriginID = rootlesson.ID,
-                        ChapterID = newid,
-                        ClassID = subject.ClassID,
-                        ClassSubjectID = subject.ID
-                    });
+                    LessonEntity newlesson = _lessonMapping.AutoOrtherType(rootlesson, new LessonEntity());
+                    newlesson.OriginID = rootlesson.ID;
+                    newlesson.ChapterID = newid;
+                    newlesson.ClassID = subject.ClassID;
+                    newlesson.ClassSubjectID = subject.ID;
                     if (newlesson.TemplateType == LESSON_TEMPLATE.EXAM)
                         counter.Exam++;
                     else
@@ -1583,19 +1611,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     await _newlessonService.CreateQuery().InsertOneAsync(newlesson);
                     //lesson part
-                    _ = _cloneLessonPartService.CreateQuery()
+                    await _cloneLessonPartService.CreateQuery()
                         .UpdateManyAsync(t => t.ClassSubjectID == subject.ID && t.ParentID == newlesson.OriginID,
                         Builders<CloneLessonPartEntity>.Update.Set(t => t.ParentID, newlesson.ID));
                     //lesson progress
-                    _ = _lessonProgressService.CreateQuery()
+                    await _lessonProgressService.CreateQuery()
                         .UpdateManyAsync(t => t.ClassSubjectID == subject.ID && t.LessonID == newlesson.OriginID,
                         Builders<LessonProgressEntity>.Update.Set(t => t.LessonID, newlesson.ID).Set(t => t.ChapterID, newid));
                     //exam
-                    _ = _examService.CreateQuery()
+                    await _examService.CreateQuery()
                         .UpdateManyAsync(t => t.ClassSubjectID == subject.ID && t.LessonID == newlesson.OriginID,
                         Builders<ExamEntity>.Update.Set(t => t.LessonID, newlesson.ID));
                     //schedule
-                    _ = _lessonScheduleService.CreateQuery()
+                    await _lessonScheduleService.CreateQuery()
                         .UpdateManyAsync(t => t.LessonID == newlesson.OriginID && t.ClassSubjectID == subject.ID,
                         Builders<LessonScheduleEntity>.Update.Set(t => t.LessonID, newlesson.ID));
                 }

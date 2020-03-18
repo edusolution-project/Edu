@@ -688,7 +688,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         {"Error", "Không tìm thấy môn học" }
                     });
 
-                var chapters = _chapterService.GetSubChapters(currentCs.CourseID, "0");
+                var chapters = _chapterService.GetSubChapters(currentCs.ID, "0");
                 var chapterExtends = _chapterExtendService.Search(currentCs.ID);
 
                 var listProgress = new List<ChapterProgressViewModel>();
