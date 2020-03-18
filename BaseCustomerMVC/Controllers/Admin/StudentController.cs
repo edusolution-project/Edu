@@ -193,8 +193,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                     var delete = _service.Collection.DeleteMany(o => model.ArrID == o.ID);
                     return new JsonResult(delete);
                 }
-
-
             }
         }
 

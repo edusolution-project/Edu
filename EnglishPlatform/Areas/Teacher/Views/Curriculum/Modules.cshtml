@@ -2,20 +2,20 @@
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseEntity;
-    var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.ChapterEntity>;
+    var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.CourseChapterEntity>;
     var isLock = Data.IsActive;// || Data.IsUsed;
     var user = ViewBag.User as string;
 }
 
 
-    @*<script>
+@*<script>
         setActiveMenu("curriculum");
     </script>*@
 
 @*<script>
-    activeTab = "curriculum";
-    activeSub = "modules";
-</script>*@
+        activeTab = "curriculum";
+        activeSub = "modules";
+    </script>*@
 
 <div class="left-col">
     <div class="page-title">
@@ -23,8 +23,8 @@
     </div>
     <div class="main-container">
         @*<div class="sub-sidebar">
-            @await Html.PartialAsync("_subSidebarTeacher-Curriculum")
-        </div>*@
+                @await Html.PartialAsync("_subSidebarTeacher-Curriculum")
+            </div>*@
         <div class="main-content">
             <div class="detail pb-3 row">
                 <div class="text-left col-md-10">
@@ -128,7 +128,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="@Url.Action("CreateOrUpdate","Lesson")" name="lessonForm" enctype="multipart/form-data" method="post">
+                    <form action="@Url.Action("CreateOrUpdateLesson","Curriculum")" name="lessonForm" enctype="multipart/form-data" method="post">
                         <input type="hidden" name="ID" />
                         <input type="hidden" name="CourseID" value="@Data.ID" />
                         <input type="hidden" name="ChapterID" value="" />
@@ -197,7 +197,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@Url.Action("CreateOrUpdate","Lesson")','update' , ReloadCourse)">Lưu</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@Url.Action("CreateOrUpdateLesson","Curriculum")','update' , ReloadCourse)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -213,7 +213,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="@Url.Action("CreateOrUpdate","Lesson")" name="joinLessonModal" enctype="multipart/form-data" method="post">
+                    <form action="#" name="joinLessonModal" enctype="multipart/form-data" method="post">
                         <input type="hidden" name="ID" />
                         <input type="hidden" name="ChapterID" value="" />
                         <div class="form-group">
@@ -226,7 +226,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@Url.Action("Join","Lesson")','join' , ReloadCourse)">Lưu</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@Url.Action("JoinLesson","Curriculum")','join' , ReloadCourse)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -579,7 +579,7 @@
     {
         if(confirm('Confirm remove?'))
         {
-            ExcuteOnlyItem(ID, '@Url.Action("Remove", "Lesson")', LoadData);
+            ExcuteOnlyItem(ID, '@Url.Action("RemoveLesson", "Curriculum")', LoadData);
         }
         return false;
     }

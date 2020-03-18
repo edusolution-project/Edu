@@ -25,10 +25,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly GradeService _gradeService;
         private readonly CourseLessonService _lessonService;
         private readonly SkillService _skillService;
+
         private readonly LessonPartService _lessonPartService;
-        private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
+
+
         //private readonly LessonExtendService _lessonExtendService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
@@ -60,7 +62,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ChapterProgressService _chapterProgressService;
         private readonly LessonProgressService _lessonProgressService;
         private readonly ExamService _examService;
-        //private readonly ExamDetailService _examDetailService;
+        private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly MappingEntity<ChapterEntity, CourseChapterEntity> _chapterMappingRev = new MappingEntity<ChapterEntity, CourseChapterEntity>();
@@ -76,7 +78,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  CourseLessonService lessonService,
                  SkillService skillService,
                  LessonPartService lessonPartService,
-                 CloneLessonPartService cloneLessonPartService,
                  LessonPartAnswerService lessonPartAnswerService,
                  LessonPartQuestionService lessonPartQuestionService,
                  //LessonExtendService lessonExtendService,
@@ -99,6 +100,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
             //use for fixing data
+            , CloneLessonPartService cloneLessonPartService
             , ChapterService newchapterService
             , LessonService newlessonService
             , ChapterProgressService chapterProgressService
@@ -117,10 +119,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _gradeService = gradeService;
             _skillService = skillService;
             _lessonService = lessonService;
+
             _lessonPartService = lessonPartService;
-            _cloneLessonPartService = cloneLessonPartService;
             _lessonPartAnswerService = lessonPartAnswerService;
             _lessonPartQuestionService = lessonPartQuestionService;
+
+
             //_lessonExtendService = lessonExtendService;
             _teacherService = teacherService;
             _modservice = modservice;
@@ -141,6 +145,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             //fix
             _classService = classService;
+            _cloneLessonPartService = cloneLessonPartService;
             _classSubjectService = classSubjectService;
             _newchapterService = newchapterService;
             _newlessonService = newlessonService;
@@ -818,12 +823,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {"Error", null }
                             });
                 }
-                if (chapter.CreateUser != UserID)
-                    return new JsonResult(new Dictionary<string, object>
-                            {
-                                { "Data", null },
-                                {"Error", "Permisson Error" }
-                            });
+
+
+                //if (chapter.CreateUser != UserID)
+                //    return new JsonResult(new Dictionary<string, object>
+                //            {
+                //                { "Data", null },
+                //                {"Error", "Permisson Error" }
+                //            });
 
                 await RemoveCourseChapter(chapter);
                 return new JsonResult(new Dictionary<string, object>
@@ -844,7 +851,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private async Task RemoveCourseChapter(CourseChapterEntity chap)
         {
-            _lessonService.CreateQuery().DeleteMany(o => o.ChapterID == chap.ID);
+            //_lessonService.CreateQuery().DeleteMany(o => o.ChapterID == chap.ID);
+            var lessons = _lessonService.CreateQuery().Find(o => o.ChapterID == chap.ID).ToList();
+            if (lessons != null && lessons.Count > 0)
+                foreach (var lesson in lessons)
+                    _ = RemoveSingleLesson(lesson);
+
             var subchapters = _chapterService.CreateQuery().Find(o => o.ParentID == chap.ID).ToList();
             if (subchapters != null && subchapters.Count > 0)
                 foreach (var chapter in subchapters)
@@ -906,6 +918,242 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     { "Data", null },
                     {"Error", ex.Message }
                 });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult CreateOrUpdateLesson(CourseLessonEntity item)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var data = _lessonService.GetItemByID(item.ID);
+                if (data == null)
+                {
+                    item.Created = DateTime.Now;
+                    item.CreateUser = UserID;
+                    item.IsAdmin = true;
+                    item.IsActive = false;
+                    item.IsParentCourse = item.ChapterID.Equals("0");
+                    item.Updated = DateTime.Now;
+                    item.Order = 0;
+                    var maxItem = new CourseLessonEntity();
+                    if (item.IsParentCourse)
+                        maxItem = _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID && o.IsParentCourse).SortByDescending(o => o.Order).FirstOrDefault();
+                    else
+                        maxItem = _lessonService.CreateQuery().Find(o => o.ChapterID == item.ChapterID).SortByDescending(o => o.Order).FirstOrDefault();
+                    if (maxItem != null)
+                    {
+                        item.Order = maxItem.Order + 1;
+                    }
+                    _lessonService.CreateQuery().InsertOne(item);
+                    //update total lesson to parent chapter
+                    if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
+                        _ = _chapterService.IncreaseLessonCount(item.ChapterID, 1);
+                    else
+                        _ = _service.IncreaseLessonCount(item.CourseID, 1);
+                }
+                else
+                {
+                    item.Updated = DateTime.Now;
+                    var newOrder = item.Order - 1;
+                    item.Order = data.Order;
+                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+
+                    if (item.Order != newOrder)//change Position
+                    {
+                        ChangeLessonPosition(item, newOrder);
+                    }
+                }
+
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", item },
+                    {"Error",null }
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error",ex.Message }
+                });
+            }
+        }
+
+
+        private int ChangeLessonPosition(CourseLessonEntity item, int pos)
+        {
+            var parts = new List<CourseLessonEntity>();
+            parts = item.IsParentCourse
+                ? _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID && o.IsParentCourse == true)
+                .SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                : _lessonService.CreateQuery().Find(o => o.ChapterID == item.ChapterID)
+                .SortBy(o => o.Order).ThenBy(o => o.ID).ToList();
+
+            var ids = parts.Select(o => o.ID).ToList();
+
+            var oldPos = ids.IndexOf(item.ID);
+            if (oldPos == pos)
+                return oldPos;
+
+            if (pos > parts.Count())
+                pos = parts.Count() - 1;
+            item.Order = pos;
+
+            _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+            int entry = -1;
+            foreach (var part in parts)
+            {
+                if (part.ID == item.ID) continue;
+                if (entry == pos - 1)
+                    entry++;
+                entry++;
+                part.Order = entry;
+                _lessonService.CreateQuery().ReplaceOne(o => o.ID == part.ID, part);
+            }
+            return pos;
+        }
+
+        [HttpPost]
+        public JsonResult JoinLesson(string ID, string JoinLesson)
+        {
+            try
+            {
+                var rootItem = _lessonService.GetItemByID(ID);
+                var joinItem = _lessonService.GetItemByID(JoinLesson);
+                if (rootItem == null || joinItem == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        { "Error", "Dữ liệu không đúng" }
+                    });
+                }
+                var currentIndex = _lessonPartService.CreateQuery().CountDocuments(o => o.ParentID == rootItem.ID);
+                var joinParts = _lessonPartService.CreateQuery().Find(o => o.ParentID == joinItem.ID).SortBy(o => o.Order).ToList();
+
+                if (joinParts != null && joinParts.Count > 0)
+                {
+                    foreach (var part in joinParts)
+                    {
+                        part.ParentID = rootItem.ID;
+                        part.Order = (int)currentIndex++;
+                        _lessonPartService.CreateQuery().ReplaceOne(o => o.ID == part.ID, part);
+                    }
+                }
+
+                ChangeLessonPosition(joinItem, int.MaxValue);//chuyển lesson xuống cuối của đối tượng chứa
+                _lessonService.Remove(joinItem.ID);
+
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", joinItem },
+                        { "Error", null }
+                    });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    { "Error", ex.Message }
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> RemoveLesson(DefaultModel model, string ID)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(model.ArrID))
+                    ID = model.ArrID;
+                var lesson = _lessonService.GetItemByID(ID);//TODO: check permission
+                if (lesson != null)
+                {
+                    await RemoveSingleLesson(lesson);
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", "Remove OK" },
+                                {"Error", null }
+                            });
+                }
+                else
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", "Item Not Found" }
+                            });
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message}
+                });
+            }
+        }
+
+        private async Task RemoveSingleLesson(CourseLessonEntity lesson)
+        {
+            var lessonparts = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).ToList();
+            if (lessonparts != null && lessonparts.Count > 0)
+                for (int i = 0; lessonparts != null && i < lessonparts.Count; i++)
+                    RemoveLessonPart(lessonparts[i].ID);
+            ChangeLessonPosition(lesson, int.MaxValue);//chuyển lesson xuống cuối của đối tượng chứa
+            await _lessonService.RemoveAsync(lesson.ID);
+            await _chapterService.IncreaseLessonCount(lesson.ChapterID, -1);
+        }
+
+        private void RemoveLessonPart(string ID)
+        {
+            try
+            {
+                var item = _lessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (item == null) return;
+
+                var questions = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == ID).ToList();
+                for (int i = 0; questions != null && i < questions.Count; i++)
+                    RemoveQuestion(questions[i].ID);
+                _lessonPartService.Remove(ID);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private void RemoveQuestion(string ID)
+        {
+            try
+            {
+                var item = _lessonPartQuestionService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (item == null) return;
+                _lessonPartAnswerService.CreateQuery().DeleteMany(o => o.ParentID == ID);
+                _lessonPartQuestionService.Remove(ID);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private void RemoveAnswer(string ID)
+        {
+            try
+            {
+                var item = _lessonPartAnswerService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (item == null) return;
+                _lessonPartAnswerService.Remove(ID);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
 

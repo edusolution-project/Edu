@@ -336,7 +336,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {"Error",ex.Message }
                 });
             }
-
         }
 
         public IActionResult Exam()
