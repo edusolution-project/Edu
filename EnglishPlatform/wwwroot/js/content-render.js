@@ -1906,7 +1906,7 @@ var Lesson = (function () {
                 "text": "Về danh sách"
             });
             wrapper.append(doButton);
-            wrapper.append(backButton);
+            //wrapper.append(backButton);
         }
         else {
             var lastExam = data;
@@ -1961,8 +1961,8 @@ var Lesson = (function () {
                     });
                 }
             wrapper.append(doButton)
-                .append(reviewButton)
-                .append(backButton);
+                .append(reviewButton);
+                //.append(backButton);
         }
     }
 
