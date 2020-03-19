@@ -10,11 +10,11 @@ namespace BaseCustomerMVC.Globals
 {
     public class CourseHelper : ICourseHelper
     {
-        private readonly GradeService _gradeService;
-        private readonly SubjectService _subjectService;
-        private readonly TeacherService _teacherService;
-        private readonly StudentService _studentService;
-        private readonly ClassService _classService;
+        //private readonly GradeService _gradeService;
+        //private readonly SubjectService _subjectService;
+        //private readonly TeacherService _teacherService;
+        //private readonly StudentService _studentService;
+        //private readonly ClassService _classService;
         private readonly CourseService _courseService;
         private readonly CourseChapterService _courseChapterService;
         private readonly CourseLessonService _courseLessonService;
@@ -29,22 +29,27 @@ namespace BaseCustomerMVC.Globals
 
 
         public CourseHelper(
-            GradeService gradeservice
-            , SubjectService subjectService
+            CourseService courseService
+            //GradeService gradeservice
+            //, SubjectService subjectService
             //, TeacherService teacherService
             //, ClassService classService
-            , CourseService courseService
+
             , ChapterService chapterService
             , LessonService lessonService
             , LessonHelper lessonHelper
             , LessonScheduleService lessonScheduleService
             , CalendarHelper calendarHelper
+            , CourseChapterService courseChapterService
+            , CourseLessonService courseLessonService
         )
         {
-            _gradeService = gradeservice;
-            _subjectService = subjectService;
+            //_gradeService = gradeservice;
+            //_subjectService = subjectService;
             //_teacherService = teacherService;
             _courseService = courseService;
+            _courseChapterService = courseChapterService;
+            _courseLessonService = courseLessonService;
             //_classService = classService;
             _chapterService = chapterService;
             _lessonService = lessonService;
@@ -65,15 +70,15 @@ namespace BaseCustomerMVC.Globals
             var orgID = originChapter == null ? "0" : originChapter.ID;
             var newID = "0";
 
+            ChapterEntity newchapter = null;
+
             if (originChapter != null)
             {
-                ChapterEntity newchapter = _chapterMapping.AutoOrtherType(originChapter, new ChapterEntity()
-                {
-                    OriginID = originChapter.ID,
-                    ClassID = classSubject.ClassID,
-                    ClassSubjectID = classSubject.ID
-                });
-                newchapter.ID = "";
+                newchapter = _chapterMapping.AutoOrtherType(originChapter, new ChapterEntity());
+                newchapter.OriginID = originChapter.ID;
+                newchapter.ClassID = classSubject.ClassID;
+                newchapter.ClassSubjectID = classSubject.ID;
+                newchapter.ID = null;
                 _chapterService.Save(newchapter);
                 newID = newchapter.ID;
             }
@@ -83,13 +88,12 @@ namespace BaseCustomerMVC.Globals
             if (lessons != null && lessons.Count > 0)
                 foreach (var courselesson in lessons)
                 {
-                    LessonEntity lesson = _lessonMapping.AutoOrtherType(courselesson, new LessonEntity()
-                    {
-                        ChapterID = newID,
-                        ClassID = classSubject.ClassID,
-                        ClassSubjectID = classSubject.ID
-                    });
-
+                    LessonEntity lesson = _lessonMapping.AutoOrtherType(courselesson, new LessonEntity());
+                    lesson.ChapterID = newID;
+                    lesson.OriginID = courselesson.ID;
+                    lesson.ClassID = classSubject.ClassID;
+                    lesson.ClassSubjectID = classSubject.ID;
+                    lesson.ID = null;
                     _lessonService.Save(lesson);
 
                     var schedule = new LessonScheduleEntity
@@ -105,7 +109,14 @@ namespace BaseCustomerMVC.Globals
                     _lessonHelper.CloneLessonForClassSubject(lesson, classSubject);
                 }
 
-            var subchaps = _courseChapterService.GetSubChapters(originChapter.CourseID, orgID);
+            if(newchapter != null)
+            {
+                newchapter.TotalLessons = lessons.Count;
+                _chapterService.Save(newchapter);
+            }
+
+
+            var subchaps = _courseChapterService.GetSubChapters(classSubject.CourseID, orgID);
             if (subchaps.Count > 0)
                 foreach (var chap in subchaps)
                 {

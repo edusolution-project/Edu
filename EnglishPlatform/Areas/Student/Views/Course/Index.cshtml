@@ -14,6 +14,7 @@
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
 
+
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b padding-b25">
@@ -40,7 +41,10 @@
         </div>
     </div>
 
-    <div class="card-body">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-body"  v-cloak>
         <div class="row row-list">
             <div class="col-md-3 course-item" v-for="(item,k) in list_course">
                 <div class="box radius">

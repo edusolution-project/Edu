@@ -9,8 +9,12 @@
     setActiveMenu("course");
 </script>
 
+
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25">
             <h2 class="title"><a href="@Url.Action("Detail", "Course")/@currentCs.ClassID" title="@currentCs.ClassName"><i class="ti-arrow-left"></i></a>@currentCs.ClassName/<span class="end-break">@currentCs.SkillName (@currentCs.CompletedLesssons/@currentCs.TotalLessons)</span></h2>
             <div class="c-right bad">
@@ -31,7 +35,7 @@
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box">
             <ul class="list ls-pratice">
                 <chap-content v-for="(item,k) in filterChap('0', list_data)"
@@ -236,7 +240,7 @@
                                     _that.list_data.push(chapter);
                                 })
                             }
-                                
+
                             var lessons = response.data.Data.Lessons;
                             //console.log(lessons)
                             lessons.forEach(function (lesson) {

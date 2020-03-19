@@ -9,7 +9,10 @@
 </script>
 
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex padding-b25">
             <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
             <div class="c-right">
@@ -30,7 +33,7 @@
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box" v-if="tab[0]">
             <ul class="box list ls-overview mb-3">
                 <li class="flex margin-b20">

@@ -79,7 +79,7 @@ namespace BaseCustomerMVC.Globals
         //Clone Lesson
         public void CloneLessonForClassSubject(LessonEntity lesson, ClassSubjectEntity classSubject)
         {
-            var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+            var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.OriginID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (listLessonPart != null && listLessonPart.Count > 0)
             {
                 if (_cloneLessonPartService.CreateQuery().CountDocuments(
@@ -89,6 +89,7 @@ namespace BaseCustomerMVC.Globals
                     foreach (var lessonpart in listLessonPart)
                     {
                         var clonepart = _lessonPartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity());
+                        clonepart.ParentID = lesson.ID;
                         clonepart.ID = null;
                         clonepart.OriginID = lessonpart.ID;
                         clonepart.TeacherID = classSubject.TeacherID;

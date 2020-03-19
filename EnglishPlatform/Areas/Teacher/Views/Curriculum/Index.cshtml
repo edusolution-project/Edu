@@ -16,7 +16,10 @@
 </script>
 
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25 justify-content-between">
             <div class="flex">
                 <div class="box filter-box w-152">
@@ -39,7 +42,7 @@
             <b-button class="btn-addevent" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <table id="ed_table" class="table">
             <thead>
                 <tr>

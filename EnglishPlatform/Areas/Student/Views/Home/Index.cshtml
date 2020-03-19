@@ -26,7 +26,12 @@
                 </div>*@
         </div>
     </div>
-    <div class="card-body">
+
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+
+    <div class="card-body" v-cloak>
         <div class="box mb-3">
             <div class="heading flex mb-2">
                 <h4 class="box-head">Bài học tuần này ({{lesson_week.length}})</h4>
@@ -119,7 +124,6 @@
                 </div>
             </div>
         </div>
-
         <div class="module">
             <div class="col-md-12 margin-b20">
                 <div class="heading flex">
@@ -253,7 +257,7 @@
                 var start = moment(item.startDate).toDate()
                 var end = moment(item.endDate).toDate();
                 var invalid = start > now || end < now
-                return (item.type == @BaseCustomerEntity.Database.LESSON_TEMPLATE.LECTURE) || !invalid 
+                return (item.type == @BaseCustomerEntity.Database.LESSON_TEMPLATE.LECTURE) || !invalid
             },
             showLockNotify(item) {
                 var now = moment().toDate()

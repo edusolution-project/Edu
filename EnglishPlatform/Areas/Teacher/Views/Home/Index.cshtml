@@ -12,7 +12,10 @@
     }
 </style>
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25">
             <h2 class="title">Welcome to <font>EDUSO</font></h2>
             @*<div class="search-box">
@@ -21,7 +24,7 @@
                 </div>*@
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box mb-3">
             <div class="heading flex mb-2">
                 <h4 class="box-head">Bài giảng tuần này ({{lesson_week.length}})</h4>

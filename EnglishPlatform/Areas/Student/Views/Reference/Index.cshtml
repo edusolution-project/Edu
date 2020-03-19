@@ -10,7 +10,10 @@
 </script>
 
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25">
             <div class="width-100 flex">
                 <div class="box filter-box w-152">
@@ -42,7 +45,7 @@
             <b-button class="btn-addevent" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="row ls-doc" v-if="tableData.length > 0">
             <div class="col-md-12" v-for="data in tableData">
                 <div class="inner flex">

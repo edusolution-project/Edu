@@ -26,6 +26,7 @@
 
     var renderMenu = function (parentID, init) {
 
+
         var parentPath = root_nav;
 
         if (parentID != null && parentID.length > 1) {
@@ -44,6 +45,8 @@
             }
 
         }
+
+        console.log(parentPath);
 
         $.ajax({
             type: "POST",
@@ -74,13 +77,13 @@
                     $.each(lessons, function (i, lesson) {
                         var lessonPath = $('#les_nav_' + lesson.ID);
                         if (lessonPath.length == 0) {
-                           lessonPath =
-                                $("<a>", {id: 'les_nav_' + lesson.ID, title: lesson.Title, href: '@Url.Action("Detail","Lesson")/' + lesson.ID + '/' + '@ClassSubject.ID'}).append(
-                                $("<li>", {
-                                class: 'les_nav',
-                            }).append($("<i>", { class: "far fa-file-alt mr-1" }))
-                                        .append($("<span>", { text: lesson.Title}))
-                                    );
+                            lessonPath =
+                                $("<a>", { id: 'les_nav_' + lesson.ID, title: lesson.Title, href: '@Url.Action("Detail","Lesson")/' + lesson.ID + '/' + '@ClassSubject.ID' }).append(
+                                    $("<li>", {
+                                        class: 'les_nav',
+                                    }).append($("<i>", { class: "far fa-file-alt mr-1" }))
+                                        .append($("<span>", { text: lesson.Title }))
+                                );
                             if (lesson.ID == currentLesson.ID)
                                 lessonPath.find("li").addClass('current');
                         }
@@ -126,7 +129,7 @@
         }
 
     .right_sidebar {
-        width: 300px;
+        width: 240px;
         background: #FFF;
         border: none;
         /*transition: left 2s;*/
@@ -148,7 +151,7 @@
 
 
     .right-content.expandMenu {
-        left: 300px !important;
+        left: 240px !important;
     }
 
     @@media (max-width : 1200px) {

@@ -13,7 +13,10 @@
 </script>
 
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex mb-2">
             <h2 class="title"><a href="@Url.Action("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}/@currentStudent.FullName</h2>
             @*<div class="search-box">
@@ -55,7 +58,7 @@
             <div class="c-right"></div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box" v-if="tab[0]">
             <table id="ed_table" class="table">
                 <thead>
