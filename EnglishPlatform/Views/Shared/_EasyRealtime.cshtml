@@ -918,6 +918,14 @@
         teacher: "Teacher",
         user : "Token"
     };
+
+     var removeAllLocalStored = function () {
+        localStorage.removeItem("time");
+        localStorage.removeItem(localStoredKey.group);
+        localStorage.removeItem(localStoredKey.student);
+        localStorage.removeItem(localStoredKey.teacher);
+    }
+
     //khoi tạo
     var tokenUser = localStorage.getItem(localStoredKey.user);
     if (tokenUser == null || tokenUser == "" || tokenUser == void 0) {
@@ -935,12 +943,7 @@
         localStorage.setItem(localStoredKey.student, JSON.stringify(data.student));
         localStorage.setItem(localStoredKey.teacher, JSON.stringify(data.teacher));
     }
-    var removeAllLocalStored = function () {
-        localStorage.removeItem("time");
-        localStorage.removeItem(localStoredKey.group);
-        localStorage.removeItem(localStoredKey.student);
-        localStorage.removeItem(localStoredKey.teacher);
-    }
+   
     var getDataFromLocalStored = function () {
         if (localStorage.getItem("time") == null || localStorage.getItem("time") == "" || localStorage.getItem("time") == void 0) {
             return false;
