@@ -90,7 +90,7 @@ namespace EnglishPlatform.Controllers
                     {
                         var item = realClass[i];
                         var isActive = item.StartDate <= DateTime.Now.ToUniversalTime() && item.EndDate >= DateTime.Now.ToUniversalTime();
-                        req.Add(item.ID, isActive);
+                        if(isActive) req.Add(item.ID, isActive);
                     }
                     return Success(req);
                 }
