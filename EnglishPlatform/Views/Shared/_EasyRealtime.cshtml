@@ -1061,13 +1061,15 @@
     }
     var sortHtml = function (rootElement,target,keys) {
         var list = rootElement.querySelectorAll(target);
+        var dataTrue = [];
+        var dataFalse = [];
+        var index = 0;
         for (var i = 0; i < list.length; i++) {
             var item = list[i];
             if (keys[item.dataset.itemId] == true) {
                 item.setAttribute("data-active", true);
                 var _true = rootElement.querySelectorAll("div.true");
-                var count = _true == null ? 0 : _true.length;
-                item.parentNode.insertBefore(item, list[count]);
+                item.parentNode.insertBefore(item, list[0]);
                 item.classList.add("true");
                 item.setAttribute("Title", "Lớp đang hoạt động");
                 /// join to class
@@ -1075,8 +1077,10 @@
             } else {
                 item.setAttribute("data-active", false);
                 item.setAttribute("Title", "Lớp đã hoàn thành");
+                //.parentNode.insertBefore(item, list[0]);
             }
         }
+
     }
 
     document.addEventListener("DOMContentLoaded", function () {
