@@ -198,20 +198,6 @@
                     }).catch(e => { })
             },
             getNewFeed() {
-                let _that = this
-                let _url = '@Url.Action("Get", "NewFeed")'
-
-                axios.get(_url, {
-                    params: {
-                        pageSize: 6,
-                        pageIndex: 0
-                    }
-                })
-                    .then(response => {
-                        //console.log(response.data)
-                        _that.discussion = response.data.data
-                        //console.log(_that.active_course);
-                    }).catch(e => { })
             },
             formatTime(time) {
                 //console.log(time);

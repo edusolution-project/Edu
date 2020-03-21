@@ -236,6 +236,57 @@ namespace BaseCustomerMVC.Controllers.Student
             return Json(new { Data = std });
         }
 
+        public JsonResult GetActiveListV2(DateTime today)
+        {
+            today = today.ToUniversalTime();
+            var filter = new List<FilterDefinition<ClassEntity>>();
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Authentication Error"
+                });
+            }
+
+            var classids = _classStudentService.GetStudentClasses(userId);
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => classids.Contains(o.ID)));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
+
+            var clIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
+
+
+            var lstSbj = new List<ClassSubjectEntity>();
+            var lstClass = new List<ClassEntity>();
+            foreach (var clID in clIDs)
+            {
+                lstSbj.AddRange(_classSubjectService.GetByClassID(clID));
+                lstClass.Add(_service.GetItemByID(clID));
+            }
+
+            var std = (from o in lstSbj.ToList()
+                       let _class = lstClass.SingleOrDefault(t => t.ID == o.ClassID)
+                       let progress = _classSubjectProgressService.GetItemByClassSubjectID(o.ID, userId)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
+                       let skill = _skillService.GetItemByID(o.SkillID)
+                       select new
+                       {
+                           id = o.ID,
+                           //courseID = o.CourseID,
+                           courseName = skill.Name + " (" + _class.Name + ")",
+                           endDate = _class.EndDate,
+                           percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
+                           max = o.TotalLessons,
+                           min = progress != null ? progress.Completed : 0,
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
+                           thumb = string.IsNullOrEmpty(_class.Image) ? "/pictures/english1.png" : _class.Image,
+                       }).ToList();
+            return Json(new { Data = std });
+        }
+
+
         public JsonResult GetFinishList(DefaultModel model, DateTime today)
         {
             today = today.ToUniversalTime();
@@ -321,7 +372,7 @@ namespace BaseCustomerMVC.Controllers.Student
                        let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID, o.ClassSubjectID) != null
                        let onlineUrl = o.IsOnline ? _calendarHelper.GetByScheduleId(o.ID).UrlRoom : ""
                        select new
-                       {                           
+                       {
                            id = o.ID,
                            classID = _class.ID,
                            className = _class.Name,

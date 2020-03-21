@@ -265,7 +265,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Chapter = chapter;
             ViewBag.Type = lesson.TemplateType;
             //if (newui == 1)
-                return View("Detail_new");
+            return View("Detail_new");
             //return View();
         }
 
@@ -302,7 +302,9 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var chapter = _chapterService.GetItemByID(lesson.ChapterID);
 
-            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID).ToList();
+            List<string> ExamTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "ESSAY" };
+
+            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
 
             var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
             var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();

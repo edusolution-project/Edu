@@ -199,14 +199,14 @@ namespace BaseCustomerMVC.Controllers.Student
                        { "Error", "Bài kiểm tra chưa được mở!" }
                     });
                 }
-
-                if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
-                {
-                    return new JsonResult(new Dictionary<string, object>
+                if (_lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                    if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
+                    {
+                        return new JsonResult(new Dictionary<string, object>
                     {
                        { "Error", "Bài kiểm tra đã quá hạn!" }
                     });
-                }
+                    }
 
                 item.LessonScheduleID = _schedule.ID;
                 item.Timer = _lesson.Timer;
@@ -320,6 +320,10 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public async Task<JsonResult> CreateDetail(ExamDetailEntity item)
         {
+            if (item.ExamID == null)
+            {
+                return new JsonResult("Access Denied");
+            }
             if (!_examService.IsOverTime(item.ExamID))
             {
                 var exam = _examService.GetItemByID(item.ExamID);

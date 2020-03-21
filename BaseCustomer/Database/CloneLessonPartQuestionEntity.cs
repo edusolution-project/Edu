@@ -25,10 +25,14 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<CloneLessonPartQuestionEntity>>
             {
-                //ClassID_1_ParentID_1
+                //ClassID_1
                 new CreateIndexModel<CloneLessonPartQuestionEntity>(
                     new IndexKeysDefinitionBuilder<CloneLessonPartQuestionEntity>()
-                    .Ascending(t => t.ClassID).Ascending(t=> t.ParentID)),
+                    .Ascending(t => t.ClassID)),
+                //ClassSubjectID_1
+                new CreateIndexModel<CloneLessonPartQuestionEntity>(
+                    new IndexKeysDefinitionBuilder<CloneLessonPartQuestionEntity>()
+                    .Ascending(t => t.ClassSubjectID)),
                 //ParentID_1
                 new CreateIndexModel<CloneLessonPartQuestionEntity>(
                     new IndexKeysDefinitionBuilder<CloneLessonPartQuestionEntity>()

@@ -63,6 +63,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonProgressService _lessonProgressService;
         private readonly ExamService _examService;
         private readonly CloneLessonPartService _cloneLessonPartService;
+        private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
         private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly MappingEntity<ChapterEntity, CourseChapterEntity> _chapterMappingRev = new MappingEntity<ChapterEntity, CourseChapterEntity>();
@@ -101,6 +102,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             //use for fixing data
             , CloneLessonPartService cloneLessonPartService
+            , CloneLessonPartQuestionService cloneLessonPartQuestionService
             , ChapterService newchapterService
             , LessonService newlessonService
             , ChapterProgressService chapterProgressService
@@ -146,6 +148,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //fix
             _classService = classService;
             _cloneLessonPartService = cloneLessonPartService;
+            _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
             _classSubjectService = classSubjectService;
             _newchapterService = newchapterService;
             _newlessonService = newlessonService;
@@ -1862,6 +1865,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     await _cloneLessonPartService.CreateQuery()
                         .UpdateManyAsync(t => t.ClassSubjectID == subject.ID && t.ParentID == newlesson.OriginID,
                         Builders<CloneLessonPartEntity>.Update.Set(t => t.ParentID, newlesson.ID));
+
                     //lesson progress
                     await _lessonProgressService.CreateQuery()
                         .UpdateManyAsync(t => t.ClassSubjectID == subject.ID && t.LessonID == newlesson.OriginID,
@@ -1895,6 +1899,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Builders<ChapterEntity>.Update.Set(t => t.TotalLessons, counter.Lesson).Set(t => t.TotalExams, counter.Exam));
             }
             return counter;
+        }
+
+        public async Task<JsonResult> FixResourcesV4()
+        {
+            Console.WriteLine("start");
+            var parts = _cloneLessonPartService.GetAll().ToList();
+            foreach (var part in parts)
+            {
+                await _cloneLessonPartQuestionService.Collection.UpdateManyAsync(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.LessonID, part.ParentID));
+            }
+            return new JsonResult("Update done");
         }
 
 
