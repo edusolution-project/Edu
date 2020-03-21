@@ -40,6 +40,7 @@ namespace EnglishPlatform.Controllers
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly GroupService _groupService;
         private readonly MessageService _messageService;
+        private readonly NewFeedService _newFeedService;
         private readonly IHubContext<ChatHub> _hubContent;
 
         public EasyRealTimeController(
@@ -53,6 +54,7 @@ namespace EnglishPlatform.Controllers
             LessonScheduleService lessonScheduleService,
             GroupService groupService,
             MessageService messageService,
+            NewFeedService newFeedService,
             IHubContext<ChatHub> hubContent,
             IRoxyFilemanHandler roxyFilemanHandler
         )
@@ -69,6 +71,7 @@ namespace EnglishPlatform.Controllers
             _roxyFilemanHandler = roxyFilemanHandler;
             _notificationService = notificationService;
             _commentService = commentService;
+            _newFeedService = newFeedService;
         }
         /// <summary>
         /// 
@@ -685,6 +688,72 @@ namespace EnglishPlatform.Controllers
             {
                 return Error(ex);
             }
+        }
+        #endregion
+
+        #region convert newfeedold to message 
+        public int ConvertNewFeed()
+        {
+            var all = _newFeedService.CreateQuery().Find(o => true)?.ToList();
+            if (all == null) return 0;
+            int count = 0;
+            for (int i = 0; i < all.Count; i++)
+            {
+                NewFeedEntity item = all[i];
+                if (item.Receivers?.FirstOrDefault() == null) continue;
+                //public string Poster { get; set; }
+                //public string PosterName { get; set; }
+                //public List<object> Likes { get; set; }
+                //public List<object> UnLikes { get; set; }
+                //public int ReplyCount { get; set; }
+                //public int FeedType { get; set; }
+                //public string Name { get; set; }
+
+                //public string Code { get; set; } = Guid.NewGuid().ToString();
+                //public object Sender { get; set; }
+                //public HashSet<string> Receivers { get; set; } = new HashSet<string>();
+                //public string Receiver { get; set; } // groupName
+                //public string Title { get; set; }
+                //public string Content { get; set; }
+                //public List<FileManagerCore.Globals.MediaResponseModel> Medias { get; set; } = new List<FileManagerCore.Globals.MediaResponseModel>();
+                //public int State { get; set; } = 0;
+                //public HashSet<string> Views { get; set; }
+                //public string ReplyTo { get; set; } // code message
+                //public bool? RemoveByAdmin { get; set; } = false;
+                //public DateTime? Created { get; set; } = DateTime.Now;
+                //public DateTime? Updated { get; set; } = DateTime.Now;
+
+                var student = item.Sender == null ? _studentService.GetItemByID(item.Poster) : _studentService.CreateQuery().Find(o => o.Email == item.Sender.ToString())?.FirstOrDefault();
+                var teacher = item.Sender == null ? _teacherService.GetItemByID(item.Poster) : _teacherService.CreateQuery().Find(o => o.Email == item.Sender.ToString())?.FirstOrDefault();
+                if (student == null && teacher == null) continue;
+                var sender = student == null
+                    ?
+                new MemberGroupInfo(teacher.ID,teacher.Email,teacher.FullName,true)
+                    :
+                new MemberGroupInfo(student.ID,student.Email,student.FullName,false);
+                var newItem = new MessageEntity()
+                {
+                    Code = item.ID,
+                    Content = item.Content,
+                    Medias = item.Medias,
+                    Receiver = item.Receivers?.FirstOrDefault(),
+                    RemoveByAdmin = item.RemoveByAdmin,
+                    Sender = sender,
+                    Title = item.Title,
+                    State = 1,
+                    Views = new HashSet<string>() { sender.ID },
+                    Created = item.TimePost > DateTime.MinValue ? item.TimePost : item.Created
+                };
+                if (_messageService.GetItemByCode(newItem.Code) == null)
+                {
+                    _messageService.CreateOrUpdate(newItem);
+                    count++;
+                    //_newFeedService.Remove(item.ID);
+                }
+
+            }
+
+            return count;
         }
         #endregion
     }
