@@ -10,6 +10,7 @@ namespace BaseEasyRealTime.Entities
     {
         public string Code { get; set; } = Guid.NewGuid().ToString();
         public MemberGroupInfo Sender { get; set; }
+        public HashSet<string> Receivers { get; set; } = new HashSet<string>();
         public string Receiver { get; set; } // groupName
         public string Title { get; set; }
         public string Content { get; set; }
