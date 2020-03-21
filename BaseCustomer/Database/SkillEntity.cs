@@ -38,6 +38,7 @@ namespace BaseCustomerEntity.Database
                 new SkillEntity{ID = "5", Name_vn = "Từ vựng", Name = "Vocabulary", Image = "/images/skill/vocabulary.png", IsActive = true, Color = "#007B83" },
                 new SkillEntity{ID = "6", Name_vn = "Ngữ pháp", Name = "Grammar", Image = "/images/skill/grammar.png", IsActive = true, Color = "#D03239" },
                 new SkillEntity{ID = "7", Name_vn = "Tổng hợp", Name = "General", Image = "/images/skill/general.png", IsActive = true, Color = "#47d9a5" },
+                new SkillEntity{ID = "8", Name_vn = "CDIO", Name = "CDIO", Image = "/images/skill/general.png", IsActive = true, Color = "#47d9a5" },
             };
         }
 

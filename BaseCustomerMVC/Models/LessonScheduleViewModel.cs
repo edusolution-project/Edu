@@ -33,6 +33,7 @@ namespace BaseCustomerMVC.Models
         public long Tried { get; set; }
         [JsonProperty("LastExam")]
         public string LastExam { get; set; }
-
+        [JsonProperty("IsOnline")]
+        public bool IsOnline { get; set; }
     }
 }

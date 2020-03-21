@@ -3,7 +3,7 @@
 
 @{
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
-    ViewData["Title"] = "Update Account Info";
+    ViewData["Title"] = "Cập nhật thông tin";
 }
 
 
@@ -12,7 +12,10 @@
 </script>
 
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25">
             <h2 class="title" v-if="isInfo">Thông tin cá nhân</h2>
             <h2 class="title" v-if="isPass"><a href="javascript:;" title="Quay lại" v-on:click="changeState()"><i class="ti-arrow-left"></i></a>Đổi mật khẩu</h2>
@@ -21,7 +24,7 @@
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box">
             <div class="flex">
                 <div id="avatar_box" v-if="isInfo">

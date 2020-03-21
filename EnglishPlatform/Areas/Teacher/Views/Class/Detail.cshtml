@@ -3,12 +3,19 @@
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var currentClass = ViewBag.Class as BaseCustomerMVC.Models.ClassViewModel;
     ViewData["Title"] = currentClass.Name;
+    var currentuser = User.Claims.Single(t => t.Type == "UserID").Value;
 }
 @*<script src="/libs/vuejs-datepicker.min.js"></script>*@
 <link href="~/js/lib/datetimepicker/jq.datetimepicker.css" rel="stylesheet" />
 <script src="~/js/lib/datetimepicker/php-date-formatter.min.js"></script>
 <script src="~/js/lib/datetimepicker/jquery.mousewheel.js"></script>
 <script src="~/js/lib/datetimepicker/jquery.datetimepicker.js"></script>
+
+<script src="/libs/quill-editor/quill.min.js"></script>
+<script src="/libs/quill-editor/quill-vue.min.js"></script>
+<link href="/libs/quill-editor/quill.core.css" rel="stylesheet">
+<link href="/libs/quill-editor/quill.snow.css" rel="stylesheet">
+<link href="/libs/quill-editor/quill.bubble.css" rel="stylesheet">
 
 <script>
     setActiveMenu("course");
@@ -38,7 +45,9 @@
                     <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(4)">Thảo luận</a></li>
                 </ul>
             </div>
-            <div class="c-right"></div>
+            <div class="c-right">
+                <b-button class="btn-addevent" v-on:click="showRefModal()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
+            </div>
         </div>
     </div>
     <div class="card-body">
@@ -50,7 +59,7 @@
                         <p><span class="label">Tên lớp: </span>{{domDecoder(className)}}</p>
                         @*<p><span class="label">Mã lớp : </span>IELTS_PL5_1</p>*@
                         @*<p><span class="label">Cấp độ : </span>{{gradeName}}</p>*@
-                        <p><span class="label">Chương trình: </span>{{subjectName}}</p>
+                    <p><span class="label">Chương trình: </span>{{domDecoder(subjectName)}}</p>
                         <p><span class="label">Môn học: </span>{{skillName}}</p>
                         <ul class="time-line flex">
                             <li><i class="ti-time"></i>Bắt đầu: {{formatShortDate(startDate)}} </li>
@@ -61,7 +70,7 @@
             </ul>
             <div class="box info-practice">
                 <h4>Chi tiết lớp học</h4>
-                <p>{{domDecoder(classDescription)}}</p>
+                <p>{{replaceBrkLine(domDecoder(classDescription))}}</p>
             </div>
         </div>
         <div class="box" v-if="tab[1]">
@@ -74,6 +83,7 @@
                                 <chap-content v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')"
                                               v-bind:data="item"
                                               v-bind:pos="k"
+                                              v-bind:owner="obj.TeacherID"
                                               v-bind:subchaps="filterChap(item, list_chapters)"></chap-content>
                             </ul>
                         </b-collapse>
@@ -102,46 +112,55 @@
             </table>
         </div>
         <div class="box" v-if="tab[3]">
-            <div class="row ls-doc">
-                <div class="col-md-12">
-                    <div class="inner">
+            <div class="row ls-doc" v-if="ref.data.length > 0">
+                <div class="col-md-12" v-for="data in ref.data">
+                    <div class="inner flex">
                         <a href="#" title="" class="thumb">
                             <img src="/pictures/doc1.png" alt="">
                         </a>
                         <div class="entry">
-                            <div class="flex j-between">
-                                <div class="c-left">
-                                    <a href="#" title="" class="title">IELTS Practice Tests</a>
-                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                            <div>
+                                <div>
+                                    <a href="#" title="" class="title">{{data.Title}}</a>
                                 </div>
-                                <div class="c-right">
-                                    <a href="#" title="Xem" class="btn-view">Xem</a>
-                                    <a href="#" title="Tải về" class="btn-download">Tải về</a>
+                                <div>
+                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
                                 </div>
                             </div>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</p>
+                            <div class="pt-2 pb-2">
+                                <p>{{domDecoder(replaceBrkLine(data.Description))}}</p>
+                            </div>
+                            <div>
+                                <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
+                                <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
+                                <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteRef(data)" v-if="data.OwnerID == '@currentuser'">Xóa</a>
+                                <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showRefModal(data)" v-if="data.OwnerID == '@currentuser'">Sửa</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-12">
-                    <div class="inner">
-                        <a href="#" title="" class="thumb">
-                            <img src="/pictures/doc2.png" alt="">
-                        </a>
-                        <div class="entry">
-                            <div class="flex j-between">
-                                <div class="c-left">
-                                    <a href="#" title="" class="title">IELTS Practice Tests</a>
-                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                </div>
-                                <div class="c-right">
-                                    <a href="#" title="Xem" class="btn-view">Xem</a>
-                                    <a href="#" title="Tải về" class="btn-download">Tải về</a>
-                                </div>
-                            </div>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</p>
-                        </div>
-                    </div>
+
+            </div>
+            <div class="row ls-doc text-center d-block" v-else>
+                Không có tài liệu
+            </div>
+        </div>
+        <div class="box margin-t20 flex" v-if="tab[3] && ref.data.length > 0">
+            <div class="paging-view">
+                Hiển thị:
+                <select v-model="ref.view" v-on:change="loadPreference()">
+                    <option value="10">10 kết quả</option>
+                    <option value="20">20 kết quả</option>
+                    <option value="30">30 kết quả</option>
+                </select>
+            </div>
+            <div class="page-control">
+                <div class="right">
+                    <b-pagination v-model="ref.page"
+                                  :total-rows="ref.totalRec"
+                                  :per-page="ref.view"
+                                  v-on:input="loadPreference()"></b-pagination>
                 </div>
             </div>
         </div>
@@ -191,20 +210,19 @@
             }
     </style>
 
-
-
     <script type="text/x-template" id="chapContentTemp">
         <li class="col-md-12">
             <div class="inner">
-                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic ic-edit-small"></i>{{data.Title}}<i class="ic ic-collapse"></i></a>
+                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic ic-edit-small"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></a>
                 <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
                     <b-card-body>
                         <ul class="list">
                             <chap-content v-for="(subItem,j) in subchaps"
                                           v-bind:data="subItem"
                                           v-bind:pos="j"
+                                          v-bind:owner="owner"
                                           v-bind:subchaps="filterChap(subItem, subchaps)"></chap-content>
-                            <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
+                            <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:owner="owner" v-bind:classSubject="data.ClassSubject"></lesson-item>
                         </ul>
                     </b-card-body>
                 </b-collapse>
@@ -216,11 +234,16 @@
         <li class="sub-practice">
             <div class="flex j-between width-100">
                 <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject"> <span class="width-100">{{data.Title}}</span></a>
-                <div class="flex width-100 j-end picker-schedule">
+                <div class="flex width-100 j-end picker-schedule" v-if="owner == '@currentuser'">
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed" v-on:input="updateSchedule(data)"></datepicker>
+                    <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" v-on:click="toggleOnlineClass(data)"></i>
                 </div>
-                <div class="status">
+                <div class="flex width-100 j-end picker-schedule" v-else>
+                    <div class="input-group date date st bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
+                    <div class="input-group date date ed bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
+                </div>
+                <div class="status" v-if="owner == '@currentuser'">
                     <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
                 </div>
             </div>
@@ -228,20 +251,25 @@
     </script>
 
     <script>
+        Vue.use(VueQuillEditor)
+
         Vue.component('chap-content', {
             template: '#chapContentTemp',
             props: {
                 subchaps: Array,
                 lessons: Array,
                 data: Object,
-                pos: String
+                pos: String,
+                owner: String,
             }
         })
-        Vue.component('lesson-item',{
+
+        Vue.component('lesson-item', {
             template: '#lessonItemTemp',
             props: {
                 data: Object,
-                classSubject: String
+                classSubject: String,
+                owner: String
             }
         })
 
@@ -316,8 +344,11 @@
                 this.loadClassDetail()
                 window.loadContent = this.loadContent
                 window.updateSchedule = this.updateSchedule
+                window.toggleLessonState = this.toggleLessonState
+                window.toggleOnlineClass = this.toggleOnlineClass
                 window.filterChap = this.filterChap
                 window.filterLesson = this.filterLesson
+                window.formatTime = this.formatTime
                 var hash = window.location.hash;
                 if (hash.startsWith('#')) {
                     hash = hash.split('#')[1]
@@ -329,7 +360,7 @@
                         case 'student':
                             this.tabChange(2);
                             break;
-                        case 'preference':
+                        case 'reference':
                             this.tabChange(3);
                             break;
                         case 'discuss':
@@ -338,10 +369,14 @@
                     }
                 }
             },
-            //components: {
-            //    vuejsDatepicker
-            //},
+            components: {
+          	    LocalQuillEditor: VueQuillEditor.quillEditor
+            },
             data: {
+                isLoading: false,
+                editorOption: {
+                    theme: 'snow'
+                },
                 classID: '@currentClass.ID',
                 className: '@currentClass.Name',
                 startDate: '@currentClass.StartDate',
@@ -350,10 +385,8 @@
                 classImg: '@currentClass.Image',
                 subjectName: '@currentClass.SubjectName',
                 skillName: '@currentClass.SkillName',
-                classSubjects: [
-                ],
-                list_data: [
-                ],
+                classSubjects: [],
+                list_data: [],
                 list_subjects: [],
                 list_chapters: [],
                 list_lessons:[],
@@ -391,9 +424,27 @@
                 ],
                 studentData: [
                 ],
-                view: 10,
-                page: 1,
-                tab: [true, false, false, false, false]
+                //view: 10,
+                //page: 1,
+                tab: [true, false, false, false, false],
+                ref: {
+                    range: '@BaseCustomerEntity.Database.REF_RANGE.CLASS',
+                    target: '@currentClass.ID',
+                    searchTerm: '',
+                    data: [],
+                    view: 10,
+                    page: 1
+                },
+                addRef: {
+                    ID: '',
+                    Title: '',
+                    Range: '',
+                    Link: '',
+                    Target: '',
+                    Description: '',
+                    FileName: '',
+                    file: null,
+                }
             },
             watch: {
             },
@@ -409,15 +460,19 @@
                     this.tab[a] = true
                     switch (a) {
                         case 0:
+                            history.replaceState({ tab: a }, this.className + " - Tổng quan");
                             this.loadClassDetail();
                             break;
                         case 1:
+                            history.replaceState({ tab: a }, this.className + " - Môn học", "#module");
                             this.loadClassSubjects();
                             break;
                         case 2:
+                            history.replaceState({ tab: a }, this.className + " - Danh sách học viên", "#student");
                             this.loadClassStudent();
                             break;
                         case 3:
+                            history.replaceState({ tab: a }, this.className + " - Tài liệu tham khảo", "#reference");
                             this.loadPreference();
                             break;
                         case 4:
@@ -433,17 +488,16 @@
                     let _url = '@Url.Action("GetDetail", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
-                        var _data = response.data.Data;
-                        _data.forEach(function (item, k)
-                        {
-                            _that.teacherSource.push({
-                                ID: item.id,
-                                FullName: item.fullname,
-                                SubjectID: obj.SubjectID
+                            var _data = response.data.Data;
+                            _data.forEach(function (item, k) {
+                                _that.teacherSource.push({
+                                    ID: item.id,
+                                    FullName: item.fullname,
+                                    SubjectID: obj.SubjectID
+                                })
                             })
-                        })
-                        _that.loaded_teacher.push(obj.SubjectID);
-                    }).catch(e => { })
+                            _that.loaded_teacher.push(obj.SubjectID);
+                        }).catch(e => { })
                 },
                 loadClassSubjects() {
                     let _that = this
@@ -453,80 +507,82 @@
                     let _form = new FormData()
                     _form.append('ClassID', _that.classID)
                     let _url = '@Url.Action("GetClassSubjects", "ClassSubject")'
-                        axios.post(_url, _form)
-                            .then(response => {
-                                var _data = response.data.Data;
-                                _that.classSubjects = [];
-                                _data.forEach(function (item, k) {
-                                    _that.classSubjects.push({
-                                        ID: item.ID,
-                                        Title: item.SkillName,
-                                        Image: item.SkillImage,
-                                        Teacher: item.TeacherName,
-                                        Color: item.Color,
-                                        Chapters: [],
-                                        Lessons: []
-                                    })
-                                    //_that.changeAddSubject(item)
-                                    //_that.changeAddGrade(item)
+                    axios.post(_url, _form)
+                        .then(response => {
+                            var _data = response.data.Data;
+                            _that.classSubjects = [];
+                            _data.forEach(function (item, k) {
+                                _that.classSubjects.push({
+                                    ID: item.ID,
+                                    Title: item.SkillName,
+                                    Image: item.SkillImage,
+                                    Teacher: item.TeacherName,
+                                    TeacherID: item.TeacherID,
+                                    Color: item.Color,
+                                    Chapters: [],
+                                    Lessons: []
                                 })
+                                //_that.changeAddSubject(item)
+                                //_that.changeAddGrade(item)
+                            })
 
-                                //_that.$forceUpdate()
-                            }).catch(e => { })
+                            //_that.$forceUpdate()
+                        }).catch(e => { })
                 },
                 loadContent(subject, chapter) {
                     let _that = this
                     let key = subject + "_" + chapter
                     if (_that.loaded_chapter.includes(key))
                         return;
-
                     let _form = new FormData()
                     _form.append('ID', subject)
-                    if(chapter)
+                    if (chapter)
                         _form.append('Parent', chapter)
-                        let _url = '@Url.Action("GetContents", "ClassSubject")'
-                        axios.post(_url, _form)
-                            .then(response => {
-                                var _data = response.data.Data;
-                                var _lesson = response.data.Lesson;
-                                //_that.classSubjects.forEach(function (item, k)
-                                //{
-                                //    if (item.ID == subject) {
+                    let _url = '@Url.Action("GetContents", "ClassSubject")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            var _data = response.data.Data;
+                            var _lesson = response.data.Lesson;
+                            //_that.classSubjects.forEach(function (item, k)
+                            //{
+                            //    if (item.ID == subject) {
 
-                                _data.forEach(function (chapter, k) {
-                                    var parent = chapter.ParentID;
-                                    if (parent == "0") { parent = "";}
-                                    _that.list_chapters.push({
-                                        ID: chapter.ID,
-                                        Title: chapter.Name,
-                                        ClassSubject: subject,
-                                        Parent: parent
-                                    })
+                            _data.forEach(function (chapter, k) {
+                                var parent = chapter.ParentID;
+                                if (parent == "0") { parent = ""; }
+                                _that.list_chapters.push({
+                                    ID: chapter.ID,
+                                    Title: chapter.Name,
+                                    ClassSubject: subject,
+                                    Parent: parent,
+                                    TotalLessons: chapter.TotalLessons
                                 })
-                                _lesson.forEach(function (lesson, k) {
-                                    var parent = '';
-                                    if (lesson.ChapterID) {
-                                        parent = lesson.ChapterID;
-                                    }
+                            })
+                            _lesson.forEach(function (lesson, k) {
+                                var parent = '';
+                                if (lesson.ChapterID) {
+                                    parent = lesson.ChapterID;
+                                }
 
-                                        _that.list_lessons.push({
-                                            ID: lesson.ID,
-                                            ScheduleID: lesson.ScheduleID,
-                                            Title: lesson.Title,
-                                            ClassSubject: subject,
-                                            Parent: parent,
-                                            StartDate: moment(lesson.StartDate) > moment(new Date(1900,1,1)) ? lesson.StartDate : "",
-                                            EndDate: moment(lesson.EndDate) > moment(new Date(1900,1,1)) ? lesson.EndDate : "",
-                                            IsActive: lesson.IsActive,
-                                            IsUpdating: false
-                                        })
-
+                                _that.list_lessons.push({
+                                    ID: lesson.ID,
+                                    ScheduleID: lesson.ScheduleID,
+                                    Title: lesson.Title,
+                                    ClassSubject: subject,
+                                    Parent: parent,
+                                    StartDate: moment(lesson.StartDate) > moment(new Date(1900, 1, 1)) ? lesson.StartDate : "",
+                                    EndDate: moment(lesson.EndDate) > moment(new Date(1900, 1, 1)) ? lesson.EndDate : "",
+                                    IsActive: lesson.IsActive,
+                                    IsUpdating: false,
+                                    IsOnline: lesson.IsOnline
                                 })
-                                this.loaded_chapter.push(key);
-                                this.list_chapters = _that.list_chapters
-                                this.list_lessons = _that.list_lessons
-                                _that.$forceUpdate()
-                            }).catch(e => { })
+
+                            })
+                            this.loaded_chapter.push(key);
+                            this.list_chapters = _that.list_chapters
+                            this.list_lessons = _that.list_lessons
+                            _that.$forceUpdate()
+                        }).catch(e => { })
                 },
                 loadClassStudent() {
                     let _that = this
@@ -546,11 +602,32 @@
                 },
                 loadPreference() {
                     //console.log(4)
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('SearchText', "")
+                    _form.append('Target', _that.ref.target)
+                    _form.append('PageSize', _that.ref.view)
+                    _form.append('PageIndex', _that.ref.page)
+
+                    let _url = '@Url.Action("GetClassList", "Reference")'
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.ref.data = response.data.Data;
+                            this.ref.data = _that.ref.data
+                            this.ref.totalRec = response.data.Model.totalRecord
+                            console.log(totalRec)
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
+                            //console.log(_that.active_course);
+                        }).catch(e => { })
                 },
                 loadComment() {
                     document.location = '@Url.Action("Index","Discuss", new { id = currentClass.ID })'
                     //console.log(5)
                 },
+
+                //MODULE
                 updateSchedule(obj) {
                     obj.IsUpdating = true
 
@@ -562,18 +639,10 @@
                     _form.append('StartDate', startdate)
                     _form.append('EndDate', enddate)
                     let _url = '@Url.Action("Update", "LessonSchedule")'
-                        axios.post(_url, _form)
-                            .then(response => {
-                                obj.IsUpdating = false
-                            }).catch(e => { })
-                },
-                formatShortDate(date) {
-                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
-                    return moment(date).format("DD/MM/YYYY")
-                },
-                formatTime(time) {
-                    if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
-                    return moment(time).format("DD/MM/YYYY HH:mm")
+                    axios.post(_url, _form)
+                        .then(response => {
+                            obj.IsUpdating = false
+                        }).catch(e => { })
                 },
                 matchedChap(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key
@@ -583,39 +652,272 @@
                 },
                 filterChap(obj, list) {
                     return list.filter((p) => {
-        	            return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
+                        return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
                     })
                 },
                 filterLesson(obj) {
                     var filter = this.list_lessons.filter((p) => {
-        	            return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
+                        return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
                     })
                     return filter;
                 },
-                 //Lesson Action
+
+                //Lesson Action
                 toggleLessonState(obj) {
                     let _that = this;
                     //console.log(obj)
                     //_that.tableData.forEach(function (item, k) {
-                        //if (item.ID === obj.ID) {
-                            let _url = obj.IsActive ? '@Url.Action("Unpublish", "LessonSchedule")' : '@Url.Action("Publish", "LessonSchedule")'
+                    //if (item.ID === obj.ID) {
+                    let _url = obj.IsActive ? '@Url.Action("Unpublish", "LessonSchedule")' : '@Url.Action("Publish", "LessonSchedule")'
+                    let _form = new FormData()
+                    _form.append('ArrID', obj.ScheduleID);
+                    axios.post(_url, _form)
+                        .then(response => {
+                            console.log('update ok');
+                            //item.IsActive = !item.IsActive;
+                            //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
+                        }).catch(e => { })
+                    //}
+                    //})
+                },
+                toggleOnlineClass(obj) {
+                    let _url = '@Url.Action("ToggleOnline", "LessonSchedule")'
+                    let _form = new FormData()
+                    _form.append('ID', obj.ScheduleID);
+                    axios.post(_url, _form)
+                        .then(response => {
+                            if (response.data.error == null) {
+                                obj.IsOnline = response.data.isOnline;
+                                if (response.data.isOnline == true) {
+                                    Swal.fire({
+                                        title: "Mở lớp thành công",
+                                        text: "Đã mở lớp trực tuyến cho bài học",
+                                        icon: 'success',
+                                    });
+                                }
+                                else {
+                                    Swal.fire({
+                                        title: "Thông báo",
+                                        text: "Đã hủy lớp trực tuyến",
+                                        icon: 'warning',
+                                    });
+                                }
+                            }
+                            else {
+                                Swal.fire({
+                                    title: "Có lỗi",
+                                    text: response.error,
+                                    icon: 'warning',
+                                });
+                            }
+
+                            //item.IsActive = !item.IsActive;
+                            //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
+                        }).catch(e => { })
+                },
+                //REF
+                showRefModal(obj) {
+                    let _that = this;
+                    if (obj == null) {
+                        _that.addRef.ID = '';
+                        _that.addRef.Title = '';
+                        _that.addRef.Range = '@BaseCustomerEntity.Database.REF_RANGE.ALL';
+                        _that.addRef.Link = '';
+                        _that.addRef.Target = '@currentClass.ID';
+                        _that.addRef.Description = '';
+                        _that.addRef.FileName = '';
+                    }
+                    else {
+                        _that.addRef.ID = obj.ID;
+                        _that.addRef.Title = obj.Title;
+                        _that.addRef.Range = obj.Range;
+                        _that.addRef.Link = obj.Link;
+                        _that.addRef.Description = obj.Description;
+                        _that.addRef.Target = obj.Target;
+                        if (obj.Media != null)
+                            _that.addRef.FileName = obj.Media.Name;
+                        else
+                            _that.addRef.FileName = '';
+                    }
+                    _that.addRef.file = {};
+                    _that.$bvModal.show('modal_event')
+                },
+                openLink(obj) {
+                    obj.Viewed = obj.Viewed + 1;
+                    window.open('@Url.Action("OpenLink", "Reference")/' + obj.ID);
+                },
+                download(obj) {
+                    if (obj.Media == null)
+                        return false;
+                    obj.Downloaded = obj.Downloaded + 1;
+                    window.open('@Url.Action("Download", "Reference")/' + obj.ID);
+                },
+                updateRef() {
+                    let _that = this
+                    let _form = new FormData()
+
+
+                    if (_that.addRef.Title == '') {
+                        swal.fire({
+                            title: "Có lỗi",
+                            text: "Vui lòng nhập đủ thông tin",
+                            icon: 'warning',
+                        });
+                        this.$refs["addName"].focus();
+                        return false;
+                    }
+                    _form.append('ID', _that.addRef.ID)
+                    _form.append('Title', _that.addRef.Title)
+                    _form.append('Link', _that.addRef.Link)
+                    _form.append('Target', _that.addRef.Target)
+                    _form.append('Name', _that.addRef.Title)
+                    _form.append('Description', _that.addRef.Description)
+                    _form.append('Range', _that.addRef.Range)
+
+                    if (_that.addRef.file) {
+                        _form.append('fileUpload', this.addRef.file)
+                    }
+
+
+                    let _url = '@Url.Action("Save", "Reference")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            if (response.Error == null) {
+                                Swal.fire(
+                                    'Đã cập nhât!',
+                                    'Tài liệu đã cập nhật thành công',
+                                    'success'
+                                )
+                                this.loadPreference()
+                                this.hideModal()
+                            }
+                            else {
+                                Swal.fire(
+                                    'Có lỗi!',
+                                    response.Error,
+                                    'error'
+                                )
+                            }
+
+                        }).catch(e => { })
+                },
+                deleteRef(obj) {
+                    Swal.fire({
+                        title: 'Chắc chắn xóa?',
+                        text: "Bạn sẽ không thể khôi phục lại dữ liệu này sau khi xóa",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        cancelButtonText: 'Hủy',
+                        confirmButtonText: 'Đồng ý'
+                    }).then((result) => {
+                        if (result.value == true) {
                             let _form = new FormData()
-                            _form.append('ArrID', obj.ScheduleID);
+                            _form.append('ID', obj.ID)
+                            let _url = '@Url.Action("Remove", "Reference")'
                             axios.post(_url, _form)
                                 .then(response => {
-                                    console.log('update ok');
-                                    //item.IsActive = !item.IsActive;
-                                    //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
+                                    if (response.Error == null) {
+                                        Swal.fire(
+                                            'Đã xóa!',
+                                            'Tài liệu của bạn đã được xóa',
+                                            'success'
+                                        )
+                                        this.loadPreference()
+                                    }
+                                    else {
+                                        Swal.fire(
+                                            'Có lỗi!',
+                                            response.Error,
+                                            'error'
+                                        )
+                                    }
+
                                 }).catch(e => { })
-                        //}
-                    //})
+                        }
+                    })
+                },
+                changeFile() {
+
+                    this.addRef.FileName = event.target.files[0].name
+                    this.addRef.file = event.target.files[0]
+                },
+
+                //SUPPORT
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                formatTime(time) {
+                    if(!(moment(time).isValid())) return ""
+                    if (moment(time) < moment(new Date(2000, 1, 1))) return "";
+                    console.log(moment(time))
+                    return moment(time).format("DD/MM/YYYY HH:mm")
                 },
                 domDecoder(str) {
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
-                }
+                },
+                replaceBrkLine(str) {
+                    return str.replace(/\n/gi, "<br/>")
+                },
+                shortenString(str, max = 15) {
+                    if (str == null || str.length <= max)
+                        return "";
+                    return str.substring(0, max) + "..."
+                },
+                hideModal() {
+                    $('.close').click();
+                },
             }
         });
     </script>
+}
+
+@section Modals{
+    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Cập nhật tài liệu tham khảo">
+        <b-col class="form-group">
+            <label for="">Tên tài liệu</label>
+            <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addRef.Title">
+        </b-col>
+        <b-col class="form-group">
+            <label for="">Mô tả</label>
+            <quill-editor v-model="addRef.Description"
+                          ref="quillEditorA"
+                          :options="editorOption">
+            </quill-editor>
+        </b-col>
+        <b-col class="form-group">
+            <label for="">Link liên kết</label>
+            <input type="text" name="" value="" class="form-control" placeholder="Link liên kết" v-model="addRef.Link">
+        </b-col>
+        <b-col class="form-group">
+            <label class="col-form-label">File đính kèm:</label>
+            <i class="ic ic-paper-clip"></i><label class="p-1" ref="filedsp" v-on:click="$refs.file.click()">{{shortenString(addRef.FileName)}} - (Click để chọn)</label>
+            <input type="file" ref="file" class="d-none" v-on:change="changeFile()">
+        </b-col>
+        <b-col class="form-group">
+            <label class="col-form-label">Phạm vi chia sẻ:</label>
+            <select name="range" onchange="ChooseRange()" id="refRange" class="form-control d-inline w-25" v-model="addRef.Range">
+                <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
+                <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
+                <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Riêng trong lớp</option>
+            </select>
+            <select name="target" id="refTarget" v-model="addRef.Target" class="form-control d-inline w-25" v-if="addRef.Range == '@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+                <option value="@currentClass.ID">@currentClass.Name</option>
+            </select>
+        </b-col>
+
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="updateRef()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
 }

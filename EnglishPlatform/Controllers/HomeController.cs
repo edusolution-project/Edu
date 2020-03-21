@@ -36,6 +36,13 @@ namespace EnglishPlatform.Controllers
         private readonly ILog _log;
         private readonly ClassService _classService;
         private readonly StudentHelper _studentHelper;
+        private readonly CalendarHelper _calendarHelper;
+
+
+        //fix
+        private readonly ClassStudentService _classStudentService;
+
+
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -45,6 +52,8 @@ namespace EnglishPlatform.Controllers
             , AccessesService accessesService
             , ClassService classService
             , IOptions<DefaultConfigs> defaultvalue
+            , CalendarHelper calendarHelper
+            , ClassStudentService classStudentService
             , ILog log)
         {
             _accessesService = accessesService;
@@ -56,6 +65,8 @@ namespace EnglishPlatform.Controllers
             _studentService = studentService;
             _classService = classService;
             _studentHelper = new StudentHelper(studentService, accountService);
+            _calendarHelper = calendarHelper;
+            _classStudentService = classStudentService;
             _log = log;
             _default = defaultvalue.Value;
         }
@@ -103,7 +114,7 @@ namespace EnglishPlatform.Controllers
             }
             else
             {
-                string _sPass = Security.Encrypt(PassWord);
+                string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
                 var user = _accountService.GetAccount(UserName.ToLower(), _sPass);
                 if (user == null)
                 {
@@ -156,7 +167,8 @@ namespace EnglishPlatform.Controllers
                                             Email = user.UserName,
                                             Phone = user.Phone,
                                             IsActive = true,// active student
-                                            CreateDate = DateTime.Now
+                                            CreateDate = DateTime.Now,
+                                            ID = user.UserID
                                         };
                                         _studentService.CreateQuery().InsertOne(st);
                                     }
@@ -184,7 +196,7 @@ namespace EnglishPlatform.Controllers
                                 new Claim(ClaimTypes.Email, user.UserName),
                                 new Claim(ClaimTypes.Name, FullName),
                                 new Claim(ClaimTypes.Role, role.Code),
-                                new Claim("Type", user.Type),
+                                new Claim("Type", role.Type),
                                 new Claim("RoleID", role.ID)
                             };
 
@@ -254,7 +266,7 @@ namespace EnglishPlatform.Controllers
             }
             else
             {
-                string _sPass = Security.Encrypt(PassWord);
+                string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
                 if (_accountService.IsAvailable(_username))
                 {
                     return Json(new ReturnJsonModel
@@ -399,8 +411,8 @@ namespace EnglishPlatform.Controllers
                 IsActive = true,
                 Type = ACCOUNT_TYPE.ADMIN,
                 UserName = "supperadmin@gmail.com",
-                PassTemp = Security.Encrypt("123"),
-                PassWord = Security.Encrypt("123"),
+                PassTemp = Core_v2.Globals.Security.Encrypt("123"),
+                PassWord = Core_v2.Globals.Security.Encrypt("123"),
                 UserID = "0", // admin
                 RoleID = superadminRole.ID
             };
@@ -503,6 +515,89 @@ namespace EnglishPlatform.Controllers
             var successMessage = "image is uploaded successfully";
             dynamic success = JsonConvert.DeserializeObject("{ 'uploaded': 1,'fileName': \"" + fileName + "\",'url': \"" + url + "\", 'error': { 'message': \"" + successMessage + "\"}}");
             return Json(success);
+        }
+
+        public IActionResult OnlineClass(string ID)
+        {
+            var @event = _calendarHelper.GetByEventID(ID);
+            if (@event != null)
+            {
+                //@event.UrlRoom = "6725744943";
+
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var type = User.Claims.GetClaimByType("Type").Value;
+                if (type == "teacher")
+                {
+                    //ViewBag.Role = "1";
+                    var teacher = _teacherService.GetItemByID(UserID);
+                    //if (!string.IsNullOrEmpty(teacher.ZoomID))
+                    if (teacher.ZoomID == @event.UrlRoom)
+                    {
+                        //var roomID = "6725744943";//test
+                        ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "") + "/join";
+                        //ViewBag.URL = Url.Action("ZoomClass", "Home", new { roomID });
+                    }
+                    else
+                        ViewBag.URL = @event.UrlRoom;
+                }
+                else
+                {
+                    //ViewBag.Role = "0";
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "") });
+                }
+            }
+            return View();
+        }
+
+        public IActionResult ZoomClass(string roomID)
+        {
+            ViewBag.RoomID = roomID;
+            return View();
+        }
+
+        //Fix Data
+        public JsonResult FixStudentNull()
+        {
+            int count = 0;
+            var teachers = _teacherService.GetAll().ToList();
+            var _studentMapping = new MappingEntity<StudentEntity, StudentEntity>();
+            foreach(var teacher in teachers)
+            {
+                var students = _studentService.Collection.Find(t => t.Email == teacher.Email).ToList();
+                if(students.Count > 0) //has student account
+                {
+                    var validStud = students.Find(t => t.ID == teacher.ID);
+                    if(validStud != null)
+                    {
+
+                    }
+                    else
+                    {
+                        var oldid = students[0].ID;
+                        validStud = _studentMapping.Clone(students[0], new StudentEntity());
+                        validStud.ID = teacher.ID;
+                        _studentService.Collection.InsertOne(validStud);
+                    }
+
+                    foreach(var student in students)
+                    {
+                        if (student.ID == validStud.ID)
+                            continue;
+                        var classstudents = _classStudentService.GetStudentClasses(student.ID);
+                        if(classstudents != null && classstudents.Count > 0)
+                        {
+                            foreach(var cs in classstudents)
+                            {
+                                _classStudentService.RemoveClassStudent(cs, student.ID);
+                                _classStudentService.Collection.InsertOne(new ClassStudentEntity { ClassID = cs, StudentID = validStud.ID });
+                                count++;
+                            }
+                        }
+                        _studentService.Remove(student.ID);
+                    }
+                }
+            }
+            return Json("OK");
         }
     }
 }

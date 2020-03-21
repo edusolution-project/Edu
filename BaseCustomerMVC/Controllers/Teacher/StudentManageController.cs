@@ -34,6 +34,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ScoreStudentService _scoreStudentService;
         private readonly LearningHistoryService _learningHistoryService;
         private readonly ExamService _examService;
+        private readonly LessonScheduleService _lessonScheduleService;
         private readonly IHostingEnvironment _env;
 
 
@@ -52,6 +53,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassProgressService classProgressService,
             ClassSubjectProgressService classSubjectProgressService,
             ScoreStudentService scoreStudentService,
+            LessonScheduleService lessonScheduleService,
             StudentService studentService,
             IHostingEnvironment evn
             )
@@ -70,6 +72,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _scoreStudentService = scoreStudentService;
             _classStudentService = classStudentService;
             _classSubjectService = classSubjectService;
+            _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
             _env = evn;
 
@@ -151,21 +154,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 TeacherID = User.Claims.GetClaimByType("UserID").Value;
             }
+            var classids = new List<string>();
             if (!string.IsNullOrEmpty(ClassID))
-                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.ClassID == ClassID));
-            if (!string.IsNullOrEmpty(SubjectID))
-                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            if (!string.IsNullOrEmpty(TeacherID))
-                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
-            if (!string.IsNullOrEmpty(SkillID))
-                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SkillID == SkillID));
-            if (!string.IsNullOrEmpty(GradeID))
-                filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+            {
+                classids.Add(ClassID);
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(SubjectID))
+                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+                if (!string.IsNullOrEmpty(TeacherID))
+                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                if (!string.IsNullOrEmpty(SkillID))
+                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SkillID == SkillID));
+                if (!string.IsNullOrEmpty(GradeID))
+                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+                classids =
+                    filterCs.Count > 0 ? _classSubjectService.Collection.Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs)).ToList()
+                : _classService.Collection.Find(t => true).Project(t => t.ID).ToList();
+            }
 
-            var classids = (filterCs.Count > 0 ? _classSubjectService.Collection
-                .Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs))
-                //.Find(Builders<ClassSubjectEntity>.Filter.And(filterCs))
-                : _classSubjectService.Collection.Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.Empty)).ToList();
 
             if (classids == null || classids.Count() == 0)
                 return new JsonResult(new Dictionary<string, object>
@@ -199,9 +207,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (string.IsNullOrEmpty(SubjectID))
             {
+
                 studentsView = (from r in retStudents
                                 let @class = _classService.GetItemByID(r.ClassID)
                                 where @class != null
+                                let examCount = _lessonScheduleService.CountClassExam(r.ClassID, end: DateTime.Now)//TODO: HEAVY LOAD -> NEED FIX
                                 let @student = _studentService.GetItemByID(r.StudentID)
                                 where @student != null
                                 let progress = _classProgressService.GetItemByClassID(@class.ID, @student.ID) ?? new ClassProgressEntity()
@@ -211,8 +221,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     ClassName = @class.Name,
                                     ClassStatus = "Đang học",
                                     LastJoinDate = progress.LastDate,
-                                    Percent = progress.TotalLessons > 0 ? (progress.Completed * 100 / progress.TotalLessons) : 0,
-                                    Score = progress.AvgPoint
+                                    Percent = (progress.TotalLessons == 0) ? 0 : (progress.Completed * 100 / progress.TotalLessons),
+                                    Score = examCount == 0 ? 0 : progress.TotalPoint / examCount
                                 })).ToList();
             }
             else
@@ -220,17 +230,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 studentsView = (from r in retStudents
                                 let @class = _classService.GetItemByID(r.ClassID)
                                 where @class != null
+                                let classusbjectIds = _classSubjectService.GetIDsByClassID_Subject(r.ClassID, SubjectID)
+                                let examCount = _lessonScheduleService.CountClassSubjectExam(classusbjectIds, end: DateTime.Now)
                                 let @student = _studentService.GetItemByID(r.StudentID)
                                 where @student != null
-                                let progress = _classSubjectProgressService.GetItemByClassSubjectID(SubjectID, @student.ID) ?? new ClassSubjectProgressEntity()
+                                let progress = _classSubjectProgressService.GetItemByClassSubjectID(SubjectID, @student.ID) ?? new ClassSubjectProgressEntity() //TODO: Multiple class subject ???? - Too complicated
                                 select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
                                 {
                                     ClassID = @class.ID,
                                     ClassName = @class.Name,
                                     ClassStatus = "Đang học",
                                     LastJoinDate = progress.LastDate,
-                                    Percent = progress.TotalLessons > 0 ? (progress.Completed * 100 / progress.TotalLessons) : 0,
-                                    Score = progress.AvgPoint
+                                    Percent = (progress.TotalLessons == 0) ? 0 : (progress.Completed * 100 / progress.TotalLessons),
+                                    Score = examCount == 0 ? 0 : progress.TotalPoint / examCount
                                 })).ToList();
             }
 
@@ -378,11 +390,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //{
                                 //    CreateDate = DateTime.Now,
                                 //    IsActive = true,
-                                //    PassTemp = Security.Encrypt(
+                                //    PassTemp = Core_v2.Globals.Security.Encrypt
                                 //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
                                 //        defPass
                                 //        ),
-                                //    PassWord = Security.Encrypt(
+                                //    PassWord = Core_v2.Globals.Security.Encrypt
                                 //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
                                 //        defPass
                                 //        ),

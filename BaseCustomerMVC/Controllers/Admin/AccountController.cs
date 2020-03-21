@@ -194,10 +194,10 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.UserCreate = User.Claims.GetClaimByType("UserID").Value;
                 item.Type = _roleService.GetItemByID(item.RoleID).Type;
 
-                if (string.IsNullOrEmpty(item.PassWord) || Security.Encrypt(item.PassWord) == oldData.PassWord) item.PassWord = oldData.PassWord;
-                else item.PassWord = Security.Encrypt(item.PassWord);
-                if (string.IsNullOrEmpty(item.PassTemp) || Security.Encrypt(item.PassTemp) == oldData.PassTemp) item.PassTemp = oldData.PassTemp;
-                else item.PassTemp = Security.Encrypt(item.PassTemp);
+                if (string.IsNullOrEmpty(item.PassWord) || Core_v2.Globals.Security.Encrypt(item.PassWord) == oldData.PassWord) item.PassWord = oldData.PassWord;
+                else item.PassWord = Core_v2.Globals.Security.Encrypt(item.PassWord);
+                if (string.IsNullOrEmpty(item.PassTemp) || Core_v2.Globals.Security.Encrypt(item.PassTemp) == oldData.PassTemp) item.PassTemp = oldData.PassTemp;
+                else item.PassTemp = Core_v2.Globals.Security.Encrypt(item.PassTemp);
 
                 _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
 
@@ -347,7 +347,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 {
                     {"Error", "Password blank"}
                 });
-            account.PassWord = Security.Encrypt(Pass);
+            account.PassWord = Core_v2.Globals.Security.Encrypt(Pass);
             _service.CreateQuery().ReplaceOne(t => t.ID == AccountID, account);
             return new JsonResult(new Dictionary<string, object>()
                 {

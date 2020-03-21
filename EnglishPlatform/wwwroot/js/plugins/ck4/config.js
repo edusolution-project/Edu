@@ -10,7 +10,7 @@ CKEDITOR.editorConfig = function( config ) {
 	
 	config.toolbarGroups = [
 		{ name: 'clipboard',   groups: [ 'clipboard', 'undo' ] },
-		{ name: 'editing',     groups: [ 'find', 'selection', 'spellchecker' ] },
+		//{ name: 'editing',     groups: [ 'find', 'selection', 'spellchecker' ] },
 		{ name: 'links' },
 		{ name: 'insert' },
 		{ name: 'forms' },
@@ -34,6 +34,7 @@ CKEDITOR.editorConfig = function( config ) {
     //alert(2);
     config.removeDialogTabs = 'image:advanced;link:advanced';
     config.extraPlugins = 'uploadimage';
+    config.extraPlugins = 'youtube';
     config.imageUploadUrl = '/Home/UploadImage';
     //config.filebrowserImageUploadUrl = '/CPHome/UploadImage';
 };

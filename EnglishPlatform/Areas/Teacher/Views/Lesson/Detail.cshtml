@@ -1,16 +1,17 @@
 ﻿@{
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher_noChat.cshtml";
-    var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
+    var Data = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var ClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
 }
 <script>
     activeTab = "course";
 </script>
 <div class="left-col">
-    <div class="page-title">
+    @*<div class="page-title">
         <h1><a href="@Url.Action("Detail","Class")/@Class.ID#module">@Class.Name</a> / @Data.Title</h1>
-    </div>
+    </div>*@
     <div class="main-container">
         <div id="lessonContainer" class="h-100">
         </div>
@@ -20,9 +21,13 @@
     <input type="hidden" id="ChapterID" value="@Data.ChapterID" />
     <input type="hidden" id="CourseID" value="@Data.CourseID" />
 </div>
+@section Sidebar
+{
+    @await Html.PartialAsync("_sidebarExam")
+}
 
 @section Scripts{
-    <script src="~/js/content-render.js?20200212"></script>
+    <script src="~/js/content-render.js?20200315"></script>
     <script>
     var config = {
         container: "lessonContainer",
@@ -38,6 +43,7 @@
         type: @Data.TemplateType,
         lesson_id: '@Data.ID',
         class_id: '@Class.ID',
+        class_subject_id: '@ClassSubject.ID',
         chap_id: '@Data.ChapterID'
     }
     var widget = new Lesson.onReady(config);
@@ -51,7 +57,7 @@
         <div class="modal-dialog modal-xl lesson-modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Add new part</h5>
+                    <h5 class="modal-title" id="modalTitle">Thêm nội dung</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -60,8 +66,8 @@
                     <form action="#" id="modal-body" name="partForm" enctype="multipart/form-data"></form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Save</button>
+                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Lưu</button>
                 </div>
             </div>
         </div>

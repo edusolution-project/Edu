@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>AndcultureCode.ZoomClient</AssemblyName>
+    <RootNamespace>AndcultureCode.ZoomClient</RootNamespace>
+    <PackageId>AndcultureCode.Zoom.NetCore.Api</PackageId>
+    <PackageVersion>1.0.17</PackageVersion>
+    <Authors>AndcultureCode</Authors>
+    <Description>.NET Core Api Wrapper around Zoom's Api</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>Update MeetingEnd endpoint</PackageReleaseNotes>
+    <Copyright>Copyright 2018 (c) Andculture</Copyright>
+    <PackageTags>Zoom NetCore</PackageTags>
+    <Version>1.0.17</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="NewtonsoftJsonSerializer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="jose-jwt" Version="2.4.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="RestSharp" Version="106.6.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\Dashboards\" />
+    <Folder Include="Models\Billing\" />
+    <Folder Include="Models\Recordings\" />
+    <Folder Include="Models\Webinars\" />
+  </ItemGroup>
+
+</Project>

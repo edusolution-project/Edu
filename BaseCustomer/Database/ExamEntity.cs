@@ -47,6 +47,9 @@ namespace BaseCustomerEntity.Database
         public long QuestionsTotal { get; set; }
         [JsonProperty("QuestionsDone")]
         public long QuestionsDone { get; set; }
+        [JsonProperty("QuestionsPass")]
+        public long QuestionsPass { get; set; }
+
     }
 
     public class ExamService : ServiceBase<ExamEntity>
@@ -117,6 +120,7 @@ namespace BaseCustomerEntity.Database
         {
             exam.Status = true;
             point = 0;
+            var pass = 0;
             var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
 
             for (int i = 0; listDetails != null && i < listDetails.Count; i++)
@@ -184,6 +188,7 @@ namespace BaseCustomerEntity.Database
                 if (_correctanswer != null)
                 {
                     point += question.Point;
+                    pass++;
                     examDetail.Point = question.Point;
                     examDetail.RealAnswerID = _correctanswer.ID;
                     examDetail.RealAnswerValue = _correctanswer.Content;
@@ -192,23 +197,26 @@ namespace BaseCustomerEntity.Database
                 examDetail.Updated = DateTime.Now;
                 _examDetailService.CreateOrUpdate(examDetail);
             }
+
+            exam.QuestionsPass = pass;
             exam.Point = point;
             exam.Updated = DateTime.Now;
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
             //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
             exam.QuestionsTotal =
-                _cloneLessonPartQuestionService.Collection.CountDocuments(t => t.LessonID == lesson.ID);
+                _cloneLessonPartQuestionService.Collection.CountDocuments(t => t.LessonID == exam.LessonID);
             //_cloneLessonPartService.Collection.CountDocuments(t => t.ParentID == lesson.ID && t.Type == "essay");
             _ = _lessonProgressService.UpdateLastPoint(exam);
             var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(exam.ClassSubjectID, exam.StudentID, exam.LessonID);
 
-            _ = _chapterProgressService.UpdatePoint(lessonProgress);
-            _ = _classSubjectProgressService.UpdatePoint(lessonProgress);
-            _ = _classProgressService.UpdatePoint(lessonProgress);
-
+            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+            {
+                _ = _chapterProgressService.UpdatePoint(lessonProgress);
+                _ = _classSubjectProgressService.UpdatePoint(lessonProgress);
+                _ = _classProgressService.UpdatePoint(lessonProgress);
+            }
             CreateOrUpdate(exam);
-
             return exam;
         }
 
@@ -228,6 +236,7 @@ namespace BaseCustomerEntity.Database
 
         public Task RemoveClassSubjectExam(string ClassSubjectID)
         {
+
             Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             _examDetailService.Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             return Task.CompletedTask;

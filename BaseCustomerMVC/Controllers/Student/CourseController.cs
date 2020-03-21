@@ -42,6 +42,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ChapterService _chapterService;
         private readonly ChapterProgressService _chapterProgressService;
         private readonly ChapterExtendService _chapterExtendService;
+        private readonly CalendarHelper _calendarHelper;
         private readonly LearningHistoryService _learningHistoryService;
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
@@ -81,6 +82,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , StudentService studentService
             , LessonProgressService lessonProgressService
             , LearningHistoryService learningHistoryService
+            , CalendarHelper calendarHelper
             )
         {
             _lessonProgressService = lessonProgressService;
@@ -113,7 +115,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _lessonPartAnswerService = lessonPartAnswerService;
             _studentMapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
-
+            _calendarHelper = calendarHelper;
 
 
             _lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
@@ -142,11 +144,11 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
             }
-            if (model.StartDate > DateTime.MinValue)
+            if (model.StartDate > new DateTime(2000, 1, 1))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
             }
-            if (model.EndDate > DateTime.MinValue)
+            if (model.EndDate > new DateTime(2000, 1, 1))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
@@ -217,6 +219,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
                        select new
                        {
                            id = o.ID,
@@ -227,11 +230,62 @@ namespace BaseCustomerMVC.Controllers.Student
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
                            min = progress != null ? progress.Completed : 0,
-                           score = progress != null ? progress.AvgPoint : 0,
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
                            thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                        }).ToList();
             return Json(new { Data = std });
         }
+
+        public JsonResult GetActiveListV2(DateTime today)
+        {
+            today = today.ToUniversalTime();
+            var filter = new List<FilterDefinition<ClassEntity>>();
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Authentication Error"
+                });
+            }
+
+            var classids = _classStudentService.GetStudentClasses(userId);
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => classids.Contains(o.ID)));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
+
+            var clIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
+
+
+            var lstSbj = new List<ClassSubjectEntity>();
+            var lstClass = new List<ClassEntity>();
+            foreach (var clID in clIDs)
+            {
+                lstSbj.AddRange(_classSubjectService.GetByClassID(clID));
+                lstClass.Add(_service.GetItemByID(clID));
+            }
+
+            var std = (from o in lstSbj.ToList()
+                       let _class = lstClass.SingleOrDefault(t => t.ID == o.ClassID)
+                       let progress = _classSubjectProgressService.GetItemByClassSubjectID(o.ID, userId)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
+                       let skill = _skillService.GetItemByID(o.SkillID)
+                       select new
+                       {
+                           id = o.ID,
+                           //courseID = o.CourseID,
+                           courseName = skill.Name + " (" + _class.Name + ")",
+                           endDate = _class.EndDate,
+                           percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
+                           max = o.TotalLessons,
+                           min = progress != null ? progress.Completed : 0,
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
+                           thumb = string.IsNullOrEmpty(_class.Image) ? "/pictures/english1.png" : _class.Image,
+                       }).ToList();
+            return Json(new { Data = std });
+        }
+
 
         public JsonResult GetFinishList(DefaultModel model, DateTime today)
         {
@@ -257,6 +311,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var std = (from o in DataResponse
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
                        let per = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID)
                        select new
                        {
                            id = o.ID,
@@ -266,13 +321,15 @@ namespace BaseCustomerMVC.Controllers.Student
                            per,
                            max = o.TotalLessons,
                            min = progress != null ? progress.Completed : 0,
-                           score = progress != null ? progress.AvgPoint : 0
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
                        }).ToList();
             return Json(new { Data = std });
         }
 
         public JsonResult GetThisWeekLesson(DateTime today)
         {
+            if (today < new DateTime(1900, 1, 1))
+                return null;
             today = today.ToUniversalTime();
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
@@ -313,6 +370,7 @@ namespace BaseCustomerMVC.Controllers.Student
                        let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
                        where _subject != null
                        let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID, o.ClassSubjectID) != null
+                       let onlineUrl = o.IsOnline ? _calendarHelper.GetByScheduleId(o.ID).UrlRoom : ""
                        select new
                        {
                            id = o.ID,
@@ -325,7 +383,9 @@ namespace BaseCustomerMVC.Controllers.Student
                            startDate = o.StartDate,
                            endDate = o.EndDate,
                            skill = skill,
-                           isLearnt = isLearnt
+                           isLearnt = isLearnt,
+                           type = _lesson.TemplateType,
+                           onlineUrl = o.IsOnline ? onlineUrl : ""
                        }).OrderBy(t => t.startDate).ToList();
             //var std = (from o in data.ToList()
             //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
@@ -666,26 +726,28 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult GetMainChapters(string ID, string UserID)
+        public JsonResult GetMainChapters(string ID)
         {
             try
             {
-                var currentClass = _service.GetItemByID(ID);
-                if (currentClass == null)
+                var userId = User.Claims.GetClaimByType("UserID").Value;
+
+                var currentCs = _classSubjectService.GetItemByID(ID);
+                if (currentCs == null)
                     return new JsonResult(new Dictionary<string, object>
                     {
-                        {"Error", "Không tìm thấy lớp học" }
+                        {"Error", "Không tìm thấy môn học" }
                     });
 
-                var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == "0").ToList();
-                var chapterExtends = _chapterExtendService.Search(currentClass.ID);
+                var chapters = _chapterService.GetSubChapters(currentCs.ID, "0");
+                var chapterExtends = _chapterExtendService.Search(currentCs.ID);
 
                 var listProgress = new List<ChapterProgressViewModel>();
 
                 foreach (var chapter in chapters)
                 {
                     var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
-                    var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, UserID, currentClass.ID);
+                    var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, userId, currentCs.ID);
                     if (extend != null) chapter.Description = extend.Description;
                     var viewModel = new MappingEntity<ChapterEntity, ChapterProgressViewModel>().AutoOrtherType(chapter, new ChapterProgressViewModel());
                     if (progress != null)

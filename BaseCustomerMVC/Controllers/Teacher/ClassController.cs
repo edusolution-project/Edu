@@ -27,6 +27,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SkillService _skillService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
+        private readonly CourseHelper _courseHelper;
         private readonly ClassProgressService _classProgressService;
 
         private readonly ChapterService _chapterService;
@@ -50,14 +51,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
 
-        //private readonly CloneLessonPartService _cloneLessonPartService;
-        //private readonly CloneLessonPartAnswerService _cloneAnswerService;
-        //private readonly CloneLessonPartQuestionService _cloneQuestionService;
-
-        //private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
-        //private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
-        //private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
-
         private readonly FileProcess _fileProcess;
         private readonly StudentHelper _studentHelper;
         private readonly LessonHelper _lessonHelper;
@@ -75,6 +68,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassService service,
             SkillService skillService,
             CourseService courseService,
+            CourseHelper courseHelper,
             ClassProgressService classProgressService,
 
             ChapterService chapterService,
@@ -86,18 +80,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LearningHistoryService learningHistoryService,
 
             ScoreStudentService scoreStudentService,
-            LessonPartService lessonPartService,
-            LessonPartQuestionService lessonPartQuestionService,
-            LessonPartAnswerService lessonPartAnswerService,
             LessonProgressService lessonProgressService,
-
-            CloneLessonPartService cloneLessonPartService,
-            CloneLessonPartAnswerService cloneLessonPartAnswerService,
-            CloneLessonPartQuestionService cloneLessonPartQuestionService,
 
             StudentService studentService, IHostingEnvironment evn,
 
             FileProcess fileProcess,
+            LessonHelper lessonHelper,
+            StudentHelper studentHelper,
 
             ChapterProgressService chapterProgressService
 
@@ -108,6 +97,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _subjectService = subjectService;
             _teacherService = teacherService;
             _courseService = courseService;
+            _courseHelper = courseHelper;
             _service = service;
             _skillService = skillService;
             _classSubjectService = classSubjectService;
@@ -131,16 +121,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _env = evn;
             _fileProcess = fileProcess;
 
-            _studentHelper = new StudentHelper(studentService, accountService);
-            _lessonHelper = new LessonHelper(
-                lessonService,
-                lessonPartService,
-                lessonPartQuestionService,
-                lessonPartAnswerService,
-                cloneLessonPartService,
-                cloneLessonPartAnswerService,
-                cloneLessonPartQuestionService
-                );
+            _studentHelper = studentHelper;
+
+            _lessonHelper = lessonHelper;
+
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
 
@@ -352,7 +336,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-
         //Class Detail Management
         [HttpPost]
         public JsonResult GetDetail(string ID)
@@ -379,192 +362,150 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        [HttpPost]
-        public JsonResult GetMainChapters(string ID)
-        {
-            try
-            {
-                var currentClass = _service.GetItemByID(ID);
-                if (currentClass == null)
-                    return new JsonResult(new Dictionary<string, object>
-                    {
-                        {"Error", "Không tìm thấy lớp học" }
-                    });
+        //TODO: Check Usage
+        //[HttpPost]
+        //public JsonResult GetMainChapters(string ID)
+        //{
+        //    try
+        //    {
+        //        var currentClass = _service.GetItemByID(ID);
+        //        if (currentClass == null)
+        //            return new JsonResult(new Dictionary<string, object>
+        //            {
+        //                {"Error", "Không tìm thấy lớp học" }
+        //            });
 
-                var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == "0").ToList();
-                var chapterExtends = _chapterExtendService.Search(currentClass.ID);
+        //        var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == "0").ToList();
+        //        var chapterExtends = _chapterExtendService.Search(currentClass.ID);
 
-                foreach (var chapter in chapters)
-                {
-                    var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
-                    if (extend != null) chapter.Description = extend.Description;
-                }
-                var response = new Dictionary<string, object>
-                {
-                    { "Data", chapters }
-                };
+        //        foreach (var chapter in chapters)
+        //        {
+        //            var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
+        //            if (extend != null) chapter.Description = extend.Description;
+        //        }
+        //        var response = new Dictionary<string, object>
+        //        {
+        //            { "Data", chapters }
+        //        };
 
-                return new JsonResult(response);
-            }
-            catch (Exception ex)
-            {
-                return new JsonResult(new Dictionary<string, object>
-                {
-                    { "Data", null },
-                    {"Error", ex.Message }
-                });
-            }
-        }
+        //        return new JsonResult(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object>
+        //        {
+        //            { "Data", null },
+        //            {"Error", ex.Message }
+        //        });
+        //    }
+        //}
 
-        [HttpPost]
-        public JsonResult UpdateChapterInfo(string ClassID, ChapterEntity chapter)
-        {
-            try
-            {
-                var currentClass = _service.GetItemByID(ClassID);
-                if (currentClass == null)
-                    return new JsonResult(new Dictionary<string, object>
-                    {
-                        {"Error", "Không tìm thấy lớp học" }
-                    });
+        //[HttpPost]
+        //public JsonResult UpdateChapterInfo(string ClassID, ChapterEntity chapter)
+        //{
+        //    try
+        //    {
+        //        var currentClass = _service.GetItemByID(ClassID);
+        //        if (currentClass == null)
+        //            return new JsonResult(new Dictionary<string, object>
+        //            {
+        //                {"Error", "Không tìm thấy lớp học" }
+        //            });
 
-                var currentChapter = _chapterService.CreateQuery().Find(c => c.ID == chapter.ID).FirstOrDefault();
-                if (currentChapter == null)
-                    return new JsonResult(new Dictionary<string, object>
-                    {
-                        {"Error", "Không tìm thấy chương" }
-                    });
+        //        var currentChapter = _chapterService.CreateQuery().Find(c => c.ID == chapter.ID).FirstOrDefault();
+        //        if (currentChapter == null)
+        //            return new JsonResult(new Dictionary<string, object>
+        //            {
+        //                {"Error", "Không tìm thấy chương" }
+        //            });
 
-                var chapterExtend = _chapterExtendService.Search(ClassID, chapter.ID).SingleOrDefault();
-                if (chapterExtend == null)
-                {
-                    chapterExtend = new ChapterExtendEntity
-                    {
-                        ChapterID = chapter.ID,
-                        ClassID = ClassID
-                    };
-                }
-                chapterExtend.Description = chapter.Description;
-                _chapterExtendService.Save(chapterExtend);
+        //        var chapterExtend = _chapterExtendService.Search(ClassID, chapter.ID).SingleOrDefault();
+        //        if (chapterExtend == null)
+        //        {
+        //            chapterExtend = new ChapterExtendEntity
+        //            {
+        //                ChapterID = chapter.ID,
+        //                ClassID = ClassID
+        //            };
+        //        }
+        //        chapterExtend.Description = chapter.Description;
+        //        _chapterExtendService.Save(chapterExtend);
 
-                currentChapter.Description = chapter.Description;
+        //        currentChapter.Description = chapter.Description;
 
-                var response = new Dictionary<string, object>
-                {
-                    { "Data", currentChapter }
-                };
+        //        var response = new Dictionary<string, object>
+        //        {
+        //            { "Data", currentChapter }
+        //        };
 
-                return new JsonResult(response);
-            }
-            catch (Exception ex)
-            {
-                return new JsonResult(new Dictionary<string, object>
-                {
-                    { "Data", null },
-                    {"Error", ex.Message }
-                });
-            }
-        }
+        //        return new JsonResult(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object>
+        //        {
+        //            { "Data", null },
+        //            {"Error", ex.Message }
+        //        });
+        //    }
+        //}
 
-        [Obsolete]
-        [HttpPost]
-        public JsonResult GetDetailsLesson(DefaultModel model, string SubjectID = "", string GradeID = "", string UserID = "")
-        {
-            var filter = new List<FilterDefinition<ClassEntity>>();
-            TeacherEntity teacher = null;
-            if (string.IsNullOrEmpty(UserID))
-                UserID = User.Claims.GetClaimByType("UserID").Value;
-            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
-            {
-                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
-                if (teacher == null)
-                {
-                    return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin giảng viên" }
-                    });
-                }
-            }
-            if (teacher != null)
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID));
+        //TODO: CHECK USAGE
+        //[Obsolete]
+        //[HttpPost]
+        //public JsonResult GetDetailsLesson(DefaultModel model, string SubjectID = "", string GradeID = "", string UserID = "")
+        //{
+        //    var filter = new List<FilterDefinition<ClassEntity>>();
+        //    TeacherEntity teacher = null;
+        //    if (string.IsNullOrEmpty(UserID))
+        //        UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+        //    {
+        //        teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+        //        if (teacher == null)
+        //        {
+        //            return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",model },
+        //                {"Msg","Không có thông tin giảng viên" }
+        //            });
+        //        }
+        //    }
+        //    if (teacher != null)
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID));
 
-            if (!string.IsNullOrEmpty(model.SearchText))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
-            }
-            if (!string.IsNullOrEmpty(SubjectID))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            }
-            if (!string.IsNullOrEmpty(GradeID))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == GradeID));
-            }
+        //    if (!string.IsNullOrEmpty(model.SearchText))
+        //    {
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
+        //    }
+        //    if (!string.IsNullOrEmpty(SubjectID))
+        //    {
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+        //    }
+        //    if (!string.IsNullOrEmpty(GradeID))
+        //    {
+        //        filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == GradeID));
+        //    }
 
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
-            model.TotalRecord = data.Count();
-            var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-                ? data
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+        //    var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
+        //    model.TotalRecord = data.Count();
+        //    var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
+        //        ? data
+        //        : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
 
-            var response = new Dictionary<string, object>
-            {
-                { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
-                        CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
-                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                        SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
-                        TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
-                    })
-                },
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
-
-        public JsonResult GetListMember(DefaultModel model)
-        {
-            if (string.IsNullOrEmpty(model.ID))
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không tìm thấy thông tin lớp" }
-                    });
-            var currentClass = _service.GetItemByID(model.ID);
-            if (currentClass == null)
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không tìm thấy thông tin lớp" }
-                    });
-            var teacher = _teacherService.GetItemByID(currentClass.TeacherID);
-
-            var filter = new List<FilterDefinition<StudentEntity>>();
-            filter.Add(Builders<StudentEntity>.Filter.Where(o => currentClass.Students.Contains(o.ID)));
-            var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
-            var studentsView =
-                (from r in students.ToList()
-                 let progress = _classProgressService.GetItemByClassID(currentClass.ID, r.ID) ?? new ClassProgressEntity()
-                 select _mapping.AutoOrtherType(r, new ClassStudentViewModel()
-                 {
-                     ClassName = currentClass.Name,
-                     ClassStatus = "Đang học",
-                     LastJoinDate = DateTime.Now,
-                     Percent = progress.TotalLessons > 0 ? (progress.Completed * 100 / progress.TotalLessons) : 0,
-                     Score = progress.AvgPoint
-                 })).ToList();
-
-            var response = new Dictionary<string, object>
-            {
-                { "Data",new Dictionary<string, object> {
-                        {"Teacher",teacher },
-                        {"Students",studentsView }
-                    }
-                },
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data", DataResponse.ToList().Select(o=> new ClassViewModel(o){
+        //                CourseName = _courseService.GetItemByID(o.CourseID)?.Name,
+        //                GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+        //                SubjectName = _subjectService.GetItemByID(o.SubjectID).Name,
+        //                TeacherName = _teacherService.GetItemByID(o.TeacherID).FullName
+        //            })
+        //        },
+        //        { "Model", model }
+        //    };
+        //    return new JsonResult(response);
+        //}
 
         public JsonResult GetListTeacher(string SubjectID = "")
         {
@@ -795,7 +736,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        let _sbj = _classSubjectService.GetItemByID(o.ClassSubjectID)
                        let skill = _skillService.GetItemByID(_sbj.SkillID)
                        let studentCount = _classStudentService.GetClassStudents(_class.ID).Count
-                       //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
                        select new
                        {
                            id = o.ID,
@@ -832,65 +772,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Manage
         public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
-            //var filter = new List<FilterDefinition<ClassSubjectEntity>>();
-            //if (!string.IsNullOrEmpty(SubjectID))
-            //{
-            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            //}
-            //if (!string.IsNullOrEmpty(GradeID))
-            //{
-            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
-            //}
-            //if (!string.IsNullOrEmpty(TeacherID))
-            //{
-            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
-            //}
-            //if (model.StartDate > new DateTime(1900, 1, 1))
-            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
-            //if (model.StartDate > new DateTime(1900, 1, 1))
-            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
-
-            //var data = _classSubjectService.Collection
-            //    //.AsQueryable().
-            //    //GroupBy(t => t.ClassID).Select(t => new ClassViewModel(t) {
-            //    //    CourseName = 
-            //    //})
-            //    .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
-            //model.TotalRecord = data.Count();
-            //var classData = _service.Collection.AsQueryable().Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)).OrderByDescending(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToList();
-            //var returndata = from o in classData
-            //                     //where o.Skills != null
-            //                 let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
-            //                 let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
-            //                 select new Dictionary<string, object>
-            //                 {
-            //                     { "ID", o.ID },
-            //                     { "Name", o.Name },
-            //                     { "Students", _classStudentService.GetClassStudents(o.ID).Count },
-            //                     { "Created", o.Created },
-            //                     { "IsActive", o.IsActive },
-            //                     { "Image", o.Image },
-            //                     { "StartDate", o.StartDate },
-            //                     { "EndDate", o.EndDate },
-            //                     { "Order", o.Order },
-            //                     { "Skills", o.Skills },
-            //                     { "Members", o.Members },
-            //                     { "Description", o.Description },
-            //                     { "SkillName", sname }
-            //                 };
-
-            //var response = new Dictionary<string, object>
-            //    {
-            //        { "Data", returndata.ToList()},
-            //        { "Model", model }
-            //    };
-
-            //return new JsonResult(response);
             var returndata = FilterClass(model, SubjectID, GradeID, TeacherID, skipActive);
+            //model.TotalRecord = totalrec;
 
             var response = new Dictionary<string, object>
                 {
-                    { "Data", returndata.ToList()},
+                    { "Data", returndata},
                     { "Model", model }
                 };
             return new JsonResult(response);
@@ -899,10 +786,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public JsonResult GetClassList(DefaultModel model, string SubjectID = "", string GradeID = "")
         {
             var returndata = FilterClass(model, SubjectID, GradeID, User.Claims.GetClaimByType("UserID").Value, true);
+            //model.TotalRecord = totalrec;
 
             var response = new Dictionary<string, object>
                 {
-                    { "Data", returndata.ToList()},
+                    { "Data", returndata},
                     { "Model", model }
                 };
             return new JsonResult(response);
@@ -910,10 +798,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private List<Dictionary<string, object>> FilterClass(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
+            model.TotalRecord = 0;
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
+            var classfilter = new List<FilterDefinition<ClassEntity>>();
+            FilterDefinition<ClassEntity> ownerfilter = null;
+
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+            }
+            else
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var teacher = _teacherService.GetItemByID(UserID);
+                if (teacher == null)
+                    return null;
+                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
             }
             if (!string.IsNullOrEmpty(GradeID))
             {
@@ -922,34 +822,50 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (!string.IsNullOrEmpty(TeacherID))
             {
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                if (string.IsNullOrEmpty(SubjectID) && string.IsNullOrEmpty(GradeID))
+                    ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == TeacherID);
             }
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
+
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
 
-
             var data = _classSubjectService.Collection
-                //.AsQueryable().
-                //GroupBy(t => t.ClassID).Select(t => new ClassViewModel(t) {
-                //    CourseName = 
-                //})
                 .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
-
+            //filter by classsubject
             if (data.Count > 0)
             {
-                var classfilter = new List<FilterDefinition<ClassEntity>>();
-                classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
-                if (!string.IsNullOrEmpty(model.SearchText))
-                    classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
-                var classResult = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classfilter));
-                model.TotalRecord = classResult.CountDocuments();
-                var classData = classResult.SortBy(t => t.IsActive).ThenByDescending(t => t.ID).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
-                var returndata = from o in classData
-                                 let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
-                                 let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
-                                 select new Dictionary<string, object>
-                             {
+                if (ownerfilter != null)
+                    classfilter.Add(
+                        Builders<ClassEntity>.Filter.Or(ownerfilter,
+                        Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive))));
+                else
+                    classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
+            }
+
+            if (ownerfilter != null && filter.Count <= 1)//no filter
+                classfilter.Add(ownerfilter);
+
+            if (!string.IsNullOrEmpty(model.SearchText))
+                classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
+
+
+
+            if (classfilter.Count == 0)
+                return null;
+
+            var classResult = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classfilter));
+
+            model.TotalRecord = classResult.CountDocuments();
+
+            var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+            var returndata = from o in classData
+                             let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
+                             let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
+                             let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
+                             select new Dictionary<string, object>
+                                {
                                  { "ID", o.ID },
                                  { "Name", o.Name },
                                  { "Students", _classStudentService.GetClassStudents(o.ID).Count },
@@ -962,11 +878,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Skills", o.Skills },
                                  { "Members", o.Members },
                                  { "Description", o.Description },
-                                 { "SkillName", sname }
+                                 { "SkillName", sname },
+                                 { "Creator", o.TeacherID },
+                                 { "CreatorName", creator.FullName }
                              };
-                return returndata.ToList();
-            }
-            return null;
+            return returndata.ToList();
         }
 
 
@@ -983,9 +899,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     return new JsonResult(new Dictionary<string, object>()
                         {
-                            {"Error", "Permission Error" }
+                            {"Error", "Vui lòng đăng nhập lại" }
                         });
                 }
+
+                if (classSubjects == null || classSubjects.Count == 0)
+                {
+                    return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Cần chọn ít nhất một môn học" }
+                        });
+                }
+
                 item.TeacherID = userId; // creator
                 item.Skills = new List<string>();
                 item.Subjects = new List<string>();
@@ -1021,7 +946,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                     _service.Save(item);
                 }
-
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
                     {"Data",item },
@@ -1063,16 +987,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (nSbj == null || (nSbj.CourseID != oSbj.CourseID))
                         //delete oldSubject
                         {
-                            ////remove old schedule
-                            _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassSubjectID == oSbj.ID);
-                            //remove clone lesson part
-                            _lessonHelper.RemoveCloneClassSubject(oSbj.ID);
-                            //remove progress: learning history => class progress, chapter progress, lesson progress
-                            _learningHistoryService.RemoveClassSubjectHistory(oSbj.ID);
-                            //resest exam
-                            _examService.RemoveClassSubjectExam(oSbj.ID);
-                            if (nSbj == null)
-                                _classSubjectService.Remove(oSbj.ID);
+                            _ = RemoveClassSubject(oSbj);
+                            if (nSbj != null)
+                                nSbj.ID = null;//remove ID to create new
                         }
 
                         if (nSbj != null)
@@ -1110,7 +1027,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                                 oldData.Members.Add(newMember);
                             oldData.TotalLessons += lessoncount;
-
                         }
                     }
                 }
@@ -1144,11 +1060,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     oldData.Image = pathImage;
                 }
 
-
                 //update data
                 _service.Save(oldData);
-
-                //_courseService.Collection.UpdateOneAsync(t => t.ID == item.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
+                //refresh class total lesson
+                _ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -1159,6 +1074,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(response);
             }
         }
+
+        private async Task RemoveClassSubject(ClassSubjectEntity cs)
+        {
+            ////remove old schedule
+            await _lessonScheduleService.RemoveClassSubject(cs.ID);
+            //remove chapter
+            await _chapterService.RemoveClassSubjectChapter(cs.ID);
+            //remove clone lesson
+            await _lessonHelper.RemoveClassSubjectLesson(cs.ID);
+            //remove progress: learning history => class progress, chapter progress, lesson progress
+            await _learningHistoryService.RemoveClassSubjectHistory(cs.ID);
+            //remove exam
+            await _examService.RemoveClassSubjectExam(cs.ID);
+            //remove classSubject
+            _classSubjectService.Remove(cs.ID);
+        }
+
 
         private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount)
         {
@@ -1176,6 +1108,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     throw new Exception("Course " + nSbj.CourseID + " is not avaiable");
                 }
+
                 lessoncount = course.TotalLessons;
 
                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
@@ -1195,26 +1128,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 _classSubjectService.Save(nSbj);
 
-                //Clone Lesson
-                var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == nSbj.CourseID).ToList();
-
-                if (lessons != null)
-                    foreach (LessonEntity lesson in lessons)
-                    {
-                        var schedule = new LessonScheduleEntity
-                        {
-                            ClassID = @class.ID,
-                            ClassSubjectID = nSbj.ID,
-                            LessonID = lesson.ID,
-                            IsActive = true
-                        };
-                        _lessonScheduleService.Save(schedule);
-                        //_calendarHelper.ConvertCalendarFromSchedule(schedule, "");
-
-                        _lessonHelper.CloneLessonForClass(lesson, nSbj);
-                    }
-
-                _courseService.Collection.UpdateOneAsync(t => t.ID == nSbj.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
+                //Clone Course
+                _courseHelper.CloneForClassSubject(nSbj);
 
                 member = new ClassMemberEntity
                 {
@@ -1251,10 +1166,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     //Remove Class Student
                     _classStudentService.RemoveManyClass(ids);
-                    //remove Schedule, Part, Question, Answer
-                    _lessonScheduleService.CreateQuery().DeleteMany(o => ids.Contains(o.ClassID));
+                    //remove ClassSubject
+                    _classSubjectService.RemoveClassSubjects(ids);
+                    //remove Lesson, Part, Question, Answer
                     _lessonHelper.RemoveClone(ids);
+                    //remove Schedule
+                    _ = _lessonScheduleService.RemoveManyClass(ids);
+                    //remove History
+                    _ = _learningHistoryService.RemoveClassHistory(ids);
+                    //remove Exam
                     _examService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    //remove Exam Detail
                     _examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     var delete = _service.Collection.DeleteMany(o => ids.Contains(o.ID));
                     return new JsonResult(delete);
@@ -1395,30 +1317,40 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //var course = _courseService.GetItemByID(courseid);
 
             List<LessonProgressEntity> data;
+            List<LessonScheduleEntity> passExams;
             if (string.IsNullOrEmpty(ClassSubjectID))
+            {
+                passExams = _lessonScheduleService.GetClassExam(ClassID, model.StartDate, model.EndDate);
                 data = _lessonProgressService.GetByClassID_StudentID(ClassID, class_student.StudentID);
+            }
             else
+            {
+                passExams = _lessonScheduleService.GetClassSubjectExam(ClassSubjectID, model.StartDate, model.EndDate);
                 data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, class_student.StudentID);
+            }
 
             var subjects = _classSubjectService.GetByClassID(ClassID);
 
-            var lessons = (from progress in data
-                           where progress.Tried > 0
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
-                           where schedule != null
-                           let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
-                           where classsubject != null
-                           let lesson = _lessonService.GetItemByID(progress.LessonID)
-                           select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
-                           {
-                               ScheduleID = schedule.ID,
-                               ScheduleStart = schedule.StartDate,
-                               ScheduleEnd = schedule.EndDate,
-                               IsActive = schedule.IsActive,
-                               LearnCount = progress.Tried,
-                               LearnLast = progress.LastTry,
-                               Result = progress.LastPoint,
-                           })).OrderBy(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+            var lessons = (
+                            from schedule in passExams
+                            let progress = data.FirstOrDefault(t => t.StudentID == model.ID && t.ClassSubjectID == schedule.ClassSubjectID && t.LessonID == schedule.LessonID) ?? new LessonProgressEntity()
+                            //from progress in data
+                            //where progress.Tried > 0
+                            //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                            //where schedule != null
+                            //let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
+                            //where classsubject != null
+                            let lesson = _lessonService.GetItemByID(schedule.LessonID)
+                            select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
+                            {
+                                ScheduleID = schedule.ID,
+                                ScheduleStart = schedule.StartDate,
+                                ScheduleEnd = schedule.EndDate,
+                                IsActive = schedule.IsActive,
+                                LearnCount = progress.Tried,
+                                LearnLast = progress.LastTry,
+                                Result = progress.LastPoint,
+                            })).OrderByDescending(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
 
             var response = new Dictionary<string, object>
             {
@@ -1432,129 +1364,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
         #region Fix Data
-        public IActionResult ConvertMultiSubject()
-        {
-            var allClass = _service.GetAll().ToList();
-            foreach (var @class in allClass)
-            {
-                if (@class.Skills == null || @class.Skills.Count == 0)
-                {
-                    //create class subject:
-                    var teacher = _teacherService.GetItemByID(@class.TeacherID);
-                    if (teacher == null)
-                    {
-                        //Delete Class
-                        _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == @class.ID);
-                        _lessonHelper.RemoveClone(@class.ID);
-                        _examService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        _examDetailService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        var delete = _service.Collection.DeleteMany(o => o.ID == @class.ID);
-                    }
-                    @class.Members = new List<ClassMemberEntity>
-                    {
-                        new ClassMemberEntity
-                        {
-                            TeacherID = teacher.ID,
-                            Name = teacher.FullName,
-                            Type = ClassMemberType.TEACHER
-                        }
-                    };
-                    var subject = _subjectService.GetItemByID(@class.SubjectID);
-                    if (subject == null)
-                    {
-                        //Delete Class
-                        _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == @class.ID);
-                        _lessonHelper.RemoveClone(@class.ID);
-                        _examService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        _examDetailService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        var delete = _service.Collection.DeleteMany(o => o.ID == @class.ID);
-                    }
-                    var course = _courseService.GetItemByID(@class.CourseID);
-                    if (course == null)
-                    {
-                        //Delete Class
-                        _lessonScheduleService.CreateQuery().DeleteMany(o => o.ClassID == @class.ID);
-                        _lessonHelper.RemoveClone(@class.ID);
-                        _examService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        _examDetailService.Collection.DeleteMany(o => o.ClassID == @class.ID);
-                        var delete = _service.Collection.DeleteMany(o => o.ID == @class.ID);
-                    }
-                    //create classSubject
-                    var classSubject = new ClassSubjectEntity
-                    {
-                        ClassID = @class.ID,
-                        CourseID = course.ID,
-                        GradeID = @class.GradeID,
-                        TeacherID = @class.TeacherID,
-                        EndDate = @class.EndDate,
-                        StartDate = @class.StartDate,
-                        Image = course.Image,
-                        LearningOutcomes = course.LearningOutcomes,
-                        Description = course.Description,
-                        SubjectID = subject.ID
-                    };
-                    _classSubjectService.Save(classSubject);
-                    //Save Class
-                    _service.Save(@class);
-                    //Convert Progress
-                    _ = _chapterProgressService.UpdateClassSubject(classSubject);
-                    _ = _learningHistoryService.UpdateClassSubject(classSubject);
-                    _ = _lessonProgressService.UpdateClassSubject(classSubject);
-                    //Convert Schedule
-                    _ = _lessonScheduleService.UpdateClassSubject(classSubject);
-                    //Convert Clone Part
-                    _ = _lessonHelper.ConvertClassSubject(classSubject);
-                    //Convert Exam
-                    _ = _examService.ConvertClassSubject(classSubject);
-                    _ = _examDetailService.ConvertClassSubject(classSubject);
-                    //Convert Score
-                    _ = _scoreStudentService.UpdateClassSubject(classSubject);
-                }
-            }
-            return null;
-        }
-
-        public IActionResult ConvertSkills()
-        {
-            var courses = _courseService.GetAll().ToList();
-            foreach (var course in courses)
-            {
-                if (course.SkillID == null)
-                {
-                    var name = course.Name.ToLower();
-                    if (name.IndexOf("listen") >= 0 || name.IndexOf("nghe") >= 0)
-                    {
-                        course.SkillID = "1";
-                    }
-                    else if (name.IndexOf("speak") >= 0)
-                    {
-                        course.SkillID = "2";
-                    }
-                    else if (name.IndexOf("read") >= 0)
-                    {
-                        course.SkillID = "3";
-                    }
-                    else if (name.IndexOf("writ") >= 0)
-                    {
-                        course.SkillID = "4";
-                    }
-                    else if (name.IndexOf("voca") >= 0)
-                    {
-                        course.SkillID = "5";
-                    }
-                    else if (name.IndexOf("gramma") >= 0)
-                    {
-                        course.SkillID = "6";
-                    }
-                    else
-                        course.SkillID = "7";
-                }
-                _courseService.Save(course);
-                _classSubjectService.UpdateCourseSkill(course.ID, course.SkillID);
-            }
-            return null;
-        }
-
         public IActionResult FixClassStudent()
         {
             var classids = _classStudentService.GetAll().ToList().Select(t => t.ClassID).Distinct();

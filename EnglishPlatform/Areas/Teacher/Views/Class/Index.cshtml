@@ -2,11 +2,12 @@
 
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
-    ViewData["Title"] = "My Courses - " + DateTime.Now.ToString("D");
+    ViewData["Title"] = "Quản lý lớp học";
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
     var isHeadteacher = User.IsInRole("head-teacher");
+    var userid = User.Claims.Single(t => t.Type == "UserID").Value;
 }
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
@@ -16,12 +17,15 @@
 </script>
 
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25 justify-content-between">
             <div class="flex">
                 <div class="box filter-box">
-                    <input type="text" value="01/08/2019 - 30/09/2019" name="dates">
-                    <span class="ic ic-picker"></span>
+                    <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
+                    <span class="ic ic-picker inactive"></span>
                 </div>
                 <div class="box filter-box w-152">
                     <select v-model="subject">
@@ -33,13 +37,17 @@
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" v-model="searchTerm" placeholder="Tên lớp cần tìm">
                 </div>
+                @if (isHeadteacher)
+                {
+                    <div class="box private_box">
+                        <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
+                    </div>
+                }
             </div>
-
-
             <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <table id="ed_table" class="table">
             <thead>
                 <tr>
@@ -48,24 +56,35 @@
             </thead>
             <tbody>
                 <tr v-if="tableData == null || tableData.length <= 0">
-                    <td colspan="6">Không có thông tin phù hợp</a></td>
+                    <template v-if="isLoading">
+                        <td colspan="8">Đang gửi dữ liệu...</td>
+                    </template>
+                    <template v-else>
+                        <td colspan="8">Không có thông tin phù hợp</td>
+                    </template>
                 </tr>
                 <tr v-else v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
-                    <td><a :href="'@Url.Action("Detail","Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
+                    <td><a :href="'@Url.Action("Detail", "Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
                     <td>{{item.SkillName}}</td>
+                    <td>{{item.CreatorName}}</td>
                     <td>{{item.Students}}</td>
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
-                    @if (isHeadteacher)
-                    {
-                        <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
-                        <td>
-                            <div class="d-flex btn-group">
-                                <a class="btn-act btn-edit" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
-                                <button class="btn-act btn-trash" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
-                            </div>
-                        </td>
-                    }
+                    @*<td> {{ item.IsActive? 'Hoạt động' : 'Tạm dừng'}} </td>*@
+                    <td>
+                        <b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)" class="mt-2" @if (!isHeadteacher) { @: v-if="item.Creator == '@userid'"
+                                         }>
+                        </b-form-checkbox>
+                    </td>
+                    <td>
+                        <div class="d-flex btn-group" @if (!isHeadteacher) { @: v-if="item.Creator == '@userid'"
+                             }>
+                            @*<b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)" class="mt-2"></b-form-checkbox>*@
+                            <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
+                            <a href="javascript:;" title="Quản lý học viên" v-on:click="manageStudent(item)" class="btn-act btn-edit"><i class="ti-user"></i></a>
+                            <button class="btn-act btn-trash" title="Xóa" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
+                        </div>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -98,9 +117,182 @@
 </section>
 
 @section Scripts{
+    <script type="text/x-template" id="autocomplete">
+        <div class="autocomplete">
+            <input type="text" v-on:input="onChange" v-model="search" v-on:keyup.down="onArrowDown" v-on:keyup.up="onArrowUp" v-on:keyup.enter="onEnter" class="form-control" :placeholder="plhd" />
+            <ul id="autocomplete-results" v-show="isOpen" class="autocomplete-results">
+                <li class="loading" v-if="isLoading">
+                    Đang gửi dữ liệu ...
+                </li>
+                <li v-else v-for="(result, i) in results" :key="i" v-on:click="setResult(result)" class="autocomplete-result" :class="{'is-active': i === arrowCounter }">
+                    {{ result.Name }}
+                </li>
+            </ul>
+
+        </div>
+    </script>
 
     <style>
-        #modal_class .modal-dialog {
+        .autocomplete {
+            position: relative;
+            width: 100%;
+        }
+
+        .autocomplete-results {
+            padding: 0;
+            margin: 0;
+            border: 1px solid #eeeeee;
+            max-height: 120px;
+            overflow: auto;
+            width: 100%;
+            position: absolute;
+            min-width: 200px;
+            background: #FFF;
+        }
+
+        .autocomplete-result {
+            list-style: none;
+            text-align: left;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+            .autocomplete-result.is-active,
+            .autocomplete-result:hover {
+                background-color: #4aae9b;
+                color: white;
+            }
+
+    </style>
+
+    <script>
+        Vue.component("autocomplete",
+            {
+                template: "#autocomplete",
+                props: {
+                    items: {
+                        type: Array,
+                        required: false,
+                        default: () => []
+                    },
+                    url: {
+                        type: String,
+                        required: false,
+                        default: () => ''
+                    },
+                    plhd: {
+                        type: String,
+                        required: false,
+                        default: () => 'Nhập để tìm kiếm (>2 chữ)'
+                    }
+                },
+                data() {
+                    return {
+                        isOpen: false,
+                        results: [],
+                        search: "",
+                        isLoading: false,
+                        arrowCounter: 0,
+                        loadedTerms: [],
+                    };
+                },
+                methods: {
+                    onChange() {
+                        // Let's warn the parent that a change was made
+                        this.$emit("input", this.search, this.filterResults);
+                        if (this.search.length < 2) {
+                            this.isOpen = false
+                        }
+                        else {
+                            this.isOpen = true
+                        }
+                    },
+                    searchResult() {
+                        this.filterResults();
+                        this.isOpen = true;
+                        this.$forceUpdate();
+                    },
+                    filterResults() {
+                        this.results = this.items
+                        this.isOpen = true
+                    },
+                    setResult(result) {
+                        this.search = result.Name;
+                        this.isOpen = false;
+                        this.arrowCounter = -1;
+                        this.$emit("chooseitem", result);
+                    },
+                    onArrowDown(evt) {
+                        if (this.arrowCounter < this.results.length) {
+                            this.arrowCounter = this.arrowCounter + 1;
+                        }
+                    },
+                    onArrowUp() {
+                        if (this.arrowCounter > 0) {
+                            this.arrowCounter = this.arrowCounter - 1;
+                        }
+                    },
+                    onEnter() {
+                        if (this.arrowCounter < 0 || this.arrowCounter > this.results.length)
+                            return false;
+                        this.setResult(this.results[this.arrowCounter])
+                        //this.search = this.results[this.arrowCounter].FullName;
+                        //this.isOpen = false;
+                        //this.arrowCounter = -1;
+                        //this.$emit("chooseStudent", result);
+                    },
+                    handleClickOutside(evt) {
+                        if (!this.$el.contains(evt.target)) {
+                            this.isOpen = false;
+                            this.arrowCounter = -1;
+                        }
+                    }
+                },
+                watch: {
+                    items: function (val, oldValue) {
+                        // actually compare them
+                        if (val.length !== oldValue.length) {
+                            this.results = val;
+                            this.isLoading = false;
+                        }
+                    }
+                },
+                mounted() {
+                    document.addEventListener("click", this.handleClickOutside);
+                },
+                destroyed() {
+                    document.removeEventListener("click", this.handleClickOutside);
+                }
+            }
+        )
+    </script>
+    <style>
+        .private_box {
+            padding: 5px 0;
+            width: 200px;
+        }
+
+            .private_box input {
+                width: 20px;
+                height: 20px;
+                vertical-align: middle;
+            }
+
+            .private_box span {
+                vertical-align: middle;
+            }
+
+
+        .ic-picker {
+            cursor: pointer;
+        }
+
+            .ic-picker.inactive {
+                background-image: url('../images/pickerdate-1.png');
+            }
+
+        #modal_class .modal-dialog,
+        #modal_student .modal-dialog {
             max-width: 1100px;
         }
 
@@ -126,42 +318,39 @@
         }
     </style>
     <script>
-
+        var isSearchDate = false;
         new Vue({
             el: "#main",
             mounted() {
-                var start = moment();
-                var end = moment().add(29, 'days');
-                $('input[name="dates"]').daterangepicker({
-                    startDate: start,
-                    endDate: end,
-                    locale: {
-                        format: "DD/MM/YYYY",
-                    }
-                }, function (s, e, label) {
-                    RepDate(s, e);
-                    GetData();
-                });
                 this.view = 30
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.list_skill = @Html.Raw(Json.Serialize(skills));
-                window.ChooseCalendar = this.chooseCalendar
                 window.changeAddSubject = this.changeAddSubject
+                window.InitDate = this.initDate
+                window.DestroyDate = this.destroyDate
                 window.GetData = this.getData
                 window.RepDate = this.repDate
-                $('input[name=dates]').siblings('.ic-picker').click(function () { ChooseCalendar() });
+                $('input[name=dates]').siblings('.ic-picker').click(function () {
+                    if (isSearchDate) {
+                        DestroyDate(this)
+                    }
+                    else {
+                        InitDate();
+                    }
+                });
                 this.getData()
 
             },
             components: {
-          	    vuejsDatepicker
+                vuejsDatepicker
             },
             data: {
+                isPrivate: false,
                 isLoading: false,
                 list_subject: [],
-                tableData: [
-                ],
+                tableData: [],
+                ac_student: [],
                 fields: [
                     {
                         key: 'stt',
@@ -176,6 +365,10 @@
                         label: 'Môn học'
                     },
                     {
+                        key: 'creator_name',
+                        label: 'Giáo viên tạo'
+                    },
+                    {
                         key: 'students',
                         label: 'Học viên'
                     },
@@ -183,9 +376,35 @@
                         key: 'date',
                         label: 'Thời gian'
                     },
-                    @if (isHeadteacher)
                     {
-                        @Html.Raw("{ key: 'status', label: 'Trạng thái' }, { key: 'actions', label: 'Tác vụ' }");
+                        key: 'status',
+                        label: 'Trạng thái'
+                    },
+                    {
+                        key: 'actions',
+                        label: 'Tác vụ'
+                    }
+                ],
+                students_fields: [
+                    {
+                        key: 'stt',
+                        label: '#'
+                    },
+                    {
+                        key: 'name',
+                        label: 'Họ tên'
+                    },
+                    {
+                        key: 'email',
+                        label: 'Email'
+                    },
+                    {
+                        key: 'phone',
+                        label: 'SĐT'
+                    },
+                    {
+                        key: 'actions',
+                        label: 'Tác vụ'
                     }
                 ],
                 subject: '',
@@ -199,9 +418,25 @@
                 view: 20,
                 totalRec: 0,
                 page: 1,
+                student_data: {
+                    data: [],
+                    view: 30,
+                    totalRec: 0,
+                    page: 1,
+                    isLoading: false
+                },
                 searchTerm: '',
-                startdate: moment(),
-                enddate: moment().add(29, 'days'),
+                startdate: moment(new Date(1800,1,1)),
+                enddate: moment(new Date(1800, 1, 1)),
+                add_student: {
+                    id: "",
+                    name: "",
+                    email: "",
+                    class_id: "",
+                    uploadfile: {
+                        file: null,
+                    },
+                },
                 class_info: {
                     ID: '',
                     Name: '',
@@ -209,14 +444,14 @@
                     EndDate: '',
                     Description: '',
                     thumbnail: {
-                                src: '',
+                        src: '',
                         file: null,
                         height: 90,
                         width: 160
                     },
                     subject: [
                         {
-                                ID: '',
+                            ID: '',
                             SubjectID: '',
                             GradeID: '',
                             SkillID: '',
@@ -249,6 +484,9 @@
                 subject: function () {
                     this.getData()
                 },
+                isPrivate: function () {
+                    this.getData()
+                },
                 searchTerm: function(){
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
@@ -273,11 +511,12 @@
                     @if(!User.IsInRole("head-teacher"))
                     {
                         @:let _url = '@Url.Action("GetClassList", "Class")'
+
                     }
                     else
                     {
                         @:let _url = '@Url.Action("GetManageList", "Class")'
-
+                        @:if( this.isPrivate) _url = '@Url.Action("GetClassList", "Class")'
                     }
 
                     axios.post(_url, _form)
@@ -290,8 +529,7 @@
                             //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
                             //console.log(_that.active_course);
                         }).catch(e => { })
-                        },
-
+                },
                 //Class Action
                 toggleState(obj) {
                     //let _that = this;
@@ -386,7 +624,7 @@
                     if (!valid) return false
 
                     if (notify) {
-                        if (!confirm("Lưu ý: thay đổi thông tin môn học sẽ khởi tạo lại toàn bộ thông tin liên quan đến học tập của môn học. Tiếp tục?"))
+                        if (!confirm("Lưu ý: thay đổi thông tin môn học / cập nhật phiên bản sẽ khởi tạo lại toàn bộ thông tin liên quan đến học tập của môn học. Tiếp tục?"))
                             return false;
                     }
                      _that.isLoading = true
@@ -398,8 +636,18 @@
                             if (response.data.Error != null)
                                 alert(response.data.Error)
                             else {
+
                                 this.getData();
                                 _that.$bvModal.hide('modal_class');
+                                console.log(_that.class_info.ID);
+
+                                if (_that.class_info.ID == null)//add
+                                {
+                                    var data = response.data.Data;
+                                    _that.class_info.ID = data.ID;
+                                    _that.manageStudent();
+                                }
+
                             }
                         }).catch(e => {
                             _that.isLoading = false
@@ -525,8 +773,11 @@
                     }
                     _that.$bvModal.show('modal_class')
                 },
-                hideModal() {
-                    $('.close').click();
+                hideModal(modalid) {
+                    if (modalid == null)
+                        $('.close').click();
+                    else
+                        $('#' + modalid + ' .close').click();
                 },
                 getEditTitle() {
                     if (this.class_info.ID == '')
@@ -643,6 +894,19 @@
                 removeSubject(k) {
                     this.class_info.subject.splice(k, 1);
                 },
+                refreshSubject(k, obj) {
+                    if (this.class_info.subject[k].ID != "") {
+                        $(obj.target).attr('oldID', this.class_info.subject[k].ID);
+                        $(obj.target).addClass('text-danger')
+                        this.class_info.subject[k].ID = "";
+                    }
+                    else {
+                        var oldId = $(obj.target).attr('oldID');
+                        this.class_info.subject[k].ID = oldId;
+                        $(obj.target).removeClass('text-danger');
+                    }
+                    
+                },
                 errorImgUrl() {
                     this.class_info.thumbnail.src = null;
                     this.class_info.thumbnail.file = null;
@@ -668,16 +932,232 @@
                         }, 1000);
                     }, 1000);
                 },
+                initDate() {
+                    console.log(isSearchDate);
+                    if (isSearchDate) return;
+                    let _that = this
+                    var start = moment();
+                    var end = moment().add(29, 'days');
+                    $('input[name="dates"]').daterangepicker({
+                        startDate: start,
+                        endDate: end,
+                        locale: {
+                            format: "DD/MM/YYYY",
+                        }
+                    }, function (s, e, label) {
+                        RepDate(s, e);
+                        GetData();
+                    });
+                    $('input[name="dates"]').siblings().removeClass('inactive');
+                    isSearchDate = true;
+                    $('input[name="dates"]').focus().click();
+                    _that.startdate = start;
+                    _that.enddate = end;
+                    GetData()
+                },
+                destroyDate() {
+                    let _that = this
+                    if (!isSearchDate) return false;
+                    //$('input[name="dates"]').daterangepicker().destroy()
+                    $('input[name="dates"]').data('daterangepicker').remove();
+                    $('input[name="dates"]').val('-- Chọn thời gian --');
+                    $('input[name="dates"]').siblings().addClass('inactive');
+                    isSearchDate = false;
+                    _that.startdate = moment(new Date(1800,1,1)),
+                    _that.enddate = moment(new Date(1800,1,1)),
+                    GetData();
 
-                //nav
-                //goPage(pgIdx) {
-                //    if (pgIdx < 1) pgIdx = 1;
-                //    if (pgIdx > this.max_page)
-                //        pgIdx = this.max_page;
-                //    this.page = pgIdx;
-                //    this.getData();
-                //},
+                },
+                //student
+                manageStudent(data) {
+                    let _that = this;
+                    this.hideModal();
+                    if (data != null) {
+                        _that.class_info.ID = data.ID
+                        _that.class_info.Name = data.Name
+                    }
+                    _that.student_data.page = 1;
+                    this.loadStudent();
+                    _that.$bvModal.show('modal_student')
+                },
+                loadStudent() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('ClassID', _that.class_info.ID)
+                    _form.append('PageSize', _that.student_data.view)
+                    _form.append('PageIndex', _that.student_data.page)
 
+                    let _url = '@Url.Action("GetList", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.student_data.data = response.data.Data;
+                            this.student_data = _that.student_data
+                            this.student_data.totalRec = response.data.Model.totalRecord
+                            this.setClassStudent(_that.class_info.ID, response.data.Model.totalRecord);
+
+                        }).catch(e => { })
+                },
+                showStudentAddModal() {
+                    this.add_student.class_id = this.class_info.ID
+                    this.$bvModal.show('modal_student_add')
+                },
+                showStudentUploadModal() {
+                    this.add_student.class_id = this.class_info.ID
+                    this.add_student.uploadfile.file = null
+                    this.$bvModal.show('modal_student_upload')
+                },
+                chooseStudent(student) {
+                    this.add_student.name = student.Name
+                    this.add_student.email = student.Email
+                    this.add_student.id = student.ID
+                },
+                setClassStudent(classid, count) {
+                    this.tableData.forEach(function (item) {
+                        if (item.ID == classid)
+                            item.Students = count;
+                    })
+                },
+                autocompleteStudent(term, callback) {
+                    let _that = this
+                    if (term.length >= 2) {
+                        if (this.actimeout != null)
+                            clearTimeout(this.actimeout);
+                        this.actimeout = setTimeout(function () {
+                            if (_that.loadedTermsST == null)
+                                _that.loadedTermsST = []
+
+                            if (_that.loadedTermsST.filter(item => item.term.indexOf(term) > -1).length == 0) {
+                                let _form = new FormData()
+                                _form.append('term', term)
+                                let _url = '@Url.Action("Search","StudentManage")'
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        var data = []
+                                        if (response.data.length > 0) {
+                                            response.data.forEach(function (item) {
+                                                data.push({
+                                                    ID: item.ID,
+                                                    Name: item.FullName,
+                                                    Email: item.Email
+                                                });
+                                            })
+                                        }
+                                        _that.ac_student = data
+                                        _that.loadedTermsST.push({
+                                            term: term,
+                                            data: data
+                                        })
+                                        callback()
+                                    }).catch(e => { })
+                            } else {
+                                _that.student_data.data = _that.loadedTermsST.filter(item => item.term.indexOf(term) > -1)[0].data;
+                                callback()
+                            }
+                        }, 500)
+                    }
+                },
+                createStudent() {
+                    let _that = this
+                    let _form = new FormData()
+                    if (_that.add_student.class_id == '') {
+                        Swal.fire('Chưa chọn lớp học','','warning');
+                        return false;
+                    }
+                    if (_that.add_student.id == '') {
+                        alert('Vui lòng chọn lại học viên')
+                        return false;
+                    }
+                    _form.append('ClassID', _that.add_student.class_id)
+                    _form.append('StudentID', _that.add_student.id)
+                    _that.student_data.isLoading = true
+                    let _url = '@Url.Action("AddStudent", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.student_data.isLoading = false
+                            if (response.data.error != null) {
+                                alert(response.data.error);
+                                return false;
+                            }
+                            else {
+                                alert(response.data.msg)
+                                this.search_class_id = _that.add_student.class_id
+                                this.search_grade_id = ''
+                                this.search_skill_id = ''
+                                this.search_subject_id = ''
+                                this.loadStudent()
+                                this.$bvModal.hide('modal_student_add')
+                            }
+                        }).catch(e => {
+                            _that.student_data.isLoading = false
+                            console.log(e)
+                        })
+                },
+                uploadStudent() {
+                    let _that = this
+                    let _form = new FormData()
+                    if (_that.add_student.class_id == '') {
+                        alert('Chưa chọn lớp học');
+                        return false;
+                    }
+                    if (!_that.add_student.uploadfile.file) {
+                         alert('Chưa chọn danh sách học viên');
+                        return false;
+                    }
+                    _form.append('ClassID', _that.add_student.class_id)
+                    _form.append('fileUpload', _that.add_student.uploadfile.file)
+                    _that.student_data.isLoading = true
+                    let _url = '@Url.Action("ImportStudent", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.student_data.isLoading = false
+                            if (response.data.error != null) {
+                                alert(response.data.error);
+                                return false;
+                            }
+                            else {
+                                alert(response.data.msg)
+                                this.search_class_id = _that.add_student.class_id
+                                this.loadStudent()
+                                this.$bvModal.hide('modal_student_upload')
+                            }
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
+                        }).catch(e => {
+                            _that.student_data.isLoading = false
+                            console.log(e)
+                        })
+                },
+                removeStudent(student) {
+                    if (!confirm('Xác nhận xóa học viên ' + student.FullName + ' khỏi lớp ' + student.ClassName + '?')) {
+                        return false;
+                    }
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('ClassID', student.ClassID)
+                    _form.append('StudentID', student.ID)
+                    let _url = '@Url.Action("RemoveStudent", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            if (response.data.error != null) {
+                                alert(response.data.error);
+                                return false;
+                            }
+                            else {
+                                alert(response.data.msg)
+                                this.getData()
+                                this.hideModal()
+                            }
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
+                        }).catch(e => { console.log(e) })
+                },
+                changeFile() {
+                    console.log(event.target.files[0])
+                    this.add_student.uploadfile.file = event.target.files[0]
+                },
+                downloadTemplate() {
+                    window.open("@Url.Action("StudentTemplate", "StudentManage")");
+                },
                 //support
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
@@ -778,7 +1258,8 @@
                             </select>
                         </div>
                         <div class="btn-group mt-4">
-                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock"><i class="ti-trash"></i></button>
+                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học"><i class="ti-trash"></i></button>
+                            <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
                         </div>
                     </li>
                 </ul>
@@ -788,13 +1269,113 @@
 
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">
-                <b-button>Đang thực hiện...</b-button>
+                <b-button>Đang gửi dữ liệu ...</b-button>
             </template>
             <template v-else>
                 <b-button variant="success" v-on:click="createClass()">Lưu</b-button>
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
             </template>
-
         </template>
     </b-modal>
+
+
+    <b-modal :no-close-on-backdrop="true" id="modal_student" centered title="Cập nhật danh sách học viên" style="width:800px">
+        <div class="row">
+            <div class="col-md-12">
+
+                <div class="flex border-b padding-b25 justify-content-between">
+                    <div class="flex width-100">
+                        <label class="label">Lớp: {{class_info.Name}} </label>
+                        <input type="hidden" value="{{class_info.ID}}" />
+                    </div>
+
+                    <div class="flex">
+                        <b-button class="btn-addevent btn-student btn-sm" v-on:click="showStudentAddModal()"><i class="ti-plus"></i></b-button>
+                        <b-button class="btn-addevent btn-student btn-sm" style="margin-left:5px" v-on:click="showStudentUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
+                    </div>
+                </div>
+                <table id="st_table" class="table">
+                    <thead>
+                        <tr>
+                            <th v-for="(field,k) in students_fields">{{field.label}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in student_data.data">
+                            <td>{{k+1}}</td>
+                            <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
+                            <td>{{item.Email}}</td>
+                            <td>{{item.Phone}}</td>
+                            <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="box margin-t20 flex">
+                    <div class="paging-view">
+                        Hiển thị:
+                        <select v-model="student_data.view" v-on:change="loadStudent()">
+                            <option value="10">10 kết quả</option>
+                            <option value="20">20 kết quả</option>
+                            <option value="30">30 kết quả</option>
+                        </select>
+                    </div>
+                    <div class="page-control">
+                        <div class="right">
+                            <b-pagination v-model="student_data.page"
+                                          :total-rows="student_data.totalRec"
+                                          :per-page="student_data.view"
+                                          v-on:input="loadStudent()"></b-pagination>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template v-slot:modal-footer>
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal :no-close-on-backdrop="true" id="modal_student_add" centered title="Thêm học viên">
+        <b-col class="form-group">
+            <label class="label">Lớp: {{class_info.Name}} </label>
+            <input type="hidden" value="{{class_info.ID}}" />
+        </b-col>
+        <b-col class="form-group">
+            <label for="">Học viên</label>
+            <autocomplete v-on:chooseitem="chooseStudent" :items="ac_student" v-on:input="autocompleteStudent" />
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="student_data.isLoading">
+                <b-button>Đang gửi dữ liệu ...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="createStudent()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal('modal_student_add')">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
+
+    <b-modal :no-close-on-backdrop="true" id="modal_student_upload" centered title="Nhập học viên từ file">
+        <b-col class="form-group">
+            <label class="label">Lớp: {{class_info.Name}} </label>
+            <input type="hidden" value="{{class_info.ID}}" />
+        </b-col>
+        <b-col class="form-group">
+            <label for="">Chọn danh sách học viên (excel)</label>
+            <input type="file" class="btn btn-info" :ref="`uploadfile`" accept=".xls,.xlsx" v-on:change="changeFile()" /><br />
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <button v-on:click="downloadTemplate()" class="btn btn-secondary">Tải file mẫu</button>
+            <template v-if="student_data.isLoading">
+                <b-button>Đang gửi dữ liệu ...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="uploadStudent()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal('modal_student_upload')">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
+
+
 }

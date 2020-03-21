@@ -31,6 +31,8 @@ namespace BaseCustomerEntity.Database
         public long ExamDone { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
+        [JsonProperty("TotalPoint")]
+        public double TotalPoint { get; set; }
     }
 
     public class ClassProgressService : ServiceBase<ClassProgressEntity>
@@ -68,12 +70,7 @@ namespace BaseCustomerEntity.Database
             var progress = GetItemByClassID(item.ClassID, item.StudentID);
             if (progress == null)
             {
-                var courseIds = _classSubjectService.GetCourseIdsByClassID(item.ClassID);
-                long totalLessons = 0;
-                foreach (var courseID in courseIds)
-                {
-                    totalLessons += _lessonService.CountCourseLesson(courseID);
-                }
+                var totalLessons = _lessonService.CountClassLesson(item.ClassID);
 
                 //create new progress
                 await Collection.InsertOneAsync(new ClassProgressEntity
@@ -110,34 +107,25 @@ namespace BaseCustomerEntity.Database
             else
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
-                {
-                    progress.AvgPoint = (progress.AvgPoint * progress.ExamDone + item.LastPoint) / (progress.ExamDone + 1);
                     progress.ExamDone++;
-                }
-                else
-                {
-                    progress.AvgPoint = (progress.AvgPoint * progress.ExamDone + item.PointChange) / progress.ExamDone;
-                }
+
+                progress.TotalPoint += item.PointChange;
+                progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }
 
-        public async Task RefreshTotalLessonForSubject(string ClassSubjectID)
+        public async Task<long> RefreshTotalLessonForClass(string ClassID)
         {
-            var subject = _classSubjectService.GetItemByID(ClassSubjectID);
-            if (subject == null) return;
+            var totalLessons = _lessonService.CountClassLesson(ClassID);
 
-            var courseIds = _classSubjectService.GetCourseIdsByClassID(subject.ClassID);
-            long totalLessons = 0;
-            foreach (var courseID in courseIds)
-            {
-                totalLessons += _lessonService.CountCourseLesson(courseID);
-            }
             var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
                      //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
                      .Set(t => t.TotalLessons, totalLessons);
 
-            await Collection.UpdateManyAsync(t => t.ClassID == subject.ClassID, update);
+            await Collection.UpdateManyAsync(t => t.ClassID == ClassID, update);
+            return totalLessons;
         }
 
         public async Task DecreaseCompleted(string ClassID, long decrease)
@@ -161,6 +149,15 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-
+        public async Task DecreaseClassSubject(ClassSubjectProgressEntity clssbj)
+        {
+            var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
+                     //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
+                     .Inc(t => t.Completed, 0 - clssbj.Completed)
+                     .Inc(t => t.ExamDone, 0 - clssbj.ExamDone)
+                     .Inc(t => t.TotalPoint, 0 - clssbj.TotalPoint)
+                     .Inc(t => t.TotalLessons, 0 - clssbj.TotalLessons);
+            await Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID, update);
+        }
     }
 }

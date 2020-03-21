@@ -15,8 +15,10 @@
 </script>
 
 <section class="module" id="dashboard_content">
-
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25 justify-content-between">
             <div class="flex width-100">
                 <div class="box filter-box w-152">
@@ -52,7 +54,7 @@
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <table id="ed_table" class="table">
             <thead>
                 <tr>
@@ -598,17 +600,6 @@
                 changeFile() {
                     console.log(event.target.files[0])
                     this.uploadfile.file = event.target.files[0]
-                },
-                testdata() {
-                    let _that = this
-                    let list = _that.list_student
-                    console.log(list)
-                    list.forEach(function(item) {
-                        _that.list_student.push(item)
-                    })
-                    this.list_student = _that.list_student;
-                    console.log(this.list_student)
-                    this.$forceUpdate()
                 },
                 downloadTemplate() {
                     window.open("@Url.Action("StudentTemplate", "StudentManage")");

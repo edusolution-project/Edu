@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace BaseCustomerEntity.Database
 {
@@ -166,6 +167,17 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
+        public async Task RemoveClassHistory(string[] ClassIDs)
+        {
+            await Collection.DeleteManyAsync(o => ClassIDs.Contains(o.ClassID));
+            await _classProgressService.CreateQuery().DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
+            await _chapterProgressService.CreateQuery().DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
+            await _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
+            await _lessonProgressService.CreateQuery().DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
+        }
+
+
+
         public Task RemoveClassStudentHistory(string ClassID, string StudentID)
         {
             _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
@@ -176,18 +188,15 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
-        public Task RemoveClassSubjectHistory(string ClassSubjectID)
+        public async Task RemoveClassSubjectHistory(string ClassSubjectID)
         {
-            _ = Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            await Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             var subjectProgresses = _classSubjectProgressService.GetClassListOfCurrentSubject(ClassSubjectID);
             foreach (var progress in subjectProgresses)
-                _ = _classProgressService.DecreaseCompleted(progress.ClassID, progress.Completed);
-            _ = _classProgressService.RefreshTotalLessonForSubject(ClassSubjectID);
-            _ = _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
-            _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
-            _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
-
-            return Task.CompletedTask;
+                await _classProgressService.DecreaseClassSubject(progress);
+            await _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            await _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            await _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
         }
 
         public async Task UpdateClassSubject(ClassSubjectEntity classSubject)

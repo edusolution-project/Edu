@@ -9,18 +9,22 @@
     setActiveMenu("course");
 </script>
 
+
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25">
             <h2 class="title"><a href="@Url.Action("Detail", "Course")/@currentCs.ClassID" title="@currentCs.ClassName"><i class="ti-arrow-left"></i></a>@currentCs.ClassName/<span class="end-break">@currentCs.SkillName (@currentCs.CompletedLesssons/@currentCs.TotalLessons)</span></h2>
             <div class="c-right bad">
                 <div class="flex">
                     <b-progress :value="@currentCs.CompletedLesssons" :max="@currentCs.TotalLessons" class="mb-3"></b-progress>
                     <span>
-                        @if (currentCs.TotalLessons > 0) 
+                        @if (currentCs.TotalLessons > 0)
                         {
                             var complete = currentCs.CompletedLesssons * 100.00 / currentCs.TotalLessons;
-                            @: @complete.ToString("0.00")% 
+                            @: @complete.ToString("0.00")%
                         }
                         else
                         {
@@ -31,7 +35,7 @@
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box">
             <ul class="list ls-pratice">
                 <chap-content v-for="(item,k) in filterChap('0', list_data)"
@@ -101,7 +105,7 @@
                         <span>{{formatTime(lesson.LastJoin)}}</span>
                     </div>
                     <div class="c c3">
-                        <span v-bind:class="{'bg-danger' : parseInt(lesson.DoPoint)<50}">{{lesson.DoPoint}}</span>%
+                        <span class="bg-transparent text-primary font-weight-bold" v-bind:class="{'text-danger' : parseInt(lesson.DoPoint) < 50, 'text-success' : parseInt(lesson.DoPoint) > 70}">{{lesson.DoPoint.toFixed(2)}}%</span>
                     </div>
                 </template>
                 <template v-else>
@@ -136,7 +140,7 @@
                         <span>{{formatTime(lesson.LastJoin)}}</span>
                     </template>
                 </div>
-                <div class="c cs">
+                <div class="c c3">
                 </div>
                 <div class="c schedule">
                     <span>{{formatTime(lesson.StartDate)}}</span><br />
@@ -192,11 +196,11 @@
                 let _that = this
                 let _form = new FormData()
                 _form.append('ID', '@currentCs.ID')
-                let _url = '@Url.Action("GetSchedules", "Lesson")'
+                let _url = '@Url.Action("GetMainChapters", "Course")'
                 axios.post(_url, _form)
                     .then(response => {
                         //console.log(response.data.Data)
-                        _that.list_data = response.data.Data.Chapters
+                        _that.list_data = response.data.Data
                         if (window.location.hash != "")
                         {
 
@@ -212,7 +216,7 @@
             },
             filterLesson(ID) {
                 //console.log(ID);
-                console.log(this.list_lessons);
+                //console.log(this.list_lessons);
                 return this.list_lessons.filter((p) => {
         	        return p.ChapterID == ID
                 })
@@ -228,12 +232,23 @@
                     let _url = '@Url.Action("GetChapterContent", "Lesson")'
                     axios.post(_url, _form)
                         .then(response => {
+                            var chapters = response.data.Data.Chapters;
+                            if (chapters != null && chapters.length > 0)
+                            {
+                                chapters.forEach(function(chapter)
+                                {
+                                    _that.list_data.push(chapter);
+                                })
+                            }
+
                             var lessons = response.data.Data.Lessons;
-                            console.log(lessons)
+                            //console.log(lessons)
                             lessons.forEach(function (lesson) {
                                 if(_that.list_lessons.findIndex(t=>t.ID == lesson.ID) == -1)
                                     _that.list_lessons.push(lesson)
                             })
+                            this.list_data = _that.list_data;
+                            console.log(this.list_data);
                             this.list_lessons = _that.list_lessons;
                             this.load_chapter.push(chapterId);
                         }).catch(e => { })

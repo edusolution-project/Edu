@@ -233,7 +233,7 @@ button, input, a {
 }
 
 .good {
-    color: #00D085;
+    color: #00D085 !important;
     font-weight: 600
 }
 
@@ -630,6 +630,20 @@ button, input, a {
     width: 13px;
     height: 14px
 }
+
+.ic-online-class {
+    background-image: url(../images/online-class.png);
+    width: 32px;
+    height: 32px;
+    margin: 2px 0 0 2px;
+    opacity: 0.2;
+    cursor: pointer;
+}
+
+    .ic-online-class.active,
+    .ic-online-class:hover {
+        opacity: 1;
+    }
 
 .ic-collapse {
     background-image: url(../images/arrow-up.png);
@@ -2165,7 +2179,7 @@ button, input, a {
 .btn-view, .btn-download, .btn-clear {
     color: #fff;
     border-radius: 20px;
-    width: 80px;
+    min-width: 80px;
     text-align: center;
     padding: 3px 15px;
     font-size: 12px;

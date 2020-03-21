@@ -13,7 +13,10 @@
 </script>
 
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex mb-2">
             <h2 class="title"><a href="@Url.Action("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}/@currentStudent.FullName</h2>
             @*<div class="search-box">
@@ -55,7 +58,7 @@
             <div class="c-right"></div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box" v-if="tab[0]">
             <table id="ed_table" class="table">
                 <thead>
@@ -91,7 +94,7 @@
                         <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
                         <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
                         <td>{{formatFullDate(item.LearnLast)}}</td>
-                        <td>{{item.Result.toFixed(2)}}%</td>
+                        <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (item.Result.toFixed(2) + '%')}}</td>
                         <td>{{item.LearnCount}}</td>
                     </tr>
                 </tbody>
@@ -106,8 +109,8 @@
             el: "#main",
             mounted() {
                 this.loadClassSubjects()
-                var start = moment().add(-29, 'days');
-                var end = moment();
+                var start = moment('@currentClass.StartDate.ToLocalTime().ToString("MM/dd/yyyy")');
+                var end = moment('@currentClass.EndDate.ToLocalTime().ToString("MM/dd/yyyy")');
                 $('input[name="dates"]').daterangepicker({
                     startDate: start,
                     endDate: end,
@@ -152,11 +155,11 @@
                 resultFields: [
                     {
                         key: 'lesson',
-                        label: 'Bài học'
+                        label: 'Bài kiểm tra'
                     },
                     {
                         key: 'schedule',
-                        label: 'Lịch học'
+                        label: 'Lịch kiểm tra'
                     },
                     {
                         key: 'last_update',
@@ -176,8 +179,8 @@
                 view: 10,
                 page: 1,
                 avgPoint: 0,
-                startdate: moment(),
-                enddate: moment(),
+                startdate: moment('@currentClass.StartDate.ToLocalTime().ToString("MM/dd/yyyy")'),
+                enddate: moment('@currentClass.EndDate.ToLocalTime().ToString("MM/dd/yyyy")'),
                 tab: [true, false]
             },
             watch: {

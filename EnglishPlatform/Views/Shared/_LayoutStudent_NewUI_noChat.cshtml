@@ -95,8 +95,8 @@
             <!-- Main Content -->
             <div id="content">
 
-                @*@await Html.PartialAsync("_sideBarStudentNewUI")*@
-
+                @RenderSection("Sidebar",  false)
+                
                 <div class="right-content">
                     @RenderBody()
                 </div>

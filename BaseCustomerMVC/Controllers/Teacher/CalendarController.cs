@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using BaseCustomerMVC.Controllers.Student;
 using BaseCustomerEntity.Globals;
+using EasyZoom.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -77,6 +78,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             data = map.AutoOrtherType(DataResponse, data);
             // scheduleId => classID + lesson ID => student/lesson/detail/lessonid/classsubject;
             var schedule = string.IsNullOrEmpty(DataResponse.ScheduleID) ? null : _scheduleService.GetItemByID(DataResponse.ScheduleID);
+            //schedule -> LessonID + class -> classubject -> skill
             string url = schedule != null ? Url.Action("Detail", "Lesson", new { id = schedule.LessonID, ClassID = schedule.ClassSubjectID }) : null;
             data.LinkLesson = url;
             return Task.FromResult(new JsonResult(data));
@@ -119,9 +121,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return _calendarHelper.RemoveEvent(id, User.FindFirst("UserID").Value).Result;
         }
 
+        [Obsolete]
         public JsonResult FixCalendar()
         {
-            _calendarHelper.ScheduleAutoConvertEvent();
+            _ = _calendarHelper.ScheduleAutoConvertEvent();
             return Json("Fixed");
         }
 

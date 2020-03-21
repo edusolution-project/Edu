@@ -13,6 +13,8 @@ var ExamReview = (function () {
 
     var _totalPart = 0;
     var _type = 0;
+    var _totalQuiz = 0;
+    var _correctQuiz = 0;
 
     var prevPart = function () {
         var panes = $('.tab-pane');
@@ -135,9 +137,7 @@ var ExamReview = (function () {
         var starttime = moment(data.Created);
         var duration = moment.duration(completetime.diff(starttime));
 
-        lastExamResult =
-            $("<div>", { id: "last-result", class: "text-center pt-1 text-white" })
-                .append("Work time: " + durationFormat(duration) + " - Score: " + lastpoint.toFixed(0) + "%");
+        lastExamResult = $("<div>", { id: "last-result", class: "text-center pt-1 text-white" });
 
         $('#lessonSummary').prepend(lastExamResult);
         $('#quiz_number_counter .completed').text(data.QuestionsDone);
@@ -152,6 +152,11 @@ var ExamReview = (function () {
                 renderAnswer(detail, quizType);
             }
         }
+
+        _correctQuiz = $('#quizNavigator .quiz-wrapper .bg-success').length;
+        _totalQuiz = $('#quizNavigator .quiz-wrapper button').length;
+
+        $("#last-result").append("Thời gian làm bài: " + durationFormat(duration) + " - Kết quả: " + _correctQuiz + " / " + _totalQuiz);
     }
 
     var renderLessonPart = function (data, index, type) {
@@ -476,6 +481,7 @@ var ExamReview = (function () {
             tabList += content;
             var title = item.Title == void 0 || item.Title == null || item.Title == "null" ? "" : item.Title;
         }
+
         tabList += '</div>';
         html = '<div class="lesson-body" id="' + data.ID + '">' + tabList + '</div>';
         $('#lessonSummary').append(nav_bottom_wrapper);

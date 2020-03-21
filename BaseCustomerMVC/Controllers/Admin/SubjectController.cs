@@ -59,7 +59,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             model.TotalRecord = data.Count();
             var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data.ToList()
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
+                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
             var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse },
@@ -100,7 +100,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 //    };
                 //    return new JsonResult(response);
                 //}
-                
+
                 if (!Exist(item.Name))
                 {
                     item.ID = null;
@@ -163,14 +163,14 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
                 else
                 {
-                    var delete = _service.Collection.DeleteMany(o => model.ArrID==o.ID);
+                    var delete = _service.Collection.DeleteMany(o => model.ArrID == o.ID);
                     return new JsonResult(delete);
                 }
-                    
-                
+
+
             }
         }
-        
+
         [HttpGet]
         [Obsolete]
         public async Task<IActionResult> Export(DefaultModel model)
@@ -191,7 +191,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             var filterData = filter.Count > 0 ? _service.Collection.Find(Builders<SubjectEntity>.Filter.And(filter)) : _service.GetAll();
             var list = await filterData.ToListAsync();
-            var data = list.Select(o => new { o.Name,o.Code,o.Created,o.IsActive });
+            var data = list.Select(o => new { o.Name, o.Code, o.Created, o.IsActive });
             var stream = new MemoryStream();
 
             using (var package = new ExcelPackage(stream))
@@ -206,7 +206,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
-       
+
         [HttpPost]
         [Obsolete]
         public JsonResult Publish(DefaultModel model)
@@ -220,8 +220,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (model.ArrID.Contains(","))
                 {
                     var filter = Builders<SubjectEntity>.Filter.Where(o => model.ArrID.Split(',').Contains(o.ID) && o.IsActive == false);
-                    var update = Builders<SubjectEntity>.Update.Set("IsActive",true);
-                    var publish = _service.Collection.UpdateMany(filter,update);
+                    var update = Builders<SubjectEntity>.Update.Set("IsActive", true);
+                    var publish = _service.Collection.UpdateMany(filter, update);
                     return new JsonResult(publish);
                 }
                 else
@@ -235,7 +235,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             }
         }
-        
+
         [HttpPost]
         [Obsolete]
         public JsonResult UnPublish(DefaultModel model)
@@ -269,7 +269,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private bool Exist(string name)
         {
             var _currentData = _service.CreateQuery().Find(o => o.Name == name);
-            if(_currentData.Count() > 0)
+            if (_currentData.Count() > 0)
             {
                 return true;
             }

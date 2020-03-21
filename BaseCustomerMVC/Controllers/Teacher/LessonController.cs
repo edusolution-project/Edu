@@ -73,7 +73,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return RedirectToAction("Index", "Class");
             ViewBag.Class = currentClass;
             ViewBag.Subject = currentClassSubject;
-            ViewBag.Data = Data;
+            ViewBag.Lesson = Data;
             ViewBag.Title = Data.Title;
 
             if (frameview == 1)
@@ -219,6 +219,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
+
         [Obsolete]
         [HttpPost]
         public JsonResult GetChapterContent(DefaultModel model, string ChapterID)
@@ -282,7 +283,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             try
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var data = _lessonService.CreateQuery().Find(o => o.ID == item.ID).SingleOrDefault();
+                var data = _lessonService.GetItemByID(item.ID);
                 if (data == null)
                 {
                     item.Created = DateTime.Now;
@@ -311,8 +312,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 else
                 {
                     item.Updated = DateTime.Now;
+                    var newOrder = item.Order - 1;
                     item.Order = data.Order;
                     _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+
+                    if (item.Order != newOrder)//change Position
+                    {
+                        ChangeLessonPosition(item, newOrder);
+                    }
                 }
 
                 return new JsonResult(new Dictionary<string, object>
@@ -329,7 +336,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {"Error",ex.Message }
                 });
             }
-
         }
 
         public IActionResult Exam()
@@ -465,7 +471,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var parts = new List<LessonEntity>();
             parts = item.IsParentCourse
-                ? _lessonService.CreateQuery().Find(o => o.CourseID == item.ID && o.IsParentCourse == true)
+                ? _lessonService.CreateQuery().Find(o => o.CourseID == item.CourseID && o.IsParentCourse == true)
                 .SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
                 : _lessonService.CreateQuery().Find(o => o.ChapterID == item.ChapterID)
                 .SortBy(o => o.Order).ThenBy(o => o.ID).ToList();

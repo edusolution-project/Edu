@@ -20,7 +20,6 @@ namespace BaseCustomerMVC.Globals
 
         public ProgressHelper(
             LearningHistoryService learningHistoryService,
-            
             LessonProgressService lessonProgressService,
             ChapterProgressService chapterProgressService,
             ClassSubjectProgressService classSubjectProgressService,

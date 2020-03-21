@@ -14,7 +14,28 @@
 @*longht add 2020-01-12*@
 <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
 <link href="~/js/calendar/css/style.css" rel="stylesheet" />
-
+<style>
+    .swal-title {
+      margin: 0px;
+      font-size: 16px;
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+      margin-bottom: 28px;
+    }
+    .swal-text {
+      padding: 17px;
+      display: block;
+      margin: auto;
+      text-align: center;
+      color: #61534e;
+    }
+    .swal-footer {
+      text-align:center;
+      background-color: rgb(245, 248, 250);
+      margin-top: 32px;
+      border-top: 1px solid #E9EEF1;
+      overflow: hidden;
+    }
+</style>
 <script>
     setActiveMenu("calendar");
 </script>
@@ -154,53 +175,48 @@
                         if (jsonData.Status == 5) {
                             document.body.classList.remove("open-add-event");
                             var time = new Date(jsonData.StartDate);
-
-                            var Title = `Time : ${timeEvent} \r\n Date : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
-
+                            var Title = `${jsonData.Title} (${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${timeEvent})`;
                             var str = `Giáo viên : ${jsonData.TeacherName}`;
                             swal({
                                 title: Title,
-                                type: "info",
                                 text: str,
-                                showCancelButton: true,
-                                confirmButtonClass: "btn-sm btn-primary",
-                                confirmButtonText: "go to room",
-                                cancelButtonClass: "btn-sm",
-                                cancelButtonText: "close",
-                                closeOnConfirm: false
-                            }, function () {
-                                swal.close();
-                                var _skype = jsonData.UrlRoom;
-                                window.open(`${_skype}`, "_blank");
-                            });
-                        } else {
-
-                            if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != "null" && jsonData.Skype != void 0) {
-                                document.body.classList.remove("open-add-event");
-                                var time = new Date(jsonData.Created);
-                                var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
-
-                                var str = `Giáo viên : ${jsonData.TeacherName}`;
-                                swal({
-                                    title: Title,
-                                    type: "info",
-                                    text: str,
-                                    showCancelButton: true,
-                                    confirmButtonClass: "btn-sm btn-primary",
-                                    confirmButtonText: "Call skype",
-                                    cancelButtonClass: "btn-sm",
-                                    cancelButtonText: "close",
-                                    closeOnConfirm: false
-                                }, function () {
-                                    swal.close();
-                                    var _skype = jsonData.Skype;
-                                    if (jsonData.Skype == null) {
-                                        _skype = skype;
+                                buttons: {
+                                    cancel: {
+                                        text: "Đóng",
+                                        value: null,
+                                        visible: true,
+                                        className: "",
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: "Vào lớp",
+                                        value: true,
+                                        visible: true,
+                                        className: "",
+                                        closeModal: true
+                                    },
+                                    roll: {
+                                      text: "Mở bài học",
+                                      value: "roll",
+                                      visible: jsonData.LinkLesson != null && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "" && jsonData.LinkLesson != "null"
+                                    },
+                                }
+                            }).then(function (value) {
+                                if (value == true) {
+                                    var _skype = jsonData.UrlRoom;
+                                    if (_skype.startsWith('http'))
+                                        window.open(`${_skype}`, "_blank");
+                                    else {
+                                        var link = '@Url.Action("OnlineClass","Home")/' + jsonData.ID
+                                        window.open(`${link}`, "_blank");
                                     }
-                                    window.open(`skype:${_skype}?call`, "_blank");
-                                });
-                            } else {
-                                document.body.classList.add("open-add-event");
+                                }
+                                if (value == "roll") {
+                                    window.open(`${jsonData.LinkLesson}`, "_blank");
+                                }
+                            })
+                        } else {
+                            document.body.classList.add("open-add-event");
                                 var formEvent = document.getElementById("form-event");
                                 var bodyEvent = formEvent.querySelector(".body-form-event");
                                 bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
@@ -232,7 +248,10 @@
                                             btnGoTo.style.display = 'inline-block';
                                             btnGoTo.onclick = function () {
                                                 var dataLink = btnGoTo.dataset.link;
+
+                                                //TODO: check here
                                                 window.open(`${dataLink}`, "_blank");
+                                                console.log(jsonData);
                                                 document.body.classList.remove("open-add-event");
                                             }
                                         }
@@ -241,7 +260,33 @@
                                         }
                                     }
                                 }
-                            }
+                            //if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != "null" && jsonData.Skype != void 0) {
+                            //    document.body.classList.remove("open-add-event");
+                            //    var time = new Date(jsonData.Created);
+                            //    var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
+
+                            //    var str = `Giáo viên : ${jsonData.TeacherName}`;
+                            //    swal({
+                            //        title: Title,
+                            //        type: "info",
+                            //        text: str,
+                            //        showCancelButton: true,
+                            //        confirmButtonClass: "btn-sm btn-primary",
+                            //        confirmButtonText: "Call skype",
+                            //        cancelButtonClass: "btn-sm",
+                            //        cancelButtonText: "close",
+                            //        closeOnConfirm: false
+                            //    }, function () {
+                            //        swal.close();
+                            //        var _skype = jsonData.Skype;
+                            //        if (jsonData.Skype == null) {
+                            //            _skype = skype;
+                            //        }
+                            //        window.open(`skype:${_skype}?call`, "_blank");
+                            //    });
+                            //} else {
+                                
+                            //}
                         }
                     }
                 } else {

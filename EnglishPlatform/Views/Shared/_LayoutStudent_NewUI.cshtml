@@ -15,11 +15,12 @@
     <link href="~/css/bootstrap.4.3.1.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Be+Vietnam&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/fonts.css">
+    <link href="~/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
     @*longht them*@
     <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
     <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
     <link href="~/js/calendar/css/style.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/stylesheet.min.css">
+    <link rel="stylesheet" href="/css/stylesheet.min.css?20200227">
     @*<script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>*@
     @*<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>*@
     <script src="~/js/vue@2.6.0.js"></script>
@@ -43,6 +44,15 @@
     </script>
 </head>
 <body>
+    <style>
+        [v-cloak], [cloak-holder] {
+            display: none
+        }
+
+            [v-cloak][cloak-holder] {
+                display: block
+            }
+    </style>
     <main id="main">
         @await Html.PartialAsync("_sideBarStudentNewUI")
         @RenderBody()
@@ -265,11 +275,12 @@
             loadCalendar(startTimePre);
         }
     </script>
-
-    @RenderSection("Modals", false)
+    <div v-cloak>
+        @RenderSection("Modals", false)
+    </div>
     @RenderSection("Scripts", false)
     <!--Start of Tawk.to Script-->
-    <script type="text/javascript">
+    @*<script type="text/javascript">
         var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
         (function () {
             var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
@@ -279,7 +290,7 @@
             s1.setAttribute('crossorigin', '*');
             s0.parentNode.insertBefore(s1, s0);
         })();
-    </script>
+    </script>*@
     <!--End of Tawk.to Script-->
 </body>
 </html>

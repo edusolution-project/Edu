@@ -28,9 +28,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Areas\Student\Views\Course\Assignment.cshtml" />
+    <Content Remove="Areas\Student\Views\Course\Calendar.cshtml" />
+    <Content Remove="Areas\Student\Views\Course\Modules_o.cshtml" />
+    <Content Remove="Areas\Student\Views\Course\References.cshtml" />
+    <Content Remove="Areas\Student\Views\Course\Syllabus.cshtml" />
+    <Content Remove="Areas\Student\Views\Lesson\Detail.cshtml" />
     <Content Remove="Areas\Student\Views\Lesson\Exam.cshtml" />
+    <Content Remove="Areas\Student\Views\Lesson\Index.cshtml" />
     <Content Remove="Areas\Student\Views\Lesson\Lecture.cshtml" />
     <Content Remove="Areas\Teacher\Views\Class\Detail - Copy.cshtml" />
+    <Content Remove="Areas\Teacher\Views\Home\Index_o.cshtml" />
+    <Content Remove="Areas\Teacher\Views\Home\Profile_o.cshtml" />
     <Content Remove="Areas\Teacher\Views\Schedule\Schedule.cshtml" />
     <Content Remove="compilerconfig.json" />
     <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
@@ -55,9 +64,7 @@
     <None Include="Areas\Admin\Views\Subject\Index.cshtml" />
     <None Include="Areas\Admin\Views\Teacher\Index.cshtml" />
     <None Include="Areas\Student\Views\Home\Index.cshtml" />
-    <None Include="Areas\Student\Views\Lesson\Index.cshtml" />
     <None Include="Areas\Student\Views\Lesson\Detail_new.cshtml" />
-    <None Include="Areas\Student\Views\Course\Calendar.cshtml" />
     <None Include="Areas\Student\Views\Course\Detail.cshtml" />
     <None Include="Areas\Student\Views\Course\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Calendar\CheckList.cshtml" />

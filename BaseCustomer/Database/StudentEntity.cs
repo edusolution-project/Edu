@@ -51,7 +51,7 @@ namespace BaseCustomerEntity.Database
 
         public List<StudentEntity> Search(string name, int limit = 0)
         {
-            return Collection.Find(Builders<StudentEntity>.Filter.Text(name)).Limit(limit).ToList();
+            return Collection.Find(Builders<StudentEntity>.Filter.Text("\"" + name + "\"")).Limit(limit).ToList();
         }
     }
 }

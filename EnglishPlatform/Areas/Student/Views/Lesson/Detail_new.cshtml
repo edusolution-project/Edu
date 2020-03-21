@@ -9,32 +9,20 @@
     var currentChapter = ViewBag.Chapter as BaseCustomerEntity.Database.ChapterEntity;
     ViewData["Title"] = currentLesson.Title;
 }
-
+@section Sidebar
+{
+    @await Html.PartialAsync("_sidebarExam")
+}
 <script>
     activeTab = "course";
 </script>
 <div class="left-col">
-    <div class="page-title row">
-        <h2 class="col-md-6 p-0">
-            @if (currentChapter != null)
-            {
-                <a href="@Url.Action("Modules" ,"Course")/@currentClassSubject.ID#@currentChapter.ID">@currentChapter.Name</a>
-            }
-            / @currentLesson.Title
-        </h2>
-        @if (nextLesson != null)
-        {
-            <h2 class="col-md-6 p-0 text-right">
-                Bài tiếp > <a href="@Url.Action("Detail" ,"Lesson")/@nextLesson.ID/@currentClassSubject.ID">@nextLesson.Title</a>
-            </h2>
-        }
-    </div>
     <div class="main-container">
         <!-- Begin Page Content -->
         <div id="exam-student" class="h-100">
         </div>
         <!-- End of Main Content -->
-        <input type="hidden" name="ExamID" id="ExamID" value="" />
+        @*<input type="hidden" name="ExamID" id="ExamID" value="" />*@
     </div>
 
     <div id="lessonSummary" class="shadow">
@@ -43,8 +31,16 @@
 </div>
 @section Footer{}
 @section Scripts{
+    <style>
+        .expand ~ .card-body {
+            padding-bottom: 100px !important;
+        }
 
-    <script src="~/js/content-render.js?20191213"></script>
+        .card-header[style*="display:none"] ~ .card-body {
+            top: 0 !important;
+        }
+    </style>
+    <script src="~/js/content-render.js?20200320"></script>
     <script>
             var config = {
                 container: "exam-student",
@@ -67,6 +63,5 @@
             var widget = new Lesson.onReady(config);
     </script>
     <link href="~/css/detailui.css?20191512" rel="stylesheet" />
-
 }
 

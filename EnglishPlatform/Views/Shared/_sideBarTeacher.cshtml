@@ -16,7 +16,7 @@
             </li>
 
             <li class="sidebar-item profile">
-                <a class="nav-link p-0 overflow-hidden position-relative" data-toggle="collapse" data-target="#extra-sidebar" onclick="showExtra('profile')" title="Profile">
+                <a class="nav-link p-0 overflow-hidden position-relative" href="@Url.Action("Profile","Home")" title="Thông tin cá nhân">
 
                     @if (!string.IsNullOrEmpty(avatar))
                     {
@@ -25,9 +25,9 @@
                              id="leftMenuPhotoAcc" />
                     }
 
-                    <span>Account</span>
+                    <span>Thông tin cá nhân</span>
                 </a>
-                <div class="extra">
+                @*<div class="extra">
                     <div class="avatarHolder">
                         @{
                             var name = User.Identity.Name;
@@ -65,7 +65,7 @@
                             </li>
                         </ul>
                     </div>
-                </div>
+                </div>*@
             </li>
 
             @*<li class="sidebar-item dashboard">
@@ -76,44 +76,44 @@
                 </li>*@
 
             <li class="sidebar-item curriculum">
-                <a class="nav-link p-0" href="@Url.Action("Index", "Curriculum" )" title="Curriculum Management">
+                <a class="nav-link p-0" href="@Url.Action("Index", "Curriculum" )" title="Quản lý bài giảng">
                     <i></i>
-                    <span>Curriculum</span>
+                    <span>Soạn bài giảng</span>
                 </a>
             </li>
             <li class="sidebar-item course">
-                <a class="nav-link p-0" href="@Url.Action("Index","Class")" title="Class Management">
+                <a class="nav-link p-0" href="@Url.Action("Index","Class")" title="Quản lý lớp học">
                     <i></i>
-                    <span>Class Management</span>
+                    <span>Quản lý lớp học</span>
                 </a>
             </li>
             <li class="sidebar-item calendar">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )" title="Calendar">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Calendar" )" title="Lịch dạy">
                     <i></i>
-                    <span>Calendar</span>
+                    <span>Lịch dạy</span>
                 </a>
             </li>
 
             <li class="sidebar-item students" style="background-image:none">
-                <a class="nav-link p-0" href="@Url.Action("Index", "StudentManage" )" title="Student Management">
+                <a class="nav-link p-0" href="@Url.Action("Index", "StudentManage" )" title="Quản lý học viên">
                     <i class="fas fa-users"></i>
-                    <span>Student</span>
+                    <span>Quản lý học viên</span>
                 </a>
             </li>
             <li class="sidebar-item comments" style="background-image:none">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )" title="Discussion">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Discuss" )" title="Thảo luận">
                     <i class="fas fa-comments" aria-hidden="true"></i>
-                    <span>Announcement</span>
+                    <span>Thảo luận</span>
                 </a>
             </li>
             <li class="sidebar-item guide">
-                <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )" title="Reference">
+                <a class="nav-link p-0" href="@Url.Action("Index" , "Reference" )" title="Tài liệu tham khảo">
                     <i></i>
-                    <span>Reference</span>
+                    <span>Tài liệu tham khảo</span>
                 </a>
             </li>
 
-            <li class="sidebar-item accounts" style="background-image:none">
+            @*<li class="sidebar-item accounts" style="background-image:none">
                 <a class="nav-link p-0" href="#" title="Account Management">
                     <i class="fas fa-users-cog"></i>
                     <span>Accounts</span>
@@ -125,7 +125,7 @@
                     <i class="fas fa-cogs"></i>
                     <span>Settings</span>
                 </a>
-            </li>
+            </li>*@
 
 
         </ul>

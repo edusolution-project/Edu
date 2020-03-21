@@ -1,5 +1,6 @@
 ﻿using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Models;
+using EasyZoom.Interfaces;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -13,24 +14,35 @@ namespace BaseCustomerMVC.Globals
         private readonly CalendarService _calendarService;
         private readonly LessonService _lessonService;
         private readonly ClassService _classService;
+        private readonly SkillService _skillService;
+        private readonly ClassSubjectService _classSubjectService;
         private readonly TeacherService _teacherService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
+
+        private readonly IZoomHelpers _zoomHelpers;
+
         public CalendarHelper(
             CalendarService calendarService,
             LessonScheduleService lessonScheduleService,
             LessonService lessonService,
             ClassService classService,
+            SkillService skillService,
+            ClassSubjectService classSubjectService,
             TeacherService teacherService,
-            StudentService studentService
+            StudentService studentService,
+            IZoomHelpers zoomHelpers
             )
         {
             _calendarService = calendarService;
             _lessonService = lessonService;
             _classService = classService;
+            _skillService = skillService;
+            _classSubjectService = classSubjectService;
             _teacherService = teacherService;
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
+            _zoomHelpers = zoomHelpers;
         }
         public Task<CalendarEntity> CreateEvent(CalendarEntity item)
         {
@@ -38,6 +50,12 @@ namespace BaseCustomerMVC.Globals
             if (!string.IsNullOrEmpty(item.ID))
             {
                 // update event
+                if (string.IsNullOrEmpty(item.UrlRoom) && item.Status == 5)
+                {
+                    var zoomScheduled = _zoomHelpers.CreateScheduled(item.Title, item.StartDate, 60);
+                    item.UrlRoom = zoomScheduled.Id;
+                }
+
                 _calendarService.CreateOrUpdate(item);
                 return Task.FromResult(item);
             }
@@ -50,6 +68,8 @@ namespace BaseCustomerMVC.Globals
             item.Created = DateTime.Now;
             if (item.Status == 5)
             {
+                var zoomScheduled = _zoomHelpers.CreateScheduled(item.Title, item.StartDate, 60);
+                item.UrlRoom = zoomScheduled.Id;
                 var teacher = _teacherService.GetItemByID(item.CreateUser);
                 if (teacher != null)
                 {
@@ -79,6 +99,10 @@ namespace BaseCustomerMVC.Globals
             }
 
             item.Status = 5;
+
+            var zoomScheduled = _zoomHelpers.CreateScheduled(item.Title, item.StartDate, 60);
+            item.UrlRoom = zoomScheduled.Id;
+
             _calendarService.CreateOrUpdate(item);
 
             return Task.FromResult(item);
@@ -163,23 +187,39 @@ namespace BaseCustomerMVC.Globals
             }
             filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.IsDel == false) && (o.CreateUser == userid || classList.Contains(o.GroupID))));
             var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
-            var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList().Select(o => new CalendarEventModel()
-            {
-                start = o.StartDate,
-                groupid = o.GroupID,
-                id = o.ID,
-                title = o.Title,
-                url = "",
-                skype = "",//isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype,
-                Status = o.Status,
-                Color = o.Status == 5 ? "#ccc" : ""
-            }).ToList();
+
+            var DataResponse = new List<CalendarEventModel>();
+
+            if (data == null || data.Count() <= 0)
+                DataResponse = null;
+            else
+                DataResponse =
+                    (from r in data.ToList() //TODO: Too heavy => add info to schedule & add to Event later
+                     let schedule = _lessonScheduleService.GetItemByID(r.ScheduleID)
+                     let classSbj = schedule != null ? _classSubjectService.GetItemByID(schedule.ClassSubjectID) : null
+                     let skill = classSbj != null ? _skillService.GetItemByID(classSbj.SkillID) : null
+                     select new CalendarEventModel()
+                     {
+                         start = r.StartDate,
+                         groupid = r.GroupID,
+                         id = r.ID,
+                         title = r.Title + (skill == null ? "" : (" (" + skill.Name + ")")),
+                         url = "",
+                         skype = "",//isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype,
+                         Status = r.Status,
+                         Color = r.Status == 5 ? "#ccc" : ""
+                     }).ToList();
             return DataResponse;
         }
 
         public CalendarEntity GetByScheduleId(string scheduleID)
         {
             return _calendarService.CreateQuery().Find(t => t.ScheduleID == scheduleID).SingleOrDefault();
+        }
+
+        public CalendarEntity GetByEventID(string eventID)
+        {
+            return _calendarService.CreateQuery().Find(t => t.ID == eventID).SingleOrDefault();
         }
 
         public long Remove(string ID)
@@ -228,9 +268,9 @@ namespace BaseCustomerMVC.Globals
                     TeacherID = teacher.ID,
                     TeacherName = teacher.FullName,
                     Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
-                    Status = 0,
+                    Status = item.IsOnline ? 5 : 0,
                     LimitNumberUser = 0,
-                    UrlRoom = string.Empty,
+                    UrlRoom = item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(lesson.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
                     UserBook = new List<string>(),
                     ScheduleID = item.ID
                 };
@@ -249,9 +289,10 @@ namespace BaseCustomerMVC.Globals
                     TeacherID = teacher.ID,
                     TeacherName = teacher.FullName,
                     Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
-                    Status = oldItem.Status,
+                    Status = item.IsOnline ? 5 : 0,
                     LimitNumberUser = oldItem.LimitNumberUser,
-                    UrlRoom = oldItem.UrlRoom,
+                    UrlRoom = (item.IsOnline && oldItem.Status == 5) ? oldItem.UrlRoom : //not change => keep event
+                        item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(lesson.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
                     UserBook = oldItem.UserBook,
                     ScheduleID = item.ID
                 };

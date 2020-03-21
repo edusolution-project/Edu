@@ -61,6 +61,8 @@ namespace BaseCustomerEntity.Database
         public string Image { get; set; }
         [JsonProperty("TotalLessons")]
         public long TotalLessons { get; set; }
+        [JsonProperty("TotalExams")]
+        public long TotalExams { get; set; }
 
     }
 
