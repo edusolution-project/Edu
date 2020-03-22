@@ -1669,6 +1669,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             await _lessonPartAnswerService.Collection.InsertOneAsync(item);
         }
 
+
+        #region Fix resources
+
         [HttpGet]
         public JsonResult FixResourcesV2()
         {
@@ -1912,7 +1915,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult("Update done");
         }
 
-
+        public async Task<JsonResult> FixLessonCounter()
+        {
+            return new JsonResult("Update done");
+        }
+        #endregion
     }
 
     public class Counter
