@@ -750,9 +750,10 @@ namespace BaseCustomerMVC.Controllers.Student
                     var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, userId, currentCs.ID);
                     if (extend != null) chapter.Description = extend.Description;
                     var viewModel = new MappingEntity<ChapterEntity, ChapterProgressViewModel>().AutoOrtherType(chapter, new ChapterProgressViewModel());
+                    viewModel.TotalLessons = chapter.TotalLessons;
                     if (progress != null)
                     {
-                        viewModel.TotalLessons = progress.TotalLessons;
+                        viewModel.TotalLessons = chapter.TotalLessons;
                         viewModel.CompletedLessons = progress.Completed;
                         viewModel.LastDate = progress.LastDate;
                         viewModel.LastLessonID = progress.LastLessonID;

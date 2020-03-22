@@ -23,7 +23,7 @@
 
 <section class="module" id="dashboard_content">
 
-    <div class="card-header">
+    <div class="card-header" v-cloak>
         <div class="flex mb-2">
             <h2 class="title"><a href="@Url.Action("Detail", "Class")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
             @*<div class="search-box mr-2" v-if="tab[2]">
@@ -50,7 +50,10 @@
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-body" v-cloak>
         <div class="box" v-if="tab[0]">
             <ul class="box list ls-overview mb-3">
                 <li class="flex margin-b20">
@@ -59,7 +62,7 @@
                         <p><span class="label">Tên lớp: </span>{{domDecoder(className)}}</p>
                         @*<p><span class="label">Mã lớp : </span>IELTS_PL5_1</p>*@
                         @*<p><span class="label">Cấp độ : </span>{{gradeName}}</p>*@
-                    <p><span class="label">Chương trình: </span>{{domDecoder(subjectName)}}</p>
+                        <p><span class="label">Chương trình: </span>{{domDecoder(subjectName)}}</p>
                         <p><span class="label">Môn học: </span>{{skillName}}</p>
                         <ul class="time-line flex">
                             <li><i class="ti-time"></i>Bắt đầu: {{formatShortDate(startDate)}} </li>

@@ -560,7 +560,16 @@ namespace BaseCustomerMVC.Controllers.Student
             double point = 0;
             var lesson = _lessonService.GetItemByID(exam.LessonID);
             exam = _examService.Complete(exam, lesson, out point);
-            return new JsonResult(new { Point = point, MaxPoint = lesson.Point, ID = exam.ID, Number = exam.Number, Limit = lesson.Limit });
+            return new JsonResult(new
+            {
+                Point = point,
+                MaxPoint = lesson.Point,
+                ID = exam.ID,
+                Number = exam.Number,
+                Limit = lesson.Limit,
+                QuestionsTotal = exam.QuestionsTotal,
+                QuestionsPass = exam.QuestionsPass
+            });
         }
 
         public IActionResult Index(DefaultModel model)

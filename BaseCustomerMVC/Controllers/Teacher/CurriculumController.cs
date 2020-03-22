@@ -1917,10 +1917,57 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public async Task<JsonResult> FixLessonCounter()
         {
+            var classes = _classService.GetAll().ToList();
+            foreach (var cclass in classes)
+            {
+                cclass.TotalLessons = _newlessonService.CountClassLesson(cclass.ID);
+                _classService.Save(cclass);
+            }
+            var subjects = _classSubjectService.GetAll().ToList();
+            foreach (var subject in subjects)
+            {
+                subject.TotalLessons = _newlessonService.CountClassSubjectLesson(subject.ID);
+                _classSubjectService.Save(subject);
+
+
+                await FixChapterCounter(subject.ID, "0");
+
+            }
             return new JsonResult("Update done");
         }
+
+        private async Task<long> FixChapterCounter(string ClassSubjectID, string ParentID)
+        {
+            var subchaps = _newchapterService.GetSubChapters(ClassSubjectID, ParentID);
+            ChapterEntity parentChap = null;
+            if (ParentID != "0")
+            {
+                parentChap = _newchapterService.GetItemByID(ParentID);
+                parentChap.TotalLessons = _newlessonService.CountChapterLesson(ParentID);
+            }
+            if (subchaps != null && subchaps.Count > 0)
+                foreach (var chap in subchaps)
+                {
+                    var counter = await FixChapterCounter(ClassSubjectID, chap.ID);
+                    if (parentChap != null)
+                        parentChap.TotalLessons += counter;
+                }
+            if (ParentID != "0")
+            {
+                _newchapterService.Save(parentChap);
+                return parentChap.TotalLessons;
+            }
+            else
+                return 0;
+
+        }
+
         #endregion
+
+
     }
+
+
 
     public class Counter
     {

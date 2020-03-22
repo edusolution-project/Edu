@@ -320,10 +320,10 @@ var ExamStudent = (function () {
                 }
                 review = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.Review(\'' + lastExam.ID + '\')" style="cursor: pointer;">Xem đáp án</div></div>';
             }
-            var back = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.GoBack()" style="cursor: pointer;">Về danh sách</div></div>';
+            //var back = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.GoBack()" style="cursor: pointer;">Về danh sách</div></div>';
             var content = checkExam()
                 ? renderContent(data.Data)
-                : (lastExamResult + '<div class="text-center p-3 col-md-12">' + doButton + review + back + '</div>');
+                : (lastExamResult + '<div class="text-center p-3 col-md-12">' + doButton + review + '</div>');
 
 
             if (doable) {

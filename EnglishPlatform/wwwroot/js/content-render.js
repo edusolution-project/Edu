@@ -1963,12 +1963,12 @@ var Lesson = (function () {
         }
 
         if (isNull(data)) {
-            var backButton = $('<div>', {
-                "class": "btn btn-primary m-3",
-                "onclick": "GoBack()",
-                "style": "cursor: pointer",
-                "text": "Về danh sách"
-            });
+            //var backButton = $('<div>', {
+            //    "class": "btn btn-primary m-3",
+            //    "onclick": "GoBack()",
+            //    "style": "cursor: pointer",
+            //    "text": "Về danh sách"
+            //});
             wrapper.append(doButton);
             //wrapper.append(backButton);
         }
@@ -1983,17 +1983,17 @@ var Lesson = (function () {
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
-                .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.QuestionsPass == null ? 0 : Lesson.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+                .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
             wrapper.append(lastExamResult);
 
             tryleft = limit - tried;
             //var doButton = null;
-            var backButton = $('<div>', {
-                "class": "btn btn-primary m-3",
-                "onclick": "GoBack()",
-                "style": "cursor: pointer",
-                "text": "Về danh sách"
-            });
+            //var backButton = $('<div>', {
+            //    "class": "btn btn-primary m-3",
+            //    "onclick": "GoBack()",
+            //    "style": "cursor: pointer",
+            //    "text": "Về danh sách"
+            //});
             var reviewButton = $('<div>', {
                 "class": "btn btn-primary m-3",
                 "onclick": 'Review(\'' + lastExam.ID + '\')',
@@ -2518,7 +2518,7 @@ var Lesson = (function () {
             //var exam = document.querySelector("input[name='ExamID']");
             //var exam = getLocalData("CurrentExam");
             var dataform = new FormData();
-            console.log("Complete :" + $('#ExamID').val());
+            //console.log("Complete :" + $('#ExamID').val());
             dataform.append("ExamID", $('#ExamID').val());
             Ajax(config.url.end, dataform, "POST", true)
                 .then(function (res) {
@@ -2565,14 +2565,14 @@ var Lesson = (function () {
                 "style": "cursor: pointer",
                 "text": "Làm bài"
             });
-            var backButton = $('<div>', {
-                "class": "btn btn-primary m-3",
-                "onclick": "$(this).prop('disabled',true); GoBack();",
-                "style": "cursor: pointer",
-                "text": "Về danh sách"
-            });
+            //var backButton = $('<div>', {
+            //    "class": "btn btn-primary m-3",
+            //    "onclick": "$(this).prop('disabled',true); GoBack();",
+            //    "style": "cursor: pointer",
+            //    "text": "Về danh sách"
+            //});
             wrapper.append(doButton);
-            wrapper.append(backButton);
+            //wrapper.append(backButton);
         }
         else {
             var lastExam = data;
@@ -2581,23 +2581,23 @@ var Lesson = (function () {
 
             var limit = lastExam.limit;
             var tried = lastExam.number;
-
+            console.log(lastExam);
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Điểm của bạn: " + lastpoint.toFixed(0) + "%" }));
+                .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.questionsPass == null ? 0 : lastExam.questionsPass) + "/" + lastExam.questionsTotal }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
 
             tryleft = limit - tried;
 
-            var backButton = $('<div>', {
-                "class": "btn btn-primary m-3",
-                "onclick": "GoBack()",
-                "style": "cursor: pointer",
-                "text": "Về danh sách"
-            });
+            //var backButton = $('<div>', {
+            //    "class": "btn btn-primary m-3",
+            //    "onclick": "GoBack()",
+            //    "style": "cursor: pointer",
+            //    "text": "Về danh sách"
+            //});
             var reviewButton = $('<div>', {
                 "class": "btn btn-primary m-3",
                 "onclick": 'Review(\'' + lastExam.id + '\'); $(this).prop(\'disabled\',true)',
@@ -2628,8 +2628,8 @@ var Lesson = (function () {
                 });
             }
             wrapper.append(doButton)
-                .append(reviewButton)
-                .append(backButton);
+                .append(reviewButton);
+                //.append(backButton);
         }
     }
 
