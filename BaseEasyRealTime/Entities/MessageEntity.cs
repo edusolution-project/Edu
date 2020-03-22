@@ -9,7 +9,8 @@ namespace BaseEasyRealTime.Entities
     public class MessageEntity : EntityBase
     {
         public string Code { get; set; } = Guid.NewGuid().ToString();
-        public MemberGroupInfo Sender { get; set; }
+        public object Sender { get; set; }
+        public HashSet<string> Receivers { get; set; } = new HashSet<string>(); // chir dung cho new feed
         public string Receiver { get; set; } // groupName
         public string Title { get; set; }
         public string Content { get; set; }
