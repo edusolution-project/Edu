@@ -462,10 +462,10 @@ var Lesson = (function () {
                             .empty().append($(this).find('.part-box-header')).append(media).append(html)
                             .appendTo('#leftCol')
                     })
-                }
-
-                else if (_UImode == UIMode.BOTH);
+                }                
+                else if (_UImode == UIMode.BOTH)
                 {
+                    //console.log(_UImode);
                     var dataform = new FormData();
                     dataform.append("ClassID", config.class_id);
                     dataform.append("ClassSubjectID", config.class_subject_id);
@@ -2031,6 +2031,7 @@ var Lesson = (function () {
     }
 
     var renderLectureExam = function (data, isContinue) {
+        alert(1);
         var wrapper = $("<div>", { "class": "w-100 text-center" });
         if (data != null) {
             var lastExam = data;

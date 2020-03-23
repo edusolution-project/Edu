@@ -65,13 +65,13 @@ namespace BaseCustomerMVC.Globals
             _courseService.Collection.UpdateOneAsync(t => t.ID == classSubject.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
         }
 
-        internal async Task CloneChapterForClassSubject(ClassSubjectEntity classSubject, CourseChapterEntity originChapter = null)
+        internal async Task<long> CloneChapterForClassSubject(ClassSubjectEntity classSubject, CourseChapterEntity originChapter = null)
         {
             var orgID = originChapter == null ? "0" : originChapter.ID;
             var newID = "0";
 
+            long lessoncounter = 0;
             ChapterEntity newchapter = null;
-
             if (originChapter != null)
             {
                 newchapter = _chapterMapping.AutoOrtherType(originChapter, new ChapterEntity());
@@ -84,8 +84,8 @@ namespace BaseCustomerMVC.Globals
             }
 
             var lessons = _courseLessonService.CreateQuery().Find(o => o.CourseID == classSubject.CourseID && o.ChapterID == orgID).ToList();
-
             if (lessons != null && lessons.Count > 0)
+            { 
                 foreach (var courselesson in lessons)
                 {
                     LessonEntity lesson = _lessonMapping.AutoOrtherType(courselesson, new LessonEntity());
@@ -108,21 +108,23 @@ namespace BaseCustomerMVC.Globals
                     _calendarHelper.ConvertCalendarFromSchedule(schedule, "");
                     _lessonHelper.CloneLessonForClassSubject(lesson, classSubject);
                 }
-
-            if(newchapter != null)
-            {
-                newchapter.TotalLessons = lessons.Count;
-                _chapterService.Save(newchapter);
+                lessoncounter = lessons.Count;
             }
-
+            
 
             var subchaps = _courseChapterService.GetSubChapters(classSubject.CourseID, orgID);
             if (subchaps.Count > 0)
                 foreach (var chap in subchaps)
                 {
                     chap.ParentID = newID;
-                    await CloneChapterForClassSubject(classSubject, chap);
+                    lessoncounter += await CloneChapterForClassSubject(classSubject, chap);
                 }
+            if (newchapter != null)
+            {
+                newchapter.TotalLessons = lessoncounter;
+                _chapterService.Save(newchapter);
+            }
+            return lessoncounter;
         }
     }
 }
