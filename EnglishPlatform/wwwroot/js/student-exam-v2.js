@@ -743,7 +743,7 @@ var ExamStudent = (function () {
         nav_bottom_wrapper.append(prev_btn_holder).append(ct_action_holder).append(next_btn_holder);
 
         $('<div>', { id: 'quizIdx_holder' }).appendTo(nav_bottom_wrapper);
-
+        alert(2);
         //nav += '<div class="lesson-tabs col-md-10 d-inline-block"><ul id="pills-tab" class="nav nav-pills compact" onclick="toggle_tab_compact()">';
 
         _totalPart = data.Part.length;

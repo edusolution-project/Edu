@@ -83,11 +83,12 @@
                         <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}</a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion" role="tabpanel">
                             <ul class="list">
-                                <chap-content v-for="(item,k) in list_chapters" v-if="matchedChap(item, obj.ID + '-')"
+                                <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
                                               v-bind:data="item"
+											  v-bind:classbj="obj.ID"
                                               v-bind:pos="k"
                                               v-bind:owner="obj.TeacherID"
-                                              v-bind:subchaps="filterChap(item, list_chapters)"></chap-content>
+                                              v-bind:subchaps="list_chapters"></chap-content>
                             </ul>
                         </b-collapse>
                     </div>
@@ -213,18 +214,19 @@
             }
     </style>
 
-    <script type="text/x-template" id="chapContentTemp">
-        <li class="col-md-12">
-            <div class="inner">
-                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic ic-edit-small"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></a>
+     <script type="text/x-template" id="chapContentTemp">
+        <li class="col-md-12 pr-0">
+            <div class="inner pt-3 pb-0">
+                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse mb-3" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></a>
                 <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
-                    <b-card-body>
+                    <b-card-body class="pr-0">
                         <ul class="list">
-                            <chap-content v-for="(subItem,j) in subchaps"
+                            <chap-content v-for="(subItem,j) in subchaps" v-if="subItem.ClassSubject + '-' + subItem.Parent == classbj + '-' + data.ID"
                                           v-bind:data="subItem"
+                                          v-bind:classbj="classbj"
                                           v-bind:pos="j"
                                           v-bind:owner="owner"
-                                          v-bind:subchaps="filterChap(subItem, subchaps)"></chap-content>
+                                          v-bind:subchaps="subchaps"></chap-content>
                             <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:owner="owner" v-bind:classSubject="data.ClassSubject"></lesson-item>
                         </ul>
                     </b-card-body>
@@ -234,17 +236,18 @@
     </script>
 
     <script type="text/x-template" id="lessonItemTemp">
-        <li class="sub-practice">
-            <div class="flex j-between width-100">
-                <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject"> <span class="width-100">{{data.Title}}</span></a>
-                <div class="flex width-100 j-end picker-schedule" v-if="owner == '@currentuser'">
-                    <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st" v-on:input="updateSchedule(data)"></datepicker>
-                    <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed" v-on:input="updateSchedule(data)"></datepicker>
+        <li class="sub-practice pt-1 pb-1">
+            <div class="d-flex w-100 justify-content-end align-items-start">
+                <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-fill overflow-hidden" style="text-overflow: ellipsis" :title="data.Title"> <span><i class="ic far fa-file-alt mr-2"></i>{{data.Title}}</span></a>
+                <div class="picker-schedule d-flex" v-if="owner == '@currentuser'">
+                    <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
+                    <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
                     <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" v-on:click="toggleOnlineClass(data)"></i>
                 </div>
-                <div class="flex width-100 j-end picker-schedule" v-else>
+                <div class="d-flex picker-schedule" v-else>
                     <div class="input-group date date st bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
                     <div class="input-group date date ed bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
+                    <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến"></i>
                 </div>
                 <div class="status" v-if="owner == '@currentuser'">
                     <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
@@ -260,6 +263,7 @@
             template: '#chapContentTemp',
             props: {
                 subchaps: Array,
+				classbj: String,
                 lessons: Array,
                 data: Object,
                 pos: String,

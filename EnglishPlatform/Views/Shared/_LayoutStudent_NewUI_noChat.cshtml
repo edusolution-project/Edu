@@ -6,22 +6,9 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <title>@ViewBag.Title</title>
     <!-- Custom fonts for this template-->
-    @*<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-        <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700&amp;subset=latin-ext&amp;display=swap" rel="stylesheet">
+    <link href="~/css/minify.min.css?20200326" rel="stylesheet" />
+    <link href="~/css/detail.min.css?20200326" rel="stylesheet" />
 
-        <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">*@
-    <link href="~/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
-    @*longht them*@
-    <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
-    <!-- Custom styles for this template-->
-    <link href="~/css/bootstrap.min.css" rel="stylesheet">
-    <link href="~/css/custom.css" rel="stylesheet">
-    <link href="~/css/_sidebar.min.css" rel="stylesheet" />
-    <link href="~/css/layout.min.css" rel="stylesheet" />
-    <link href="~/css/jquery-ui.min.css" rel="stylesheet" />
-    @*<link href="~/css/newsfeed.min.css" rel="stylesheet" />
-
-        <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />*@
     <script type="text/javascript">
 
         const g_CurrentUser = {
@@ -31,34 +18,9 @@
 
     </script>
 
-
-
-    <script src="~/js/site.js"></script>
-    <script type="text/javascript" src="~/vendor/jquery/jquery.min.js"></script>
-    <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="~/js/custom.js"></script>
-    <script type="text/javascript" src="~/js/plugins/jquery.lazy.min.js"></script>
-    <script type="text/javascript" src="~/js/plugins/jquery.lazy.plugins.min.js"></script>
-    <script src="~/js/jquery.scrollbar.min.js"></script>
-    <link href="~/css/jquery.scrollbar.css" rel="stylesheet" />
+    <script src="~/js/detail.min.js"></script>
     <script src="~/js/plugins/ck4/ckeditor.js"></script>
-    <script src="~/js/moment.min.js"></script>
-    @*<script src="~/js/lib/config.url.base.js"></script>
-        <script src="~/js/lib/notification/notification.js"></script>
-        <script src="~/js/lib/xhr.js"></script>*@
 
-    @*<script src="~/js/hubs/render.html.js"></script>
-        <script src="~/lib/signalr/signalr.js"></script>
-        <script src="~/js/hubs/connection.js"></script>*@
-
-    <!-- Bootstrap core JavaScript-->
-    <script type="text/javascript" src="~/js/popper.min.js"></script>
-    <script type="text/javascript" src="~/vendor/bootstrap/js/bootstrap.js"></script>
-    @*<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>*@
-    <!-- Core plugin JavaScript-->
-    <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
-    <!-- Custom scripts for all pages-->
-    <script type="text/javascript" src="~/js/sb-admin-2.min.js"></script>
 
 </head>
 <body>
@@ -95,8 +57,8 @@
             <!-- Main Content -->
             <div id="content">
 
-                @RenderSection("Sidebar",  false)
-                
+                @RenderSection("Sidebar", false)
+
                 <div class="right-content">
                     @RenderBody()
                 </div>
@@ -127,8 +89,6 @@
     <!-- Logout Modal-->
     @await Html.PartialAsync("_modalLogout")
     @RenderSection("Modals", false)
-    @*alert*@
-    <script src="~/js/calendar/js/sweetalert.min.js"></script>
     @RenderSection("Scripts", false)
 </body>
 </html>

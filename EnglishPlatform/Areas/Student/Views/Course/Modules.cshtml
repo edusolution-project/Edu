@@ -38,10 +38,11 @@
     <div class="card-body" v-cloak>
         <div class="box">
             <ul class="list ls-pratice">
-                <chap-content v-for="(item,k) in filterChap('0', list_data)"
+                <chap-content v-for="(item,k) in list_data"
                               v-bind:data="item"
                               v-bind:pos="k"
-                              v-bind:subchaps="filterChap(item.ID, list_data)">
+                              v-if="item.ParentID == '0'"
+                              v-bind:subchaps="list_data">
                 </chap-content>
             </ul>
         </div>
@@ -78,14 +79,15 @@
     <script type="text/x-template" id="chapContentTemp">
         <li class="col-md-12">
             <div class="inner">
-                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic ic-edit-small"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}<i class="ic ic-collapse"></i></a>
+                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}<i class="ic ic-collapse"></i></a>
                 <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.ParentID}`" :title="`my-accordion-${data.ParentID}`" role="tabpanel">
                     <b-card-body>
                         <ul class="list">
                             <chap-content v-for="(item,k) in subchaps"
                                           v-bind:data="item"
                                           v-bind:pos="k"
-                                          v-bind:subchaps="filterChap(item.ID, subchaps)"></chap-content>
+                                          v-bind:subchaps="subchaps"
+                                          v-if="item.ParentID == data.ID"></chap-content>
                             <lesson-item v-for="lesson in filterLesson(data.ID)" v-bind:lesson="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
                         </ul>
                     </b-card-body>
@@ -96,7 +98,7 @@
 
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice">
-            <span class="c c1"> <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'">{{lesson.Title}}</a></span>
+            <span class="c c1"> <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'"><i class="ic far fa-file-alt mr-2"></i>{{lesson.Title}}</a></span>
             @*Exam*@
             <template v-if="lesson.TemplateType === 2">
                 <template v-if="isViewed(lesson.LastJoin)">
@@ -248,7 +250,7 @@
                                     _that.list_lessons.push(lesson)
                             })
                             this.list_data = _that.list_data;
-                            console.log(this.list_data);
+                            //console.log(this.list_data);
                             this.list_lessons = _that.list_lessons;
                             this.load_chapter.push(chapterId);
                         }).catch(e => { })

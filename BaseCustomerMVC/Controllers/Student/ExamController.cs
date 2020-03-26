@@ -224,7 +224,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.Marked = false;
             }
             item.Updated = DateTime.Now;
-            _examService.CreateOrUpdate(item);
+            //_examService.CreateOrUpdate(item);//MAPPING BUG
+            _examService.Save(item);
             return new JsonResult(new Dictionary<string, object>
                     {
                        { "Data", item }
@@ -245,12 +246,13 @@ namespace BaseCustomerMVC.Controllers.Student
             var schedule = _lessonScheduleService.GetItemByLessonID_ClassSubjectID(LessonID, ClassSubjectID);
             if (x != null && !x.Status)
             {
-                if (schedule != null && schedule.EndDate > new DateTime(1900, 1, 1) && schedule.EndDate <= DateTime.Now)
-                {
-                    x.Status = true;
-                    x.Updated = schedule.EndDate;
-                    _examService.Save(x);
-                }
+                if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                    if (schedule != null && schedule.EndDate > new DateTime(1900, 1, 1) && schedule.EndDate <= DateTime.Now)
+                    {
+                        x.Status = true;
+                        x.Updated = schedule.EndDate;
+                        _examService.Save(x);
+                    }
                 x.CurrentDoTime = DateTime.Now;
             }
             return new JsonResult(new { exam = x, schedule, limit = lesson.Limit });
