@@ -2,35 +2,290 @@
     var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseLessonEntity;
     var Course = ViewBag.Course as BaseCustomerEntity.Database.CourseEntity;
 }
+<style>
+
+    #sidebar {
+        width: 100%;
+        height: 43px;
+        border-bottom: 1px solid #DEDEDE;
+        background: white;
+    }
+
+    .menu-bar {
+        overflow: visible;
+    }
+
+        .menu-bar li a {
+            padding: 10px 15px;
+            border: solid 1px transparent;
+        }
+
+    .sub-menu a {
+        padding: 5px 5px !important;
+    }
+
+
+    .sub-menu li:hover {
+        background: #DDD;
+    }
+
+    .top-menu a .ic {
+        margin-right: 7px !important;
+    }
+
+    .top-menu {
+        width: 130px;
+        margin-top: 2px;
+    }
+
+        .top-menu:hover a, .top-menu.active a {
+            border-color: transparent;
+            color: #333;
+        }
+
+        .top-menu > a {
+            border: solid 1px transparent;
+        }
+
+    .menu-bar li:hover a {
+        border-color: transparent;
+        color: #333;
+        background: #FFF;
+    }
+
+    .top-menu[for=path_menu].active > a,
+    .top-menu[for=path_menu]:hover > a {
+        border-radius: 10px 10px 0 0;
+        border: solid 1px #CCC !important;
+        border-bottom: transparent !important;
+    }
+
+
+    .top-menu .sub-menu {
+        display: none;
+        min-width: 250px;
+        background: #FFF;
+        margin-top: -1px;
+        border: solid 1px #CCC;
+        border-top: none;
+        max-height: 600px;
+        overflow-y: auto;
+        border-radius: 0 0 0 10px;
+        position: fixed;
+        top: 44px;
+        bottom: 0;
+    }
+
+    .top-menu:hover .sub-menu {
+        display: block;
+    }
+
+    .right-content {
+        top: 44px;
+        left: 0;
+    }
+
+    .top_nav_menu {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        height: 26px;
+        opacity: 0.7;
+        background: #FFF;
+        position: fixed;
+        left: 5px;
+        top: 7px;
+    }
+
+        .top_nav_menu:hover,
+        .top_nav_menu.active {
+            opacity: 1;
+        }
+
+    .les_nav.current {
+        background: rgb(85,230,191);
+    }
+
+    .chap_nav_title,
+    .chap_content a {
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /*.chap_nav_title:hover,
+        .les_nav:hover {
+            text-decoration: underline;
+        }*/
+
+    .right_sidebar > div {
+        height: 100%;
+        /*padding: 10px;*/
+        overflow-y: auto;
+    }
+
+    .chap_content, .p_chap_nav {
+        margin-left: 0px;
+        padding: 3px 0 5px 0;
+        cursor: pointer;
+        /*border-top: solid 1px #CCC;*/
+    }
+
+        .chap_content a {
+            padding: 3px 0 5px 0;
+        }
+
+    .chap_nav_title {
+        margin-left: 0px;
+        padding: 5px 0 5px 12px;
+    }
+
+    .chap_content li {
+        list-style: circle inside;
+        padding: 5px 5px 5px 15px;
+    }
+
+
+    .right_sidebar ul > :first-child,
+    .right_sidebar ul > a:first-child > li {
+        margin-top: -5px;
+    }
+
+
+    ul > ul {
+        margin-bottom: -5px;
+        padding-left: 7px !important;
+    }
+
+    .p_chap_nav .chap_nav_title {
+        margin-bottom: 0;
+    }
+
+
+    .chap_content a:hover {
+        text-decoration: none;
+    }
+
+    .p_chap_nav > .chap_content {
+        display: none;
+    }
+
+    .p_chap_nav.plus > .chap_content {
+        display: block;
+    }
+
+    #QuizNav {
+        position: absolute;
+        top: 44px;
+        background: #FFF;
+        left: 0;
+        right: 0;
+        border: solid 3px #CCC;
+        border-radius: 10px;
+        box-shadow: 1px 2px 7px #999;
+        display: none;
+    }
+
+        #QuizNav.show {
+            display: block;
+        }
+
+    .right-content.showQuiz {
+        top: 97px;
+    }
+
+    #QuizNav .rounded-quiz {
+        width: 28px;
+        height: 28px;
+        display: block;
+        padding: 0px !important;
+    }
+
+    .embed-frame {
+        width: 100%;
+        min-height: 800px;
+    }
+
+    .quiz-item .media-holder img,
+    .tab-pane-quiz img {
+        width: auto;
+    }
+
+    @@media (max-width : 1200px) {
+        .embed-frame {
+            width: 100%;
+            max-height: 600px;
+        }
+    }
+
+    .tab-content > .main-column:first-child {
+        border-right: dashed 2px #CCC;
+    }
+
+    .menu-bar .btn-primary {
+        border: #FFF;
+        background: #FFF;
+        font-weight: bold;
+        color: #333;
+    }
+
+        .menu-bar .btn-primary:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+
+        .menu-bar .btn-primary.btn-warning {
+            background: #ffc107
+        }
+
+        .menu-bar .btn-primary:hover {
+            color: #007bff;
+        }
+
+        .menu-bar .btn-primary:disabled {
+            color: #999;
+            opacity: 0.4;
+        }
+
+            .menu-bar .btn-primary:disabled:hover {
+                cursor: default;
+            }
+</style>
+<aside class="d-flex justify-content-start bg-white" id="sidebar">
+    <div class="menu-bar w-100">
+        <ul class="d-flex p-0 m-0 h-100">
+            <li for="home" class="top-menu">
+                <a href="@Url.Action("Index", "Home")" title="Trang chủ"><i class="ic fas fa-home"></i>Trang chủ</a>
+            </li>
+            <li for="path_menu" class="top-menu">
+                <a title="Mục lục"><i class="ic fas fa-list-ol"></i>Mục lục</a>
+                <div class="sub-menu">
+                    <div class="content-holder">
+                        <ul class="chap_content"></ul>
+                    </div>
+                </div>
+            </li>
+            <li for="lesson-info" class="top-menu flex-grow-1 d-flex justify-content-end">
+            </li>
+            <div id="QuizNav" style="z-index:-1"></div>
+        </ul>
+    </div>
+</aside>
+<!-- End of Sidebar -->
 <script>
+    var root_nav = $('li[for=path_menu] .content-holder');
+
     $(document).ready(function () {
-
-
-        var home = $("<i>", {
-            class: "fas fa-home list_menu top_nav_menu mr-3",
-            style: "cursor: pointer",
-        }).click(function () {
-            document.location = '/'
-        });
-
-        var menu = $("<i>", {
-            class: "fas fa-bars list_menu top_nav_menu mr-1 active",
-            style: "cursor: pointer",
-        }).click(function () {
-            toggleMenu(this,'.path_menu');
-        });
-
         renderMenu(currentLesson.ChapterID, true);
-        //$('.page-title h1').prepend(questiontrack);
-        //$('.page-title h1').prepend(menu);
-        $('.right_sidebar').prepend(home);
-        //menu.click();
-
     });
 
-    var dataUrl = '@Url.Action("GetContents","Curriculum")';
+    var dataUrl = '@Url.Action("GetContents","ClassSubject")';
 
     var renderMenu = function (parentID, init) {
+
+        //console.log(root_nav);
 
         var parentPath = root_nav;
 
@@ -51,6 +306,8 @@
 
         }
 
+        //console.log(parentPath);
+
         $.ajax({
             type: "POST",
             url: dataUrl,
@@ -68,7 +325,7 @@
                                 class: 'p_chap_nav',
                                 href: '#'
                             });
-                            chapterPath.append($("<div>", { class: "chap_nav_title" }))
+                            chapterPath.append($("<div>", { class: "chap_nav_title", }))
                                 .append($("<ul>", { class: "chap_content" }));
                             chapterPath.find("> .chap_nav_title").click(function () { toggleChap(this) });
                         }
@@ -81,13 +338,14 @@
                         var lessonPath = $('#les_nav_' + lesson.ID);
                         if (lessonPath.length == 0) {
                             lessonPath =
-                                $("<a>", { id: 'les_nav_' + lesson.ID, title: lesson.Title, href: '@Url.Action("Lesson","Curriculum")/' + lesson.ID + '?CourseID=' + '@Course.ID' })
-                                .append($("<li>", { class: 'les_nav', })
-                                    .append($("<i>", { class: "far fa-file-alt mr-1" }))
-                                        .append($("<span>", { text: lesson.Title}))
-                                    );
+                                $("<a>", { id: 'les_nav_' + lesson.ID, title: lesson.Title, href: '@Url.Action("Curriculum","Lesson")/' + lesson.ID + '/' + '@Course.ID' }).append(
+                                    $("<li>", {
+                                        class: 'les_nav',
+                                    }).append($("<i>", { class: "far fa-file-alt mr-1" }))
+                                        .append($("<span>", { text: lesson.Title }))
+                                );
                             if (lesson.ID == currentLesson.ID)
-                                lessonPath.find('li').addClass('current');
+                                lessonPath.find("li").addClass('current');
                         }
                         parentPath.find('> .chap_content').append(lessonPath);
                     })
@@ -109,228 +367,4 @@
         var id = $(obj).parent().attr('id').replace('chap_nav_', '');
         renderMenu(id, false);
     }
-</script>
-
-<style>
-    .top_nav_menu {
-        padding: 5px 10px;
-        border: none;
-        border-radius: 5px;
-        height: 26px;
-        opacity: 0.7;
-        background: #FFF;
-        position: fixed;
-        left: 5px;
-        top: 7px;
-    }
-
-        .top_nav_menu:hover,
-        .top_nav_menu.active {
-            opacity: 1;
-        }
-
-    .right_sidebar {
-        width: 240px;
-        background: #FFF;
-        border: none;
-        /*transition: left 2s;*/
-        border: solid 1px #bac3f5;
-        border-left: none;
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        color: #333;
-        z-index: 1;
-        overflow-x: visible;
-        line-height: 1.7rem;
-    }
-
-    .right_sidebar {
-        left: 0;
-    }
-
-
-    .right-content.expandMenu {
-        left: 240px !important;
-    }
-
-    @@media (max-width : 1200px) {
-        .right_sidebar {
-            width: 200px;
-            font-size: 90%;
-        }
-
-        .right-content.expandMenu {
-            left: 200px !important;
-        }
-    }
-
-    .path_menu .current,
-    .path_menu .current a {
-    }
-
-    .les_nav.current {
-        background: rgb(85,230,191);
-    }
-
-    .path_menu li,
-    .path_menu .chap_nav_title,
-    .path_menu ul {
-        cursor: pointer;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .path_menu a {
-        color: #333;
-    }
-
-    /*.chap_nav_title:hover,
-    .les_nav:hover {
-        text-decoration: underline;
-    }*/
-
-    .right_sidebar > div {
-        height: 100%;
-        /*padding: 10px;*/
-        overflow-y: auto;
-    }
-
-    .chap_content, .p_chap_nav {
-        margin-left: 0px;
-        padding: 5px 0 5px 0;
-        border-top: solid 1px #CCC;
-    }
-
-    .chap_nav_title {
-        margin-left: 0px;
-        padding: 5px 0 5px 5px;
-    }
-
-    .chap_content li {
-        list-style: circle inside;
-        padding: 5px 5px 5px 15px;
-    }
-
-
-    ul > :first-child,
-    ul > a:first-child > li {
-        margin-top: -5px;
-    }
-
-
-    ul > ul {
-        margin-bottom: -5px;
-    }
-
-    .p_chap_nav .chap_nav_title {
-        margin-bottom: 0;
-    }
-
-    .chap_nav_title:hover, li:hover {
-        background: #CCC;
-    }
-        
-       .chap_content a:hover {
-            text-decoration: none;
-        }
-
-    .p_chap_nav > .chap_content {
-        display: none;
-    }
-
-    .p_chap_nav.plus > .chap_content {
-        display: block;
-    }
-
-    .path_menu .toggle_row {
-        text-align: right;
-        /*margin-bottom: 10px;*/
-        /*border-bottom: solid 1px #999;*/
-        padding: 7px;
-        color: #000;
-        height: 40px;
-        background: #999;
-    }
-
-    .path_menu .content-holder {
-        position: absolute;
-        top: 40px;
-        left: 0;
-        right: 0px;
-        bottom: 0px;
-        overflow-y: auto;
-    }
-
-    .path_menu .collapse_menu {
-        cursor: pointer;
-    }
-    .embed-frame{
-        width:100%;
-        min-height: 800px;
-    }
-     @@media (max-width : 1200px) {
-           .embed-frame{
-            width:100%;
-            max-height: 600px;
-        }
-    }
-</style>
-
-<nav class="right_sidebar expand">
-    <div class="path_menu">
-        <div class="toggle_row">
-        </div>
-        <div class="content-holder">
-            <ul class="chap_content"></ul>
-        </div>
-    </div>
-  </nav>
-<!-- End of Sidebar -->
-<script>
-    var root_nav = $('.path_menu .content-holder');
-
-    $('.collapse_menu').click(function () {
-        hideMenu();
-    })
-
-    $(document).ready(function () {
-        //$('.right-content').click(function () {
-        //    hideMenu();
-        //})
-
-        $('.right-content').addClass('expandMenu');
-
-        //var timeout = setTimeout(function () { hideMenu() }, 1500);
-    })
-
-    function hideMenu() {
-        $('.top_nav_menu.active').click();
-    }
-
-    var toggleMenu = function (trigger, menu) {
-        $('.top_nav_menu').removeClass('active');
-        if ($('.right_sidebar').hasClass("expand")) {
-            if ($(menu).is(":visible")) {
-                $('.right_sidebar').removeClass("expand");
-                $('.right-content').removeClass('expandMenu');
-            }
-            else {
-                $(trigger).addClass('active')
-                $('.right_sidebar > div').hide();
-                $(menu).show()
-            }
-        }
-        else {
-            $(trigger).addClass('active')
-            $('.right_sidebar > div').hide();
-            $(menu).show()
-            $('.right_sidebar').addClass("expand");
-            $('.right-content').addClass('expandMenu');
-        }
-    }
-
-
 </script>

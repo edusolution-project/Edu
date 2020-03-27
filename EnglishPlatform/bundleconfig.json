@@ -58,11 +58,12 @@
       "wwwroot/vendor/jquery/jquery.min.js",
       "wwwroot/js/jquery-ui.min.js",
       "wwwroot/js/custom.js",
+      "wwwroot/js/popper.min.js",
+      "wwwroot/vendor/bootstrap/js/bootstrap.js",
       "wwwroot/js/plugins/jquery.lazy.min.js",
       "wwwroot/js/plugins/jquery.lazy.plugins.min.js",
       "wwwroot/js/jquery.scrollbar.min.js",
       "wwwroot/js/moment.min.js",
-      "wwwroot/js/popper.min.js",
       "wwwroot/vendor/jquery-easing/jquery.easing.js"
     ],
     "minify": {

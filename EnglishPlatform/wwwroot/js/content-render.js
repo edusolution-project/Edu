@@ -294,15 +294,15 @@ var Lesson = (function () {
                 //var close = $("<button>", { "class": "btn btn-primary btn-close", "text": "X", "onclick": "render.resetLesson()" });
                 //var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Remove" });
 
-                var iconSort = $("<i>", { "class": "fas fa-sort" });
-                var iconEdit = $("<i>", { "class": "fas fa-edit" });
-                var iconCreate = $("<i>", { "class": "fas fa-plus-square" });
-                var iconTrash = $("<i>", { "class": "fas fa-trash" });
+                var iconSort = $("<i>", { "class": "fas fa-sort mt-2 mb-2 mr-2" });
+                var iconEdit = $("<i>", { "class": "fas fa-edit mt-2 mb-2 mr-2" });
+                var iconCreate = $("<i>", { "class": "fas fa-plus-square mt-2 mb-2 mr-2" });
+                var iconTrash = $("<i>", { "class": "fas fa-trash mr-2" });
                 lessonButton.append(iconSort);
 
 
                 lessonButton.append(sort);
-                sort.prepend(iconSort);
+                sort.prepend(iconSort).append("Sắp xếp");
 
 
                 if (!(_totalPart > 0)) {
@@ -310,9 +310,9 @@ var Lesson = (function () {
                 }
 
                 lessonButton.append(edit);
-                edit.prepend(iconEdit);
+                edit.prepend(iconEdit).append("Sửa");
                 lessonButton.append(create);
-                create.prepend(iconCreate);
+                create.prepend(iconCreate).append("Thêm nội dung");
                 //lessonButton.append(remove); //removeLesson
                 //remove.append(iconTrash);
                 //headerRow.append(lessonButton);
