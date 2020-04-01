@@ -13,6 +13,7 @@
 
     .menu-bar {
         overflow: visible;
+        /*display: none;*/
     }
 
         .menu-bar li a {
@@ -256,115 +257,9 @@
 <aside class="d-flex justify-content-start bg-white" id="sidebar">
     <div class="menu-bar w-100">
         <ul class="d-flex p-0 m-0 h-100">
-            <li for="home" class="top-menu">
-                <a href="@Url.Action("Index", "Home")" title="Trang chủ"><i class="ic fas fa-home"></i>Trang chủ</a>
-            </li>
-            <li for="path_menu" class="top-menu">
-                <a title="Mục lục"><i class="ic fas fa-list-ol"></i>Mục lục</a>
-                <div class="sub-menu">
-                    <div class="content-holder">
-                        <ul class="chap_content"></ul>
-                    </div>
-                </div>
-            </li>
             <li for="lesson-info" class="top-menu flex-grow-1 d-flex justify-content-end">
             </li>
             <div id="QuizNav" style="z-index:-1"></div>
         </ul>
     </div>
 </aside>
-<!-- End of Sidebar -->
-<script>
-    var root_nav = $('li[for=path_menu] .content-holder');
-
-    $(document).ready(function () {
-        renderMenu(currentLesson.ChapterID, true);
-    });
-
-    var dataUrl = '@Url.Action("GetContents","Curriculum")';
-
-    var renderMenu = function (parentID, init) {
-
-        //console.log(root_nav);
-
-        var parentPath = root_nav;
-
-        if (parentID != null && parentID.length > 1) {
-            parentPath = $('#chap_nav_' + parentID);
-            if (parentPath.length == 0) {
-                parentPath = $("<ul>", {id: 'chap_nav_' + parentID, class: 'p_chap_nav'});
-                parentPath
-                    .append($("<div>", { class: "chap_nav_title", text: "" }))
-                    .append($("<ul>", { class: "chap_content" }));
-                parentPath.find("> .chap_nav_title").click(function () {toggleChap(this)})
-                root_nav.append(parentPath);
-            }
-            if (init) {
-                parentPath.addClass('plus');
-                parentPath.find(" > .chap_nav_title").addClass('current')
-            }
-
-        }
-
-        //console.log(parentPath);
-
-        $.ajax({
-            type: "POST",
-            url: dataUrl,
-            data: { ID: '@Course.ID', Parent: parentID },
-            success: function (data) {
-                var rootID = data.RootID;
-                var chapters = data.Data;
-                var lessons = data.Lesson;
-                if (chapters != null && chapters.length > 0) {
-                    $.each(chapters, function (i, chapter) {
-                        var chapterPath = $('#chap_nav_' + chapter.ID);
-                        if (chapterPath.length == 0) {
-                            chapterPath = $("<ul>", {
-                                id: 'chap_nav_' + chapter.ID,
-                                class: 'p_chap_nav',
-                                href: '#'
-                            });
-                            chapterPath.append($("<div>", { class: "chap_nav_title", }))
-                                .append($("<ul>", { class: "chap_content" }));
-                            chapterPath.find("> .chap_nav_title").click(function () { toggleChap(this) });
-                        }
-                        chapterPath.find('> .chap_nav_title').text(chapter.Name).attr('title',chapter.Name).prepend($("<i>", { class: "far fa-folder mr-1" }));;
-                        parentPath.find('> .chap_content').append(chapterPath);
-                    })
-                }
-                if (lessons != null && lessons.length > 0) {
-                    $.each(lessons, function (i, lesson) {
-                        var lessonPath = $('#les_nav_' + lesson.ID);
-                        if (lessonPath.length == 0) {
-                            lessonPath =
-                                $("<a>", { id: 'les_nav_' + lesson.ID, title: lesson.Title, href: '@Url.Action("Curriculum","Lesson")/' + lesson.ID + '/' + '@Course.ID' }).append(
-                                    $("<li>", {
-                                        class: 'les_nav',
-                                    }).append($("<i>", { class: "far fa-file-alt mr-1" }))
-                                        .append($("<span>", { text: lesson.Title }))
-                                );
-                            if (lesson.ID == currentLesson.ID)
-                                lessonPath.find("li").addClass('current');
-                        }
-                        parentPath.find('> .chap_content').append(lessonPath);
-                    })
-                }
-                parentPath.attr('loaded', 1);
-                if(parentID != null && parentID.length > 1)
-                    renderMenu(rootID, init);
-            },
-        });
-    }
-
-    var currentLesson = @Html.Raw(Json.Serialize(Data))
-
-    var toggleChap = function (obj) {
-        $(obj).parent().toggleClass('plus');
-        var loaded = $(obj).parent().attr('loaded');
-        if (loaded == 1)
-            return false;
-        var id = $(obj).parent().attr('id').replace('chap_nav_', '');
-        renderMenu(id, false);
-    }
-</script>

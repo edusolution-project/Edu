@@ -312,7 +312,7 @@
             $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "Course")',
-            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, SubjectID: SubjectID, GradeID: GradeID},
+            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, SubjectID: SubjectID, GradeID: GradeID, PageSize: 500},
             dataType:"json",
             success: function (data) {
                 hideModal();

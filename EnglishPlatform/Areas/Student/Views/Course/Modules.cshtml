@@ -80,7 +80,7 @@
         <li class="col-md-12">
             <div class="inner">
                 <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}<i class="ic ic-collapse"></i></a>
-                <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.ParentID}`" :title="`my-accordion-${data.ParentID}`" role="tabpanel">
+                <b-collapse visible :id="`prc-${data.ID}-${pos}`" @*:accordion="`my-accordion-${data.ParentID}`"*@ :title="`my-accordion-${data.ParentID}`" role="tabpanel">
                     <b-card-body>
                         <ul class="list">
                             <chap-content v-for="(item,k) in subchaps"
@@ -97,8 +97,8 @@
     </script>
 
     <script type="text/x-template" id="lessonItemTemp">
-        <li class="sub-practice">
-            <span class="c c1"> <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'"><i class="ic far fa-file-alt mr-2"></i>{{lesson.Title}}</a></span>
+        <li class="sub-practice" :id="lesson.ID">
+            <span class="c c1"> <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-on:click.prevent="GoLesson(lesson.ID)"><i class="ic far fa-file-alt mr-2"></i>{{lesson.Title}}</a></span>
             @*Exam*@
             <template v-if="lesson.TemplateType === 2">
                 <template v-if="isViewed(lesson.LastJoin)">
@@ -183,6 +183,23 @@
             window.isViewed = this.isViewed
             window.formatTime = this.formatTime
             window.isValid = this.isValid
+            window.GoLesson = this.goLesson
+            var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    var needscroll = true;
+                    var lessonID = hash;
+                    var r = setInterval(function () {
+                        if (needscroll) {
+                            var container = $("#" + lessonID);
+                            if (container.length > 0) {
+                                container.scrollTop = 0;
+                                needscroll = false;
+                            }
+                            //alert(1);
+                        }
+                    }, 200);
+                }
 		},
         data: {
             list_data: [],
@@ -202,12 +219,13 @@
                 axios.post(_url, _form)
                     .then(response => {
                         //console.log(response.data.Data)
-                        _that.list_data = response.data.Data
+                        _that.list_data = response.data.Data;
+                        var data = response.data.Data;
+                        data.forEach(function (item) { getSubList(item.ID)});
                         if (window.location.hash != "")
                         {
 
                         }
-
                         //console.log(_that.active_course);
                     }).catch(e => { })
             },
@@ -239,6 +257,7 @@
                             {
                                 chapters.forEach(function(chapter)
                                 {
+                                    getSubList(chapter.ID);
                                     _that.list_data.push(chapter);
                                 })
                             }
@@ -281,6 +300,12 @@
                         html: 'Bài học đã hết hạn lúc ' + this.formatTime(item.EndDate),
                         icon: 'warning'
                     });
+            },
+            goLesson(ID) {
+                var state = {};
+                var url = '@Url.Action("Detail", "Lesson")/' + ID + '/@currentCs.ID'
+                history.replaceState(state, document.title, '#' + ID);
+                document.location.href = url;
             }
         }
     });

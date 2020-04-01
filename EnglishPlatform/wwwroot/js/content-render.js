@@ -266,7 +266,7 @@ var Lesson = (function () {
         //header
         switch (config.mod) {
             case mod.PREVIEW:
-                var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
+                var headerRow = $("<div>", { "class": "justify-content-between d-none" });
                 lessonHeader.show().append(headerRow);
 
                 var title_wrapper = $("<div>", { "class": "lesson-header-title" });
@@ -317,7 +317,7 @@ var Lesson = (function () {
                 //remove.append(iconTrash);
                 //headerRow.append(lessonButton);
 
-                lesson_action_holder.prepend(lessonButton);
+                lesson_action_holder.empty().prepend(lessonButton);
 
                 break;
             case mod.TEACHERVIEW:
@@ -650,7 +650,7 @@ var Lesson = (function () {
 
                 var complete_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "CompleteExam()" }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");;
                 var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
-                    .append('<i class="far fa-clock mr-2"></i>')
+                    .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
                     .append($("<span>", { class: "time-counter "}));
 
 
@@ -763,7 +763,7 @@ var Lesson = (function () {
         switch (config.mod) {
             case mod.PREVIEW:
             case mod.TEACHEREDIT:
-                boxHeader.append($("<h5>", { "class": "title col-md-10", "text": (data.Title == null ? "" : data.Title) + time + point }));
+                boxHeader.append($("<h5>", { "class": "title col-md-10 font-weight-bold", "text": (data.Title == null ? "" : data.Title) + time + point }));
 
                 var iconEdit = $("<i>", { "class": "fas fa-edit" });
                 var iconTrash = $("<i>", { "class": "fas fa-trash" });

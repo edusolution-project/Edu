@@ -1,39 +1,39 @@
 ﻿@{
-    Layout = "~/Views/Shared/_LayoutTeacher_frame.cshtml";
-    var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
+    Layout = "~/Views/Shared/_LayoutTeacher_noChat.cshtml";
+    var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseLessonEntity;
     var Course = ViewBag.Course as BaseCustomerEntity.Database.CourseEntity;
     ViewData["Title"] = Data.Title;
 }
 
-<script>
-    activeTab = "curriculum";
-</script>
 
-<div class="left-col p-0 h-100">
-    <div class="main-container" style="top:0; bottom: 0">
+<div class="left-col">
+    <div class="page-title">
+        <h1><a href="@Url.Action("Modules","Curriculum")/@Course.ID">@Course.Name</a> / @Data.Title</h1>
+    </div>
+    <div class="main-container">
         <div id="lessonContainer" class="h-100">
-
         </div>
         <input type="hidden" id="action" value="" />
     </div>
-    <input type="hidden" id="LessonType" value="@Data.TemplateType" />
     <input type="hidden" id="LessonID" value="@Data.ID" />
     <input type="hidden" id="ChapterID" value="@Data.ChapterID" />
     <input type="hidden" id="CourseID" value="@Data.CourseID" />
-
-    <style>
-    </style>
-
 </div>
 
+@section Sidebar
+{
+    @await Html.PartialAsync("_sidebarCurriculum_frame")
+}
+
 @section Scripts{
-    <script src="~/js/content-render.js?20191207"></script>
+    @*<script src="~/js/content-render.js?20200315"></script>*@
+    <script src="~/js/detail.fn.min.js?20200329"></script>
     <script>
     var config = {
         container: "lessonContainer",
-        mod: "preview",
+        mod: mod.PREVIEW,
         url: {
-            load: '@Url.Action("GetDetailsLesson", "Lesson")',
+            load: '@Url.Action("GetDetailsLesson", "Curriculum")',
             list_part: '@Url.Action("GetList", "LessonPart")',
             load_part: '@Url.Action("GetDetail", "LessonPart")',
             save_part: '@Url.Action("CreateOrUpdate", "LessonPart")',
@@ -42,12 +42,16 @@
         },
         type: @Data.TemplateType,
         lesson_id: '@Data.ID',
-        class_id: '@Data.ID',
         chap_id: '@Data.ChapterID'
     }
     var widget = new Lesson.onReady(config);
     </script>
     <link href="~/css/detailui.css" rel="stylesheet" />
+    <script>
+        var RefreshPage = function () {
+            document.location = document.location
+        }
+    </script>
 }
 
 @section Modals{
@@ -56,8 +60,8 @@
         <div class="modal-dialog modal-xl lesson-modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Edit Lesson</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="modalTitle">Cập nhật thông tin</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -67,59 +71,59 @@
                         <input type="hidden" name="CourseID" value="@Course.ID" />
                         <input type="hidden" name="ChapterID" value="" />
                         <div class="form-group">
-                            <label class="col-form-label">Lessson Type:</label>
+                            <label class="col-form-label">Loại bài giảng:</label>
                             <select name="TemplateType" class="form-control" onchange="SelectTemplate()">
-                                <option value="1">Lecture</option>
-                                <option value="2">Exam</option>
+                                <option value="1">Bài lý thuyết</option>
+                                <option value="2">Bài kiểm tra</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label">Title:</label>
+                            <label class="col-form-label">Tiêu đề:</label>
                             <input type="text" class="form-control" name="Title" required>
                         </div>
                         <div class="form-group" style="width: 45%;  display:inline-block; margin-right: 5%;" for="examOnly">
-                            <label class="col-form-label">Duration (minutes):</label>
-                            <input type="text" class="form-control" name="Timer" placeholder="0 = unlimited" required>
+                            <label class="col-form-label">Thời lượng (phút):</label>
+                            <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required>
                         </div>
                         <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
-                            <label class="col-form-label">Attempt limit:</label>
-                            <input type="text" class="form-control" name="Limit" placeholder="0 = unlimited" required>
+                            <label class="col-form-label">Giới hạn lượt làm bài:</label>
+                            <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required>
                         </div>
                         <div class="form-group" style="width: 45%; display:inline-block; margin-right: 5%;" for="examOnly">
-                            <label class="col-form-label">Point:</label>
+                            <label class="col-form-label">Điểm:</label>
                             <input type="text" class="form-control" name="Point" placeholder="0" required>
                         </div>
                         <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
-                            <label class="col-form-label">Multiple:</label>
+                            <label class="col-form-label">Hệ số:</label>
                             <input type="text" class="form-control" name="Multiple" placeholder="> 0" required>
                         </div>
                         <div class="form-group" style="width: 45%;  display:inline-block;" for="examOnly">
-                            <label class="col-form-label">Exam Type:</label>
+                            <label class="col-form-label">Loại bài kiểm tra:</label>
                             <select name="Etype" class="form-control" required>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Practice</option>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Weekly Exam</option>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Checkpoint Exam</option>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.EXPERIMENT">Experiment Report</option>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.INTERSHIP">Intership Report</option>
-                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">End-of-course Exam</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Luyện tập</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Kiểm tra hàng tuần</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Kiểm tra Checkpoint</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.EXPERIMENT">Báo cáo thí nghiệm</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.INTERSHIP">Báo cáo thực tập</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">Kiểm tra cuối kỳ</option>
                             </select>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event, '#lessonModal', RefreshPage())">Save</button>
+                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event, '#lessonModal', RefreshPage())">Lưu</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="partModal" data-backdrop="static">
+    <div class="modal fade" role="dialog" aria-hidden="true" id="partModal" data-backdrop="static">
         <div class="modal-dialog modal-xl lesson-modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Add new part</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="modalTitle">Thêm phần mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -127,8 +131,8 @@
                     <form action="#" id="modal-body" name="partForm" enctype="multipart/form-data"></form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Save</button>
+                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Lưu</button>
                 </div>
             </div>
         </div>

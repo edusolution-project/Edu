@@ -5,9 +5,6 @@
     ViewData["Title"] = Data.Title;
 }
 
-<script>
-    activeTab = "curriculum";
-</script>
 <div class="left-col">
     <div class="page-title">
         <h1><a href="@Url.Action("Modules","Curriculum")/@Course.ID">@Course.Name</a> / @Data.Title</h1>
@@ -30,7 +27,7 @@
 
 @section Scripts{
     @*<script src="~/js/content-render.js?20200315"></script>*@
-    <script src="~/js/detail.fn.min.js?20200327"></script>
+    <script src="~/js/detail.fn.min.js?20200329"></script>
     <script>
     var config = {
         container: "lessonContainer",

@@ -822,7 +822,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     return new JsonResult(new Dictionary<string, object>
                             {
-                                { "Data", "Already removed" },
+                                { "Data", null },
                                 {"Error", null }
                             });
                 }
@@ -838,7 +838,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 await RemoveCourseChapter(chapter);
                 return new JsonResult(new Dictionary<string, object>
                             {
-                                { "Data", "Remove OK" },
+                                { "Data", ID },
                                 {"Error", null }
                             });
             }
@@ -1053,6 +1053,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(new Dictionary<string, object>
                     {
                         { "Data", joinItem },
+                        { "Del", JoinLesson },
                         { "Error", null }
                     });
             }
@@ -1079,7 +1080,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     await RemoveSingleLesson(lesson);
                     return new JsonResult(new Dictionary<string, object>
                             {
-                                { "Data", "Remove OK" },
+                                { "Data", ID },
                                 {"Error", null }
                             });
                 }
