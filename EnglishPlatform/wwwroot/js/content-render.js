@@ -90,6 +90,7 @@ var Lesson = (function () {
                 break;
         }
         window.getLocalData = getLocalData
+        window.ShowFullScreen = showFullScreen;
         var hash = window.location.hash;
         if (hash.startsWith('#')) {
             hash = hash.split('#')[1]
@@ -267,7 +268,7 @@ var Lesson = (function () {
         switch (config.mod) {
             case mod.PREVIEW:
                 var headerRow = $("<div>", { "class": "justify-content-between d-none" });
-                lessonHeader.show().append(headerRow);
+                //lessonHeader.show().append(headerRow);
 
                 var title_wrapper = $("<div>", { "class": "lesson-header-title" });
                 var title = $("<h5>");
@@ -289,13 +290,13 @@ var Lesson = (function () {
 
                 var lessonButton = $("<div>", { "class": "lesson-button" });
                 var sort = $("<button>", { "class": "btn btn-primary btn-sort", "title": "Sắp xếp", "onclick": "SortPart()" });
-                var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Sửa", "data-toggle": "modal", "data-target": "#lessonModal", "onclick": "EditLesson('" + data.ID + "')" });
+                //var edit = $("<button>", { "class": "btn btn-primary btn-edit", "title": "Sửa", "data-toggle": "modal", "data-target": "#lessonModal", "onclick": "EditLesson('" + data.ID + "')" });
                 var create = $("<button>", { "class": "btn btn-primary btn-add", "title": "Thêm", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "','" + data.TemplateType + "')" });
                 //var close = $("<button>", { "class": "btn btn-primary btn-close", "text": "X", "onclick": "render.resetLesson()" });
                 //var remove = $("<button>", { "class": "btn btn-danger btn-remove", "title": "Remove" });
 
                 var iconSort = $("<i>", { "class": "fas fa-sort mt-2 mb-2 mr-2" });
-                var iconEdit = $("<i>", { "class": "fas fa-edit mt-2 mb-2 mr-2" });
+                //var iconEdit = $("<i>", { "class": "fas fa-edit mt-2 mb-2 mr-2" });
                 var iconCreate = $("<i>", { "class": "fas fa-plus-square mt-2 mb-2 mr-2" });
                 var iconTrash = $("<i>", { "class": "fas fa-trash mr-2" });
                 lessonButton.append(iconSort);
@@ -309,8 +310,8 @@ var Lesson = (function () {
                     $(sort).prop("disabled", true);
                 }
 
-                lessonButton.append(edit);
-                edit.prepend(iconEdit).append("Sửa");
+                //lessonButton.append(edit);
+                //edit.prepend(iconEdit).append("Sửa");
                 lessonButton.append(create);
                 create.prepend(iconCreate).append("Thêm nội dung");
                 //lessonButton.append(remove); //removeLesson
@@ -321,9 +322,8 @@ var Lesson = (function () {
 
                 break;
             case mod.TEACHERVIEW:
-
                 var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
-                lessonHeader.show().append(headerRow);
+                //lessonHeader.show().append(headerRow);
 
                 var title_wrapper = $("<div>", { "class": "lesson-header-title" });
                 var title = $("<h5>");
@@ -438,6 +438,9 @@ var Lesson = (function () {
                     var item = data.Part[i];
                     renderPreviewPart(item);
                 }
+                if (data.Part != null && data.Part.length == 1) {
+                    $('.fas.fa-caret-down:first').click();
+                }
                 if (_UImode == UIMode.EXAM_ONLY) {
                     $('#rightCol .tab-pane').each(function () {
                         var media = null;
@@ -497,6 +500,9 @@ var Lesson = (function () {
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
                     renderStudentPart(item);
+                }
+                if (data.Part != null && data.Part.length == 1) {
+                    $('.fas.fa-caret-down:first').click();
                 }
                 switch (_UImode) {
                     case UIMode.EXAM_ONLY:
@@ -651,7 +657,7 @@ var Lesson = (function () {
                 var complete_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "CompleteExam()" }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");;
                 var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
                     .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
-                    .append($("<span>", { class: "time-counter "}));
+                    .append($("<span>", { class: "time-counter " }));
 
 
                 nav_bottom.prepend(timer).append(complete_btn);
@@ -713,6 +719,7 @@ var Lesson = (function () {
     }
 
     var renderPreviewPart = function (data) {
+
         var mainContainer = $('#' + config.container);
         var leftCol = mainContainer.find('#leftCol');
         var rightCol = mainContainer.find('#rightCol');
@@ -800,7 +807,7 @@ var Lesson = (function () {
                 break;
             case "IMG":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
                 }
@@ -811,7 +818,7 @@ var Lesson = (function () {
                 break;
             case "AUDIO":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
                 if (data.Description != null)
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
                 renderMediaContent(data, itemBody, "AUDIO");
@@ -821,7 +828,7 @@ var Lesson = (function () {
                 break;
             case "VIDEO":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
                 if (data.Description != null)
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
                 renderMediaContent(data, itemBody, "VIDEO");
@@ -911,6 +918,21 @@ var Lesson = (function () {
                 }
                 break;
         }
+        itembox.find('iframe').each(function (i, item) {
+            //if (!$(item)[0].hasAttribute('allow')) {
+            //    $(item).attr('allow', 'fullscreen');
+            //    $(item).attr('allowfullscreen', 'true');
+            //}
+            $(item).wrap($('<div>', {
+                class: 'fullscreenSupport'
+            }));
+            $(item).parent().append($('<div>').append($('<button>', {
+                class: "btn btn-primary", click: function () {
+                    ShowFullScreen(this)
+                }
+            }).append('<i class="ic fa fa-expand mr-2"></i>').append('Xem toàn màn hình')))
+        });
+
 
         if (listPartContainer.find(".nav-item").length == 1) {
             itemtitle.addClass("active");
@@ -924,6 +946,10 @@ var Lesson = (function () {
         $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
 
         startDragDrop();
+    }
+
+    var showFullScreen = function (obj) {
+        $(obj).parent().siblings('iframe')[0].webkitRequestFullscreen();
     }
 
     var renderPreviewQuestion = function (data, template) {
@@ -1374,25 +1400,37 @@ var Lesson = (function () {
     }
 
     var removePart = function (id) {
-        var check = confirm("Xóa nội dung này?");
-        if (check) {
 
-            $.ajax({
-                type: "POST",
-                url: config.url.del_part,
-                data: {
-                    "ID": id
-                },
-                success: function (data) {
-                    if (data.Error == null) {
-                        document.location = document.location;
+        Swal.fire({
+            title: 'Xóa nội dung này?',
+            text: "Bạn sẽ không thể khôi phục lại sau khi xóa!",
+            icon: 'warning',
+            showCancelButton: true,
+            focusConfirm: false,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#CCC',
+            cancelButtonText: 'Hủy',
+            confirmButtonText: 'Đồng ý xóa!'
+        }).then((result) => {
+            if (result.value) {
+                //ExcuteOnlyItem(ID, '@Url.Action("RemoveChapter", "Curriculum")', DeleteChapterCallback);
+                $.ajax({
+                    type: "POST",
+                    url: config.url.del_part,
+                    data: {
+                        "ID": id
+                    },
+                    success: function (data) {
+                        if (data.Error == null) {
+                            document.location = document.location;
+                        }
+                        else {
+                            alert(data.Error);
+                        }
                     }
-                    else {
-                        alert(data.Error);
-                    }
-                }
-            });
-        }
+                });
+            }
+        })
     }
 
     var changePartPos = function (id, pos) {
@@ -1449,7 +1487,7 @@ var Lesson = (function () {
         answer_template_holder.empty();
 
         contentholder.append($("<label>", { "class": "title", "text": "Tiêu đề:" }));
-        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Tiêu đề", "required": "required" }));
+        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Tiêu đề" }));
         if (data != null && data.Title != null)
             contentholder.find("[name=Title]").val(data.Title);
 
@@ -2281,7 +2319,7 @@ var Lesson = (function () {
                 break;
             case "IMG":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
                 }
@@ -2292,7 +2330,7 @@ var Lesson = (function () {
                 break;
             case "AUDIO":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
                 if (data.Description != null)
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
                 renderMediaContent(data, itemBody, "AUDIO");
@@ -2302,7 +2340,7 @@ var Lesson = (function () {
                 break;
             case "VIDEO":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
                 if (data.Description != null)
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
                 renderMediaContent(data, itemBody, "VIDEO");
@@ -2390,6 +2428,20 @@ var Lesson = (function () {
                 break;
         }
 
+        itembox.find('iframe').each(function (i, item) {
+            //if (!$(item)[0].hasAttribute('allow')) {
+            //    $(item).attr('allow', 'fullscreen');
+            //    $(item).attr('allowfullscreen', 'true');
+            //}
+            $(item).wrap($('<div>', {
+                class: 'fullscreenSupport'
+            }));
+            $(item).parent().append($('<div>').append($('<button>', {
+                class: "btn btn-primary", click: function () {
+                    ShowFullScreen(this)
+                }
+            }).append('<i class="ic fa fa-expand mr-2"></i>').append('Xem toàn màn hình')))
+        });
 
         if (listPartContainer.find(".nav-item").length == 1) {
             itemtitle.addClass("active");
@@ -3124,11 +3176,21 @@ var submitForm = function (event, modalId, callback) {
     }
     var err = false;
     var requires = $(Form).find(':required');
+
+    document.activeElement.blur();
+
     requires.each(function () {
+        var obj = $(this);
         if ($(this).val() == "" || $(this).val() == null) {
-            alert("Please fill your content");
-            $(this).focus();
-            $('.btnSaveForm').show();
+            Swal.fire({
+                title: 'Lưu ý',
+                text: "Vui lòng điền đầy đủ nội dung",
+                icon: 'warning',
+                confirmButtonText: "Đóng"
+            }).then(() => {
+                $('.btnSaveForm').show();
+                $(obj).focus();
+            });
             err = true;
             return false;
         }

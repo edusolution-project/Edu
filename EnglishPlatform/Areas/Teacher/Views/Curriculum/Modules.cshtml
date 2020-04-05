@@ -229,7 +229,7 @@
     </div>
 
     <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonFrameModal">
-        <div class="modal-dialog modal-lg" style="max-width:95%; height: 90%; display: flex">
+        <div class="modal-dialog modal-lg w-100 m-0" style="max-width:100%; display: flex; height: 100%;">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <h5 class="modal-title" id="modalTitle">Cập nhật nội dung</h5>
@@ -269,7 +269,7 @@
     var RenderLesson = function (item) {
         var oldItem = $('#' + item.ID);
 
-        var rowData = $("<div>", { "class": "modules-content-item row item-row", id: item.ID });
+        var rowData = $("<div>", { "class": "modules-content-item row item-row ml-0", id: item.ID });
         var leftPart = $("<div>", { "class": "col-md-10" });
         var rightPart = $("<div>", { "class": "col-md-2 text-right row-action" });
         leftPart.append($("<span>", { "class": "modules-content-item-icon" + (item.TemplateType === 2 ? (" assignment atype" + item.Etype) : "") }));
@@ -330,8 +330,8 @@
             }
         }
         else {
-            if (item.ChapterID == null) {
 
+            if (item.ChapterID == null) {
                 modulesBody.append(rowData);
             }
             else {
@@ -469,17 +469,23 @@
                 chapters = data.Data.Chapters;
                 lessons = data.Data.Lessons;
 
+                var rootContent = $("<div>", { "id": "0", "pid": "0", "class": "modules" });
+                var rootLessons = $("<div>", {"class": "modules-content collapse show" });
+
                 @if(!isLock)
                 {
                     @:var chapContent = $("<div>", { "id": "0", "pid": "0", "class": "modules" });
-                    @:var chapTitle = $("<div>", { "class": "modules-title row item-row" });
+                    @:var rootAction = $("<div>", { "class": "modules-title row item-row" });
                     @:title_cPart = $("<div>", { "class": "col-md-12" });
-                    @:title_cPart.append($("<i>", { "class": "fas fa-plus-square mr-1 mt-1", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm Chương", "onclick": "AddChapter('0'); return false;" }));
+                    @:title_cPart.append($("<i>", { "class": "far fa-folder mr-1 mt-1", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm Chương", "onclick": "AddChapter('0'); return false;" }));
                     @:title_cPart.append($("<span>", { "class": "align-top", "text": "Thêm chương", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm Chương", "onclick": "AddChapter('0'); return false;" }));
-                    @:chapTitle.append(title_cPart);
-                    @:chapContent.append(chapTitle);
-                    @:modulesBody.append(chapContent);
+                    @:title_cPart.append($("<i>", { "class": "far fa-file ml-5 mr-1 mt-1", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm nội dung", "onclick": "AddLesson('0'); return false;" }));
+                    @:title_cPart.append($("<span>", { "class": "align-top", "text": "Thêm nội dung", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm nội dung", "onclick": "AddLesson('0'); return false;" }));
+                    @:rootAction.append(title_cPart);
+                    @:rootContent.append(rootAction);
                 }
+                rootContent.append(rootLessons);
+                modulesBody.append(rootContent);
 
 
                 if (chapters.length > 0) {

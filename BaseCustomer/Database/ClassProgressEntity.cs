@@ -128,13 +128,13 @@ namespace BaseCustomerEntity.Database
             return totalLessons;
         }
 
-        public async Task DecreaseCompleted(string ClassID, long decrease)
-        {
-            var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
-                     //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
-                     .Inc(t => t.Completed, 0 - decrease);
-            await Collection.UpdateManyAsync(t => t.ClassID == ClassID, update);
-        }
+        //public async Task DecreaseCompleted(string ClassID, long decrease)
+        //{
+        //    var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
+        //             //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
+        //             .Inc(t => t.Completed, 0 - decrease);
+        //    await Collection.UpdateManyAsync(t => t.ClassID == ClassID, update);
+        //}
 
 
         public ClassProgressEntity GetItemByClassID(string ClassID, string StudentID)
@@ -157,7 +157,7 @@ namespace BaseCustomerEntity.Database
                      .Inc(t => t.ExamDone, 0 - clssbj.ExamDone)
                      .Inc(t => t.TotalPoint, 0 - clssbj.TotalPoint)
                      .Inc(t => t.TotalLessons, 0 - clssbj.TotalLessons);
-            await Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID, update);
+            await Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID && t.StudentID == clssbj.StudentID, update);
         }
     }
 }

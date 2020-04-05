@@ -20,6 +20,14 @@
     ]
   },
   {
+    "outputFileName": "wwwroot/css/chat.min.css",
+    "inputFiles": [
+      "wwwroot/css/materialdesignicons.min.css",
+      "wwwroot/css/NewChat/app.css",
+      "wwwroot/css/NewChat/default.css"
+    ]
+  },
+  {
     "outputFileName": "wwwroot/js/common.min.js",
     "inputFiles": [
       "wwwroot/js/vue@2.6.0.js",

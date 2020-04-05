@@ -634,15 +634,19 @@ button, input, a {
 .ic-online-class {
     background-image: url(../images/online-class.png);
     width: 32px;
-    height: 32px;
     margin: 2px 0 0 2px;
+}
+
+.ic-online-class, .ic-clear-schedule {
+    height: 32px;
     opacity: 0.2;
-    cursor: pointer;
 }
 
     .ic-online-class.active,
-    .ic-online-class:hover {
+    .ic-online-class:hover,
+    .ic-clear-schedule:hover {
         opacity: 1;
+        cursor: pointer;
     }
 
 .ic-collapse {
@@ -759,9 +763,9 @@ button, input, a {
 }
 
 .card-header .title {
-    font-size: 24px;
+    font-size: 16px;
     color: #000;
-    font-weight: 400;
+    font-weight: 700;
     width: 100%
 }
 

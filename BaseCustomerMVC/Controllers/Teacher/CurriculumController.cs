@@ -62,6 +62,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ChapterProgressService _chapterProgressService;
         private readonly LessonProgressService _lessonProgressService;
         private readonly ExamService _examService;
+        private readonly ExamDetailService _examDetailService;
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
         private readonly LessonScheduleService _lessonScheduleService;
@@ -98,8 +99,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 , IHostingEnvironment evn
                 , FileProcess fileProcess
 
-
-
             //use for fixing data
             , CloneLessonPartService cloneLessonPartService
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
@@ -112,6 +111,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , ExamService examService
             , ClassService classService
             , LessonScheduleService lessonScheduleService
+            , ExamDetailService examDetailService
                  )
         {
             _service = service;
@@ -157,6 +157,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classSubjectProgressService = classSubjectProgressService;
             _lessonProgressService = lessonProgressService;
             _examService = examService;
+            _examDetailService = examDetailService;
             _lessonScheduleService = lessonScheduleService;
         }
 
@@ -1933,6 +1934,36 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 await FixChapterCounter(subject.ID, "0");
 
+            }
+            return new JsonResult("Update done");
+        }
+
+        public async Task<JsonResult> FixProgress()
+        {
+            Console.WriteLine("start");
+            var classes = _classService.GetAll().ToList();
+            //_ = _examService.RemoveAllAsync();
+            //_ = _examDetailService.RemoveAllAsync();
+
+            foreach (var @class in classes)
+            {
+                var progresses = _classProgressService.CreateQuery().Find(t => t.ClassID == @class.ID).ToList();
+                foreach (var progress in progresses)
+                {
+                    progress.Completed = (int)await _lessonProgressService.CreateQuery().CountDocumentsAsync(t => t.ClassID == @class.ID && t.StudentID == progress.StudentID);
+                    _classProgressService.Save(progress);
+                }
+
+                var sbjs = _classSubjectService.GetByClassID(@class.ID);
+                foreach (var sbj in sbjs)
+                {
+                    var sbjprgs = _classSubjectProgressService.CreateQuery().Find(t => t.ClassSubjectID == sbj.ID).ToList();
+                    foreach (var sbjprg in sbjprgs)
+                    {
+                        sbjprg.Completed = (int)await _lessonProgressService.CreateQuery().CountDocumentsAsync(t => t.ClassSubjectID == sbj.ID && t.StudentID == sbjprg.StudentID);
+                        _classSubjectProgressService.Save(sbjprg);
+                    }
+                }
             }
             return new JsonResult("Update done");
         }

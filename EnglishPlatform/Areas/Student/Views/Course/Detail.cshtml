@@ -13,8 +13,8 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header" v-cloak>
-        <div class="flex padding-b25">
-            <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
+        <div class="flex pb-2">
+            <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}</h2>
             <div class="c-right">
                 <ul class="time-line flex">
                     <li><i class="ti-time"></i>Bắt đầu: {{formatShortDate(startDate)}} </li>

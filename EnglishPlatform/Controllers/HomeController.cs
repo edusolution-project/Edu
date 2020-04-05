@@ -345,7 +345,7 @@ namespace EnglishPlatform.Controllers
                     return Json(new ReturnJsonModel
                     {
                         StatusCode = ReturnStatus.SUCCESS,
-                        StatusDesc = "Account created successfully, login now to begin your first test!",
+                        StatusDesc = "Tài khoản đã được tạo, mời bạn đăng nhập để trải nghiệm ngay!",
                         Location = "/Login"
                     });
                 }
@@ -561,13 +561,13 @@ namespace EnglishPlatform.Controllers
             int count = 0;
             var teachers = _teacherService.GetAll().ToList();
             var _studentMapping = new MappingEntity<StudentEntity, StudentEntity>();
-            foreach(var teacher in teachers)
+            foreach (var teacher in teachers)
             {
                 var students = _studentService.Collection.Find(t => t.Email == teacher.Email).ToList();
-                if(students.Count > 0) //has student account
+                if (students.Count > 0) //has student account
                 {
                     var validStud = students.Find(t => t.ID == teacher.ID);
-                    if(validStud != null)
+                    if (validStud != null)
                     {
 
                     }
@@ -579,14 +579,14 @@ namespace EnglishPlatform.Controllers
                         _studentService.Collection.InsertOne(validStud);
                     }
 
-                    foreach(var student in students)
+                    foreach (var student in students)
                     {
                         if (student.ID == validStud.ID)
                             continue;
                         var classstudents = _classStudentService.GetStudentClasses(student.ID);
-                        if(classstudents != null && classstudents.Count > 0)
+                        if (classstudents != null && classstudents.Count > 0)
                         {
-                            foreach(var cs in classstudents)
+                            foreach (var cs in classstudents)
                             {
                                 _classStudentService.RemoveClassStudent(cs, student.ID);
                                 _classStudentService.Collection.InsertOne(new ClassStudentEntity { ClassID = cs, StudentID = validStud.ID });

@@ -25,7 +25,7 @@
 
     <div class="card-header" v-cloak>
         <div class="flex mb-2">
-            <h2 class="title"><a href="@Url.Action("Detail", "Class")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
+            <h2 class="title"><a href="@Url.Action("Detail", "Class")" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}</h2>
             @*<div class="search-box mr-2" v-if="tab[2]">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
@@ -85,7 +85,7 @@
                             <ul class="list">
                                 <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
                                               v-bind:data="item"
-											  v-bind:classbj="obj.ID"
+                                              v-bind:classbj="obj.ID"
                                               v-bind:pos="k"
                                               v-bind:owner="obj.TeacherID"
                                               v-bind:subchaps="list_chapters"></chap-content>
@@ -214,7 +214,7 @@
             }
     </style>
 
-     <script type="text/x-template" id="chapContentTemp">
+    <script type="text/x-template" id="chapContentTemp">
         <li class="col-md-12 pr-0">
             <div class="inner pt-3 pb-0">
                 <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse mb-3" v-on:click="loadContent(data.ClassSubject, data.ID)"><i class="ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></a>
@@ -239,9 +239,10 @@
         <li class="sub-practice pt-1 pb-1">
             <div class="d-flex w-100 justify-content-end align-items-start">
                 <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-fill overflow-hidden" style="text-overflow: ellipsis" :title="data.Title"> <span><i class="ic far fa-file-alt mr-2"></i>{{data.Title}}</span></a>
-                <div class="picker-schedule d-flex" v-if="owner == '@currentuser'">
+                <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
+                    <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" v-bind:class="{active: data.IsOnline == true}" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
                     <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" v-on:click="toggleOnlineClass(data)"></i>
                 </div>
                 <div class="d-flex picker-schedule" v-else>
@@ -351,6 +352,7 @@
                 this.loadClassDetail()
                 window.loadContent = this.loadContent
                 window.updateSchedule = this.updateSchedule
+                window.clearSchedule = this.clearSchedule
                 window.toggleLessonState = this.toggleLessonState
                 window.toggleOnlineClass = this.toggleOnlineClass
                 window.filterChap = this.filterChap
@@ -651,6 +653,20 @@
                             obj.IsUpdating = false
                         }).catch(e => { })
                 },
+                clearSchedule(obj) {
+                    obj.IsUpdating = true
+                    obj.StartDate = ''
+                    obj.EndDate = ''
+
+                    let _form = new FormData()
+                    _form.append('ID', obj.ScheduleID)
+                    let _url = '@Url.Action("Update", "LessonSchedule")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            obj.IsUpdating = false
+                        }).catch(e => { })
+                },
+
                 matchedChap(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key
                 },
