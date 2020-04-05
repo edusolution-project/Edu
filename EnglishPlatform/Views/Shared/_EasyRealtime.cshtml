@@ -425,13 +425,31 @@
     .chatstyle-01{
         margin-top:60px;
     }
+    .list-member{
+        display:none;
+    }
+    .list-member.list-member--open>.item-member {
+        border-bottom: 1px solid #ccc;
+        padding-left:30px;
+    }
+    .list-member.list-member--open>.item-member.active{
+        color:coral;
+    }
+    .list-member.list-member--open {
+        display: block;
+        background: #fff;
+        z-index: 9;
+        width: 100%;
+        box-shadow: 0 0 10px #ccc;
+        padding: 10px;
+    }
 </style>
 <div class="box-chat-eduso">
     <div class="fn-box-chat-eduso" style="height:50px;color: #fff;text-align: center;padding-top: 15px;" onclick="javascript: this.parentElement.classList.toggle('open'); this.scrollIntoView(true);">
         Chat
     </div>
-    <div class="box-chat-eduso--container-app" style="position:relative;width:100%;height:100%">
-        <div id="easy-real-time-app" style="    position: absolute;
+    <div class="box-chat-eduso--container-app" style="position: relative; width: 100%; height: 100%">
+        <div id="easy-real-time-app" style="        position: absolute;
         top: 0;
         left: 0;
         right: 0;
@@ -459,12 +477,6 @@
                             <div class="form-group">
                                 <input type="text" name="search-text" value="" class="form-control" placeholder="Group Name / user name" />
                             </div>
-                        </div>
-                        <div id="tab-chat-btn" class="show-tab-chat float-left w-100 text-center" style="display: none ">
-                            <ul class="ul-slider-bar-left w-50" style="margin:auto">
-                                <li class="active text-center" data-type="Group" onclick="onActiveThis(this)"><a href="javascript:void 0;">Group</a><span></span></li>
-                                <li class="text-center" data-type="User" onclick="onActiveThis(this)"><a href="javascript:void 0;">User</a><span></span></li>
-                            </ul>
                         </div>
                         <div class="w-100 padding-10" style="max-height: 75%; overflow: auto; ">
                             <div id="tab-group" data-type="new-feed">
@@ -571,36 +583,14 @@
         var active = itemRoot.querySelector(".active");
         if (active != null) active.classList.remove("active");
         self.classList.add("active");
-        if (self.dataset.type == "Chat" || self.dataset.type == "Group" || self.dataset.type=="User") {
-            document.getElementById("tab-chat-btn").style.display = 'block';
-            if (self.dataset.type == "Chat") {
-                if (document.querySelector("ul>li[data-type='User']").classList.contains("active")) {
-                    document.getElementById("tab-user").style.display = 'block';
-                    document.getElementById("tab-group").style.display = 'none';
-                }
-                else {
-                    document.getElementById("tab-user").style.display = 'none';
-                    document.getElementById("tab-group").style.display = 'block';
-                }
-            }
-            if (self.dataset.type == "User") {
-                document.getElementById("tab-user").style.display = 'block';
-                document.getElementById("tab-group").style.display = 'none';
-            }
-            if (self.dataset.type == "Group") {
-                document.getElementById("tab-user").style.display = 'none';
-                document.getElementById("tab-group").style.display = 'block';
-            }
+        if (self.dataset.type == "Chat") {
             form.querySelector('input[name="Title"]').style.display = 'none';
             form.querySelector('hr').style.display = 'none';
             form.querySelector("div#preview-files-easy-realtime-app").style.display='none';
-            
         } else {
+            getRootElement().querySelector('.list-member--open') != null ? getRootElement().querySelector('.list-member--open').classList.remove('list-member--open'):"";
             form.querySelector('input[name="Title"]').style.display = 'block';
             form.querySelector('hr').style.display = 'block';
-            document.getElementById("tab-chat-btn").style.display = 'none';
-            document.getElementById("tab-user").style.display = 'none';
-            document.getElementById("tab-group").style.display = 'block';
             form.querySelector("div#preview-files-easy-realtime-app").style.display='block';
         }
         var rootEl = getRootElement();
@@ -973,7 +963,7 @@
                 switch (dataJson.code) {
                     case 200:
                         localStorage.setItem("time", new Date());
-                        saveDataFromLocalStored(dataJson.data);
+                        //saveDataFromLocalStored(dataJson.data);
                         renderDataEasyRealTime(dataJson.data);
                         break;
                     default:
@@ -989,7 +979,7 @@
         var group = data.group;
         var student = data.student;
         var teacher = data.teacher;
-        renderDataGroup(group);
+        renderDataGroup(data);
         renderDataStudent(student);
         renderDataTeacher(teacher);
     }
@@ -999,7 +989,7 @@
         for (var i = 0; data != null && i < data.length; i++) {
             var item = data[i];
             if (tabGroup != null) {
-                tabGroup.innerHTML += renderItemGroup(item.name, item.displayName);
+                tabGroup.innerHTML += renderItemGroup(item.id, item.name, item.isActive);
             }
         }
         //update status class
@@ -1025,8 +1015,13 @@
         }
     }
 
-    var renderItemGroup = function (id,name) {
-        return `<div class="Item-group" data-item-id="${id}"><a href="javascript:void 0;" onclick="OpenGroup('${id}','${name}')">${name}</a><span></span><button class="btn btn-sm float-right"> i </button></div>`;
+    var renderItemGroup = function (id,name,active) {
+        return `<div class="Item-group" data-item-id="${id}" data-active="${active}">
+                <a href="javascript:void 0;" onclick="OpenGroup('${id}','${name}')">${name}</a>
+                <span></span>
+                <button class="btn btn-sm float-right" onclick="toggleMemeber('${id}',this)"> i </button>
+                <div class="list-member"></div>
+                </div>`;
     }
     var renderDataStudent = function (data) {
         var rootElemet = getRootElement();
@@ -1182,7 +1177,9 @@
         new MyAjax().proccess("GET", url, null).then(function (data) {
             var dataJson = JSON.parse(data);
             if (dataJson.code == 200) {
-                var messages = dataJson.data.messages;
+                debugger;
+                if (dataJson.data == null) return;
+                var messages = dataJson.data.messages || dataJson.data;
                 if (messages != null && messages.length > 0) {
                     for (var i = 0; i < messages.length; i++) {
                         var message = messages[i];
@@ -1217,7 +1214,6 @@
                     newFeed.innerHTML = "";
                     chat.querySelector('div.chatstyle-01').innerHTML = "";
                 }
-                console.log(messages);
             }
         });
     }
@@ -1551,7 +1547,6 @@
                             }
                             if (getState() == 0) {
                                 var rootElement = getRootElement();
-                                var tab = rootElement.querySelector("div#tab-chat-btn");
 
                                 var rootEl = getRootElement();
                                 var mainApp = rootEl.querySelector("div.content-easy-main-app");
@@ -1562,7 +1557,7 @@
                                 var html = CreateMessage("ca-send", '', message.sender.name, message.content, `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`, message.code, message.medias);
                                 chat.querySelector('div.chatstyle-01').innerHTML += html
 
-                                if (tab.querySelector("ul>li.active").dataset.type == "User") {
+                                if (rootElement.querySelector('.item-member.active') != null) {
                                     connection.invoke("SendToUser", groupName.value, message);
                                 } else {
                                     connection.invoke("SendToGroup", message,  groupName.value);
@@ -1919,5 +1914,79 @@
     var UpdateNotification = function () {
 
     }
+    var g_target = null;
+    var toggleMemeber = function (id, _this) {
+        if (getState() != 0) return;
+        var target = _this.parentElement.querySelector('.list-member');
+        if (target != null) {
+            if (g_target != null && g_target == target) {
+                target.classList.toggle('list-member--open');
+            } else {
+                var open = target.parentElement.parentElement.querySelector('.list-member--open');
+                if (open != null) open.classList.remove('list-member--open');
+                target.classList.add('list-member--open');
+                target.innerHTML = "";
+                g_target = target;
+                new MyAjax().proccess("GET", "@Url.Action("GetMembers","EasyRealTime")?classID=" + id, null).then(function (data) {
+                    var dataJson = JSON.parse(data);
+                    if (dataJson.data != null && dataJson.data.length > 0) {
+                        if (target != null) {
+                            for (var i = 0; i < dataJson.data.length; i++) {
+                                var item = dataJson.data[i];
+                                var el = renderItemMember(id, item.id, item.name, item.isTeacher);
+                                target.innerHTML += el;
+                                var itemEL = target.querySelector("div[data-item-id='" + item.id + "']");
+                                if (itemEL != null) {
+                                    itemEL.setAttribute("data-active-user", true);
+                                    itemEL.setAttribute("data-teacher", item.isTeacher);
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+        }
+    }
 
+    var renderItemMember = function (group, id, name, isTeacher) {
+        var type = isTeacher ? "gv" : "hv";
+        return `<div class="item-member" data-group="${group}" data-item-id="${id}">
+                <a style="display:block" href="javascript:void 0;" onclick="OpenMember('${group}','${id}','${name}')">${name} (${type})</a>
+                <span></span>
+                </div>`;
+    }
+
+    var OpenMember = function (root,groupName,title) {
+        if (getState() == 0) {
+            var rootElement = getRootElement();
+            var formEasy = getFormEasyRealTimeApp();
+            var form = getFormRealTimeApp();
+            var _groupName = form.querySelector("input[name='groupName']");
+            _groupName.value = groupName;
+            var Item =  rootElement.querySelector(`div[data-item-id='${root}']`);
+            var ItemActive = rootElement.querySelector("div.item-member.active");
+            if (ItemActive != null) {
+                ItemActive.classList.remove("active");
+            }
+            if (Item != null) {
+                if (!Item.classList.contains("active")) Item.classList.add("active");
+                if (Item.dataset.active == true || Item.dataset.active == "true") {
+                    formEasy.style.display = 'block';
+                } else {
+                    if (Item.dataset.activeUser == true || Item.dataset.activeUser == "true") {
+                         formEasy.style.display = 'block';
+                    } else {
+                        formEasy.style.display = 'none';
+                        swal({ text: "lớp đã hoàn thành , ko thể trao đổi thêm " });
+                    }
+                }
+                var header = rootElement.querySelector(".header-easy-main-app>h4");
+                if (header != null) {
+                    header.innerHTML = title;
+                }
+                var now = new Date();
+                loadMessage(groupName, now);
+            }
+        }
+    }
 </script>

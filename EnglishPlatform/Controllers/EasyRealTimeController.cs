@@ -125,71 +125,9 @@ namespace EnglishPlatform.Controllers
                     var realClass = listClass != null
                         ? _classService.CreateQuery().Find(o => listClass.Contains(o.ID))?.ToList()
                         : _classService.CreateQuery().Find(o => o.TeacherID == _userID)?.ToList();
-                    var listMembers = new HashSet<MemberGroupInfo>();
-                    var listMemberTeacher = new HashSet<MemberGroupInfo>();
-                    if (realClass != null)
-                    {
-                        // danh sach lop
-                        var listClassID = realClass.Select(o => o.ID).ToList();
-                        var liststudentClass = _classStudentService.CreateQuery().Find(o => listClassID.Contains(o.ClassID))?.ToList();
-                        var listStudent = liststudentClass?.Select(o => o.StudentID);
-                        var listTeacher = realClass.Select(o => o.TeacherID).Distinct();
-
-                        if (listStudent != null)
-                        {
-                            listMembers = _studentService.CreateQuery().Find(o => listStudent.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();
-                        }
-                        if (listTeacher != null)
-                        {
-                            listMemberTeacher = _teacherService.CreateQuery().Find(o => listTeacher.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, true))?.ToHashSet();
-                        }
-                        int countClassID = listClassID.Count;
-                        // danh sach nhom bao gom 
-                        var groupList = _groupService.CreateQuery().Find(o => o.IsPrivateChat == false && (listClassID.Contains(o.Name) || listClassID.Contains(o.ParentID)))?.ToList();
-                        // danh sach goc
-                        var listGroupName = groupList != null ? groupList.Where(o => o.ParentID == null || o.ParentID == "" || o.ParentID == "null")?.Select(o => o.Name) : new List<string>();
-                        if (listGroupName == null || listGroupName?.Count() < countClassID)
-                        {
-                            for (int i = 0; i < countClassID; i++)
-                            {
-                                var itemClass = realClass[i];
-                                if (listGroupName == null || !listGroupName.Contains(itemClass.ID))
-                                {
-                                    var listMembersStudentID = _classStudentService.GetClassStudents(itemClass.ID)?.Select(o => o.StudentID)?.ToList();
-                                    var members = _studentService.CreateQuery().Find(o => listStudent.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();
-                                    var teacher = _teacherService.GetItemByID(itemClass.TeacherID);
-                                    if (members == null)
-                                    {
-                                        members = new HashSet<MemberGroupInfo>() {
-                                            new MemberGroupInfo(teacher.ID,teacher.Email, teacher.FullName, true)
-                                        };
-                                    }
-                                    else
-                                    {
-                                        for (int x = 0; x < listMemberTeacher.Count; x++)
-                                        {
-                                            members.Add(new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true));
-                                        }
-
-                                    }
-                                    var newGroup = new GroupEntity()
-                                    {
-                                        IsPrivateChat = false,
-                                        DisplayName = itemClass.Name,
-                                        Name = itemClass.ID,
-                                        Status = true,
-                                        Created = DateTime.Now,
-                                        CreateUser = itemClass.TeacherID,
-                                        MasterGroup = new HashSet<MemberGroupInfo>() { new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true) },
-                                        Members = members
-                                    };
-                                    _groupService.CreateOrUpdate(newGroup);
-                                }
-                            }
-                        }
-                        groupList = _groupService.CreateQuery().Find(o => o.IsPrivateChat == false && listClassID.Contains(o.Name))?.ToList();
-                        return Success(new { Group = groupList, Student = listMembers, Teacher = listMemberTeacher });
-                    }
+                    var data = realClass?.Select(o => new { o.ID, o.Name, isActive = o.StartDate <= DateTime.Now.ToUniversalTime() && o.EndDate >= DateTime.Now.ToUniversalTime() })?.ToList();
+                    _ = UpdateGroup(realClass);
+                    return Success(data);
                 }
 
                 return NotFoundData();
@@ -200,6 +138,76 @@ namespace EnglishPlatform.Controllers
                 return Error(ex);
             }
         }
+
+        private async Task UpdateGroup(List<ClassEntity> realClass)
+        {
+            var listMembers = new HashSet<MemberGroupInfo>();
+            var listMemberTeacher = new HashSet<MemberGroupInfo>();
+            if (realClass != null)
+            {
+                // danh sach lop
+                var listClassID = realClass.Select(o => o.ID).ToList();
+                var liststudentClass = _classStudentService.CreateQuery().Find(o => listClassID.Contains(o.ClassID))?.ToList();
+                var listStudent = liststudentClass?.Select(o => o.StudentID);
+                var listTeacher = realClass.Select(o => o.TeacherID).Distinct();
+
+                if (listStudent != null)
+                {
+                    listMembers = _studentService.CreateQuery().Find(o => listStudent.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();
+                }
+                if (listTeacher != null)
+                {
+                    listMemberTeacher = _teacherService.CreateQuery().Find(o => listTeacher.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, true))?.ToHashSet();
+                }
+                int countClassID = listClassID.Count;
+                // danh sach nhom bao gom 
+                var groupList = _groupService.CreateQuery().Find(o => o.IsPrivateChat == false && (listClassID.Contains(o.Name) || listClassID.Contains(o.ParentID)))?.ToList();
+                // danh sach goc
+                var listGroupName = groupList != null ? groupList.Where(o => o.ParentID == null || o.ParentID == "" || o.ParentID == "null")?.Select(o => o.Name) : new List<string>();
+                if (listGroupName == null || listGroupName?.Count() < countClassID)
+                {
+                    for (int i = 0; i < countClassID; i++)
+                    {
+                        var itemClass = realClass[i];
+                        if (listGroupName == null || !listGroupName.Contains(itemClass.ID))
+                        {
+                            var listMembersStudentID = _classStudentService.GetClassStudents(itemClass.ID)?.Select(o => o.StudentID)?.ToList();
+                            var members = _studentService.CreateQuery().Find(o => listStudent.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();
+                            var teacher = _teacherService.GetItemByID(itemClass.TeacherID);
+                            if (members == null)
+                            {
+                                members = new HashSet<MemberGroupInfo>() {
+                                            new MemberGroupInfo(teacher.ID,teacher.Email, teacher.FullName, true)
+                                        };
+                            }
+                            else
+                            {
+                                for (int x = 0; x < listMemberTeacher.Count; x++)
+                                {
+                                    members.Add(new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true));
+                                }
+
+                            }
+                            var newGroup = new GroupEntity()
+                            {
+                                IsPrivateChat = false,
+                                DisplayName = itemClass.Name,
+                                Name = itemClass.ID,
+                                Status = true,
+                                Created = DateTime.Now,
+                                CreateUser = itemClass.TeacherID,
+                                MasterGroup = new HashSet<MemberGroupInfo>() { new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true) },
+                                Members = members
+                            };
+                            _groupService.CreateOrUpdate(newGroup);
+                        }
+                    }
+                }
+                groupList = _groupService.CreateQuery().Find(o => o.IsPrivateChat == false && listClassID.Contains(o.Name))?.ToList();
+            }
+            await Task.CompletedTask;
+        }
+
         [HttpPut]
         public JsonResult UpdateGroup(GroupEntity group)
         {
@@ -345,6 +353,31 @@ namespace EnglishPlatform.Controllers
 
             return NotFoundData();
         }
+
+
+        public JsonResult GetMembers(string classID)
+        {
+            try
+            {
+                if (IsAuthenticated())
+                {
+                    var student = _classStudentService.GetClassStudents(classID)?.Select(o=> o.StudentID);
+                    var teacherID = _classService.GetItemByID(classID)?.TeacherID;
+                    var listMembers = _studentService.CreateQuery().Find(o => student.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID,x.Email,x.FullName,false))?.ToList();
+                    var teacher = _teacherService.GetItemByID(teacherID);
+                    listMembers.Add(new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true));
+                    return Success(listMembers?.OrderByDescending(o=>o.IsTeacher));
+                }
+
+                return NotFoundData();
+            }
+            catch (Exception ex)
+            {
+                _ = _groupService.RemoveAllAsync();
+                return Error(ex);
+            }
+        }
+
         #endregion
         #region Message
         [HttpGet]
@@ -378,7 +411,7 @@ namespace EnglishPlatform.Controllers
                 if (group != null) {
 
                     var message = state == 0 ? _messageService.GetMessageList(group.Name, startDate, endDate) : _messageService.GetNewFeedList(group.Name, startDate, endDate);
-                    return Success(new { messages= message});
+                    return Success(message);
                 }
             }
 
