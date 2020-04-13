@@ -66,6 +66,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
         private readonly LessonScheduleService _lessonScheduleService;
+        private readonly StudentService _studentService;
 
         private readonly MappingEntity<ChapterEntity, CourseChapterEntity> _chapterMappingRev = new MappingEntity<ChapterEntity, CourseChapterEntity>();
         private readonly MappingEntity<CourseChapterEntity, ChapterEntity> _chapterMapping = new MappingEntity<CourseChapterEntity, ChapterEntity>();
@@ -112,6 +113,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , ClassService classService
             , LessonScheduleService lessonScheduleService
             , ExamDetailService examDetailService
+            , StudentService studentService
                  )
         {
             _service = service;
@@ -159,6 +161,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _examService = examService;
             _examDetailService = examDetailService;
             _lessonScheduleService = lessonScheduleService;
+            _studentService = studentService;
         }
 
         public IActionResult Index(DefaultModel model, int old = 0)
@@ -1945,26 +1948,88 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //_ = _examService.RemoveAllAsync();
             //_ = _examDetailService.RemoveAllAsync();
 
+
+
             foreach (var @class in classes)
             {
-                var progresses = _classProgressService.CreateQuery().Find(t => t.ClassID == @class.ID).ToList();
-                foreach (var progress in progresses)
-                {
-                    progress.Completed = (int)await _lessonProgressService.CreateQuery().CountDocumentsAsync(t => t.ClassID == @class.ID && t.StudentID == progress.StudentID);
-                    _classProgressService.Save(progress);
-                }
-
                 var sbjs = _classSubjectService.GetByClassID(@class.ID);
+                var classLessons = _newlessonService.CountClassLesson(@class.ID);
+
                 foreach (var sbj in sbjs)
                 {
                     var sbjprgs = _classSubjectProgressService.CreateQuery().Find(t => t.ClassSubjectID == sbj.ID).ToList();
+                    var totalLessons = _newlessonService.CountClassSubjectLesson(sbj.ID);
+
                     foreach (var sbjprg in sbjprgs)
                     {
+                        var student = _studentService.GetItemByID(sbjprg.StudentID);
+                        if (student.JoinedClasses == null || !student.JoinedClasses.Contains(sbjprg.ClassID))
+                        {
+                            _classProgressService.Remove(sbjprg.ID);
+                            continue;
+                        }
+
+                        sbjprg.TotalLessons = totalLessons;
                         sbjprg.Completed = (int)await _lessonProgressService.CreateQuery().CountDocumentsAsync(t => t.ClassSubjectID == sbj.ID && t.StudentID == sbjprg.StudentID);
                         _classSubjectProgressService.Save(sbjprg);
                     }
                 }
+
+
+                var progresses = _classProgressService.CreateQuery().Find(t => t.ClassID == @class.ID).ToList();
+                foreach (var progress in progresses)
+                {
+
+                    var student = _studentService.GetItemByID(progress.StudentID);
+                    if(student.JoinedClasses == null || !student.JoinedClasses.Contains(progress.ClassID))
+                    {
+                        _classProgressService.Remove(progress.ID);
+                        continue;
+                    }    
+                    //var exams = _examService.CreateQuery().Find(t => t.ClassID == progress.ID && t.StudentID == progress.StudentID && t.Status).SortByDescending(t=> t.Updated);
+
+                    //var count = 0;
+                    //var ids = new List<string>();
+                    //foreach(var exam in exams)
+                    //progress.ExamDone = sbjqry.ToList().GroupBy(t=> t.LessonID, )
+                    //progress.TotalPoint = sbjqry.ToList().Sum(t => t.Point);
+                    //if (progress.ExamDone > 0)
+                    //{
+                    //    progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+                    //}
+                    //else
+                    //    progress.AvgPoint = 0;
+                    progress.TotalLessons = classLessons;
+                    progress.Completed = (int)await _lessonProgressService.CreateQuery().CountDocumentsAsync(t => t.ClassID == @class.ID && t.StudentID == progress.StudentID);
+                    _classProgressService.Save(progress);
+                }
             }
+
+            _ = _lessonProgressService.CreateQuery().UpdateManyAsync(t => true, Builders<LessonProgressEntity>.Update
+                .Set(t => t.AvgPoint, 0).Set(t => t.PointChange, 0).Set(t => t.LastPoint, 0).Set(t => t.MaxPoint, 0).Set(t => t.MinPoint, 0)
+                .Set(t=> t.Tried, 0));
+            _ = _chapterProgressService.CreateQuery().UpdateManyAsync(t => true, Builders<ChapterProgressEntity>.Update
+                .Set(t => t.AvgPoint, 0).Set(t => t.ExamDone, 0).Set(t => t.TotalPoint, 0));
+            _ = _classSubjectProgressService.CreateQuery().UpdateManyAsync(t => true, Builders<ClassSubjectProgressEntity>.Update
+                .Set(t => t.AvgPoint, 0).Set(t => t.ExamDone, 0).Set(t => t.TotalPoint, 0));
+            _ = _classProgressService.CreateQuery().UpdateManyAsync(t => true, Builders<ClassProgressEntity>.Update
+                .Set(t => t.AvgPoint, 0).Set(t => t.ExamDone, 0).Set(t => t.TotalPoint, 0));
+
+            var exams = _examService.GetAll().SortBy(t => t.StudentID).ThenBy(t => t.LessonID).ThenBy(t => t.Number).ToList();
+            foreach (var exam in exams)
+            {
+                double point = 0;
+                var lesson = _newlessonService.GetItemByID(exam.LessonID);
+                var student = _studentService.GetItemByID(exam.StudentID);
+                if (lesson == null || student == null || !student.JoinedClasses.Contains(exam.ClassID))
+                    _examService.Remove(exam.ID);
+                else
+                {     
+                    //if(exam.ClassID == "5e4165a2fce9522790ccf65d" && exam.StudentID == "5d838a00d5d1bf27e4410c06")
+                    _ = _examService.Complete(exam, lesson, out point);
+                }
+            }
+
             return new JsonResult("Update done");
         }
 

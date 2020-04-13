@@ -25,9 +25,20 @@
     @await Html.PartialAsync("_sidebarCurriculum")
 }
 
+<style>
+    .media_preview img {
+        max-width: 150px;
+    }
+    .media_preview audio,
+    .media_preview video,
+    .media_preview iframe {
+        max-width: 400px;
+    }
+</style>
+
 @section Scripts{
     @*<script src="~/js/content-render.js"></script>*@
-    <script src="~/js/detail.fn.min.js?2020402"></script>
+    <script src="~/js/detail.fn.min.js"></script>
     <script>
     var config = {
         container: "lessonContainer",

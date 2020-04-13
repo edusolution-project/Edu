@@ -38,11 +38,6 @@ namespace EnglishPlatform.Controllers
         private readonly StudentHelper _studentHelper;
         private readonly CalendarHelper _calendarHelper;
 
-
-        //fix
-        private readonly ClassStudentService _classStudentService;
-
-
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -53,7 +48,6 @@ namespace EnglishPlatform.Controllers
             , ClassService classService
             , IOptions<DefaultConfigs> defaultvalue
             , CalendarHelper calendarHelper
-            , ClassStudentService classStudentService
             , ILog log)
         {
             _accessesService = accessesService;
@@ -66,7 +60,6 @@ namespace EnglishPlatform.Controllers
             _classService = classService;
             _studentHelper = new StudentHelper(studentService, accountService);
             _calendarHelper = calendarHelper;
-            _classStudentService = classStudentService;
             _log = log;
             _default = defaultvalue.Value;
         }
@@ -553,51 +546,6 @@ namespace EnglishPlatform.Controllers
         {
             ViewBag.RoomID = roomID;
             return View();
-        }
-
-        //Fix Data
-        public JsonResult FixStudentNull()
-        {
-            int count = 0;
-            var teachers = _teacherService.GetAll().ToList();
-            var _studentMapping = new MappingEntity<StudentEntity, StudentEntity>();
-            foreach (var teacher in teachers)
-            {
-                var students = _studentService.Collection.Find(t => t.Email == teacher.Email).ToList();
-                if (students.Count > 0) //has student account
-                {
-                    var validStud = students.Find(t => t.ID == teacher.ID);
-                    if (validStud != null)
-                    {
-
-                    }
-                    else
-                    {
-                        var oldid = students[0].ID;
-                        validStud = _studentMapping.Clone(students[0], new StudentEntity());
-                        validStud.ID = teacher.ID;
-                        _studentService.Collection.InsertOne(validStud);
-                    }
-
-                    foreach (var student in students)
-                    {
-                        if (student.ID == validStud.ID)
-                            continue;
-                        var classstudents = _classStudentService.GetStudentClasses(student.ID);
-                        if (classstudents != null && classstudents.Count > 0)
-                        {
-                            foreach (var cs in classstudents)
-                            {
-                                _classStudentService.RemoveClassStudent(cs, student.ID);
-                                _classStudentService.Collection.InsertOne(new ClassStudentEntity { ClassID = cs, StudentID = validStud.ID });
-                                count++;
-                            }
-                        }
-                        _studentService.Remove(student.ID);
-                    }
-                }
-            }
-            return Json("OK");
         }
     }
 }

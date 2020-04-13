@@ -18,7 +18,7 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex mb-2">
-            <h2 class="title"><a href="@Url.Action("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}/@currentStudent.FullName</h2>
+            <h2 class="title"><a href="@Url.Action("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i>{{domDecoder(className)}}</a>/ @currentStudent.FullName</h2>
             @*<div class="search-box">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
@@ -26,29 +26,27 @@
         </div>
         <div class="flex j-between">
             <div class="flex padding-b25">
-                <div class="box filter-box w-250">
-                    <input type="text" value="01/08/2019 - 30/09/2019" name="dates">
-                    <span class="ic ic-picker"></span>
-                </div>
                 <div class="box filter-box w-152">
                     <select v-model="search_subject">
-                        <option value="">Môn học</option>
+                        <option value="">-- Tất cả các môn ---</option>
                         <option v-for="(item, k) in classSubjects"
                                 :value="item.ID">
                             {{item.Title}}
                         </option>
                     </select>
                 </div>
+                <div class="box filter-box w-250" v-if="search_subject != ''">
+                    <input type="text" value="01/08/2019 - 30/09/2019" name="dates">
+                    <span class="ic ic-picker"></span>
+                </div>
             </div>
-            <div class="flex rate" v-if="tab[1]">
-                <span><i class="ic ic-paper-yet"></i>Điểm: {{avgPoint.toFixed(2)}}%</span>
-                <span><i class="ic ic-award"></i>Xếp hạng: 1</span>
-                <!-- <span><i class="ic ic-award-2"></i>Xếp hạng: 2</span> -->
-                <!-- <span><i class="ic ic-award-3"></i>Xếp hạng: 3</span> -->
-                <!-- <span><i class="ic ic-award-n"></i>Xếp hạng: 4</span> -->
+            <div class="flex rate" v-if="tab[1] || search_subject == ''">
+                <span><i class="ic ic-paper-yet"></i>Điểm: <b class="text-danger" v-bind:class="{good : (avgPoint > 50)}">{{avgPoint.toFixed(2)}}%</b></span>
+                <span><i class="ic ic-award"></i>Xếp hạng: {{rank.pos + '/' + rank.total}}</span>
+
             </div>
         </div>
-        <div class="flex j-between border-b">
+        <div class="flex j-between border-b" v-if="search_subject != ''">
             <div class="tab bg-none">
                 <ul class="flex">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Lịch sử học tập" v-on:click="tabChange()">Lịch sử học tập</a></li>
@@ -59,47 +57,68 @@
         </div>
     </div>
     <div class="card-body" v-cloak>
-        <div class="box" v-if="tab[0]">
-            <table id="ed_table" class="table">
-                <thead>
-                    <tr>
-                        <th v-for="(field,k) in progressFields">{{field.label}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-if="progressData == null || progressData.length <= 0">
-                        <td colspan="4">Chưa có lịch sử học tập</a></td>
-                    </tr>
-                    <tr v-for="(item,k) in progressData" v-else>
-                        <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
-                        <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
-                        <td>{{formatFullDate(item.LearnLast)}}</td>
-                        <td>{{item.LearnCount}}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="box" v-if="tab[1]">
-            <table id="ed_table" class="table">
-                <thead>
-                    <tr>
-                        <th v-for="(field,k) in resultFields">{{field.label}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-if="resultData == null || resultData.length <= 0">
-                        <td colspan="5">Chưa có kết quả</a></td>
-                    </tr>
-                    <tr v-for="(item,k) in resultData">
-                        <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
-                        <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
-                        <td>{{formatFullDate(item.LearnLast)}}</td>
-                        <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (item.Result.toFixed(2) + '%')}}</td>
-                        <td>{{item.LearnCount}}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <template v-if="search_subject != ''">
+            <div class="box" v-if="tab[0]">
+                <table id="p_table" class="table">
+                    <thead>
+                        <tr>
+                            <th v-for="(field,k) in progressFields">{{field.label}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-if="progressData == null || progressData.length <= 0">
+                            <td colspan="4">Chưa có lịch sử học tập</a></td>
+                        </tr>
+                        <tr v-for="(item,k) in progressData" v-else>
+                            <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
+                            <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
+                            <td>{{formatFullDate(item.LearnLast)}}</td>
+                            <td>{{item.LearnCount}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="box" v-if="tab[1]">
+                <table id="r_table" class="table">
+                    <thead>
+                        <tr>
+                            <th v-for="(field,k) in resultFields">{{field.label}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-if="resultData == null || resultData.length <= 0">
+                            <td colspan="5">Chưa có kết quả</a></td>
+                        </tr>
+                        <tr v-for="(item,k) in resultData">
+                            <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
+                            <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
+                            <td>{{formatFullDate(item.LearnLast)}}</td>
+                            <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (item.Result.toFixed(2) + '%')}}</td>
+                            <td>{{item.LearnCount}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <template v-else>
+            <div class="box">
+                <table id="s_table" class="table">
+                    <thead>
+                        <tr>
+                            <th v-for="(field,k) in summaryFields">{{field.label}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in sumarryData">
+                            <td><a href="#" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
+                            <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
+                            <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
+                            <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
     </div>
 </section>
 
@@ -134,6 +153,24 @@
                 className: '@currentClass.Name',
                 classSubjects: [],
                 search_subject: '',
+                summaryFields: [
+                    {
+                        key: 'subject',
+                        label: 'Môn học'
+                    },
+                    {
+                        key: 'progress',
+                        label: 'Tiến độ'
+                    },
+                    {
+                        key: 'score',
+                        label: 'Kết quả'
+                    },
+                    {
+                        key: 'rank',
+                        label: 'Xếp hạng'
+                    },
+                ],
                 progressFields: [
                     {
                         key: 'lesson',
@@ -175,17 +212,19 @@
                     },
                 ],
                 progressData: [],
+                sumarryData: [],
                 resultData: [],
                 view: 10,
                 page: 1,
                 avgPoint: 0,
+                rank: { pos: 1, total: 1},
                 startdate: moment('@currentClass.StartDate.ToLocalTime().ToString("MM/dd/yyyy")'),
                 enddate: moment('@currentClass.EndDate.ToLocalTime().ToString("MM/dd/yyyy")'),
                 tab: [true, false]
             },
             watch: {
                 search_subject: function () {
-                    console.log(this.search_subject)
+                    history.replaceState({ sbj: this.search_subject }, '', '#' + this.search_subject);
                     this.loadData()
                 }
             },
@@ -210,6 +249,10 @@
             methods: {
                 loadData() {
                     let _that = this
+                    if (_that.search_subject == '') {
+                        _that.loadSummary();
+                        return true;
+                    }
                     var pos = 0
                     _that.tab.forEach(function (item, k) {
                         if (_that.tab[k] == true) {
@@ -240,13 +283,15 @@
                         .then(response => {
                             _that.resultData = response.data.Data;
                             _that.avgPoint = 0;
-                            console.log(_that.avgPoint)
+                            
                             if (_that.resultData.length > 0) {
                                 _that.resultData.forEach(function (exam) {
                                     _that.avgPoint += exam.Result
                                 });
                                 _that.avgPoint = _that.avgPoint / _that.resultData.length
                             }
+
+                            console.log(_that.avgPoint)
                         }).catch(e => { })
                 },
                 loadHistory() {
@@ -262,6 +307,19 @@
                     axios.post(_url, _form)
                         .then(response => {
                             _that.progressData = response.data.Data;
+                        }).catch(e => { })
+                },
+                loadSummary() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('ClassID', _that.classID)
+                    _form.append('ID', '@currentStudent.ID')
+                    let _url = '@Url.Action("GetLearningSummary", "Class")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.sumarryData = response.data.Data;
+                            _that.rank = response.data.Result;
+                            _that.avgPoint = response.data.Result.avg;
                         }).catch(e => { })
                 },
                 loadClassSubjects() {
@@ -282,6 +340,13 @@
                                     Title: item.SkillName,
                                     Image: item.SkillImage,
                                 })
+
+                                var hash = window.location.hash.replace('#', '');
+                                if (Array.from(_that.classSubjects).findIndex(t => t.ID == hash) >= 0) {
+
+                                    _that.search_subject = hash;
+                                }
+
                             })
                         }).catch(e => { })
                 },
@@ -313,6 +378,12 @@
                     this.eDate = evalue;
                     this.sDate = svalue;
                 },
+                getPercent(a, b) {
+                    var result = 0;
+                    if (a > 0)
+                        result = a * 100 / b;
+                    return result;
+                }
             }
         });
     </script>

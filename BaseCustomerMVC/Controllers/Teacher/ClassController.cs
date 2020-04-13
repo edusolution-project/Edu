@@ -29,6 +29,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CourseService _courseService;
         private readonly CourseHelper _courseHelper;
         private readonly ClassProgressService _classProgressService;
+        private readonly ClassSubjectProgressService _classSubjectProgressService;
 
         private readonly ChapterService _chapterService;
         private readonly ChapterExtendService _chapterExtendService;
@@ -70,6 +71,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CourseService courseService,
             CourseHelper courseHelper,
             ClassProgressService classProgressService,
+            ClassSubjectProgressService classSubjectProgressService,
 
             ChapterService chapterService,
             ChapterExtendService chapterExtendService,
@@ -103,6 +105,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classSubjectService = classSubjectService;
             _classStudentService = classStudentService;
             _classProgressService = classProgressService;
+            _classSubjectProgressService = classSubjectProgressService;
 
             _chapterService = chapterService;
             _chapterExtendService = chapterExtendService;
@@ -336,7 +339,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        //Class Detail Management
+        #region ClassDetail
         [HttpPost]
         public JsonResult GetDetail(string ID)
         {
@@ -531,7 +534,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-
         public JsonResult GetMarks(DefaultModel model)
         {
             if (string.IsNullOrEmpty(model.ID))
@@ -570,6 +572,49 @@ namespace BaseCustomerMVC.Controllers.Teacher
             };
             return new JsonResult(response);
         }
+
+        public JsonResult GetClassResult(DefaultModel model, string ClassID)
+        {
+            var @class = _service.GetItemByID(ClassID);
+            if (@class == null)
+                return null;
+            var data = new List<StudentSummaryViewModel>();
+
+            var total_students = _studentService.CountByClass(@class.ID);
+            var examCount = _lessonScheduleService.CountClassExam(@class.ID, null);
+            var total_lessons = _lessonService.CountClassLesson(@class.ID);
+            var results = _classProgressService.GetClassResults(@class.ID).OrderByDescending(t => t.TotalPoint).ToList();
+            foreach (var student in _studentService.GetClassStudents(@class.ID))
+            {
+                var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
+                    .AutoOrtherType(_classProgressService.GetStudentResult(@class.ID, student.ID) ?? new ClassProgressEntity
+                    {
+                        ClassID = @class.ID,
+                        StudentID = student.ID,
+                        TotalLessons = total_lessons,
+                    }, new StudentSummaryViewModel()
+                    {
+                        ClassName = @class.Name,
+                        Rank = -1,
+                        TotalStudents = (int)total_students
+                    });
+
+                summary.FullName = student.FullName;
+                if (results != null && (results.FindIndex(t => t.StudentID == student.ID) >= 0))
+                    summary.Rank = results.FindIndex(t => t.TotalPoint == summary.TotalPoint) + 1;
+                summary.AvgPoint = examCount > 0 ? summary.TotalPoint / examCount : 0;
+
+                data.Add(summary);
+            }
+            var response = new Dictionary<string, object>
+            {
+                { "Data", data},
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+        #endregion
 
         #region Old
         //Class Management
@@ -653,7 +698,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var std = (from o in data.ToList()
                        let totalweek = (o.EndDate.Date - o.StartDate.Date).TotalDays / 7
                        let subject = _subjectService.GetItemByID(o.SubjectID)
-                       let studentCount = _classStudentService.GetClassStudents(o.ID).Count
+                       let studentCount = //_classStudentService.GetClassStudents(o.ID).Count
+                       _studentService.CountByClass(o.ID)
                        select new
                        {
                            id = o.ID,
@@ -735,7 +781,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        where _class != null
                        let _sbj = _classSubjectService.GetItemByID(o.ClassSubjectID)
                        let skill = _skillService.GetItemByID(_sbj.SkillID)
-                       let studentCount = _classStudentService.GetClassStudents(_class.ID).Count
+                       let studentCount = //_classStudentService.GetClassStudents(_class.ID).Count
+                       _studentService.CountByClass(_class.ID)
                        select new
                        {
                            id = o.ID,
@@ -801,15 +848,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             model.TotalRecord = 0;
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
             var classfilter = new List<FilterDefinition<ClassEntity>>();
+            var deep_filter = false;
             FilterDefinition<ClassEntity> ownerfilter = null;
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
 
             if (!string.IsNullOrEmpty(SubjectID))
             {
+                deep_filter = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
             else
             {
-                var UserID = User.Claims.GetClaimByType("UserID").Value;
                 var teacher = _teacherService.GetItemByID(UserID);
                 if (teacher == null)
                     return null;
@@ -817,14 +866,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             if (!string.IsNullOrEmpty(GradeID))
             {
+                deep_filter = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
             if (!string.IsNullOrEmpty(TeacherID))
             {
+                deep_filter = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
-                if (string.IsNullOrEmpty(SubjectID) && string.IsNullOrEmpty(GradeID))
-                    ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == TeacherID);
             }
+
+            if (!deep_filter)
+                ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == UserID);
+
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
 
@@ -834,23 +887,32 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var data = _classSubjectService.Collection
                 .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
             //filter by classsubject
-            if (data.Count > 0)
+            if (ownerfilter != null)
             {
-                if (ownerfilter != null)
+                if (data.Count > 0)
                     classfilter.Add(
                         Builders<ClassEntity>.Filter.Or(ownerfilter,
                         Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive))));
                 else
-                    classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
+                    classfilter.Add(ownerfilter);
             }
+            else
+                if (data.Count > 0)
+                classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
 
-            if (ownerfilter != null && filter.Count <= 1)//no filter
-                classfilter.Add(ownerfilter);
+            //if (data.Count > 0)
+            //{
+            //    if (ownerfilter != null)
+
+            //    else
+            //        classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
+            //}
+
+            //if (ownerfilter != null && filter.Count <= 1)//no filter
+            //    classfilter.Add(ownerfilter);
 
             if (!string.IsNullOrEmpty(model.SearchText))
                 classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
-
-
 
             if (classfilter.Count == 0)
                 return null;
@@ -868,7 +930,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {
                                  { "ID", o.ID },
                                  { "Name", o.Name },
-                                 { "Students", _classStudentService.GetClassStudents(o.ID).Count },
+                                 { "Students", 
+                                     //_classStudentService.GetClassStudents(o.ID).Count 
+                                     _studentService.CountByClass(o.ID)
+                                 },
                                  { "Created", o.Created },
                                  { "IsActive", o.IsActive },
                                  { "Image", o.Image },
@@ -976,7 +1041,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldData.Members = new List<ClassMemberEntity>();
                 oldData.TotalLessons = 0;
 
-
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
 
                 if (oldSubjects != null)
@@ -1062,7 +1126,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 //update data
                 _service.Save(oldData);
-                //refresh class total lesson
+                //refresh class total lesson => no need
                 _ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -1165,7 +1229,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (ids.Length > 0)
                 {
                     //Remove Class Student
-                    _classStudentService.RemoveManyClass(ids);
+                    _ = _studentService.LeaveClassAll(ids.ToList());
                     //remove ClassSubject
                     _classSubjectService.RemoveClassSubjects(ids);
                     //remove Lesson, Part, Question, Answer
@@ -1255,23 +1319,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Student Detail
         public JsonResult GetLearningProgress(DefaultModel model, string ClassID, string ClassSubjectID)
         {
-            var class_student = _classStudentService.GetClassStudent(ClassID, model.ID);
-            if (class_student == null)
+            var StudentID = model.ID;
+            if (!_studentService.IsStudentInClass(ClassID, StudentID))
                 return null;
 
             var currentClass = _service.GetItemByID(ClassID);
             if (currentClass == null)
                 return null;
 
-            //ViewBag.Class = currentClass;
-            //string courseid = currentClass.CourseID;
-            //var course = _courseService.GetItemByID(courseid);
-
             List<LessonProgressEntity> data;
             if (string.IsNullOrEmpty(ClassSubjectID))
-                data = _lessonProgressService.GetByClassID_StudentID(ClassID, class_student.StudentID);
+                data = _lessonProgressService.GetByClassID_StudentID(ClassID, StudentID);
             else
-                data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, class_student.StudentID);
+                data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, StudentID);
 
             var subjects = _classSubjectService.GetByClassID(ClassID);
 
@@ -1304,29 +1364,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult GetLearningResult(DefaultModel model, string ClassID, string ClassSubjectID)
         {
-            var class_student = _classStudentService.GetClassStudent(ClassID, model.ID);
-            if (class_student == null)
+            var StudentID = model.ID;
+            if (!_studentService.IsStudentInClass(ClassID, StudentID))
                 return null;
 
             var currentClass = _service.GetItemByID(ClassID);
             if (currentClass == null)
                 return null;
 
-            //ViewBag.Class = currentClass;
-            //string courseid = currentClass.CourseID;
-            //var course = _courseService.GetItemByID(courseid);
-
             List<LessonProgressEntity> data;
             List<LessonScheduleEntity> passExams;
             if (string.IsNullOrEmpty(ClassSubjectID))
             {
                 passExams = _lessonScheduleService.GetClassExam(ClassID, model.StartDate, model.EndDate);
-                data = _lessonProgressService.GetByClassID_StudentID(ClassID, class_student.StudentID);
+                data = _lessonProgressService.GetByClassID_StudentID(ClassID, StudentID);
             }
             else
             {
                 passExams = _lessonScheduleService.GetClassSubjectExam(ClassSubjectID, model.StartDate, model.EndDate);
-                data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, class_student.StudentID);
+                data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, StudentID);
             }
 
             var subjects = _classSubjectService.GetByClassID(ClassID);
@@ -1360,30 +1416,123 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
+        public JsonResult GetLearningSummary(DefaultModel model, string ClassID)
+        {
+            var StudentID = model.ID;
+            if (!_studentService.IsStudentInClass(ClassID, StudentID))
+                return null;
+
+            var currentClass = _service.GetItemByID(ClassID);
+            if (currentClass == null)
+                return null;
+
+            var total_students = _studentService.CountByClass(currentClass.ID);
+            var rank = -1;
+            var results = _classProgressService.GetClassResults(ClassID).OrderByDescending(t => t.TotalPoint).ToList();
+            var avgpoint = 0.0;
+            var studentresult = _classProgressService.GetStudentResult(ClassID, StudentID);
+
+            if (studentresult != null) {
+                var examCount = _lessonScheduleService.CountClassExam(ClassID, null);
+                if (examCount > 0)
+                    avgpoint = studentresult.TotalPoint / examCount;
+            }
+            if (studentresult != null && results != null && (results.FindIndex(t => t.StudentID == StudentID) >= 0))
+                rank = results.FindIndex(t => t.TotalPoint == studentresult.TotalPoint) + 1;
+            var response = new Dictionary<string, object>
+            {
+                { "Result", new { pos =  1, total = total_students, avg = avgpoint } },
+                { "Data", GetClassSubjectSummary(currentClass, StudentID, total_students)},
+                { "Model", model }
+            };
+
+            return new JsonResult(response);
+        }
+
+        public JsonResult GetStudentSummary(DefaultModel model)
+        {
+            var StudentID = model.ID;
+            var student = _studentService.GetItemByID(StudentID);
+            if (student == null)
+                return null;
+
+            var data = new List<StudentSummaryViewModel>();
+            if (student.JoinedClasses != null && student.JoinedClasses.Count > 0)
+            {
+
+                foreach (var ClassID in student.JoinedClasses)
+                {
+                    var @class = _service.GetItemByID(ClassID);
+                    var total_students = _studentService.CountByClass(@class.ID);
+                    var examCount = _lessonScheduleService.CountClassExam(@class.ID, null);
+                    var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
+                        .AutoOrtherType(_classProgressService.GetStudentResult(ClassID, StudentID) ?? new ClassProgressEntity
+                        {
+                            ClassID = ClassID,
+                            StudentID = StudentID,
+                            TotalLessons = _lessonService.CountClassLesson(ClassID),
+                        }, new StudentSummaryViewModel()
+                        {
+                            ClassName = @class.Name,
+                            Rank = -1,
+                            TotalStudents = (int)total_students
+                        });
+
+                    var results = _classProgressService.GetClassResults(ClassID).OrderByDescending(t => t.TotalPoint).ToList();
+                    if (results != null && (results.FindIndex(t => t.StudentID == StudentID) >= 0))
+                        summary.Rank = results.FindIndex(t => t.TotalPoint == summary.TotalPoint) + 1;
+                    summary.AvgPoint = examCount > 0 ? summary.TotalPoint / examCount : 0;
+
+                    data.Add(summary);
+                    data.AddRange(GetClassSubjectSummary(@class, StudentID, total_students));
+                }
+            }
+            var response = new Dictionary<string, object>
+            {
+                { "Data", data},
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+
+        private List<StudentSummaryViewModel> GetClassSubjectSummary(ClassEntity @class, string StudentID, long total_students)
+        {
+            var data = new List<StudentSummaryViewModel>();
+
+            var subjects = _classSubjectService.GetByClassID(@class.ID);
+
+            foreach (var sbj in subjects)
+            {
+                var examCount = _lessonScheduleService.CountClassSubjectExam(new List<string> { sbj.ID }, null);
+                var prg = new MappingEntity<ClassSubjectProgressEntity, StudentSummaryViewModel>()
+                    .AutoOrtherType(_classSubjectProgressService.GetItemByClassSubjectID(sbj.ID, StudentID) ?? new ClassSubjectProgressEntity
+                    {
+                        ClassID = @class.ID,
+                        StudentID = StudentID,
+                        ClassSubjectID = sbj.ID,
+                        TotalLessons = _lessonService.CountClassSubjectLesson(sbj.ID)
+                    }, new StudentSummaryViewModel()
+                    {
+                        SkillName = _skillService.GetItemByID(sbj.SkillID).Name,
+                        Rank = -1,
+                        TotalStudents = (int)total_students
+                    });
+
+                var results = _classSubjectProgressService.GetStudentResults(sbj.ID).OrderByDescending(t => t.TotalPoint).ToList();
+                if (results != null && (results.FindIndex(t => t.StudentID == StudentID) >= 0))
+                    prg.Rank = results.FindIndex(t => t.TotalPoint == prg.TotalPoint) + 1;
+                prg.AvgPoint = examCount > 0 ? prg.TotalPoint / examCount : 0;
+
+                data.Add(prg);
+            }
+            return data;
+        }
+
         #endregion
 
 
         #region Fix Data
-        public IActionResult FixClassStudent()
-        {
-            var classids = _classStudentService.GetAll().ToList().Select(t => t.ClassID).Distinct();
-            foreach (var classid in classids)
-            {
-                if (_service.GetItemByID(classid) == null)
-                {
-                    _classStudentService.RemoveClass(classid);
-                }
-            }
-            var studentids = _classStudentService.GetAll().ToList().Select(t => t.StudentID).Distinct();
-            foreach (var studentid in studentids)
-            {
-                if (_studentService.GetItemByID(studentid) == null)
-                {
-                    _classStudentService.RemoveStudent(studentid);
-                }
-            }
-            return null;
-        }
         #endregion
     }
 }

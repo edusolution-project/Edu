@@ -115,5 +115,15 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().UpdateManyAsync(t => t.ID.Equals(ID),
                 Builders<ClassEntity>.Update.AddToSet("Subjects", subjectID)).Result.ModifiedCount;
         }
+
+        public IEnumerable<string> GetMultipleClassName(List<string> IDs)
+        {
+            return Collection.Find(t => IDs.Contains(t.ID)).Project(t => t.Name).ToEnumerable();
+        }
+
+        public IEnumerable<ClassEntity> GetItemsByIDs(List<string> ClassIDs)
+        {
+            return Collection.Find(t => ClassIDs.Contains(t.ID)).ToEnumerable();
+        }
     }
 }

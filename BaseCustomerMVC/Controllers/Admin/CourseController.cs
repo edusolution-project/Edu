@@ -238,7 +238,9 @@ namespace BaseCustomerMVC.Controllers.Admin
                                 {
                                  { "ID", o.ID },
                                  { "Name", o.Name },
-                                 { "Students", _classStudentService.GetClassStudents(o.ID).Count },
+                                 { "Students",
+                                     _studentService.CountByClass(o.ID)
+                                     /*_classStudentService.GetClassStudents(o.ID).Count*/ },
                                  { "Created", o.Created },
                                  { "IsActive", o.IsActive },
                                  { "Image", o.Image },
@@ -624,7 +626,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             itemCourse.Students = itemCourse.Students.Distinct().ToList();
                             foreach (var student in itemCourse.Students)
                             {
-
+                                _studentService.JoinClass(itemCourse.ID, student);
                             }
                             _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
                         }

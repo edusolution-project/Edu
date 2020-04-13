@@ -64,7 +64,10 @@
             <tbody>
                 <tr v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
-                    <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
+                    <td>
+                        <a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName" v-if="item.ClassID != null">{{item.FullName}}</a>
+                        <a :href="'@Url.Action("Detail", "StudentManage")/' + item.ID" :title="item.FullName" v-else="item.ClassID != null">{{item.FullName}}</a>
+                    </td>
                     <td>{{item.ClassName}}</td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>

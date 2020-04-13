@@ -1,0 +1,138 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    var currentStudent = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
+    ViewData["Title"] = "Học viên " + currentStudent.FullName + " - Thông tin chi tiết";
+}
+<script src="~/js/daterangepicker.min.js"></script>
+<link href="~/css/daterangepicker.css" rel="stylesheet" />
+<script src="/libs/vuejs-datepicker.min.js"></script>
+<script>
+    setActiveMenu("course");
+</script>
+
+<section class="module" id="dashboard_content">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
+        <div class="flex mb-2">
+            <h2 class="title"><a href="@Url.Action("Index", "StudentManage")" title="Quản lý học viên"><i class="ti-arrow-left d-none"></i>Quản lý Học viên</a> / @currentStudent.FullName</h2>
+            @*<div class="search-box">
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" placeholder="Search">
+                </div>*@
+        </div>
+    </div>
+    <div class="card-body" v-cloak>
+        <template>
+            <div class="box">
+                <table id="s_table" class="table">
+                    <thead>
+                        <tr>
+                            <th v-for="(field,k) in summaryFields">{{field.label}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template v-for="(item,k) in sumarryData">
+                            <tr :class="item.ClassName != null ? 'font-weight-bold bg-light' : ''">
+                                <template v-if="item.ClassName != null">
+                                    <td colspan="2">
+                                        <a :href="'@Url.Action("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.ClassName}}</a>
+                                    </td>
+                                </template>
+                                <template v-else>
+                                    <td></td>
+                                    <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID + '#' + item.ClassSubjectID" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
+                                </template>
+                                <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
+                                <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
+                                <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        new Vue({
+            el: "#main",
+            mounted() {
+                window.loadData = this.loadData
+                loadData()
+            },
+            components: {
+                vuejsDatepicker
+            },
+            data: {
+                classSubjects: [],
+                summaryFields: [
+                    {
+                        key: 'class',
+                        label: 'Lớp'
+                    },
+                    {
+                        key: 'subject',
+                        label: 'Môn học'
+                    },
+                    {
+                        key: 'progress',
+                        label: 'Tiến độ'
+                    },
+                    {
+                        key: 'score',
+                        label: 'Kết quả'
+                    },
+                    {
+                        key: 'rank',
+                        label: 'Xếp hạng'
+                    },
+                ],
+                sumarryData: [],
+                view: 10,
+                page: 1,
+                avgPoint: 0,
+                tab: [true, false]
+            },
+            methods: {
+                loadData() {
+                    let _that = this
+                    _that.loadSummary();
+                },
+                loadSummary() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('ID', '@currentStudent.ID')
+                    let _url = '@Url.Action("GetStudentSummary", "Class")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.sumarryData = response.data.Data;
+                        }).catch(e => { })
+                },
+                domDecoder(str) {
+                    let parser = new DOMParser();
+                    let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
+                    return dom.body.textContent;
+                },
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                formatFullDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY hh:mm A")
+                },
+                getPercent(a, b) {
+                    var result = 0;
+                    if (a > 0)
+                        result = a * 100 / b;
+                    return result;
+                }
+            }
+        });
+    </script>
+}

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -34,6 +35,8 @@ namespace BaseCustomerEntity.Database
         public DateTime CreateDate { get; set; }
         [JsonProperty("Skype")]
         public string Skype { get; set; }
+        [JsonProperty("JoinedClasses")]
+        public List<string> JoinedClasses { get; set; }
     }
     public class StudentService : ServiceBase<StudentEntity>
     {
@@ -53,5 +56,57 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(Builders<StudentEntity>.Filter.Text("\"" + name + "\"")).Limit(limit).ToList();
         }
+
+
+        //joined class
+        public long CountByClass(string ClassID)
+        {
+            return Collection.CountDocuments(t => t.JoinedClasses.Contains(ClassID));
+        }
+
+        public List<StudentEntity> GetClassStudents(string ClassID)
+        {
+            return Collection.Find(t => t.JoinedClasses.Contains(ClassID)).ToList();
+        }
+
+        public List<string> GetClassStudentIDs(string ClassID)
+        {
+            return Collection.Find(t => t.JoinedClasses.Contains(ClassID)).Project(t => t.ID).ToList();
+        }
+
+        public bool IsStudentInClass(string ClassID, string ID)
+        {
+            return Collection.CountDocuments(t => t.ID == ID && t.JoinedClasses.Contains(ClassID)) > 0;
+        }
+
+        public async Task LeaveClassAll(string ClassID)
+        {
+            await Collection.UpdateManyAsync(t => t.JoinedClasses.Contains(ClassID), Builders<StudentEntity>.Update.Pull(t => t.JoinedClasses, ClassID));
+        }
+
+        public async Task LeaveClassAll(List<string> ClassIDs)
+        {
+            await Collection.UpdateManyAsync(t => t.JoinedClasses.Exists(o => ClassIDs.Contains(o)), Builders<StudentEntity>.Update.PullAll(t => t.JoinedClasses, ClassIDs));
+        }
+
+        public long LeaveClass(string ClassID, string StudentID)
+        {
+            return Collection.UpdateMany(t => t.ID == StudentID, Builders<StudentEntity>.Update.Pull(t => t.JoinedClasses, ClassID)).ModifiedCount;
+        }
+
+        public long JoinClass(string ClassID, string StudentID)
+        {
+            return Collection.UpdateMany(t => t.ID == StudentID, Builders<StudentEntity>.Update.AddToSet(t => t.JoinedClasses, ClassID)).ModifiedCount;
+        }
+    }
+
+    public class StudentRanking
+    {
+        public int Rank { get; set; }
+        public string StudentID { get; set; }
+        public double AvgPoint { get; set; }
+        public double TotalPoint { get; set; }
+        public long ExamDone { get; set; }
+        public int Count { get; set; }
     }
 }

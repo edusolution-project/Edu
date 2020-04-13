@@ -217,7 +217,7 @@ var Lesson = (function () {
         lessonContainer.append(lessonContent);
 
         //header row (contain title; lesson action - default hide)
-        var lessonHeader = $("<div>", { "class": "card-header", style: "display:none" });
+        var lessonHeader = $("<div>", { "class": "card-header d-none", style: "display:none" });
         lessonContent.append(lessonHeader);
 
         //footer row (part navigation, question navigation... - default: hide)
@@ -719,7 +719,6 @@ var Lesson = (function () {
     }
 
     var renderPreviewPart = function (data) {
-
         var mainContainer = $('#' + config.container);
         var leftCol = mainContainer.find('#leftCol');
         var rightCol = mainContainer.find('#rightCol');
@@ -770,7 +769,10 @@ var Lesson = (function () {
         switch (config.mod) {
             case mod.PREVIEW:
             case mod.TEACHEREDIT:
-                boxHeader.append($("<h5>", { "class": "title col-md-10 font-weight-bold", "text": (data.Title == null ? "" : data.Title) + time + point }));
+                boxHeader.append($("<h5>", {
+                    "class": "title col-md-10 font-weight-bold", "text": (data.Title == null ? "" : data.Title) + time
+                    //+ point
+                }));
 
                 var iconEdit = $("<i>", { "class": "fas fa-edit" });
                 var iconTrash = $("<i>", { "class": "fas fa-trash" });
@@ -781,7 +783,10 @@ var Lesson = (function () {
                 boxHeader.append(boxButton);
                 break;
             default:
-                boxHeader.append($("<h5>", { "class": "title col-md-12", "text": (data.Title == null ? "" : data.Title) + time + point }));
+                boxHeader.append($("<h5>", {
+                    "class": "title col-md-12", "text": (data.Title == null ? "" : data.Title) + time
+                    //+ point
+                }));
                 break;
         }
 
@@ -807,10 +812,8 @@ var Lesson = (function () {
                 break;
             case "IMG":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
-                if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
-                }
+                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
+                if (data.Description != null) itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description)));
                 renderMediaContent(data, itemBody, "IMG");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
                 itembox.append(itemBody);
@@ -818,9 +821,9 @@ var Lesson = (function () {
                 break;
             case "AUDIO":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description)));
                 renderMediaContent(data, itemBody, "AUDIO");
                 itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
                 itembox.append(itemBody);
@@ -828,9 +831,9 @@ var Lesson = (function () {
                 break;
             case "VIDEO":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description)));
                 renderMediaContent(data, itemBody, "VIDEO");
                 itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
                 itembox.append(itemBody);
@@ -840,7 +843,7 @@ var Lesson = (function () {
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description)));
                 renderMediaContent(data, itemBody, "DOC");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
                 itembox.append(itemBody);
@@ -918,16 +921,17 @@ var Lesson = (function () {
                 }
                 break;
         }
-        itembox.find('iframe').each(function (i, item) {
+
+        itembox.find('iframe,embed,video').each(function (i, item) {
             //if (!$(item)[0].hasAttribute('allow')) {
             //    $(item).attr('allow', 'fullscreen');
             //    $(item).attr('allowfullscreen', 'true');
             //}
             $(item).wrap($('<div>', {
-                class: 'fullscreenSupport'
+                class: 'fullscreenSupport d-inline-block'
             }));
             $(item).parent().append($('<div>').append($('<button>', {
-                class: "btn btn-primary", click: function () {
+                class: "btn btn-primary mt-1", click: function () {
                     ShowFullScreen(this)
                 }
             }).append('<i class="ic fa fa-expand mr-2"></i>').append('Xem toàn màn hình')))
@@ -949,7 +953,7 @@ var Lesson = (function () {
     }
 
     var showFullScreen = function (obj) {
-        $(obj).parent().siblings('iframe')[0].webkitRequestFullscreen();
+        $(obj).parent().siblings('iframe,embed,video')[0].webkitRequestFullscreen();
     }
 
     var renderPreviewQuestion = function (data, template) {
@@ -964,7 +968,10 @@ var Lesson = (function () {
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
-                boxHeader.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
+                boxHeader.append($("<div>", {
+                    "class": "quiz-text", "html": breakLine(data.Content)
+                    //+ point
+                }));
                 renderMediaContent(data, boxHeader);
                 quizitem.append(boxHeader);
 
@@ -1005,7 +1012,10 @@ var Lesson = (function () {
 
                 var pane_item = $("<div>", { "class": "pane-item" });
                 if (data.Media == null) {
-                    pane_item.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
+                    pane_item.append($("<div>", {
+                        "class": "quiz-text", "html": breakLine(data.Content)
+                        //+ point
+                    }));
                 } else {
                     renderMediaContent(data, pane_item);
                 }
@@ -1044,7 +1054,10 @@ var Lesson = (function () {
                 var itembox = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
-                    boxHeader.append($("<h5>", { "class": "title", "html": breakLine(data.Content) + point }));
+                    boxHeader.append($("<h5>", {
+                        "class": "title", "html": breakLine(data.Content)
+                        //+ point
+                    }));
                 else
                     boxHeader.append($("<h5>", { "class": "title", "text": point }));
 
@@ -1133,12 +1146,13 @@ var Lesson = (function () {
     }
 
     var renderMediaContent = function (data, wrapper, type = "") {
-
         if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder mt-2 mb-2 " + type });
+            //var contentWrapper = $("<div>", { class: "m-content" });
             switch (type) {
                 case "IMG":
-                    mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") }));
+                    mediaHolder.append(
+                        $("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") }));
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -1155,19 +1169,29 @@ var Lesson = (function () {
                     }
                     else {
                         if (data.Media != null)
-                            mediaHolder.append($("<embed>", { "src": data.Media.Path + "#view=FitH", "class": "embed-frame" }));
+                            mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "#view=FitH", "class": "embed-frame" }));
                     }
                     break;
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
-                            mediaHolder.append($("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") }));
+                            mediaHolder.append(
+                                $("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
                             mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
-                        else
-                            mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "#view=FitH" }));
+                        else {
+                            if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
+                                data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
+                                data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
+                            ) {
+                                mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path + "", "class": "embed-frame", "frameborder": "0" }));
+                            }
+                            else
+                                mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "#view=FitH" }));
+                        }
+
                     break;
             }
             wrapper.append(mediaHolder);
@@ -1538,7 +1562,7 @@ var Lesson = (function () {
                 renderAddMedia(questionTemplate.find(".media_holder"), "Questions.");
                 questionTemplate.append($("<div>", { "class": "media_preview" }));
                 questionTemplate.append(
-                    $("<div>", { class: "mt-1" }).append($("<label>", { "class": "input_label mr-1", "text": "Điểm" }))
+                    $("<div>", { class: "mt-1 d-none" }).append($("<label>", { "class": "input_label mr-1", "text": "Điểm" }))
                         .append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1" })));
                 questionTemplate.append($("<div>", { class: "mt-1" }).append($("<label>", { "class": "part_label", "text": "Answer (tick if correct)" })));
 
@@ -1583,7 +1607,7 @@ var Lesson = (function () {
                 quizWrapper.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 quizWrapper.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)" }));
                 quizWrapper.append($("<input>", { "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Position (skip for media content)" }));
-                quizWrapper.append($("<label>", { "class": "input_label mr-1", "text": "Point" }));
+                quizWrapper.append($("<label>", { "class": "input_label mr-1 d-none", "text": "Điểm" }));
                 quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1" }));
                 quizWrapper.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
@@ -1632,8 +1656,8 @@ var Lesson = (function () {
                 quizWrapper.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
                 quizWrapper.append($("<div>", { "class": "media_preview" }));
-                quizWrapper.append($("<label>", { "class": "input_label", "text": "Point" }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1", "tabindex": 0 }));
+                quizWrapper.append($("<label>", { "class": "input_label d-none", "text": "Điểm " }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "d-none input-text part_point form-control", "placeholder": "Point", "value": "1", "tabindex": 0 }));
                 questionTemplate.append(quizWrapper);
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
@@ -2064,7 +2088,6 @@ var Lesson = (function () {
                     "class": "btn btn-primary m-2 lesson-action",
                     "onclick": "BeginExam(this)",
                     "style": "cursor: pointer",
-
                 }).append('<i class="fas fa-play mr-2"></i>').append('Làm bài');
             }
         }
@@ -2079,6 +2102,11 @@ var Lesson = (function () {
             lesson_action_holder.append(doButton);
             //wrapper.append(doButton);
             //wrapper.append(backButton);
+            lastExamResult =
+                $("<div>", { id: "last-result", class: "text-center" })
+                    .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần 0) chưa bắt đầu" }))
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả ko có" })).html();
+            wrapper.append(lastExamResult);
         }
         else {
             var lastExam = data;
@@ -2296,7 +2324,10 @@ var Lesson = (function () {
 
         var boxHeader = $("<div>", { "class": "part-box-header row" });
 
-        boxHeader.append($("<h5>", { "class": "title col-md-12", "text": (data.Title == null ? "" : data.Title) + time + point }));
+        boxHeader.append($("<h5>", {
+            "class": "title col-md-12", "text": (data.Title == null ? "" : data.Title) + time
+            //+ point
+        }));
 
         itembox.append(boxHeader);
 
@@ -2319,9 +2350,9 @@ var Lesson = (function () {
                 break;
             case "IMG":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description)));
                 }
                 renderMediaContent(data, itemBody, "IMG");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
@@ -2330,9 +2361,9 @@ var Lesson = (function () {
                 break;
             case "AUDIO":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description)));
                 renderMediaContent(data, itemBody, "AUDIO");
                 itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
                 itembox.append(itemBody);
@@ -2340,9 +2371,9 @@ var Lesson = (function () {
                 break;
             case "VIDEO":
                 boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "media-wrapper d-flex justify-content-center collapsable collapse" });
+                var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description)));
                 renderMediaContent(data, itemBody, "VIDEO");
                 itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
                 itembox.append(itemBody);
@@ -2352,8 +2383,7 @@ var Lesson = (function () {
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
-
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description)));
                 renderMediaContent(data, itemBody, "DOC");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
                 itembox.append(itemBody);
@@ -2428,7 +2458,7 @@ var Lesson = (function () {
                 break;
         }
 
-        itembox.find('iframe').each(function (i, item) {
+        itembox.find('iframe,embed,video').each(function (i, item) {
             //if (!$(item)[0].hasAttribute('allow')) {
             //    $(item).attr('allow', 'fullscreen');
             //    $(item).attr('allowfullscreen', 'true');
@@ -2437,7 +2467,7 @@ var Lesson = (function () {
                 class: 'fullscreenSupport'
             }));
             $(item).parent().append($('<div>').append($('<button>', {
-                class: "btn btn-primary", click: function () {
+                class: "btn btn-primary mt-1", click: function () {
                     ShowFullScreen(this)
                 }
             }).append('<i class="ic fa fa-expand mr-2"></i>').append('Xem toàn màn hình')))
@@ -2468,7 +2498,10 @@ var Lesson = (function () {
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
-                boxHeader.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
+                boxHeader.append($("<div>", {
+                    "class": "quiz-text", "html": breakLine(data.Content)
+                    //+ point
+                }));
                 renderMediaContent(data, boxHeader);
                 quizitem.append(boxHeader);
 
@@ -2502,7 +2535,10 @@ var Lesson = (function () {
                 quizitem.append(answer_part);
                 var pane_item = $("<div>", { "class": "pane-item" });
                 if (data.Media == null) {
-                    pane_item.append($("<div>", { "class": "quiz-text", "html": breakLine(data.Content) + point }));
+                    pane_item.append($("<div>", {
+                        "class": "quiz-text", "html": breakLine(data.Content)
+                        //+ point
+                    }));
                 } else {
                     renderMediaContent(data, pane_item);
                 }
@@ -2540,7 +2576,10 @@ var Lesson = (function () {
                 var itembox = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
-                    boxHeader.append($("<h5>", { "class": "title", "html": breakLine(data.Content) + point }));
+                    boxHeader.append($("<h5>", {
+                        "class": "title", "html": breakLine(data.Content)
+                        //+ point
+                    }));
                 else
                     boxHeader.append($("<h5>", { "class": "title", "text": point }));
 
@@ -3242,12 +3281,13 @@ var submitForm = function (event, modalId, callback) {
 
 var toggleExpand = function (obj) {
     $('.collapsable').addClass('collapse');
+    $('.media-holder video').trigger('pause');
+
     if (!$(obj).hasClass("fa-caret-up"))//expand
     {
         $('.title > .fa-caret-up').removeClass("fa-caret-up");
         $(obj).addClass("fa-caret-up");
         $(obj).parent().parent().siblings('.collapse').removeClass("collapse");
-
 
         $('#leftCol').animate({
             scrollTop: $(obj).parent().parent().parent().parent().offset().top - 60

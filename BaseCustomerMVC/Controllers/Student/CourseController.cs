@@ -136,9 +136,9 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else
             {
-                var classids = _classStudentService.GetStudentClasses(userId);
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => classids.Contains(o.ID)));
-                //filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
+                var currentStudent = _studentService.GetItemByID(userId);
+                if (currentStudent == null || currentStudent.JoinedClasses == null) return null;
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
             }
             if (!string.IsNullOrEmpty(model.SearchText))
             {
@@ -170,7 +170,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std =
                 (from o in DataResponse
-                 let progress = _progressService.GetItemByClassID(o.ID, userId)
+                 let progress = _progressService.GetStudentResult(o.ID, userId)
                  let course = _courseService.GetItemByID(o.CourseID)
                  let subject = _subjectService.GetItemByID(o.SubjectID)
                  let grade = _gradeService.GetItemByID(o.GradeID)
@@ -211,14 +211,14 @@ namespace BaseCustomerMVC.Controllers.Student
                 });
             }
 
-            var classids = _classStudentService.GetStudentClasses(userId);
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => classids.Contains(o.ID)));
+            var currentStudent = _studentService.GetItemByID(userId);
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
 
             var std = (from o in data.ToList()
-                       let progress = _progressService.GetItemByClassID(o.ID, userId)
+                       let progress = _progressService.GetStudentResult(o.ID, userId)
                        let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
                        select new
                        {
@@ -251,8 +251,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 });
             }
 
-            var classids = _classStudentService.GetStudentClasses(userId);
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => classids.Contains(o.ID)));
+            var currentStudent = _studentService.GetItemByID(userId);
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
             var clIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
@@ -297,9 +297,10 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 return null;
             }
-            var classids = _classStudentService.GetStudentClasses(userId);
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => classids.Contains(o.ID)));
-            //filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(userId)));
+            
+            var currentStudent = _studentService.GetItemByID(userId);
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
+
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
@@ -309,7 +310,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 : data.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
 
             var std = (from o in DataResponse
-                       let progress = _progressService.GetItemByClassID(o.ID, userId)
+                       let progress = _progressService.GetStudentResult(o.ID, userId)
                        let per = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons
                        let examCount = _lessonScheduleService.CountClassExam(o.ID)
                        select new
@@ -347,11 +348,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 });
             }
 
-            //var classFilter = new List<FilterDefinition<ClassEntity>>();
-
-            var classIds = _classStudentService.GetStudentClasses(userId);
-
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
+            var currentStudent = _studentService.GetItemByID(userId);
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ClassID)));            
 
             //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
 
@@ -536,7 +534,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                 {
                                     ClassName = currentClass.Name,
                                     ClassStatus = "Đang học",
-                                    Progress = _progressService.GetItemByClassID(currentClass.ID, r.ID),
+                                    Progress = _progressService.GetStudentResult(currentClass.ID, r.ID),
                                 })).ToList();
 
             var response = new Dictionary<string, object>
@@ -624,8 +622,8 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (currentClass == null)
                 return RedirectToAction("Index");
-            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
-            if (classStudent == null)
+            //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
+            if (!_studentService.IsStudentInClass(currentClass.ID, userId))
                 return RedirectToAction("Index");
             var vm = new ClassViewModel(currentClass);
             var subjects = _classSubjectService.GetByClassID(currentClass.ID);
@@ -661,8 +659,9 @@ namespace BaseCustomerMVC.Controllers.Student
             var currentClass = _service.GetItemByID(currentCs.ClassID);
             if (currentClass == null)
                 return RedirectToAction("Index");
-            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
-            if (classStudent == null)
+            //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
+            //if (classStudent == null)
+            if (!_studentService.IsStudentInClass(currentClass.ID, userId))
                 return RedirectToAction("Index");
             var progress = _classSubjectProgressService.GetItemByClassSubjectID(id, userId);
             //long completed = 0;
@@ -694,8 +693,10 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (currentClass == null)
                 return RedirectToAction("Index");
-            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
-            if (classStudent == null)
+            //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
+            //if (classStudent == null)
+            //    return RedirectToAction("Index");
+            if (!_studentService.IsStudentInClass(currentClass.ID, userId))
                 return RedirectToAction("Index");
             ViewBag.Class = currentClass;
             return View();
@@ -708,8 +709,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (currentClass == null)
                 return RedirectToAction("Index");
-            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
-            if (classStudent == null)
+            if (!_studentService.IsStudentInClass(currentClass.ID, userId))
                 return RedirectToAction("Index");
             ViewBag.Class = currentClass;
             return View();

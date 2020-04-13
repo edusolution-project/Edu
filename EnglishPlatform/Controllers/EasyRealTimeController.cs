@@ -85,7 +85,7 @@ namespace EnglishPlatform.Controllers
                 if (IsAuthenticated())
                 {
                     Dictionary<string, bool> req = new Dictionary<string, bool>();
-                    var listClass = !_typeUser.Contains(Teacher) ? _classStudentService.GetStudentClasses(_userID) : null;
+                    var listClass = !_typeUser.Contains(Teacher) ? _studentService.GetItemByID(_userID).JoinedClasses : null;
                     var realClass = listClass != null
                         ? _classService.CreateQuery().Find(o => listClass.Contains(o.ID))?.ToList()
                         : _classService.CreateQuery().Find(o => o.TeacherID == _userID)?.ToList();
@@ -93,13 +93,13 @@ namespace EnglishPlatform.Controllers
                     {
                         var item = realClass[i];
                         var isActive = item.StartDate <= DateTime.Now.ToUniversalTime() && item.EndDate >= DateTime.Now.ToUniversalTime();
-                        if(isActive) req.Add(item.ID, isActive);
+                        if (isActive) req.Add(item.ID, isActive);
                     }
                     return Success(req);
                 }
                 return NotFoundData();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Error(ex);
             }
@@ -121,7 +121,10 @@ namespace EnglishPlatform.Controllers
             {
                 if (IsAuthenticated())
                 {
-                    var listClass = !_typeUser.Contains(Teacher) ? _classStudentService.GetStudentClasses(_userID) : null;
+                    var listClass = !_typeUser.Contains(Teacher) ?
+                        //_classStudentService.GetStudentClasses(_userID) 
+                        _studentService.GetItemByID(_userID).JoinedClasses
+                        : null;
                     var realClass = listClass != null
                         ? _classService.CreateQuery().Find(o => listClass.Contains(o.ID))?.ToList()
                         : _classService.CreateQuery().Find(o => o.TeacherID == _userID)?.ToList();
@@ -155,7 +158,8 @@ namespace EnglishPlatform.Controllers
                                 var itemClass = realClass[i];
                                 if (listGroupName == null || !listGroupName.Contains(itemClass.ID))
                                 {
-                                    var listMembersStudentID = _classStudentService.GetClassStudents(itemClass.ID)?.Select(o => o.StudentID)?.ToList();
+                                    var listMembersStudentID = //_classStudentService.GetClassStudents(itemClass.ID)?.Select(o => o.StudentID)?.ToList();
+                                        _studentService.GetClassStudentIDs(itemClass.ID);
                                     var members = _studentService.CreateQuery().Find(o => listStudent.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();
                                     var teacher = _teacherService.GetItemByID(itemClass.TeacherID);
                                     if (members == null)
@@ -208,7 +212,7 @@ namespace EnglishPlatform.Controllers
                 if (!string.IsNullOrEmpty(group.ID))
                 {
                     var oldGroup = _groupService.GetItemByID(group.ID);
-                    if(oldGroup != null)
+                    if (oldGroup != null)
                     {
                         _groupService.CreateOrUpdate(group);
                         return Success(group);
@@ -259,19 +263,19 @@ namespace EnglishPlatform.Controllers
                         DisplayName = groupName,
                         Members = members.ToHashSet(),
                         IsPrivateChat = IsPrivate,
-                        
+
                     };
                     // user to user
                     if (!IsPrivate)
                     {
                         group.ParentID = groupParent;
-                        group.MasterGroup = new HashSet<MemberGroupInfo>() { new MemberGroupInfo(_userID,_email,_name, _typeUser.Contains(Teacher)) };
+                        group.MasterGroup = new HashSet<MemberGroupInfo>() { new MemberGroupInfo(_userID, _email, _name, _typeUser.Contains(Teacher)) };
                     }
                     // taoj ra la sub cua lop
                     else
                     {
                         var master = members.Where(o => o.IsTeacher)?.ToHashSet();
-                        if(master == null)
+                        if (master == null)
                         {
                             var _groupParent = _groupService.CreateQuery().Find(o => o.Name == groupParent)?.FirstOrDefault();
 
@@ -280,7 +284,7 @@ namespace EnglishPlatform.Controllers
                             master = _groupParent.MasterGroup;
                         }
 
-                        if(master == null) return ResponseApi(404,"Not Found group master");
+                        if (master == null) return ResponseApi(404, "Not Found group master");
 
                         group.MasterGroup = master;
                     }
@@ -293,7 +297,7 @@ namespace EnglishPlatform.Controllers
             return NotFoundData();
         }
         [HttpPost]
-        public JsonResult AddMemberToGroup(string memberID,string groupName)
+        public JsonResult AddMemberToGroup(string memberID, string groupName)
         {
             if (IsAuthenticated())
             {
@@ -348,7 +352,7 @@ namespace EnglishPlatform.Controllers
         #endregion
         #region Message
         [HttpGet]
-        public JsonResult GetListMessage(string groupName, int state , DateTime startDate , DateTime endDate, bool IsUser, bool IsTeacher)
+        public JsonResult GetListMessage(string groupName, int state, DateTime startDate, DateTime endDate, bool IsUser, bool IsTeacher)
         {
             if (IsAuthenticated())
             {
@@ -359,7 +363,7 @@ namespace EnglishPlatform.Controllers
                     if (IsTeacher)
                     {
                         var teacher = _teacherService.GetItemByID(groupName);
-                        if(teacher != null)
+                        if (teacher != null)
                         {
                             var receiver = new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, IsTeacher);
                             group = _groupService.CreateNewGroup(sender, receiver);
@@ -375,10 +379,11 @@ namespace EnglishPlatform.Controllers
                         }
                     }
                 }
-                if (group != null) {
+                if (group != null)
+                {
 
                     var message = state == 0 ? _messageService.GetMessageList(group.Name, startDate, endDate) : _messageService.GetNewFeedList(group.Name, startDate, endDate);
-                    return Success(new { messages= message});
+                    return Success(new { messages = message });
                 }
             }
 
@@ -394,16 +399,16 @@ namespace EnglishPlatform.Controllers
         /// <param name="content"> null/ string </param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult Create([FromForm]string groupName,[FromForm] string reply, [FromForm] int state, [FromForm] string title,[FromForm] string content)
+        public JsonResult Create([FromForm]string groupName, [FromForm] string reply, [FromForm] int state, [FromForm] string title, [FromForm] string content)
         {
             if (IsAuthenticated())
             {
                 var sender = new MemberGroupInfo(_userID, _email, _name, _typeUser.Contains(Teacher));
                 var group = _groupService.CreateQuery().Find(o => o.Name == groupName)?.FirstOrDefault();
 
-                if(group == null)
+                if (group == null)
                 {
-                    
+
                     MemberGroupInfo receiver = null;
                     var teacher = _teacherService.GetItemByID(groupName);
                     if (teacher != null)
@@ -419,7 +424,7 @@ namespace EnglishPlatform.Controllers
                         }
                     }
 
-                    if(receiver != null)
+                    if (receiver != null)
                     {
                         group = _groupService.CreateNewGroup(sender, receiver);
                     }
@@ -496,9 +501,9 @@ namespace EnglishPlatform.Controllers
             if (IsAuthenticated())
             {
                 var item = _messageService.GetItemByCode(code);
-                if(item != null)
+                if (item != null)
                 {
-                    if(item.Sender == new MemberGroupInfo(_userID, _email, _name, _typeUser.Contains(Teacher)))
+                    if (item.Sender == new MemberGroupInfo(_userID, _email, _name, _typeUser.Contains(Teacher)))
                     {
                         _messageService.Remove(item.ID);
 
@@ -572,7 +577,7 @@ namespace EnglishPlatform.Controllers
                     return NotFoundData();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Error(ex);
             }
@@ -615,7 +620,7 @@ namespace EnglishPlatform.Controllers
             }
             return User.Identity.IsAuthenticated;
         }
-        protected JsonResult ResponseApi(int Code, object Message , object Data=null)
+        protected JsonResult ResponseApi(int Code, object Message, object Data = null)
         {
             return new JsonResult(new { Code, Message, Data });
         }
@@ -629,7 +634,7 @@ namespace EnglishPlatform.Controllers
         }
         protected JsonResult Success(object Data)
         {
-            return ResponseApi(200,"Success",Data);
+            return ResponseApi(200, "Success", Data);
         }
         #endregion
 
@@ -642,7 +647,7 @@ namespace EnglishPlatform.Controllers
                 if (IsAuthenticated())
                 {
                     var data = _notificationService.GetListNoViews(_userID);
-                    if(data == null)
+                    if (data == null)
                     {
                         return NotFoundData();
                     }
@@ -656,7 +661,7 @@ namespace EnglishPlatform.Controllers
                     return NotFoundData();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Error(ex);
             }
@@ -669,7 +674,7 @@ namespace EnglishPlatform.Controllers
             {
                 if (IsAuthenticated())
                 {
-                    var data = _notificationService.UpdateView(groupName,messageCode,_userID);
+                    var data = _notificationService.UpdateView(groupName, messageCode, _userID);
                     if (data == null)
                     {
                         return NotFoundData();
@@ -728,9 +733,9 @@ namespace EnglishPlatform.Controllers
                 if (student == null && teacher == null) continue;
                 var sender = student == null
                     ?
-                new MemberGroupInfo(teacher.ID,teacher.Email,teacher.FullName,true)
+                new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true)
                     :
-                new MemberGroupInfo(student.ID,student.Email,student.FullName,false);
+                new MemberGroupInfo(student.ID, student.Email, student.FullName, false);
                 var newItem = new MessageEntity()
                 {
                     Code = item.ID,

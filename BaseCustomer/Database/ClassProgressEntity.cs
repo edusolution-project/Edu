@@ -67,7 +67,7 @@ namespace BaseCustomerEntity.Database
         {
             var currentObj = _classService.GetItemByID(item.ClassID);
             if (currentObj == null) return;
-            var progress = GetItemByClassID(item.ClassID, item.StudentID);
+            var progress = GetStudentResult(item.ClassID, item.StudentID);
             if (progress == null)
             {
                 var totalLessons = _lessonService.CountClassLesson(item.ClassID);
@@ -97,22 +97,21 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public async Task UpdatePoint(LessonProgressEntity item)
+        public void UpdatePoint(LessonProgressEntity item)
         {
-            var progress = GetItemByClassID(item.ClassID, item.StudentID);
+            var progress = GetStudentResult(item.ClassID, item.StudentID);
             if (progress == null)
-            {
                 return;
-            }
             else
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
                     progress.ExamDone++;
 
                 progress.TotalPoint += item.PointChange;
-                progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+                if(progress.TotalPoint > 100)
+                    progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
 
-                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
+                Collection.ReplaceOne(t => t.ID == progress.ID, progress);
             }
         }
 
@@ -137,7 +136,7 @@ namespace BaseCustomerEntity.Database
         //}
 
 
-        public ClassProgressEntity GetItemByClassID(string ClassID, string StudentID)
+        public ClassProgressEntity GetStudentResult(string ClassID, string StudentID)
         {
             try
             {
@@ -158,6 +157,17 @@ namespace BaseCustomerEntity.Database
                      .Inc(t => t.TotalPoint, 0 - clssbj.TotalPoint)
                      .Inc(t => t.TotalLessons, 0 - clssbj.TotalLessons);
             await Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID && t.StudentID == clssbj.StudentID, update);
+        }
+
+        public IEnumerable<StudentRanking> GetClassResults(string ClassID)
+        {
+            return CreateQuery().Find(t => t.ClassID == ClassID).Project(t => new StudentRanking
+            {
+                StudentID = t.StudentID,
+                AvgPoint = t.AvgPoint,
+                ExamDone = t.ExamDone,
+                TotalPoint = t.TotalPoint
+            }).ToEnumerable();
         }
     }
 }

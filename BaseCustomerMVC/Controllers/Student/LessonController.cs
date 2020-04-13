@@ -16,6 +16,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CourseService _courseService;
         private readonly ClassService _classService;
         private readonly ClassStudentService _classStudentService;
+        private readonly StudentService _studentService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly ChapterService _chapterService;
         private readonly LessonScheduleService _lessonScheduleService;
@@ -44,6 +45,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , CourseService courseService
             , ClassService classService
             , ClassStudentService classStudentService
+            , StudentService studentService
             , ClassSubjectService classSubjectService
             , ChapterService chapterService
             , LessonScheduleService lessonScheduleService
@@ -65,6 +67,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _courseService = courseService;
             _classService = classService;
             _classStudentService = classStudentService;
+            _studentService = studentService;
             _classSubjectService = classSubjectService;
             _chapterService = chapterService;
             _lessonScheduleService = lessonScheduleService;
@@ -493,8 +496,9 @@ namespace BaseCustomerMVC.Controllers.Student
                         {"Error",model },
                         {"Msg","Không có thông tin lớp học" }
                     });
-            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, UserID);
-            if (classStudent == null)
+            //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, UserID);
+            //if (classStudent == null)
+            if (!_studentService.IsStudentInClass(currentClass.ID, UserID))
                 return new JsonResult(new Dictionary<string, object> {
                         {"Data",null },
                         {"Error",model },
@@ -569,8 +573,9 @@ namespace BaseCustomerMVC.Controllers.Student
                         {"Error",model },
                         {"Msg","Không có thông tin lớp học" }
                     });
-            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, UserID);
-            if (classStudent == null)
+            //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, UserID);
+            //if (classStudent == null)
+            if (!_studentService.IsStudentInClass(currentClass.ID, UserID))
                 return new JsonResult(new Dictionary<string, object> {
                         {"Data",null },
                         {"Error",model },

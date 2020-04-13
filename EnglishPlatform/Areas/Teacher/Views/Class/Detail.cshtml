@@ -42,7 +42,7 @@
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Môn học</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Học viên</a></li>
                     <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>
-                    <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(4)">Thảo luận</a></li>
+                    @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(4)">Thảo luận</a></li>*@
                 </ul>
             </div>
             <div class="c-right">
@@ -73,7 +73,7 @@
             </ul>
             <div class="box info-practice">
                 <h4>Chi tiết lớp học</h4>
-                <p>{{replaceBrkLine(domDecoder(classDescription))}}</p>
+                <p v-html="replaceBrkLine(domDecoder(classDescription))"></p>
             </div>
         </div>
         <div class="box" v-if="tab[1]">
@@ -105,12 +105,11 @@
                 <tbody>
                     <tr v-for="(item,k) in studentData">
                         <td>{{(k+1)}}</td>
-                        <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
-                        @*<td>{{item.Email}}</td>
-                            <td>{{item.Phone}}</td>*@
-                        <td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
+                        <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
+                        <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
                         <td>{{formatTime(item.LastJoinDate)}}</td>
-                        <td v-bind:class="{good : (item.Score > 50)}">{{item.Score == null ? '---' : (item.Score.toFixed(2) + '%')}}</td>
+                        <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
+                        <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -429,6 +428,10 @@
                     {
                         key: 'score',
                         label: 'Điểm trung bình'
+                    },
+                    {
+                        key: 'rank',
+                        label: 'Xếp hạng'
                     }
                 ],
                 studentData: [
@@ -599,7 +602,7 @@
                     _form.append('ClassID', _that.classID)
                     _form.append('PageSize', 1000)
                     _form.append('PageIndex', 1)
-                    let _url = '@Url.Action("GetList", "StudentManage")'
+                    let _url = '@Url.Action("GetClassResult", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.studentData = response.data.Data;
@@ -632,8 +635,9 @@
                         }).catch(e => { })
                 },
                 loadComment() {
-                    document.location = '@Url.Action("Index","Discuss", new { id = currentClass.ID })'
+                    @*document.location = '@Url.Action("Index","Discuss", new { id = currentClass.ID })'*@
                     //console.log(5)
+                    $('.fn-box-chat-eduso').focus().click()
                 },
 
                 //MODULE
@@ -894,6 +898,12 @@
                 hideModal() {
                     $('.close').click();
                 },
+                getPercent(a, b) {
+                    var result = 0;
+                    if (a > 0)
+                        result = a * 100 / b;
+                    return result;
+                }
             }
         });
     </script>

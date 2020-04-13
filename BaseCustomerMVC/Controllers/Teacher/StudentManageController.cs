@@ -79,7 +79,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _studentHelper = new StudentHelper(studentService, accountService);
         }
 
-        public IActionResult Index(DefaultModel model, int old = 0)
+        public IActionResult Index(DefaultModel model)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
@@ -100,8 +100,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.User = UserID;
             ViewBag.Model = model;
             ViewBag.Managable = CheckPermission(PERMISSION.MEMBER_COURSE_EDIT);
-            if (old == 1)
-                return View("Index - o");
+            return View();
+        }
+
+        public IActionResult Detail(DefaultModel model)
+        {
+            var student = _studentService.GetItemByID(model.ID);
+            if (student == null)
+                return RedirectToAction("Index");
+            ViewBag.Student = student;
             return View();
         }
 
@@ -114,14 +121,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     error = "Thông tin không chính xác"
                 });
             }
-            var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
-            if (deleted > 0)
+            //var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
+            if (_studentService.LeaveClass(ClassID, StudentID) > 0)
             {
                 //remove history, exam, exam detail, progress...
                 _learningHistoryService.RemoveClassStudentHistory(ClassID, StudentID);
                 _examService.RemoveClassStudentExam(ClassID, StudentID);
             }
-            return Json(new { msg = "đã xóa " + deleted + " học viên" });
+            return Json(new { msg = "đã xóa học viên" });
         }
 
         public JsonResult AddStudent(string ClassID, string StudentID)
@@ -134,15 +141,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var student = _studentService.GetItemByID(StudentID);
             if (student == null)
                 return Json(new { error = "Học viên không tồn tại" });
-            var classstudent = _classStudentService.GetClassStudent(ClassID, student.ID);
-            if (classstudent != null)
+            if (_studentService.IsStudentInClass(ClassID, student.ID))
             {
-                //already in class
                 return Json(new { data = @class, msg = "Học viên đã có trong lớp" });
             }
-            var newstudent = new ClassStudentEntity { ClassID = ClassID, StudentID = StudentID };
-            _classStudentService.Save(newstudent);
-            if (newstudent.ID != null)
+            if (_studentService.JoinClass(ClassID, StudentID) > 0)
                 return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
             return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
         }
@@ -174,81 +177,37 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 : _classService.Collection.Find(t => true).Project(t => t.ID).ToList();
             }
 
-
             if (classids == null || classids.Count() == 0)
                 return new JsonResult(new Dictionary<string, object>
                 {
                     { "Model", model }
                 });
-            var retStudents = new List<ClassStudentEntity>();
-
-            if (!string.IsNullOrEmpty(model.SearchText))
-            {
-                var studentids = _studentService.Collection.Find(Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")).Project(t => t.ID).ToList();
-                //TODO: Lưu ý chỗ này, khi lượng sinh viên lớn thì tương đối nặng
-                var list = _classStudentService.Collection.Find(t => classids.Contains(t.ClassID) && studentids.Contains(t.StudentID)).SortByDescending(t => t.ID);
-                model.TotalRecord = list.CountDocuments();
-                //var filter = new List<FilterDefinition<StudentEntity>>();
-                retStudents = list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
-            }
-            else
-            {
-                var studentList = _classStudentService.Collection.Find(t => classids.Contains(t.ClassID)).SortByDescending(t => t.ID);
-                model.TotalRecord = studentList.CountDocuments();
-                //var filter = new List<FilterDefinition<StudentEntity>>();
-                retStudents = studentList.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
-            }
-            //filter.Add(Builders<StudentEntity>.Filter.Where(o => retStudents.Contains(o.ID)));
-            //var students = filter.Count > 0 ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _studentService.GetAll();
+            var list =
+                    string.IsNullOrEmpty(model.SearchText) ?
+                        _studentService.Collection.Find(Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids))
+                        .SortByDescending(t => t.ID)
+                        :
+                        _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(
+                        Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids),
+                        Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")))
+                        .SortByDescending(t => t.ID);
+            //var list = _classStudentService.Collection.Find(t => classids.Contains(t.ClassID) && studentids.Contains(t.StudentID)).SortByDescending(t => t.ID);
+            model.TotalRecord = list.CountDocuments();
 
             var _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
 
-            var studentsView = new List<ClassStudentViewModel>();
-
-            if (string.IsNullOrEmpty(SubjectID))
-            {
-
-                studentsView = (from r in retStudents
-                                let @class = _classService.GetItemByID(r.ClassID)
-                                where @class != null
-                                let examCount = _lessonScheduleService.CountClassExam(r.ClassID, end: DateTime.Now)//TODO: HEAVY LOAD -> NEED FIX
-                                let @student = _studentService.GetItemByID(r.StudentID)
-                                where @student != null
-                                let progress = _classProgressService.GetItemByClassID(@class.ID, @student.ID) ?? new ClassProgressEntity()
-                                select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
-                                {
-                                    ClassID = @class.ID,
-                                    ClassName = @class.Name,
-                                    ClassStatus = "Đang học",
-                                    LastJoinDate = progress.LastDate,
-                                    Percent = (progress.TotalLessons == 0) ? 0 : (progress.Completed * 100 / progress.TotalLessons),
-                                    Score = examCount == 0 ? 0 : progress.TotalPoint / examCount
-                                })).ToList();
-            }
-            else
-            {
-                studentsView = (from r in retStudents
-                                let @class = _classService.GetItemByID(r.ClassID)
-                                where @class != null
-                                let classusbjectIds = _classSubjectService.GetIDsByClassID_Subject(r.ClassID, SubjectID)
-                                let examCount = _lessonScheduleService.CountClassSubjectExam(classusbjectIds, end: DateTime.Now)
-                                let @student = _studentService.GetItemByID(r.StudentID)
-                                where @student != null
-                                let progress = _classSubjectProgressService.GetItemByClassSubjectID(SubjectID, @student.ID) ?? new ClassSubjectProgressEntity() //TODO: Multiple class subject ???? - Too complicated
-                                select _mapping.AutoOrtherType(@student, new ClassStudentViewModel()
-                                {
-                                    ClassID = @class.ID,
-                                    ClassName = @class.Name,
-                                    ClassStatus = "Đang học",
-                                    LastJoinDate = progress.LastDate,
-                                    Percent = (progress.TotalLessons == 0) ? 0 : (progress.Completed * 100 / progress.TotalLessons),
-                                    Score = examCount == 0 ? 0 : progress.TotalPoint / examCount
-                                })).ToList();
-            }
+            var retStudents = list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList()
+                .Select(t => _mapping.AutoOrtherType(t, new ClassStudentViewModel()
+                {
+                    ClassID = ClassID,
+                    ClassName = string.IsNullOrEmpty(ClassID) ?
+                        string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses)) :
+                        _classService.GetItemByID(ClassID).Name
+                }));
 
             var response = new Dictionary<string, object>
             {
-                { "Data", studentsView },
+                { "Data", retStudents },
                 { "Model", model }
             };
             return new JsonResult(response);
@@ -259,65 +218,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return Json(_studentService.Search(term, 100));
         }
 
-        //[HttpPost]
-        //[DisableRequestSizeLimit]
-        //public async Task<JsonResult> SaveInfo(ClassEntity entity)
-        //{
-
-        //    if (String.IsNullOrEmpty(entity.ID))
-        //    {
-        //        new JsonResult(
-        //            new Dictionary<string, object>
-        //            {
-        //                { "Error", "Không có thông tin lớp"}
-        //            });
-        //    }
-
-        //    var currentClass = _service.GetItemByID(entity.ID);
-        //    if (currentClass == null)
-        //        if (String.IsNullOrEmpty(entity.ID))
-        //        {
-        //            new JsonResult(
-        //                new Dictionary<string, object>
-        //                {
-        //                { "Error", "Không có thông tin lớp"}
-        //                });
-        //        }
-
-        //    try
-        //    {
-        //        var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
-        //        if (files != null && files.Count > 0)
-        //        {
-        //            var file = files[0];
-
-        //            var filename = currentClass.ID + "_" + DateTime.Now.ToUniversalTime().ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
-        //            currentClass.Image = await _fileProcess.SaveMediaAsync(file, filename);
-        //        }
-        //        currentClass.Description = entity.Description ?? "";
-        //        currentClass.Syllabus = entity.Syllabus ?? "";
-        //        currentClass.Modules = entity.Modules ?? "";
-        //        currentClass.LearningOutcomes = entity.LearningOutcomes ?? "";
-        //        currentClass.References = entity.References ?? "";
-        //        _service.CreateOrUpdate(currentClass);
-
-        //        return new JsonResult(
-        //            new Dictionary<string, object>
-        //            {
-        //                { "Data", currentClass }
-        //            }
-        //        );
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return new JsonResult(
-        //                new Dictionary<string, object>
-        //                {
-        //                    { "Error", e.Message}
-        //                });
-        //    }
-        //}
-
+        #region Batch Import
         [HttpPost]
         [Obsolete]
         public async Task<JsonResult> ImportStudent(string ClassID)
@@ -347,7 +248,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
                             int totalRows = workSheet.Dimension.Rows;
-                            var classStudents = _classStudentService.GetClassStudents(ClassID);
+                            var classStudents =
+                                _studentService.GetClassStudentIDs(ClassID);
                             var keyCol = 4;
                             var defPass = "Eduso123";
                             for (int i = 1; i <= totalRows; i++)
@@ -357,57 +259,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 if (string.IsNullOrEmpty(studentEmail)) continue;
                                 var student = _studentService.CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
 
-
                                 if (student == null) continue;
-                                //{
-                                //if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                                //if (workSheet.Cells[i, 4].Value == null) continue; // Email null;
-                                //                                                   //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
-                                //string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
-                                //string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
-                                //var birthdate = new DateTime();
-                                //DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
-                                //                   DateTimeStyles.None,
-                                //                   out birthdate);
-                                //var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
-                                //var skype = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString();
-                                //student = new StudentEntity
-                                //{
-                                //    //StudentId = code,
-                                //    FullName = name,
-                                //    DateBorn = birthdate,
-                                //    Email = studentEmail,
-                                //    Phone = phone,
-                                //    Skype = skype,
-                                //    CreateDate = DateTime.Now,
-                                //    UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
-                                //    IsActive = true
-                                //};
-
-                                //await _studentService.CreateQuery().InsertOneAsync(student);
-
-                                //var account = new AccountEntity()
-                                //{
-                                //    CreateDate = DateTime.Now,
-                                //    IsActive = true,
-                                //    PassTemp = Core_v2.Globals.Security.Encrypt
-                                //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
-                                //        defPass
-                                //        ),
-                                //    PassWord = Core_v2.Globals.Security.Encrypt
-                                //        //string.Format("{0:ddMMyyyy}", item.DateBorn)
-                                //        defPass
-                                //        ),
-                                //    UserCreate = student.UserCreate,
-                                //    Type = ACCOUNT_TYPE.STUDENT,
-                                //    UserID = student.ID,
-                                //    UserName = student.Email.ToLower().Trim(),
-                                //    RoleID = _roleService.GetItemByCode("student").ID
-                                //};
-                                //_accountService.CreateQuery().InsertOne(account);
-                                //}
-                                //else 
-                                if (classStudents.Any(t => t.StudentID == student.ID)) continue;
+                                if (classStudents.Any(t => t == student.ID)) continue;
 
                                 _classStudentService.Save(new ClassStudentEntity
                                 {
@@ -428,28 +281,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        public IActionResult ConvertStudent()
+        public async Task<IActionResult> ExportTemplate(DefaultModel model)
         {
-            var classes = _classService.GetAll().ToList();
-            foreach (var @class in classes)
-            {
-                _classStudentService.RemoveClass(@class.ID);
-                var students = @class.Students;
-                foreach (var student in students)
-                {
-                    _classStudentService.Save(new ClassStudentEntity
-                    {
-                        ClassID = @class.ID,
-                        StudentID = student
-                    });
-                }
-            }
-            return null;
-        }
-
-        public async Task<IActionResult> StudentTemplate(DefaultModel model)
-        {
-
             var list = new List<StudentEntity>() { new StudentEntity() {
                 ID = "undefined"
                 } };
@@ -476,5 +309,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
+        #endregion
+
+        public async Task<JsonResult> ConvertStudent()
+        {
+            var classes = _classService.GetAll().ToList();
+            var count = 0;
+            var str = "";
+            _studentService.Collection.UpdateMany(t => true, Builders<StudentEntity>.Update.Unset(t => t.JoinedClasses));
+            foreach (var @class in classes)
+            {
+                await _studentService.LeaveClassAll(@class.ID);
+                //if (@class.ID != "5e652e05fd6d8e01304cd67c") continue;
+                //_classStudentService.RemoveClass(@class.ID);
+                var students = _classStudentService.GetClassStudents(@class.ID);
+
+                foreach (var student in students)
+                {
+                    if (_studentService.JoinClass(@class.ID, student.StudentID) > 0)
+                        count++;
+                    else
+                    {
+                        str += student.ID + "<br/>";
+                    }
+                }
+            }
+            return new JsonResult("OK " + str);
+        }
+
     }
 }

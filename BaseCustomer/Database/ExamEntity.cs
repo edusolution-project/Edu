@@ -207,16 +207,17 @@ namespace BaseCustomerEntity.Database
             exam.QuestionsTotal =
                 _cloneLessonPartQuestionService.Collection.CountDocuments(t => t.LessonID == exam.LessonID);
             //_cloneLessonPartService.Collection.CountDocuments(t => t.ParentID == lesson.ID && t.Type == "essay");
-            _ = _lessonProgressService.UpdateLastPoint(exam);
-            var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(exam.ClassSubjectID, exam.StudentID, exam.LessonID);
+
+            var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
+            //_lessonProgressService.GetByClassSubjectID_StudentID_LessonID(exam.ClassSubjectID, exam.StudentID, exam.LessonID);
 
             if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
             {
                 _ = _chapterProgressService.UpdatePoint(lessonProgress);
                 _ = _classSubjectProgressService.UpdatePoint(lessonProgress);
-                _ = _classProgressService.UpdatePoint(lessonProgress);
+                _classProgressService.UpdatePoint(lessonProgress);
             }
-            CreateOrUpdate(exam);
+            Save(exam);
             return exam;
         }
 

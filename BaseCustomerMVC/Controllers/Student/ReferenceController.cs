@@ -16,14 +16,15 @@ namespace BaseCustomerMVC.Controllers.Student
     public class ReferenceController : StudentController
     {
         private readonly TeacherService _teacherService;
+        private readonly StudentService _studentService;
         private readonly ClassService _classService;
         private readonly FileProcess _fileProcess;
-        private readonly ClassStudentService _classStudentService;
+
         private readonly ReferenceService _referenceService;
         private readonly IHostingEnvironment _env;
 
         public ReferenceController(
-            ClassStudentService classStudentService,
+            StudentService studentService,
             TeacherService teacherService,
             ClassService classService,
             FileProcess fileProcess,
@@ -31,7 +32,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ReferenceService referenceService
             )
         {
-            _classStudentService = classStudentService;
+            _studentService = studentService;
             _teacherService = teacherService;
             _classService = classService;
             _referenceService = referenceService;
@@ -42,7 +43,7 @@ namespace BaseCustomerMVC.Controllers.Student
         public IActionResult Index(DefaultModel model, int old = 0)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var classIds = _classStudentService.GetStudentClasses(UserID);
+            var classIds = _studentService.GetItemByID(UserID).JoinedClasses;
             var myClasses = new List<ClassEntity>();
             if (classIds != null && classIds.Count > 0)
             {
@@ -86,7 +87,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         filter.Add(Builders<ReferenceEntity>.Filter.Where(o => (o.Range == REF_RANGE.ALL)));
                         break;
                     default:
-                        var classIds = _classStudentService.GetStudentClasses(UserID);
+                        var classIds = _studentService.GetItemByID(UserID).JoinedClasses;
                         var teacherIDs = new List<string>();
                         if (classIds != null && classIds.Count > 0)
                         {

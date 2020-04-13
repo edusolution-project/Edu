@@ -117,16 +117,31 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID).FirstOrDefault();
         }
 
-        public List<ClassSubjectProgressEntity> GetClassListOfCurrentSubject(string ClassSubjectID)
+        public IEnumerable<ClassSubjectProgressEntity> GetClassListOfCurrentSubject(string ClassSubjectID)
         {
             var currentObj = _classSubjectService.GetItemByID(ClassSubjectID);
             if (currentObj == null) return null;
-            return CreateQuery().Find(t => t.ClassID == currentObj.ClassID).ToList();
+            return CreateQuery().Find(t => t.ClassID == currentObj.ClassID).ToEnumerable();
         }
 
-        //public ClassProgressEntity GetItemByClassSubjectID(string ClassSubjectID, string StudentID)
-        //{
-        //    return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID).FirstOrDefault();
-        //}
+        public IEnumerable<ClassSubjectProgressEntity> GetListOfCurrentSubject(string ClassSubjectID)
+        {
+            var currentObj = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (currentObj == null) return null;
+            return CreateQuery().Find(t => t.ClassSubjectID == currentObj.ID).ToEnumerable();
+        }
+
+        public IEnumerable<StudentRanking> GetStudentResults(string ClassSubjectID)
+        {
+            return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID).Project(t => new StudentRanking
+            {
+                StudentID = t.StudentID,
+                AvgPoint = t.AvgPoint,
+                ExamDone = t.ExamDone,
+                TotalPoint = t.TotalPoint
+            }).ToEnumerable();
+        }
     }
+
+
 }

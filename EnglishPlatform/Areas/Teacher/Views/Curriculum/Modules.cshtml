@@ -157,15 +157,15 @@
                                        }>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row d-none">
                             <div class="form-group col-md-6" for="examOnly">
                                 <label class="col-form-label">Điểm :</label>
-                                <input type="text" class="form-control" name="Point" placeholder="0" required @if (isLock) { @: readonly="true"
+                                <input type="text" class="form-control" name="Point" placeholder="0" value="1" required @if (isLock) { @: readonly="true"
                                        }>
                             </div>
                             <div class="form-group col-md-6" for="examOnly">
                                 <label class="col-form-label">Hệ số:</label>
-                                <input type="text" class="form-control" name="Multiple" placeholder="> 0" required @if (isLock) { @: readonly="true"
+                                <input type="text" class="form-control" name="Multiple" placeholder="> 0" value="1" required @if (isLock) { @: readonly="true"
                                        }>
                             </div>
                         </div>
@@ -228,12 +228,12 @@
         </div>
     </div>
 
-    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="lessonFrameModal">
+    <div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" id="lessonFrameModal">
         <div class="modal-dialog modal-lg w-100 m-0" style="max-width:100%; display: flex; height: 100%;">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <h5 class="modal-title" id="modalTitle">Cập nhật nội dung</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeLessonFrame()">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -241,7 +241,7 @@
                     <iframe width="100%" height="100%" style="display: flex; border:none;" src=""></iframe>
                 </div>
                 <div class="modal-footer p-2">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeLessonFrame()">Đóng</button>
                 </div>
             </div>
         </div>
@@ -801,7 +801,20 @@
     }
 
     function openLesson(obj) {
-        $("#lessonFrameModal iframe").attr("src",$(obj).attr("href") + "&frameview=1")
+        var url = $(obj).attr("href");
+        console.log($(obj).text());
+        $("#lessonFrameModal iframe").attr("src", url + "&frameview=1")
+        window.history.replaceState({ frame: 1 }, $(obj).text(), url);
+        document.title = $(obj).text();
+    }
+
+    function closeLessonFrame() {
+        var url = '@Url.Action("Modules", "Curriculum")/@Data.ID';
+        var title = '@Data.Name'
+        
+        //window.location.replace(url);
+        window.history.replaceState({ frame: 0 }, title, url);
+        document.title = title
     }
 
     $(document).ready(function () {

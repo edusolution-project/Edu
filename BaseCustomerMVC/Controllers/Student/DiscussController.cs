@@ -14,46 +14,16 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
-        private readonly ClassStudentService _classStudentService;
+
         public DiscussController(ClassService classService, StudentService studentService, TeacherService teacherService, ClassStudentService classStudentService)
         {
             _classService = classService;
             _studentService = studentService;
             _teacherService = teacherService;
-            _classStudentService = classStudentService;
         }
 
         public IActionResult Index(string id,string searchText)
         {
-            var listClassID = _classStudentService.GetStudentClasses(User.Claims.GetClaimByType("UserID")?.Value);
-            var listClass = listClassID != null ? _classService.CreateQuery().Find(o=> listClassID.Contains(o.ID))?.ToList() : null;
-            var listActive = listClass?.Select(o => new ClassInfo()
-            {
-                ID = o.ID,
-                IsAllow = o.EndDate >= DateTime.Now && o.StartDate <= DateTime.Now,
-                Name = o.Name
-            })?.OrderByDescending(o=>o.IsAllow)?.ToList();
-            ViewBag.Data = listActive;
-            ViewBag.SearchText = searchText;
-            ViewBag.ID = id;
-            if (!string.IsNullOrEmpty(id))
-            {
-                var currentClass = _classService.GetItemByID(id);
-                if(currentClass != null)
-                {
-                    ViewBag.Class = new ClassInfo() {
-                        ID = currentClass.ID,
-                        Name = currentClass.Name,
-                        IsAllow = currentClass.StartDate <= DateTime.Now && currentClass.EndDate >= DateTime.Now
-                    };
-                    var listAccount = _classStudentService.GetClassStudents(currentClass.ID)?.Select(o=>o.StudentID)?.ToList();
-                    var teacherID = currentClass.TeacherID;
-                    ViewBag.Students = _studentService.Collection.Find(o => listAccount.Contains(o.ID))?.ToList()?
-                        .Select(x => new MemberInfo (){ ID= x.ID, Name = x.FullName, Email = x.Email , Skype = x.Skype}).ToList();
-                    var teacher = _teacherService.GetItemByID(teacherID);
-                    ViewBag.Teacher = new MemberInfo() { ID = teacher.ID, Name = teacher.FullName, Email = teacher.Email, Skype = teacher.Skype };
-                }
-            }
             return View();
         }
 
