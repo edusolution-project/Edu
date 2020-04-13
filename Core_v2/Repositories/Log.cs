@@ -20,6 +20,14 @@ namespace Core_v2.Repositories
             _configuration = configuration;
             _path = string.IsNullOrEmpty(getPathLog()) ? _env.WebRootPath : getPathLog();
         }
+        public Log()
+        {
+            _path = Path.Combine("wwwroot", "logs");
+            if (!Directory.Exists(_path))
+            {
+                Directory.CreateDirectory(_path);
+            }
+        }
         public Task Debug(string function, object content)
         {
             var path = Path.Combine(_path, function + "\\Debug");

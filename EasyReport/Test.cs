@@ -20,24 +20,27 @@ namespace EasyReport
                 new SinhVien{ MSSV = "15211TT00xx", Name = "Nguyễn Trung Hiếu", Phone = "090999xxxx" },
             };
 
+            
+
             // khởi tạo wb rỗng
             XSSFWorkbook wb = new XSSFWorkbook();
 
             // Tạo ra 1 sheet
             ISheet sheet = wb.CreateSheet();
-
+            sheet.Autobreaks = true;
             // Bắt đầu ghi lên sheet
 
             // Tạo row
             var row0 = sheet.CreateRow(0);
             // Merge lại row đầu 3 cột
             row0.CreateCell(0); // tạo ra cell trc khi merge
-            CellRangeAddress cellMerge = new CellRangeAddress(0, 0, 0, 3);
+            CellRangeAddress cellMerge = new CellRangeAddress(0, 1, 0, 2);
             sheet.AddMergedRegion(cellMerge);
             row0.GetCell(0).SetCellValue("Thông tin sinh viên");
 
             // Ghi tên cột ở row 1
-            var row1 = sheet.CreateRow(1);
+            var row1 = sheet.CreateRow(2);
+            
             row1.CreateCell(0).SetCellValue("MSSV");
             //public XSSFCellStyle(StylesTable stylesSource);
             //public XSSFCellStyle(int cellXfId, int cellStyleXfId, StylesTable stylesSource, ThemesTable theme);
@@ -61,16 +64,18 @@ namespace EasyReport
 
             row1.CreateCell(1).SetCellValue("Tên");
             row1.CreateCell(2).SetCellValue("Phone");
-
+            
             // bắt đầu duyệt mảng và ghi tiếp tục
-            int rowIndex = 2;
+            int rowIndex = 3;
             foreach (var item in list)
             {
                 // tao row mới
                 var newRow = sheet.CreateRow(rowIndex);
-
+                var cell0 = newRow.CreateCell(0);
                 // set giá trị
-                newRow.CreateCell(0).SetCellValue(item.MSSV);
+                cell0.SetCellValue(item.MSSV);
+                cell0.CellStyle.Alignment = HorizontalAlignment.Fill;
+                
                 newRow.CreateCell(1).SetCellValue(item.Name);
                 newRow.CreateCell(2).SetCellValue(item.Phone);
 

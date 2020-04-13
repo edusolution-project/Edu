@@ -9,5 +9,6 @@ namespace EasyReport.Models
         public MergeModel Merge { get; set; }
         public string Field { get; set; }
         public string Value { get; set; }
+        public bool IsTrue { get; set; }
     }
 }
