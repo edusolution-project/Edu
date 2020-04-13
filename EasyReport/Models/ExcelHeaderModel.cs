@@ -7,8 +7,7 @@ namespace EasyReport.Models
     public class ExcelHeaderModel
     {
         public MergeModel Merge { get; set; }
-        public string Field { get; set; }
-        public string Value { get; set; }
-        public bool IsTrue { get; set; }
+        public string Field { get; set; } // tên trường trong table
+        public string Value { get; set; } // text , 1 2 3 hoặc "xin chào"
     }
 }

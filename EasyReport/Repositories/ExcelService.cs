@@ -22,10 +22,16 @@ namespace EasyReport.Repositories
         {
             _log = new Log();
         }
+
+        private void ImportTemplate(string file)
+        {
+
+        }
+
         private void export(string sheetName)
         {
             // tạo mới 1 workbook
-            XSSFWorkbook workbook = new XSSFWorkbook();
+            XSSFWorkbook workbook = new XSSFWorkbook("EventExpenseReport.xls");
             // tạo sheet
             ISheet sheet = workbook.CreateSheet(sheetName);
 

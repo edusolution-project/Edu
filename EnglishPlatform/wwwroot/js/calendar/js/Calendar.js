@@ -327,8 +327,8 @@ var EduCalendar = (function(){
         var formEventxxx = document.getElementById("form-event-class");
         if (formEventxxx != null) {
             formEventxxx.classList.remove("show_go_to_class");
-            var btnMo = formEvent.querySelector("button#btn-mo-bai-hoc");
-            var btnOnline = formEvent.querySelector("button#btn-vao-lop-online");
+            var btnMo = formEventxxx.querySelector("button#btn-mo-bai-hoc");
+            var btnOnline = formEventxxx.querySelector("button#btn-vao-lop-online");
             if (btnMo != null) {
                 btnMo.removeAttribute("data-url");
                 btnMo.style.display = "none";
