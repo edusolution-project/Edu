@@ -436,10 +436,10 @@ namespace BaseCustomerMVC.Controllers.Student
                 //    Time = DateTime.Now,
                 //    StudentID = User.Claims.GetClaimByType("UserID").Value
                 //});
-                var deleted = _examDetailService.CreateQuery().DeleteMany(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).DeletedCount;
+                var deleted = await _examDetailService.CreateQuery().DeleteManyAsync(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID);
 
                 exam.Updated = DateTime.Now;
-                if (deleted > 0 && exam.QuestionsDone > 0)
+                if (deleted.DeletedCount > 0 && exam.QuestionsDone > 0)
                     exam.QuestionsDone -= 1;
 
                 _examService.CreateOrUpdate(exam);

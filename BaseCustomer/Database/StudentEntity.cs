@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,26 +53,36 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public List<StudentEntity> Search(string name, int limit = 0)
+        public IEnumerable<StudentEntity> Search(string name, int limit = 0)
         {
-            return Collection.Find(Builders<StudentEntity>.Filter.Text("\"" + name + "\"")).Limit(limit).ToList();
+            return Collection.Find(Builders<StudentEntity>.Filter.Text("\"" + name + "\"")).Limit(limit).ToEnumerable();
         }
 
 
         //joined class
         public long CountByClass(string ClassID)
         {
-            return Collection.CountDocuments(t => t.JoinedClasses.Contains(ClassID));
+            return GetStudentsByClassId(ClassID).Count();
         }
 
-        public List<StudentEntity> GetClassStudents(string ClassID)
+        public IEnumerable<StudentEntity> GetStudentsByClassId(string ClassID)
         {
-            return Collection.Find(t => t.JoinedClasses.Contains(ClassID)).ToList();
+            return Collection.Find(t => t.JoinedClasses.Contains(ClassID)).ToEnumerable();
         }
 
-        public List<string> GetClassStudentIDs(string ClassID)
+        public IEnumerable<string> GetStudentIdsByClassId(string ClassID)
         {
-            return Collection.Find(t => t.JoinedClasses.Contains(ClassID)).Project(t => t.ID).ToList();
+            return Collection.Find(t => t.JoinedClasses.Contains(ClassID)).Project(t => t.ID).ToEnumerable();
+        }
+
+        public IEnumerable<string> GetStudentIdsByClassIds(List<string> ClassIDs)
+        {
+            return GetStudentsByClassIds(ClassIDs).Select(t => t.ID);
+        }
+        
+        public IEnumerable<StudentEntity> GetStudentsByClassIds(List<string> ClassIDs)
+        {
+            return Collection.Find(t => t.JoinedClasses.FindIndex(t1 => ClassIDs.Contains(t1)) >= 0).ToEnumerable();
         }
 
         public bool IsStudentInClass(string ClassID, string ID)
@@ -86,7 +97,11 @@ namespace BaseCustomerEntity.Database
 
         public async Task LeaveClassAll(List<string> ClassIDs)
         {
-            await Collection.UpdateManyAsync(t => t.JoinedClasses.Exists(o => ClassIDs.Contains(o)), Builders<StudentEntity>.Update.PullAll(t => t.JoinedClasses, ClassIDs));
+            foreach (var ClassID in ClassIDs)
+            {
+                await LeaveClassAll(ClassID);
+            }
+            //await Collection.UpdateManyAsync(t => t.JoinedClasses.Exists(o => ClassIDs.Contains(o)), Builders<StudentEntity>.Update.PullAll(t => t.JoinedClasses, ClassIDs));
         }
 
         public long LeaveClass(string ClassID, string StudentID)
@@ -96,7 +111,15 @@ namespace BaseCustomerEntity.Database
 
         public long JoinClass(string ClassID, string StudentID)
         {
-            return Collection.UpdateMany(t => t.ID == StudentID, Builders<StudentEntity>.Update.AddToSet(t => t.JoinedClasses, ClassID)).ModifiedCount;
+            if (Collection.Find(t => t.ID == StudentID && t.JoinedClasses == null).CountDocuments() > 0)
+                return Collection.UpdateMany(t => t.ID == StudentID, Builders<StudentEntity>.Update.Set(t => t.JoinedClasses, new List<string> { ClassID })).ModifiedCount;
+            else
+                return Collection.UpdateMany(t => t.ID == StudentID, Builders<StudentEntity>.Update.AddToSet(t => t.JoinedClasses, ClassID)).ModifiedCount;
+        }
+
+        public StudentEntity GetStudentByEmail(string studentEmail)
+        {
+            return CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
         }
     }
 

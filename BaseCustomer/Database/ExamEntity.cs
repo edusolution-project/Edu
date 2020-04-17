@@ -213,39 +213,48 @@ namespace BaseCustomerEntity.Database
 
             if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
             {
-                _ = _chapterProgressService.UpdatePoint(lessonProgress);
-                _ = _classSubjectProgressService.UpdatePoint(lessonProgress);
-                _classProgressService.UpdatePoint(lessonProgress);
+                var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
+                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
+                var ctask = _classProgressService.UpdatePoint(lessonProgress);
+                Task.WhenAll(cttask, cstask, ctask);
             }
             Save(exam);
             return exam;
         }
 
-        public Task RemoveClassExam(string ClassID)
+        public async Task RemoveClassExam(string ClassID)
         {
-            Collection.DeleteManyAsync(t => t.ClassID == ClassID);
-            _examDetailService.Collection.DeleteManyAsync(t => t.ClassID == ClassID);
-            return Task.CompletedTask;
+            var extask = Collection.DeleteManyAsync(t => t.ClassID == ClassID);
+            var edtask = _examDetailService.Collection.DeleteManyAsync(t => t.ClassID == ClassID);
+            await Task.WhenAll(extask, edtask);
         }
 
-        public Task RemoveClassStudentExam(string ClassID, string StudentID)
+        public async Task RemoveManyClassExam(string[] ids)
         {
-            Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
-            _examDetailService.Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
-            return Task.CompletedTask;
+            var extask = Collection.DeleteManyAsync(t => ids.Contains(t.ClassID));
+            var edtask = _examDetailService.Collection.DeleteManyAsync(t => ids.Contains(t.ClassID));
+            await Task.WhenAll(extask, edtask);
         }
 
-        public Task RemoveClassSubjectExam(string ClassSubjectID)
+        public async Task RemoveClassStudentExam(string ClassID, string StudentID)
         {
+            var extask = Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
+            var edtask = _examDetailService.Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
+            await Task.WhenAll(extask, edtask);
+        }
 
-            Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
-            _examDetailService.Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
-            return Task.CompletedTask;
+        public async Task RemoveClassSubjectExam(string ClassSubjectID)
+        {
+            var extask = Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            var edtask = _examDetailService.Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            await Task.WhenAll(extask, edtask);
         }
 
         public async Task ConvertClassSubject(ClassSubjectEntity classSubject)
         {
             await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ExamEntity>.Update.Set("ClassSubjectID", classSubject.ID));
         }
+
+
     }
 }

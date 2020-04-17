@@ -16,9 +16,9 @@ namespace BaseCustomerEntity.Database
         public string ClassID { get; set; }
     }
 
-    public class ClassStudentService : ServiceBase<ClassStudentEntity>
+    public class ClassStudentService_old : ServiceBase<ClassStudentEntity>
     {
-        public ClassStudentService(IConfiguration configuration) : base(configuration)
+        public ClassStudentService_old(IConfiguration configuration) : base(configuration)
         {
 
             var indexs = new List<CreateIndexModel<ClassStudentEntity>>

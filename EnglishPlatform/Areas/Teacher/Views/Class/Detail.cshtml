@@ -107,7 +107,7 @@
                         <td>{{(k+1)}}</td>
                         <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
                         <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
-                        <td>{{formatTime(item.LastJoinDate)}}</td>
+                        <td>{{formatTime(item.LastDate)}}</td>
                         <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
                         <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
                     </tr>

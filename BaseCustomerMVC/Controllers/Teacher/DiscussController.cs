@@ -16,7 +16,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
 
-        public DiscussController(ClassService classService, StudentService studentService, TeacherService teacherService, ClassStudentService classStudentService)
+        public DiscussController(ClassService classService, StudentService studentService, TeacherService teacherService)
         {
             _classService = classService;
             _studentService = studentService;

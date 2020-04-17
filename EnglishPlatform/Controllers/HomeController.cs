@@ -21,6 +21,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace EnglishPlatform.Controllers
 {
@@ -34,6 +35,7 @@ namespace EnglishPlatform.Controllers
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ILog _log;
+        private readonly MailHelper _mailHelper;
         private readonly ClassService _classService;
         private readonly StudentHelper _studentHelper;
         private readonly CalendarHelper _calendarHelper;
@@ -48,6 +50,7 @@ namespace EnglishPlatform.Controllers
             , ClassService classService
             , IOptions<DefaultConfigs> defaultvalue
             , CalendarHelper calendarHelper
+            , MailHelper mailHelper
             , ILog log)
         {
             _accessesService = accessesService;
@@ -61,7 +64,9 @@ namespace EnglishPlatform.Controllers
             _studentHelper = new StudentHelper(studentService, accountService);
             _calendarHelper = calendarHelper;
             _log = log;
+            _mailHelper = mailHelper;
             _default = defaultvalue.Value;
+
         }
 
         public IActionResult Index()
@@ -335,6 +340,14 @@ namespace EnglishPlatform.Controllers
                     var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
                     _accountService.CreateQuery().ReplaceOne(filter, user);
                     ViewBag.Data = user;
+                    try
+                    {
+                        await _mailHelper.SendRegisterEmail(user, PassWord).ConfigureAwait(false);
+                    }
+                    catch(Exception ex)
+                    {
+                        Trace.WriteLine(ex);
+                    }
                     return Json(new ReturnJsonModel
                     {
                         StatusCode = ReturnStatus.SUCCESS,

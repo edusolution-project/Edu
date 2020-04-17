@@ -51,7 +51,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly CalendarHelper _calendarHelper;
-        private readonly ClassStudentService _classStudentService;
+        //private readonly ClassStudentService _classStudentService;
         private readonly IHostingEnvironment _env;
 
         private readonly LessonHelper _lessonHelper;
@@ -64,7 +64,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             TeacherService teacherService,
             StudentService studentService,
             SkillService skillService,
-            ClassStudentService classStudentService,
+            //ClassStudentService classStudentService,
             LessonService lessonService,
             LessonScheduleService lessonScheduleService,
             ExamService examService,

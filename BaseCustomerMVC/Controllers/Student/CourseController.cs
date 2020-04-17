@@ -19,7 +19,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly SkillService _skillService;
         private readonly CourseService _courseService;
         private readonly TeacherService _teacherService;
-        private readonly ClassStudentService _classStudentService;
+        //private readonly ClassStudentService _classStudentService;
         private readonly SubjectService _subjectService;
         private readonly GradeService _gradeService;
         private readonly LessonService _lessonService;
@@ -60,7 +60,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , ClassSubjectService classSubjectService
             , SkillService skillService
             , CourseService courseService
-            , ClassStudentService classStudentService
+            //, ClassStudentService classStudentService
             , TeacherService teacherService
             , SubjectService subjectService
             , GradeService gradeService
@@ -97,7 +97,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _skillService = skillService;
             _classSubjectService = classSubjectService;
             _courseService = courseService;
-            _classStudentService = classStudentService;
+            //_classStudentService = classStudentService;
             _teacherService = teacherService;
             _subjectService = subjectService;
             _gradeService = gradeService;

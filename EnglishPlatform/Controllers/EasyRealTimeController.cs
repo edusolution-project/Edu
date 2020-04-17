@@ -36,7 +36,7 @@ namespace EnglishPlatform.Controllers
         private readonly TeacherService _teacherService;
         private readonly SubjectService _subjectService;
         private readonly ClassService _classService;
-        private readonly ClassStudentService _classStudentService;
+        //private readonly ClassStudentService _classStudentService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly GroupService _groupService;
         private readonly MessageService _messageService;
@@ -50,7 +50,7 @@ namespace EnglishPlatform.Controllers
             TeacherService teacherService,
             SubjectService subjectService,
             ClassService classService,
-            ClassStudentService classStudentService,
+            //ClassStudentService classStudentService,
             LessonScheduleService lessonScheduleService,
             GroupService groupService,
             MessageService messageService,
@@ -63,7 +63,7 @@ namespace EnglishPlatform.Controllers
             _teacherService = teacherService;
             _subjectService = subjectService;
             _classService = classService;
-            _classStudentService = classStudentService;
+            //_classStudentService = classStudentService;
             _lessonScheduleService = lessonScheduleService;
             _groupService = groupService;
             _messageService = messageService;
@@ -134,8 +134,9 @@ namespace EnglishPlatform.Controllers
                     {
                         // danh sach lop
                         var listClassID = realClass.Select(o => o.ID).ToList();
-                        var liststudentClass = _classStudentService.CreateQuery().Find(o => listClassID.Contains(o.ClassID))?.ToList();
-                        var listStudent = liststudentClass?.Select(o => o.StudentID);
+                        //var liststudentClass = _classStudentService.CreateQuery().Find(o => listClassID.Contains(o.ClassID))?.ToList();
+                        var listStudent = _studentService.GetStudentIdsByClassIds(listClassID) ;
+                            //liststudentClass?.Select(o => o.StudentID);
                         var listTeacher = realClass.Select(o => o.TeacherID).Distinct();
 
                         if (listStudent != null)
@@ -158,10 +159,11 @@ namespace EnglishPlatform.Controllers
                                 var itemClass = realClass[i];
                                 if (listGroupName == null || !listGroupName.Contains(itemClass.ID))
                                 {
-                                    var listMembersStudentID = //_classStudentService.GetClassStudents(itemClass.ID)?.Select(o => o.StudentID)?.ToList();
-                                        _studentService.GetClassStudentIDs(itemClass.ID);
-                                    var members = _studentService.CreateQuery().Find(o => listStudent.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();
-                                    var teacher = _teacherService.GetItemByID(itemClass.TeacherID);
+                                    //var listMembersStudentID = //_classStudentService.GetClassStudents(itemClass.ID)?.Select(o => o.StudentID)?.ToList();
+                                    //    _studentService.GetStudentIdsByClassId(itemClass.ID);
+                                    //var members = _studentService.CreateQuery().Find(o => listStudent.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();//chỗ này lấy hết SV???
+                                    var members = _studentService.GetStudentsByClassId(itemClass.ID).Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();
+                                    var teacher =  _teacherService.GetItemByID(itemClass.TeacherID);
                                     if (members == null)
                                     {
                                         members = new HashSet<MemberGroupInfo>() {

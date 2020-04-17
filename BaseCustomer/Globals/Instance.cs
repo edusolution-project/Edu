@@ -54,7 +54,7 @@ namespace BaseCustomerEntity.Globals
 
             services.AddSingleton<ClassService>();
             services.AddSingleton<ClassSubjectService>();
-            services.AddSingleton<ClassStudentService>();
+            //services.AddSingleton<ClassStudentService>();
             services.AddSingleton<ClassProgressService>();
             services.AddSingleton<ClassSubjectProgressService>();
 
@@ -69,6 +69,8 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<CalendarReportService>();
             services.AddSingleton<CalendarLogService>();
             services.AddSingleton<AccessesService>();
+
+            services.AddSingleton<MailLogService>();
             return services;
         }
     }

@@ -97,7 +97,7 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public void UpdatePoint(LessonProgressEntity item)
+        public async Task UpdatePoint(LessonProgressEntity item)
         {
             var progress = GetStudentResult(item.ClassID, item.StudentID);
             if (progress == null)
@@ -111,7 +111,7 @@ namespace BaseCustomerEntity.Database
                 if(progress.TotalPoint > 100)
                     progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
 
-                Collection.ReplaceOne(t => t.ID == progress.ID, progress);
+                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }
 

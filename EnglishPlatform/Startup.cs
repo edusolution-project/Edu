@@ -52,6 +52,7 @@ namespace EnglishPlatform
             services.AddServiceBase();
             services.AddScoped<FileProcess>();
             services.AddSingleton<CalendarHelper>();
+            services.AddSingleton<MailHelper>();
             services.AddSingleton<CourseHelper>();
             services.AddSingleton<StudentHelper>();
             services.AddSingleton<LessonHelper>();

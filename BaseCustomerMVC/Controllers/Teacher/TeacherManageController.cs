@@ -25,7 +25,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly TeacherService _teacherService;
         private readonly SkillService _skillService;
         private readonly ClassService _classService;
-        private readonly ClassStudentService _classStudentService;
+        //private readonly ClassStudentService _classStudentService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly StudentService _studentService;
         private readonly StudentHelper _studentHelper;
@@ -46,7 +46,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassService classService,
             SkillService skillService,
             ExamService examService,
-            ClassStudentService classStudentService,
+            //ClassStudentService classStudentService,
             ClassSubjectService classSubjectService,
             LearningHistoryService learningHistoryService,
             ClassProgressService classProgressService,
@@ -68,7 +68,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classProgressService = classProgressService;
             _classSubjectProgressService = classSubjectProgressService;
             _scoreStudentService = scoreStudentService;
-            _classStudentService = classStudentService;
+            //_classStudentService = classStudentService;
             _classSubjectService = classSubjectService;
             _studentService = studentService;
             _env = evn;

@@ -23,7 +23,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _service;
-        private readonly ClassStudentService _classStudentService;
+        //private readonly ClassStudentService _classStudentService;
         private readonly SkillService _skillService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
@@ -64,7 +64,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             GradeService gradeservice,
             SubjectService subjectService,
             ClassSubjectService classSubjectService,
-            ClassStudentService classStudentService,
+            //ClassStudentService classStudentService,
             TeacherService teacherService,
             ClassService service,
             SkillService skillService,
@@ -103,7 +103,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _service = service;
             _skillService = skillService;
             _classSubjectService = classSubjectService;
-            _classStudentService = classStudentService;
+            //_classStudentService = classStudentService;
             _classProgressService = classProgressService;
             _classSubjectProgressService = classSubjectProgressService;
 
@@ -584,7 +584,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var examCount = _lessonScheduleService.CountClassExam(@class.ID, null);
             var total_lessons = _lessonService.CountClassLesson(@class.ID);
             var results = _classProgressService.GetClassResults(@class.ID).OrderByDescending(t => t.TotalPoint).ToList();
-            foreach (var student in _studentService.GetClassStudents(@class.ID))
+            foreach (var student in _studentService.GetStudentsByClassId(@class.ID))
             {
                 var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
                     .AutoOrtherType(_classProgressService.GetStudentResult(@class.ID, student.ID) ?? new ClassProgressEntity
@@ -1142,16 +1142,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private async Task RemoveClassSubject(ClassSubjectEntity cs)
         {
             ////remove old schedule
-            await _lessonScheduleService.RemoveClassSubject(cs.ID);
+            var CsTask = _lessonScheduleService.RemoveClassSubject(cs.ID);
             //remove chapter
-            await _chapterService.RemoveClassSubjectChapter(cs.ID);
+            var CtTask = _chapterService.RemoveClassSubjectChapter(cs.ID);
             //remove clone lesson
-            await _lessonHelper.RemoveClassSubjectLesson(cs.ID);
+            var LsTask = _lessonHelper.RemoveClassSubjectLesson(cs.ID);
             //remove progress: learning history => class progress, chapter progress, lesson progress
-            await _learningHistoryService.RemoveClassSubjectHistory(cs.ID);
+            var LhTask = _learningHistoryService.RemoveClassSubjectHistory(cs.ID);
             //remove exam
-            await _examService.RemoveClassSubjectExam(cs.ID);
+            var ExTask = _examService.RemoveClassSubjectExam(cs.ID);
             //remove classSubject
+            await Task.WhenAll(CsTask, CtTask, LsTask, LhTask, ExTask);
             _classSubjectService.Remove(cs.ID);
         }
 
@@ -1211,7 +1212,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Remove(DefaultModel model)
+        public async Task<JsonResult> Remove(DefaultModel model)
         {
             if (model.ArrID.Length <= 0)
             {
@@ -1229,17 +1230,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (ids.Length > 0)
                 {
                     //Remove Class Student
-                    _ = _studentService.LeaveClassAll(ids.ToList());
+                    var sttask = _studentService.LeaveClassAll(ids.ToList());
                     //remove ClassSubject
-                    _classSubjectService.RemoveClassSubjects(ids);
+                    var cstask = _classSubjectService.RemoveClassSubjects(ids);
                     //remove Lesson, Part, Question, Answer
-                    _lessonHelper.RemoveClone(ids);
+                    var ltask = _lessonHelper.RemoveClone(ids);
                     //remove Schedule
-                    _ = _lessonScheduleService.RemoveManyClass(ids);
+                    var lstask = _lessonScheduleService.RemoveManyClass(ids);
                     //remove History
-                    _ = _learningHistoryService.RemoveClassHistory(ids);
+                    var lhtask = _learningHistoryService.RemoveClassHistory(ids);
                     //remove Exam
-                    _examService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    var extask = _examService.RemoveManyClassExam(ids);
+                        //.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     //remove Exam Detail
                     _examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     var delete = _service.Collection.DeleteMany(o => ids.Contains(o.ID));
@@ -1463,6 +1465,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 foreach (var ClassID in student.JoinedClasses)
                 {
                     var @class = _service.GetItemByID(ClassID);
+                    if (@class == null) continue;
                     var total_students = _studentService.CountByClass(@class.ID);
                     var examCount = _lessonScheduleService.CountClassExam(@class.ID, null);
                     var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()

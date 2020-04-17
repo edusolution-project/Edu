@@ -39,12 +39,12 @@ namespace BaseCustomerEntity.Database
 
         public async Task RemoveByParentAsync(string ParentID)
         {
-            _ = Collection.DeleteManyAsync(t => t.ParentID == ParentID);
+            await Collection.DeleteManyAsync(t => t.ParentID == ParentID);
         }
 
         public async Task RemoveManyAsync(List<string> IDs)
         {
-            _ = Collection.DeleteManyAsync(t => IDs.Contains(t.ID));
+            await Collection.DeleteManyAsync(t => IDs.Contains(t.ID));
         }
     }
 }

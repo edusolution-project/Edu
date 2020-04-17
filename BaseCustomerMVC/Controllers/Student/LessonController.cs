@@ -15,7 +15,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly SubjectService _subjectService;
         private readonly CourseService _courseService;
         private readonly ClassService _classService;
-        private readonly ClassStudentService _classStudentService;
+        //private readonly ClassStudentService _classStudentService;
         private readonly StudentService _studentService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly ChapterService _chapterService;
@@ -44,7 +44,7 @@ namespace BaseCustomerMVC.Controllers.Student
             SubjectService subjectService
             , CourseService courseService
             , ClassService classService
-            , ClassStudentService classStudentService
+            //, ClassStudentService classStudentService
             , StudentService studentService
             , ClassSubjectService classSubjectService
             , ChapterService chapterService
@@ -66,7 +66,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _subjectService = subjectService;
             _courseService = courseService;
             _classService = classService;
-            _classStudentService = classStudentService;
+            //_classStudentService = classStudentService;
             _studentService = studentService;
             _classSubjectService = classSubjectService;
             _chapterService = chapterService;

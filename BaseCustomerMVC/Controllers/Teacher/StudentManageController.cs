@@ -25,7 +25,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly TeacherService _teacherService;
         private readonly SkillService _skillService;
         private readonly ClassService _classService;
-        private readonly ClassStudentService _classStudentService;
+        //private readonly ClassStudentService _classStudentService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly StudentService _studentService;
         private readonly StudentHelper _studentHelper;
@@ -47,7 +47,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassService classService,
             SkillService skillService,
             ExamService examService,
-            ClassStudentService classStudentService,
+            //ClassStudentService classStudentService,
             ClassSubjectService classSubjectService,
             LearningHistoryService learningHistoryService,
             ClassProgressService classProgressService,
@@ -70,7 +70,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classProgressService = classProgressService;
             _classSubjectProgressService = classSubjectProgressService;
             _scoreStudentService = scoreStudentService;
-            _classStudentService = classStudentService;
+            //_classStudentService = classStudentService;
             _classSubjectService = classSubjectService;
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
@@ -249,24 +249,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
                             int totalRows = workSheet.Dimension.Rows;
                             var classStudents =
-                                _studentService.GetClassStudentIDs(ClassID);
+                                _studentService.GetStudentIdsByClassId(ClassID);
                             var keyCol = 4;
-                            var defPass = "Eduso123";
                             for (int i = 1; i <= totalRows; i++)
                             {
                                 if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
                                 var studentEmail = workSheet.Cells[i, keyCol].Value == null ? "" : workSheet.Cells[i, keyCol].Value.ToString();
                                 if (string.IsNullOrEmpty(studentEmail)) continue;
-                                var student = _studentService.CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
+                                var student = _studentService.GetStudentByEmail(studentEmail);
 
                                 if (student == null) continue;
                                 if (classStudents.Any(t => t == student.ID)) continue;
 
-                                _classStudentService.Save(new ClassStudentEntity
-                                {
-                                    StudentID = student.ID,
-                                    ClassID = @class.ID
-                                });
+                                _studentService.JoinClass(ClassID, student.ID);
+
+                                //_classStudentService.Save(new ClassStudentEntity
+                                //{
+                                //    StudentID = student.ID,
+                                //    ClassID = @class.ID
+                                //});
                                 counter++;
                             }
                         }
@@ -311,31 +312,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         #endregion
 
-        public async Task<JsonResult> ConvertStudent()
-        {
-            var classes = _classService.GetAll().ToList();
-            var count = 0;
-            var str = "";
-            _studentService.Collection.UpdateMany(t => true, Builders<StudentEntity>.Update.Unset(t => t.JoinedClasses));
-            foreach (var @class in classes)
-            {
-                await _studentService.LeaveClassAll(@class.ID);
-                //if (@class.ID != "5e652e05fd6d8e01304cd67c") continue;
-                //_classStudentService.RemoveClass(@class.ID);
-                var students = _classStudentService.GetClassStudents(@class.ID);
+        //public async Task<JsonResult> ConvertStudent()
+        //{
+        //    var classes = _classService.GetAll().ToList();
+        //    var count = 0;
+        //    var str = "";
+        //    _studentService.Collection.UpdateMany(t => true, Builders<StudentEntity>.Update.Unset(t => t.JoinedClasses));
+        //    foreach (var @class in classes)
+        //    {
+        //        await _studentService.LeaveClassAll(@class.ID);
+        //        //if (@class.ID != "5e652e05fd6d8e01304cd67c") continue;
+        //        //_classStudentService.RemoveClass(@class.ID);
+        //        var students = _classStudentService.GetClassStudents(@class.ID);
 
-                foreach (var student in students)
-                {
-                    if (_studentService.JoinClass(@class.ID, student.StudentID) > 0)
-                        count++;
-                    else
-                    {
-                        str += student.ID + "<br/>";
-                    }
-                }
-            }
-            return new JsonResult("OK " + str);
-        }
+        //        foreach (var student in students)
+        //        {
+        //            if (_studentService.JoinClass(@class.ID, student.StudentID) > 0)
+        //                count++;
+        //            else
+        //            {
+        //                str += student.ID + "<br/>";
+        //            }
+        //        }
+        //    }
+        //    return new JsonResult("OK " + str);
+        //}
 
     }
 }

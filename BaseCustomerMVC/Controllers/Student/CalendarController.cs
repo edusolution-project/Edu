@@ -21,7 +21,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CalendarReportService _calendarReportService;
         private readonly CalendarHelper _calendarHelper;
         private readonly ClassService _classService;
-        private readonly ClassStudentService _classStudentService;
+        //private readonly ClassStudentService _classStudentService;
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly LessonScheduleService _scheduleService;
@@ -30,7 +30,7 @@ namespace BaseCustomerMVC.Controllers.Student
             CalendarLogService calendarLogService,
             CalendarReportService calendarReportService,
             CalendarHelper calendarHelper,
-             ClassStudentService classStudentService,
+             //ClassStudentService classStudentService,
             ClassService classService,
             TeacherService teacherService,
             StudentService studentService,
@@ -45,7 +45,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _teacherService = teacherService;
             _studentService = studentService;
             _scheduleService = scheduleService;
-            _classStudentService = classStudentService;
+            //_classStudentService = classStudentService;
         }
 
         public IActionResult Index(DefaultModel model)
