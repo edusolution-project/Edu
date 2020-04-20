@@ -311,7 +311,7 @@
         console.log(data);
         var url = '@Url.Action("Save")';
         g_Ajax(url, JSON.stringify(data)).then(function (data) {
-            console.log(data);
+            location.reload();
         })
 
     }
