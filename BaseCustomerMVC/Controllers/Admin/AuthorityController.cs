@@ -37,15 +37,34 @@ namespace BaseCustomerMVC.Controllers.Admin
             ViewBag.AdminCtrl = _access.GetAccessByAttribue<Globals.AdminController>(assembly, "admin");
             ViewBag.TeacherCtrl = _access.GetAccessByAttribue<Globals.TeacherController>(assembly, "teacher");
             ViewBag.StudentCtrl = _access.GetAccessByAttribue<Globals.StudentController>(assembly, "student");
+            List<AuthorityEntity> data = _authorityService.GetAll()?.ToList();
+            ViewBag.Data = data;
             return View();
         }
-        public ActionResult Detail()
+        [HttpPost]
+        public JsonResult Save([FromBody] List<AuthorityEntity> authorities)
         {
-            var assembly = GetAssembly();
-            ViewBag.AdminCtrl = _access.GetAccessByAttribue<Globals.AdminController>(assembly, "admin");
-            ViewBag.TeacherCtrl = _access.GetAccessByAttribue<Globals.TeacherController>(assembly, "teacher");
-            ViewBag.StudentCtrl = _access.GetAccessByAttribue<Globals.StudentController>(assembly, "student");
-            return View();
+            if(authorities != null)
+            {
+                int count = authorities.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    AuthorityEntity item = authorities[i];
+                    switch (item.Type)
+                    {
+                        case AuthorityType.VIEW: _authorityService.CreateView(item.Area, item.Description, item.CtrlName, item.ActName); break;
+                        case AuthorityType.UPDATE: _authorityService.CreateUpdate(item.Area, item.Description, item.CtrlName, item.ActName); break;
+                        case AuthorityType.ADD: _authorityService.CreateAdd(item.Area, item.Description, item.CtrlName, item.ActName); break;
+                        case AuthorityType.DELETE: _authorityService.CreateDelete(item.Area, item.Description, item.CtrlName, item.ActName); break;
+                        case AuthorityType.IMPORT: _authorityService.CreateImport(item.Area, item.Description, item.CtrlName, item.ActName); break;
+                        case AuthorityType.EXPORT: _authorityService.CreateExport(item.Area, item.Description, item.CtrlName, item.ActName); break;
+                        case AuthorityType.OTHER: _authorityService.CreateOther(item.Area, item.Description, item.CtrlName, item.ActName); break;
+                        case AuthorityType.APPROVED: _authorityService.CreateApproved(item.Area, item.Description, item.CtrlName, item.ActName); break;
+                        default:break;
+                    }
+                }
+            }
+            return new JsonResult(authorities);
         }
         private Assembly GetAssembly()
         {
