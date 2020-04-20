@@ -65,6 +65,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<CalendarReportService>();
             services.AddSingleton<CalendarLogService>();
             services.AddSingleton<AccessesService>();
+            services.AddSingleton<AuthorityService>();
             return services;
         }
     }
