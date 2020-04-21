@@ -39,6 +39,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             return View();
         }
         [HttpGet]
+        [Obsolete]
         public JsonResult Get(DefaultModel model)
         {
             try
@@ -46,27 +47,32 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (User != null && User.Identity.IsAuthenticated)
                 {
                     string parent = User.FindFirst(ClaimTypes.Role)?.Value;
-                    if (parent != null && parent != "supperadmin")
+                    if (string.IsNullOrEmpty(model.SearchText)) model.SearchText = string.Empty;
+                    long count = _service.CreateQuery().Count(_=>true);
+                    if (count > 0)
                     {
-                        var data = _service.CreateQuery().Find(o =>
-                        (string.IsNullOrEmpty(model.SearchText) || (o.Name.Contains(model.SearchText) || o.Code.Contains(model.SearchText)) &&
-                        (string.IsNullOrEmpty(model.ID) || o.ID == model.ID) &&
-                        (parent != null && o.ParentID == parent) // chỉ lấy data từ thằng cha
-                        ))?.ToList();
-                        if (data != null)
+                        if (parent != null && parent != "supperadmin" && parent != "superadmin")
                         {
-                            return new JsonResult(new { code = 200, msg = "success", data = data });
+                            var data = _service.CreateQuery().Find(o =>
+                            (string.IsNullOrEmpty(model.SearchText) || (o.Name.Contains(model.SearchText) || o.Code.Contains(model.SearchText)) &&
+                            (string.IsNullOrEmpty(model.ID) || o.ID == model.ID) &&
+                            (parent != null && o.ParentID == parent) // chỉ lấy data từ thằng cha
+                            ))?.ToList();
+                            if (data != null)
+                            {
+                                return new JsonResult(new { code = 200, msg = "success", data = data });
+                            }
                         }
-                    }
-                    if(parent == "supperadmin")
-                    {
-                        var data = _service.CreateQuery().Find(o =>
-                        (string.IsNullOrEmpty(model.SearchText) || (o.Name.Contains(model.SearchText) || o.Code.Contains(model.SearchText)) &&
-                        (string.IsNullOrEmpty(model.ID) || o.ID == model.ID)))?.ToList();
-
-                        if (data != null)
+                        if (parent == "supperadmin" || parent == "superadmin")
                         {
-                            return new JsonResult(new { code = 200, msg = "success", data = data });
+                            var data = _service.CreateQuery().Find(o => o.Code != "supperadmin" && o.Code != "superadmin" &&
+                            (string.IsNullOrEmpty(model.SearchText) || (o.Name.Contains(model.SearchText) || o.Code.Contains(model.SearchText)) &&
+                            (string.IsNullOrEmpty(model.ID) || o.ID == model.ID)) 
+                            )?.ToList();
+                            if (data != null)
+                            {
+                                return new JsonResult(new { code = 200, msg = "success", data = data });
+                            }
                         }
                     }
                 }
