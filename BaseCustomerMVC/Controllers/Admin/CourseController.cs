@@ -508,10 +508,12 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (ids.Length > 0)
                 {
                     //remove Schedule, Part, Question, Answer
-                    _lessonScheduleService.CreateQuery().DeleteMany(o => ids.Contains(o.ClassID));
-                    _lessonHelper.RemoveClone(ids);
-                    _examService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
-                    _examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    _ = _lessonScheduleService.RemoveManyClass(ids);
+                        //CreateQuery().DeleteMany(o => ids.Contains(o.ClassID));
+                    _ = _lessonHelper.RemoveClone(ids);
+                    _ = _examService.RemoveManyClassExam(ids);
+                        //Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    //_examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     var delete = _service.Collection.DeleteMany(o => ids.Contains(o.ID));
                     return new JsonResult(delete);
                 }

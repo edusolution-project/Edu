@@ -135,7 +135,7 @@ namespace EnglishPlatform.Controllers
                         // danh sach lop
                         var listClassID = realClass.Select(o => o.ID).ToList();
                         //var liststudentClass = _classStudentService.CreateQuery().Find(o => listClassID.Contains(o.ClassID))?.ToList();
-                        var listStudent = _studentService.GetStudentIdsByClassIds(listClassID) ;
+                        var listStudent = _studentService.GetStudentIdsByClassIds(listClassID).ToList() ;
                             //liststudentClass?.Select(o => o.StudentID);
                         var listTeacher = realClass.Select(o => o.TeacherID).Distinct();
 

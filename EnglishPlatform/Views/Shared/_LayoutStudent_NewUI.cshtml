@@ -102,10 +102,10 @@
                     <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                 </div>
                 <ul class="list list-news">
-                    <li v-for="(item,k) in list_news">
-                        <a href="#" :title="item.title" class="thumb"><img :src="item.thumbnail" /></a>
-                        <div class="info">
-                            <a href="#" :title="item.title" class="title">{{item.title}}</a>
+                    <li v-for="(item,k) in list_news" class="d-flex">
+                        <a :href="item.href" :title="item.title" target="_blank" class="thumb w-25"><img :src="item.thumbnail" /></a>
+                        <div class="info w-75">
+                            <a :href="item.href" target="_blank" :title="item.title" class="title">{{item.title}}</a>
                             <p>{{item.description}}</p>
                         </div>
                     </li>
@@ -123,20 +123,17 @@
             data: {
                 list_news: [
                     {
-                        title: 'Đã đến lúc HLV Park',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news1.png'
+                        href: 'https://www.facebook.com/utcelearning/?hc_ref=ARQzn875E9EnzJl0pDOIsk-T6UjYmWEn8oE0bsjwjNISY5FfbD6PgeCUIPWrnvXcc9o&ref=nf_target&__tn__=kC-R',
+                        title: 'Hướng dẫn đào tạo trực tuyến',
+                        description: 'Tổng hợp tài liệu & video hướng dẫn đào tạo trực tuyến cập nhật các tính năng mới',
+                        thumbnail: 'https://scontent.fhan4-1.fna.fbcdn.net/v/t1.0-0/p370x247/71767146_116313109773262_2458809184288768000_n.jpg?_nc_cat=104&_nc_sid=85a577&_nc_ohc=YBpwjKJSJLAAX9HDnwb&_nc_ht=scontent.fhan4-1.fna&_nc_tp=6&oh=73d15dd234f902d1aadd61170ef6dda0&oe=5EBD1FB8'
                     },
                     {
-                        title: 'HLV Park: Có khi p',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news2.png'
+                        href: 'http://educoo.vn',
+                        title: 'Khóa học tiếng Anh 1 - 1',
+                        description: 'Khóa học tiếng Anh 1 - 1: Educoo.vn',
+                        thumbnail: 'http://educoo.vn/Content/v-637088577654292784/img/banner.png'
                     },
-                    {
-                        title: 'Tiến Dũng và Văn Toả',
-                        description: 'Đây là lúc để HLV Park giải bài toán khó nhất của ông',
-                        thumbnail: '/pictures/news3.png'
-                    }
                 ]
             }
         });
@@ -148,7 +145,7 @@
     </div>
     @RenderSection("Scripts", false)
     <!--Start of Tawk.to Script-->
-    @*<script type="text/javascript">
+    <script type="text/javascript">
             var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
             (function () {
                 var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
@@ -158,7 +155,7 @@
                 s1.setAttribute('crossorigin', '*');
                 s0.parentNode.insertBefore(s1, s0);
             })();
-        </script>*@
+        </script>
     <!--End of Tawk.to Script-->
     @await Html.PartialAsync("_EasyRealtime")
     <script>

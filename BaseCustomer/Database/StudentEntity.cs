@@ -82,7 +82,7 @@ namespace BaseCustomerEntity.Database
         
         public IEnumerable<StudentEntity> GetStudentsByClassIds(List<string> ClassIDs)
         {
-            return Collection.Find(t => t.JoinedClasses.FindIndex(t1 => ClassIDs.Contains(t1)) >= 0).ToEnumerable();
+            return Collection.Find(t => t.JoinedClasses.Any(t1 => ClassIDs.Contains(t1))).ToEnumerable();
         }
 
         public bool IsStudentInClass(string ClassID, string ID)

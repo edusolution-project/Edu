@@ -2104,8 +2104,10 @@ var Lesson = (function () {
             //wrapper.append(backButton);
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
-                    .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần 0) chưa bắt đầu" }))
-                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả ko có" })).html();
+                    //.append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần 0) chưa bắt đầu" }))
+                .append($('<div>', { class: "text-center h4 btn-primary mt-5 btn", text: "Làm bài ngay", style: "cursor:pointer" }).click(function () {
+                    BeginExam(this)
+                }).prepend($('<i>', { class: "fas fa-play mr-2"})));
             wrapper.append(lastExamResult);
         }
         else {

@@ -112,13 +112,20 @@
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="list-discus">
-                            <li v-for="(item,k) in discussion">
-                                <div class="flex c-top">
-                                    <a :href="'@Url.Action("Index","Discuss")#' + item.ID" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
-                                    <div class="c-right"><i class="icofont icofont-user"></i>{{3 + ' members'}}</div>
-                                </div>
-                                <p>{{shortenString(item.content,160)}}.</p>
-                            </li>
+                            <template v-if="discussion.length > 0">
+                                <li v-for="(item,k) in discussion">
+                                    <div class="flex c-top">
+                                        <a href="#" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
+                                        <div class="c-right"><i class="icofont icofont-user"></i>{{3 + ' members'}}</div>
+                                    </div>
+                                    <p>{{shortenString(item.content,160)}}.</p>
+                                </li>
+                            </template>
+                            <template v-else>
+                                <li>
+                                    Chưa có thảo luận nào! <button class="ml-2 btn btn-sm btn-secondary" onclick="$('.fn-box-chat-eduso').focus().click()"> <i class="far fa-comments"></i> Kết nối ngay</button>
+                                </li>
+                            </template>
                         </ul>
                     </div>
                 </div>

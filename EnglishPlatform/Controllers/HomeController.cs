@@ -340,14 +340,7 @@ namespace EnglishPlatform.Controllers
                     var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
                     _accountService.CreateQuery().ReplaceOne(filter, user);
                     ViewBag.Data = user;
-                    try
-                    {
-                        await _mailHelper.SendRegisterEmail(user, PassWord).ConfigureAwait(false);
-                    }
-                    catch(Exception ex)
-                    {
-                        Trace.WriteLine(ex);
-                    }
+                    _ = _mailHelper.SendRegisterEmail(user, PassWord);
                     return Json(new ReturnJsonModel
                     {
                         StatusCode = ReturnStatus.SUCCESS,

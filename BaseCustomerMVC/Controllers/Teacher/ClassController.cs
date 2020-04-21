@@ -5,14 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System;
 using MongoDB.Driver;
-using System.Text;
 using System.Linq;
 using Core_v2.Globals;
-using System.Threading.Tasks;
-using System.IO;
 using Microsoft.AspNetCore.Hosting;
-using OfficeOpenXml;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -1152,8 +1149,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //remove exam
             var ExTask = _examService.RemoveClassSubjectExam(cs.ID);
             //remove classSubject
-            await Task.WhenAll(CsTask, CtTask, LsTask, LhTask, ExTask);
-            _classSubjectService.Remove(cs.ID);
+            //await Task.WhenAll(CsTask, CtTask, LsTask, LhTask, ExTask);
+            await _classSubjectService.RemoveAsync(cs.ID);
         }
 
 
@@ -1230,18 +1227,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (ids.Length > 0)
                 {
                     //Remove Class Student
-                    var sttask = _studentService.LeaveClassAll(ids.ToList());
+                    _ = _studentService.LeaveClassAll(ids.ToList());
                     //remove ClassSubject
-                    var cstask = _classSubjectService.RemoveClassSubjects(ids);
+                    _ = _classSubjectService.RemoveClassSubjects(ids);
                     //remove Lesson, Part, Question, Answer
-                    var ltask = _lessonHelper.RemoveClone(ids);
+                    _ = _lessonHelper.RemoveClone(ids);
                     //remove Schedule
-                    var lstask = _lessonScheduleService.RemoveManyClass(ids);
+                    _ = _lessonScheduleService.RemoveManyClass(ids);
                     //remove History
-                    var lhtask = _learningHistoryService.RemoveClassHistory(ids);
+                    _ = _learningHistoryService.RemoveClassHistory(ids);
                     //remove Exam
-                    var extask = _examService.RemoveManyClassExam(ids);
-                        //.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    _ = _examService.RemoveManyClassExam(ids);
+                    //.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     //remove Exam Detail
                     _examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     var delete = _service.Collection.DeleteMany(o => ids.Contains(o.ID));
@@ -1434,7 +1431,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var avgpoint = 0.0;
             var studentresult = _classProgressService.GetStudentResult(ClassID, StudentID);
 
-            if (studentresult != null) {
+            if (studentresult != null)
+            {
                 var examCount = _lessonScheduleService.CountClassExam(ClassID, null);
                 if (examCount > 0)
                     avgpoint = studentresult.TotalPoint / examCount;
