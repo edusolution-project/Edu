@@ -102,7 +102,8 @@ namespace EnglishPlatform.Controllers
         {
             //var x = HttpContext.Request;
             //_log.Debug("login", new { UserName, PassWord, Type, IsRemmember });
-            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
+            var _username = UserName.Trim().ToLower();
+            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
             {
                 return Json(new ReturnJsonModel
                 {
@@ -113,7 +114,7 @@ namespace EnglishPlatform.Controllers
             else
             {
                 string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
-                var user = _accountService.GetAccount(UserName.ToLower(), _sPass);
+                var user = _accountService.GetAccount(_username, _sPass);
                 if (user == null)
                 {
                     return Json(new ReturnJsonModel
@@ -126,7 +127,7 @@ namespace EnglishPlatform.Controllers
                 {
                     if (user.IsActive)
                     {
-                        TempData["success"] = "Hi " + user.UserName;
+                        TempData["success"] = "Hi " + _username;
                         string _token = Guid.NewGuid().ToString();
                         string FullName, id;
                         HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
@@ -162,7 +163,7 @@ namespace EnglishPlatform.Controllers
                                         st = new StudentEntity()
                                         {
                                             FullName = user.Name,
-                                            Email = user.UserName,
+                                            Email = _username,
                                             Phone = user.Phone,
                                             IsActive = true,// active student
                                             CreateDate = DateTime.Now,
@@ -178,7 +179,7 @@ namespace EnglishPlatform.Controllers
                                         });
                                 }
                                 role = _roleService.GetItemByCode("student");
-                                FullName = st.FullName;
+                                FullName = st.FullName ?? st.Email;
                                 id = st.ID;
                                 break;
                             default:
@@ -191,7 +192,7 @@ namespace EnglishPlatform.Controllers
                         var claims = new List<Claim>
                             {
                                 new Claim("UserID",id),
-                                new Claim(ClaimTypes.Email, user.UserName),
+                                new Claim(ClaimTypes.Email, _username),
                                 new Claim(ClaimTypes.Name, FullName),
                                 new Claim(ClaimTypes.Role, role.Code),
                                 new Claim("Type", role.Type),
@@ -279,7 +280,7 @@ namespace EnglishPlatform.Controllers
                     {
                         PassWord = _sPass,
                         UserName = _username,
-                        Name = Name,
+                        Name = Name ?? _username,
                         Phone = Phone,
                         Type = Type,
                         IsActive = false,
@@ -304,7 +305,7 @@ namespace EnglishPlatform.Controllers
                             var teacher = new TeacherEntity()
                             {
                                 FullName = user.Name,
-                                Email = user.UserName,
+                                Email = _username,
                                 Phone = user.Phone,
                                 IsActive = false,
                                 CreateDate = DateTime.Now
@@ -318,7 +319,7 @@ namespace EnglishPlatform.Controllers
                             var student = new StudentEntity()
                             {
                                 FullName = user.Name,
-                                Email = user.UserName,
+                                Email = _username,
                                 Phone = user.Phone,
                                 IsActive = true,// active student
                                 CreateDate = DateTime.Now

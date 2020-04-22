@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Linq;
 using MongoDB.Bson;
 using System.Globalization;
+using Microsoft.Extensions.Configuration;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -27,12 +28,15 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly MappingEntity<StudentEntity, StudentViewModel> _mapping;
 
         private readonly StudentHelper _studentHelper;
+        private IConfiguration _configuration;
+        private readonly string _defaultPass;
 
         public StudentController(StudentService service
             , RoleService roleService
             , AccountService accountService
             , StudentService studentService
             , IHostingEnvironment evn
+            , IConfiguration iConfig
             )
         {
             _env = evn;
@@ -42,6 +46,8 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             _studentHelper = new StudentHelper(studentService, accountService);
             _mapping = new MappingEntity<StudentEntity, StudentViewModel>();
+            _configuration = iConfig;
+            _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
         }
         // GET: Home
 
@@ -116,6 +122,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         [Obsolete]
         public JsonResult Create(StudentEntity item)
         {
+
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 if (!ExistEmail(item.Email)
@@ -133,8 +140,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {
                         CreateDate = DateTime.Now,
                         IsActive = true,
-                        PassTemp = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                        PassWord = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                        PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                        PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
                         UserCreate = item.UserCreate,
                         Type = ACCOUNT_TYPE.STUDENT,
                         UserID = item.ID,
@@ -226,7 +233,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                             int totalRows = workSheet.Dimension.Rows;
                             studentList = new List<StudentEntity>();
                             Error = new List<StudentEntity>();
-                            var defPass = "Eduso123";
                             for (int i = 1; i <= totalRows; i++)
                             {
                                 if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
@@ -264,8 +270,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     {
                                         CreateDate = DateTime.Now,
                                         IsActive = true,
-                                        PassTemp = Core_v2.Globals.Security.Encrypt(defPass),
-                                        PassWord = Core_v2.Globals.Security.Encrypt(defPass),
+                                        PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                                        PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
                                         UserCreate = item.UserCreate,
                                         Type = ACCOUNT_TYPE.STUDENT,
                                         UserID = item.ID,

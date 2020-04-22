@@ -18,6 +18,7 @@ namespace BaseCustomerMVC.Globals
 
         private IConfiguration _configuration;
         private string _defaultSender;
+        private string _defaultSenderName;
         private string _defaultPassword;
 
         public MailHelper(IConfiguration iConfig,
@@ -28,6 +29,7 @@ namespace BaseCustomerMVC.Globals
             _mailLogService = mailLogService;
             _defaultSender = _configuration.GetValue<string>("MailConfig:Email");
             _defaultPassword = _configuration.GetValue<string>("MailConfig:Password");
+            _defaultSenderName = _configuration.GetValue<string>("MailConfig:Name");
         }
 
         private static readonly string legalFooter = "<div style='padding-top:20px; border-top:solid 1px #CCC; margin-top: 50px; font-size: 0.6rem; color: #999'>" +
@@ -42,7 +44,7 @@ namespace BaseCustomerMVC.Globals
             //string senderPassword = ConfigurationManager.AppSettings["MailPassword"]; // sender password here…
             string senderPassword = _defaultPassword;
             if (!String.IsNullOrEmpty(fromPass)) senderPassword = fromPass;
-            var senderName = "CSKH Eduso";
+            var senderName = _defaultSenderName;
             if (!String.IsNullOrEmpty(fromName)) senderName = fromName;
             try
             {

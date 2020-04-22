@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
+using Microsoft.Extensions.Configuration;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -30,11 +31,15 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         private readonly TeacherHelper _teacherHelper;
 
+        private IConfiguration _configuration;
+        private readonly string _defaultPass;
+
         public TeacherController(TeacherService service
             , RoleService roleService
             , AccountService accountService
             , IHostingEnvironment evn
-            , SubjectService subjectService)
+            , SubjectService subjectService
+            , IConfiguration iConfig)
         {
             _env = evn;
             _service = service;
@@ -44,6 +49,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             _mapping = new MappingEntity<TeacherEntity, TeacherViewModel>();
 
             _teacherHelper = new TeacherHelper(service, accountService);
+            _configuration = iConfig;
+            _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
         }
 
         public ActionResult Index(DefaultModel model)
@@ -155,7 +162,9 @@ namespace BaseCustomerMVC.Controllers.Admin
                     };
                     return new JsonResult(response);
                 }
-                if (!ExistEmail(item.Email) //&& !ExistTeacherId(item.TeacherId)
+                var _username = item.Email.Trim().ToLower();
+                item.Email = _username;
+                if (!ExistEmail(_username) //&& !ExistTeacherId(item.TeacherId)
                         )
                 {
                     _service.CreateQuery().InsertOne(item);
@@ -169,12 +178,13 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {
                         CreateDate = DateTime.Now,
                         IsActive = true,
-                        PassTemp = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                        PassWord = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                        PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                        PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
                         UserCreate = item.UserCreate,
                         Type = ACCOUNT_TYPE.TEACHER,
+                        Name = item.FullName,
                         UserID = item.ID,
-                        UserName = item.Email.ToLower().Trim(),
+                        UserName = _username,
                         RoleID = RoleID
                     };
                     _accountService.CreateOrUpdate(account);
@@ -205,6 +215,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (oldAccount == null) return new JsonResult(null);
                 oldAccount.RoleID = RoleID;
                 oldAccount.IsActive = item.IsActive;
+                oldAccount.Name = item.FullName;
                 _accountService.CreateOrUpdate(oldAccount);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -255,6 +266,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var filePath = Path.Combine(_env.WebRootPath, file.FileName + DateTime.Now.ToString("ddMMyyyyhhmmss"));
             List<TeacherEntity> importlist = null;
             List<TeacherEntity> Error = null;
+
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
@@ -274,7 +286,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             {
 
                                 if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                                var email = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
+                                var email = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString().Trim().ToLower();
                                 //string ho = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
                                 //string name = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
                                 //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
@@ -310,12 +322,12 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     {
                                         CreateDate = DateTime.Now,
                                         IsActive = true,
-                                        PassTemp = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                                        PassWord = Core_v2.Globals.Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                                        PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                                        PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
                                         UserCreate = item.UserCreate,
                                         Type = ACCOUNT_TYPE.TEACHER,
                                         UserID = item.ID,
-                                        UserName = item.Email.ToLower().Trim(),
+                                        UserName = item.Email,
                                         RoleID = _roleService.GetItemByCode("teacher").ID
                                     };
                                     _accountService.CreateQuery().InsertOne(account);

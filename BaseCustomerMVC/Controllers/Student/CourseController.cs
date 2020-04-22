@@ -132,12 +132,13 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return null;
+                return Json(new { });
             }
             else
             {
                 var currentStudent = _studentService.GetItemByID(userId);
-                if (currentStudent == null || currentStudent.JoinedClasses == null) return null;
+                if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
+                    return Json(new { });
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
             }
             if (!string.IsNullOrEmpty(model.SearchText))
@@ -212,6 +213,10 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             var currentStudent = _studentService.GetItemByID(userId);
+            if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
+                return Json(new { });
+
+
             filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
@@ -252,6 +257,9 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             var currentStudent = _studentService.GetItemByID(userId);
+            if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
+                return Json(new { });
+
             filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
@@ -295,10 +303,13 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return null;
+                return Json(new { });
             }
-            
+
             var currentStudent = _studentService.GetItemByID(userId);
+            if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
+                return Json(new { });
+
             filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
 
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
@@ -330,14 +341,11 @@ namespace BaseCustomerMVC.Controllers.Student
         public JsonResult GetThisWeekLesson(DateTime today)
         {
             if (today < new DateTime(1900, 1, 1))
-                return null;
+                return Json(new { });
             today = today.ToUniversalTime();
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
-            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
@@ -347,17 +355,22 @@ namespace BaseCustomerMVC.Controllers.Student
                     StatusDesc = "Authentication Error"
                 });
             }
-
             var currentStudent = _studentService.GetItemByID(userId);
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ClassID)));            
+            if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
+                return Json(new { });
+
+            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ClassID)));
 
             //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
 
             //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
 
-            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter));
+            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
 
-            var std = (from o in data.ToList()
+            var std = (from o in data
                        let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
                        where _lesson != null
                        let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
@@ -412,7 +425,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return null;
+                return Json(new { });
             }
             else
             {
@@ -453,11 +466,11 @@ namespace BaseCustomerMVC.Controllers.Student
                 var userId = User.Claims.GetClaimByType("UserID").Value;
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return null;
+                    return Json(new { });
                 }
                 var filterSchedule = Builders<LessonScheduleEntity>.Filter.Where(o => o.ClassID == ClassID);
                 var dataSchedule = _lessonScheduleService.Collection.Find(filterSchedule);
-                if (dataSchedule == null || dataSchedule.Count() <= 0) return null;
+                if (dataSchedule == null || dataSchedule.Count() <= 0) return Json(new { });
                 var schedules = dataSchedule.ToEnumerable();
                 var filter = new List<FilterDefinition<LessonEntity>>();
                 filter.Add(Builders<LessonEntity>.Filter.Where(o => o.CourseID == CourseID));
