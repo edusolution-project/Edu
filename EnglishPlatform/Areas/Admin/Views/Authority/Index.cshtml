@@ -1,0 +1,322 @@
+﻿@using BaseCustomerEntity.Database 
+@using BaseAccess.Attribule
+@inject AuthorityService _authorityService
+@{
+    ViewData["Title"] = "Quản lý quyền";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    List<AuthorityEntity> data = ViewBag.Data as List<AuthorityEntity>;
+    List<AccessCtrlAttribute> authorityAdmin = ViewBag.AdminCtrl as List<AccessCtrlAttribute>;
+    List<AccessCtrlAttribute> authorityTeacher = ViewBag.TeacherCtrl as List<AccessCtrlAttribute>;
+    List<AccessCtrlAttribute> authorityStudent = ViewBag.StudentCtrl as List<AccessCtrlAttribute>;
+}
+    <style>
+        .change-item{
+            border-bottom: 1px solid #ff6a00;
+        }
+        .target-change{
+            border:1px solid #00ff21;
+        }
+    </style>
+    <div class="container-fluid">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="float-right">
+                            <button class="btn btn-success" onclick="AuthoritySave()"> Save </button>
+                            <button class="btn btn-default" onclick="AuthorityCancel()"> Cancel </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th class='text-center'>
+                                    <div class="input-group">
+                                        <input type="checkbox" aria-label="Checkbox" onclick="toggleAll(this, 'dataTable')">
+                                    </div>
+                                </th>
+                                <th class='text-center'>STT</th>
+                                <th class='text-center'>Chức năng</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="authority">
+                            @{
+                                int count = authorityAdmin != null ? authorityAdmin.Count : 0;
+                                int index = 1;
+                                for (int i = 0; authorityAdmin != null && i < count; i++)
+                                {
+                                    AccessCtrlAttribute item = authorityAdmin[i];
+                                    string ctrlName = item.Module;
+                                    string des = item.Name;
+                                    var actsName = item.Acts;
+                                    <tr>
+                                        <td></td>
+                                        <td>@index</td>
+                                        <td>@des <p>(@ctrlName)</p></td>
+                                        <td>
+                                            <div class="aib__content">
+                                                <div class="aib__item">
+                                                    @if (actsName == null || actsName.Count == 0) { continue; }
+                                                    @foreach (string act in actsName)
+                                                    {
+                                                        string mota = "Chưa biên tập";
+                                                        string view = "", update = "", add = "", delete = "", import = "", export = "", other = "", app = "";
+                                                        AuthorityType currentType = AuthorityType.UNSET;
+                                                        if (_authorityService.IsExist("admin", ctrlName, act, out AuthorityEntity currentItem))
+                                                        {
+                                                            mota = currentItem.Description;
+                                                            currentType = currentItem.Type;
+                                                            switch (currentItem.Type)
+                                                            {
+                                                                case AuthorityType.VIEW: view = "selected"; break;
+                                                                case AuthorityType.UPDATE: update = "selected"; break;
+                                                                case AuthorityType.ADD: add = "selected"; break;
+                                                                case AuthorityType.DELETE: delete = "selected"; break;
+                                                                case AuthorityType.IMPORT: import = "selected"; break;
+                                                                case AuthorityType.EXPORT: export = "selected"; break;
+                                                                case AuthorityType.OTHER: other = "selected"; break;
+                                                                case AuthorityType.APPROVED: app = "selected"; break;
+                                                                default: break;
+                                                            }
+                                                        }
+                                                        <div class="" style="display:flex">
+                                                            <div class="col"> Mô tả : <span contenteditable="true" class="des" data-current="@mota" onfocusout="ChangeValue(this)">@mota</span></div>
+                                                            <div class="col"> Action : <span data-type="admin" data-controller="@ctrlName" class="act">@act</span> </div>
+                                                            <div class="col">
+                                                                Method :
+                                                                <select class="method" onchange="ChangeValue(this)" data-current="@currentType">
+                                                                    <option value="@AuthorityType.UNSET"> --- Chưa biên tập --- </option>
+                                                                    <option value="@AuthorityType.VIEW" @view> View </option>
+                                                                    <option value="@AuthorityType.IMPORT" @import> Import </option>
+                                                                    <option value="@AuthorityType.EXPORT" @export> Export </option>
+                                                                    <option value="@AuthorityType.ADD" @add> Add </option>
+                                                                    <option value="@AuthorityType.UPDATE" @update> Update </option>
+                                                                    <option value="@AuthorityType.DELETE" @delete> Delete </option>
+                                                                    <option value="@AuthorityType.APPROVED" @app> Approved </option>
+                                                                    <option value="@AuthorityType.OTHER" @other> Other </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    index++;
+                                }
+                                count = authorityTeacher != null ? authorityTeacher.Count : 0;
+                                for (int i = 0; authorityTeacher != null && i < count; i++)
+                                {
+                                    AccessCtrlAttribute item = authorityTeacher[i];
+                                    string ctrlName = item.Module;
+                                    string des = item.Name;
+                                    var actsName = item.Acts;
+                                    <tr>
+                                        <td></td>
+                                        <td>@index</td>
+                                        <td>@des <p>(@ctrlName)</p></td>
+                                        <td>
+                                            <div class="aib__content">
+                                                <div class="aib__item">
+                                                    @if (actsName == null || actsName.Count == 0) { continue; }
+                                                    @foreach (string act in actsName)
+                                                    {
+                                                        string mota = "Chưa biên tập";
+                                                        string view = "", update = "", add = "", delete = "", import = "", export = "", other = "", app = "";
+                                                        AuthorityType currentType = AuthorityType.UNSET;
+                                                        if (_authorityService.IsExist("admin", ctrlName, act, out AuthorityEntity currentItem))
+                                                        {
+                                                            mota = currentItem.Description;
+                                                            currentType = currentItem.Type;
+                                                            switch (currentItem.Type)
+                                                            {
+                                                                case AuthorityType.VIEW: view = "selected"; break;
+                                                                case AuthorityType.UPDATE: update = "selected"; break;
+                                                                case AuthorityType.ADD: add = "selected"; break;
+                                                                case AuthorityType.DELETE: delete = "selected"; break;
+                                                                case AuthorityType.IMPORT: import = "selected"; break;
+                                                                case AuthorityType.EXPORT: export = "selected"; break;
+                                                                case AuthorityType.OTHER: other = "selected"; break;
+                                                                case AuthorityType.APPROVED: app = "selected"; break;
+                                                                default: break;
+                                                            }
+                                                        }
+                                                        <div class="" style="display:flex">
+                                                            <div class="col"> Mô tả : <span contenteditable="true" class="des" data-current="@mota" onfocusout="ChangeValue(this)">@mota</span></div>
+                                                            <div class="col"> Action : <span data-type="admin" data-controller="@ctrlName" class="act">@act</span> </div>
+                                                            <div class="col">
+                                                                Method :
+                                                                <select class="method" onchange="ChangeValue(this)" data-current="@currentType">
+                                                                    <option value="@AuthorityType.UNSET"> --- Chưa biên tập --- </option>
+                                                                    <option value="@AuthorityType.VIEW" @view> View </option>
+                                                                    <option value="@AuthorityType.IMPORT" @import> Import </option>
+                                                                    <option value="@AuthorityType.EXPORT" @export> Export </option>
+                                                                    <option value="@AuthorityType.ADD" @add> Add </option>
+                                                                    <option value="@AuthorityType.UPDATE" @update> Update </option>
+                                                                    <option value="@AuthorityType.DELETE" @delete> Delete </option>
+                                                                    <option value="@AuthorityType.APPROVED" @app> Approved </option>
+                                                                    <option value="@AuthorityType.OTHER" @other> Other </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    index++;
+                                }
+                                count = authorityStudent != null ? authorityStudent.Count : 0;
+                                for (int i = 0; authorityTeacher != null && i < count; i++)
+                                {
+                                    AccessCtrlAttribute item = authorityStudent[i];
+                                    string ctrlName = item.Module;
+                                    string des = item.Name;
+                                    var actsName = item.Acts;
+                                    <tr>
+                                        <td></td>
+                                        <td>@index</td>
+                                        <td>@des <p>(@ctrlName)</p></td>
+                                        <td>
+                                            <div class="aib__content">
+                                                <div class="aib__item">
+                                                    @if (actsName == null || actsName.Count == 0) { continue; }
+                                                    @foreach (string act in actsName)
+                                                    {
+                                                        string mota = "Chưa biên tập";
+                                                        string view = "", update = "", add = "", delete = "", import = "", export = "", other = "", app = "";
+                                                        AuthorityType currentType = AuthorityType.UNSET;
+                                                        if (_authorityService.IsExist("admin", ctrlName, act, out AuthorityEntity currentItem))
+                                                        {
+                                                            mota = currentItem.Description;
+                                                            currentType = currentItem.Type;
+                                                            switch (currentItem.Type)
+                                                            {
+                                                                case AuthorityType.VIEW: view = "selected"; break;
+                                                                case AuthorityType.UPDATE: update = "selected"; break;
+                                                                case AuthorityType.ADD: add = "selected"; break;
+                                                                case AuthorityType.DELETE: delete = "selected"; break;
+                                                                case AuthorityType.IMPORT: import = "selected"; break;
+                                                                case AuthorityType.EXPORT: export = "selected"; break;
+                                                                case AuthorityType.OTHER: other = "selected"; break;
+                                                                case AuthorityType.APPROVED: app = "selected"; break;
+                                                                default: break;
+                                                            }
+                                                        }
+                                                        <div class="" style="display:flex">
+                                                            <div class="col"> Mô tả : <span contenteditable="true" class="des" data-current="@mota" onfocusout="ChangeValue(this)">@mota</span></div>
+                                                            <div class="col"> Action : <span data-type="admin" data-controller="@ctrlName" class="act">@act</span> </div>
+                                                            <div class="col">
+                                                                Method :
+                                                                <select class="method" onchange="ChangeValue(this)" data-current="@currentType">
+                                                                    <option value="@AuthorityType.UNSET"> --- Chưa biên tập --- </option>
+                                                                    <option value="@AuthorityType.VIEW" @view> View </option>
+                                                                    <option value="@AuthorityType.IMPORT" @import> Import </option>
+                                                                    <option value="@AuthorityType.EXPORT" @export> Export </option>
+                                                                    <option value="@AuthorityType.ADD" @add> Add </option>
+                                                                    <option value="@AuthorityType.UPDATE" @update> Update </option>
+                                                                    <option value="@AuthorityType.DELETE" @delete> Delete </option>
+                                                                    <option value="@AuthorityType.APPROVED" @app> Approved </option>
+                                                                    <option value="@AuthorityType.OTHER" @other> Other </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    index++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var g_Ajax = function (url, data,method,async) {
+        var request = new XMLHttpRequest();
+        return new Promise(function (resolve, reject) {
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {
+                    // Process the response
+                    if (request.status >= 200 && request.status < 300) {
+                        // If successful
+                        resolve(request.response);
+                    } else {
+                        var arrStatus = [
+                            "UNSENT	Client has been created.open() not called yet.",
+                            "OPENED	open() has been called.",
+                            "HEADERS_RECEIVED	send() has been called, and headers and status are available.",
+                            "LOADING	Downloading; responseText holds partial data.",
+                            "DONE	The operation is complete."
+                        ];
+                        reject({
+                            status: request.status,
+                            statusText: request.statusText
+                        });
+                    }
+                }
+            }
+            request.open(method || 'POST', url, async || true);
+            //request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;multipart/form-data;application/json');
+            // Send the request
+            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+            request.send(data);
+        });
+    }
+    var g_class_change = "change-item";
+    var g_target_change = "target-change";
+    var ChangeValue = function (self) {
+        
+        var parent = self.parentElement.parentElement;
+        var value = self.value || self.innerHTML;
+        if (value != self.dataset.current) {
+            if (!self.classList.contains(g_target_change)) self.classList.add(g_target_change);
+            if (!parent.classList.contains(g_class_change)) parent.classList.add(g_class_change);
+        } else {
+            if (self.classList.contains(g_target_change)) self.classList.remove(g_target_change);
+            if (parent.querySelector('.' + g_target_change) == null) {
+                parent.classList.remove(g_class_change);
+            }
+        }
+    }
+
+    var AuthoritySave = function () {
+        var body = document.getElementById('authority');
+        var listItem = body.querySelectorAll('.' + g_class_change);
+        var count = listItem.length;
+        var data = [];
+        for (var i = 0; i < count; i++) {
+            var item = listItem[i];
+            var des = item.querySelector('.des').innerHTML;
+            var act = item.querySelector('.act');
+            var area = act.dataset.type;
+            var ctrl = act.dataset.controller;
+            var method = item.querySelector('.method').value;
+            data.push({ Description: des, CtrlName: ctrl, ActName: act.innerHTML, Type: method, Area: area });
+        }
+        console.log(data);
+        var url = '@Url.Action("Save")';
+        g_Ajax(url, JSON.stringify(data)).then(function (data) {
+            location.reload();
+        })
+
+    }
+
+    var AuthorityCancel = function () {
+        location.reload();
+    }
+</script>

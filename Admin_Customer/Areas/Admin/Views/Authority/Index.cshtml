@@ -1,0 +1,58 @@
+﻿@using BaseAccess.Attribule 
+@{
+    ViewData["Title"] = "Quản lý quyền";
+    List<AccessCtrlAttribute> listAdmin = ViewBag.AdminCtrl as List<AccessCtrlAttribute>;
+    List<AccessCtrlAttribute> listTeacher = ViewBag.TeacherCtrl as List<AccessCtrlAttribute>;
+    List<AccessCtrlAttribute> listStudent = ViewBag.StudentCtrl as List<AccessCtrlAttribute>;
+}
+
+    <div class="container-fluid">
+        <div>
+            Admin :
+            <ul>
+                @for (int i = 0; listAdmin != null && i < listAdmin.Count; i++)
+                {
+                    var item = listAdmin[i];
+                    string ctrlName = item.Module;
+                    var actNames = item.Acts;
+                    foreach(string act in actNames)
+                    {
+                        <li>@item.Name : @ctrlName @act</li>
+                    }
+                }
+
+            </ul>
+        </div>
+        <div>
+            listTeacher :
+            <ul>
+                @for (int i = 0; listTeacher != null && i < listTeacher.Count; i++)
+                {
+                    var item = listTeacher[i];
+                    string ctrlName = item.Module;
+                    var actNames = item.Acts;
+                    foreach (string act in actNames)
+                    {
+                        <li>@item.Name : @ctrlName @act</li>
+                    }
+                }
+
+            </ul>
+        </div>
+        <div>
+            listStudent :
+            <ul>
+                @for (int i = 0; listStudent != null && i < listStudent.Count; i++)
+                {
+                    var item = listStudent[i];
+                    string ctrlName = item.Module;
+                    var actNames = item.Acts;
+                    foreach (string act in actNames)
+                    {
+                        <li>@item.Name : @ctrlName @act</li>
+                    }
+                }
+
+            </ul>
+        </div>
+    </div>
