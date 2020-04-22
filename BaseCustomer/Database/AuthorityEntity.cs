@@ -88,7 +88,7 @@ namespace BaseCustomerEntity.Database
         }
         private AuthorityEntity Create(string area,string des, string ctrlName, string actName, AuthorityType type)
         {
-            if (IsExist(area,ctrlName, actName, type, out AuthorityEntity item))
+            if (IsExist(area,ctrlName, actName, out AuthorityEntity item))
             {
                 item.Description = des;
                 item.Area = area;
