@@ -22,6 +22,8 @@ namespace BaseCustomerEntity.Database
         public string UserCreate { get; set; }
         [JsonProperty("CreateDate")]
         public DateTime CreateDate { get; set; }
+        [JsonProperty("ParentID")]
+        public string ParentID { get; set; }
     }
     public class RoleService : ServiceBase<RoleEntity>
     {

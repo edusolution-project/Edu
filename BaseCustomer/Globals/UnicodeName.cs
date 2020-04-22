@@ -12,7 +12,7 @@
         }
         public static string ConvertUnicodeToCode(this string text, string replaceWhiteSpace, bool isLowerCase)
         {
-            return string.IsNullOrEmpty(replaceWhiteSpace) ? RemoveUnicode(text).ToLower() : RemoveUnicode(text).Replace(" ", replaceWhiteSpace).ToLower();
+            return isLowerCase ? RemoveUnicode(text).ToLower() : RemoveUnicode(text).Replace(" ", replaceWhiteSpace).ToLower();
         }
         private static string RemoveUnicode(string text)
         {

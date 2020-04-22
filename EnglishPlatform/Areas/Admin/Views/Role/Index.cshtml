@@ -101,17 +101,17 @@
     function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
 
         $.ajax({
-            type: "POST",
-            url: '@Url.Action("GetList", "role")',
+            type: "GET",
+            url: '@Url.Action("get", "role")',
             data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
             dataType:"json",
             success: function (data) {
                 var body = $('#dataTable tbody');
                 body.html("");
-                if (data.Data.length > 0)
+                if (data.data.length > 0)
                 {
-                    for (i = 0; i < data.Data.length; ++i) {
-                        item = data.Data[i];
+                    for (i = 0; i < data.data.length; ++i) {
+                        item = data.data[i];
                         console.log(item);
                         var active = "";
                         if (item.IsActive) {
