@@ -40,13 +40,13 @@ namespace BaseCustomerMVC.Controllers.Admin
         }
         [HttpGet]
         [Obsolete]
-        public JsonResult Get(DefaultModel model)
+        public JsonResult Get(DefaultModel model, string code)
         {
             try
             {
                 if (User != null && User.Identity.IsAuthenticated)
                 {
-                    string parent = User.FindFirst(ClaimTypes.Role)?.Value;
+                    string parent = string.IsNullOrEmpty(code) ? User.FindFirst(ClaimTypes.Role)?.Value : code;
                     if (string.IsNullOrEmpty(model.SearchText)) model.SearchText = string.Empty;
                     long count = _service.CreateQuery().Count(_=>true);
                     if (count > 0)
