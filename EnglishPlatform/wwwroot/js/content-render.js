@@ -937,17 +937,23 @@ var Lesson = (function () {
             }).append('<i class="ic fa fa-expand mr-2"></i>').append('Xem toàn màn hình')))
         });
 
+        if (typeof (WirisPlugin) != 'undefined')
+            itembox.html(WirisPlugin.Parser.initParse(itembox.html()));
 
         if (listPartContainer.find(".nav-item").length == 1) {
             itemtitle.addClass("active");
             tabsitem.addClass("show active");
+            alert(2);
         }
+        alert(1);
         //$('.btn[title]').tooltip({
         //    trigger: 'hover'
         //});
 
         $('.Q3_absrow .quiz-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
         $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
+
+        //renderMath
 
         startDragDrop();
     }
@@ -1749,10 +1755,14 @@ var Lesson = (function () {
                 alert("Not implement");
                 break;
         }
-        CKEDITOR.replace("editor");
+        //CKEDITOR.replace("editor");        
+        CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
+        CKEDITOR.replace('editor', {
+            allowedContent: true,
+            extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+        });
         if (data != null && data.Media != null)
             renderMediaContent(data, contentholder.find(".media_preview:first"), type);
-        //debugger;
     }
 
     var addNewQuestion = function (data = null) {
@@ -2105,9 +2115,9 @@ var Lesson = (function () {
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     //.append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần 0) chưa bắt đầu" }))
-                .append($('<div>', { class: "text-center h4 btn-primary mt-5 btn", text: "Làm bài ngay", style: "cursor:pointer" }).click(function () {
-                    BeginExam(this)
-                }).prepend($('<i>', { class: "fas fa-play mr-2"})));
+                    .append($('<div>', { class: "text-center h4 btn-primary mt-5 btn", text: "Làm bài ngay", style: "cursor:pointer" }).click(function () {
+                        BeginExam(this)
+                    }).prepend($('<i>', { class: "fas fa-play mr-2" })));
             wrapper.append(lastExamResult);
         }
         else {

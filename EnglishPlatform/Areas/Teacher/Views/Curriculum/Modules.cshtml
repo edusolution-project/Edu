@@ -410,16 +410,27 @@
 
             if (oldPos != chapter.Order + 1) { //change order
                 parent = oldChap.parent();
-                parent.find('> .modules:eq(' + chapter.Order + ')').before(oldChap);
+                
+                //console.log(oldChap);
                 startchange = chapter.Order + 1;
-                parent.find('> .modules:gt(' + chapter.Order + ')').each(function (i, row) {
-                    startchange++;
-                    $(row).find('input[name=Order]').val(startchange);
+                console.log(oldPos);
+                if (oldPos < chapter.Order + 1) {
+                    parent.find('> .modules[id!=0]:eq(' + chapter.Order + ')').after(oldChap);
+                    startchange = oldPos;
+                }
+                else
+                    parent.find('> .modules[id!=0]:eq(' + chapter.Order + ')').before(oldChap);
+                var pos = startchange;
+                oldChap.find('input[name=Order]').val(pos);
+                console.log(parent.find('> .modules[id!=0]:gt(' + startchange + ')'));
+                parent.find('> .modules[id!=0]:gt(' + startchange + ')').each(function (i, row) {
+                    pos++;
+                    $(row).find('input[name=Order]').val(pos);
                 })
             }
             else {
-                oldItem.after(rowData);
-                oldItem.remove();
+                //oldChap.after(chapContent);
+                //oldChap.remove();
             }
         }
         else {
@@ -597,6 +608,7 @@
     function AddChapterCallback(res) {
         if (res != null) {
             var result = $.parseJSON(res);
+            //console.log(result);
             if (result.Error != null) {
                 alert(result.Error);
                 return false;
@@ -802,7 +814,7 @@
 
     function openLesson(obj) {
         var url = $(obj).attr("href");
-        console.log($(obj).text());
+        //console.log($(obj).text());
         $("#lessonFrameModal iframe").attr("src", url + "&frameview=1")
         window.history.replaceState({ frame: 1 }, $(obj).text(), url);
         document.title = $(obj).text();
@@ -811,7 +823,7 @@
     function closeLessonFrame() {
         var url = '@Url.Action("Modules", "Curriculum")/@Data.ID';
         var title = '@Data.Name'
-        
+
         //window.location.replace(url);
         window.history.replaceState({ frame: 0 }, title, url);
         document.title = title

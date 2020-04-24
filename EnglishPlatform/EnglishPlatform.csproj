@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Controllers\HomeController - Copy.cs" />
     <Compile Remove="Controllers\HomeController_2.cs" />
   </ItemGroup>
 
@@ -2336,6 +2335,16 @@
     <ProjectReference Include="..\BaseCustomerMVC\BaseCustomerMVC.csproj" />
     <ProjectReference Include="..\BaseEasyRealTime\BaseEasyRealTime.csproj" />
     <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Reference Include="WIRIScommon">
+      <HintPath>wwwroot\generic_wiris\bin\WIRIScommon.dll</HintPath>
+    </Reference>
+    <Reference Include="WIRISplugin">
+      <HintPath>wwwroot\generic_wiris\bin\WIRISplugin.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 

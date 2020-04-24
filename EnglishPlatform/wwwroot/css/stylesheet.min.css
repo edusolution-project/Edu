@@ -43,7 +43,7 @@ html, body {
 }
 
 img {
-    width: 100%;
+    width: auto;
     max-width: 100%;
     vertical-align: middle;
     border: none
