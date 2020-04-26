@@ -35,9 +35,20 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public ActionResult Index(DefaultModel model)
         {
+            string code = User.FindFirst(ClaimTypes.Role)?.Value;
+            if (!string.IsNullOrEmpty(code))
+            {
+               ViewBag.Data = _service.GetItemByCode(code);
+            }
             ViewBag.Model = model;
             return View();
         }
+
+        public ActionResult Permission(string roleCode)
+        {
+            return View();
+        }
+
         [HttpGet]
         [Obsolete]
         public JsonResult Get(DefaultModel model, string code)
@@ -98,7 +109,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         item.Code = code;
                         if (_service.GetItemByCode(code) == null)
                         {
-                            _service.CreateOrUpdate(item);
+                            _service.CreateNewRole(item);
                             return new JsonResult(new { code = 200, msg = "create success", data = item });
                         }
                         else
@@ -165,7 +176,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             item.UserCreate = oldItem.UserCreate;
                             item.CreateDate = oldItem.CreateDate;
                             if (string.IsNullOrEmpty(item.ParentID)) item.ParentID = oldItem.ParentID;
-                            _service.CreateOrUpdate(item);
+                            _service.UpdateRole(item);
                             return new JsonResult(new { code = 200, msg = "update success", data = item });
                         }
                     }

@@ -24,14 +24,7 @@ namespace BaseCustomerEntity.Database
     {
         public AuthorityService(IConfiguration config) : base(config)
         {
-
         }
-        private bool IsExist(string area, string ctrlName,string actName,AuthorityType type, out AuthorityEntity item)
-        {
-            item = CreateQuery().Find(o => o.Area == area && o.CtrlName == ctrlName && o.ActName == actName && o.Type == type)?.FirstOrDefault();
-            return  item != null ;
-        }
-
         public bool IsExist(string area,string ctrlName, string actName, out AuthorityEntity item)
         {
             try
