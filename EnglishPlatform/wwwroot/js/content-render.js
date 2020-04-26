@@ -793,10 +793,10 @@ var Lesson = (function () {
         itembox.append(boxHeader);
 
 
-        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", style: "cursor:pointer" });
-        $(collapseSwitch).click(function () {
-            toggleExpand(this);
-        });
+        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", style: "cursor:pointer", onclick: "toggleExpand(this)" });
+        //$(collapseSwitch).click(function () {
+        //    toggleExpand(this);
+        //});
 
         //itembox.append(ItemRow);
         switch (data.Type) {
@@ -943,9 +943,7 @@ var Lesson = (function () {
         if (listPartContainer.find(".nav-item").length == 1) {
             itemtitle.addClass("active");
             tabsitem.addClass("show active");
-            alert(2);
         }
-        alert(1);
         //$('.btn[title]').tooltip({
         //    trigger: 'hover'
         //});
