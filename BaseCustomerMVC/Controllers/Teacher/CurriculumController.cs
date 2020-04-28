@@ -12,6 +12,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using OfficeOpenXml;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -1674,6 +1676,149 @@ namespace BaseCustomerMVC.Controllers.Teacher
             await _lessonPartAnswerService.Collection.InsertOneAsync(item);
         }
 
+        public IActionResult ExportQuestionTemplate(DefaultModel model)
+        {
+            var stream = new MemoryStream();
+
+            using (var package = new ExcelPackage(stream))
+            {
+                var workSheet = package.Workbook.Worksheets.Add("Mau cau hoi");
+                //workSheet.InsertRow(1, 3);
+                //header
+                workSheet.Cells[1, 1].Value = "STT";
+                workSheet.Cells[1, 2].Value = "Nội dung";
+                workSheet.Cells[1, 3].Value = "Liên kết";
+                workSheet.Cells[1, 4].Value = "Đúng/sai";
+                //question template
+                workSheet.Cells[2, 1].Value = "1";
+                workSheet.Cells[2, 2].Value = "Câu hỏi 1";
+                workSheet.Cells[2, 3].Value = "https://eduso.vn/images/example.png";
+                workSheet.Cells[2, 4].Value = "";
+                //answer template
+                workSheet.Cells[3, 1].Value = "";
+                workSheet.Cells[3, 2].Value = "Nội dung trả lời 1";
+                workSheet.Cells[3, 3].Value = "https://eduso.vn/images/example.png";
+                workSheet.Cells[3, 4].Value = "TRUE";
+
+                workSheet.Cells[5, 1].Value = "Lưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi";
+                workSheet.Cells[6, 1].Value = "Liên kết hình ảnh/media có dạng http://... hoặc https://...";
+
+                package.Save();
+            }
+            stream.Position = 0;
+            string excelName = $"QuizTemplate.xlsx";
+
+            //return File(stream, "application/octet-stream", excelName);  
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
+        }
+
+        public async Task<JsonResult> ImportQuestion()
+        {
+            var form = HttpContext.Request.Form;
+
+            if (form == null || form.Files == null || form.Files.Count <= 0)
+                return new JsonResult(new Dictionary<string, object> { { "Error", "Chưa chọn file" } });
+            var file = form.Files[0];
+            var dirPath = "Upload\\Quiz";
+            if (!Directory.Exists(Path.Combine(_env.WebRootPath, dirPath)))
+                Directory.CreateDirectory(Path.Combine(_env.WebRootPath, dirPath));
+            var filePath = Path.Combine(_env.WebRootPath, dirPath + "\\" + DateTime.Now.ToString("ddMMyyyyhhmmss") + file.FileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+                stream.Close();
+                try
+                {
+                    var pos = -1;
+                    var full_item = new LessonPartViewModel()
+                    {
+                        Questions = new List<QuestionViewModel>()
+                    };
+                    using (var readStream = new FileStream(filePath, FileMode.Open))
+                    {
+                        using (ExcelPackage package = new ExcelPackage(readStream))
+                        {
+                            ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
+                            int totalRows = workSheet.Dimension.Rows;
+                            var contentCol = 2;
+                            if (totalRows < 2)
+                                return new JsonResult(new Dictionary<string, object> { { "Error", "Không có dữ liệu" } });
+
+                            for (int i = 2; i <= totalRows; i++)
+                            {
+                                if (workSheet.Cells[i, contentCol].Value == null || workSheet.Cells[i, contentCol].Value.ToString() == "") continue;
+
+                                if (workSheet.Cells[i, 1].Value != null && workSheet.Cells[i, 1].Value.ToString() != "")//Question
+                                {
+                                    pos++;
+                                    var question = new QuestionViewModel
+                                    {
+                                        Content = workSheet.Cells[i, contentCol].Value.ToString(),
+                                        Answers = new List<LessonPartAnswerEntity>() { }
+                                    };
+                                    if (workSheet.Cells[i, 3].Value != null)
+                                    {
+                                        var media = workSheet.Cells[i, 3].Value.ToString().Trim();
+                                        if (media != "")
+                                            question.Media = new Media
+                                            {
+                                                OriginalName = media,
+                                                Name = media,
+                                                Path = media,
+                                                Extension = GetContentType(media)
+                                            };
+                                    }
+                                    full_item.Questions.Add(question);
+                                }
+                                else //answer
+                                {
+                                    var answer = new LessonPartAnswerEntity
+                                    {
+                                        Content = workSheet.Cells[i, contentCol].Value.ToString().Trim(),
+                                        IsCorrect = workSheet.Cells[i, 4].Value.ToString() == "TRUE"
+                                    };
+                                    if (workSheet.Cells[i, 3].Value != null)
+                                    {
+                                        var media = workSheet.Cells[i, 3].Value.ToString();
+                                        if (media != "")
+                                            answer.Media = new Media
+                                            {
+                                                OriginalName = media,
+                                                Name = media,
+                                                Path = media,
+                                                Extension = GetContentType(media)
+                                            };
+                                    }
+                                    full_item.Questions[pos].Answers.Add(answer);
+                                }
+                            }
+                        }
+                    }
+                    System.IO.File.Delete(filePath);
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", full_item },
+                        {"Error", null }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return new JsonResult(new Dictionary<string, object> { { "Error", ex.Message } });
+                }
+            }
+        }
+
+        private string GetContentType(string fileName)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings.Add(".dnct", "application/dotnetcoretutorials");
+            string contentType;
+            if (!provider.TryGetContentType(fileName, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
+        }
 
         #region Fix resources
 
@@ -1981,11 +2126,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
 
                     var student = _studentService.GetItemByID(progress.StudentID);
-                    if(student.JoinedClasses == null || !student.JoinedClasses.Contains(progress.ClassID))
+                    if (student.JoinedClasses == null || !student.JoinedClasses.Contains(progress.ClassID))
                     {
                         _classProgressService.Remove(progress.ID);
                         continue;
-                    }    
+                    }
                     //var exams = _examService.CreateQuery().Find(t => t.ClassID == progress.ID && t.StudentID == progress.StudentID && t.Status).SortByDescending(t=> t.Updated);
 
                     //var count = 0;
@@ -2007,7 +2152,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             _ = _lessonProgressService.CreateQuery().UpdateManyAsync(t => true, Builders<LessonProgressEntity>.Update
                 .Set(t => t.AvgPoint, 0).Set(t => t.PointChange, 0).Set(t => t.LastPoint, 0).Set(t => t.MaxPoint, 0).Set(t => t.MinPoint, 0)
-                .Set(t=> t.Tried, 0));
+                .Set(t => t.Tried, 0));
             _ = _chapterProgressService.CreateQuery().UpdateManyAsync(t => true, Builders<ChapterProgressEntity>.Update
                 .Set(t => t.AvgPoint, 0).Set(t => t.ExamDone, 0).Set(t => t.TotalPoint, 0));
             _ = _classSubjectProgressService.CreateQuery().UpdateManyAsync(t => true, Builders<ClassSubjectProgressEntity>.Update
@@ -2024,7 +2169,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (lesson == null || student == null || !student.JoinedClasses.Contains(exam.ClassID))
                     _examService.Remove(exam.ID);
                 else
-                {     
+                {
                     //if(exam.ClassID == "5e4165a2fce9522790ccf65d" && exam.StudentID == "5d838a00d5d1bf27e4410c06")
                     _ = _examService.Complete(exam, lesson, out point);
                 }

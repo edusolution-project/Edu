@@ -51,7 +51,9 @@
             load_part: '@Url.Action("GetDetail", "LessonPart")',
             save_part: '@Url.Action("CreateOrUpdate", "LessonPart")',
             del_part: '@Url.Action("Remove", "LessonPart")',
-            move_part: '@Url.Action("ChangePosition", "LessonPart")'
+            move_part: '@Url.Action("ChangePosition", "LessonPart")',
+            export_quiztemp: '@Url.Action("ExportQuestionTemplate","Curriculum")',
+            import_quiz: '@Url.Action("ImportQuestion","Curriculum")',
         },
         type: @Data.TemplateType,
         lesson_id: '@Data.ID',

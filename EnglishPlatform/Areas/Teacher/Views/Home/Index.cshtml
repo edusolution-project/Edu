@@ -205,6 +205,19 @@
                     }).catch(e => { })
             },
             getNewFeed() {
+                let _that = this
+                // Truyen param vào đây
+                let _form = new FormData()
+                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                let _url = '@Url.Action("GetThisWeekLesson", "Class")'
+
+                axios.post(_url, _form)
+                    .then(response => {
+                        //console.log("Week")
+                        //console.log(response.data)
+                        _that.lesson_week = response.data.data;
+                        //console.log(_that.lesson_week);
+                    }).catch(e => { })
             },
             formatTime(time) {
                 //console.log(time);

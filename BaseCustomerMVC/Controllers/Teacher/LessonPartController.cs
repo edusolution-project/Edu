@@ -170,18 +170,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.Order = maxItem != null ? maxItem.Order + 1 : 0;
                     item.Updated = DateTime.Now;
 
-                    if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || files == null || !files.Any(f => f.Name == item.Media.Name))
+                    if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || (!item.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == item.Media.Name))))
                     {
                         item.Media = null;
                     }
                     else
                     {
-                        var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
-                        if (file != null)
+                        if (item.Media.Name.ToLower().StartsWith("http")) //file url (import)
                         {
                             item.Media.Created = DateTime.Now;
-                            item.Media.Size = file.Length;
-                            item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
+                            item.Media.Size = 0;
+                            item.Media.Path = item.Media.Name.Trim();
+                        }
+                        else
+                        {
+                            var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                            if (file != null)
+                            {
+                                item.Media.Created = DateTime.Now;
+                                item.Media.Size = file.Length;
+                                item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
+                            }
                         }
                     }
                 }
@@ -276,17 +285,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             quiz.Created = DateTime.Now;
                             quiz.Updated = DateTime.Now;
 
-                            if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || !files.Any(f => f.Name == quiz.Media.Name))
+                            if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || (!quiz.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == quiz.Media.Name))))
                                 quiz.Media = null;
                             else
                             {
-                                var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
-                                if (file != null)
+                                if (quiz.Media.Name.ToLower().StartsWith("http")) //file url (import)
                                 {
                                     quiz.Media.Created = DateTime.Now;
-                                    quiz.Media.Size = file.Length;
-                                    quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                                    quiz.Media.Size = 0;
+                                    quiz.Media.Path = quiz.Media.Name.Trim();
                                 }
+                                else
+                                {
+                                    var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                                    if (file != null)
+                                    {
+                                        quiz.Media.Created = DateTime.Now;
+                                        quiz.Media.Size = file.Length;
+                                        quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                                    }
+                                }
+
+                                //var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
+                                //if (file != null)
+                                //{
+                                //    quiz.Media.Created = DateTime.Now;
+                                //    quiz.Media.Size = file.Length;
+                                //    quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                                //}
                             }
                         }
                         else
@@ -342,17 +368,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     answer.Created = DateTime.Now;
                                     answer.Updated = DateTime.Now;
 
-                                    if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || !files.Any(f => f.Name == answer.Media.Name))
+                                    if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || (!answer.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == answer.Media.Name))))
                                         answer.Media = null;
                                     else
                                     {
-                                        var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
-                                        if (file != null)
+                                        if (answer.Media.Name.ToLower().StartsWith("http")) //file url (import)
                                         {
                                             answer.Media.Created = DateTime.Now;
-                                            answer.Media.Size = file.Length;
-                                            answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                            answer.Media.Size = 0;
+                                            answer.Media.Path = answer.Media.Name.Trim();
                                         }
+                                        else
+                                        {
+                                            var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                                            if (file != null)
+                                            {
+                                                answer.Media.Created = DateTime.Now;
+                                                answer.Media.Size = file.Length;
+                                                answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                            }
+                                        }
+                                        //var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
+                                        //if (file != null)
+                                        //{
+                                        //    answer.Media.Created = DateTime.Now;
+                                        //    answer.Media.Size = file.Length;
+                                        //    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                        //}
                                     }
                                 }
                                 else
@@ -368,7 +410,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                             answer.Media = null;
                                         else
                                         {
-
                                             var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();//update media
                                             answer.Media.Created = DateTime.Now;
                                             answer.Media.Size = file.Length;
