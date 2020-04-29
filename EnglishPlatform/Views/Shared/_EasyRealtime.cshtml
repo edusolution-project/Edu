@@ -455,16 +455,16 @@
 <style>
     .box-chat-eduso {
         position: fixed;
-        width: 200px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
         /*bottom: 8px;
         left: 25px;*/
         bottom: 21px;
         left: 95px;
         z-index: 9999;
         background: #00304b;
-        border-radius: 13px;
-        box-shadow: 0 0 10px #ccc;
+        border-radius: 30px;
+        box-shadow: 0px 0px 10px #333;
     }
 
         .box-chat-eduso.open {
@@ -480,6 +480,7 @@
 
         .box-chat-eduso.open .box-chat-eduso--container-app {
             display: block;
+            box-shadow: 0 0 20px #333;
         }
 
     .chatstyle-01 {
@@ -487,21 +488,11 @@
     }
 </style>
 <div class="box-chat-eduso">
-    <div class="fn-box-chat-eduso" style="height:50px;color: #fff;text-align: center;padding-top: 15px;" onclick="javascript: this.parentElement.classList.toggle('open'); this.scrollIntoView(true);">
+    <div class="fn-box-chat-eduso" style="height:50px;color: #fff;text-align: center; padding-top: 19px; cursor:pointer;" onclick="javascript: this.parentElement.classList.toggle('open'); this.scrollIntoView(true);">
         Chat
     </div>
-    <div class="box-chat-eduso--container-app" style="position:relative;width:100%;height:100%">
-        <div id="easy-real-time-app" style="    position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: #fff;
-        z-index: 9999;
-        border: 1px solid #ccc;
-        box-shadow: 0 0 20px;
-        overflow: hidden
-    ">
+    <div class="box-chat-eduso--container-app" style="position: relative; width: 100%; height: 100% ">
+        <div id="easy-real-time-app" style="position: absolute;top: 0;left: 0;right: 0;bottom: 0;background: #fff;z-index: 9999;border:none;overflow: hidden">
             <div class="box-real-time-app">
                 <div class="slider-bar-left">
                     <ul class="ul-slider-bar-left" data-ul-id="ul-slider-bar-left">

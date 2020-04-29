@@ -1907,14 +1907,25 @@ var Lesson = (function () {
     }
 
     var removeQuestion = function (obj) {
-        if (confirm("Xóa câu hỏi này?")) {
-            var id = $(obj).siblings("[name$='.ID']").val();
-            var quizHolder = $(obj).parent();
-            if (!$(obj).parent().hasClass("fieldQuestion"))
-                quizHolder = $(obj).parent().parent();
-            quizHolder.parent().append($("<input>", { "type": "hidden", "name": "RemovedQuestions", "value": id }));
-            quizHolder.remove();
-        }
+
+        Swal.fire({
+            title: 'Xác nhận xóa câu hỏi?',            
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Bỏ qua'
+        }).then((result) => {
+            if (result.value) {
+                var id = $(obj).siblings("[name$='.ID']").val();
+                var quizHolder = $(obj).parent();
+                if (!$(obj).parent().hasClass("fieldQuestion"))
+                    quizHolder = $(obj).parent().parent();
+                quizHolder.parent().append($("<input>", { "type": "hidden", "name": "RemovedQuestions", "value": id }));
+                quizHolder.remove();
+            }
+        })
     }
 
     var removeAnswer = function (obj) {
