@@ -135,8 +135,8 @@ namespace EnglishPlatform.Controllers
                         // danh sach lop
                         var listClassID = realClass.Select(o => o.ID).ToList();
                         //var liststudentClass = _classStudentService.CreateQuery().Find(o => listClassID.Contains(o.ClassID))?.ToList();
-                        var listStudent = _studentService.GetStudentIdsByClassIds(listClassID).ToList() ;
-                            //liststudentClass?.Select(o => o.StudentID);
+                        var listStudent = _studentService.GetStudentIdsByClassIds(listClassID).ToList();
+                        //liststudentClass?.Select(o => o.StudentID);
                         var listTeacher = realClass.Select(o => o.TeacherID).Distinct();
 
                         if (listStudent != null)
@@ -163,7 +163,7 @@ namespace EnglishPlatform.Controllers
                                     //    _studentService.GetStudentIdsByClassId(itemClass.ID);
                                     //var members = _studentService.CreateQuery().Find(o => listStudent.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();//chỗ này lấy hết SV???
                                     var members = _studentService.GetStudentsByClassId(itemClass.ID).Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();
-                                    var teacher =  _teacherService.GetItemByID(itemClass.TeacherID);
+                                    var teacher = _teacherService.GetItemByID(itemClass.TeacherID);
                                     if (members == null)
                                     {
                                         members = new HashSet<MemberGroupInfo>() {
@@ -389,6 +389,34 @@ namespace EnglishPlatform.Controllers
                 }
             }
 
+            return NotFoundData();
+        }
+
+
+        [HttpGet]
+        public JsonResult GetLastestMessage(DateTime startDate, DateTime endDate, int limit)
+        {
+            if (IsAuthenticated())
+            {
+                var sender = new MemberGroupInfo(_userID, _email, _name, _typeUser.Contains(Teacher));
+                if (!sender.IsTeacher)
+                {
+                    var student = _studentService.GetItemByID(_userID);
+                    if (student == null)
+                        return NotFoundData();
+                    var groupName = student.JoinedClasses;
+                    var message = _messageService.GetNewFeedList(groupName, startDate, endDate);
+                    return Success(new { messages = message });
+                }
+                else
+                {
+                    var classIDs = _classService.GetTeacherClassList(_userID).ToList();
+                    if (classIDs == null)
+                        return NotFoundData();
+                    var message = _messageService.GetNewFeedList(classIDs, startDate, endDate).Take(10).ToList();
+                    return Success(new { messages = message });
+                }
+            }
             return NotFoundData();
         }
         /// <summary>

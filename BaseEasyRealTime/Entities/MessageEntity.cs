@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using MongoDB.Driver;
+using MongoDB.Bson.Serialization;
 
 namespace BaseEasyRealTime.Entities
 {
@@ -28,6 +29,7 @@ namespace BaseEasyRealTime.Entities
         [Obsolete]
         public MessageService(IConfiguration config) : base(config)
         {
+            BsonClassMap.RegisterClassMap<MemberGroupInfo>();
             var indexs = new List<CreateIndexModel<MessageEntity>>
             {
                 //CourseID_1
@@ -59,7 +61,7 @@ namespace BaseEasyRealTime.Entities
 
         public IEnumerable<MessageEntity> GetMessageList(string GroupName, DateTime StartDate, DateTime EndDate)
         {
-            var data = CreateQuery().Find(o =>o.State == 0 && ((o.Receiver == GroupName && o.Created >= StartDate)||(o.Receiver == GroupName && o.Created <= EndDate))
+            var data = CreateQuery().Find(o => o.State == 0 && ((o.Receiver == GroupName && o.Created >= StartDate) || (o.Receiver == GroupName && o.Created <= EndDate))
             )?.ToList();
 
             if (data == null || data.Count == 0)
@@ -79,22 +81,25 @@ namespace BaseEasyRealTime.Entities
 
             return data;
         }
+
         public IEnumerable<MessageEntity> GetNewFeedList(string GroupName, DateTime StartDate, DateTime EndDate)
         {
             var data = CreateQuery().Find(o =>
             o.State == 1 &&
-            ((o.Receiver == GroupName && o.Created >= StartDate)
-            ||
-            (o.Receiver == GroupName && o.Created <= EndDate))
+            //((o.Receiver == GroupName && o.Created >= StartDate)
+            //||
+            //(o.Receiver == GroupName && o.Created <= EndDate))
+            (o.Receiver == GroupName && (o.Created >= StartDate) && (o.Created <= EndDate))
             )?.ToList();
 
-            if (data == null || data.Count == 0) {
+            if (data == null || data.Count == 0)
+            {
                 var itemLast = CreateQuery().Find(o => o.State == 1 && o.Receiver == GroupName)?.SortByDescending(o => o.Created)?.Limit(1)?.FirstOrDefault();
                 if (itemLast != null)
                 {
                     EndDate = itemLast.Created.Value;
                     StartDate = EndDate.AddDays(-7);
-                    data = CreateQuery().Find(o =>o.State == 1 &&((o.Receiver == GroupName && o.Created >= StartDate)||(o.Receiver == GroupName && o.Created <= EndDate)))?.ToList();
+                    data = CreateQuery().Find(o => o.State == 1 && ((o.Receiver == GroupName && o.Created >= StartDate) || (o.Receiver == GroupName && o.Created <= EndDate)))?.ToList();
                 }
                 else
                 {
@@ -104,5 +109,38 @@ namespace BaseEasyRealTime.Entities
 
             return data;
         }
+
+        public IEnumerable<MessageEntity> GetNewFeedList(List<string> ListGroupName, DateTime StartDate, DateTime EndDate)
+        {
+            var data = CreateQuery().Find(o =>
+            o.State == 1 &&
+            ListGroupName.Contains(o.Receiver)
+
+            //&& (o.Created >= StartDate) && ( o.Created <= EndDate))
+            ).SortByDescending(t => t.Created).ToEnumerable();
+
+            //if (data == null || data.Count == 0)
+            //{
+
+            //    var itemLast = CreateQuery().Find(o => o.State == 1 && ListGroupName.Contains(o.Receiver))?.SortByDescending(o => o.Created)?.Limit(1)?.FirstOrDefault();
+            //    if (itemLast != null)
+            //    {
+            //        EndDate = itemLast.Created.Value;
+            //        StartDate = EndDate.AddDays(-7);
+            //        data = CreateQuery().Find(o =>
+            //           o.State == 1 &&
+            //           (ListGroupName.Contains(o.Receiver) && (o.Created >= StartDate) && (o.Created <= EndDate))
+            //        )?.ToList();
+            //    }
+            //    else
+            //    {
+            //        return null;
+            //    }
+            //}
+
+            return data;
+        }
+
+
     }
 }
