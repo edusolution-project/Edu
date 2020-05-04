@@ -1685,14 +1685,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var workSheet = package.Workbook.Worksheets.Add("Mau cau hoi");
                 //workSheet.InsertRow(1, 3);
                 //header
-                workSheet.Cells[1, 1].Value = "STT";
+                
+                workSheet.Cells[1, 1].Value = "STT"; 
                 workSheet.Cells[1, 2].Value = "Nội dung";
                 workSheet.Cells[1, 3].Value = "Liên kết";
                 workSheet.Cells[1, 4].Value = "Đúng/sai";
+
+                var headerCells = workSheet.Cells[1, 1, 1, workSheet.Dimension.Columns];
+                headerCells.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                headerCells.Style.Font.Bold = true;
+
+                var col1 = workSheet.Column(1);
+                col1.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                col1.Width = 10;
+
+                var col2 = workSheet.Column(2);
+                col2.Width = 40;
+                
+                var col3 = workSheet.Column(3);
+                col3.Width = 40;
+                
+                var col4 = workSheet.Column(4);
+                col1.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                col4.Width = 10;
+
                 //question template
                 workSheet.Cells[2, 1].Value = "1";
                 workSheet.Cells[2, 2].Value = "Câu hỏi 1";
-                workSheet.Cells[2, 3].Value = "https://eduso.vn/images/example.png";
+                workSheet.Cells[2, 3].Value = "https://eduso.vn/images/quiz_example.png";
                 workSheet.Cells[2, 4].Value = "";
                 //answer template
                 workSheet.Cells[3, 1].Value = "";
@@ -1700,8 +1720,44 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 workSheet.Cells[3, 3].Value = "https://eduso.vn/images/example.png";
                 workSheet.Cells[3, 4].Value = "TRUE";
 
-                workSheet.Cells[5, 1].Value = "Lưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi";
-                workSheet.Cells[6, 1].Value = "Liên kết hình ảnh/media có dạng http://... hoặc https://...";
+                workSheet.Cells[4, 1].Value = "";
+                workSheet.Cells[4, 2].Value = "Nội dung trả lời 2";
+                workSheet.Cells[4, 3].Value = "https://eduso.vn/images/example.png";
+                workSheet.Cells[4, 4].Value = "FALSE";
+
+                workSheet.Cells[5, 1].Value = "";
+                workSheet.Cells[5, 2].Value = "Nội dung trả lời 3";
+                workSheet.Cells[5, 3].Value = "https://eduso.vn/images/example.png";
+                workSheet.Cells[5, 4].Value = "FALSE";
+
+                //question template
+                workSheet.Cells[6, 1].Value = "2";
+                workSheet.Cells[6, 2].Value = "Câu hỏi 2";
+                workSheet.Cells[6, 3].Value = "https://eduso.vn/images/quiz_example.png";
+                workSheet.Cells[6, 4].Value = "";
+                //answer template
+                workSheet.Cells[7, 1].Value = "";
+                workSheet.Cells[7, 2].Value = "Nội dung trả lời 1 - Câu 2";
+                workSheet.Cells[7, 3].Value = "https://eduso.vn/images/example.png";
+                workSheet.Cells[7, 4].Value = "FALSE";
+
+                workSheet.Cells[8, 1].Value = "";
+                workSheet.Cells[8, 2].Value = "Nội dung trả lời 2 - Câu 2";
+                workSheet.Cells[8, 3].Value = "https://eduso.vn/images/example.png";
+                workSheet.Cells[8, 4].Value = "FALSE";
+
+                workSheet.Cells[9, 1].Value = "";
+                workSheet.Cells[9, 2].Value = "Nội dung trả lời 3 - Câu 2";
+                workSheet.Cells[9, 3].Value = "https://eduso.vn/images/example.png";
+                workSheet.Cells[9, 4].Value = "FALSE";
+
+
+                workSheet.Cells[11, 1].Value = "Lưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi";
+                workSheet.Cells[12, 1].Value = "Liên kết hình ảnh/media có dạng http://... hoặc https://...";
+                var note = workSheet.Cells[11, 1, 12, workSheet.Dimension.Columns];
+                note.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Left;
+                note.Style.Font.Italic = true;
+
 
                 package.Save();
             }
