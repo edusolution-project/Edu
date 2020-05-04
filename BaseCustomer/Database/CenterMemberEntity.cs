@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace BaseCustomerEntity.Database
 {
-    public class ClassMemberEntity
+    public class CenterMemberEntity
     {
         [JsonProperty("Name")]
         public string Name { get; set; }
@@ -18,12 +18,10 @@ namespace BaseCustomerEntity.Database
         public string TeacherID { get; set; }
     }
 
-    public class ClassMemberType
+    public class CenterMemberType
     {
         public const int
             TEACHER = 1,
-            CLASS_ASSISTANT = 2,
-            CUSTOMER_MANAGEMENT = 3,
             MANAGER = 4,
             OWNER = 5;
     }

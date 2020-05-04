@@ -348,7 +348,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
 
             if (!string.IsNullOrEmpty(model.SearchText))
-                filter.Add(Builders<CourseEntity>.Filter.Text("\"" + model.SearchText + "\""));
+                //filter.Add(Builders<CourseEntity>.Filter.Text("\"" + model.SearchText + "\""));
+                filter.Add(Builders<CourseEntity>.Filter.Text(model.SearchText));
 
 
             var data = (filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);
@@ -1685,8 +1686,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var workSheet = package.Workbook.Worksheets.Add("Mau cau hoi");
                 //workSheet.InsertRow(1, 3);
                 //header
-                
-                workSheet.Cells[1, 1].Value = "STT"; 
+
+                workSheet.Cells[1, 1].Value = "STT";
                 workSheet.Cells[1, 2].Value = "Nội dung";
                 workSheet.Cells[1, 3].Value = "Liên kết";
                 workSheet.Cells[1, 4].Value = "Đúng/sai";
@@ -1701,10 +1702,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var col2 = workSheet.Column(2);
                 col2.Width = 40;
-                
+
                 var col3 = workSheet.Column(3);
                 col3.Width = 40;
-                
+
                 var col4 = workSheet.Column(4);
                 col1.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 col4.Width = 10;

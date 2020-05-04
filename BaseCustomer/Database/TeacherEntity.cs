@@ -34,8 +34,9 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Skype")]
         public string Skype { get; set; }
         [JsonProperty("ZoomID")]
-        public string ZoomID { get; set; }
+        public string ZoomID { get; set; }        
     }
+
     public class TeacherService : ServiceBase<TeacherEntity>
     {
         public TeacherService(IConfiguration configuration) : base(configuration)

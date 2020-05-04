@@ -976,7 +976,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.TeacherID = userId; // creator
                 item.Skills = new List<string>();
                 item.Subjects = new List<string>();
-                item.Members = new List<ClassMemberEntity>();
+                item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER} };
                 item.TotalLessons = 0;
                 item.IsActive = true;
                 item.StartDate = item.StartDate.ToUniversalTime();
