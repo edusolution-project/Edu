@@ -95,7 +95,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
         }
         [HttpPost]
-        public JsonResult Create(RoleEntity item)
+        public JsonResult Create([FromBody]RoleEntity item)
         {
             try
             {

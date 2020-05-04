@@ -5,6 +5,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BaseCustomerEntity.Database
@@ -39,7 +40,8 @@ namespace BaseCustomerEntity.Database
         }
         public RoleEntity GetItemByCode(string code)
         {
-            return Collection.Find(o => o.Code == code)?.First();
+            var listItem = Collection.Find(o => !string.IsNullOrEmpty(o.Code) && o.Code == code)?.ToList();
+            return listItem != null && listItem.Count > 0 ? listItem.First() : null;
         }
         public bool RemoveRole(string id)
         {

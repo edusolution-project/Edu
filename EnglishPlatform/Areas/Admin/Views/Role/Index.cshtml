@@ -24,7 +24,6 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="text-right">
-                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","role")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
                             <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
                         </div>
                     </div>
@@ -32,22 +31,15 @@
             </div>
 
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <div class="input-group"><input type="checkbox" aria-label="Checkbox" onclick="toggleAll(this, 'dataTable')"></div>
-                                </th>
-                                <th>STT</th>
-                                <th>tên</th>
-                                <th>Ngày tạo</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="role-wrapper">
+                            <button type="button" class="btn btn-sm btn-success">+</button>
+                            <div class="role-content">
+                                
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -57,49 +49,87 @@
 <!-- Modal Create Form -->
 <div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        @using (Html.BeginForm("Create", "role", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
-        {
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ModalCenterTitle">Tạo môn học</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <input type="hidden" name="Created" value="" />
-                        <input type="hidden" name="ID" />
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="Code" id="inputName" placeholder="mã môn">
-                            </div>
-                            <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="Name" id="inputText" placeholder="Tên môn">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalCenterTitle">Tạo nhóm</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <div class="form-row">
+                                <label for="staticText" class="col-md-4 col-form-label">Tên nhóm:</label>
+                                <input type="text" class="form-control col-md-8" data-name="name" placeholder="tên group">
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group row col-md-6">
-                                <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
-                                <div class="col-sm-8">
-                                    <select id="input-option" name="IsActive" class="form-control">
-                                        <option value="true" selected>Hoạt động</option>
-                                        <option value="false">Không hoạt động</option>
+                        <div class="form-group col-md-6">
+                            <div class="form-row">
+                                <label for="staticText" class="col-md-4 col-form-label">Nhóm chính:</label>
+                                <div class="col-md-8">
+                                    <select data-name="parent" class="form-control">
+                                        <option value="" selected>---- Root ----</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "role")','create',LoadData)">Lưu lại</button>
-                </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group row col-md-6">
+                            <label for="staticText" class="col-md-4 col-form-label">Trạng thái:</label>
+                            <div class="col-md-8">
+                                <select data-name="active" class="form-control">
+                                    <option value="true" selected>Hoạt động</option>
+                                    <option value="false">Không hoạt động</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
-        }
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="clear()">Đóng</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="savedata()">Lưu lại</button>
+            </div>
+        </div>
     </div>
 </div>
 <script>
+
+    var g_Ajax = function (url, data, method, async) {
+        var request = new XMLHttpRequest();
+        return new Promise(function (resolve, reject) {
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {
+                    // Process the response
+                    if (request.status >= 200 && request.status < 300) {
+                        // If successful
+                        resolve(request.response);
+                    } else {
+                        var arrStatus = [
+                            "UNSENT	Client has been created.open() not called yet.",
+                            "OPENED	open() has been called.",
+                            "HEADERS_RECEIVED	send() has been called, and headers and status are available.",
+                            "LOADING	Downloading; responseText holds partial data.",
+                            "DONE	The operation is complete."
+                        ];
+                        reject({
+                            status: request.status,
+                            statusText: request.statusText
+                        });
+                    }
+                }
+            }
+            request.open(method || 'POST', url, async || true);
+            //request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;multipart/form-data;application/json');
+            // Send the request
+            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+            request.send(data);
+        });
+    }
+
     function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
 
         $.ajax({
@@ -145,4 +175,46 @@
     $(document).ready(function () {
         LoadData();
     });
+
+    var savedata = function () {
+        var ModalCenter = document.getElementById("ModalCenter");
+        var name = ModalCenter.querySelector('input[data-name="name"]').value;
+        var parent = ModalCenter.querySelector('[data-name="parent"]').value;
+        var active = ModalCenter.querySelector('[data-name="active"]').value;
+        var data = {
+            Name: name,
+            ParentID: parent,
+            IsActive: active
+        };
+        g_Ajax("@Url.Action("Create","Role")", JSON.stringify(data), "POST").then(function (res) {
+            var dataJson = JSON.parse(res);
+            if (dataJson != null && dataJson.code == 200) {
+                //success
+                location.reload();
+            }
+        });
+    }
+    var clear = function () {
+        var ModalCenter = document.getElementById("ModalCenter");
+        ModalCenter.querySelector('input[data-name="name"]').value = "";
+        ModalCenter.querySelector('[data-name="parent"]').value = "";
+    }
+    //[JsonProperty("Name")]
+    //    public string Name { get; set; }
+    //[JsonProperty("Code")]
+    //    public string Code { get; set; }
+    //[JsonProperty("Type")]
+    //    public string Type { get; set; }
+    //[JsonProperty("IsActive")]
+    //    public bool IsActive { get; set; }
+    //[JsonProperty("UserCreate")]
+    //    public string UserCreate { get; set; }
+    //[JsonProperty("CreateDate")]
+    //    public DateTime CreateDate { get; set; }
+    //[JsonProperty("ParentID")]
+    //    public string ParentID { get; set; }
+    //[JsonProperty("Level")]
+    //    public int Level { get; set; }
+    //[JsonProperty("Group")]
+    //    public int Group { get; set; }
 </script>
