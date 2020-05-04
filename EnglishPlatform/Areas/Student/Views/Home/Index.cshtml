@@ -241,7 +241,7 @@
                         //console.log(response.data)
                         _that.discussion = response.data.data.messages;
                         //console.log(_that.discussion);
-                    }).catch(e => { })+-*            },
+                    }).catch(e => { })},
             formatTime(time) {
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
                 return moment(time).format("DD/MM/YYYY HH:mm")

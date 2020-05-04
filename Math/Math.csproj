@@ -108,11 +108,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
-      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="icons\cas.png" />
     <Content Include="icons\chem.png" />
     <Content Include="icons\formula.png" />
@@ -261,6 +256,7 @@
     <Content Include="src\services.md" />
     <Content Include="configuration.ini.dist" />
     <Content Include="VERSION" />
+    <None Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
