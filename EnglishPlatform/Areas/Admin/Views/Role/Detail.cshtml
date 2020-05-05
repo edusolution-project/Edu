@@ -1,6 +1,120 @@
-﻿@{
+﻿@using BaseCustomerEntity.Database
+@{
     ViewData["Title"] = "Quản lý phân quyền";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    List<AuthorityEntity> Data = ViewBag.Authority as List<AuthorityEntity>;
+    List<AccessEntity> Access = ViewBag.Access as List<AccessEntity>;
+    List<AccessEntity> ParentAccess = ViewBag.ParentAccess as List<AccessEntity>;
 }
+    <style>
+        .item-access > input[type='checkbox'] {
+            margin-top: 6px;
+        }
+        .item-access {
+            padding: 10px;
+        }
+    </style>
+    <div class="container-fluid">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-right">
+                        <button type="button" class="btn btn-success btn-sm" onclick="Save()"> <i class="fas fa-save"></i> </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-@ViewBag.Data
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="role-wrapper">
+                        <div class="role-content" id="authority-content">
+                            @{ 
+                                string[] over = new string[] { "superadmin", "supperadmin" };
+                                string userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                                if (userRole != null)
+                                {
+                                    for (int i = 0; Data != null && Data.Count > 0 && i < Data.Count; i++)
+                                    {
+                                        var item = Data[i];
+                                        if (!over.Contains(userRole))
+                                        {
+                                            bool isTrue = ParentAccess != null && ParentAccess.Where(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive==true) != null;
+                                            if (!isTrue)
+                                            {
+                                                continue;
+                                            }
+                                        }
+                                        bool isActive = Access != null && Access.Count > 0 && Access.FirstOrDefault(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive==true) != null;
+                                        <div class="item-access row" data-authority="@item.ID">
+                                            @if (isActive){<input type="checkbox" name="@item.ID" checked />}else{<input type="checkbox" name="@item.ID" />}
+                                             <div class="col">@item.Description</div>
+                                        </div>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+        var g_Ajax = function (url, data, method, async) {
+            var request = new XMLHttpRequest();
+            return new Promise(function (resolve, reject) {
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4) {
+                        // Process the response
+                        if (request.status >= 200 && request.status < 300) {
+                            // If successful
+                            resolve(request.response);
+                        } else {
+                            var arrStatus = [
+                                "UNSENT	Client has been created.open() not called yet.",
+                                "OPENED	open() has been called.",
+                                "HEADERS_RECEIVED	send() has been called, and headers and status are available.",
+                                "LOADING	Downloading; responseText holds partial data.",
+                                "DONE	The operation is complete."
+                            ];
+                            reject({
+                                status: request.status,
+                                statusText: request.statusText
+                            });
+                        }
+                    }
+                }
+                request.open(method || 'POST', url, async || true);
+                //request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;multipart/form-data;application/json');
+                // Send the request
+                request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+                request.send(data);
+            });
+        }
+        var Save = function () {
+            var root = document.getElementById('authority-content');
+            var listdata = root.querySelectorAll('.item-access');
+            var data = [];
+            for (var i = 0; listdata != null && i < listdata.length; i++) {
+                var el = listdata[i];
+                var elData = {
+                    Authority: el.dataset.authority,
+                    RoleID: '@ViewBag.Data',
+                    IsActive: el.querySelector('input[type="checkbox"]').checked,
+                };
+                data.push(elData);
+            }
+            g_Ajax("@Url.Action("CreateAccess","Role")", JSON.stringify(data), "POST").then(function (res) {
+            var dataJson = JSON.parse(res);
+            if (dataJson != null && dataJson.code == 200) {
+                //success
+                location.reload();
+            }});
+        }
+    </script>

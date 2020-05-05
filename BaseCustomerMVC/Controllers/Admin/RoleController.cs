@@ -26,10 +26,14 @@ namespace BaseCustomerMVC.Controllers.Admin
     {
         private readonly ILog _log;
         private readonly RoleService _service;
-        public RoleController(ILog log, RoleService service)
+        private readonly AuthorityService _authorityService;
+        private readonly AccessesService _accessesService;
+        public RoleController(ILog log, RoleService service, AuthorityService authorityService, AccessesService accessesService)
         {
             _log = log;
             _service = service;
+            _authorityService = authorityService;
+            _accessesService = accessesService;
         }
         // GET: Home
 
@@ -46,7 +50,17 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public ActionResult Detail(string id)
         {
-            ViewBag.Data = id;
+            var access = _accessesService.GetAccessByRole(id);
+            if (User != null && User.Identity.IsAuthenticated)
+            {
+                string parent = User.FindFirst(ClaimTypes.Role)?.Value;
+                var parentAccess = _accessesService.GetAccessByRole(parent);
+                List<AuthorityEntity> data = _authorityService.GetAll()?.ToList();
+                ViewBag.Authority = data?.ToList();
+                ViewBag.ParentAccess = parentAccess?.ToList();
+                ViewBag.Access = access?.ToList();
+                ViewBag.Data = id;
+            }
             return View();
         }
 
@@ -257,6 +271,42 @@ namespace BaseCustomerMVC.Controllers.Admin
                 return new JsonResult(new { code = 500, msg = ex.Message, data = ex });
             }
         }
-       
+        [HttpPost]
+        public JsonResult CreateAccess([FromBody] List<AccessEntity> listItem)
+        {
+            try
+            {
+                List<AccessEntity> success = new List<AccessEntity>();
+                if (User != null && User.Identity.IsAuthenticated)
+                {
+                    for (int i = 0; i < listItem.Count; i++)
+                    {
+                        var item = listItem[i];
+
+                        var oldItem = _accessesService.CreateQuery().Find(o => o.Authority == item.Authority && o.RoleID == item.RoleID)?.ToList();
+                        if(oldItem == null || oldItem.Count == 0)
+                        {
+                            item.UserCreate = User.FindFirst("UserID")?.Value;
+                            item.CreateDate = DateTime.Now;
+                            _accessesService.CreateOrUpdate(item);
+                            success.Add(item);
+                        }
+                        else
+                        {
+                            var realItem = oldItem.FirstOrDefault();
+                            realItem.IsActive = item.IsActive;
+                            _accessesService.Save(realItem);
+                            success.Add(realItem);
+                        }
+                    }
+                    return new JsonResult(new { code = 200, msg = "success", data = success });
+                }
+                return new JsonResult(new { code = 405, msg = "User not found" });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { code = 500, msg = ex.Message, data = ex });
+            }
+        }
     }
 }

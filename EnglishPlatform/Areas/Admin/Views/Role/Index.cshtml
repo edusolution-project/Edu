@@ -161,8 +161,8 @@
                         } else {
                             active = "<button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("approved","role")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button>";
                         }
-                        body.append("<div class='col-12' id='" + item.Code + "'> <div class='row'><a class='col' href='@Url.Action("Detail","Role")/" + item.Code + "'>" + item.Name + "</a> <button onclick='addNewRole(\"" + item.Code + "\")' type='button' class='btn btn-sm btn-success mr-1'> <i class='fas fa-plus'></i> </button> <button type='button' onclick='LoadData(\"" + item.Code + "\")' class='btn btn-sm btn-success mr-1'> <i class='fas fa-list'></i> </button> <button type='button' class='btn btn-sm btn-danger mr-1'> <i class='fas fa-trash'></i> </button> <button type='button' class='btn btn-sm btn-primary mr-1'> <i class='fas fa-edit'></i> </button>" + active + "</div><div class='addnew'></div><div class='content'></div></div> <hr/>");
-                        //LoadData(item.Code);
+                        body.append("<div class='col-12 p5' id='" + item.Code + "'> <div class='row p-1'><a class='col' href='@Url.Action("Detail","Role")/" + item.Code + "'>" + item.Name + "</a> <button onclick='addNewRole(\"" + item.Code + "\")' type='button' class='btn btn-sm btn-success mr-1'> <i class='fas fa-plus'></i> </button> <button type='button' onclick='LoadData(\"" + item.Code + "\")' class='btn btn-sm btn-success mr-1'> <i class='fas fa-list'></i> </button> <button type='button' class='btn btn-sm btn-danger mr-1'> <i class='fas fa-trash'></i> </button> <button type='button' class='btn btn-sm btn-primary mr-1'> <i class='fas fa-edit'></i> </button>" + active + "</div><div class='addnew'></div><div class='content'></div></div> <hr/>");
+                        LoadData(item.Code);
                     }
                     $('.btn').tooltip({ trigger:'hover' });
                 }
@@ -234,7 +234,9 @@
             console.log(data);
             g_Ajax("@Url.Action("Creates", "Role")", JSON.stringify(data), "POST").then(function (res) {
                 var dataJson = JSON.parse(res);
-                if (dataJson != null && dataJson.code == 200) {}
+                if (dataJson != null && dataJson.code == 200) {
+
+                }
             });
         }
     }
