@@ -18,6 +18,7 @@ using System.Reflection;
 using Core_v2.Interfaces;
 using BaseCustomerEntity.Globals;
 using System.Security.Claims;
+using System.Runtime.Caching;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -276,6 +277,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             try
             {
+                Dictionary<string, string> permission = new Dictionary<string, string>();
                 List<AccessEntity> success = new List<AccessEntity>();
                 if (User != null && User.Identity.IsAuthenticated)
                 {
@@ -290,6 +292,10 @@ namespace BaseCustomerMVC.Controllers.Admin
                             item.CreateDate = DateTime.Now;
                             _accessesService.CreateOrUpdate(item);
                             success.Add(item);
+                            if (item.IsActive)
+                            {
+                                permission.Add(item.Authority, "");
+                            }
                         }
                         else
                         {
@@ -297,7 +303,13 @@ namespace BaseCustomerMVC.Controllers.Admin
                             realItem.IsActive = item.IsActive;
                             _accessesService.Save(realItem);
                             success.Add(realItem);
+                            if (item.IsActive)
+                            {
+                                permission.Add(item.Authority, "");
+                            }
                         }
+
+
                     }
                     return new JsonResult(new { code = 200, msg = "success", data = success });
                 }
@@ -306,6 +318,17 @@ namespace BaseCustomerMVC.Controllers.Admin
             catch (Exception ex)
             {
                 return new JsonResult(new { code = 500, msg = ex.Message, data = ex });
+            }
+        }
+
+        private void UpdateAuthority(string key,Dictionary<string, string> permission)
+        {
+            string keys = CacheExtends.DefaultPermission+"_"+key;
+            ObjectCache cache = MemoryCache.Default;
+            var data = cache.Get(keys);
+            if (data != null)
+            {
+                CacheExtends.SetObjectFromCache(keys, 3600 * 24 * 360, permission);
             }
         }
     }
