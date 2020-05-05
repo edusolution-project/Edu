@@ -24,7 +24,8 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="text-right">
-                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-success btn-sm" onclick="Save()"> <i class="fas fa-save"></i> </button>
                         </div>
                     </div>
                 </div>
@@ -34,7 +35,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="role-wrapper">
-                            <div class="role-content">
+                            <div class="role-content row" id="role-content">
                                 
                             </div>
                         </div>
@@ -129,7 +130,7 @@
         });
     }
 
-    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
+    function LoadData(code) { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
         //Code: "truong phong"
         //CreateDate: "2020-05-03T16:02:59.415Z"
         //Group: 0
@@ -142,32 +143,26 @@
         //UserCreate: "0"
         $.ajax({
             type: "GET",
-            url: '@Url.Action("get", "role")',
+            url: '@Url.Action("get", "role")?code=' + code,
             data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
             dataType:"json",
             success: function (data) {
 
                 if (data.data.length > 0)
                 {
+                    var body = code == void 0 || code == "" ? $("#role-content") : $("#" + code + ">.content");
+                    body.html("");
+                    if (code != void 0 && code != "") body.css({ padding: '15px', background: '#e8e4e4cc' });
                     for (i = 0; i < data.data.length; ++i) {
                         item = data.data[i];
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("approved","role")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                            active = "<button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("approved","role")',LoadData);\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("approved","role")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("approved","role")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button>";
                         }
-                        var url = '@Url.Action("Detail","Role")';
-                        body.append("<tr>" +
-                            "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
-                            "<td>" + (i + 1) + "</td>" +
-                            "<td><a href='" + url + "/" + item.ID + "'>" + item.Name + "</a></td>" +
-                            "<td>" +  item.Type +"</td>"+active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","role")','@Url.Action("create","role")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","role")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
-                            "</td > " +
-                            "</tr>"
-                        );
+                        body.append("<div class='col-12' id='" + item.Code + "'> <div class='row'><a class='col' href='@Url.Action("Detail","Role")/" + item.Code + "'>" + item.Name + "</a> <button onclick='addNewRole(\"" + item.Code + "\")' type='button' class='btn btn-sm btn-success mr-1'> <i class='fas fa-plus'></i> </button> <button type='button' onclick='LoadData(\"" + item.Code + "\")' class='btn btn-sm btn-success mr-1'> <i class='fas fa-list'></i> </button> <button type='button' class='btn btn-sm btn-danger mr-1'> <i class='fas fa-trash'></i> </button> <button type='button' class='btn btn-sm btn-primary mr-1'> <i class='fas fa-edit'></i> </button>" + active + "</div><div class='addnew'></div><div class='content'></div></div> <hr/>");
+                        //LoadData(item.Code);
                     }
                     $('.btn').tooltip({ trigger:'hover' });
                 }
@@ -179,7 +174,7 @@
     };
 
     $(document).ready(function () {
-        LoadData();
+        LoadData("");
     });
 
     var savedata = function () {
@@ -197,6 +192,7 @@
             if (dataJson != null && dataJson.code == 200) {
                 //success
                 location.reload();
+                clear();
             }
         });
     }
@@ -205,6 +201,44 @@
         ModalCenter.querySelector('input[data-name="name"]').value = "";
         ModalCenter.querySelector('[data-name="parent"]').value = "";
     }
+
+
+    var addNewRole = function (code) {
+        var elCode = document.getElementById(code);
+        if (elCode != null) {
+            var content = elCode.querySelector('.addnew');
+            if (content != null) {
+                var btnDelete = "<button type='button' onclick='javascript:this.parentElement.parentElement.remove()' class='btn btn-sm btn-danger ml-1'> <i class='fas fa-trash'></i> </button>";
+                content.innerHTML += "<div class='row'><div class='col item-add-role'><span style='min-width:300px;display:inline-block;border:1px solid' contenteditable='true' data-parent='" + code + "' class='col-md-6 col-xs-12'/></span>" + btnDelete+"</div></div>";
+            }
+        }
+    }
+
+    var Save = function () {
+        var root = document.getElementById('role-content');
+        if (root != null) {
+            var data = [];
+            var listRole = document.querySelectorAll('.item-add-role');
+            for (var i = 0; i < listRole.length; i++) {
+                var item = listRole[i];
+                var el = item.querySelector("[contenteditable='true']");
+                if (el != null && el.innerHTML.trim() != "") {
+                    var dataItem = {
+                        Name: el.innerHTML.trim(),
+                        ParentID: el.dataset.parent,
+                        IsActive: true
+                    };
+                    data.push(dataItem);
+                }
+            }
+            console.log(data);
+            g_Ajax("@Url.Action("Creates", "Role")", JSON.stringify(data), "POST").then(function (res) {
+                var dataJson = JSON.parse(res);
+                if (dataJson != null && dataJson.code == 200) {}
+            });
+        }
+    }
+
     //[JsonProperty("Name")]
     //    public string Name { get; set; }
     //[JsonProperty("Code")]

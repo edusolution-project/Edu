@@ -65,7 +65,7 @@ namespace BaseCustomerEntity.Database
                 {
                     if (!string.IsNullOrEmpty(item.ParentID))
                     {
-                        var parentItem = GetItemByID(item.ParentID);
+                        var parentItem = GetItemByCode(item.ParentID);
                         if (parentItem != null)
                         {
                             item.Level = parentItem.Level + 1;

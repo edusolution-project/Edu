@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RouterCustomer", "RouterCus
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaketingExtends", "MaketingExtends\MaketingExtends.csproj", "{50B5C679-15D1-4CDC-9455-23B28BAC4E74}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdusoConnection", "EdusoConnection\EdusoConnection.csproj", "{8DCA7253-ACD5-467B-ACA9-64AD3D080611}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{50B5C679-15D1-4CDC-9455-23B28BAC4E74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50B5C679-15D1-4CDC-9455-23B28BAC4E74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50B5C679-15D1-4CDC-9455-23B28BAC4E74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DCA7253-ACD5-467B-ACA9-64AD3D080611}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DCA7253-ACD5-467B-ACA9-64AD3D080611}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DCA7253-ACD5-467B-ACA9-64AD3D080611}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DCA7253-ACD5-467B-ACA9-64AD3D080611}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -104,6 +110,7 @@ Global
 		{946DA669-2243-47F9-82DE-69260EE5FB30} = {D6733407-1104-4EDD-A7B9-05B1BCA864E6}
 		{8A3A6025-EF3D-4BD4-BC77-B7C4ECAF2F19} = {79E43CF4-517A-429A-98E5-0E10FDFB2296}
 		{50B5C679-15D1-4CDC-9455-23B28BAC4E74} = {79E43CF4-517A-429A-98E5-0E10FDFB2296}
+		{8DCA7253-ACD5-467B-ACA9-64AD3D080611} = {D6733407-1104-4EDD-A7B9-05B1BCA864E6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {366F4E1B-3316-4A63-BDBD-AB06A9DB34E8}
