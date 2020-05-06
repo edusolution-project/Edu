@@ -28,6 +28,7 @@ namespace EnglishPlatform.Controllers
         private readonly ILog _log;
         private readonly ClassService _classService;
         private readonly StudentHelper _studentHelper;
+        private readonly UserAndRoleService _userAndRoleService;
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -37,6 +38,7 @@ namespace EnglishPlatform.Controllers
             , AccessesService accessesService
             , ClassService classService
             , IOptions<DefaultConfigs> defaultvalue
+            , UserAndRoleService userAndRoleService
             , ILog log)
         {
             _accessesService = accessesService;
@@ -50,6 +52,7 @@ namespace EnglishPlatform.Controllers
             _studentHelper = new StudentHelper(studentService, accountService);
             _log = log;
             _default = defaultvalue.Value;
+            _userAndRoleService = userAndRoleService;
         }
 
         public IActionResult Index()
@@ -111,80 +114,71 @@ namespace EnglishPlatform.Controllers
                     {
                         TempData["success"] = "Hi " + user.UserName;
                         string _token = Guid.NewGuid().ToString();
-                        var role = _roleService.GetItemByID(user.RoleID);
-                        if (role != null)
+                        HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
+                        //_ilogs.WriteLogsInfo(_token);
+                        string FullName, id;
+                        switch (user.Type)
                         {
-                            HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
-                            //_ilogs.WriteLogsInfo(_token);
-                            string FullName, id;
-                            switch (user.Type)
-                            {
-                                case ACCOUNT_TYPE.TEACHER:
-                                    var tc = _teacherService.GetItemByID(user.UserID);
-                                    FullName = tc.FullName;
-                                    id = tc.ID;
-                                    break;
-                                case ACCOUNT_TYPE.STUDENT:
-                                    var st = _studentService.GetItemByID(user.UserID);
-                                    FullName = st.FullName;
-                                    id = st.ID;
-                                    break;
-                                default:
-                                    FullName = "admin"; id = "0";
-                                    break;
-                            }
-                            var listAccess = _accessesService.GetAccessByRole(role.ID);
+                            case ACCOUNT_TYPE.TEACHER:
+                                var tc = _teacherService.GetItemByID(user.UserID);
+                                FullName = tc.FullName;
+                                id = tc.ID;
+                                break;
+                            case ACCOUNT_TYPE.STUDENT:
+                                var st = _studentService.GetItemByID(user.UserID);
+                                FullName = st.FullName;
+                                id = st.ID;
+                                break;
+                            default:
+                                FullName = "admin"; id = "0";
+                                break;
+                        }
 
-                            var claims = new List<Claim>
-                            {
+                        var listRole = _userAndRoleService.CreateQuery().Find(o => o.UserID == id)?.ToList();
+                        // cache list basis (co so)
+                        CacheExtends.SetObjectFromCache(id, 3600 * 24 * 360, listRole.Select(o => o.Basis)?.ToList());
+                        Dictionary<string, string> Access = new Dictionary<string, string>();
+                        for(int i = 0; listRole != null && i < listRole.Count; i++)
+                        {
+                            var itemRole = listRole[i];
+                            string key = itemRole.Basis + "_" + itemRole.UserID;
+                            // cache role
+                            CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, itemRole.Role);
+                        }
+
+                        
+
+                        var claims = new List<Claim>{
                                 new Claim("UserID",id),
                                 new Claim(ClaimTypes.Email, user.UserName),
                                 new Claim(ClaimTypes.Name, FullName),
-                                new Claim(ClaimTypes.Role, role.Code),
-                                new Claim("Type", user.Type),
-                                new Claim("RoleID", role.ID)
-                            };
+                                new Claim("Type", user.Type),};
 
-                            
-                            var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
-                            _ = new AuthenticationProperties
-                            {
-                                IsPersistent = true,
-                                ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
-                            };
-                            ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
 
-                            AccountLogEntity login = new AccountLogEntity()
-                            {
-                                IP = HttpContext.Connection.RemoteIpAddress.ToString(),
-                                AccountID = user.ID,
-                                Token = _token,
-                                IsRemember = IsRemmember,
-                                CreateDate = DateTime.Now
-                            };
-                            _logService.CreateQuery().InsertOne(login);
-                            await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
-                            //await HttpContext.SignInAsync(Cookies.DefaultLogin, claim, new AuthenticationProperties()
-                            //{
-                            //    ExpiresUtc = !IsRemmember ? DateTime.Now : DateTime.Now.AddMinutes(Cookies.ExpiresLogin),
-                            //    AllowRefresh = true,
-                            //    RedirectUri = user.Type
-                            //});
-                            return Json(new ReturnJsonModel
-                            {
-                                StatusCode = ReturnStatus.SUCCESS,
-                                StatusDesc = "OK",
-                                Location = "/" + user.Type
-                            });
-                        }
-                        else
+                        var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
+                        _ = new AuthenticationProperties
                         {
-                            return Json(new ReturnJsonModel
-                            {
-                                StatusCode = ReturnStatus.ERROR,
-                                StatusDesc = "Can't signin now."
-                            });
-                        }
+                            IsPersistent = true,
+                            ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
+                        };
+                        ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
+
+                        AccountLogEntity login = new AccountLogEntity()
+                        {
+                            IP = HttpContext.Connection.RemoteIpAddress.ToString(),
+                            AccountID = user.ID,
+                            Token = _token,
+                            IsRemember = IsRemmember,
+                            CreateDate = DateTime.Now
+                        };
+                        _logService.CreateQuery().InsertOne(login);
+                        await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
+                        return Json(new ReturnJsonModel
+                        {
+                            StatusCode = ReturnStatus.SUCCESS,
+                            StatusDesc = "OK",
+                            Location = "/" + user.Type
+                        });
                     }
                     else
                     {
@@ -198,7 +192,7 @@ namespace EnglishPlatform.Controllers
             }
         }
 
-        public async Task<JsonResult> RegisterAPI(string UserName, string Name, string Phone, string PassWord, string Type)
+        public JsonResult RegisterAPI(string UserName, string Name, string Phone, string PassWord, string Type)
         {
             var _username = UserName.Trim().ToLower();
             if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
@@ -367,8 +361,14 @@ namespace EnglishPlatform.Controllers
         [Route("/logout")]
         public async Task<IActionResult> LogOut()
         {
+            string keys = User.FindFirst("UserID")?.Value;
+            if (!string.IsNullOrEmpty(keys))
+            {
+                CacheExtends.ClearCache(keys);
+            }
             await HttpContext.SignOutAsync(Cookies.DefaultLogin);
             HttpContext.Remove(Cookies.DefaultLogin);
+            
             return RedirectToAction("Login");
         }
 

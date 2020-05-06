@@ -27,14 +27,15 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly AccountService _accountService;
         private readonly IHostingEnvironment _env;
         private readonly MappingEntity<TeacherEntity, TeacherViewModel> _mapping;
-
+        private readonly UserAndRoleService _userAndRoleService;
         private readonly TeacherHelper _teacherHelper;
 
         public TeacherController(TeacherService service
             , RoleService roleService
             , AccountService accountService
             , IHostingEnvironment evn
-            , SubjectService subjectService)
+            , SubjectService subjectService,
+            UserAndRoleService userAndRoleService)
         {
             _env = evn;
             _service = service;
@@ -44,6 +45,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _mapping = new MappingEntity<TeacherEntity, TeacherViewModel>();
 
             _teacherHelper = new TeacherHelper(service, accountService);
+            _userAndRoleService = userAndRoleService;
         }
 
         public ActionResult Index(DefaultModel model)
@@ -140,7 +142,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Create(TeacherEntity item, string RoleID)
+        public JsonResult Create(TeacherEntity item, string RoleID, string Basis)
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
@@ -177,6 +179,19 @@ namespace BaseCustomerMVC.Controllers.Admin
                         RoleID = RoleID
                     };
                     _accountService.CreateOrUpdate(account);
+                    var role = _roleService.GetItemByID(RoleID);
+                    if(role != null)
+                    {
+                        var userAndRole = new UserAndRoleEntity()
+                        {
+                            Role = role.Code,
+                            UserID = item.ID,
+                            Basis = Basis
+                        };
+                        _userAndRoleService.SaveRole(userAndRole);
+                    }
+
+                    
                     return new JsonResult(response);
                 }
                 else
