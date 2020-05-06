@@ -1691,6 +1691,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 workSheet.Cells[1, 2].Value = "Nội dung";
                 workSheet.Cells[1, 3].Value = "Liên kết";
                 workSheet.Cells[1, 4].Value = "Đúng/sai";
+                workSheet.Cells[1, 5].Value = "Giải thích";
 
                 var headerCells = workSheet.Cells[1, 1, 1, workSheet.Dimension.Columns];
                 headerCells.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
@@ -1707,19 +1708,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 col3.Width = 40;
 
                 var col4 = workSheet.Column(4);
-                col1.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                col4.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 col4.Width = 10;
+
+                var col5 = workSheet.Column(5);
+                col5.Width = 60;
 
                 //question template
                 workSheet.Cells[2, 1].Value = "1";
                 workSheet.Cells[2, 2].Value = "Câu hỏi 1";
                 workSheet.Cells[2, 3].Value = "https://eduso.vn/images/quiz_example.png";
                 workSheet.Cells[2, 4].Value = "";
+                workSheet.Cells[2, 5].Value = "Giải thích đáp án câu 1";
                 //answer template
                 workSheet.Cells[3, 1].Value = "";
                 workSheet.Cells[3, 2].Value = "Nội dung trả lời 1";
                 workSheet.Cells[3, 3].Value = "https://eduso.vn/images/example.png";
                 workSheet.Cells[3, 4].Value = "TRUE";
+
 
                 workSheet.Cells[4, 1].Value = "";
                 workSheet.Cells[4, 2].Value = "Nội dung trả lời 2";
@@ -1736,6 +1742,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 workSheet.Cells[6, 2].Value = "Câu hỏi 2";
                 workSheet.Cells[6, 3].Value = "https://eduso.vn/images/quiz_example.png";
                 workSheet.Cells[6, 4].Value = "";
+                workSheet.Cells[6, 5].Value = "Giải thích đáp án câu 2";
+
                 //answer template
                 workSheet.Cells[7, 1].Value = "";
                 workSheet.Cells[7, 2].Value = "Nội dung trả lời 1 - Câu 2";
@@ -1810,8 +1818,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     pos++;
                                     var question = new QuestionViewModel
                                     {
-                                        Content = workSheet.Cells[i, contentCol].Value.ToString(),
-                                        Answers = new List<LessonPartAnswerEntity>() { }
+                                        Content = workSheet.Cells[i, contentCol].Value.ToString(),//cau hoi
+                                        Answers = new List<LessonPartAnswerEntity>() { },//danh sach cau tra loi
+                                        Description = workSheet.Cells[i, 5].Value.ToString()//giai thich dap an
                                     };
                                     if (workSheet.Cells[i, 3].Value != null)
                                     {
@@ -1832,7 +1841,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     var answer = new LessonPartAnswerEntity
                                     {
                                         Content = workSheet.Cells[i, contentCol].Value.ToString().Trim(),
-                                        IsCorrect = workSheet.Cells[i, 4].Value.ToString() == "TRUE"
+                                        IsCorrect = workSheet.Cells[i, 4].Value.ToString() == "TRUE",
                                     };
                                     if (workSheet.Cells[i, 3].Value != null)
                                     {

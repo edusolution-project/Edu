@@ -153,10 +153,13 @@ function Edit(id, urlGetData, urlPostData, _this) {
     $(form).find("input[locked]").attr("disabled", "disabled");
     var data = new FormData(form);
     Ajax(urlGetData, "POST", data, true).then(function (res) {
+        
         var item = JSON.parse(res);
         var listinput = $(form).find('input');
+
         for (var i = 0; i < listinput.length; i++) {
-            listinput[i].value = item.Data[listinput[i].name];
+            //console.log(listinput[i].name);
+            listinput[i].value = item.Data[listinput[i].name];            
             if ($(listinput[i]).hasClass("hiddenDate")) {
                 var fieldId = $(listinput[i]).attr("id");
                 $(listinput[i]).prev().removeClass("hasDatepicker").val($.datepicker.formatDate('dd/mm/yy', new Date(item.Data[listinput[i].name]))).datepicker({
@@ -168,10 +171,17 @@ function Edit(id, urlGetData, urlPostData, _this) {
                 });
             }
         }
-        var listselect = form.querySelectorAll('select');
+
+        var listselect = $(form).find('select');
         for (var i = 0; i < listselect.length; i++) {
-            listselect[i].value = item.Data[listselect[i].name];
+            //console.log($(listselect[i]).attr("name"));
+            $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
         }
+
+        //var listselect = form.querySelectorAll('select');
+        //for (var i = 0; i < listselect.length; i++) {
+        //    listselect[i].value = item.Data[listselect[i].name];
+        //}
     });
 }
 

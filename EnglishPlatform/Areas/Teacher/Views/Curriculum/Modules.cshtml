@@ -410,7 +410,7 @@
 
             if (oldPos != chapter.Order + 1) { //change order
                 parent = oldChap.parent();
-                
+
                 //console.log(oldChap);
                 startchange = chapter.Order + 1;
                 console.log(oldPos);
@@ -615,8 +615,9 @@
             }
             else {
                 chapter = result.Data;
+                //console.log(chapter);
+                $('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
                 RenderChapter(chapter);
-
                 hideModal();
             }
         }

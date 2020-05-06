@@ -11,6 +11,7 @@ namespace BaseCustomerEntity.Globals
         public static IServiceCollection AddServiceBase(this IServiceCollection services)
         {
             services.AddSingleton<AccountService>();
+            services.AddSingleton<CenterService>();
             services.AddSingleton<PermissionService>();
             services.AddSingleton<RoleService>();
             services.AddSingleton<ScoreService>();

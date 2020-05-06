@@ -42,7 +42,7 @@
                                 <th class='text-center'>Email</th>
                                 <th class='text-center'>Họ tên</th>
                                 <th class='text-center'>Ngày sinh</th>
-                                <th class='text-center'>Loại</th>
+                                <th class='text-center'>Chức danh</th>
                                 <th class='text-center'>Chuyên môn</th>
                                 <th class='text-center'>Trạng thái</th>
                                 <th class='text-center'>Thao tác</th>
@@ -115,7 +115,7 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <input type="text" class="form-control datepicker" placeholder="Ngày sinh">
+                                <input type="text" class="form-control datepicker" placeholder="Ngày sinh" required>
                                 <input type="hidden" name="DateBorn" class="hiddenDate" id="DateBorn" value="">
                             </div>
                             <div class="form-group row col-md-6">
@@ -128,7 +128,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-row">
+                        <div class="form-row d-none">
                             <div class="form-group row col-md-6">
                                 <label for="staticText" class="col-sm-4 col-form-label">Loại:</label>
                                 <div class="col-sm-8">
@@ -187,7 +187,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- Modal change pass -->
 <div class="modal fade bd-modal-lg" id="passModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
@@ -358,6 +357,7 @@
 
         var listselect = $(form).find('select');
         for (var i = 0; i < listselect.length; i++) {
+            console.log($(listselect[i]).attr("name"));
             $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
         }
 

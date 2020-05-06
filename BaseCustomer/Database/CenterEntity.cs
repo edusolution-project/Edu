@@ -14,12 +14,18 @@ namespace BaseCustomerEntity.Database
         public string Name { get; set; }
         [JsonProperty("Code")]
         public string Code { get; set; }
+        [JsonProperty("Description")]
+        public string Description { get; set; }
+        [JsonProperty("Status")]
+        public bool Status { get; set; }
+        [JsonProperty("Limit")]
+        public long Limit { get; set; }
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
         [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
-        [JsonProperty("EndDate")]
-        public DateTime EndDate { get; set; }
+        [JsonProperty("ExpireDate")]
+        public DateTime ExpireDate { get; set; }
     }
 
     public class CenterService : ServiceBase<CenterEntity>
@@ -32,6 +38,11 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public void ChangeStatus(List<string> IDs, bool status)
+        {
+            CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<CenterEntity>.Update.Set(t => t.Status, status));
         }
     }
 }

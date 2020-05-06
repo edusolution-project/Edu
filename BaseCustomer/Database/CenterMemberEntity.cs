@@ -14,8 +14,8 @@ namespace BaseCustomerEntity.Database
         public string Name { get; set; }
         [JsonProperty("Type")]
         public int Type { get; set; }
-        [JsonProperty("TeacherID")]
-        public string TeacherID { get; set; }
+        [JsonProperty("CenterID")]
+        public string CenterID { get; set; }
     }
 
     public class CenterMemberType
