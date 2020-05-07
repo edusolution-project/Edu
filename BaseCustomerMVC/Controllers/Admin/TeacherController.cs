@@ -24,11 +24,11 @@ namespace BaseCustomerMVC.Controllers.Admin
     {
         private readonly SubjectService _subjectService;
         private readonly TeacherService _service;
+        private readonly CenterService _centerService;
         private readonly RoleService _roleService;
         private readonly AccountService _accountService;
         private readonly IHostingEnvironment _env;
         private readonly MappingEntity<TeacherEntity, TeacherViewModel> _mapping;
-
         private readonly TeacherHelper _teacherHelper;
 
         private IConfiguration _configuration;
@@ -37,6 +37,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         public TeacherController(TeacherService service
             , RoleService roleService
             , AccountService accountService
+            , CenterService centerService
             , IHostingEnvironment evn
             , SubjectService subjectService
             , IConfiguration iConfig)
@@ -44,6 +45,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _env = evn;
             _service = service;
             _roleService = roleService;
+            _centerService = centerService;
             _accountService = accountService;
             _subjectService = subjectService;
             _mapping = new MappingEntity<TeacherEntity, TeacherViewModel>();
@@ -58,6 +60,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             ViewBag.Subject = _subjectService.GetAll().ToList();
             var roleList = new List<string> { "teacher", "head-teacher" };
             ViewBag.Roles = _roleService.CreateQuery().Find(o => roleList.Contains(o.Code)).ToList();
+            ViewBag.Centers = _centerService.GetAll().ToList();
             ViewBag.Model = model;
             return View();
         }
@@ -85,7 +88,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             model.TotalRecord = data.Count();
             var teachers = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize);
 
             var roleList = new List<string> { "teacher", "head-teacher" };
             var roles = _roleService.CreateQuery().Find(o => roleList.Contains(o.Code)).ToList();

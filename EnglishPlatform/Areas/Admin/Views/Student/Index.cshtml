@@ -49,6 +49,12 @@
                     </table>
                 </div>
             </div>
+
+            <div class="card-footer" style="display:none">
+                Trang
+                <select id="pageIndex" onchange="LoadData()" class="d-inline">
+                </select> / <span id="totalPage" class="d-inline"></span>
+            </div>
         </div>
         <!-- /.container-fluid -->
     }
@@ -191,11 +197,17 @@
         }).val("");
     })
 
-    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
+    function LoadData() {
+        var searchText = $("#searchText").val();
+        var startDate = $("#startDate_sort").val();
+        var endDate = $("#endDate_sort").val();
+        var pageIndex = $('#pageIndex').val();
+        if (pageIndex < 1) pageIndex = 1;
+        var pageSize = 30;
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "student")',
-            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, pageSize: 1000},
+            data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex },
             dataType:"json",
             success: function (data) {
                 hideModal();
@@ -214,7 +226,7 @@
                         var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.DateBorn));
                         body.append("<tr>" +
                             "<td class='text-center'><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
-                            "<td class='text-center'>" + (i + 1) + "</td>" +
+                            "<td class='text-center'>" + ((pageIndex - 1) * pageSize + i + 1) + "</td>" +
                             //"<td class='text-center'>" + (item.StudentId == null? "":item.StudentId) +"</td>" +
                             "<td>" + item.FullName + "</td>" +
                             "<td>" + item.Email + "</td>" +
@@ -230,6 +242,26 @@
                         );
                     }
                     $('.btn').tooltip({ trigger:'hover' });
+                }
+                if (data.Model != null) {
+                    var totalRecord = data.Model.totalRecord;
+                    if (totalRecord == 0) {
+                        $('#pageIndex').html('<option value="1"></option>').val(1);
+                        $('.card-footer').hide()
+                    }
+                    else {
+                        var totalPage = Math.floor(totalRecord / pageSize) + (totalRecord % pageSize > 0 ? 1 : 0);
+                        $('#totalPage').text(totalPage);
+                        $('#pageIndex').empty();
+                        for (i = 1; i <= totalPage; i++) {
+                            $('#pageIndex').append($('<option>', { value: i, text: i }))
+                        }
+                        var currentPage = data.Model.pageIndex + 1;
+                        if (currentPage > totalPage)
+                            currentPage = totalPage;
+                        $('#pageIndex').val(currentPage);
+                        $('.card-footer').show();
+                    }
                 }
             },
             error: function() {
