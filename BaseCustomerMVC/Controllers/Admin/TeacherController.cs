@@ -83,6 +83,16 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
+            if (!String.IsNullOrEmpty(Center))
+            {
+                filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Centers.Any(t => t.CenterID == Center)));
+            }
+            if (!String.IsNullOrEmpty(Role))
+            {
+                filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Centers.Any(t => t.RoleID == Role)));
+            }
+
+
             var data = (filter.Count > 0 ? _service.Collection.Find(Builders<TeacherEntity>.Filter.And(filter)) : _service.GetAll())
                 .SortByDescending(t => t.ID);
             model.TotalRecord = data.Count();
@@ -169,8 +179,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.Email = _username;
 
                 var centers = new List<CenterMemberEntity>();
-                if(item.Centers != null && item.Centers.Count > 0)
-                    foreach(var center in item.Centers)
+                if (item.Centers != null && item.Centers.Count > 0)
+                    foreach (var center in item.Centers)
                     {
                         var idx = centers.FindIndex(t => t.CenterID == center.CenterID);
                         if (idx >= 0)
@@ -292,7 +302,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpPost]
         [Obsolete]
-        public async Task<JsonResult> Import()
+        public async Task<JsonResult> Import(string Center)
         {
             var form = HttpContext.Request.Form;
             if (form == null) return new JsonResult(null);
@@ -301,6 +311,19 @@ namespace BaseCustomerMVC.Controllers.Admin
             var filePath = Path.Combine(_env.WebRootPath, file.FileName + DateTime.Now.ToString("ddMMyyyyhhmmss"));
             List<TeacherEntity> importlist = null;
             List<TeacherEntity> Error = null;
+            CenterMemberEntity centermember = null;
+            var role = _roleService.GetItemByCode("teacher");
+            if (!string.IsNullOrEmpty(Center))
+            {
+                var _center = _centerService.GetItemByID(Center);
+                if (_center == null) return new JsonResult("Cơ sở không đúng");
+                centermember = new CenterMemberEntity
+                {
+                    Name = _center.Name,
+                    CenterID = _center.ID,
+                    RoleID = role.ID
+                };
+            }
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
@@ -317,6 +340,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             importlist = new List<TeacherEntity>();
                             Error = new List<TeacherEntity>();
                             var allSubjects = _subjectService.GetAll().ToList();
+
                             for (int i = 1; i <= totalRows; i++)
                             {
 
@@ -336,6 +360,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                                                     DateTimeStyles.None,
                                                     out date);
 
+
+
                                 var item = new TeacherEntity
                                 {
                                     FullName = name,
@@ -346,7 +372,10 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     Phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
                                     CreateDate = DateTime.Now,
                                     UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
-                                    IsActive = true
+                                    IsActive = true,
+                                    Centers = centermember != null ? new List<CenterMemberEntity> { centermember
+                                    } : null
+
                                 };
 
                                 if (!ExistEmail(item.Email))
@@ -363,13 +392,28 @@ namespace BaseCustomerMVC.Controllers.Admin
                                         Type = ACCOUNT_TYPE.TEACHER,
                                         UserID = item.ID,
                                         UserName = item.Email,
-                                        RoleID = _roleService.GetItemByCode("teacher").ID
+                                        RoleID = role.ID
                                     };
                                     _accountService.CreateQuery().InsertOne(account);
                                 }
                                 else
                                 {
-                                    Error.Add(item);
+                                    var oldTeacher = _service.CreateQuery().Find(t => t.Email == item.Email.Trim().ToLower()).FirstOrDefault();
+                                    if (oldTeacher != null)
+                                    {
+                                        if (oldTeacher.Centers != null)
+                                        {
+                                            if (oldTeacher.Centers.Any(t => t.CenterID == Center))
+                                                continue;
+                                            else
+                                                oldTeacher.Centers.Add(centermember);
+                                        }
+                                        else
+                                            oldTeacher.Centers = item.Centers;
+                                        _service.Save(oldTeacher);
+                                    }
+                                    else
+                                        Error.Add(item);
                                 }
                             }
                         }

@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Quản lý học viên";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var centers = ViewBag.Centers as List<BaseCustomerEntity.Database.CenterEntity>;
     var role = ViewBag.Role as BaseCustomerEntity.Database.RoleEntity;
 }
 
@@ -25,6 +26,20 @@
                         </div>
                     </div>
                 </div>
+                <div class="d-flex justify-content-start align-items-center">
+                    <span class="">
+                        Lọc
+                    </span>
+                    <select class="searchCenter search-box form-control ml-1" style="width:300px;" onchange="LoadData()">
+                        <option value="">-- Tất cả cơ sở --</option>
+                        @{
+                            for (int i = 0; centers != null && i < centers.Count; i++)
+                            {
+                                <option value="@centers[i].ID">@centers[i].Name</option>
+                            }
+                        }
+                    </select>
+                </div>
             </div>
 
             <div class="card-body">
@@ -41,6 +56,7 @@
                                 <th class='text-center'>Email</th>
                                 <th class='text-center'>Phone</th>
                                 <th class='text-center'>Ngày sinh</th>
+                                <th class='text-center'>Cơ sở</th>
                                 <th class='text-center'>Trạng thái</th>
                                 <th class='text-center'>Thao tác</th>
                             </tr>
@@ -74,7 +90,6 @@
                 </div>
                 <div class="modal-body">
                     <form>
-
                         <div class="form-row">
                             @*<div class="form-group col-md-6">
                                     <input type="text" class="form-control" name="StudentId" id="inputName" placeholder="mã học viên">
@@ -101,6 +116,30 @@
                             </div>
                         </div>
                         <div class="form-row">
+                            <div class="form-group row col-md-12">
+                                <div for="staticText" class="col-md-4 col-sm-12 col-form-label">Cơ sở học:<button class="btn btn-sm btn-primary ml-2" onclick="addCenter(); return false;"><i class="fa fa-plus-circle"></i></button> </div>
+                                <div class="col-md-8 col-sm-12">
+                                    <div class="centerHolder">
+
+                                    </div>
+                                    <div class="tempCenter d-none">
+                                        <div class="posRow d-flex flex-column flex-sm-row mb-1">
+                                            <select class="CenterID form-control flex-fill mr-1">
+                                                <option value="">-- Chọn cơ sở --</option>
+                                                @{
+                                                    for (int i = 0; centers != null && i < centers.Count; i++)
+                                                    {
+                                                        <option value="@centers[i].ID">@centers[i].Name</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <button class="btn btn-sm btn-primary ml-2" onclick="removeCenter(this); return false;"><i class="fa fa-trash-alt"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group row col-md-6">
                                 <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
                                 <div class="col-sm-8">
@@ -114,8 +153,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "student")','create',LoadData)">Save lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="SaveStudent('AddForm','@Url.Action("Create", "student")','create',LoadData)">Lưu</button>
                 </div>
             </div>
         }
@@ -139,8 +178,22 @@
                         <div class="row">
                             <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
                             <div class="chose-file col-sm-9">
-                                <input type="file" name="file" class="form-control-file" id="FormControlFile">
+                                <input type="file" name="file" class="form-control-file" id="FormControlFile" required>
                             </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn cơ sở:</label>
+                            <select name="Center" class="CenterID form-control col-sm-9" required>
+                                <option value="">-- Chọn cơ sở --</option>
+                                @{
+                                    for (int i = 0; centers != null && i < centers.Count; i++)
+                                    {
+                                        <option value="@centers[i].ID">@centers[i].Name</option>
+                                    }
+                                }
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -148,8 +201,8 @@
                     <div class="button-left">
                         <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action("ExportTemplate", "student")')">Tải file mẫu</button>
                     </div>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-submit" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Save lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" data-dismiss="modal" onclick="Submit('ImportForm','','import',LoadData)">Lưu</button>
                 </div>
             }
         </div>
@@ -177,8 +230,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action("ChangePass", "Account")','changepass',checkPassUpdate)">Save lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action("ChangePass", "Account")','changepass',checkPassUpdate)">Lưu</button>
                 </div>
             }
         </div>
@@ -197,17 +250,20 @@
         }).val("");
     })
 
+    var centers = @Html.Raw(Json.Serialize(centers));
+
     function LoadData() {
         var searchText = $("#searchText").val();
         var startDate = $("#startDate_sort").val();
         var endDate = $("#endDate_sort").val();
         var pageIndex = $('#pageIndex').val();
+        var searchCenter = $('.searchCenter').val();
         if (pageIndex < 1) pageIndex = 1;
         var pageSize = 30;
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "student")',
-            data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex },
+            data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex, Center: searchCenter },
             dataType:"json",
             success: function (data) {
                 hideModal();
@@ -217,6 +273,7 @@
                 {
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
+                        console.log(item);
                         var active = "";
                         if (item.IsActive) {
                             active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","student")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
@@ -232,9 +289,10 @@
                             "<td>" + item.Email + "</td>" +
                             "<td>" + item.Phone + "</td>" +
                             "<td class='text-center'>" + date + "</td>" +
+                            "<td class='text-center'>" + renderCenter(item.Centers) + "</td>" +
                             //"<td class='text-center'>" + (item.Class == null ? "" : item.Class) + "</td>"
                             active +
-                            "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","student")','@Url.Action("create","student")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<td class='text-center'><button onclick=\"EditStudent('" + item.ID + "','@Url.Action("getdetails","student")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"ChangePass('" + item.AccountID + "')\")\" type='button' data-placement='top' title='Đổi mật khẩu' class='btn btn-primary' data-toggle='modal' data-target='#passModal'> <i class='fas fa-key'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.StudentId + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","student")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
@@ -270,10 +328,25 @@
         });
     };
 
+    function addCenter(data) {
+        var temp = $('.tempCenter.d-none');
+        var clone = $(temp).find('.posRow').clone();
+        $(temp).parent().find('.centerHolder').append(clone);
+
+        if (data != null) {
+            $(clone).find('.CenterID').val(data);
+        }
+        return false;
+    }
+
+    function removeCenter(obj) {
+        $(obj).parent().remove();
+        return false;
+    }
+
     $(document).ready(function () {
         LoadData();
     });
-
 
     function ChangePass(accountid) {
         $('form[name=PassForm] [name=AccountID]').val(accountid);
@@ -292,4 +365,119 @@
         $(this).find(".btn-submit").focus().click();
         return false;
     })
+
+    function EditStudent(id, url, _this) {
+        var modal = $(_this).attr("data-target");
+        var form = $(modal).find('form');
+        var inputID = $(form).find('input[name="ID"]');
+        if (inputID.length == 0) {
+            $(form).append($("<input>", { type: "hidden", name: "ID", value: id }));
+        }
+        else {
+            $(inputID).val(id);
+        }
+        $(form).find("input[locked]").attr("disabled", "disabled");
+
+        //var data = new FormData(form);
+        $.ajax({
+            method: "POST",
+            url: url,
+            data: { ID: id }
+        })
+            .done(function (item) {
+                var listinput = $(form).find('input');
+                for (var i = 0; i < listinput.length; i++) {
+                    listinput[i].value = item.Data[listinput[i].name];
+                    if ($(listinput[i]).hasClass("hiddenDate")) {
+                        var fieldId = $(listinput[i]).attr("id");
+                        $(listinput[i]).prev().removeClass("hasDatepicker").val($.datepicker.formatDate('dd/mm/yy', new Date(item.Data[listinput[i].name]))).datepicker({
+                            changeMonth: true,
+                            changeYear: true,
+                            dateFormat: 'dd/mm/yy',
+                            altField: '#' + fieldId,
+                            altFormat: 'yy-mm-dd'
+                        });
+                    }
+                }
+
+                var centers = item.Data.Centers;
+                console.log(centers);
+                $('.centerHolder').empty();
+                if (centers != null && centers.length > 0) {
+                    for (var i = 0; i < centers.length; i++) {
+                        addCenter(centers[i]);
+                    }
+                }
+            });
+    }
+
+    function SaveStudent(formName, url, actionName, fn) {
+        var form = document.querySelector('form[name="' + formName + '"]');
+        var _url = url == "" || url == void 0 || url == null ? form.action : url;
+        var _method = form.method;
+        var requires = $(form).find(':required');
+        var err = false;
+
+        requires.each(function () {
+            if ($(this).val() == "" || $(this).val() == null) {
+                alert("Vui lòng điền đủ thông tin");
+                $(this).focus();
+                err = true;
+                return false;
+            }
+        });
+
+        if (err) return false;
+
+        $(form).find("input:disabled").removeAttr("disabled");
+
+        var data = new FormData(form);
+
+        var centerRows = $('.centerHolder .posRow');
+
+        var pos = 0;
+        if (centerRows != null && centerRows.length > 0) {
+             for (var i = 0; i < centerRows.length; i++) {
+                 var center = $(centerRows[i]).find('.CenterID');
+                 if (center == null || $(center).val() == "") continue;
+                 data.append("Centers[" + pos + "]", $(center).val());
+                 pos++;
+            }
+        }
+
+        showLoading("Sending data ...");
+        Ajax(_url, _method, data, true)
+            .then(function (res) {
+                hideLoading();
+                if (fn != void 0) fn(res);
+            }).catch(function (res) {
+                hideLoading();
+                //notification("err", "Có lỗi, vui lòng thực hiện lại", 2000);
+                alert('Có lỗi, vui lòng thực hiện lại');
+                console.log(actionName, res);
+            });
+    }
+
+    function renderCenter(data) {
+        if (data != null && data.length > 0) {
+            var ret = "";
+            for (var i = 0; i < data.length; i++) {
+                var center = data[i];
+                ret += "<div class='center_item text-left'><span class='d-block m-1'>" + getCenterName(center) + "</span></div>";
+            }
+            return ret;
+        }
+        else
+            return "";
+    }
+
+    function getCenterName(code) {
+        var found = centers.filter(
+            function (rl) { return rl.ID == code }
+        );
+        if (found != null && found.length > 0)
+            return found[0].Name;
+        return "";
+    }
+
 </script>

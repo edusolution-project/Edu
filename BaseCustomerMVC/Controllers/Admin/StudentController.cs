@@ -24,6 +24,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly StudentService _service;
         private readonly RoleService _roleService;
         private readonly AccountService _accountService;
+        private readonly CenterService _centerService;
         private readonly IHostingEnvironment _env;
         private readonly MappingEntity<StudentEntity, StudentViewModel> _mapping;
 
@@ -35,6 +36,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             , RoleService roleService
             , AccountService accountService
             , StudentService studentService
+            , CenterService centerService
             , IHostingEnvironment evn
             , IConfiguration iConfig
             )
@@ -48,18 +50,20 @@ namespace BaseCustomerMVC.Controllers.Admin
             _mapping = new MappingEntity<StudentEntity, StudentViewModel>();
             _configuration = iConfig;
             _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
+            _centerService = centerService;
         }
         // GET: Home
 
         public ActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;
+            ViewBag.Centers = _centerService.GetAll().ToList();
             ViewBag.Role = _roleService.CreateQuery().Find(o => o.Code == "student").SingleOrDefault();
             return View();
         }
 
         [HttpPost]
-        public JsonResult GetList(DefaultModel model)
+        public JsonResult GetList(DefaultModel model, string Center)
         {
             var filter = new List<FilterDefinition<StudentEntity>>();
 
@@ -75,6 +79,11 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 filter.Add(Builders<StudentEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
+            if (!String.IsNullOrEmpty(Center))
+            {
+                filter.Add(Builders<StudentEntity>.Filter.Where(o => o.Centers.Any(t => t == Center)));
+            }
+
             var data = (filter.Count > 0 ? _service.Collection.Find(Builders<StudentEntity>.Filter.And(filter)) : _service.GetAll())
                 .SortByDescending(t => t.ID);
             model.TotalRecord = data.CountDocuments();
@@ -83,7 +92,9 @@ namespace BaseCustomerMVC.Controllers.Admin
                 : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
 
             var students = from r in DataResponse
-                           let account = _accountService.CreateQuery().Find(o => o.UserID == r.ID && o.Type == ACCOUNT_TYPE.STUDENT).FirstOrDefault()
+                           let account = _accountService.CreateQuery().Find(o => o.UserName == r.Email
+                           //&& o.Type == ACCOUNT_TYPE.STUDENT
+                           ).FirstOrDefault()
                            where account != null
                            select _mapping.AutoOrtherType(r, new StudentViewModel()
                            {
@@ -205,7 +216,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpPost]
         [Obsolete]
-        public async Task<JsonResult> Import()
+        public async Task<JsonResult> Import(string Center)
         {
             var form = HttpContext.Request.Form;
             if (form == null) return new JsonResult(null);
@@ -219,6 +230,13 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             List<StudentEntity> studentList = null;
             List<StudentEntity> Error = null;
+
+            if (!string.IsNullOrEmpty(Center))
+            {
+                var _center = _centerService.GetItemByID(Center);
+                if (_center == null) return new JsonResult("Cơ sở không đúng");
+            }
+
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
@@ -260,7 +278,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     Skype = skype,
                                     CreateDate = DateTime.Now,
                                     UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
-                                    IsActive = true
+                                    IsActive = true,
+                                    Centers = String.IsNullOrEmpty(Center) ? null : new List<string> { Center }
                                 };
                                 if (acc == null)
                                 {
@@ -286,6 +305,18 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     {
                                         await _service.CreateQuery().InsertOneAsync(item);
                                         studentList.Add(item);
+                                    }
+                                    else
+                                    {
+                                        var oldStudent = _service.GetStudentByEmail(item.Email);
+                                        if (oldStudent != null)
+                                        {
+                                            if (oldStudent.Centers == null)
+                                                oldStudent.Centers = item.Centers;
+                                            else if (!oldStudent.Centers.Contains(Center))
+                                                oldStudent.Centers.Add(Center);
+                                            _service.Save(oldStudent);
+                                        }
                                     }
                                 }
                             }

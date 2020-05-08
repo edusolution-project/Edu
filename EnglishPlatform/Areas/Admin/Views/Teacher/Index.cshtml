@@ -51,7 +51,7 @@
                     </select>
                 </div>
             </div>
-          
+
 
             <div class="card-body">
                 <div class="table-responsive">
@@ -198,6 +198,7 @@
                                                     }
                                                 }
                                             </select>
+                                            <button class="btn btn-sm btn-primary ml-2" onclick="removeCenter(this); return false;"><i class="fa fa-trash-alt"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -206,8 +207,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="SaveTeacher('AddForm','@Url.Action("Create", "teacher" )','create',LoadData)">Lưu lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="SaveTeacher('AddForm','@Url.Action("Create", "teacher" )','create',LoadData)">Lưu</button>
                 </div>
             </div>
         }
@@ -231,8 +232,22 @@
                         <div class="row">
                             <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
                             <div class="chose-file col-sm-9">
-                                <input type="file" name="file" class="form-control-file">
+                                <input type="file" name="file" class="form-control-file" required>
                             </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn cơ sở:</label>
+                            <select name="Center" class="CenterID form-control col-sm-9" required>
+                                <option value="">-- Chọn cơ sở --</option>
+                                @{
+                                    for (int i = 0; centers != null && i < centers.Count; i++)
+                                    {
+                                        <option value="@centers[i].ID">@centers[i].Name</option>
+                                    }
+                                }
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -240,8 +255,8 @@
                     <div class="button-left">
                         <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action("ExportTemplate", "Teacher" )')">Tải file mẫu</button>
                     </div>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('ImportForm','','import',LoadData)">Save lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('ImportForm','','import',LoadData)">Lưu</button>
                 </div>
             }
         </div>
@@ -269,8 +284,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action("ChangePass", "Account" )','changepass',checkPassUpdate)">Save lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action("ChangePass", "Account" )','changepass',checkPassUpdate)">Lưu</button>
                 </div>
             }
         </div>
@@ -302,7 +317,7 @@
 
         var searchCenter = $('.searchCenter').val();
         var searchRole = $('.searchRole').val();
-        
+
 
         var pageSize = 30;
         $.ajax({
@@ -389,6 +404,11 @@
         return false;
     }
 
+    function removeCenter(obj) {
+        $(obj).parent().remove();
+        return false;
+    }
+
     function ChangePass(accountid) {
         $('form[name=PassForm] [name=AccountID]').val(accountid);
     }
@@ -435,8 +455,6 @@
         var requires = $(form).find(':required');
         var err = false;
 
-
-
         requires.each(function () {
             if ($(this).val() == "" || $(this).val() == null) {
                 alert("Vui lòng điền đủ thông tin");
@@ -453,7 +471,7 @@
         var data = new FormData(form);
 
         var centerRows = $('.centerHolder .posRow');
-        
+
         var pos = 0;
         if (centerRows != null && centerRows.length > 0) {
              for (var i = 0; i < centerRows.length; i++) {
@@ -467,7 +485,6 @@
                  pos++;
             }
         }
-        
 
         showLoading("Sending data ...");
         Ajax(_url, _method, data, true)
@@ -550,7 +567,7 @@
     function renderCenter(centers) {
         if (centers != null && centers.length > 0) {
             var ret = "";
-            for (i = 0; i < centers.length; i++) {
+            for (var i = 0; i < centers.length; i++) {
                 var center = centers[i];
                 ret += "<div class='center_item text-left'><span class='d-block m-1'>" + getRoleName(center.RoleID) + " (" + center.Name + ")</span></div>";
             }

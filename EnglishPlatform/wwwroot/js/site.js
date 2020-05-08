@@ -57,7 +57,7 @@ function Submit(formName, url, actionName, fn) {
 
     requires.each(function () {
         if ($(this).val() == "" || $(this).val() == null) {
-            alert("Please fill in required fields");
+            alert("Vui lòng điền đủ thông tin");
             $(this).focus();
             err = true;
             return false;
@@ -153,13 +153,13 @@ function Edit(id, urlGetData, urlPostData, _this) {
     $(form).find("input[locked]").attr("disabled", "disabled");
     var data = new FormData(form);
     Ajax(urlGetData, "POST", data, true).then(function (res) {
-        
+
         var item = JSON.parse(res);
         var listinput = $(form).find('input');
 
         for (var i = 0; i < listinput.length; i++) {
             //console.log(listinput[i].name);
-            listinput[i].value = item.Data[listinput[i].name];            
+            listinput[i].value = item.Data[listinput[i].name];
             if ($(listinput[i]).hasClass("hiddenDate")) {
                 var fieldId = $(listinput[i]).attr("id");
                 $(listinput[i]).prev().removeClass("hasDatepicker").val($.datepicker.formatDate('dd/mm/yy', new Date(item.Data[listinput[i].name]))).datepicker({

@@ -1820,7 +1820,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     {
                                         Content = workSheet.Cells[i, contentCol].Value.ToString(),//cau hoi
                                         Answers = new List<LessonPartAnswerEntity>() { },//danh sach cau tra loi
-                                        Description = workSheet.Cells[i, 5].Value.ToString()//giai thich dap an
+                                        Description = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString()//giai thich dap an
                                     };
                                     if (workSheet.Cells[i, 3].Value != null)
                                     {
@@ -2271,11 +2271,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         #endregion
-
-
     }
-
-
 
     public class Counter
     {

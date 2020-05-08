@@ -1,8 +1,10 @@
 ﻿using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BaseCustomerEntity.Database
@@ -43,7 +45,22 @@ namespace BaseCustomerEntity.Database
     {
         public TeacherService(IConfiguration configuration) : base(configuration)
         {
+            var indexs = new List<CreateIndexModel<TeacherEntity>>
+            {
+                new CreateIndexModel<TeacherEntity>(
+                    new IndexKeysDefinitionBuilder<TeacherEntity>()
+                    .Text(t => t.FullName).Text(t=> t.Email)),
+               //Centers.CenterID_1
+                new CreateIndexModel<TeacherEntity>(
+                    new IndexKeysDefinitionBuilder<TeacherEntity>()
+                    .Descending("Centers.CenterID")),
+                //Centers.RoleID_1
+                new CreateIndexModel<TeacherEntity>(
+                    new IndexKeysDefinitionBuilder<TeacherEntity>()
+                    .Descending("Centers.RoleID"))
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
     }
 }
