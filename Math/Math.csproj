@@ -111,22 +111,6 @@
     <Content Include="icons\cas.png" />
     <Content Include="icons\chem.png" />
     <Content Include="icons\formula.png" />
-    <Content Include="integration\cas.aspx" />
-    <Content Include="integration\cleancache.aspx" />
-    <Content Include="integration\configurationjs.aspx" />
-    <Content Include="integration\configurationjson.aspx" />
-    <Content Include="integration\createcasimage.aspx" />
-    <Content Include="integration\createimage.aspx" />
-    <Content Include="integration\editor.aspx" />
-    <Content Include="integration\getmathml.aspx" />
-    <Content Include="integration\isaspx.aspx" />
-    <Content Include="integration\resource.aspx" />
-    <Content Include="integration\service.aspx" />
-    <Content Include="integration\showcasimage.aspx" />
-    <Content Include="integration\showimage.aspx" />
-    <Content Include="integration\test.aspx" />
-    <Content Include="integration\testfilter.aspx" />
-    <Content Include="integration\WIRISplugins.js" />
     <Content Include="src\global.js" />
     <Content Include="src\integration-js\src\accessibility.js" />
     <Content Include="src\integration-js\src\backwardslib.js" />
@@ -174,71 +158,12 @@
     <Content Include="wirisplugin-generic.js" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="integration\cas.aspx.cs">
-      <DependentUpon>cas.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\cleancache.aspx.cs">
-      <DependentUpon>cleancache.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\configurationjs.aspx.cs">
-      <DependentUpon>configurationjs.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\configurationjson.aspx.cs">
-      <DependentUpon>configurationjson.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\createcasimage.aspx.cs">
-      <DependentUpon>createcasimage.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\createimage.aspx.cs">
-      <DependentUpon>createimage.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\editor.aspx.cs">
-      <DependentUpon>editor.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\getmathml.aspx.cs">
-      <DependentUpon>getmathml.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\isaspx.aspx.cs">
-      <DependentUpon>isaspx.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\resource.aspx.cs">
-      <DependentUpon>resource.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\service.aspx.cs">
-      <DependentUpon>service.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\showcasimage.aspx.cs">
-      <DependentUpon>showcasimage.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\showimage.aspx.cs">
-      <DependentUpon>showimage.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\test.aspx.cs">
-      <DependentUpon>test.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="integration\testfilter.aspx.cs">
-      <DependentUpon>testfilter.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <Content Include="integration\Web.config" />
+    <Folder Include="integration\" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="src\.esdoc.json" />
     <Content Include="src\.npmignore" />
     <Content Include="src\data.md" />

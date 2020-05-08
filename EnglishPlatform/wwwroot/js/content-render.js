@@ -1604,8 +1604,8 @@ var Lesson = (function () {
                         addNewQuestion(quiz);
                     }
                 }
-                else
-                    addNewQuestion();
+                //else
+                //    addNewQuestion();
                 break;
             case "QUIZ2"://Trắc nghiệm dạng điền từ
                 var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
@@ -1650,8 +1650,8 @@ var Lesson = (function () {
                         addNewQuestion(quiz);
                     }
                 }
-                else
-                    addNewQuestion();
+                //else
+                //    addNewQuestion();
                 break;
             case "QUIZ3"://Trắc nghiệm match
                 var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
@@ -1705,8 +1705,8 @@ var Lesson = (function () {
                         addNewQuestion(quiz);
                     }
                 }
-                else
-                    addNewQuestion();
+                //else
+                //    addNewQuestion();
                 break;
             case "ESSAY"://Tự luận
                 contentholder.append($("<label>", { "class": "title", "text": "Điểm" }));
@@ -1752,8 +1752,8 @@ var Lesson = (function () {
                         addNewQuestion(quiz);
                     }
                 }
-                else
-                    addNewQuestion();
+                //else
+                //    addNewQuestion();
                 break;
             default:
                 alert("Not implement");

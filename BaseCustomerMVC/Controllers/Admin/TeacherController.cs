@@ -67,7 +67,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetList(DefaultModel model)
+        public JsonResult GetList(DefaultModel model, string Center, string Role)
         {
             var filter = new List<FilterDefinition<TeacherEntity>>();
 
@@ -167,6 +167,22 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
                 var _username = item.Email.Trim().ToLower();
                 item.Email = _username;
+
+                var centers = new List<CenterMemberEntity>();
+                if(item.Centers != null && item.Centers.Count > 0)
+                    foreach(var center in item.Centers)
+                    {
+                        var idx = centers.FindIndex(t => t.CenterID == center.CenterID);
+                        if (idx >= 0)
+                        //replace
+                        {
+                            centers[idx].RoleID = center.RoleID;
+                        }
+                        else
+                            centers.Add(centers[idx]);
+                    }
+                item.Centers = centers;
+
                 if (!ExistEmail(_username) //&& !ExistTeacherId(item.TeacherId)
                         )
                 {
@@ -212,6 +228,22 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.UserCreate = oldData.UserCreate;
                 item.CreateDate = oldData.CreateDate;
                 item.Address = oldData.Address;
+
+                var centers = new List<CenterMemberEntity>();
+                if (item.Centers != null && item.Centers.Count > 0)
+                    foreach (var center in item.Centers)
+                    {
+                        var idx = centers.FindIndex(t => t.CenterID == center.CenterID);
+                        if (idx >= 0)
+                        //replace
+                        {
+                            centers[idx].RoleID = center.RoleID;
+                        }
+                        else
+                            centers.Add(center);
+                    }
+                item.Centers = centers;
+
                 _service.CreateOrUpdate(item);
 
                 var oldAccount = _accountService.CreateQuery().Find(t => t.UserID == item.ID && t.Type == ACCOUNT_TYPE.TEACHER).SingleOrDefault();
