@@ -40,6 +40,7 @@ namespace EnglishPlatform.Controllers
         private readonly StudentHelper _studentHelper;
         private readonly CalendarHelper _calendarHelper;
         private readonly UserAndRoleService _userAndRoleService;
+        private readonly CenterService _centerService;
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -52,6 +53,7 @@ namespace EnglishPlatform.Controllers
             , CalendarHelper calendarHelper
             , MailHelper mailHelper
             , UserAndRoleService userAndRoleService
+            , CenterService centerService
             , ILog log)
         {
             _accessesService = accessesService;
@@ -68,21 +70,24 @@ namespace EnglishPlatform.Controllers
             _mailHelper = mailHelper;
             _default = defaultvalue.Value;
             _userAndRoleService = userAndRoleService;
+            _centerService = centerService;
         }
 
         public IActionResult Index()
         {
-            var type = User.Claims.GetClaimByType("Type");
-            if (type != null)
-            {
-                return Redirect(type.Value);
-            }
-            else
-            {
-                _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-                HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                return RedirectToAction("Login");
-            }
+
+            return View();
+            //var type = User.Claims.GetClaimByType("Type");
+            //if (type != null)
+            //{
+            //    return Redirect(type.Value);
+            //}
+            //else
+            //{
+            //    _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
+            //    HttpContext.SignOutAsync(Cookies.DefaultLogin);
+            //    return RedirectToAction("Login");
+            //}
         }
 
 
@@ -141,6 +146,7 @@ namespace EnglishPlatform.Controllers
                                 StatusDesc = "Có lỗi, không đăng nhập được. Vui lòng liên hệ Admin để được trợ giúp"
                             });
                         }
+                        
                         switch (Type)
                         {
                             case ACCOUNT_TYPE.TEACHER:
@@ -189,7 +195,6 @@ namespace EnglishPlatform.Controllers
                         }
 
                         var listAccess = _accessesService.GetAccessByRole(role.ID);
-
                         var listRole = _userAndRoleService.CreateQuery().Find(o => o.UserID == id)?.ToList();
                         // cache list basis (co so)
                         CacheExtends.SetObjectFromCache(id, 3600 * 24 * 360, listRole.Select(o => o.Basis)?.ToList());
@@ -201,9 +206,6 @@ namespace EnglishPlatform.Controllers
                             // cache role
                             CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, itemRole.Role);
                         }
-
-                        
-
                         var claims = new List<Claim>{
                                 new Claim("UserID",id),
                                 new Claim(ClaimTypes.Email, _username),
