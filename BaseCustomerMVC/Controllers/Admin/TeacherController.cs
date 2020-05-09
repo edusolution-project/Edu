@@ -435,7 +435,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpGet]
         [Obsolete]
-        public async Task<IActionResult> Export(DefaultModel model)
+        public async Task<IActionResult> Export(DefaultModel model, string Center)
         {
             var filter = new List<FilterDefinition<TeacherEntity>>();
 
@@ -450,6 +450,10 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (model.EndDate > DateTime.MinValue)
             {
                 filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
+            }
+            if (!String.IsNullOrEmpty(Center))
+            {
+                filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Centers.Any(t => t.CenterID == Center)));
             }
             var filterData = filter.Count > 0 ? _service.Collection.Find(Builders<TeacherEntity>.Filter.And(filter)) : _service.GetAll();
             var list = await filterData.ToListAsync();
