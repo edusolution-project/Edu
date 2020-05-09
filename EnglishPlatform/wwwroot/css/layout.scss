@@ -313,10 +313,15 @@ table {
                 background-color: #f5f5f5;
 
                 .modules {
-                    padding: 12px 24px;
-                    border-bottom: dashed 1px #CCC;
+                    padding: 12px 24px 0;
+                    border-top: dashed 1px #CCC;
                     font-weight: 600;
                     position: relative;
+                    margin-top: 12px;
+
+                    &:first-child {
+                        margin-top: 0;
+                    }
 
                     .modules {
                         padding-right: 0;

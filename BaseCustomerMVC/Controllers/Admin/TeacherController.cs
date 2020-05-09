@@ -14,7 +14,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Core_v2.Globals;
+using System.Globalization;
+using Microsoft.Extensions.Configuration;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -23,6 +24,7 @@ namespace BaseCustomerMVC.Controllers.Admin
     {
         private readonly SubjectService _subjectService;
         private readonly TeacherService _service;
+        private readonly CenterService _centerService;
         private readonly RoleService _roleService;
         private readonly AccountService _accountService;
         private readonly IHostingEnvironment _env;
@@ -30,9 +32,13 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly UserAndRoleService _userAndRoleService;
         private readonly TeacherHelper _teacherHelper;
 
+        private IConfiguration _configuration;
+        private readonly string _defaultPass;
+
         public TeacherController(TeacherService service
             , RoleService roleService
             , AccountService accountService
+            , CenterService centerService
             , IHostingEnvironment evn
             , SubjectService subjectService,
             UserAndRoleService userAndRoleService)
@@ -40,6 +46,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _env = evn;
             _service = service;
             _roleService = roleService;
+            _centerService = centerService;
             _accountService = accountService;
             _subjectService = subjectService;
             _mapping = new MappingEntity<TeacherEntity, TeacherViewModel>();
@@ -53,13 +60,14 @@ namespace BaseCustomerMVC.Controllers.Admin
             ViewBag.Subject = _subjectService.GetAll().ToList();
             var roleList = new List<string> { "teacher", "head-teacher" };
             ViewBag.Roles = _roleService.CreateQuery().Find(o => roleList.Contains(o.Code)).ToList();
+            ViewBag.Centers = _centerService.GetAll().ToList();
             ViewBag.Model = model;
             return View();
         }
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetList(DefaultModel model)
+        public JsonResult GetList(DefaultModel model, string Center, string Role)
         {
             var filter = new List<FilterDefinition<TeacherEntity>>();
 
@@ -75,11 +83,22 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<TeacherEntity>.Filter.And(filter)) : _service.GetAll();
+            if (!String.IsNullOrEmpty(Center))
+            {
+                filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Centers.Any(t => t.CenterID == Center)));
+            }
+            if (!String.IsNullOrEmpty(Role))
+            {
+                filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Centers.Any(t => t.RoleID == Role)));
+            }
+
+
+            var data = (filter.Count > 0 ? _service.Collection.Find(Builders<TeacherEntity>.Filter.And(filter)) : _service.GetAll())
+                .SortByDescending(t => t.ID);
             model.TotalRecord = data.Count();
             var teachers = data == null || data.Count() <= 0 || data.Count() < model.PageSize
                 ? data
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
+                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize);
 
             var roleList = new List<string> { "teacher", "head-teacher" };
             var roles = _roleService.CreateQuery().Find(o => roleList.Contains(o.Code)).ToList();
@@ -156,7 +175,25 @@ namespace BaseCustomerMVC.Controllers.Admin
                     };
                     return new JsonResult(response);
                 }
-                if (!ExistEmail(item.Email) //&& !ExistTeacherId(item.TeacherId)
+                var _username = item.Email.Trim().ToLower();
+                item.Email = _username;
+
+                var centers = new List<CenterMemberEntity>();
+                if (item.Centers != null && item.Centers.Count > 0)
+                    foreach (var center in item.Centers)
+                    {
+                        var idx = centers.FindIndex(t => t.CenterID == center.CenterID);
+                        if (idx >= 0)
+                        //replace
+                        {
+                            centers[idx].RoleID = center.RoleID;
+                        }
+                        else
+                            centers.Add(centers[idx]);
+                    }
+                item.Centers = centers;
+
+                if (!ExistEmail(_username) //&& !ExistTeacherId(item.TeacherId)
                         )
                 {
                     _service.CreateQuery().InsertOne(item);
@@ -170,12 +207,13 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {
                         CreateDate = DateTime.Now,
                         IsActive = true,
-                        PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                        PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
+                        PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                        PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
                         UserCreate = item.UserCreate,
                         Type = ACCOUNT_TYPE.TEACHER,
+                        Name = item.FullName,
                         UserID = item.ID,
-                        UserName = item.Email.ToLower().Trim(),
+                        UserName = _username,
                         RoleID = RoleID
                     };
                     _accountService.CreateOrUpdate(account);
@@ -213,12 +251,29 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.UserCreate = oldData.UserCreate;
                 item.CreateDate = oldData.CreateDate;
                 item.Address = oldData.Address;
+
+                var centers = new List<CenterMemberEntity>();
+                if (item.Centers != null && item.Centers.Count > 0)
+                    foreach (var center in item.Centers)
+                    {
+                        var idx = centers.FindIndex(t => t.CenterID == center.CenterID);
+                        if (idx >= 0)
+                        //replace
+                        {
+                            centers[idx].RoleID = center.RoleID;
+                        }
+                        else
+                            centers.Add(center);
+                    }
+                item.Centers = centers;
+
                 _service.CreateOrUpdate(item);
 
                 var oldAccount = _accountService.CreateQuery().Find(t => t.UserID == item.ID && t.Type == ACCOUNT_TYPE.TEACHER).SingleOrDefault();
                 if (oldAccount == null) return new JsonResult(null);
                 oldAccount.RoleID = RoleID;
                 oldAccount.IsActive = item.IsActive;
+                oldAccount.Name = item.FullName;
                 _accountService.CreateOrUpdate(oldAccount);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -260,7 +315,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpPost]
         [Obsolete]
-        public async Task<JsonResult> Import()
+        public async Task<JsonResult> Import(string Center)
         {
             var form = HttpContext.Request.Form;
             if (form == null) return new JsonResult(null);
@@ -269,63 +324,110 @@ namespace BaseCustomerMVC.Controllers.Admin
             var filePath = Path.Combine(_env.WebRootPath, file.FileName + DateTime.Now.ToString("ddMMyyyyhhmmss"));
             List<TeacherEntity> importlist = null;
             List<TeacherEntity> Error = null;
+            CenterMemberEntity centermember = null;
+            var role = _roleService.GetItemByCode("teacher");
+            if (!string.IsNullOrEmpty(Center))
+            {
+                var _center = _centerService.GetItemByID(Center);
+                if (_center == null) return new JsonResult("Cơ sở không đúng");
+                centermember = new CenterMemberEntity
+                {
+                    Name = _center.Name,
+                    CenterID = _center.ID,
+                    RoleID = role.ID
+                };
+            }
+
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
                 stream.Close();
                 try
                 {
-                    var readStream = new FileStream(filePath, FileMode.Open);
-                    using (ExcelPackage package = new ExcelPackage(readStream))
+                    using (var readStream = new FileStream(filePath, FileMode.Open))
                     {
-                        ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
-                        int totalRows = workSheet.Dimension.Rows;
-                        importlist = new List<TeacherEntity>();
-                        Error = new List<TeacherEntity>();
-                        for (int i = 1; i <= totalRows; i++)
+                        using (ExcelPackage package = new ExcelPackage(readStream))
                         {
-                            if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                            //string ho = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
-                            //string name = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
-                            string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
-                            string name = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
-                            string subjectname = workSheet.Cells[i, 8].Value == null ? "" : workSheet.Cells[i, 8].Value.ToString().Trim();
-                            var subject = _subjectService.CreateQuery().Find(t => subjectname.Split(',').Contains(t.Name.ToLower().Trim())).ToList();
-                            var item = new TeacherEntity
-                            {
-                                FullName = name,
-                                TeacherId = code,
-                                Subjects = (subject != null && subject.Count > 0 ? subject.Select(s => s.ID).ToList() : null),
-                                DateBorn = workSheet.Cells[i, 4].Value == null ? DateTime.MinValue : (DateTime.Parse(workSheet.Cells[i, 4].Value.ToString())),
-                                Email = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
-                                Phone = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString(),
-                                Address = workSheet.Cells[i, 7].Value == null ? "" : workSheet.Cells[i, 7].Value.ToString(),
-                                CreateDate = DateTime.Now,
-                                UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
-                                IsActive = true
-                            };
+                            ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
+                            int totalRows = workSheet.Dimension.Rows;
+                            importlist = new List<TeacherEntity>();
+                            Error = new List<TeacherEntity>();
+                            var allSubjects = _subjectService.GetAll().ToList();
 
-                            if (!ExistEmail(item.Email))
+                            for (int i = 1; i <= totalRows; i++)
                             {
-                                await _service.CreateQuery().InsertOneAsync(item);
-                                importlist.Add(item);
-                                var account = new AccountEntity()
+
+                                if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
+                                var email = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString().Trim().ToLower();
+                                //string ho = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
+                                //string name = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
+                                //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                string subjectname = workSheet.Cells[i, 6].Value == null ? "" : workSheet.Cells[i, 6].Value.ToString().Trim();
+                                var sbjs = subjectname.Split(',').ToList();
+                                string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
+                                var sbjIDs = allSubjects.Where(t => sbjs.Contains(t.Name.ToLower().Trim())).Select(t => t.ID).ToList();
+
+                                var date = DateTime.MinValue;
+                                DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
+                                                    DateTimeStyles.None,
+                                                    out date);
+
+
+
+                                var item = new TeacherEntity
                                 {
+                                    FullName = name,
+                                    //TeacherId = code,
+                                    Subjects = sbjIDs,
+                                    DateBorn = date,
+                                    Email = email,
+                                    Phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
                                     CreateDate = DateTime.Now,
+                                    UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
                                     IsActive = true,
-                                    PassTemp = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                                    PassWord = Security.Encrypt(string.Format("{0:ddMMyyyy}", item.DateBorn)),
-                                    UserCreate = item.UserCreate,
-                                    Type = ACCOUNT_TYPE.TEACHER,
-                                    UserID = item.ID,
-                                    UserName = item.Email.ToLower().Trim(),
-                                    RoleID = _roleService.GetItemByCode("teacher").ID
+                                    Centers = centermember != null ? new List<CenterMemberEntity> { centermember
+                                    } : null
+
                                 };
-                                _accountService.CreateQuery().InsertOne(account);
-                            }
-                            else
-                            {
-                                Error.Add(item);
+
+                                if (!ExistEmail(item.Email))
+                                {
+                                    await _service.CreateQuery().InsertOneAsync(item);
+                                    importlist.Add(item);
+                                    var account = new AccountEntity()
+                                    {
+                                        CreateDate = DateTime.Now,
+                                        IsActive = true,
+                                        PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                                        PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                                        UserCreate = item.UserCreate,
+                                        Type = ACCOUNT_TYPE.TEACHER,
+                                        UserID = item.ID,
+                                        UserName = item.Email,
+                                        RoleID = role.ID
+                                    };
+                                    _accountService.CreateQuery().InsertOne(account);
+                                }
+                                else
+                                {
+                                    var oldTeacher = _service.CreateQuery().Find(t => t.Email == item.Email.Trim().ToLower()).FirstOrDefault();
+                                    if (oldTeacher != null)
+                                    {
+                                        if (oldTeacher.Centers != null)
+                                        {
+                                            if (oldTeacher.Centers.Any(t => t.CenterID == Center))
+                                                continue;
+                                            else
+                                                oldTeacher.Centers.Add(centermember);
+                                        }
+                                        else
+                                            oldTeacher.Centers = item.Centers;
+                                        _service.Save(oldTeacher);
+                                    }
+                                    else
+                                        Error.Add(item);
+                                }
                             }
                         }
                     }
@@ -374,7 +476,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var dataResponse = dataview.Select(o => new
             {
                 STT = index++,
-                Ma_GV = o.TeacherId,
+                //Ma_GV = o.TeacherId,
                 Ho_ten = o.FullName,
                 Ngay_sinh = o.DateBorn.ToLocalTime().ToString("MM/dd/yyyy"),
                 o.Email,
@@ -398,6 +500,40 @@ namespace BaseCustomerMVC.Controllers.Admin
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
+
+
+        [HttpGet]
+        [Obsolete]
+        public async Task<IActionResult> ExportTemplate(DefaultModel model)
+        {
+
+            var list = new List<TeacherEntity>() { new TeacherEntity() {
+                ID = "undefined"
+                } };
+            var data = list.Select(o => new
+            {
+                STT = 1,
+                Ho_ten = "Nguyễn Văn A",
+                Ngay_sinh = "dd/mm/yyyy",
+                Email = "email@gmail.com",
+                SDT = "0123456789",
+                Mon_hoc = "Danh sách tên chương trình cách nhau bởi dấu ,"
+            });
+            var stream = new MemoryStream();
+
+            using (var package = new ExcelPackage(stream))
+            {
+                var workSheet = package.Workbook.Worksheets.Add("DS_HV");
+                workSheet.Cells.LoadFromCollection(data, true);
+                package.Save();
+            }
+            stream.Position = 0;
+            string excelName = $"TeacherTemplate.xlsx";
+
+            //return File(stream, "application/octet-stream", excelName);  
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
+        }
+
         [HttpPost]
         [Obsolete]
         public JsonResult Publish(DefaultModel model)
@@ -427,7 +563,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             else
                 _teacherHelper.ChangeStatus(model.ArrID, status);
         }
-
 
         [Obsolete]
         private bool ExistEmail(string email)

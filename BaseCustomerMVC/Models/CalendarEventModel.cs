@@ -13,5 +13,7 @@ namespace BaseCustomerMVC.Models
         public DateTime end { get; set; }
         public string url { get; set; }
         public string skype { get; set; }
+        public int Status { get; set; }
+        public string Color { get; set; }
     }
 }

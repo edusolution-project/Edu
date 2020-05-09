@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewData["Title"] = "Dashboard - " + DateTime.Now.ToString("D");
+    ViewData["Title"] = "Trang chủ - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var student = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
 }
@@ -11,33 +11,53 @@
 <script>
     setActiveMenu("home");
 </script>
-
+<style>
+    .height-245 {
+        height: 268px;
+    }
+</style>
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b padding-b25">
-            <h2 class="title">Welcome to <font>EDUCOO</font></h2>
+            <h2 class="title">Welcome to <font>EDUSO</font></h2>
             @*<div class="search-box">
-                <button><i class="ic ic-find"></i></button>
-                <input type="text" name="" placeholder="Search">
-            </div>*@
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" placeholder="Search">
+                </div>*@
         </div>
     </div>
-    <div class="card-body">
+
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+
+    <div class="card-body" v-cloak>
         <div class="box mb-3">
             <div class="heading flex mb-2">
-                <h4 class="box-head">Bài học tuần này</h4>
-                <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                <h4 class="box-head">Bài học tuần này ({{lesson_week.length}})</h4>
+                @*<a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
             </div>
             <div class="box bg-1 padding-15">
                 <ul class="box list-scroll">
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
-                            <div class="padding-15 inner">
-                                <a :href="'@Url.Action("Modules","Course")/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                            <div class="padding-15 inner" v-if="validDate(item)">
+                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
                                 <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
-                                    <a :href="'@Url.Action("Detail","Course")/' + item.classID" :title="item.className" class="title">{{item.className}}</a>
-                                    <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
+                                    <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.className" class="title">{{item.className}}</a>
+                                    <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
+                                    <div class="flex">
+                                        <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="padding-15 inner bg-light" v-else>
+                                <a href="javascript:;" :title="item.skill.Name" v-on:click="showLockNotify(item)" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a href="javascript:;" :title="item.title" class="title" v-on:click="showLockNotify(item)">{{item.title}}</a>
+                                <div class="c-bot">
+                                    <a href="javascript:;" :title="item.className" class="title" v-on:click="showLockNotify(item)">{{item.className}}</a>
+                                    <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
                                     <div class="flex">
                                         <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
                                     </div>
@@ -52,27 +72,27 @@
             <div class="col-md-6">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
-                        <h4 class="box-head">Lớp học đang diễn ra</h4>
+                        <h4 class="box-head">Môn học đang diễn ra</h4>
                         <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in active_course">
-                                <a :href="'@Url.Action("Detail","Course")/' + item.id" :title="item.courseName">
+                                <a :href="'@Url.Action("Modules","Course")/' + item.id" :title="item.courseName">
                                     <div class="box radius">
                                         <div class="thumb">
                                             <img v-if="item.thumb" :src="item.thumb" alt="">
                                             <img v-else src="/pictures/ielts1.png" alt="">
                                         </div>
                                         <div class="padding-15 inner">
-                                            <a :href="'@Url.Action("Detail","Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
-                                            <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
+                                            <a :href="'@Url.Action("Modules","Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
+                                            <p><i class="ti-time"></i>{{formatShortDate(item.endDate)}}</p>
                                             <div class="c-bot">
                                                 <div class="flex reverse">
                                                     <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
                                                     <div class="flex justify-content-between">
-                                                        <span>{{item.percent}}%</span>
-                                                        <span>{{item.score}} điểm</span>
+                                                        <span>{{item.min}}/{{item.max}}</span>
+                                                        <span>{{item.score.toFixed(2)}}%</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -88,23 +108,29 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Thảo luận</h4>
-                        <a href="@Url.Action("Index","Discuss")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="javascript:$('.fn-box-chat-eduso').focus().click()" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="list-discus">
-                            <li v-for="(item,k) in discussion">
-                                <div class="flex c-top">
-                                    <a :href="'@Url.Action("Index","Discuss")#' + item.ID" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
-                                    <div class="c-right"><i class="icofont icofont-user"></i>{{3 + ' members'}}</div>
-                                </div>
-                                <p>{{shortenString(item.content,160)}}.</p>
-                            </li>
+                            <template v-if="discussion.length > 0">
+                                <li v-for="(item,k) in discussion">
+                                    <div class="flex c-top">
+                                        <a href="javascript:$('.fn-box-chat-eduso').focus().click()" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
+                                        <div class="c-right"><i class="icofont icofont-user"></i>{{item.sender.name}}</div>
+                                    </div>
+                                    <p>{{shortenString(item.content,160)}}.</p>
+                                </li>
+                            </template>
+                            <template v-else>
+                                <li>
+                                    Chưa có thảo luận nào! <button class="ml-2 btn btn-sm btn-secondary" onclick="$('.fn-box-chat-eduso').focus().click()"> <i class="far fa-comments"></i> Kết nối ngay</button>
+                                </li>
+                            </template>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="module">
             <div class="col-md-12 margin-b20">
                 <div class="heading flex">
@@ -119,7 +145,7 @@
                             <span class="per">{{item.per + '%'}}</span>
                             <div class="info">
                                 <span>{{item.title}}</span>
-                                <span>{{item.score}} điểm</span>
+                                <span>{{item.score.toFixed(2)}}%</span>
                             </div>
                             <span class="arr-right ti-arrow-right"></span>
                         </a>
@@ -161,7 +187,7 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
-                let _url = '@Url.Action("GetActiveList", "Course")'
+                let _url = '@Url.Action("GetActiveListV2", "Course")'
 
                 axios.post(_url, _form)
                     .then(response => {
@@ -197,38 +223,66 @@
 
                 axios.post(_url, _form)
                     .then(response => {
-                        console.log("Week")
-                        console.log(response.data)
+                        //console.log("Week")
+                        //console.log(response.data)
                         _that.lesson_week = response.data.data;
                         //console.log(_that.lesson_week);
                     }).catch(e => { })
             },
             getNewFeed() {
                 let _that = this
-                let _url = '@Url.Action("Get", "NewFeed")'
+                // Truyen param vào đây
+                let _form = new FormData()
+                let _url = '@Url.Action("GetLastestMessage", "EasyRealtime")'
 
-                axios.get(_url, {
-                    params: {
-                        pageSize: 6,
-                        pageIndex: 0
-                    }
-                })
+                axios.get(_url, _form)
                     .then(response => {
-                        console.log(response.data)
-                        _that.discussion = response.data.data
-                        //console.log(_that.active_course);
-                    }).catch(e => { })
-            },
+                        //console.log("Week")
+                        //console.log(response.data)
+                        _that.discussion = response.data.data.messages;
+                        //console.log(_that.discussion);
+                    }).catch(e => { })},
             formatTime(time) {
-                console.log(time);
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
-                return moment(time).format("DD/MM/YYYY hh:mm")
+                return moment(time).format("DD/MM/YYYY HH:mm")
             },
+
             shortenString(str, length) {
                 if (str.length <= length)
                     return str;
                 return str.substring(0, length) + "...";
-            }
+            },
+            formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+            },
+            validDate(item) {
+                var now = moment().toDate();
+                var start = moment(item.startDate).toDate()
+                var end = moment(item.endDate).toDate();
+                var invalid = start > now || end < now
+                return (item.type == @BaseCustomerEntity.Database.LESSON_TEMPLATE.LECTURE) || !invalid
+            },
+            showLockNotify(item) {
+                var now = moment().toDate()
+                if (moment(item.startDate).toDate() > now)
+                    Swal.fire({
+                        title: 'Lưu ý',
+                        html: 'Bài học sẽ mở lúc ' + this.formatTime(item.startDate),
+                        icon: 'warning'
+                    });
+                else if (moment(item.endDate).toDate() < now)
+                {
+                    Swal.fire({
+                        title: 'Lưu ý',
+                        html: 'Bài học đã hết hạn lúc ' + this.formatTime(item.endDate),
+                        icon: 'warning'
+                    });
+                }
+                else {
+                    document.location = '@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID
+                }
+            },
         }
     });
     </script>

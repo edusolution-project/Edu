@@ -31,5 +31,8 @@ namespace BaseCustomerMVC.Models
         public string ArrID { get; set; }
 
         public bool Status { get; set; }
+
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
     }
 }

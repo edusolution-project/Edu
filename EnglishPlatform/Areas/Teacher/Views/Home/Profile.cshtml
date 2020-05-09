@@ -3,7 +3,7 @@
 
 @{
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
-    ViewData["Title"] = "Update Account Info";
+    ViewData["Title"] = "Thông tin cá nhân";
 }
 
 
@@ -12,7 +12,10 @@
 </script>
 
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25">
             <h2 class="title" v-if="isInfo">Thông tin cá nhân</h2>
             <h2 class="title" v-if="isPass"><a href="javascript:;" title="Quay lại" v-on:click="changeState()"><i class="ti-arrow-left"></i></a>Đổi mật khẩu</h2>
@@ -21,12 +24,12 @@
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box">
             <div class="flex">
                 <div id="avatar_box" v-if="isInfo">
                     <img v-on:error="errorImgUrl()" :src="avatar.src" alt="" v-if="avatar" />
-                    <img v-else src="/images/no-avatar.png"/>
+                    <img v-else src="/images/no-avatar.png" />
                     <label for="in_avatar">Đổi hình đại diện</label>
                     <input type="file" :ref="`avatar`" v-on:change="previewThumb()" id="in_avatar">
                 </div>
@@ -43,6 +46,12 @@
                         <label for="mskype">Skype</label>
                         <input type="text" v-model="profile.Skype" class="form-control" placeholder="Skype" id="mskype">
                     </div>
+
+                    <div class="form-group" v-if="isInfo">
+                        <label for="msZoom">ZoomID</label>
+                        <input type="text" v-model="profile.ZoomID" class="form-control" placeholder="ZoomID" id="msZoom"> <a href="https://view.officeapps.live.com/op/embed.aspx?src=https://utc.eduso.vn/HDSD/HD_dang_ky_Zoom.docx" target="_blank">Xem hướng dẫn</a>
+                    </div>
+
                     <div class="form-group" v-if="isInfo">
                         <label for="email">Địa chỉ email</label>
                         <input type="text" v-model="profile.Email" class="form-control" placeholder="Email" id="email">
@@ -130,13 +139,13 @@
                             _that.isInfo = true
                             break;
                     }
-                    console.log(s);
+                    //console.log(s);
                 },
                 getProfile() {
                      let _url = '@Url.Action("GetProfile","Home")'
                      axios.get(_url)
                          .then(response =>{
-                             console.log(response.data);
+                             //console.log(response.data);
                              if(response.data.StatusCode){
                                  this.profile = response.data.Data
                                  this.avatar.src = this.profile.Avatar
@@ -152,6 +161,7 @@
                     _form.append("FullName", this.profile.FullName);
                     _form.append("Phone", this.profile.Phone);
                     _form.append("Skype", this.profile.Skype);
+                    _form.append("ZoomID", this.profile.ZoomID);
                     if (this.avatar.file) {
                         _form.append('fileUpload', this.avatar.file)
                     }
@@ -162,9 +172,11 @@
                     }
                     axios.post(_url, _form, _headers)
                         .then(response => {
-                            if (response.data.StatusCode == 1) {
-                                swal("update success !!", "" ,"success");
+                            if (response.data.Error == null) {
+                                Swal.fire("Đã cập nhật thông tin", "" ,"success");
                             }
+                            else
+                                Swal.fire(response.data.Error, "" ,"error");
                         }).catch(e => { })
                 },
                 updatePassword() {
@@ -174,10 +186,15 @@
                     _form.append("newpass", this.password_new);
                     _form.append("retypepass", this.password_confirm);
                     axios.post(_url, _form)
-                        .them(response => {
-                            if (response.data.StatusCode == 1) {
-                                swal("update success !!", "" ,"success");
+                        .then(response => {
+                            if (response.data.Error == null) {
+                                Swal.fire("Đã cập nhật mật khẩu", "", "success");
+                                this.password_old = ''
+                                this.password_new = ''
+                                this.password_confirm = ''
                             }
+                            else
+                                Swal.fire(response.data.Error, "" ,"error");
                         }).catch(e => { })
                 },
                 errorImgUrl() {
@@ -196,7 +213,7 @@
                     _that.avatar.src = URL.createObjectURL(event.target.files[0])
                     _that.avatar.file = event.target.files[0]
                     var src = URL.createObjectURL(event.target.files[0])
-                    console.log(this.avatar);
+                    //console.log(this.avatar);
                     setTimeout(function () {
                         var imgTesting = new Image();
                         imgTesting.src = src;

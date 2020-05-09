@@ -13,6 +13,15 @@ using BaseCustomerMVC.Globals;
 using BaseAccess.Interfaces;
 using Microsoft.Extensions.Options;
 using BaseCustomerMVC.Models;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace EnglishPlatform.Controllers
 {
@@ -26,9 +35,11 @@ namespace EnglishPlatform.Controllers
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ILog _log;
+        private readonly MailHelper _mailHelper;
         private readonly ClassService _classService;
         private readonly StudentHelper _studentHelper;
-        private readonly UserAndRoleService _userAndRoleService;
+        private readonly CalendarHelper _calendarHelper;
+
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -38,6 +49,8 @@ namespace EnglishPlatform.Controllers
             , AccessesService accessesService
             , ClassService classService
             , IOptions<DefaultConfigs> defaultvalue
+            , CalendarHelper calendarHelper
+            , MailHelper mailHelper
             , UserAndRoleService userAndRoleService
             , ILog log)
         {
@@ -50,9 +63,11 @@ namespace EnglishPlatform.Controllers
             _studentService = studentService;
             _classService = classService;
             _studentHelper = new StudentHelper(studentService, accountService);
+            _calendarHelper = calendarHelper;
             _log = log;
+            _mailHelper = mailHelper;
             _default = defaultvalue.Value;
-            _userAndRoleService = userAndRoleService;
+
         }
 
         public IActionResult Index()
@@ -88,51 +103,92 @@ namespace EnglishPlatform.Controllers
         {
             //var x = HttpContext.Request;
             //_log.Debug("login", new { UserName, PassWord, Type, IsRemmember });
-            if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(PassWord))
+            var _username = UserName.Trim().ToLower();
+            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
             {
                 return Json(new ReturnJsonModel
                 {
                     StatusCode = ReturnStatus.ERROR,
-                    StatusDesc = "Please fill your information",
+                    StatusDesc = "Vui lòng điền đầy đủ thông tin",
                 });
             }
             else
             {
-                string _sPass = Security.Encrypt(PassWord);
-                var user = _accountService.GetAccount(Type, UserName.ToLower(), _sPass);
+                string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
+                var user = _accountService.GetAccount(_username, _sPass);
                 if (user == null)
                 {
                     return Json(new ReturnJsonModel
                     {
                         StatusCode = ReturnStatus.ERROR,
-                        StatusDesc = "Account's infomation is not correct"
+                        StatusDesc = "Thông tin tài khoản không đúng"
                     });
                 }
                 else
                 {
                     if (user.IsActive)
                     {
-                        TempData["success"] = "Hi " + user.UserName;
+                        TempData["success"] = "Hi " + _username;
                         string _token = Guid.NewGuid().ToString();
-                        HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
-                        //_ilogs.WriteLogsInfo(_token);
                         string FullName, id;
-                        switch (user.Type)
+                        HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
+                        var role = _roleService.GetItemByID(user.RoleID);
+                        if (role == null)
+                        {
+                            return Json(new ReturnJsonModel
+                            {
+                                StatusCode = ReturnStatus.ERROR,
+                                StatusDesc = "Có lỗi, không đăng nhập được. Vui lòng liên hệ Admin để được trợ giúp"
+                            });
+                        }
+                        switch (Type)
                         {
                             case ACCOUNT_TYPE.TEACHER:
                                 var tc = _teacherService.GetItemByID(user.UserID);
+                                if (tc == null)
+                                    return Json(new ReturnJsonModel
+                                    {
+                                        StatusCode = ReturnStatus.ERROR,
+                                        StatusDesc = "Thông tin tài khoản không đúng",
+                                    });
                                 FullName = tc.FullName;
                                 id = tc.ID;
                                 break;
                             case ACCOUNT_TYPE.STUDENT:
                                 var st = _studentService.GetItemByID(user.UserID);
-                                FullName = st.FullName;
+                                if (st == null)
+                                {
+                                    if (role.Type == "teacher")
+                                    {
+                                        //create student account
+                                        st = new StudentEntity()
+                                        {
+                                            FullName = user.Name,
+                                            Email = _username,
+                                            Phone = user.Phone,
+                                            IsActive = true,// active student
+                                            CreateDate = DateTime.Now,
+                                            ID = user.UserID
+                                        };
+                                        _studentService.CreateQuery().InsertOne(st);
+                                    }
+                                    else
+                                        return Json(new ReturnJsonModel
+                                        {
+                                            StatusCode = ReturnStatus.ERROR,
+                                            StatusDesc = "Thông tin tài khoản không đúng",
+                                        });
+                                }
+                                role = _roleService.GetItemByCode("student");
+                                FullName = st.FullName ?? st.Email;
                                 id = st.ID;
                                 break;
                             default:
                                 FullName = "admin"; id = "0";
                                 break;
                         }
+
+                        var listAccess = _accessesService.GetAccessByRole(role.ID);
 
                         var listRole = _userAndRoleService.CreateQuery().Find(o => o.UserID == id)?.ToList();
                         // cache list basis (co so)
@@ -150,7 +206,7 @@ namespace EnglishPlatform.Controllers
 
                         var claims = new List<Claim>{
                                 new Claim("UserID",id),
-                                new Claim(ClaimTypes.Email, user.UserName),
+                                new Claim(ClaimTypes.Email, _username),
                                 new Claim(ClaimTypes.Name, FullName),
                                 new Claim("Type", user.Type),};
 
@@ -185,7 +241,7 @@ namespace EnglishPlatform.Controllers
                         return Json(new ReturnJsonModel
                         {
                             StatusCode = ReturnStatus.ERROR,
-                            StatusDesc = "Account is locked"
+                            StatusDesc = "Tài khoản đang bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
                         });
                     }
                 }
@@ -205,7 +261,7 @@ namespace EnglishPlatform.Controllers
             }
             else
             {
-                string _sPass = Security.Encrypt(PassWord);
+                string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
                 if (_accountService.IsAvailable(_username))
                 {
                     return Json(new ReturnJsonModel
@@ -220,7 +276,7 @@ namespace EnglishPlatform.Controllers
                     {
                         PassWord = _sPass,
                         UserName = _username,
-                        Name = Name,
+                        Name = Name ?? _username,
                         Phone = Phone,
                         Type = Type,
                         IsActive = false,
@@ -245,7 +301,7 @@ namespace EnglishPlatform.Controllers
                             var teacher = new TeacherEntity()
                             {
                                 FullName = user.Name,
-                                Email = user.UserName,
+                                Email = _username,
                                 Phone = user.Phone,
                                 IsActive = false,
                                 CreateDate = DateTime.Now
@@ -259,7 +315,7 @@ namespace EnglishPlatform.Controllers
                             var student = new StudentEntity()
                             {
                                 FullName = user.Name,
-                                Email = user.UserName,
+                                Email = _username,
                                 Phone = user.Phone,
                                 IsActive = true,// active student
                                 CreateDate = DateTime.Now
@@ -281,10 +337,11 @@ namespace EnglishPlatform.Controllers
                     var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
                     _accountService.CreateQuery().ReplaceOne(filter, user);
                     ViewBag.Data = user;
+                    _ = _mailHelper.SendRegisterEmail(user, PassWord);
                     return Json(new ReturnJsonModel
                     {
                         StatusCode = ReturnStatus.SUCCESS,
-                        StatusDesc = "Account created successfully, login now to begin your first test!",
+                        StatusDesc = "Tài khoản đã được tạo, mời bạn đăng nhập để trải nghiệm ngay!",
                         Location = "/Login"
                     });
                 }
@@ -350,8 +407,8 @@ namespace EnglishPlatform.Controllers
                 IsActive = true,
                 Type = ACCOUNT_TYPE.ADMIN,
                 UserName = "supperadmin@gmail.com",
-                PassTemp = Security.Encrypt("123"),
-                PassWord = Security.Encrypt("123"),
+                PassTemp = Core_v2.Globals.Security.Encrypt("123"),
+                PassWord = Core_v2.Globals.Security.Encrypt("123"),
                 UserID = "0", // admin
                 RoleID = superadminRole.ID
             };
@@ -383,6 +440,120 @@ namespace EnglishPlatform.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ForgotPassword(string Email)
         {
+            return View();
+        }
+
+
+        [HttpPost]
+        public IActionResult UploadImage(IFormFile upload, string CKEditorFuncNum, string CKEditor, string langCode)
+        {
+            if (upload.Length <= 0) return null;
+            //if (!upload.IsImage())
+            //{
+            //    var NotImageMessage = "please choose a picture";
+            //    dynamic NotImage = JsonConvert.DeserializeObject("{ 'uploaded': 0, 'error': { 'message': \"" + NotImageMessage + "\"}}");
+            //    return Json(NotImage);
+            //}
+
+            var fileName = Guid.NewGuid() + Path.GetExtension(upload.FileName).ToLower();
+
+            //Image image = .FromStream(upload.OpenReadStream());
+            //int width = image.Width;
+            //int height = image.Height;
+            //if ((width > 750) || (height > 500))
+            //{
+            //    var DimensionErrorMessage = "Custom Message for error"
+            //    dynamic stuff = JsonConvert.DeserializeObject("{ 'uploaded': 0, 'error': { 'message': \"" + DimensionErrorMessage + "\"}}");
+            //    return Json(stuff);
+            //}
+
+            //if (upload.Length > 500 * 1024)
+            //{
+            //    var LengthErrorMessage = "Custom Message for error";
+            //    dynamic stuff = JsonConvert.DeserializeObject("{ 'uploaded': 0, 'error': { 'message': \"" + LengthErrorMessage + "\"}}");
+            //    return Json(stuff);
+            //}
+
+            var path = Path.Combine(
+                Directory.GetCurrentDirectory(), "wwwroot/images/CKEditorImages",
+                fileName);
+
+            //using (var stream = new FileStream(path, FileMode.Create))
+            //{
+            //    upload.CopyTo(stream);
+            //}
+
+            var standardSize = new SixLabors.Primitives.Size(1024, 768);
+
+            using (Stream inputStream = upload.OpenReadStream())
+            {
+                using (var image = Image.Load<Rgba32>(inputStream))
+                {
+                    var imageEncoder = new JpegEncoder()
+                    {
+                        Quality = 90,
+                        Subsample = JpegSubsample.Ratio444
+                    };
+
+                    int width = image.Width;
+                    int height = image.Height;
+                    if ((width > standardSize.Width) || (height > standardSize.Height))
+                    {
+                        ResizeOptions options = new ResizeOptions
+                        {
+                            Mode = ResizeMode.Max,
+                            Size = standardSize,
+                        };
+                        image.Mutate(x => x
+                         .Resize(options));
+
+                        //.Grayscale());
+                    }
+                    image.Save(path, imageEncoder); // Automatic encoder selected based on extension.
+                }
+            }
+
+            var url = $"{"/images/CKEditorImages/"}{fileName}";
+            var successMessage = "image is uploaded successfully";
+            dynamic success = JsonConvert.DeserializeObject("{ 'uploaded': 1,'fileName': \"" + fileName + "\",'url': \"" + url + "\", 'error': { 'message': \"" + successMessage + "\"}}");
+            return Json(success);
+        }
+
+        public IActionResult OnlineClass(string ID)
+        {
+            var @event = _calendarHelper.GetByEventID(ID);
+            if (@event != null)
+            {
+                //@event.UrlRoom = "6725744943";
+
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var type = User.Claims.GetClaimByType("Type").Value;
+                if (type == "teacher")
+                {
+                    //ViewBag.Role = "1";
+                    var teacher = _teacherService.GetItemByID(UserID);
+                    //if (!string.IsNullOrEmpty(teacher.ZoomID))
+                    if (teacher.ZoomID == @event.UrlRoom)
+                    {
+                        //var roomID = "6725744943";//test
+                        ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "") + "/join";
+                        //ViewBag.URL = Url.Action("ZoomClass", "Home", new { roomID });
+                    }
+                    else
+                        ViewBag.URL = @event.UrlRoom;
+                }
+                else
+                {
+                    //ViewBag.Role = "0";
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "") });
+                }
+            }
+            return View();
+        }
+
+        public IActionResult ZoomClass(string roomID)
+        {
+            ViewBag.RoomID = roomID;
             return View();
         }
     }

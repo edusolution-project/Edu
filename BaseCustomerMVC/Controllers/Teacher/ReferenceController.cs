@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using MongoDB.Driver;
 using System.Threading.Tasks;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -17,11 +19,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassService _classService;
         private readonly FileProcess _fileProcess;
         private readonly ReferenceService _referenceService;
+        private readonly IHostingEnvironment _env;
 
         public ReferenceController(
             TeacherService teacherService,
             ClassService classService,
             FileProcess fileProcess,
+            IHostingEnvironment env,
             ReferenceService referenceService
             )
         {
@@ -29,18 +33,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classService = classService;
             _referenceService = referenceService;
             _fileProcess = fileProcess;
+            _env = env;
         }
 
-        public IActionResult Index(DefaultModel model)
+        public IActionResult Index(DefaultModel model, int old = 0)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var myClasses = _referenceService.CreateQuery()
-                .Find(t => t.OwnerID == UserID)
+            var myClasses = _classService.CreateQuery()
+                .Find(t => t.Members.Any(o => o.TeacherID == UserID)
+                //&& t.IsActive
+                ).SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate)
                 //.Find(t=> true)
                 //.Project(Builders<ClassEntity>.Projection.Include(t => t.ID).Include(t => t.Name))
                 .ToList();
             ViewBag.AllClass = myClasses;
             ViewBag.User = UserID;
+            if (old == 1)
+                return View("index_o");
             return View();
         }
 
@@ -49,23 +58,68 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (entity != null)
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var result = new List<ReferenceEntity>();
+                var filter = new List<FilterDefinition<ReferenceEntity>>();
+
+                var tc = (string.IsNullOrEmpty(entity.Target) || entity.Range != REF_RANGE.CLASS) ? UserID : entity.Target;
+                var filterTeacher = Builders<ReferenceEntity>.Filter.Where(o => o.Range == REF_RANGE.CLASS && o.OwnerID == tc);
+                var filterAll = Builders<ReferenceEntity>.Filter.Eq(o => o.Range, REF_RANGE.ALL);
+
                 switch (entity.Range)
                 {
                     case REF_RANGE.TEACHER:
-                        result = _referenceService.CreateQuery().Find(t => t.Range == REF_RANGE.TEACHER && t.OwnerID == UserID).Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
+                        filter.Add(filterTeacher);
                         break;
                     case REF_RANGE.CLASS:
-                        result = _referenceService.CreateQuery().Find(t => t.OwnerID == UserID && (t.Range == REF_RANGE.TEACHER) || (t.Range == REF_RANGE.CLASS && t.Target == entity.Target)).Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
+                        filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.Range == entity.Range && o.Target == entity.Target));
                         break;
-                    //case REF_RANGE.ALL:
+                    case REF_RANGE.ALL:
+                        filter.Add(filterAll);
+                        break;
                     default:
-                        result = _referenceService.CreateQuery().Find(t => t.Range == REF_RANGE.ALL).Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
+                        filter.Add(Builders<ReferenceEntity>.Filter.Or(filterTeacher, filterAll));
                         break;
                 }
+                if (!string.IsNullOrEmpty(defaultModel.SearchText))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
+                }
+                var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
+                defaultModel.TotalRecord = result.CountDocuments();
+                var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
                 return new JsonResult(new Dictionary<string, object>
                 {
-                    { "Data", result },
+                    { "Data", returnData },
+                    { "Model", defaultModel }
+                });
+            }
+            return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null},
+                });
+        }
+
+        public JsonResult GetClassList(ReferenceEntity entity, DefaultModel defaultModel)
+        {
+            if (entity != null)
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var filter = new List<FilterDefinition<ReferenceEntity>>();
+                filter.Add(Builders<ReferenceEntity>.Filter.Where(o =>
+                    (o.Range == REF_RANGE.ALL) ||
+                    (o.Range == REF_RANGE.TEACHER && o.Target == UserID) ||
+                    (o.Range == REF_RANGE.CLASS && o.Target == entity.Target))
+                );
+                if (!string.IsNullOrEmpty(defaultModel.SearchText))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
+                }
+                var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
+                defaultModel.TotalRecord = result.CountDocuments();
+                var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", returnData },
+                    { "Model", defaultModel }
                 });
             }
             return new JsonResult(new Dictionary<string, object>
@@ -110,12 +164,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (oldObj == null)
                         return new JsonResult(new Dictionary<string, object>
                         {
-                            {"Error", "Item not found" }
+                            {"Error", "Dữ liệu không đúng" }
                         });
                     if (oldObj.OwnerID != UserID)
                         return new JsonResult(new Dictionary<string, object>
                         {
-                            {"Error", "Permission fail" }
+                            {"Error", "Bạn không được quyền thực hiện thao tác này" }
                         });
                     entity.Media = oldObj.Media ?? new Media();
                     entity.OwnerID = UserID;
@@ -137,11 +191,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     }
                 }
+                if (entity.Link == null)
+                    entity.Link = "";
                 if (!string.IsNullOrEmpty(entity.Link))
                     if (!(entity.Link.ToLower().StartsWith("http://") || entity.Link.ToLower().StartsWith("https://")))
                         entity.Link = "http://" + entity.Link;
                 entity.UpdateTime = DateTime.Now;
-                _referenceService.CreateOrUpdate(entity);
+                _referenceService.Save(entity);
                 return new JsonResult(new Dictionary<string, object>
                 {
                     { "Data", entity},
@@ -166,9 +222,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (item.OwnerID != UserID)
                     return new JsonResult(new Dictionary<string, object>
                     {
-                        {"Error", "Permission fail" }
+                        {"Error", "Bạn không có quyền xóa tài liệu này" }
                     });
-                await _referenceService.RemoveAsync(ID);
+                _ = _referenceService.RemoveAsync(ID);
             }
             return new JsonResult(new Dictionary<string, object>
             {
@@ -188,6 +244,53 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
             return null;
+        }
+
+        public IActionResult Download(string ID)
+        {
+            if (!string.IsNullOrEmpty(ID))
+            {
+                var item = _referenceService.GetItemByID(ID);
+                if (item == null)
+                    return BadRequest();
+                _ = _referenceService.IncDownload(ID, 1);
+
+                //TODO: create download log
+                if (item.Media != null)
+                {
+                    try
+                    {
+                        var filePath = Path.Combine(_env.WebRootPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
+                        var stream = System.IO.File.OpenRead(filePath);
+                        return File(stream, "application/octet-stream", item.Media.Name);
+                    }
+                    catch
+                    {
+                        return NotFound();
+                    }
+                }
+            }
+            return BadRequest();
+        }
+
+        public IActionResult OpenLink(string ID)
+        {
+            if (!string.IsNullOrEmpty(ID))
+            {
+                var item = _referenceService.GetItemByID(ID);
+                if (item == null)
+                    return BadRequest();
+                _ = _referenceService.IncView(ID, 1);
+                //TODO: create view log
+                var url = item.Link;
+                if (!string.IsNullOrEmpty(url))
+                {
+                    if (!url.ToLower().StartsWith("http://") && !url.ToLower().StartsWith("https://"))
+                        url = "http://" + url;
+                    return Redirect(url);
+                }
+            }
+            return BadRequest();
         }
     }
 }

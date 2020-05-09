@@ -13,6 +13,8 @@ var ExamReview = (function () {
 
     var _totalPart = 0;
     var _type = 0;
+    var _totalQuiz = 0;
+    var _correctQuiz = 0;
 
     var prevPart = function () {
         var panes = $('.tab-pane');
@@ -52,8 +54,17 @@ var ExamReview = (function () {
     }
 
     var toggleNav = function (obj) {
-        $('#lessonSummary').toggleClass("expand");
+        //$('#lessonSummary').toggleClass("expand");
+        //$(obj).toggleClass('btn-warning');
         $(obj).toggleClass('btn-warning');
+        if ($('#QuizNav').hasClass("show")) {
+            $('#QuizNav').removeClass("show");
+            $('.right-content').removeClass("showQuiz");
+        }
+        else {
+            $('#QuizNav').addClass("show");
+            $('.right-content').addClass("showQuiz");
+        }
     }
 
     var toggleExplain = function (obj) {
@@ -120,10 +131,10 @@ var ExamReview = (function () {
     var durationFormat = function (_duration) {
         var result = "";
         if (_duration.asHours() > 1)
-            result += _duration.asHours().toFixed(0) + "h ";
+            result += _duration.asHours().toFixed(0) + ":";
         if (_duration.asMinutes() > 0)
-            result += _duration.minutes().toFixed(0) + "m ";
-        result += _duration.seconds() + "s";
+            result += _duration.minutes().toFixed(0) + ":";
+        result += _duration.seconds();
         return result;
     }
 
@@ -135,11 +146,9 @@ var ExamReview = (function () {
         var starttime = moment(data.Created);
         var duration = moment.duration(completetime.diff(starttime));
 
-        lastExamResult =
-            $("<div>", { id: "last-result", class: "text-center pt-1 text-white" })
-                .append("Work time: " + durationFormat(duration) + " - Score: " + lastpoint.toFixed(0) + "%");
+        lastExamResult = $("<div>", { id: "last-result", class: "text-center p-1 text-white" });
 
-        $('#lessonSummary').prepend(lastExamResult);
+
         $('#quiz_number_counter .completed').text(data.QuestionsDone);
 
         var details = data.Details;
@@ -152,6 +161,19 @@ var ExamReview = (function () {
                 renderAnswer(detail, quizType);
             }
         }
+
+        $('#lessonSummary #nav-menu .text-center').prepend(lastExamResult);
+
+        _correctQuiz = $('#quizNavigator .quiz-wrapper .bg-success').length;
+        _totalQuiz = $('#quizNavigator .quiz-wrapper button').length;
+
+        $(".top-menu[for=lesson-info]").prepend($('<span>',
+            {
+                class: "m-2 text-muted font-weight-bold",
+                style: "font-size: 150%",
+
+            }).append("Kết quả: ").append($('<span>',
+                { class: "text-primary", text: _correctQuiz + "/" + _totalQuiz })).append(" (" + durationFormat(duration) + ")" ));
     }
 
     var renderLessonPart = function (data, index, type) {
@@ -249,7 +271,12 @@ var ExamReview = (function () {
     var renderDOC = function (data) {
         var title = '<div class="part-box-header col-md-2 d-inline-block part-column"><h5 class="title">' + data.Title + '</h5></div>';
         var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
-        html += '<div class="media-holder ' + data.Type + '"><embed src="' + data.Media.Path + '" style="width: 100%; height: 800px; border:1px solid"></div>';
+
+        if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx")) {
+            html += "<div class='media-holder " + data.Type + "'><iframe src='https://docs.google.com/gview?url=http://" + window.location.hostname + data.Media.Path + "&embedded=true' style='width:100%, height:800px'></iframe></div>";
+        }
+        else
+            html += '<div class="media-holder ' + data.Type + '"><embed src="' + data.Media.Path + '#view=FitH" style="width: 100%; height: 800px; border:1px solid"></div>';
         html += '</div>';
         return html;
     }
@@ -279,14 +306,14 @@ var ExamReview = (function () {
             html += '<div class="quiz-box-header"><h5 class="title">' + item.Content + '</h5>' + renderMedia(item.Media) + '</div>';
             html += '<div class="answer-wrapper">';
             html += '<div class="student-answer">';
-            html += '<fieldset class="answer-item d-inline mr-3">';
+            html += '<fieldset class="answer-item d-inline mr-3 align-top">';
             html += '<div style="cursor: pointer; display:inline-block" class="form-check">';
             html += '<label class="answer-text form-check-label"><i>Trả lời: </i></label>';
             html += '</div>';
             html += '</fieldset>';
             html += '</div>';
             html += '<div>';
-            html += '<fieldset class="answer-item d-inline mr-3">';
+            html += '<fieldset class="answer-item d-inline mr-3 align-top">';
             html += '<div style="cursor: pointer; display:inline-block" class="form-check">';
             html += '<label class="answer-text form-check-label"><i>Đáp án đúng: </i></label>';
             html += '</div>';
@@ -294,7 +321,7 @@ var ExamReview = (function () {
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
                 //if(!answer.IsCorrect) continue;
-                html += '<fieldset class="answer-item d-inline mr-3" id="' + answer.ID + '">';
+                html += '<fieldset class="answer-item d-inline mr-3 align-top" id="' + answer.ID + '">';
                 html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '" onclick="AnswerQuestion(this)">';
                 if (answer.IsCorrect)
                     html += '<label class="answer-text form-check-label text-success" for="' + answer.ID + '">' + answer.Content + '</label>';
@@ -432,30 +459,30 @@ var ExamReview = (function () {
     var renderContent = function (data) {
         var tabList = '<div id="pills-tabContent" class="tab-content">';
         //var nav = '<div id="nav-menu" class="col-md-12 mb-3 pb-3 bd-bottom">';
-        var nav_bottom_wrapper = $('<div>', { id: "nav-menu", class: 'col-md-12 pl-0 pr-0' });
+        //var nav_bottom_wrapper = $('<div>', { id: "nav-menu", class: 'd-flex justify-content-between align-items-baseline' });
         //'<div id="nav-menu" class="col-md-12 mt-3 pt-3 bd-top">';
-        //nav += '<div class="col-md-1 text-left d-inline-block"><button class="prevtab btn btn-success" data-toggle="tooltip" title="Phần trước" onclick="tab_goback()"><i class="fas fa-arrow-left"></i></button></div>'; //left button
+        //nav += '<div class="col-md-1 text-left d-inline-block"><button class="prevtab btn btn-success" data-toggle="tooltip" title="Phần trước" onclick="tab_goback()"><i class="fas fa-arrow-circle-left"></i></button></div>'; //left button
 
-        var quiz_counter = $('<div>', { id: 'quiz-counter-holder', class: "d-inline-block text-white font-weight-bold align-middle pl-3" });
+        //var quiz_counter = $('<div>', { id: 'quiz-counter-holder', class: "d-inline-block text-white font-weight-bold align-middle pl-2" });
 
-        var prev_btn_holder = $('<div>', { class: "col-md-3 col-sm-2 text-left d-inline-block" });
-        var prev_btn = $('<button>', { class: "prevtab btn btn-success", disabled: "disabled", onclick: "window.PrevPart()" }).append($('<i>', { class: "fas fa-arrow-left" }));
-        prev_btn_holder.append(prev_btn).append(quiz_counter);
-        var ct_action_holder = $('<div>', { class: "col-md-6 col-sm-8 text-center d-inline-block" });
+        var lesson_info_holder = $('.top-menu[for=lesson-info]');
+        var prev_btn = $('<button>', { class: "prevtab btn btn-primary m-2", disabled: "disabled", onclick: "window.PrevPart()" }).append($('<i>', { class: "fas fa-arrow-circle-left mr-2" })).append("Câu trước");
+        lesson_info_holder.append(prev_btn);//.append(quiz_counter);
+        //var ct_action_holder = $('<div>', { class: "text-center" });
 
-        if (_type != 1) {
-            var explain_btn = $('<button>', { class: "btn btn-success pl-3 pr-3", onclick: "ToggleExplain(this)", text: "Bật/ tắt giải thích" });
-            var golist_btn = $('<button>', { class: "btn btn-success pl-3 pr-3 ml-1", onclick: "GoList(this)", text: "Về danh sách" });
-            var redo_btn = $('<button>', { class: "btn btn-success pl-3 pr-3 mr-1", onclick: "Redo(this)", text: "Thực hiện lại" });
-            ct_action_holder.append(redo_btn).append(explain_btn).append(golist_btn);
-        }
-        var next_btn_holder = $('<div>', { class: "col-md-3 col-sm-2 text-right d-inline-block" });
-        var next_btn = $('<button>', { class: "nexttab btn btn-success", onclick: "window.NextPart()" }).append($('<i>', { class: "fas fa-arrow-right" }));
-        next_btn_holder.append(next_btn);
+        //if (_type != 1) {
+        var explain_btn = $('<button>', { class: "btn btn-primary mt-2 mr-2 mb-2", onclick: "ToggleExplain(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+            //var golist_btn = $('<button>', { class: "btn btn-success pl-3 pr-3 ml-1", onclick: "GoList(this)", text: "Về danh sách" });
+        var redo_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "Redo(this)" }).append($("<i>", { "class": "fas fa-play mr-2" })).append("Thực hiện lại");
+            lesson_info_holder.append(explain_btn).append(redo_btn);//.append(golist_btn);
+        //}
+        var next_btn_holder = $('<div>', { class: "text-right align-self-end" });
+        var next_btn = $('<button>', { class: "nexttab btn btn-primary m-2", onclick: "window.NextPart()" }).append($('<i>', { class: "fas fa-arrow-circle-right mr-2" })).append("Câu sau");
+        lesson_info_holder.append(next_btn);
 
-        nav_bottom_wrapper.append(prev_btn_holder).append(ct_action_holder).append(next_btn_holder);
+        //nav_bottom_wrapper.append(prev_btn_holder).append(ct_action_holder).append(next_btn_holder);
 
-        $('<div>', { id: 'quizIdx_holder' }).appendTo(nav_bottom_wrapper);
+
 
         //nav += '<div class="lesson-tabs col-md-10 d-inline-block"><ul id="pills-tab" class="nav nav-pills compact" onclick="toggle_tab_compact()">';
 
@@ -471,9 +498,11 @@ var ExamReview = (function () {
             tabList += content;
             var title = item.Title == void 0 || item.Title == null || item.Title == "null" ? "" : item.Title;
         }
+
         tabList += '</div>';
         html = '<div class="lesson-body" id="' + data.ID + '">' + tabList + '</div>';
-        $('#lessonSummary').append(nav_bottom_wrapper);
+        //$('#lessonSummary').append(nav_bottom_wrapper);
+        $('<div>', { id: 'quizIdx_holder' }).appendTo($('#lessonSummary'));
         return html;
     }
 
@@ -512,38 +541,37 @@ var ExamReview = (function () {
             quiz_number_counter.find(".completed").text(count);
             quiz_number_counter.find(".total").text(listQuiz.length);
         } else {
-            quiz_number_holder.append($("<button>", {
-                id: "quiz_number_counter",
-                class: "quizNumber btn btn-success font-weight-bold"
-            })
-                .append($("<span>", {
-                    class: "completed",
-                    text: count
-                })).append(" / ")
-                .append($("<span>", {
-                    class: "total",
-                    text: listQuiz.length
-                }))).append($('<button>', { class: "quizNumber btn btn-success ml-2", onclick: "window.ToggleNav(this)", tooltips: "Ẩn hiện bảng theo dõi" })
-                    .append($("<i>", { class: "fa fa-bars" })));
+            $(".top-menu[for=lesson-info] .prevtab")
+                //    .after($("<button>", {
+                //    id: "quiz_number_counter",
+                //    class: "quizNumber btn btn-success font-weight-bold"
+                //})
+                //    .append($("<span>", {
+                //        class: "completed",
+                //        text: count
+                //    })).append(" / ")
+                //    .append($("<span>", {
+                //        class: "total",
+                //        text: listQuiz.length
+                //    })))
+                .after($('<button>', { class: "quizNumber btn btn-primary mt-2 mr-2 mb-2", onclick: "window.ToggleNav(this)", tooltips: "Ẩn hiện bảng theo dõi" })
+                    .append($("<i>", { class: "fas fa-question-circle mr-2" })).append("Danh sách câu trả lời"));
         }
 
         var quizNavigator = $('#quizNavigator');
         if (quizNavigator.length == 0) {
-            quizNavigator = $('<div>', { id: "quizNavigator", class: "p-2" });
+            quizNavigator = $('<div>', { id: "quizNavigator", class: "p-1" });
             quizNavigator.append($('<div>', { class: "input-group quiz-wrapper" }).append(answerList));
             $('#quizIdx_holder').append(quizNavigator);
         }
-        if (quizNavigator != null) {
-            if (listQuiz != null && count >= listQuiz.length) {
-                console.log(count, listQuiz.length);
-                var btn = document.getElementById("btn-completed");
-                if (btn != null) btn.style.display = "block";
-            } else {
-                var btn = document.getElementById("btn-completed");
-                if (btn != null) btn.style.display = "none!important";
-            }
+        $("#QuizNav").append(quizNavigator);
+        if (listQuiz != null && count >= listQuiz.length) {
+            console.log(count, listQuiz.length);
+            var btn = document.getElementById("btn-completed");
+            if (btn != null) btn.style.display = "block";
         } else {
-            document.body.innerHTML += html;
+            var btn = document.getElementById("btn-completed");
+            if (btn != null) btn.style.display = "none!important";
         }
     }
 

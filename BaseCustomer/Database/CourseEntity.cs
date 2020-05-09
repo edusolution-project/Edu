@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -46,9 +47,13 @@ namespace BaseCustomerEntity.Database
         public string Outline { get; set; }             // Đề cương môn học
         [JsonProperty("LearningOutcomes")]
         public string LearningOutcomes { get; set; }  // Mục tiêu môn học
+        [JsonProperty("TotalLessons")]
+        public long TotalLessons { get; set; }
     }
+
     public class CourseService : ServiceBase<CourseEntity>
     {
+
         public CourseService(IConfiguration config) : base(config)
         {
             var indexs = new List<CreateIndexModel<CourseEntity>>
@@ -66,10 +71,19 @@ namespace BaseCustomerEntity.Database
                     new IndexKeysDefinitionBuilder<CourseEntity>()
                     .Ascending(t => t.SubjectID)
                     .Ascending(t=> t.GradeID)
+                    ),
+                new CreateIndexModel<CourseEntity>(
+                    new IndexKeysDefinitionBuilder<CourseEntity>()
+                    .Text(t=> t.Name)
                     )
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public async Task IncreaseLessonCount(string ID, long increment)
+        {
+            await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseEntity>().Inc(t => t.TotalLessons, increment));
         }
     }
 }

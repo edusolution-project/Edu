@@ -1,6 +1,10 @@
-﻿@{
-    ViewData["Title"] = "My Events";
+﻿@using BaseCustomerEntity.Database;
+@{
+    ViewData["Title"] = "Lịch dạy";
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    var listClass = ViewBag.ClassList as List<ClassEntity>;
+    var currentTeacher = ViewBag.CurrentTeacher as TeacherEntity;
+    string ZoomUrl = "";
 }
 
 <link href="~/css/calendar/core.css" rel="stylesheet" />
@@ -28,7 +32,10 @@
 
 </div>
 <div class="form-event" id="form-event">
-    <div class="header-form-event">Sự kiện</div>
+    <div class="header-form-event">
+        Sự kiện
+        <button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button>
+    </div>
     <div class="body-form-event">
         <input type="hidden" name="ID" value="" />
         <div class="item-event">
@@ -53,7 +60,57 @@
         <button class="btn btn-o btn-delete-event btn-danger" id="btn-delete-event">Xóa</button>
     </div>
 </div>
-<div id="dark-smooke" class="dark-smooke" onclick="javascript: document.body.classList.remove('open-add-event');"></div>
+
+<div class="form-event form-event-class" id="form-event-class">
+    <div class="header-form-event">Thêm lớp học trực tuyến  <button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button></div>
+    <div class="body-form-event">
+        <input type="hidden" name="ID" value="" />
+        <input type="hidden" name="Status" value="5" />
+        <div class="item-event">
+            <label for="Title">Tiêu đề</label>
+            <input type="text" name="Title" class="form-control" placeholder="Nhập tiêu đề">
+        </div>
+        <div class="item-event">
+            <label>Chọn lớp học </label>
+            @if (listClass != null)
+            {
+                <select name="ClassID" class="form-control">
+                    @for (int i = 0; i < listClass.Count; i++)
+                    {
+                        var item = listClass[i];
+                        <option value="@item.ID">
+                            @item.Name
+                        </option>
+                    }
+                </select>
+            }
+        </div>
+        <div class="item-event">
+            <label for="Thời gian">Thời gian</label>
+            <div class="group-input-event">
+                <input type="text" name="Time" class="form-control timepicker" placeholder="Nhập giờ">
+                <input style="margin-left:5px;" type="date" value="" name="Date" class="form-control" placeholder="Nhập tiêu đề">
+            </div>
+        </div>
+        <div class="item-event">
+            <label for="Content">Link lớp học </label>
+            @if (currentTeacher != null)
+            {
+                ZoomUrl = string.IsNullOrEmpty(currentTeacher.ZoomID) ? "" : "https://zoom.us/wc/" + currentTeacher.ZoomID.Replace("-", "") + "/start";
+            }
+            <input type="text" name="UrlRoom" value="@ZoomUrl" class="form-control" placeholder="appear / zoom / skype join">
+        </div>
+    </div>
+    <div class="footer-form-event">
+        <button style="display:none" onclick="openWindow(this)" class="btn btn-primary btn-show-class-event" id="btn-mo-bai-hoc">Mở bài học</button>
+        <button style="display:none" onclick="openWindow(this)" class="btn btn-primary btn-show-class-event" id="btn-vao-lop-online">Vào lớp</button>
+        <button class="btn btn-primary btn-save-event" id="btn-save-event-class">Lưu</button>
+        <button class="btn btn-o btn-cancel-event" id="btn-cancel-event-class">Hủy</button>
+        <button class="btn btn-o btn-delete-event btn-danger" id="btn-delete-event-class">Xóa</button>
+    </div>
+</div>
+
+<div id="dark-smooke" class="dark-smooke" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');"></div>
 
 @section Scripts{
     @*longht add 2020-01-12*@
@@ -62,6 +119,14 @@
     <script src="~/js/lib/schedule.js"></script>
     <script src="/js/calendar/js/Calendar.js"></script>
     <script>
+        var openWindow = function (self) {
+            console.log(self);
+            if (self.dataset.url == void 0 || self.dataset.url == null) {
+                return;
+            } else {
+                window.open(self.dataset.url,"_blank");
+            }
+        }
         var changeTime = function (date) {
             var hours = date.getHours();
             var minute = date.getMinutes();
@@ -82,7 +147,7 @@
     </script>
     <script>
         var EduCalendar = new EduCalendar();
-        EduCalendar.useEduTemplate().loadConfig({
+        EduCalendar.useEduTemplateTeacher().loadConfig({
             url: "@Url.Action("GetList","Calendar")",
             type: "teacher",
             isDev: !1,
@@ -102,68 +167,26 @@
             EduCalendar.schedule.Ajax.PostAny("@Url.Action("GetDetail","Calendar")?id=" + id, null).then(function (data) {
                 if (data != null) {
                     var jsonData = JSON.parse(data);
-                    if (jsonData.CreateUser == "@User.FindFirst("UserID")?.Value") {
-                        document.body.classList.add("open-add-event");
-                        var startDate = new Date(jsonData.StartDate);
-                        var timeEvent = changeTime(startDate);
-                        var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
-                        var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
-                        var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
-                        var formEvent = document.getElementById("form-event");
-                        var bodyEvent = formEvent.querySelector(".body-form-event");
-                        bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
-                        if (bodyEvent != null) {
-                            var Title = bodyEvent.querySelector("input[name='Title']");
-                            if (Title != null) {
-                                Title.value = jsonData.Title;
-                            }
-                            var Content = bodyEvent.querySelector("textarea[name='Content']");
-                            if (Content != null) {
-                                Content.value = jsonData.Content != void 0
-                                    ? jsonData.Content
-                                    : "";
-                            }
-                            var time = bodyEvent.querySelector("input[name='Time']");
-                            if (time != null) {
-                                time.value = timeEvent;
-                            }
-                            var date = bodyEvent.querySelector("input[name='Date']");
-                            if (date != null) {
-                                date.value = dateEvent;
-                            }
-                            formEvent.classList.remove("view-form");
-                            formEvent.classList.add("edit-form");
+
+                    var formEventxxx = document.getElementById("form-event-class");
+                    if (formEventxxx != null) {
+                        formEventxxx.classList.remove("show_go_to_class");
+                        var btnMo = formEventxxx.querySelector("button#btn-mo-bai-hoc");
+                        var btnOnline = formEventxxx.querySelector("button#btn-vao-lop-online");
+
+                        if (btnMo != null) {
+                            btnMo.removeAttribute("data-url");
+                            btnMo.style.display = "none";
                         }
-                        if (checkTime(new Date(jsonData.Created), 0)) {
-                            // cho phép xóa
+                        if (btnOnline != null) {
+                            btnOnline.removeAttribute("data-url");
+                            btnOnline.style.display = "none";
                         }
                     }
-                    else {
-                        if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != void 0) {
-                            document.body.classList.remove("open-add-event");
-                            var time = new Date(jsonData.Created);
-                            var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
-                           
-                            var str = `Học viên : ${jsonData.StudentName}`;
-                            swal({
-                                title: Title,
-                                type: "info",
-                                text: str,
-                                showCancelButton: true,
-                                confirmButtonClass: "btn-sm btn-primary",
-                                confirmButtonText: "Call skype",
-                                cancelButtonClass :"btn-sm",
-                                cancelButtonText:"close",
-                                closeOnConfirm: false
-                            },function () {
-                                swal.close();
-                                var _skype = jsonData.Skype;
-                                if (jsonData.Skype == null) {
-                                    _skype = skype;
-                                }
-                                window.open(`skype:${_skype}?call`, "_blank");
-                            });
-                        } else {
+
+                    if ((jsonData.CreateUser == "@User.FindFirst("UserID")?.Value" && jsonData.ScheduleID == null) ||
+                        (jsonData.TeacherID == "@User.FindFirst("UserID")?.Value" && jsonData.ScheduleID != null)) {
+                        if (jsonData.Status != 5) {
                             document.body.classList.add("open-add-event");
                             var startDate = new Date(jsonData.StartDate);
                             var timeEvent = changeTime(startDate);
@@ -172,6 +195,7 @@
                             var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
                             var formEvent = document.getElementById("form-event");
                             var bodyEvent = formEvent.querySelector(".body-form-event");
+                            
                             bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
                             if (bodyEvent != null) {
                                 var Title = bodyEvent.querySelector("input[name='Title']");
@@ -180,6 +204,7 @@
                                 }
                                 var Content = bodyEvent.querySelector("textarea[name='Content']");
                                 if (Content != null) {
+
                                     Content.value = jsonData.Content != void 0
                                         ? jsonData.Content
                                         : "";
@@ -192,8 +217,169 @@
                                 if (date != null) {
                                     date.value = dateEvent;
                                 }
+                                formEvent.classList.remove("view-form");
                                 formEvent.classList.add("edit-form");
-                                formEvent.classList.add("view-form");
+                            }
+                            if (checkTime(new Date(jsonData.Created), 0)) {
+                                // cho phép xóa
+                            }
+                        } else {
+
+                            //teacher show
+                            document.body.classList.add("open-add-event-class");
+                            var startDate = new Date(jsonData.StartDate);
+                            var timeEvent = changeTime(startDate);
+                            var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
+                            var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
+                            var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
+                            var formEvent = document.getElementById("form-event-class");
+                            var bodyEvent = formEvent.querySelector(".body-form-event");
+                            //longht them
+                            var btnMo = formEvent.querySelector("button#btn-mo-bai-hoc");
+                            var btnOnline = formEvent.querySelector("button#btn-vao-lop-online");
+                            if (jsonData.LinkLesson != null && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "" && jsonData.LinkLesson != "null") {
+                                if (btnMo != null) {
+                                    btnMo.setAttribute("data-url", jsonData.LinkLesson);
+                                    btnMo.removeAttribute("style");
+                                }
+                            } else {
+                                if (btnMo != null) {
+                                    btnMo.removeAttribute("data-url");
+                                    btnMo.style.display = "none";
+                                }
+                            }
+                            if (jsonData.UrlRoom != null && jsonData.UrlRoom != void 0 && jsonData.UrlRoom != "" && jsonData.UrlRoom != "null") {
+                                if (btnOnline != null) {
+                                    btnOnline.setAttribute("data-url", jsonData.UrlRoom.startsWith("https") ? jsonData.UrlRoom : "@ZoomUrl");
+                                    btnOnline.removeAttribute("style");
+                                }
+                            } else {
+                                if (btnOnline != null) {
+                                    btnOnline.removeAttribute("data-url");
+                                    btnOnline.style.display = "none";
+                                }
+                            }
+                            bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
+                            if (bodyEvent != null) {
+                                var Title = bodyEvent.querySelector("input[name='Title']");
+                                if (Title != null) {
+                                    Title.value = jsonData.Title;
+                                }
+                                var Content = bodyEvent.querySelector("input[name='UrlRoom']");
+                                if (Content != null) {
+                                    Content.value = jsonData.UrlRoom != void 0
+                                        ? jsonData.UrlRoom
+                                        : "@ZoomUrl";
+                                }
+                                var time = bodyEvent.querySelector("input[name='Time']");
+                                if (time != null) {
+                                    time.value = timeEvent;
+                                }
+                                var date = bodyEvent.querySelector("input[name='Date']");
+                                if (date != null) {
+                                    date.value = dateEvent;
+                                }
+                                var select = bodyEvent.querySelector("select[name='ClassID']");
+                                if (select != null) {
+                                    select.value = jsonData.GroupID;
+                                }
+                               
+
+                                formEvent.classList.remove("view-form");
+                                formEvent.classList.add("edit-form");
+                            }
+                            if (checkTime(new Date(jsonData.Created), 0)) {
+                                // cho phép xóa
+                            }
+                        }
+                    }
+                    else {
+                        if (jsonData.Status == 5) {
+                            // student show
+                            document.body.classList.add("open-add-event-class");
+                            var title = jsonData.Title;
+                            var classID = jsonData.GroupID;
+                            var time = new Date(jsonData.StartDate);
+
+                            console.log(title, classID, time);
+                            //Title: "Exercise 4"
+                            //GroupID: "5e5e1216f7d700160cac885e"
+                            //StartDate: "2020-03-04T01:00:00Z"
+                            //EndDate: "2020-03-04T01:00:00Z"
+                            //TeacherID: "5db11841b5433109d4533cae"
+                            //TeacherName: "Quynh Dan"
+                            //StudentID: null
+                            //StudentName: null
+                            //UrlRoom: "2132160662"
+                            //LimitNumberUser: 0
+                            //UserBook: []
+                            //CreateUser: "5e5e00b215a5472720d17593"
+                            //Status: 5
+                            //IsDel: false
+                            //Created: "2020-03-03T08:21:06.364Z"
+                            //ScheduleID: "5e5e1216f7d700160cac89a0"
+                            //Skype: "live:engcoo"
+                            //Content: null
+                            //ID: "5e5e1372f7d700160cacab18"
+                            //LinkLesson: "/teacher/
+
+                        } else {
+                            if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != void 0) {
+                                document.body.classList.remove("open-add-event");
+                                var time = new Date(jsonData.Created);
+                                var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
+
+                                var str = `Học viên : ${jsonData.StudentName}`;
+                                swal({
+                                    title: Title,
+                                    type: "info",
+                                    text: str,
+                                    showCancelButton: true,
+                                    confirmButtonClass: "btn-sm btn-primary",
+                                    confirmButtonText: "Call skype",
+                                    cancelButtonClass: "btn-sm",
+                                    cancelButtonText: "close",
+                                    closeOnConfirm: false
+                                }, function () {
+                                    swal.close();
+                                    var _skype = jsonData.Skype;
+                                    if (jsonData.Skype == null) {
+                                        _skype = skype;
+                                    }
+                                    window.open(`skype:${_skype}?call`, "_blank");
+                                });
+                            } else {
+                                document.body.classList.add("open-add-event");
+                                var startDate = new Date(jsonData.StartDate);
+                                var timeEvent = changeTime(startDate);
+                                var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
+                                var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
+                                var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
+                                var formEvent = document.getElementById("form-event");
+                                var bodyEvent = formEvent.querySelector(".body-form-event");
+                                bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
+                                if (bodyEvent != null) {
+                                    var Title = bodyEvent.querySelector("input[name='Title']");
+                                    if (Title != null) {
+                                        Title.value = jsonData.Title;
+                                    }
+                                    var Content = bodyEvent.querySelector("textarea[name='Content']");
+                                    if (Content != null) {
+                                        Content.value = jsonData.Content != void 0
+                                            ? jsonData.Content
+                                            : "";
+                                    }
+                                    var time = bodyEvent.querySelector("input[name='Time']");
+                                    if (time != null) {
+                                        time.value = timeEvent;
+                                    }
+                                    var date = bodyEvent.querySelector("input[name='Date']");
+                                    if (date != null) {
+                                        date.value = dateEvent;
+                                    }
+                                    formEvent.classList.add("edit-form");
+                                    formEvent.classList.add("view-form");
+                                }
                             }
                         }
                     }
@@ -265,6 +451,38 @@
                     swal("Hủy!", "Đã hủy thành công.", "success");
                 });
         }
+        document.getElementById("btn-cancel-event-class").onclick = function () {
+             var formEvent = document.getElementById("form-event");
+             var bodyEvent = formEvent.querySelector(".body-form-event");
+            var Title = bodyEvent.querySelector("input[name='Title']");
+            if (Title.value == "" || Title.value == null || Title.value == void 0) {
+                document.body.classList.remove("open-add-event");
+                return;
+            }
+            swal({
+                title: "Bạn muốn hủy thông tin trên?",
+                text: "Dữ liệu bạn đã ghi sẽ bị mất !!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "Đồng ý",
+                cancelButtonText: "Hủy",
+                closeOnConfirm: false
+            },
+                function () {
+                    var inputs = formEvent.querySelectorAll("input");
+                    var textarea = formEvent.querySelector("textarea");
+                    for (var i = 0; i < inputs.length; i++) {
+                        var input = inputs[i];
+                        input.value = "";
+                    }
+                    if (textarea != null) textarea.value = "";
+                    document.body.classList.remove("open-add-event");
+                    document.body.classList.remove("open-add-event-class");
+                    swal("Hủy!", "Đã hủy thành công.", "success");
+                });
+        }
+
         document.getElementById("btn-save-event").onclick = function () {
             var formEvent = document.getElementById("form-event");
             var bodyEvent = formEvent.querySelector(".body-form-event");
@@ -291,6 +509,11 @@
                     newFormData.append("ID", ID);
                     isUpdate = true;
                 }
+
+                if (title.length < 5) {
+                    return swal("", "Tiêu đề không thể bỏ trống.", "warning");
+                }
+
             newFormData.append("Title", title);
             newFormData.append("Content", content);
             newFormData.append("StartDate", `${date.value} ${timeEvent}`);
@@ -321,7 +544,7 @@
                             };
                             EduCalendar.schedule.EduCalendar.addEvent(event);
                         }
-                        
+
                     }
                     else
                         swal("Tạo mới!", dataJson.msg, "warning");
@@ -329,10 +552,93 @@
                      swal("Tạo mới!", "thất bại", "warning");
                 }
                 document.body.classList.remove("open-add-event");
+
             })
             }
 
         }
+
+
+        document.getElementById("btn-save-event-class").onclick = function () {
+            var formEvent = document.getElementById("form-event-class");
+            var bodyEvent = formEvent.querySelector(".body-form-event");
+            var title = "", url = "", startdate = null, classID = "";
+            if (bodyEvent != null) {
+                var Title = bodyEvent.querySelector("input[name='Title']");
+                if (Title != null) {
+                    title = Title.value;
+                }
+                var Url = bodyEvent.querySelector("input[name='UrlRoom']");
+                if (Url != null) {
+                    url = Url.value;
+                }
+                var time = bodyEvent.querySelector("input[name='Time']");
+                var date = bodyEvent.querySelector("input[name='Date']");
+                if (date != null && time != null) {
+                    var timeEvent = time.value.replace('PM', "").replace("AM", "");
+                    startdate = new Date(`${date.value} ${timeEvent}`);
+                }
+                var newFormData = new FormData();
+                var ID = bodyEvent.querySelector("input[name='ID']").value;
+                var isUpdate = false;
+                if (ID != "") {
+                    newFormData.append("ID", ID);
+                    isUpdate = true;
+                }
+                var group = bodyEvent.querySelector("select[name='ClassID']");
+                if (group != null) {
+                    classID = group.value;
+                }
+
+                if (title.length < 5) {
+                    return swal("", "Tiêu đề không thể bỏ trống.", "warning");
+                }
+
+                newFormData.append("Title", title);
+                newFormData.append("UrlRoom", url);
+                newFormData.append("Status", 5);
+                newFormData.append("StartDate", `${date.value} ${timeEvent}`);
+                newFormData.append("EndDate", `${date.value} ${timeEvent}`);
+                newFormData.append("GroupID", classID);
+                EduCalendar.schedule.Ajax.PostAny("@Url.Action("Create","Calendar")", newFormData).then(function (data) {
+                    if (data != null) {
+                        var dataJson = JSON.parse(data);
+                        if (dataJson.code == 201) {
+                            if (isUpdate) {
+                                swal("Update!", "Cập nhật thành công.", "success");
+                                EduCalendar.schedule.EduCalendar.getEventById(dataJson.data.ID).remove();
+                                var event = {
+                                    id: dataJson.data.ID,
+                                    title: dataJson.data.Title,
+                                    groupid: dataJson.data.GroupID,
+                                    start: dataJson.data.StartDate,
+                                    status: 5
+                                };
+                                EduCalendar.schedule.EduCalendar.addEvent(event);
+                            }
+                            else {
+                                swal("Tạo mới!", "Đã tạo thành công.", "success");
+                                var event = {
+                                    id: dataJson.data.ID,
+                                    title: dataJson.data.Title,
+                                    groupid: dataJson.data.GroupID,
+                                    start: dataJson.data.StartDate
+                                };
+                                EduCalendar.schedule.EduCalendar.addEvent(event);
+                            }
+
+                        }
+                        else
+                            swal("Tạo mới!", dataJson.msg, "warning");
+                    } else {
+                         swal("Tạo mới!", "thất bại", "warning");
+                    }
+                     document.body.classList.remove("open-add-event-class");
+                })
+            }
+
+        }
+
         document.getElementById("btn-delete-event").onclick = function () {
 
             swal({
@@ -369,6 +675,44 @@
 
 
         }
+
+        document.getElementById("btn-delete-event-class").onclick = function () {
+
+            swal({
+                title: "Bạn muốn xóa thông tin trên?",
+                text: "Dữ liệu bạn đã ghi sẽ bị mất !!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "Đồng ý",
+                cancelButtonText: "Hủy",
+                closeOnConfirm: false
+            },
+                function () {
+                    document.body.classList.remove("open-add-event-class");
+                    var formEvent = document.getElementById("form-event-class");
+                    var bodyEvent = formEvent.querySelector(".body-form-event");
+                    var id = bodyEvent.querySelector("input[name='ID']").value;
+                    EduCalendar.schedule.Ajax.PostAny("@Url.Action("Delete","Calendar")?id=" + id, null).then(function (data) {
+                        if (data == true || data == "true") {
+
+                            var event = EduCalendar.schedule.EduCalendar.getEventById(id);
+                            if (event != null) {
+                                event.remove();
+                                swal("Xóa!", "Đã hủy thành công.", "success");
+                            }
+                            else {
+                                swal("Xóa!", "không thể xóa", "warning");
+                            }
+                        } else {
+                            swal("Xóa!", "không thể xóa", "error");
+                        }
+                    })
+                });
+
+
+        }
+
         if ($ != void 0 && $('.timepicker') != void 0) {
             $('.timepicker').timepicker({
                 timeFormat: 'HH:mm p',

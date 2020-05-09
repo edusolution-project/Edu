@@ -7,7 +7,7 @@ namespace BaseCustomerMVC.Globals
 {
     public interface ICourseHelper
     {
-        List<CourseEntity> GetListCourseByTeacher(string teacherid);
-        List<CourseEntity> GetListCourseByStudent(string studentid);
+        //List<CourseEntity> GetListCourseByTeacher(string teacherid);
+        //List<CourseEntity> GetListCourseByStudent(string studentid);
     }
 }

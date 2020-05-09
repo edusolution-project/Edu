@@ -20,10 +20,12 @@ namespace BaseCustomerEntity.Database
 
     public class ClassMemberType
     {
-        public const int 
+        public const int
             TEACHER = 1,
             CLASS_ASSISTANT = 2,
-            CUSTOMER_MANAGEMENT = 3;
+            CUSTOMER_MANAGEMENT = 3,
+            MANAGER = 4,
+            OWNER = 5;
     }
 
 }

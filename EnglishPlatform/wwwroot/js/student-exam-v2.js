@@ -7,7 +7,7 @@ var TEMPLATE_TYPE = {
 
 var writeLog = function (name, msg) {
     if (Debug) {
-        console.log(name, msg);
+        //console.log(name, msg);
     }
 }
 
@@ -25,6 +25,7 @@ var ExamStudent = (function () {
         if (time == "" || time == null) return;
         var minutes = parseInt(time.split(":")[0]);
         var second = parseInt(time.split(":")[1]);
+        //console.log(time);
         if (second > 0) {
             second--;
         }
@@ -40,7 +41,7 @@ var ExamStudent = (function () {
         }
         var text = (minutes < 10 ? ("0" + minutes) : minutes) + ":" + (second < 10 ? ("0" + second) : second);
         $(".time-counter").text(text);
-        console.log(text)
+        //console.log(text)
         lessontimeout = setTimeout(function () {
             countdown();
         }, 1000);
@@ -140,8 +141,8 @@ var ExamStudent = (function () {
             formData.append("ClassID", config.class_id);
             formData.append("ClassSubjectID", config.class_subject_id);
             Ajax(config.url.load, formData, "POST", true).then(function (res) {
+                console.log(data);
                 if (res != "Access Deny" && res != "null" && res != null && res.message != "res is not defined" && res != void 0) {
-                    console.log(data);
                     var resData = JSON.parse(res);
                     if (resData.Data.TemplateType != 1) {
                         var exam = resData.Exam;
@@ -211,6 +212,7 @@ var ExamStudent = (function () {
             else {
                 var data = JSON.parse(res);
                 document.querySelector("input[name='ExamID']").value = data.ID;
+                console.log(res)
                 //TODO: currentTimer here;
                 var current = data.CurrentDoTime;
                 var start = data.Created;
@@ -219,7 +221,8 @@ var ExamStudent = (function () {
                 if ((data.Timer > 0) && moment(timer).minutes() >= data.Timer)//Timeout
                 {
                     localStorage.setItem("Timer", "00:00");
-                    ExamComplete(true);
+                    if(!data.Status)
+                        ExamComplete(true);
                 }
                 else {
                     if (data.Timer > 0) {
@@ -317,10 +320,10 @@ var ExamStudent = (function () {
                 }
                 review = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.Review(\'' + lastExam.ID + '\')" style="cursor: pointer;">Xem đáp án</div></div>';
             }
-            var back = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.GoBack()" style="cursor: pointer;">Về danh sách</div></div>';
+            //var back = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.GoBack()" style="cursor: pointer;">Về danh sách</div></div>';
             var content = checkExam()
                 ? renderContent(data.Data)
-                : (lastExamResult + '<div class="text-center p-3 col-md-12">' + doButton + review + back + '</div>');
+                : (lastExamResult + '<div class="text-center p-3 col-md-12">' + doButton + review + '</div>');
 
 
             if (doable) {
@@ -410,16 +413,21 @@ var ExamStudent = (function () {
         var title = '';
         if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
         var html = title + '<div class="media-wrapper">';
-        html += '<div class="media-holder VIDEO"><video controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the video tag</video></div>';
+        if (data.Media != null) {
+            html += '<div class="media-holder VIDEO"><video controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the video tag</video></div>';
+        }
         html += '</div>';
         return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
     }
 
     var renderAUDIO = function (data) {
+
         var title = '';
         if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
         var html = title + '<div class="media-wrapper">';
-        html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the audio tag</audio></div>';
+        if (data.Media != null) {
+            html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the audio tag</audio></div>';
+        }
         html += '</div>';
         return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
     }
@@ -428,7 +436,9 @@ var ExamStudent = (function () {
         var title = '';
         if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
         var html = title + '<div class="media-wrapper">';
-        html += '<div class="media-holder ' + data.Type + '"><img src="' + data.Media.Path + '" title="' + data.Title + '" class="img-fluid lazy"></div>';
+        if (data.Media != null) {
+            html += '<div class="media-holder ' + data.Type + '"><img src="' + data.Media.Path + '" title="' + data.Title + '" class="img-fluid lazy"></div>';
+        }
         html += '</div>';
         return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
     }
@@ -437,7 +447,13 @@ var ExamStudent = (function () {
         var title = '';
         if (data.Title != null) { title = '<div class="part-box-header"><h5 class="title">' + data.Title + '</h5></div>'; }
         var html = title + '<div class="media-wrapper">';
-        html += '<div class="media-holder ' + data.Type + '"><embed class="mediaContainer scrollbar-outer" src="' + data.Media.Path + '" style="width: 100%; height: 800px; border:1px solid"></div>';
+        if (data.Media != null) {
+            if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx")) {
+                html += "<div class='media-holder " + data.Type + "'><iframe src='https://docs.google.com/gview?url=http://" + window.location.hostname + data.Media.Path + "&embedded=true' style='width:100%, height:800px; border: 1px solid'></iframe></div>";
+            }
+            else
+                html += '<div class="media-holder ' + data.Type + '"><embed src="' + data.Media.Path + '#view=FitH" style="width: 100%; height: 800px; border:1px solid"></div>';
+        }
         html += '</div>';
         return "<div class='pr-3 pl-3 pb-3'>" + html + "</div>";
     }
@@ -727,7 +743,7 @@ var ExamStudent = (function () {
         nav_bottom_wrapper.append(prev_btn_holder).append(ct_action_holder).append(next_btn_holder);
 
         $('<div>', { id: 'quizIdx_holder' }).appendTo(nav_bottom_wrapper);
-
+        alert(2);
         //nav += '<div class="lesson-tabs col-md-10 d-inline-block"><ul id="pills-tab" class="nav nav-pills compact" onclick="toggle_tab_compact()">';
 
         _totalPart = data.Part.length;
@@ -973,7 +989,6 @@ var ExamStudent = (function () {
                 else {
                     doButton = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.Redo(this)" style="cursor: pointer;">Thực hiện lại</div></div>';
                 }
-                console.log(lastExam);
                 var review = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="Review(\'' + lastExam.id + '\')" style="cursor: pointer;">Xem đáp án</div></div>';
                 var back = '<div class="p-3 d-inline"><div class="btn btn-primary" onclick="window.GoBack()" style="cursor: pointer;">Về danh sách</div></div>';
 
@@ -1187,7 +1202,7 @@ var ExamStudent = (function () {
                     class: "total",
                     text: listQuiz.length
                 }))
-            ).append($('<button>', { class: "quizNumber d-none btn btn-success ml-2", onclick: "window.ToggleNav(this)", tooltips: "Toggle Scoreboard" })
+            ).append($('<button>', { class: "quizNumber d-none btn btn-success ml-2 btn-warning", onclick: "window.ToggleNav(this)", tooltips: "Toggle Scoreboard" })
                 .append($("<i>", { class: "fa fa-bars" })));
         }
         //var html = '<div id="quizNavigator" class="overlay">';
@@ -1208,7 +1223,7 @@ var ExamStudent = (function () {
         }
         if (quizNavigator != null) {
             if (listQuiz != null && count >= listQuiz.length) {
-                console.log(count, listQuiz.length);
+                //console.log(count, listQuiz.length);
                 var btn = document.getElementById("btn-completed");
                 if (btn != null) btn.style.display = "block";
             } else {

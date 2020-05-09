@@ -39,6 +39,10 @@ namespace BaseCustomerEntity.Database
         public string Description { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
+        [JsonProperty("TotalLessons")]
+        public long TotalLessons { get; set; }
+        [JsonProperty("TotalExams")]
+        public long TotalExams { get; set; }
     }
 
     public class ClassSubjectService : ServiceBase<ClassSubjectEntity>
@@ -57,16 +61,50 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(t => t.ClassID == ClassID).ToList();
         }
 
+        public List<string> GetIDsByClassID_Subject(string ClassID, string SubjectID)
+        {
+            return Collection.Find(t => t.ClassID == ClassID && t.SubjectID == SubjectID).Project(t => t.ID).ToList();
+        }
+
+        public List<string> GetCourseIdsByClassID(string ClassID)
+        {
+            return Collection.Find(t => t.ClassID == ClassID).Project(t => t.CourseID).ToList();
+        }
+
+        public List<string> GetIdsByClassID(string ClassID)
+        {
+            return Collection.Find(t => t.ClassID == ClassID).Project(t => t.ID).ToList();
+        }
+
+
         public Task RemoveClassSubjects(string ClassID)
         {
             _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID);
             return Task.CompletedTask;
         }
 
-        public Task UpdateCourseSkill(string CourseID, string SkillID)
+        public Task RemoveClassSubjects(string[] ClassIDs)
         {
-            _ = Collection.UpdateManyAsync(t => t.CourseID == CourseID, Builders<ClassSubjectEntity>.Update.Set("SkillID", SkillID));
+            _ = Collection.DeleteManyAsync(t=> ClassIDs.Contains(t.ClassID));
             return Task.CompletedTask;
+        }
+
+
+        //Prevent this action
+        //public Task UpdateCourseSkill(string CourseID, string SkillID)
+        //{
+        //    _ = Collection.UpdateManyAsync(t => t.CourseID == CourseID, Builders<ClassSubjectEntity>.Update.Set("SkillID", SkillID));
+        //    return Task.CompletedTask;
+        //}
+
+        public long CountByCourseID(string CourseID)
+        {
+            return Collection.CountDocuments(t => t.CourseID == CourseID);
+        }
+
+        public List<ClassSubjectEntity> GetByCourseID(string CourseID)
+        {
+            return Collection.Find(t => t.CourseID == CourseID).ToList();
         }
     }
 

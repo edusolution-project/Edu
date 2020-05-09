@@ -1,0 +1,31 @@
+﻿<script src="~/easy-real-time/bundle.js"></script>
+<script>
+    var easyRealtime = new EasyRealTime.Ui({
+            id:"easy-realtime",
+            header_text:"Trò chuyện",
+            api:{
+                group:{
+                    get:"@Url.Action("GetGroupList","EasyRealTime")",
+                    post:""
+                },
+                user:{
+                    get:"",
+                    post:""
+                },
+                message:{
+                    get:"@Url.Action("GetListMessage","EasyRealTime")",
+                    post:"@Url.Action("CREATE","EASYREALTIME")"
+                },
+                status: {
+                    get: "@Url.Action("GetClassStatus","EasyRealTime")"
+                }
+            },
+        currentUser: {
+            id: '@User.FindFirst("UserID")?.Value',
+            email: '@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value',
+            name: '@User.Identity.Name',
+            type: '@User.FindFirst("Type")?.Value'
+        }
+    });
+    easyRealtime.onLoadData();
+</script>

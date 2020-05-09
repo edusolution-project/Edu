@@ -11,26 +11,38 @@
     <Compile Remove="Areas\Teacher\Controllers\**" />
     <Compile Remove="wwwroot\Files\**" />
     <Compile Remove="wwwroot\file\**" />
+    <Compile Remove="wwwroot\generic_wiris\integration\**" />
     <Content Remove="Areas\Teacher\Controllers\**" />
     <Content Remove="wwwroot\Files\**" />
     <Content Remove="wwwroot\file\**" />
+    <Content Remove="wwwroot\generic_wiris\integration\**" />
     <EmbeddedResource Remove="Areas\Teacher\Controllers\**" />
     <EmbeddedResource Remove="wwwroot\Files\**" />
     <EmbeddedResource Remove="wwwroot\file\**" />
+    <EmbeddedResource Remove="wwwroot\generic_wiris\integration\**" />
     <None Remove="Areas\Teacher\Controllers\**" />
     <None Remove="wwwroot\Files\**" />
     <None Remove="wwwroot\file\**" />
+    <None Remove="wwwroot\generic_wiris\integration\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Controllers\HomeController - Copy.cs" />
     <Compile Remove="Controllers\HomeController_2.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Areas\Student\Views\Course\Assignment.cshtml" />
+    <Content Remove="Areas\Student\Views\Course\Calendar.cshtml" />
+    <Content Remove="Areas\Student\Views\Course\Modules_o.cshtml" />
+    <Content Remove="Areas\Student\Views\Course\References.cshtml" />
+    <Content Remove="Areas\Student\Views\Course\Syllabus.cshtml" />
+    <Content Remove="Areas\Student\Views\Lesson\Detail.cshtml" />
     <Content Remove="Areas\Student\Views\Lesson\Exam.cshtml" />
+    <Content Remove="Areas\Student\Views\Lesson\Index.cshtml" />
     <Content Remove="Areas\Student\Views\Lesson\Lecture.cshtml" />
     <Content Remove="Areas\Teacher\Views\Class\Detail - Copy.cshtml" />
+    <Content Remove="Areas\Teacher\Views\Home\Index_o.cshtml" />
+    <Content Remove="Areas\Teacher\Views\Home\Profile_o.cshtml" />
     <Content Remove="Areas\Teacher\Views\Schedule\Schedule.cshtml" />
     <Content Remove="compilerconfig.json" />
     <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
@@ -55,9 +67,7 @@
     <None Include="Areas\Admin\Views\Subject\Index.cshtml" />
     <None Include="Areas\Admin\Views\Teacher\Index.cshtml" />
     <None Include="Areas\Student\Views\Home\Index.cshtml" />
-    <None Include="Areas\Student\Views\Lesson\Index.cshtml" />
     <None Include="Areas\Student\Views\Lesson\Detail_new.cshtml" />
-    <None Include="Areas\Student\Views\Course\Calendar.cshtml" />
     <None Include="Areas\Student\Views\Course\Detail.cshtml" />
     <None Include="Areas\Student\Views\Course\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Calendar\CheckList.cshtml" />
@@ -2315,9 +2325,11 @@
 
 
   <ItemGroup>
+    <PackageReference Include="BuildBundlerMinifier" Version="3.2.435" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.4" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
     <PackageReference Include="System.Runtime.Caching" Version="4.5.0" />
   </ItemGroup>
 
@@ -2327,6 +2339,16 @@
     <ProjectReference Include="..\BaseCustomerMVC\BaseCustomerMVC.csproj" />
     <ProjectReference Include="..\BaseEasyRealTime\BaseEasyRealTime.csproj" />
     <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Reference Include="WIRIScommon">
+      <HintPath>wwwroot\generic_wiris\bin\WIRIScommon.dll</HintPath>
+    </Reference>
+    <Reference Include="WIRISplugin">
+      <HintPath>wwwroot\generic_wiris\bin\WIRISplugin.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 

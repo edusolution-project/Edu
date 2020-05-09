@@ -59,39 +59,44 @@ namespace BaseCustomerMVC.Globals
             _cloneAnswerService.Collection.DeleteMany(o => o.ClassID == id);
         }
 
-        public void RemoveCloneClassSubject(string id)
+        public async Task RemoveClassSubjectLesson(string ClassSubjectID)
         {
-            _cloneLessonPartService.Collection.DeleteMany(o => o.ClassSubjectID == id);
-            _cloneQuestionService.Collection.DeleteMany(o => o.ClassSubjectID == id);
-            _cloneAnswerService.Collection.DeleteMany(o => o.ClassSubjectID == id);
+            var lstask = _lessonService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
+            var cltask = _cloneLessonPartService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
+            var cqtask = _cloneQuestionService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
+            var catask = _cloneAnswerService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
+            await Task.WhenAll(lstask, cltask, cqtask, catask);
         }
 
-        public void RemoveClone(string[] ids)
+        public async Task RemoveClone(string[] ids)
         {
-            _cloneLessonPartService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
-            _cloneQuestionService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
-            _cloneAnswerService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+            var lstask = _lessonService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
+            var cltask = _cloneLessonPartService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
+            var cqtask = _cloneQuestionService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
+            var catask = _cloneAnswerService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
+            await Task.WhenAll(lstask, cltask, cqtask, catask);
         }
 
         //Clone Lesson
         //Clone Lesson
-        public void CloneLessonForClass(LessonEntity lesson, ClassSubjectEntity @class)
+        public void CloneLessonForClassSubject(LessonEntity lesson, ClassSubjectEntity classSubject)
         {
-            var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+            var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.OriginID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (listLessonPart != null && listLessonPart.Count > 0)
             {
                 if (_cloneLessonPartService.CreateQuery().CountDocuments(
                     o => o.ParentID == lesson.ID &&
-                    o.TeacherID == @class.TeacherID && o.ClassID == @class.ID) == 0)
+                    o.TeacherID == classSubject.TeacherID && o.ClassID == classSubject.ID) == 0)
                 {
                     foreach (var lessonpart in listLessonPart)
                     {
                         var clonepart = _lessonPartMapping.AutoOrtherType(lessonpart, new CloneLessonPartEntity());
+                        clonepart.ParentID = lesson.ID;
                         clonepart.ID = null;
                         clonepart.OriginID = lessonpart.ID;
-                        clonepart.TeacherID = @class.TeacherID;
-                        clonepart.ClassID = @class.ClassID;
-                        clonepart.ClassSubjectID = @class.ID;
+                        clonepart.TeacherID = classSubject.TeacherID;
+                        clonepart.ClassID = classSubject.ClassID;
+                        clonepart.ClassSubjectID = classSubject.ID;
                         CloneLessonPart(clonepart);
                     }
                 }
@@ -144,9 +149,10 @@ namespace BaseCustomerMVC.Globals
 
         public async Task ConvertClassSubject(ClassSubjectEntity classSubject)
         {
-            await _cloneLessonPartService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartEntity>.Update.Set("ClassSubjectID", classSubject.ID));
-            await _cloneQuestionService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartQuestionEntity>.Update.Set("ClassSubjectID", classSubject.ID));
-            await _cloneAnswerService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartAnswerEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+            var cltask = _cloneLessonPartService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+            var cqtask = _cloneQuestionService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartQuestionEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+            var catask = _cloneAnswerService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartAnswerEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+            await Task.WhenAll(cltask, cqtask, catask);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("StudentNumber")]
         public int StudentNumber { get; set; }
         [JsonProperty("CompletePercent")]
-        public int CompletePercent { get; set; }
+        public long CompletePercent { get; set; }
         [JsonProperty("Progress")]
         public ClassProgressEntity Progress { get; set; }
     }

@@ -17,13 +17,13 @@ namespace BaseCustomerMVC.Models
         public DateTime LastJoinDate { get; set; }
         [JsonProperty("ClassStatus")]
         public string ClassStatus { get; set; }
-        [JsonProperty("LastJoin")]
-        public DateTime LastJoin { get; set; } 
+        //[JsonProperty("LastJoin")]
+        //public DateTime LastJoin { get; set; } 
         [JsonProperty("Progress")]
         public ClassProgressEntity Progress { get; set; }
         [JsonProperty("Percent")]
         public double Percent { get; set; }
         [JsonProperty("Score")]
-        public ScoreStudentEntity Score { get; set; }
+        public double Score { get; set; }
     }
 }

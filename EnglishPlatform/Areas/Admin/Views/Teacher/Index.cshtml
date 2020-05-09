@@ -1,10 +1,9 @@
 ﻿@{
     ViewData["Title"] = "Quản lý giáo viên";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    var roles = ViewBag.Roles as List<BaseCustomerEntity.Database.RoleEntity>
-    ;
-    var subject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>
-        ;
+    var roles = ViewBag.Roles as List<BaseCustomerEntity.Database.RoleEntity>;
+    var centers = ViewBag.Centers as List<BaseCustomerEntity.Database.CenterEntity>;
+    var subject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
 }
 
 <!-- Begin Page Content -->
@@ -28,7 +27,31 @@
                         </div>
                     </div>
                 </div>
+                <div class="d-flex justify-content-start align-items-center">
+                    <span class="">
+                        Lọc
+                    </span>
+                    <select class="searchCenter search-box form-control ml-1" style="width:300px;" onchange="LoadData()">
+                        <option value="">-- Tất cả cơ sở --</option>
+                        @{
+                            for (int i = 0; centers != null && i < centers.Count; i++)
+                            {
+                                <option value="@centers[i].ID">@centers[i].Name</option>
+                            }
+                        }
+                    </select>
+                    <select class="searchRole form-control ml-1" style="width:300px;" onchange="LoadData()">
+                        <option value="">-- Tất cả vai trò --</option>
+                        @{
+                            for (int i = 0; roles != null && i < roles.Count; i++)
+                            {
+                                <option value="@roles[i].ID">@roles[i].Name</option>
+                            }
+                        }
+                    </select>
+                </div>
             </div>
+
 
             <div class="card-body">
                 <div class="table-responsive">
@@ -42,7 +65,7 @@
                                 <th class='text-center'>Email</th>
                                 <th class='text-center'>Họ tên</th>
                                 <th class='text-center'>Ngày sinh</th>
-                                <th class='text-center'>Loại</th>
+                                <th class='text-center'>Chức danh</th>
                                 <th class='text-center'>Chuyên môn</th>
                                 <th class='text-center'>Trạng thái</th>
                                 <th class='text-center'>Thao tác</th>
@@ -52,8 +75,13 @@
                     </table>
                 </div>
             </div>
+
+            <div class="card-footer" style="display:none">
+                Trang
+                <select id="pageIndex" onchange="LoadData()" class="d-inline">
+                </select> / <span id="totalPage" class="d-inline"></span>
+            </div>
         </div>
-        <!-- /.container-fluid -->
     }
 </div>
 
@@ -102,7 +130,7 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên">
+                                <input type="text" class="form-control" name="FullName" id="inputText" placeholder="Họ và tên" required>
                             </div>
                         </div>
                         <div class="form-row">
@@ -115,7 +143,7 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <input type="text" class="form-control datepicker" placeholder="Ngày sinh">
+                                <input type="text" class="form-control datepicker" placeholder="Ngày sinh" required>
                                 <input type="hidden" name="DateBorn" class="hiddenDate" id="DateBorn" value="">
                             </div>
                             <div class="form-group row col-md-6">
@@ -128,7 +156,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-row">
+                        <div class="form-row d-none">
                             <div class="form-group row col-md-6">
                                 <label for="staticText" class="col-sm-4 col-form-label">Loại:</label>
                                 <div class="col-sm-8">
@@ -143,11 +171,44 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="form-row">
+                            <div class="form-group row col-md-12">
+                                <div for="staticText" class="col-md-4 col-sm-12 col-form-label">Vị trí công tác:<button class="btn btn-sm btn-primary ml-2" onclick="addPossition(); return false;"><i class="fa fa-plus-circle"></i></button> </div>
+                                <div class="col-md-8 col-sm-12">
+                                    <div class="centerHolder">
+
+                                    </div>
+                                    <div class="tempCenter d-none">
+                                        <div class="posRow d-flex flex-column flex-sm-row mb-1">
+                                            <select class="CenterID form-control flex-fill mr-1">
+                                                <option value="">-- Chọn cơ sở --</option>
+                                                @{
+                                                    for (int i = 0; centers != null && i < centers.Count; i++)
+                                                    {
+                                                        <option value="@centers[i].ID">@centers[i].Name</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <select class="RoleID form-control flex-fill">
+                                                <option value="">-- Chọn vai trò --</option>
+                                                @{
+                                                    for (int i = 0; roles != null && i < roles.Count; i++)
+                                                    {
+                                                        <option value="@roles[i].ID">@roles[i].Name</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <button class="btn btn-sm btn-primary ml-2" onclick="removeCenter(this); return false;"><i class="fa fa-trash-alt"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("Create", "teacher" )','create',LoadData)">Save lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="SaveTeacher('AddForm','@Url.Action("Create", "teacher" )','create',LoadData)">Lưu</button>
                 </div>
             </div>
         }
@@ -171,23 +232,36 @@
                         <div class="row">
                             <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn file excel:</label>
                             <div class="chose-file col-sm-9">
-                                <input type="file" name="file" class="form-control-file">
+                                <input type="file" name="file" class="form-control-file" required>
                             </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <label class="col-sm-3 form-label p-3" for="FormControlFile">Chọn cơ sở:</label>
+                            <select name="Center" class="CenterID form-control col-sm-9" required>
+                                <option value="">-- Chọn cơ sở --</option>
+                                @{
+                                    for (int i = 0; centers != null && i < centers.Count; i++)
+                                    {
+                                        <option value="@centers[i].ID">@centers[i].Name</option>
+                                    }
+                                }
+                            </select>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <div class="button-left">
-                        <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')">Tải file mẫu</button>
+                        <button type="button" class="btn btn-secondary" onclick="Export('FormControl','@Url.Action("ExportTemplate", "Teacher" )')">Tải file mẫu</button>
                     </div>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('ImportForm','','import',LoadData)">Save lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('ImportForm','','import',LoadData)">Lưu</button>
                 </div>
             }
         </div>
     </div>
 </div>
-
 
 <!-- Modal change pass -->
 <div class="modal fade bd-modal-lg" id="passModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
@@ -210,8 +284,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action("ChangePass", "Account" )','changepass',checkPassUpdate)">Save lại</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-submit" onclick="Submit('PassForm','@Url.Action("ChangePass", "Account" )','changepass',checkPassUpdate)">Lưu</button>
                 </div>
             }
         </div>
@@ -230,19 +304,33 @@
         }).val("");
     })
 
-    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
+    var roles = @Html.Raw(Json.Serialize(roles));
+
+    function LoadData() {
         hideModal();
+
+        var searchText = $("#searchText").val();
+        var startDate = $("#startDate_sort").val();
+        var endDate = $("#endDate_sort").val();
+        var pageIndex = $('#pageIndex').val();
+        if (pageIndex < 1) pageIndex = 1;
+
+        var searchCenter = $('.searchCenter').val();
+        var searchRole = $('.searchRole').val();
+
+
+        var pageSize = 30;
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "teacher")',
-            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
+            data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex, Center: searchCenter, Role: searchRole},
             dataType:"json",
             success: function (data) {
                 var body = $('#dataTable tbody');
                 body.html("");
                 if (data.Data.length > 0)
                 {
-                    for (i = 0; i < data.Data.length; ++i) {
+                    for (var i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
                         var active = "";
                         if (item.IsActive) {
@@ -252,7 +340,7 @@
                         }
                         var subject = "";
                         if (item.SubjectList != null && item.SubjectList.length > 0) {
-                            for (j = 0; j < item.SubjectList.length; ++j) {
+                            for (var j = 0; j < item.SubjectList.length; ++j) {
                                 subject += item.SubjectList[j].Name + "<br/>";
                             }
                         }
@@ -260,12 +348,12 @@
 
                         body.append("<tr>" +
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
-                            "<td class='text-center'>" + (i + 1) + "</td>" +
+                            "<td class='text-center'>" + ((pageIndex - 1) * pageSize + i + 1) + "</td>" +
                             //"<td>" + ((item.TeacherId == null) ? "" : item.TeacherId) + "</td>" +
                             "<td>" + item.Email + "</td>" +
                             "<td>" + item.FullName + "</td>" +
                             "<td class='text-center'>" + date + "</td>" +
-                            "<td class='text-center'>" + item.RoleName + "</td>" +
+                            "<td class='text-center'>" + renderCenter(item.Centers) + "</td>" +
                             "<td class='text-center'>" + subject + "</td>" + active +
                             "<td class='text-center'><button onclick=\"EditTeacher('" + item.ID + "','@Url.Action("getdetails", "teacher")',this)\" type='button' data-placement='top' title='Sửa' class='btn btn-primary' data-toggle='modal' data-target='#editModal'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"ChangePass('" + item.AccountID + "')\")\" type='button' data-placement='top' title='Đổi mật khẩu' class='btn btn-primary' data-toggle='modal' data-target='#passModal'> <i class='fas fa-key'></i> </button>" +
@@ -276,12 +364,50 @@
                     }
                     $('.btn:has(i)').tooltip();
                 }
+                if (data.Model != null) {
+                    var totalRecord = data.Model.totalRecord;
+                    if (totalRecord == 0) {
+                        $('#pageIndex').html('<option value="1"></option>').val(1);
+                        $('.card-footer').hide()
+                    }
+                    else {
+
+                        var totalPage = Math.floor(totalRecord / pageSize) + (totalRecord % pageSize > 0 ? 1 : 0);
+                        $('#totalPage').text(totalPage);
+                        $('#pageIndex').empty();
+                        for (var i = 1; i <= totalPage; i++) {
+                            $('#pageIndex').append($('<option>', { value: i, text: i }))
+                        }
+                        var currentPage = data.Model.pageIndex + 1;
+                        if (currentPage > totalPage)
+                            currentPage = totalPage;
+                        $('#pageIndex').val(currentPage);
+                        $('.card-footer').show()
+                    }
+                }
             },
             error: function() {
                 alert("Error");
             }
         });
     };
+
+    function addPossition(data) {
+        var temp = $('.tempCenter.d-none');
+        var clone = $(temp).find('.posRow').clone();
+        $(temp).parent().find('.centerHolder').append(clone);
+
+        if (data != null) {
+            $(clone).find('.CenterID').val(data.CenterID);
+            $(clone).find('.RoleID').val(data.RoleID);
+        }
+        return false;
+    }
+
+    function removeCenter(obj) {
+        $(obj).parent().remove();
+        return false;
+    }
 
     function ChangePass(accountid) {
         $('form[name=PassForm] [name=AccountID]').val(accountid);
@@ -321,61 +447,145 @@
         });
     });
 
+    function SaveTeacher(formName, url, actionName, fn) {
+
+        var form = document.querySelector('form[name="' + formName + '"]');
+        var _url = url == "" || url == void 0 || url == null ? form.action : url;
+        var _method = form.method;
+        var requires = $(form).find(':required');
+        var err = false;
+
+        requires.each(function () {
+            if ($(this).val() == "" || $(this).val() == null) {
+                alert("Vui lòng điền đủ thông tin");
+                $(this).focus();
+                err = true;
+                return false;
+            }
+        });
+
+        if (err) return false;
+
+        $(form).find("input:disabled").removeAttr("disabled");
+
+        var data = new FormData(form);
+
+        var centerRows = $('.centerHolder .posRow');
+
+        var pos = 0;
+        if (centerRows != null && centerRows.length > 0) {
+             for (var i = 0; i < centerRows.length; i++) {
+                 var center = $(centerRows[i]).find('.CenterID');
+                 if (center == null || $(center).val() == "") continue;
+                 var role = $(centerRows[i]).find('.RoleID');
+                 if (role == null || $(role).val() == "") continue;
+                 data.append("Centers[" + pos + "].Name", $(center).find('option:selected').text());
+                 data.append("Centers[" + pos + "].CenterID", $(center).val());
+                 data.append("Centers[" + pos + "].RoleID", $(role).val());
+                 pos++;
+            }
+        }
+
+        showLoading("Sending data ...");
+        Ajax(_url, _method, data, true)
+            .then(function (res) {
+                hideLoading();
+                if (fn != void 0) fn(res);
+            }).catch(function (res) {
+                hideLoading();
+                //notification("err", "Có lỗi, vui lòng thực hiện lại", 2000);
+                alert('Có lỗi, vui lòng thực hiện lại');
+                console.log(actionName, res);
+            });
+    }
+
     function EditTeacher(id, url, _this) {
-    var modal = $(_this).attr("data-target");
-    var form = $(modal).find('form');
-    var inputID = $(form).find('input[name="ID"]');
-        console.log(inputID);
-    if (inputID.length == 0) {
-        $(form).append($("<input>", {type: "hidden", name:"ID", value: id}));
-    }
-    else {
-        $(inputID).val(id);
-    }
-    $(form).find("input[locked]").attr("disabled", "disabled");
-    //var data = new FormData(form);
-    $.ajax({
-          method: "POST",
-          url: url,
-          data: { ID: id }
-    })
-    .done(function( item ) {
-
-        var listinput = $(form).find('input');
-        for (var i = 0; i < listinput.length; i++) {
-            listinput[i].value = item.Data[listinput[i].name];
-            if ($(listinput[i]).hasClass("hiddenDate")) {
-                var fieldId = $(listinput[i]).attr("id");
-                $(listinput[i]).prev().removeClass("hasDatepicker").val($.datepicker.formatDate('dd/mm/yy', new Date(item.Data[listinput[i].name]))).datepicker({
-                    changeMonth: true,
-                    changeYear: true,
-                    dateFormat: 'dd/mm/yy',
-                    altField: '#' + fieldId,
-                    altFormat: 'yy-mm-dd'
-                });
-            }
+        var modal = $(_this).attr("data-target");
+        var form = $(modal).find('form');
+        var inputID = $(form).find('input[name="ID"]');
+        if (inputID.length == 0) {
+            $(form).append($("<input>", { type: "hidden", name: "ID", value: id }));
         }
-
-        var listselect = $(form).find('select');
-        for (var i = 0; i < listselect.length; i++) {
-            $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
+        else {
+            $(inputID).val(id);
         }
+        $(form).find("input[locked]").attr("disabled", "disabled");
 
-        var subjects = item.Data.SubjectList;
-        $('.subject_wrapper').empty();
-        $(".subjectDisplay").val('');
-        $('.subjectSelect input[type=checkbox]').prop("checked", false);
-        var line = '';
-        if(subjects != null && subjects.length > 0)
-            for(var i = 0; i < subjects.length; i++)
-            {
-                console.log(subjects);
-                $(".subjectSelect input[type=checkbox]#" + subjects[i].ID).prop("checked",true);
-                line += (subjects[i].Name + "; ");
-                $('.subject_wrapper').append($("<input>", { type: "hidden", name: "Subjects", value: subjects[i].ID }));
+        //var data = new FormData(form);
+        $.ajax({
+            method: "POST",
+            url: url,
+            data: { ID: id }
+        })
+            .done(function (item) {
+                var listinput = $(form).find('input');
+                for (var i = 0; i < listinput.length; i++) {
+                    listinput[i].value = item.Data[listinput[i].name];
+                    if ($(listinput[i]).hasClass("hiddenDate")) {
+                        var fieldId = $(listinput[i]).attr("id");
+                        $(listinput[i]).prev().removeClass("hasDatepicker").val($.datepicker.formatDate('dd/mm/yy', new Date(item.Data[listinput[i].name]))).datepicker({
+                            changeMonth: true,
+                            changeYear: true,
+                            dateFormat: 'dd/mm/yy',
+                            altField: '#' + fieldId,
+                            altFormat: 'yy-mm-dd'
+                        });
+                    }
+                }
+
+                //var listselect = $(form).find('select');
+                //for (var i = 0; i < listselect.length; i++) {
+                //    //console.log($(listselect[i]).attr("name"));
+                //    $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
+                //}
+
+                var subjects = item.Data.SubjectList;
+                $('.subject_wrapper').empty();
+                $(".subjectDisplay").val('');
+                $('.subjectSelect input[type=checkbox]').prop("checked", false);
+                var line = '';
+                if (subjects != null && subjects.length > 0)
+                    for (var i = 0; i < subjects.length; i++) {
+                        //console.log(subjects);
+                        $(".subjectSelect input[type=checkbox]#" + subjects[i].ID).prop("checked", true);
+                        line += (subjects[i].Name + "; ");
+                        $('.subject_wrapper').append($("<input>", { type: "hidden", name: "Subjects", value: subjects[i].ID }));
+                    }
+                $(".subjectDisplay").val(line);
+
+                var centers = item.Data.Centers;
+                console.log(centers);
+                $('.centerHolder').empty();
+                if (centers != null && centers.length > 0) {
+                    for (var i = 0; i < centers.length; i++) {
+                        addPossition(centers[i]);
+                    }
+                }
+            });
+    }
+
+    function renderCenter(centers) {
+        if (centers != null && centers.length > 0) {
+            var ret = "";
+            for (var i = 0; i < centers.length; i++) {
+                var center = centers[i];
+                ret += "<div class='center_item text-left'><span class='d-block m-1'>" + getRoleName(center.RoleID) + " (" + center.Name + ")</span></div>";
             }
-        $(".subjectDisplay").val(line);
-    });
-}
+            return ret;
+        }
+        else
+            return "";
+    }
+
+    function getRoleName(role) {
+        var found = roles.filter(
+              function(rl){ return rl.ID == role }
+        );
+        if (found != null && found.length > 0)
+            return found[0].Name;
+        return "";
+    }
+
+
 
 </script>

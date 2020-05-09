@@ -13,43 +13,46 @@ namespace BaseCustomerMVC.Controllers.Teacher
 {
     public class LessonPartController : TeacherController
     {
-        private readonly GradeService _gradeService;
-        private readonly SubjectService _subjectService;
-        private readonly TeacherService _teacherService;
-        private readonly ClassService _classService;
-        private readonly CourseService _courseService;
-        private readonly ChapterService _chapterService;
-        private readonly LessonService _lessonService;
+        //private readonly GradeService _gradeService;
+        //private readonly SubjectService _subjectService;
+        //private readonly TeacherService _teacherService;
+        //private readonly ClassService _classService;
+        //private readonly CourseService _courseService;
+        //private readonly ChapterService _chapterService;
+        //private readonly LessonScheduleService _lessonScheduleService;
+
+        private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
         private readonly LessonPartQuestionService _questionService;
         private readonly LessonPartAnswerService _answerService;
-        private readonly LessonScheduleService _lessonScheduleService;
         private readonly FileProcess _fileProcess;
 
         public LessonPartController(
-            GradeService gradeservice,
-            SubjectService subjectService,
-            TeacherService teacherService,
-            ClassService classService,
-            CourseService courseService,
-            ChapterService chapterService,
-            LessonService lessonService,
+            //GradeService gradeservice,
+            //SubjectService subjectService,
+            //TeacherService teacherService,
+            //ClassService classService,
+            //CourseService courseService,
+            //ChapterService chapterService,
+            //LessonScheduleService lessonScheduleService,
+
+            CourseLessonService lessonService,
             LessonPartService lessonPartService,
-            LessonScheduleService lessonScheduleService,
             LessonPartQuestionService questionService,
             LessonPartAnswerService answerService,
             FileProcess fileProcess
             )
         {
-            _gradeService = gradeservice;
-            _subjectService = subjectService;
-            _teacherService = teacherService;
-            _courseService = courseService;
-            _classService = classService;
-            _chapterService = chapterService;
+            //_gradeService = gradeservice;
+            //_subjectService = subjectService;
+            //_teacherService = teacherService;
+            //_courseService = courseService;
+            //_classService = classService;
+            //_chapterService = chapterService;
+            //_lessonScheduleService = lessonScheduleService;
+
             _lessonService = lessonService;
             _lessonPartService = lessonPartService;
-            _lessonScheduleService = lessonScheduleService;
             _questionService = questionService;
             _answerService = answerService;
             _fileProcess = fileProcess;
@@ -154,7 +157,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //try
             //{
             var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID).SingleOrDefault();
-            if (parentLesson != null)//Chỉ add/edit được part trong lesson do mình tạo
+            if (parentLesson != null)
             {
                 if (item.Media != null && item.Media.Name == null) item.Media = null;//valid Media
                 var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
@@ -167,18 +170,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.Order = maxItem != null ? maxItem.Order + 1 : 0;
                     item.Updated = DateTime.Now;
 
-                    if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || files == null || !files.Any(f => f.Name == item.Media.Name))
+                    if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || (!item.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == item.Media.Name))))
                     {
                         item.Media = null;
                     }
                     else
                     {
-                        var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
-                        if (file != null)
+                        if (item.Media.Name.ToLower().StartsWith("http")) //file url (import)
                         {
                             item.Media.Created = DateTime.Now;
-                            item.Media.Size = file.Length;
-                            item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
+                            item.Media.Size = 0;
+                            item.Media.Path = item.Media.Name.Trim();
+                        }
+                        else
+                        {
+                            var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                            if (file != null)
+                            {
+                                item.Media.Created = DateTime.Now;
+                                item.Media.Size = file.Length;
+                                item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
+                            }
                         }
                     }
                 }
@@ -222,6 +234,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     _lessonPartService.CreateQuery().InsertOne(lessonpart);
                 }
+
+                if (lessonpart.Type == "ESSAY")
+                {
+                    _questionService.CreateQuery().DeleteMany(t => t.ParentID == lessonpart.ID);
+                    var question = new LessonPartQuestionEntity
+                    {
+                        CourseID = lessonpart.CourseID,
+                        Content = "",
+                        Description = "",
+                        ParentID = lessonpart.ID,
+                        CreateUser = User.Claims.GetClaimByType("UserID").Value,
+                        Point = lessonpart.Point,
+                        Created = lessonpart.Created,
+                    };
+                    _questionService.Save(question);
+                }
+
                 //_lessonPartService.CreateOrUpdate(lessonpart);
                 item.ID = lessonpart.ID;
 
@@ -256,17 +285,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             quiz.Created = DateTime.Now;
                             quiz.Updated = DateTime.Now;
 
-                            if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || !files.Any(f => f.Name == quiz.Media.Name))
+                            if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || (!quiz.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == quiz.Media.Name))))
                                 quiz.Media = null;
                             else
                             {
-                                var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
-                                if (file != null)
+                                if (quiz.Media.Name.ToLower().StartsWith("http")) //file url (import)
                                 {
                                     quiz.Media.Created = DateTime.Now;
-                                    quiz.Media.Size = file.Length;
-                                    quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                                    quiz.Media.Size = 0;
+                                    quiz.Media.Path = quiz.Media.Name.Trim();
                                 }
+                                else
+                                {
+                                    var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                                    if (file != null)
+                                    {
+                                        quiz.Media.Created = DateTime.Now;
+                                        quiz.Media.Size = file.Length;
+                                        quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                                    }
+                                }
+
+                                //var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
+                                //if (file != null)
+                                //{
+                                //    quiz.Media.Created = DateTime.Now;
+                                //    quiz.Media.Size = file.Length;
+                                //    quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                                //}
                             }
                         }
                         else
@@ -322,17 +368,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     answer.Created = DateTime.Now;
                                     answer.Updated = DateTime.Now;
 
-                                    if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || !files.Any(f => f.Name == answer.Media.Name))
+                                    if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || (!answer.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == answer.Media.Name))))
                                         answer.Media = null;
                                     else
                                     {
-                                        var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
-                                        if (file != null)
+                                        if (answer.Media.Name.ToLower().StartsWith("http")) //file url (import)
                                         {
                                             answer.Media.Created = DateTime.Now;
-                                            answer.Media.Size = file.Length;
-                                            answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                            answer.Media.Size = 0;
+                                            answer.Media.Path = answer.Media.Name.Trim();
                                         }
+                                        else
+                                        {
+                                            var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                                            if (file != null)
+                                            {
+                                                answer.Media.Created = DateTime.Now;
+                                                answer.Media.Size = file.Length;
+                                                answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                            }
+                                        }
+                                        //var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
+                                        //if (file != null)
+                                        //{
+                                        //    answer.Media.Created = DateTime.Now;
+                                        //    answer.Media.Size = file.Length;
+                                        //    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                        //}
                                     }
                                 }
                                 else
@@ -348,7 +410,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                             answer.Media = null;
                                         else
                                         {
-
                                             var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();//update media
                                             answer.Media.Created = DateTime.Now;
                                             answer.Media.Size = file.Length;

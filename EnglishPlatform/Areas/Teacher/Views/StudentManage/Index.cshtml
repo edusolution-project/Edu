@@ -1,7 +1,7 @@
 ﻿@{
 
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
-    ViewData["Title"] = "Student Management";
+    ViewData["Title"] = "Quản lý học viên";
     var listGrade = ViewBag.Grade as List<BaseCustomerEntity.Database.GradeEntity>;
     var listSubject = ViewBag.Subject as List<BaseCustomerEntity.Database.SubjectEntity>;
     var listTeacher = ViewBag.Teacher as List<BaseCustomerEntity.Database.TeacherEntity>;
@@ -15,15 +15,14 @@
 </script>
 
 <section class="module" id="dashboard_content">
-
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25 justify-content-between">
-            <div class="flex">
+            <div class="flex width-100">
                 <div class="box filter-box w-152">
-                    <select name="" v-model="search_class_id">
-                        <option value="">Lớp</option>
-                        <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
-                    </select>
+                    <autocomplete v-on:chooseitem="chooseClass" :items="list_ac_class" v-on:input="autocompleteClass" :plhd="'Nhập để tìm lớp'" />
                 </div>
                 <div class="box filter-box w-152">
                     <select name="" v-model="search_subject_id">
@@ -43,20 +42,19 @@
                         <option v-for="(item,k) in list_grades_full" v-if="matchGrade(item)" :value="item.ID">{{item.Name}}</option>
                     </select>
                 </div>
-                @*<div class="w-152 box filter-box">
-                        <select name="" v-model="search.teacher_id">
-                            <option value="">Giáo viên</option>
-                            <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                        </select>
-                    </div>*@
+                <div class="search-box mr-2">
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" v-model="searchTerm" placeholder="Tên học viên">
+                </div>
             </div>
+
             <div class="flex">
-                <b-button class="btn-addevent btn-student" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
-                <b-button class="btn-addevent btn-student" style="margin-left:5px" v-on:click="showStudentUploadModal()"><i class="ti-zip"></i></b-button>
+                <b-button class="btn-addevent btn-student btn-sm" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
+                <b-button class="btn-addevent btn-student btn-sm" style="margin-left:5px" v-on:click="showStudentUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <table id="ed_table" class="table">
             <thead>
                 <tr>
@@ -66,13 +64,13 @@
             <tbody>
                 <tr v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
-                    <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
+                    <td>
+                        <a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName" v-if="item.ClassID != null">{{item.FullName}}</a>
+                        <a :href="'@Url.Action("Detail", "StudentManage")/' + item.ID" :title="item.FullName" v-else="item.ClassID != null">{{item.FullName}}</a>
+                    </td>
                     <td>{{item.ClassName}}</td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
-                    @*<td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
-                    <td>{{item.last_update}}</td>
-                    <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>*@
                     <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
                 </tr>
             </tbody>
@@ -87,13 +85,6 @@
                 </select>
             </div>
             <div class="page-control">
-                @*<div class="inner">
-                        <button v-on:click="goPage(0)"><i class="ti-angle-left"></i></button>
-                        <button v-on:click="goPage(page - 1)"><i class="ti-angle-double-left"></i></button>
-                        <input type="text" v-model="page" v-on:change="getData()" />
-                        <button v-on:click="goPage(page + 1)"><i class="ti-angle-double-right"></i></button>
-                        <button v-on:click="goPage(max_page)"><i class="ti-angle-right"></i></button>
-                    </div>*@
                 <div class="right">
                     <b-pagination v-model="page"
                                   :total-rows="totalRec"
@@ -110,13 +101,13 @@
 
     <script type="text/x-template" id="autocomplete">
         <div class="autocomplete">
-            <input type="text" v-on:input="onChange" v-model="search" v-on:keyup.down="onArrowDown" v-on:keyup.up="onArrowUp" v-on:keyup.enter="onEnter" class="form-control" placeholder="Nhập để tìm kiếm (>2 chữ)" />
+            <input type="text" v-on:input="onChange" v-model="search" v-on:keyup.down="onArrowDown" v-on:keyup.up="onArrowUp" v-on:keyup.enter="onEnter" class="form-control" :placeholder="plhd" />
             <ul id="autocomplete-results" v-show="isOpen" class="autocomplete-results">
                 <li class="loading" v-if="isLoading">
                     Loading results...
                 </li>
                 <li v-else v-for="(result, i) in results" :key="i" v-on:click="setResult(result)" class="autocomplete-result" :class="{'is-active': i === arrowCounter }">
-                    {{ result.FullName }}
+                    {{ result.Name }}
                 </li>
             </ul>
 
@@ -124,6 +115,10 @@
     </script>
 
     <style>
+        .card-header .search-box {
+            width: auto;
+        }
+
         #app {
             font-family: "Avenir", Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -145,6 +140,7 @@
             overflow: auto;
             width: 100%;
             position: absolute;
+            min-width: 200px;
             background: #FFF;
         }
 
@@ -171,6 +167,16 @@
                         type: Array,
                         required: false,
                         default: () => []
+                    },
+                    url: {
+                        type: String,
+                        required: false,
+                        default: () => ''
+                    },
+                    plhd: {
+                        type: String,
+                        required: false,
+                        default: () => 'Nhập để tìm kiếm (>2 chữ)'
                     }
                 },
                 data() {
@@ -186,52 +192,25 @@
                 methods: {
                     onChange() {
                         // Let's warn the parent that a change was made
-                        this.$emit("input", this.search);
-                        //console.log("change");
-                        if (this.search.length >= 2) {
-                            //checkifTerm is loaded
-                            //clearTimeout(this.timeout)
-                            var _that = this
-                            var term = _that.search.toLowerCase()
-                            //this.timeout = setTimeout(function () {
-                            if (this.loadedTerms.filter(item => item.term.indexOf(term) > -1).length == 0) {
-                                this.isLoading = true;
-                                let _form = new FormData()
-                                _form.append('term', term)
-                                let _url = '@Url.Action("Search","StudentManage")'
-                                axios.post(_url, _form)
-                                    .then(response => {
-                                        this.isLoading = false
-                                        this.items = response.data
-                                        this.loadedTerms.push({
-                                            term: term,
-                                            data: response.data
-                                        })
-                                        this.isOpen = true
-                                        this.$forceUpdate();
-                                    }).catch(e => { })
-                            } else {
-                                this.items = this.loadedTerms.filter(item => item.term.indexOf(term) > -1)[0].data;
-                                this.filterResults();
-                                this.isOpen = true;
-                                this.$forceUpdate();
-                            }
-                            //}, 200)
-                            // Is the data given by an outside ajax request?
-
-                        }
-                        else {
+                        this.$emit("input", this.search, this.filterResults);
+                        if (this.search.length < 2) {
                             this.isOpen = false
                         }
+                        else {
+                            this.isOpen = true
+                        }
+                    },
+                    searchResult() {
+                        this.filterResults();
+                        this.isOpen = true;
+                        this.$forceUpdate();
                     },
                     filterResults() {
-                        // first uncapitalize all the things
-                        this.results = this.items.filter(item => {
-                            return item.FullName.toLowerCase().indexOf(this.search.toLowerCase()) > -1;
-                        });
+                        this.results = this.items
+                        this.isOpen = true
                     },
                     setResult(result) {
-                        this.search = result.FullName;
+                        this.search = result.Name;
                         this.isOpen = false;
                         this.arrowCounter = -1;
                         this.$emit("chooseitem", result);
@@ -302,6 +281,8 @@
                     email: "",
                     class_id: ""
                 },
+                list_student: [
+                ],
                 fields: [
                     {
                         key: 'stt',
@@ -348,6 +329,7 @@
                 teacherSource: [],
                 courseSource: [],
                 list_active_class: [],
+                list_ac_class: [],
                 week: '',
                 view: 30,
                 page: 1,
@@ -356,6 +338,7 @@
                 search_grade_id: '',
                 search_teacher_id: '',
                 search_skill_id: '',
+                searchTerm: '',
                 totalRec: 0,
                 uploadfile: {
                     file: null,
@@ -373,7 +356,16 @@
                 },
                 search_class_id: function () {
                     this.getData()
-                }
+                },
+                searchTerm: function(){
+                    if(this.searchTimeout != null)
+                        clearTimeout(this.searchTimeout)
+                    var fn = this.getData
+                    this.searchTimeout = setTimeout(function(){
+                        fn()
+                        fn = null
+                    }, 500)
+                },
             },
             methods: {
                 getData() {
@@ -386,6 +378,8 @@
                     _form.append('TeacherID', _that.search_teacher_id)
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
+                    _form.append('SearchText', _that.searchTerm)
+
                     let _url = '@Url.Action("GetList", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -401,12 +395,19 @@
                         let _that = this
                         let _form = new FormData()
                         _form.append('skipActive', false)
-                        let _url = '@Url.Action("GetManageList","Class")'
+                        _form.append('PageSize', 500)
+                        @if(!User.IsInRole("head-teacher"))
+                        {
+                            @:let _url = '@Url.Action("GetClassList", "Class")'
+                        }
+                        else
+                        {
+                            @:let _url = '@Url.Action("GetManageList", "Class")'
+                        }
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
                                 _data.forEach(function (item, k) {
-                                    console.log(item);
                                     _that.list_active_class.push({
                                         ID: item.ID,
                                         Name: item.Name
@@ -444,6 +445,51 @@
                     this.add_student.class_id = this.search_class_id
                     this.$bvModal.show('modal_event')
                 },
+                autocompleteStudent(term, callback) {
+                    let _that = this
+                    if (term.length >= 2) {
+                        if (this.actimeout != null)
+                            clearTimeout(this.actimeout);
+                        this.actimeout = setTimeout(function () {
+                            if (_that.loadedTermsST == null)
+                                _that.loadedTermsST = []
+
+                            if (_that.loadedTermsST.filter(item => item.term.indexOf(term) > -1).length == 0) {
+                                let _form = new FormData()
+                                _form.append('term', term)
+                                let _url = '@Url.Action("Search","StudentManage")'
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        var data = []
+                                        if (response.data.length > 0) {
+                                            response.data.forEach(function (item) {
+                                                data.push({
+                                                    ID: item.ID,
+                                                    Name: item.FullName,
+                                                    Email: item.Email
+                                                });
+                                            })
+                                        }
+                                        _that.list_student = data
+                                        _that.loadedTermsST.push({
+                                            term: term,
+                                            data: data
+                                        })
+                                        callback()
+                                    }).catch(e => { })
+                            } else {
+                                _that.list_student = _that.loadedTermsST.filter(item => item.term.indexOf(term) > -1)[0].data;
+                                callback()
+                            }
+                        }, 500)
+                    }
+                },
+                autocompleteClass(term, callback) {
+                    let _that = this
+                    term = term.toLowerCase()
+                    _that.list_ac_class = _that.list_active_class.filter(item => item.Name.toLowerCase().indexOf(term) > -1);
+                    callback()
+                },
                 showStudentUploadModal() {
                     this.add_student.class_id = this.search_class_id
                     this.$bvModal.show('modal_upload')
@@ -453,11 +499,14 @@
                     this.add_student.email = student.Email
                     this.add_student.id = student.ID
                 },
+                chooseClass(_class){
+                    this.search_class_id = _class.ID;
+                },
                 createStudent() {
                     let _that = this
                     let _form = new FormData()
                     if (_that.add_student.class_id == '') {
-                        alert('Chưa chọn lớp học');
+                        Swal.fire('Chưa chọn lớp học','','warning');
                         return false;
                     }
                     if (_that.add_student.id == '') {
@@ -556,11 +605,10 @@
                     this.uploadfile.file = event.target.files[0]
                 },
                 downloadTemplate() {
-                    window.open("@Url.Action("StudentTemplate", "StudentManage")");
+                    window.open("@Url.Action("ExportTemplate", "StudentManage")");
                 }
             }
         });
-
     </script>
 }
 
@@ -575,7 +623,7 @@
         </b-col>
         <b-col class="form-group">
             <label for="">Học viên</label>
-            <autocomplete v-on:chooseitem="chooseStudent" />
+            <autocomplete v-on:chooseitem="chooseStudent" :items="list_student" v-on:input="autocompleteStudent" />
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">

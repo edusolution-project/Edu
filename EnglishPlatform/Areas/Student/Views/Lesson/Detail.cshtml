@@ -38,6 +38,15 @@
             height: auto;
         }
 
+    .expand ~ .main-container {
+        bottom: 100px !important;
+    }
+
+    .main-container ~ .expand {
+        background: red;
+    }
+
+
     .description img {
         max-width: 100%;
     }
@@ -75,6 +84,8 @@
                 z-index: -1;
                 /*overflow-y: auto !important;*/
             }
+
+
 
     #lessonSummary {
         position: absolute;
@@ -116,12 +127,18 @@
 
     .QUIZ1 .answer-item {
         max-width: 30%;
+        vertical-align: top;
+    }
+
+    #quizIdx_holder {
+        max-height: 54px;
+        overflow-y: auto;
     }
 </style>
 
 <div class="left-col">
     <div class="page-title row">
-        <h2 class="col-md-6 p-0">
+        <h2 class="col-md-12 p-0">
             @*<a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
                 "Modules" ,"Course")/@currentClass.ID">@currentClass.Name</a>*@
             @if (currentChapter != null)
@@ -131,13 +148,15 @@
                         }
             / @currentLesson.Title
         </h2>
-        @if (nextLesson != null)
+        @*@if (nextLesson != null)
         {
             <h2 class="col-md-6 p-0 text-right">
                 Bài tiếp > <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
                             "Detail" ,"Lesson")/@nextLesson.ID/@currentClassSubject.ID">@nextLesson.Title</a>
                         </h2>
-                    }
+                    }*@
+    </div>
+    <div id="lessonSummary" class="shadow expand">
     </div>
     <div class="main-container">
         <!-- Begin Page Content -->
@@ -147,14 +166,13 @@
         <input type="hidden" name="ExamID" id="ExamID" value="" />
     </div>
 
-    <div id="lessonSummary" class="shadow">
-    </div>
+
 
 </div>
 @section Footer{}
 @section Scripts{
 
-    <script src="~/js/student-exam-v2.js?20200205"></script>
+    <script src="~/js/student-exam-v2.js?20200228"></script>
 
     <script>
         //localStorage.clear();
@@ -168,7 +186,6 @@
                     removeans: '@Url.Action("RemoveDetail", "Exam")',
                     end: '@Url.Action("CompleteExam", "Exam")',
                     review: '@Url.Action("Review","Lesson")'
-
                 },
                 type: @currentLesson.TemplateType,
                 lesson_id: '@currentLesson.ID',

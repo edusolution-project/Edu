@@ -160,7 +160,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
-                       { "Error", "No Class for Student" }
+                       { "Error", "Thông tin không đúng" }
                     });
                 }
 
@@ -169,7 +169,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
-                       { "Error", "No Schedule for Class" }
+                       { "Error", "Thông tin không đúng" }
                     });
                 }
 
@@ -178,27 +178,54 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
-                       { "Error", "This exam has been marked!" }
+                       { "Error", "Bài kiểm tra đã chấm, không thực hiện lại được!" }
                     });
                 }
+
+                item.StudentID = userid;
+                item.Number = (int)_examService.CreateQuery().CountDocuments(o => o.LessonScheduleID == _schedule.ID && o.StudentID == item.StudentID) + 1;
+                if (_lesson.Limit > 0 && item.Number > _lesson.Limit)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Bạn đã hết lượt làm bài!" }
+                    });
+                }
+
+                if (_schedule.StartDate.ToLocalTime() > DateTime.Now)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Bài kiểm tra chưa được mở!" }
+                    });
+                }
+                if (_lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                    if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
+                    {
+                        return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Bài kiểm tra đã quá hạn!" }
+                    });
+                    }
 
                 item.LessonScheduleID = _schedule.ID;
                 item.Timer = _lesson.Timer;
                 item.Point = 0;
                 item.MaxPoint = _lesson.Point;
-                item.StudentID = userid;
+
                 item.TeacherID = _class.TeacherID;
                 item.ID = null;
                 item.Created = DateTime.Now;
                 item.CurrentDoTime = DateTime.Now;
                 item.Status = false;
-                item.Number = (int)_examService.CreateQuery().CountDocuments(o => o.LessonScheduleID == item.LessonScheduleID && o.StudentID == item.StudentID) + 1;
+
                 item.QuestionsTotal = _cloneLessonPartQuestionService.CreateQuery().CountDocuments(o => o.LessonID == item.LessonID);
                 item.QuestionsDone = 0;
                 item.Marked = false;
             }
             item.Updated = DateTime.Now;
-            _examService.CreateOrUpdate(item);
+            //_examService.CreateOrUpdate(item);//MAPPING BUG
+            _examService.Save(item);
             return new JsonResult(new Dictionary<string, object>
                     {
                        { "Data", item }
@@ -206,15 +233,29 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult GetCurrentExam(string ClassID, string LessonID)
+        public JsonResult GetCurrentExam(string ClassSubjectID, string LessonID)
         {
             var userID = User.Claims.GetClaimByType("UserID").Value;
-            var x = _examService.CreateQuery().Find(o => o.ClassID == ClassID && o.LessonID == LessonID &&
+            var lesson = _lessonService.GetItemByID(LessonID);
+            if (lesson == null)
+                return new JsonResult(new { Error = "Bài học không đúng" });
+            var x = _examService.CreateQuery().Find(o => o.ClassSubjectID == ClassSubjectID && o.LessonID == LessonID &&
             //o.Status == false && 
-            o.StudentID == userID).FirstOrDefault();
-            if (x != null)
+            o.StudentID == userID).SortByDescending(o => o.ID).FirstOrDefault();
+            //hết hạn => đóng luôn
+            var schedule = _lessonScheduleService.GetItemByLessonID_ClassSubjectID(LessonID, ClassSubjectID);
+            if (x != null && !x.Status)
+            {
+                if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                    if (schedule != null && schedule.EndDate > new DateTime(1900, 1, 1) && schedule.EndDate <= DateTime.Now)
+                    {
+                        x.Status = true;
+                        x.Updated = schedule.EndDate;
+                        _examService.Save(x);
+                    }
                 x.CurrentDoTime = DateTime.Now;
-            return new JsonResult(x);
+            }
+            return new JsonResult(new { exam = x, schedule, limit = lesson.Limit });
         }
 
         [HttpPost]
@@ -281,20 +322,25 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public async Task<JsonResult> CreateDetail(ExamDetailEntity item)
         {
+            if (item.ExamID == null)
+            {
+                return new JsonResult("Access Denied");
+            }
             if (!_examService.IsOverTime(item.ExamID))
             {
                 var exam = _examService.GetItemByID(item.ExamID);
 
-                await _learningHistoryService.CreateHist(new LearningHistoryEntity()
-                {
-                    ClassID = exam.ClassID,
-                    ClassSubjectID = exam.ClassSubjectID,
-                    LessonID = exam.LessonID,
-                    LessonPartID = item.LessonPartID,
-                    QuestionID = item.QuestionID,
-                    Time = DateTime.Now,
-                    StudentID = User.Claims.GetClaimByType("UserID").Value
-                });
+                //TODO: recheck history for doing exam
+                //await _learningHistoryService.CreateHist(new LearningHistoryEntity()
+                //{
+                //    ClassID = exam.ClassID,
+                //    ClassSubjectID = exam.ClassSubjectID,
+                //    LessonID = exam.LessonID,
+                //    LessonPartID = item.LessonPartID,
+                //    QuestionID = item.QuestionID,
+                //    Time = DateTime.Now,
+                //    StudentID = User.Claims.GetClaimByType("UserID").Value
+                //});
                 if (string.IsNullOrEmpty(item.ID) || item.ID == "0" || item.ID == "null")
                 {
                     if (item.AnswerID == null && item.AnswerValue == null)
@@ -379,20 +425,21 @@ namespace BaseCustomerMVC.Controllers.Student
             if (!_examService.IsOverTime(item.ExamID))
             {
                 var exam = _examService.GetItemByID(item.ExamID);
-                await _learningHistoryService.CreateHist(new LearningHistoryEntity()
-                {
-                    ClassID = exam.ClassID,
-                    LessonID = exam.LessonID,
-                    ClassSubjectID = exam.ClassSubjectID,
-                    LessonPartID = item.LessonPartID,
-                    QuestionID = item.QuestionID,
-                    Time = DateTime.Now,
-                    StudentID = User.Claims.GetClaimByType("UserID").Value
-                });
-                var deleted = _examDetailService.CreateQuery().DeleteMany(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).DeletedCount;
+                //TODO: recheck history for doing exam
+                //await _learningHistoryService.CreateHist(new LearningHistoryEntity()
+                //{
+                //    ClassID = exam.ClassID,
+                //    LessonID = exam.LessonID,
+                //    ClassSubjectID = exam.ClassSubjectID,
+                //    LessonPartID = item.LessonPartID,
+                //    QuestionID = item.QuestionID,
+                //    Time = DateTime.Now,
+                //    StudentID = User.Claims.GetClaimByType("UserID").Value
+                //});
+                var deleted = await _examDetailService.CreateQuery().DeleteManyAsync(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID);
 
                 exam.Updated = DateTime.Now;
-                if (deleted > 0 && exam.QuestionsDone > 0)
+                if (deleted.DeletedCount > 0 && exam.QuestionsDone > 0)
                     exam.QuestionsDone -= 1;
 
                 _examService.CreateOrUpdate(exam);
@@ -417,6 +464,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             if (exam.Status)
             {
+                //return new JsonResult(new { Point = exam.Point, MaxPoint = exam.MaxPoint, ID = exam.ID, Number = exam.Number, Limit = 0 });
                 return new JsonResult("Access deny");
             }
             //exam.Status = true;
@@ -514,7 +562,16 @@ namespace BaseCustomerMVC.Controllers.Student
             double point = 0;
             var lesson = _lessonService.GetItemByID(exam.LessonID);
             exam = _examService.Complete(exam, lesson, out point);
-            return new JsonResult(new { Point = point, MaxPoint = lesson.Point, ID = exam.ID, Number = exam.Number, Limit = lesson.Limit });
+            return new JsonResult(new
+            {
+                Point = point,
+                MaxPoint = lesson.Point,
+                ID = exam.ID,
+                Number = exam.Number,
+                Limit = lesson.Limit,
+                QuestionsTotal = exam.QuestionsTotal,
+                QuestionsPass = exam.QuestionsPass
+            });
         }
 
         public IActionResult Index(DefaultModel model)

@@ -88,6 +88,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             acc.FullName = entity.FullName;
             acc.Phone = entity.Phone;
             acc.Skype = entity.Skype;
+            acc.ZoomID = entity.ZoomID;
             _teacherService.CreateOrUpdate(acc);
             ViewBag.avatar = acc.Avatar ?? _default.defaultAvatar;
             ViewBag.Description = "Lưu thành công!";
@@ -156,7 +157,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             AccountEntity user = _accountService.GetAccountByEmail(acc.Email);
 
-            if (!Security.Encrypt(oldpass).Equals(user.PassWord))
+            if (!Core_v2.Globals.Security.Encrypt(oldpass).Equals(user.PassWord))
             {
                 return new JsonResult(
                 new Dictionary<string, object>
@@ -166,7 +167,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
 
-            if (Security.Encrypt(newpass).Equals(user.PassWord))
+            if (Core_v2.Globals.Security.Encrypt(newpass).Equals(user.PassWord))
             {
                 return new JsonResult(
                 new Dictionary<string, object>
@@ -175,7 +176,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  });
             }
 
-            user.PassWord = Security.Encrypt(newpass);
+            user.PassWord = Core_v2.Globals.Security.Encrypt(newpass);
             _accountService.CreateOrUpdate(user);
             return new JsonResult(
             new Dictionary<string, object>
@@ -202,7 +203,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
         [HttpPost]
-        public JsonResult SaveProfile(StudentEntity entity, IFormFile fileUpload)
+        public JsonResult SaveProfile(TeacherEntity entity, IFormFile fileUpload)
         {
             try
             {
@@ -211,6 +212,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 account.FullName = entity.FullName;
                 account.Phone = entity.Phone;
                 account.Skype = entity.Skype;
+                account.ZoomID = entity.ZoomID;
                 if (fileUpload != null)
                 {
                     var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
@@ -278,7 +280,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         //    AccountEntity user = _accountService.GetAccountByEmail(te.Email);
 
-        //    if (Security.Encrypt(newpass).Equals(user.PassWord))
+        //    if (Core_v2.Globals.Security.Encryptnewpass).Equals(user.PassWord))
         //    {
         //        return new JsonResult(
         //        new Dictionary<string, object>
@@ -287,7 +289,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //         });
         //    }
 
-        //    user.PassWord = Security.Encrypt(newpass);
+        //    user.PassWord = Core_v2.Globals.Security.Encryptnewpass);
         //    _accountService.CreateOrUpdate(user);
         //    return new JsonResult(
         //    new Dictionary<string, object>

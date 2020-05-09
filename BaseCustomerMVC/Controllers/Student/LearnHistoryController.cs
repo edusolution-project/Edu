@@ -102,30 +102,5 @@ namespace BaseCustomerMVC.Controllers.Student
 
             return new JsonResult(data);
         }
-
-        //[HttpPost]
-        //public JsonResult Create(LearningHistoryEntity item)
-        //{
-        //    string userID = User.Claims.GetClaimByType("UserID").Value;
-        //    var oldItem = _service.CreateQuery().Find(o => o.StudentID == userID
-        //    && o.LessonID == item.LessonID
-        //    && o.ClassID == item.ClassID
-        //    && o.LessonPartID == item.LessonPartID
-        //    && o.QuestionID == item.QuestionID).ToList();
-        //    if (oldItem != null)
-        //    {
-        //        item.Time = DateTime.Now;
-        //        item.ViewCount = 0;
-        //    }
-        //    else
-        //    {
-        //        item.ViewCount = oldItem.Count;
-        //        item.Time = DateTime.Now;
-        //    }
-        //    _service.CreateOrUpdate(item);
-
-        //    return new JsonResult(item);
-
-        //}
     }
 }

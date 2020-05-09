@@ -1,25 +1,33 @@
 ﻿@{
-    ViewData["Title"] = "Dashboard - " + DateTime.Now.ToString("D");
+    ViewData["Title"] = "Trang chủ - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
 }
 <script>
     setActiveMenu("home");
 </script>
 
+<style>
+    .height-245 {
+        height: 268px;
+    }
+</style>
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25">
-            <h2 class="title">Welcome to <font>EDUCOO</font></h2>
+            <h2 class="title">Welcome to <font>EDUSO</font></h2>
             @*<div class="search-box">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
                 </div>*@
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box mb-3">
             <div class="heading flex mb-2">
-                <h4 class="box-head">Bài giảng tuần này</h4>
+                <h4 class="box-head">Bài giảng tuần này ({{lesson_week.length}})</h4>
                 <a href="@Url.Action("Index","Class")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
             </div>
             <div class="box bg-1 padding-15">
@@ -27,12 +35,12 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <a :href="'@Url.Action("Detail","Class")/' + item.classID + '#module'" :title="item.skill.Name" class="title"><h4><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@Url.Action("Detail","Class")/' + item.classID + '#module'" :title="item.skill.Name" class="title"><h4 class="abc" :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
                                 <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
                                     <a :href="'@Url.Action("Detail","Class")/' + item.classID" :title="item.className" class="title">{{item.className}}</a>
-                                    <p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>
-                                    <p><i class="ti-time"></i>{{formatTime(item.endDate)}}</p>
+                                    @*<p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>*@
+                                    <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
                                 </div>
                             </div>
                         </div>
@@ -72,17 +80,24 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Thảo luận</h4>
-                        <a href="/discussion.html" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="javascript:$('.fn-box-chat-eduso').focus().click()" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="list-discus">
-                            <li v-for="(item,k) in discussion">
-                                <div class="flex c-top">
-                                    <a :href="'@Url.Action("Index","Discuss")#' + item.ID" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
-                                    <div class="c-right"><i class="icofont icofont-user"></i>{{3 + ' members'}}</div>
-                                </div>
-                                <p>{{shortenString(item.content,160)}}.</p>
-                            </li>
+                            <template v-if="discussion.length > 0">
+                                <li v-for="(item,k) in discussion">
+                                    <div class="flex c-top">
+                                        <a href="javascript:$('.fn-box-chat-eduso').focus().click()" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
+                                        <div class="c-right"><i class="icofont icofont-user"></i>{{item.sender.name}}</div>
+                                    </div>
+                                    <p>{{shortenString(item.content,160)}}.</p>
+                                </li>
+                            </template>
+                            <template v-else>
+                                <li>
+                                    Chưa có thảo luận nào! <button class="ml-2 btn btn-sm btn-secondary" onclick="$('.fn-box-chat-eduso').focus().click()"> <i class="far fa-comments"></i> Kết nối ngay</button>
+                                </li>
+                            </template>
                         </ul>
                     </div>
                 </div>
@@ -138,7 +153,7 @@
         },
         watch : {
             lesson_week : function(val){
-                console.log(val)
+                //console.log(val)
             }
         },
         methods: {
@@ -183,35 +198,35 @@
 
                 axios.post(_url, _form)
                     .then(response => {
-                        console.log("Week")
-                        console.log(response.data)
+                        //console.log("Week")
+                        //console.log(response.data)
                         _that.lesson_week = response.data.data;
                         //console.log(_that.lesson_week);
                     }).catch(e => { })
             },
             getNewFeed() {
                 let _that = this
-                let _url = '@Url.Action("Get", "NewFeed")'
+                // Truyen param vào đây
+                let _form = new FormData()
+                let _url = '@Url.Action("GetLastestMessage", "EasyRealtime")'
 
-                axios.get(_url, {
-                    params: {
-                        pageSize: 6,
-                        pageIndex: 0
-                    }
-                })
+                axios.get(_url, _form)
                     .then(response => {
-                        console.log(response.data)
-                        _that.discussion = response.data.data
-                        //console.log(_that.active_course);
+                        //console.log("Week")
+                        //console.log(response.data)
+                        _that.discussion = response.data.data.messages;
+                        //console.log(_that.discussion);
                     }).catch(e => { })
             },
             formatTime(time) {
-                console.log(time);
+                //console.log(time);
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
-                return moment(time).format("DD/MM/YYYY hh:mm")
+                var options = { weekday: "long", day: "numeric" };
+                var date = new Date(time);
+                return moment(time).format("HH:mm") +  ' ' + date.toLocaleDateString("vi-VN", options).replace("ngày ","")
             },
             formatDate(time) {
-                console.log(time);
+                //console.log(time);
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
                 return moment(time).format("DD/MM/YYYY")
             },

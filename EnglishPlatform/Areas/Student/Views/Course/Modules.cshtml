@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var currentCs = ViewBag.ClassSubject as BaseCustomerMVC.Models.ClassSubjectViewModel;
-    var completePercent = (int)ViewBag.CompletePercent;
+    //var completePercent = (int)ViewBag.CompletePercent;
     ViewData["Title"] = currentCs.SkillName + " - " + currentCs.ClassName;
 }
 
@@ -9,96 +9,64 @@
     setActiveMenu("course");
 </script>
 
+
 <section class="module" id="dashboard_content">
-    <div class="card-header">
-        <div class="flex border-b padding-b25">
-            <h2 class="title"><a href="@Url.Action("Detail","Course")/@currentCs.ClassID" title="@currentCs.ClassName"><i class="ti-arrow-left"></i></a>@currentCs.ClassName/<span class="end-break">@currentCs.SkillName</span></h2>
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
+        <div class="flex border-b pb-2">
+            <h2 class="title"><a href="@Url.Action("Detail", "Course")/@currentCs.ClassID#module" title="@currentCs.ClassName" class="text-dark"><i class="ti-arrow-left d-none"></i>@currentCs.ClassName</a> / <span class="end-break">@currentCs.SkillName (@currentCs.CompletedLesssons/@currentCs.TotalLessons)</span></h2>
             <div class="c-right bad">
                 <div class="flex">
-                    <b-progress :value="7" :max="10" class="mb-3"></b-progress>
-                    <span>@completePercent%</span>
+                    <b-progress :value="@currentCs.CompletedLesssons" :max="@currentCs.TotalLessons" class="mb-3"></b-progress>
+                    <span>
+                        @if (currentCs.TotalLessons > 0)
+                        {
+                            var complete = currentCs.CompletedLesssons * 100.00 / currentCs.TotalLessons;
+                            @: @complete.ToString("0.00")%
+                        }
+                        else
+                        {
+                            @:0%
+                        }
+                    </span>
                 </div>
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box">
             <ul class="list ls-pratice">
-                <li class="col-md-12" v-if="list_data.length" v-for="(item,k) in list_data">
-                    <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`prc-${k}`" class="btn-collapse" v-on:click="getSubList(item.ID, k)" :id="item.ID"><i class="ic ic-edit-small"></i>{{item.Name}}<i class="ic ic-collapse"></i></a>
-                        <b-collapse :id="`prc-${k}`" accordion="my-accordion" role="tabpanel">
-                            <b-card-body>
-                                <ul class="list">
-
-                                    <li class="sub-practice" v-if="item.detail.length" v-for="(lesson,j) in item.detail">
-                                        <span class="c c1"> <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'">{{lesson.Title}}</a></span>
-
-                                        @*Exam*@
-                                        <template v-if="lesson.TemplateType === 2">
-                                            <template v-if="isViewed(lesson.LastJoin)">
-                                                <div class="c c2">
-                                                    <span>Làm bài lần cuối</span>
-                                                    <span>{{formatTime(lesson.LastJoin)}}</span>
-                                                </div>
-                                                <div class="c c3">
-                                                    <span v-bind:class="{'bg-danger' : parseInt(lesson.DoPoint)<50}">{{lesson.DoPoint}}</span>%
-                                                </div>
-                                            </template>
-                                            <template v-else>
-                                                <div class="c c2">
-                                                </div>
-                                                <div class="c c3">
-                                                </div>
-                                            </template>
-                                            <div class="c schedule">
-                                                <span>{{formatTime(lesson.StartDate)}}</span><br />
-                                                <span>{{formatTime(lesson.EndDate)}}</span>
-                                            </div>
-                                            <div class="c c4">
-                                                <template v-if="!isInDue(lesson.EndDate)">
-                                                    <a title="Hết hạn" class="btn-act act bg-secondary" v-on:click="lockNotify()">Hết hạn</a>
-                                                </template>
-                                                <template v-else-if="lesson.Tried > 0">
-                                                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="lesson.LastExam != null" title="Làm lại" class="btn-act act">Làm lại</a>
-                                                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-else title="Tiếp tục" class="btn-act act">Tiếp tục</a>
-                                                </template>
-                                                <template v-else>
-                                                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="Làm bài" class="btn-act act">Làm bài</a>
-                                                </template>
-                                                <a v-if="lesson.Tried > 0 && lesson.LastExam != null" :href="'@Url.Action("Review", "Lesson")/' + lesson.LastExam" title="Xem đáp án" class="btn-act view">Xem đáp án</a>
-                                            </div>
-                                        </template>
-                                        <template v-else>
-                                            <div class="c c2">
-                                                <template v-if="isViewed(lesson.LastJoin)">
-                                                    <span>Học lần cuối</span>
-                                                    <span>{{formatTime(lesson.LastJoin)}}</span>
-                                                </template>
-                                            </div>
-                                            <div class="c cs">
-                                            </div>
-                                            <div class="c schedule">
-                                                <span>{{formatTime(lesson.StartDate)}}</span><br />
-                                                <span>{{formatTime(lesson.EndDate)}}</span>
-                                            </div>
-                                            <div class="c c4">
-                                                <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'" class="btn-act act">{{isViewed(lesson.LastJoin) ? 'Học lại':'Học ngay'}}</a>
-                                            </div>
-                                        </template>
-                                    </li>
-                                </ul>
-                            </b-card-body>
-                        </b-collapse>
-                    </div>
-                </li>
+                <chap-content v-for="(item,k) in list_data"
+                              v-bind:data="item"
+                              v-bind:pos="k"
+                              v-if="item.ParentID == '0'"
+                              v-bind:subchaps="list_data">
+                </chap-content>
             </ul>
         </div>
     </div>
 </section>
 
+
+
 @section Scripts {
     <style>
+        .ls-pratice .list {
+            max-height: none;
+        }
+
+        .ls-pratice li .inner {
+            border: none;
+        }
+
+        .btn-collapse {
+            border-bottom: .5px solid #D0DFE8;
+            margin-bottom: 0;
+            padding: 5px 0 13px;
+        }
+
         .btn-act {
             font-size: 12px;
         }
@@ -108,16 +76,118 @@
         }
     </style>
 
+    <script type="text/x-template" id="chapContentTemp">
+        <li class="col-md-12">
+            <div class="inner">
+                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}<i class="ic ic-collapse"></i></a>
+                <b-collapse visible :id="`prc-${data.ID}-${pos}`" @*:accordion="`my-accordion-${data.ParentID}`"*@ :title="`my-accordion-${data.ParentID}`" role="tabpanel">
+                    <b-card-body>
+                        <ul class="list">
+                            <chap-content v-for="(item,k) in subchaps"
+                                          v-bind:data="item"
+                                          v-bind:pos="k"
+                                          v-bind:subchaps="subchaps"
+                                          v-if="item.ParentID == data.ID"></chap-content>
+                            <lesson-item v-for="lesson in filterLesson(data.ID)" v-bind:lesson="lesson" v-bind:classSubject="data.ClassSubject"></lesson-item>
+                        </ul>
+                    </b-card-body>
+                </b-collapse>
+            </div>
+        </li>
+    </script>
+
+    <script type="text/x-template" id="lessonItemTemp">
+        <li class="sub-practice d-flex flex-column" :id="lesson.ID">
+            <div class="d-flex justify-content-between w-100 align-items-center">
+                <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-on:click.prevent="GoLesson(lesson.ID)" class="text-dark font-weight-bold"><i class="ic far fa-file-alt mr-2"></i>{{lesson.Title}}</a>
+                <ul class="time-line flex">
+                    <li v-if="isValidTime(lesson.StartDate)"><i class="ti-time"></i>{{formatTime(lesson.StartDate)}} </li>
+                    <li v-if="isValidTime(lesson.EndDate)"><i class="ti-time"></i>{{formatTime(lesson.EndDate)}} </li>
+                </ul>
+            </div>
+            @*Exam*@
+            <div class="d-flex justify-content-start w-100 mt-2 align-items-center">
+                <template v-if="lesson.TemplateType === 2">
+                    <template v-if="!isValid(lesson)">
+                        <a title="CHƯA MỞ" class="btn-act act ml-0 bg-secondary pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" v-if="moment(lesson.StartDate) > moment()" v-on:click="lockNotify(lesson,1)">CHƯA MỞ</a>
+                        <a title="HẾT HẠN" class="btn-act act ml-0 bg-secondary pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" v-else v-on:click="lockNotify(lesson,0)">HẾT HẠN</a>
+                    </template>
+                    <template v-else-if="lesson.Tried > 0">
+                        <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="lesson.LastExam != null" class="btn-act act ml-0 bg-success pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" title="ĐÃ LÀM">ĐÃ LÀM</a>
+                        <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-else class="btn-act act ml-0 bg-warning pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" title="ĐANG LÀM">ĐANG LÀM</a>
+                    </template>
+                    <template v-else>
+                        <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="Làm bài" class="btn-act act ml-0 bg-info pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;">CHƯA LÀM</a>
+                    </template>
+                    <div v-if="isValidTime(lesson.LastJoin)"  class="text-muted ml-2" style="font-size:90%">
+                        @*<span>Làm bài lần cuối</span>*@
+                        <span>{{formatTime(lesson.LastJoin)}}</span> - @*Kết quả:*@
+                        <span class="bg-transparent text-primary font-weight-bold" v-bind:class="{'text-danger' : parseInt(lesson.DoPoint) < 50, 'text-success' : parseInt(lesson.DoPoint) > 70}">{{lesson.DoPoint.toFixed(2)}}%</span>
+                    </div>
+                    <a v-if="lesson.Tried > 0 && lesson.LastExam != null" :href="'@Url.Action("Review", "Lesson")/' + lesson.LastExam" title="Xem đáp án" class="pt-0 pb-0 pl-2 pr-2 ml-1 text-muted" style="min-width:unset; font-size: 90%;"> (Xem đáp án)</a>
+                </template>
+                <template v-else>
+                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="isValidTime(lesson.LastJoin)" title="ĐÃ HỌC" class="btn-act act ml-0 bg-success pt-0 pb-0 pl-2 pr-2" style=" min-width:unset; font-size:60%;">ĐÃ HỌC</a>
+                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-else title="CHƯA HỌC" class="btn-act act ml-0 pt-0 pb-0 pl-2 pr-2 bg-info" style="font-size:60%; min-width: unset;">CHƯA HỌC</a>
+                    <div v-if="isValidTime(lesson.LastJoin)" class="text-muted" style="font-size:90%">
+                        @*<span class="ml-2">Học lần cuối: </span>*@
+                        <span class="ml-2">{{formatTime(lesson.LastJoin)}}</span>
+                    </div>
+                </template>
+            </div>
+        </li>
+    </script>
+
+
     <script>
+        Vue.component('chap-content', {
+            template: '#chapContentTemp',
+            props: {
+                subchaps: Array,
+                data: Object,
+                pos: String
+            }
+        })
+        Vue.component('lesson-item',{
+            template: '#lessonItemTemp',
+            props: {
+                lesson: Object,
+                classSubject: String
+            }
+        })
 
         new Vue({
         el: "#dashboard_content",
 		mounted(){
             this.getList()
+            window.filterChap = this.filterChap
+            window.getSubList = this.getSubList
+            window.filterLesson = this.filterLesson
+            window.isValidTime = this.isValidTime
+            window.formatTime = this.formatTime
+            window.isValid = this.isValid
+            window.GoLesson = this.goLesson
+            var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    var needscroll = true;
+                    var lessonID = hash;
+                    var r = setInterval(function () {
+                        if (needscroll) {
+                            var container = $("#" + lessonID);
+                            if (container.length > 0) {
+                                container.scrollTop = 0;
+                                needscroll = false;
+                            }
+                            //alert(1);
+                        }
+                    }, 200);
+                }
 		},
         data: {
-            list_data : [
-            ],
+            list_data: [],
+            list_lessons: [],
+            load_chapter: [],
             view : 10,
             page : 1
         },
@@ -125,54 +195,100 @@
         },
         methods: {
             getList(){
-
                 let _that = this
                 let _form = new FormData()
                 _form.append('ID', '@currentCs.ID')
-                let _url = '@Url.Action("GetSchedules", "Lesson")'
+                let _url = '@Url.Action("GetMainChapters", "Course")'
                 axios.post(_url, _form)
                     .then(response => {
-                        console.log(response.data.Data)
-                        _that.list_data = response.data.Data.Chapters
-
+                        //console.log(response.data.Data)
+                        _that.list_data = response.data.Data;
+                        var data = response.data.Data;
+                        data.forEach(function (item) { getSubList(item.ID)});
                         if (window.location.hash != "")
                         {
 
                         }
-
                         //console.log(_that.active_course);
                     }).catch(e => { })
             },
+            filterChap(ID, list) {
+                return list.filter((p) => {
+        	        return p.ParentID == ID
+                })
+            },
+            filterLesson(ID) {
+                //console.log(ID);
+                //console.log(this.list_lessons);
+                return this.list_lessons.filter((p) => {
+        	        return p.ChapterID == ID
+                })
+            },
             getSubList(chapterId, pos){
                 let _that = this
-                console.log(_that.list_data[pos].detail);
-                if (_that.list_data[pos].detail == null) {
-                    var name = _that.list_data[pos].Name;
+                if (_that.load_chapter.findIndex(t=> t == chapterId) < 0) {
+                    //var name = _that.list_data[pos].Name;
                     let _form = new FormData()
-                    _that.list_data[pos].Name = _that.list_data[pos].Name + "...";
+                    //_that.list_data[pos].Name = _that.list_data[pos].Name + "...";
                     _form.append('ID', '@currentCs.ID')
                     _form.append('ChapterID', chapterId)
                     let _url = '@Url.Action("GetChapterContent", "Lesson")'
                     axios.post(_url, _form)
                         .then(response => {
-                            console.log(response.data.Data);
-                            _that.list_data[pos].detail = response.data.Data.Lessons;
-                            _that.list_data[pos].Name = name;
+                            var chapters = response.data.Data.Chapters;
+                            if (chapters != null && chapters.length > 0)
+                            {
+                                chapters.forEach(function(chapter)
+                                {
+                                    getSubList(chapter.ID);
+                                    _that.list_data.push(chapter);
+                                })
+                            }
+
+                            var lessons = response.data.Data.Lessons;
+                            //console.log(lessons)
+                            lessons.forEach(function (lesson) {
+                                if(_that.list_lessons.findIndex(t=>t.ID == lesson.ID) == -1)
+                                    _that.list_lessons.push(lesson)
+                            })
+                            this.list_data = _that.list_data;
+                            //console.log(this.list_data);
+                            this.list_lessons = _that.list_lessons;
+                            this.load_chapter.push(chapterId);
                         }).catch(e => { })
                 }
             },
             formatTime(time) {
-                if (!this.isViewed(time)) return "";
-                return moment(time).format("DD/MM/YYYY hh:mm")
+                if (!this.isValidTime(time)) return "";
+                return moment(time).format("DD/MM/YYYY HH:mm")
             },
-            isViewed(time) {
+            isValidTime(time) {
                 return (moment(time) > moment(new Date(2000, 1, 1)));
             },
-            isInDue(time) {
-                 return (moment(time) < moment(new Date(2000, 1, 1))) || (moment(time) > moment());
+            isValid(item) {
+                var now = moment()
+                if (moment(item.StartDate) > now) return false
+                return (moment(item.EndDate) < moment(new Date(2000, 1, 1))) || (moment(item.EndDate) > now);
             },
-            lockNotify() {
-                alert("Lesson is overdue!");
+            lockNotify(item, start) {
+                if (start == 1)
+                    Swal.fire({
+                        title: 'Lưu ý',
+                        html: 'Bài học sẽ mở lúc ' + this.formatTime(item.StartDate),
+                        icon: 'warning'
+                    });
+                else
+                    Swal.fire({
+                        title: 'Lưu ý',
+                        html: 'Bài học đã hết hạn lúc ' + this.formatTime(item.EndDate),
+                        icon: 'warning'
+                    });
+            },
+            goLesson(ID) {
+                var state = {};
+                var url = '@Url.Action("Detail", "Lesson")/' + ID + '/@currentCs.ID'
+                history.replaceState(state, document.title, '#' + ID);
+                document.location.href = url;
             }
         }
     });

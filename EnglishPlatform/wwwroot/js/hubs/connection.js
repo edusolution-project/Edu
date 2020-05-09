@@ -35,10 +35,10 @@ connection.onclose(function () {
 
 
 connection.on("JoinGroup", function (data) {
-    console.log(data);
+    //console.log(data);
 })
 connection.on("LeaveGroup", function (data) {
-    console.log(data);
+    //console.log(data);
 })
 connection.on("CommentNewFeed", function (data) {
    

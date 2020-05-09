@@ -18,6 +18,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
+        private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
@@ -42,6 +43,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             SubjectService subjectService,
             TeacherService teacherService,
             ClassService classService,
+            ClassSubjectService classSubjectService,
             CourseService courseService,
             ChapterService chapterService,
             LessonService lessonService,
@@ -59,6 +61,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _subjectService = subjectService;
             _teacherService = teacherService;
             _courseService = courseService;
+            _classSubjectService = classSubjectService;
             _classService = classService;
             _chapterService = chapterService;
             _lessonService = lessonService;
@@ -79,16 +82,28 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetList(string LessonID, string ClassID)
+        public JsonResult GetList(string LessonID, string ClassID, string ClassSubjectID)
         {
             var root = _lessonService.CreateQuery().Find(o => o.ID == LessonID).SingleOrDefault();
             var data = new List<CloneLessonPartViewModel>();
 
-            var currentClass = _classService.CreateQuery().Find(o => o.ID == ClassID).SingleOrDefault();
+            //var currentClass = _classService.CreateQuery().Find(o => o.ID == ClassID).SingleOrDefault();
+
+
+
+            var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (currentCs == null)
+                return new JsonResult(
+                new Dictionary<string, object> { { "Error", "Subject not found" } });
+
+            var currentClass = _classService.GetItemByID(ClassID);
+            if (currentClass == null)
+                return new JsonResult(
+                new Dictionary<string, object> { { "Error", "Class not found" } });
 
             if (root != null && currentClass != null)
             {
-                var listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.ClassID == currentClass.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                var listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.ClassSubjectID == currentCs.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
                 if (listCloneLessonPart != null && listCloneLessonPart.Count > 0)
                 {
                     data.AddRange(listCloneLessonPart.Select(o => new CloneLessonPartViewModel(o)
@@ -163,35 +178,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [DisableRequestSizeLimit]
-        public async Task<JsonResult> CreateOrUpdate(CloneLessonPartViewModel item, string ClassID, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
+        public async Task<JsonResult> CreateOrUpdate(CloneLessonPartViewModel item, string ClassSubjectID, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
         {
-            var root = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID).SingleOrDefault();
-            var currentClass = _classService.CreateQuery().Find(o => o.ID == ClassID).SingleOrDefault();
+            var root = _lessonService.GetItemByID(item.ParentID);
+            var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
 
-            if (root == null || currentClass == null)
+            if (root == null || currentCs == null)
             {
                 return new JsonResult(new Dictionary<string, object>
-                            {
-                                { "Data", null },
-                                {"Error", "Parent Item Not found" }
-                            });
+                {
+                    { "Data", null },
+                    {"Error", "Parent Item Not found" }
+                });
             }
-            //try
-            //{
-
 
             if (item.Media != null && item.Media.Name == null) item.Media = null;//valid Media
             var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
             if (item.ID == "0" || item.ID == null) //create
             {
                 item.Created = DateTime.Now;
-                item.TeacherID = currentClass.TeacherID;
-                item.ClassID = currentClass.ID;
+                item.TeacherID = currentCs.TeacherID;
                 var maxItem = _service.CreateQuery()
                     .Find(o => o.ParentID == item.ParentID)
                     .SortByDescending(o => o.Order).FirstOrDefault();
                 item.Order = maxItem != null ? maxItem.Order + 1 : 0;
-                item.Updated = DateTime.Now;
                 if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || files == null || !files.Any(f => f.Name == item.Media.Name))
                 {
                     item.Media = null;
@@ -232,37 +242,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.Media.Size = file.Length;
                     item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
                 }
-
-                item.Updated = DateTime.Now;
+                item.OriginID = olditem.OriginID;
                 item.Created = olditem.Created;
                 item.Order = olditem.Order;
-                item.ClassID = currentClass.ID;
             }
 
+            item.Updated = DateTime.Now;
+            item.ClassID = currentCs.ClassID;
+            item.ClassSubjectID = currentCs.ID;
+            item.CourseID = currentCs.CourseID;
+
             var lessonpart = item.ToEntity();
-            //_service.CreateOrUpdate(lessonpart);
-            if (lessonpart.ID != null)
-            {
-                _service.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
-            }
-            else
-            {
-                _service.CreateQuery().InsertOne(lessonpart);
-            }
+            _service.Save(lessonpart);
+
             item.ID = lessonpart.ID;
 
             if (RemovedQuestions != null & RemovedQuestions.Count > 0)
             {
-                _cloneQuestionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
+                _ = _cloneQuestionService.RemoveManyAsync(RemovedQuestions);
 
                 foreach (var quizID in RemovedQuestions)
                 {
-                    _cloneAnswerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
+                    _ = _cloneAnswerService.RemoveByParentAsync(quizID);
                 }
             }
 
             if (RemovedAnswers != null & RemovedAnswers.Count > 0)
-                _cloneAnswerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
+                _ = _cloneAnswerService.RemoveManyAsync(RemovedAnswers);
 
             if (item.Questions != null && item.Questions.Count > 0)
             {
@@ -280,9 +286,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             .SortByDescending(o => o.Order).FirstOrDefault();
                         quiz.Order = maxItem != null ? maxItem.Order + 1 : 0;
                         quiz.Created = DateTime.Now;
-                        quiz.Updated = DateTime.Now;
-                        quiz.ClassID = item.ClassID;
-                        quiz.LessonID = item.ParentID;
 
                         if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || !files.Any(f => f.Name == quiz.Media.Name))
                             quiz.Media = null;
@@ -320,20 +323,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         quiz.Order = oldquiz.Order;
                         quiz.Created = oldquiz.Created;
-                        quiz.Updated = DateTime.Now;
-                        quiz.ClassID = item.ClassID;
-                        quiz.LessonID = item.ParentID;
+
                     }
 
-                    //_cloneQuestionService.CreateOrUpdate(quiz);
-                    if (quiz.ID != null)
-                    {
-                        _cloneQuestionService.CreateQuery().ReplaceOne(t => t.ID == quiz.ID, quiz);
-                    }
-                    else
-                    {
-                        _cloneQuestionService.CreateQuery().InsertOne(quiz);
-                    }
+                    quiz.Updated = DateTime.Now;
+                    quiz.ClassID = item.ClassID;
+                    quiz.ClassSubjectID = item.ClassSubjectID;
+                    quiz.LessonID = item.ParentID;
+                    quiz.CourseID = item.CourseID;
+
+                    _cloneQuestionService.Save(quiz);
+
                     questionVM.ID = quiz.ID;
 
                     if (questionVM.Answers != null && questionVM.Answers.Count > 0)
@@ -349,7 +349,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 var maxItem = _cloneAnswerService.CreateQuery().Find(o => o.ParentID == quiz.ID).SortByDescending(o => o.Order).FirstOrDefault();
                                 answer.Order = maxItem != null ? maxItem.Order + 1 : 0;
                                 answer.Created = DateTime.Now;
-                                answer.Updated = DateTime.Now;
 
                                 if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || !files.Any(f => f.Name == answer.Media.Name))
                                     answer.Media = null;
@@ -390,18 +389,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //}
                                 answer.Order = oldanswer.Order;
                                 answer.Created = oldanswer.Created;
-                                answer.Updated = DateTime.Now;
-                                answer.ClassID = item.ClassID;
+                                answer.OriginID = oldanswer.OriginID;
                             }
-                            //_cloneAnswerService.CreateOrUpdate(answer);
-                            if (answer.ID != null)
-                            {
-                                _cloneAnswerService.CreateQuery().ReplaceOne(t => t.ID == answer.ID, answer);
-                            }
-                            else
-                            {
-                                _cloneAnswerService.CreateQuery().InsertOne(answer);
-                            }
+
+                            answer.Updated = DateTime.Now;
+                            answer.ClassID = item.ClassID;
+                            answer.ClassSubjectID = item.ClassSubjectID;
+                            answer.CourseID = item.CourseID;
+
+                            _cloneAnswerService.Save(answer);
                         }
                     }
                 }

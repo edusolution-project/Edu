@@ -356,4 +356,9 @@ Admin_Customer/Views/Shared/_LayoutStudent.oldcshtml
 EnglishPlatform/wwwroot/Files/
 /EnglishPlatform/.config
 /EnglishPlatform/wwwroot/UPLOADS/NewFeed
+/EnglishPlatform/wwwroot
+EnglishPlatform/Areas/Student/Views/Course/Modules - Copy.cshtml
+Math/cache/
+Math/formulas/2d/e0/85ba5aab70766eec2a4fc52dab10.ini
+Math/formulas/
 /EdusoConnection

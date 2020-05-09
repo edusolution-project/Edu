@@ -10,15 +10,17 @@
 <script>
     setActiveMenu("class");
 </script>
+
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
+
 
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b padding-b25">
             <div class="box filter-box">
-                <input type="text" value="" name="dates">
-                <span class="ic ic-picker"></span>
+                <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
+                <span class="ic ic-picker inactive"></span>
             </div>
             <div class="box filter-box w-152">
                 <select v-model="subject" v-on:change="changeSubject()">
@@ -39,7 +41,10 @@
         </div>
     </div>
 
-    <div class="card-body">
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-body"  v-cloak>
         <div class="row row-list">
             <div class="col-md-3 course-item" v-for="(item,k) in list_course">
                 <div class="box radius">
@@ -80,31 +85,63 @@
 </section>
 
 @section Scripts{
-    <script>
+    <style>
 
+        .ic-picker {
+            cursor: pointer;
+        }
+
+            .ic-picker.inactive {
+                background-image: url('../images/pickerdate-1.png');
+            }
+
+        .course-item .thumb {
+            position: relative;
+            height: 0;
+            padding-top: 56%;
+        }
+
+            .course-item .thumb img {
+                position: absolute;
+                top: 0;
+                max-height: none;
+                height: auto;
+            }
+    </style>
+    <script>
+        var isSearchDate = false;
         new Vue({
             el: "#main",
             mounted() {
-                var start = moment();
-                var end = moment().add(29, 'days');
-                $('input[name="dates"]').daterangepicker({
-                    startDate: start,
-                    endDate: end,
-                    locale: {
-                        format: "DD/MM/YYYY",
-                    }
-                }, function (s, e, label) {
-                    RepDate(s,e);
-                    GetCourse();
-                });
+                //var start = moment();
+                //var end = moment().add(29, 'days');
+                //$('input[name="dates"]').daterangepicker({
+                //    startDate: start,
+                //    endDate: end,
+                //    locale: {
+                //        format: "DD/MM/YYYY",
+                //    }
+                //}, function (s, e, label) {
+                //    RepDate(s,e);
+                //    GetCourse();
+                //});
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 //console.log(this.list_grades_full);
                 this.changeSubject()
                 window.ChooseCalendar = this.chooseCalendar
                 window.GetCourse = this.getCourse
+                window.InitDate = this.initDate
+                window.DestroyDate = this.destroyDate
                 window.RepDate = this.repDate
-                $('input[name=dates]').siblings('.ic-picker').click(function () { ChooseCalendar() });
+                $('input[name=dates]').siblings('.ic-picker').click(function () {
+                    if (isSearchDate) {
+                        DestroyDate(this)
+                    }
+                    else {
+                        InitDate();
+                    }
+                });
             },
             data: {
                 list_course: [
@@ -116,8 +153,8 @@
                 grade: '',
                 view: 10,
                 page: 1,
-                startdate: moment(),
-                enddate: moment().add(29, 'days')
+                startdate: moment(new Date(1800,1,1)),
+                enddate: moment(new Date(1800,1,1)),
             },
             computed: {
                 sDate: {
@@ -183,8 +220,44 @@
                 },
                 chooseCalendar() {
                     $('input[name=dates]').focus().click()
-                }
-                , repDate(svalue, evalue) {
+                },
+                initDate() {
+                    if (isSearchDate) return;
+                    let _that = this
+                    var start = moment();
+                    var end = moment().add(29, 'days');
+                    $('input[name="dates"]').daterangepicker({
+                        startDate: start,
+                        endDate: end,
+                        locale: {
+                            format: "DD/MM/YYYY",
+                        }
+                    }, function (s, e, label) {
+                        RepDate(s, e);
+                        GetCourse();
+                    });
+                    $('input[name="dates"]').siblings().removeClass('inactive');
+                    isSearchDate = true;
+                    $('input[name="dates"]').focus().click();
+                    _that.startdate = start;
+                    _that.enddate = end;
+                    GetCourse()
+                },
+                destroyDate() {
+                    let _that = this
+                    console.log(isSearchDate);
+                    if (!isSearchDate) return false;
+                    //$('input[name="dates"]').daterangepicker().destroy()
+                    $('input[name="dates"]').data('daterangepicker').remove();
+                    $('input[name="dates"]').val('-- Chọn thời gian --');
+                    $('input[name="dates"]').siblings().addClass('inactive');
+                    isSearchDate = false;
+                    console.log(isSearchDate);
+                    _that.startdate = moment(new Date(1800,1,1)),
+                    _that.enddate = moment(new Date(1800,1,1)),
+                    GetCourse();
+                },
+                repDate(svalue, evalue) {
                     this.eDate = evalue;
                     this.sDate = svalue;
                 }

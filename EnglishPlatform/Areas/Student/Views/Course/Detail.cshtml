@@ -9,9 +9,12 @@
 </script>
 
 <section class="module" id="dashboard_content">
-    <div class="card-header">
-        <div class="flex padding-b25">
-            <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left"></i></a>{{domDecoder(className)}}</h2>
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-header" v-cloak>
+        <div class="flex pb-2">
+            <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}</h2>
             <div class="c-right">
                 <ul class="time-line flex">
                     <li><i class="ti-time"></i>Bắt đầu: {{formatShortDate(startDate)}} </li>
@@ -24,11 +27,13 @@
                 <ul class="flex">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Môn học</a></li>
+                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(2)">Tài liệu tham khảo</a></li>
+                    <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(3)">Thảo luận</a></li>
                 </ul>
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-cloak>
         <div class="box" v-if="tab[0]">
             <ul class="box list ls-overview mb-3">
                 <li class="flex margin-b20">
@@ -54,9 +59,64 @@
                 <div class="box">
                     <div class="inner">
                         <span class="ic ic-headphone" :style="'background-image:url(' + item.Image + ')'"></span>
-                        <a :href="'@Url.Action("Modules","Course")/' + item.ID" title="" class="title">{{item.Title}}</a>
-                        <a :href="'@Url.Action("Modules","Course")/' + item.ID" class="btn-learn">Học ngay</a>
+                        <a :href="'@Url.Action("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">{{item.Title}}</a>
+                        <span class="name center">
+                            {{item.Grade}}<br />
+                            GV: {{item.Teacher}}
+                        </span>
+                        <a :href="'@Url.Action("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="box" v-if="tab[2]">
+            <div class="row ls-doc" v-if="ref.data.length > 0">
+                <div class="col-md-12" v-for="data in ref.data">
+                    <div class="inner flex">
+                        <a href="#" title="" class="thumb">
+                            <img src="/pictures/doc1.png" alt="">
+                        </a>
+                        <div class="entry">
+                            <div>
+                                <div>
+                                    <a href="#" title="" class="title">{{data.Title}}</a>
+                                </div>
+                                <div>
+                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
+                                </div>
+                            </div>
+                            <div class="pt-2 pb-2">
+                                <p>{{domDecoder(data.Description)}}</p>
+                            </div>
+                            <div>
+                                <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
+                                <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row ls-doc text-center d-block" v-else>
+                Không có tài liệu
+            </div>
+        </div>
+        <div class="box margin-t20 flex" v-if="tab[2] && ref.data.length > 0">
+            <div class="paging-view">
+                Hiển thị:
+                <select v-model="ref.view" v-on:change="loadPreference()">
+                    <option value="10">10 kết quả</option>
+                    <option value="20">20 kết quả</option>
+                    <option value="30">30 kết quả</option>
+                </select>
+            </div>
+            <div class="page-control">
+                <div class="right">
+                    <b-pagination v-model="ref.page"
+                                  :total-rows="ref.totalRec"
+                                  :per-page="ref.view"
+                                  v-on:input="loadPreference()"></b-pagination>
                 </div>
             </div>
         </div>
@@ -69,6 +129,22 @@
             mounted() {
                 this.loadClassDetail()
                 window.loadContent = this.loadContent
+                var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    //console.log(hash)
+                    switch (hash) {
+                        case 'module':
+                            this.tabChange(1);
+                            break;
+                        case 'reference':
+                            this.tabChange(2);
+                            break;
+                        case 'discuss':
+                            this.tabChange(3);
+                            break;
+                    }
+                }
             },
             data: {
                 classID: '@currentClass.ID',
@@ -80,7 +156,15 @@
                 subjectName: '@currentClass.SubjectName',
                 skillName: '@currentClass.SkillName',
                 classSubjects: [],
-                tab: [true, false]
+                tab: [true, false],
+                ref: {
+                    range: '@BaseCustomerEntity.Database.REF_RANGE.CLASS',
+                    target: '@currentClass.ID',
+                    searchTerm: '',
+                    data: [],
+                    view: 10,
+                    page: 1
+                },
             },
             watch: {
             },
@@ -96,14 +180,24 @@
                     this.tab[a] = true
                     switch (a) {
                         case 0:
+                            history.replaceState({ tab: a }, this.className + " - Tổng quan");
                             this.loadClassDetail();
                             break;
                         case 1:
+                            history.replaceState({ tab: a }, this.className + " - Môn học", "#module");
                             this.loadClassSubjects();
+                            break;
+                        case 2:
+                            history.replaceState({ tab: a }, this.className + " - Tài liệu tham khảo", "#reference");
+                            this.loadPreference();
+                            break;
+                        case 3:
+                            this.loadComment();
                             break;
                     }
                     this.$forceUpdate()
                 },
+
                 loadClassDetail() {
                     let _that = this
                     let _form = new FormData()
@@ -123,6 +217,11 @@
                         _that.loaded_teacher.push(obj.SubjectID);
                     }).catch(e => { })
                 },
+                loadComment() {
+                    document.location = '@Url.Action("Index","Discuss", new { id = currentClass.ID })'
+                },
+
+                //MODULES
                 loadClassSubjects() {
                     let _that = this
                     if (_that.classSubjects.length > 0)
@@ -139,7 +238,10 @@
                                     _that.classSubjects.push({
                                         ID: item.ID,
                                         Title: item.SkillName,
-                                        Image:  item.SkillImage,
+                                        Image: item.SkillImage,
+                                        Color: item.Color,
+                                        Teacher: item.TeacherName,
+                                        Grade: item.GradeName,
                                         Chapters: [],
                                         Lessons: []
                                     })
@@ -150,10 +252,6 @@
                                 //_that.$forceUpdate()
                             }).catch(e => { })
                 },
-                formatShortDate(date) {
-                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
-                    return moment(date).format("DD/MM/YYYY")
-                },
                 matchedItem(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key
                 },
@@ -162,11 +260,52 @@
         	            return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
                     })
                 },
+                
+
+                //REF
+                loadPreference() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('SearchText', "")
+                    _form.append('Target', _that.ref.target)
+                    _form.append('PageSize', _that.ref.view)
+                    _form.append('PageIndex', _that.ref.page)
+
+                    let _url = '@Url.Action("GetClassList", "Reference")'
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.ref.data = response.data.Data;
+                            this.ref.data = _that.ref.data
+                            this.ref.totalRec = response.data.Model.totalRecord
+                            console.log(totalRec)
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
+                            //console.log(_that.active_course);
+                        }).catch(e => { })
+                },
+                openLink(obj) {
+                    obj.Viewed = obj.Viewed + 1;
+                    window.open('@Url.Action("OpenLink", "Reference")/' + obj.ID);
+                },
+                download(obj) {
+                    if (obj.Media == null)
+                        return false;
+                    obj.Downloaded = obj.Downloaded + 1;
+                    window.open('@Url.Action("Download", "Reference")/' + obj.ID);
+                },
+
+                //SUPPORT
                 domDecoder(str) {
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
-                }
+                },
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                
             }
         });
     </script>

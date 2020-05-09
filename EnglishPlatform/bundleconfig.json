@@ -1,0 +1,94 @@
+[
+  {
+    "outputFileName": "wwwroot/css/minify.min.css",
+    "inputFiles": [
+      "wwwroot/css/bootstrap.4.3.1.min.css",
+      "wwwroot/css/be-vietnam-font.css",
+      "wwwroot/css/fonts.css",
+      "wwwroot/css/stylesheet.min.css",
+      "wwwroot/vendor/fontawesome-free/css/all.css"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/css/detail.min.css",
+    "inputFiles": [
+      "wwwroot/css/custom.css",
+      "wwwroot/css/layout.min.css",
+      "wwwroot/css/jquery-ui.min.css",
+      "wwwroot/css/jquery.scrollbar.css",
+      "wwwroot/css/stylesheet.min.css"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/css/chat.min.css",
+    "inputFiles": [
+      "wwwroot/css/materialdesignicons.min.css",
+      "wwwroot/css/NewChat/app.css",
+      "wwwroot/css/NewChat/default.css"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/common.min.js",
+    "inputFiles": [
+      "wwwroot/js/vue@2.6.0.js",
+      "wwwroot/js/axios.min.js",
+      "wwwroot/js/bootstrap-vue.min.js",
+      "wwwroot/js/jquery.min.js",
+      "wwwroot/js/moment.min.js",
+      "wwwroot/js/moment-with-locales.min.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": true
+  },
+  {
+    "outputFileName": "wwwroot/js/common.lib.min.js",
+    "inputFiles": [
+      "wwwroot/js/lib/config.url.base.js",
+      "wwwroot/js/lib/notification/notification.js",
+      "wwwroot/js/lib/xhr.js",
+      "wwwroot/js/lib/sweetalert2@9.js",
+      "wwwroot/js/calendar/js/sweetalert.min.js",
+      "wwwroot/js/hubs/render.html.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": true
+  },
+  {
+    "outputFileName": "wwwroot/js/detail.min.js",
+    "inputFiles": [
+      "wwwroot/js/site.js",
+      "wwwroot/vendor/jquery/jquery.min.js",
+      "wwwroot/js/jquery-ui.min.js",
+      "wwwroot/js/custom.js",
+      "wwwroot/js/popper.min.js",
+      "wwwroot/vendor/bootstrap/js/bootstrap.js",
+      "wwwroot/js/plugins/jquery.lazy.min.js",
+      "wwwroot/js/plugins/jquery.lazy.plugins.min.js",
+      "wwwroot/js/jquery.scrollbar.min.js",
+      "wwwroot/js/moment.min.js",
+      "wwwroot/vendor/jquery-easing/jquery.easing.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": true
+  },
+  {
+    "outputFileName": "wwwroot/js/detail.fn.min.js",
+    "inputFiles": [
+      "wwwroot/js/content-render.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  }
+]

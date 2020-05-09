@@ -184,6 +184,7 @@ b, th {
 
 video, audio {
     width: 80%;
+    max-width: 600px;
     display: inline-block;
     vertical-align: middle;
 }

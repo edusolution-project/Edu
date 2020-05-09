@@ -18,6 +18,7 @@ namespace BaseEasyRealTime.Globals
             service.AddSingleton<MessageService>();
             service.AddSingleton<NewFeedService>();
             service.AddSingleton<CommentService>();
+            service.AddSingleton<NotificationService>();
             return service;
         }
     }

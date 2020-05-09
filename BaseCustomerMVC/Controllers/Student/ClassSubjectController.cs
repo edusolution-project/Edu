@@ -148,8 +148,10 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
                           let subject = _subjectService.GetItemByID(r.SubjectID)
+                          let grade = _gradeService.GetItemByID(r.GradeID)
                           let course = _courseService.GetItemByID(r.CourseID)
                           let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
+                          let teacher = _teacherService.GetItemByID(r.TeacherID)
                           select new ClassSubjectViewModel
                           {
                               ID = r.ID,
@@ -157,11 +159,14 @@ namespace BaseCustomerMVC.Controllers.Student
                               SkillID = r.SkillID,
                               SkillName = skill != null ? skill.Name : "",
                               SkillImage = skill != null ? skill.Image : "",
+                              Color = skill != null ? skill.Color : "",
                               SubjectName = subject.Name,
                               GradeID = r.GradeID,
+                              GradeName = grade.Name,
                               CourseID = r.CourseID,
                               CourseName = course.Name,
-                              TeacherID = r.TeacherID
+                              TeacherID = r.TeacherID,
+                              TeacherName = teacher.FullName
                           }).ToList()
                 },
             };
@@ -183,7 +188,19 @@ namespace BaseCustomerMVC.Controllers.Student
             if (string.IsNullOrEmpty(Parent))
                 Parent = "0";
 
-            var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.CourseID && c.ParentID == Parent).ToList();
+            var TopID = "";
+            if (Parent != "0")
+            {
+                var top = _chapterService.GetItemByID(Parent);
+                if (top == null)
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy chương" }
+                    });
+                TopID = top.ParentID;
+            }
+
+            var chapters = _chapterService.CreateQuery().Find(c => c.ClassSubjectID == currentClass.ID && c.ParentID == Parent).ToList();
             //var chapterExtends = _chapterExtendService.Search(currentClass.ID);
 
             //foreach (var chapter in chapters)
@@ -192,7 +209,7 @@ namespace BaseCustomerMVC.Controllers.Student
             //    if (extend != null) chapter.Description = extend.Description;
             //}
 
-            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == currentClass.CourseID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
+            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentClass.ID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
                            where schedule != null
                            select _lessonMapping.AutoOrtherType(r, new LessonScheduleViewModel()
@@ -205,6 +222,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var response = new Dictionary<string, object>
                 {
+                    { "RootID", TopID },
                     { "Data", chapters },
                     { "Lesson", lessons }
                 };

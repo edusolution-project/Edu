@@ -45,7 +45,7 @@ namespace BaseCustomerEntity.Database
         public string SubjectID { get; set; }
         [JsonProperty("CourseID")]
         public string CourseID { get; set; }
-        [JsonProperty("TeacherID")] 
+        [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
         [JsonProperty("Syllabus")]
         public string Syllabus { get; set; }
@@ -59,6 +59,12 @@ namespace BaseCustomerEntity.Database
         public string Description { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
+        [JsonProperty("TotalLessons")]
+        public long TotalLessons { get; set; }
+        [JsonProperty("TotalExams")]
+        public long TotalExams { get; set; }
+
+        public string Center { get; set; }
 
     }
 
@@ -79,7 +85,10 @@ namespace BaseCustomerEntity.Database
                     new IndexKeysDefinitionBuilder<ClassEntity>()
                     .Ascending(t=> t.TeacherID)
                     .Ascending(t => t.SubjectID)
-                    .Ascending(t=> t.GradeID))
+                    .Ascending(t=> t.GradeID)),
+                new CreateIndexModel<ClassEntity>(
+                    new IndexKeysDefinitionBuilder<ClassEntity>()
+                    .Text(t=> t.Name))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
@@ -107,6 +116,21 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().UpdateManyAsync(t => t.ID.Equals(ID),
                 Builders<ClassEntity>.Update.AddToSet("Subjects", subjectID)).Result.ModifiedCount;
+        }
+
+        public IEnumerable<string> GetMultipleClassName(List<string> IDs)
+        {
+            return Collection.Find(t => IDs.Contains(t.ID)).Project(t => t.Name).ToEnumerable();
+        }
+
+        public IEnumerable<ClassEntity> GetItemsByIDs(List<string> ClassIDs)
+        {
+            return Collection.Find(t => ClassIDs.Contains(t.ID)).ToEnumerable();
+        }
+
+        public IEnumerable<string> GetTeacherClassList(string userID)
+        {
+            return Collection.Find(t => t.Members.Any(o => o.TeacherID == userID)).Project(t => t.ID).ToEnumerable();
         }
     }
 }

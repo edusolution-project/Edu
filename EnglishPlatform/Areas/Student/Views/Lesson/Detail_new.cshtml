@@ -1,6 +1,6 @@
 ﻿@{
 
-    Layout = "~/Views/Shared/_LayoutStudent_noChat.cshtml";
+    Layout = "~/Views/Shared/_LayoutStudent_NewUI_noChat.cshtml";
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     var currentClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
@@ -9,36 +9,17 @@
     var currentChapter = ViewBag.Chapter as BaseCustomerEntity.Database.ChapterEntity;
     ViewData["Title"] = currentLesson.Title;
 }
-
-<script>
-    activeTab = "course";
-</script>
+@section Sidebar
+{
+    @await Html.PartialAsync("_sidebarExam_Student")
+}
 <div class="left-col">
-    <div class="page-title row">
-        <h2 class="col-md-6 p-0">
-            @*<a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
-                "Modules" ,"Course")/@currentClass.ID">@currentClass.Name</a>*@
-            @if (currentChapter != null)
-            {
-                @*<span>/</span>*@ <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
-                            "Modules" ,"Course")/@currentClass.ID#@currentChapter.ID">@currentChapter.Name</a>
-                        }
-            / @currentLesson.Title
-        </h2>
-        @if (nextLesson != null)
-        {
-            <h2 class="col-md-6 p-0 text-right">
-                Next > <a href="@Url.Action(//currentLesson.TemplateType == 2 ? "Assignment":
-                            "Detail" ,"Lesson")/@nextLesson.ID/@currentClassSubject.ID">@nextLesson.Title</a>
-                        </h2>
-                    }
-    </div>
     <div class="main-container">
         <!-- Begin Page Content -->
         <div id="exam-student" class="h-100">
         </div>
         <!-- End of Main Content -->
-        <input type="hidden" name="ExamID" id="ExamID" value="" />
+        @*<input type="hidden" name="ExamID" id="ExamID" value="" />*@
     </div>
 
     <div id="lessonSummary" class="shadow">
@@ -47,8 +28,16 @@
 </div>
 @section Footer{}
 @section Scripts{
+    <style>
+        .card-header[style*="display:none"] ~ .card-body {
+            top: 0 !important;
+        }
 
-    <script src="~/js/content-render.js?20191213"></script>
+        .uimod_exam .card-body {
+            padding-bottom: 7px !important;
+        }
+    </style>
+    <script src="~/js/detail.fn.min.js?20200420"></script>
     <script>
             var config = {
                 container: "exam-student",
@@ -64,12 +53,12 @@
                 },
                 type: @currentLesson.TemplateType,
                 lesson_id: '@currentLesson.ID',
-                class_id: '@currentClassSubject.ID',
+                class_id: '@currentClass.ID',
+                class_subject_id: '@currentClassSubject.ID',
                 chap_id: '@currentLesson.ChapterID'
             }
             var widget = new Lesson.onReady(config);
     </script>
     <link href="~/css/detailui.css?20191512" rel="stylesheet" />
-
 }
 

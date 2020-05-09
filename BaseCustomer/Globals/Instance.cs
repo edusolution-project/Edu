@@ -11,6 +11,7 @@ namespace BaseCustomerEntity.Globals
         public static IServiceCollection AddServiceBase(this IServiceCollection services)
         {
             services.AddSingleton<AccountService>();
+            services.AddSingleton<CenterService>();
             services.AddSingleton<PermissionService>();
             services.AddSingleton<RoleService>();
             services.AddSingleton<ScoreService>();
@@ -30,16 +31,19 @@ namespace BaseCustomerEntity.Globals
 
             services.AddSingleton<ProgramService>();
             services.AddSingleton<CourseService>();
+            services.AddSingleton<CourseChapterService>();
+            services.AddSingleton<CourseLessonService>();
+
             services.AddSingleton<ChapterService>();
             services.AddSingleton<ChapterProgressService>();
-
             services.AddSingleton<ChapterExtendService>();
+
             services.AddSingleton<SubjectService>();
             services.AddSingleton<SkillService>();
             services.AddSingleton<GradeService>();
             services.AddSingleton<LessonService>();
             services.AddSingleton<LessonPartService>();
-            services.AddSingleton<LessonExtendService>();
+            //services.AddSingleton<LessonExtendService>();
             services.AddSingleton<LessonPartAnswerService>();
             services.AddSingleton<LessonPartQuestionService>();
             services.AddSingleton<LessonScheduleService>();
@@ -51,8 +55,9 @@ namespace BaseCustomerEntity.Globals
 
             services.AddSingleton<ClassService>();
             services.AddSingleton<ClassSubjectService>();
-            services.AddSingleton<ClassStudentService>();
+            //services.AddSingleton<ClassStudentService>();
             services.AddSingleton<ClassProgressService>();
+            services.AddSingleton<ClassSubjectProgressService>();
 
             services.AddSingleton<ExamService>();
             services.AddSingleton<ExamDetailService>();
@@ -66,6 +71,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<CalendarLogService>();
             services.AddSingleton<AccessesService>();
             services.AddSingleton<AuthorityService>();
+            services.AddSingleton<MailLogService>();
             services.AddSingleton<UserAndRoleService>();
             return services;
         }

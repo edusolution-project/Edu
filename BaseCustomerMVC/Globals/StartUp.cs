@@ -67,6 +67,7 @@ namespace BaseCustomerMVC.Globals
         {
             Configuration = configuration;
         }
+
         public static IApplicationBuilder UseAuthention(this IApplicationBuilder app, IConfiguration configuration)
         {
             app.Use(next => context =>

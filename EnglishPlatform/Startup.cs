@@ -8,9 +8,11 @@ using BaseCustomerMVC.Globals;
 using BaseEasyRealTime.Globals;
 using BaseHub;
 using Core_v2.Globals;
+using EasyZoom;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -51,6 +53,10 @@ namespace EnglishPlatform
             services.AddServiceBase();
             services.AddScoped<FileProcess>();
             services.AddSingleton<CalendarHelper>();
+            services.AddSingleton<MailHelper>();
+            services.AddSingleton<CourseHelper>();
+            services.AddSingleton<StudentHelper>();
+            services.AddSingleton<LessonHelper>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddMvc(options =>
             {
@@ -64,8 +70,14 @@ namespace EnglishPlatform
 
             services.AddSession();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.Configure<FormOptions>(x =>
+            {
+                x.ValueLengthLimit = int.MaxValue;
+                x.MultipartBodyLengthLimit = int.MaxValue; // In case of multipart
+            });
             services.AddDistributedMemoryCache();
             services.AddSignalR();
+            services.AddEasyZoom(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
@@ -24,10 +25,14 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<CloneLessonPartQuestionEntity>>
             {
-                //ClassID_1_ParentID_1
+                //ClassID_1
                 new CreateIndexModel<CloneLessonPartQuestionEntity>(
                     new IndexKeysDefinitionBuilder<CloneLessonPartQuestionEntity>()
-                    .Ascending(t => t.ClassID).Ascending(t=> t.ParentID)),
+                    .Ascending(t => t.ClassID)),
+                //ClassSubjectID_1
+                new CreateIndexModel<CloneLessonPartQuestionEntity>(
+                    new IndexKeysDefinitionBuilder<CloneLessonPartQuestionEntity>()
+                    .Ascending(t => t.ClassSubjectID)),
                 //ParentID_1
                 new CreateIndexModel<CloneLessonPartQuestionEntity>(
                     new IndexKeysDefinitionBuilder<CloneLessonPartQuestionEntity>()
@@ -35,6 +40,11 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public async Task RemoveManyAsync(List<string> Ids)
+        {
+            _ = Collection.DeleteManyAsync(t => Ids.Contains(t.ID));
         }
     }
 

@@ -15,15 +15,16 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly SubjectService _subjectService;
         private readonly CourseService _courseService;
         private readonly ClassService _classService;
-        private readonly ClassStudentService _classStudentService;
+        //private readonly ClassStudentService _classStudentService;
+        private readonly StudentService _studentService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly ChapterService _chapterService;
         private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly LessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
-        private readonly LessonPartQuestionService _lessonPartQuestionService;
-        private readonly LessonPartAnswerService _lessonPartAnswerService;
+        //private readonly LessonPartQuestionService _lessonPartQuestionService;
+        //private readonly LessonPartAnswerService _lessonPartAnswerService;
 
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
@@ -35,15 +36,16 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _schedulemapping;
-        private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
-        private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
-        private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
+        //private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
+        //private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
+        //private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
 
         public LessonController(
             SubjectService subjectService
             , CourseService courseService
             , ClassService classService
-            , ClassStudentService classStudentService
+            //, ClassStudentService classStudentService
+            , StudentService studentService
             , ClassSubjectService classSubjectService
             , ChapterService chapterService
             , LessonScheduleService lessonScheduleService
@@ -53,8 +55,8 @@ namespace BaseCustomerMVC.Controllers.Student
             , ExamService examService
             , ExamDetailService examDetailService
             , LessonPartService lessonPartService
-            , LessonPartQuestionService lessonPartQuestionService
-            , LessonPartAnswerService lessonPartAnswerService
+            //, LessonPartQuestionService lessonPartQuestionService
+            //, LessonPartAnswerService lessonPartAnswerService
 
             , CloneLessonPartService cloneLessonPartService
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
@@ -64,7 +66,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _subjectService = subjectService;
             _courseService = courseService;
             _classService = classService;
-            _classStudentService = classStudentService;
+            //_classStudentService = classStudentService;
+            _studentService = studentService;
             _classSubjectService = classSubjectService;
             _chapterService = chapterService;
             _lessonScheduleService = lessonScheduleService;
@@ -264,9 +267,9 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.NextLesson = nextLesson;
             ViewBag.Chapter = chapter;
             ViewBag.Type = lesson.TemplateType;
-            if (newui == 1)
-                return View("Detail_new");
-            return View();
+            //if (newui == 1)
+            return View("Detail_new");
+            //return View();
         }
 
         public IActionResult Review(DefaultModel model)
@@ -302,7 +305,9 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var chapter = _chapterService.GetItemByID(lesson.ChapterID);
 
-            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID).ToList();
+            List<string> ExamTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "ESSAY" };
+
+            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
 
             var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
             var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
@@ -426,7 +431,6 @@ namespace BaseCustomerMVC.Controllers.Student
 
             if (lastexam == null)
             {
-
                 var respone = new Dictionary<string, object> { { "Data", dataResponse } };
                 return new JsonResult(respone);
             }
@@ -492,8 +496,9 @@ namespace BaseCustomerMVC.Controllers.Student
                         {"Error",model },
                         {"Msg","Không có thông tin lớp học" }
                     });
-            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, UserID);
-            if (classStudent == null)
+            //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, UserID);
+            //if (classStudent == null)
+            if (!_studentService.IsStudentInClass(currentClass.ID, UserID))
                 return new JsonResult(new Dictionary<string, object> {
                         {"Data",null },
                         {"Error",model },
@@ -568,8 +573,9 @@ namespace BaseCustomerMVC.Controllers.Student
                         {"Error",model },
                         {"Msg","Không có thông tin lớp học" }
                     });
-            var classStudent = _classStudentService.GetClassStudent(currentClass.ID, UserID);
-            if (classStudent == null)
+            //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, UserID);
+            //if (classStudent == null)
+            if (!_studentService.IsStudentInClass(currentClass.ID, UserID))
                 return new JsonResult(new Dictionary<string, object> {
                         {"Data",null },
                         {"Error",model },
@@ -589,7 +595,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var classSchedule = new ClassScheduleViewModel(course)
             {
-                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                Chapters = _chapterService.GetSubChapters(currentCs.ID, ChapterID),
+                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == model.ID).FirstOrDefault()
                            let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID).SortByDescending(o => o.ID).FirstOrDefault()
                            let lastexam = r.TemplateType == LESSON_TEMPLATE.EXAM ? _examService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID
@@ -619,67 +626,67 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(response);
         }
 
-        [Obsolete]
-        [HttpPost]
-        public JsonResult GetAssignments(string ID)
-        {
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //[Obsolete]
+        //[HttpPost]
+        //public JsonResult GetAssignments(string ID)
+        //{
+        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
 
-            if (string.IsNullOrEmpty(ID))
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error", ID },
-                        {"Msg","Không có thông tin lớp học" }
-                    });
-            }
+        //    if (string.IsNullOrEmpty(ID))
+        //    {
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error", ID },
+        //                {"Msg","Không có thông tin lớp học" }
+        //            });
+        //    }
 
-            var currentClass = _classService.GetItemByID(ID);
-            if (currentClass == null || currentClass.Students.IndexOf(UserID) < 0)
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error", ID },
-                        {"Msg","Không có thông tin lớp học" }
-                    });
-            }
+        //    var currentClass = _classService.GetItemByID(ID);
+        //    if (currentClass == null || currentClass.Students.IndexOf(UserID) < 0)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error", ID },
+        //                {"Msg","Không có thông tin lớp học" }
+        //            });
+        //    }
 
-            var course = _courseService.GetItemByID(currentClass.CourseID);
+        //    var course = _courseService.GetItemByID(currentClass.CourseID);
 
-            if (course == null)
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error", ID },
-                        {"Msg","Không có thông tin giáo trình" }
-                    });
-            }
+        //    if (course == null)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error", ID },
+        //                {"Msg","Không có thông tin giáo trình" }
+        //            });
+        //    }
 
-            var classSchedule = new ClassScheduleViewModel(course)
-            {
+        //    var classSchedule = new ClassScheduleViewModel(course)
+        //    {
 
-                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID
-                           //&& o.Etype > 0
-                           ).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ID).FirstOrDefault()
-                           let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassID == ID).SortByDescending(o => o.ID).FirstOrDefault()
-                           select _schedulemapping.AutoOrtherType(r, new LessonScheduleViewModel()
-                           {
-                               ScheduleID = schedule.ID,
-                               StartDate = schedule.StartDate,
-                               EndDate = schedule.EndDate,
-                               IsActive = schedule.IsActive,
-                               IsView = lastjoin != null,
-                               LastJoin = lastjoin != null ? lastjoin.Time : DateTime.MinValue
-                           })).ToList()
-            };
+        //        Lessons = (from r in _lessonService.CreateQuery().Find(o => o.Class == course.ID
+        //                   //&& o.Etype > 0
+        //                   ).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+        //                   let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == ID).FirstOrDefault()
+        //                   let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassID == ID).SortByDescending(o => o.ID).FirstOrDefault()
+        //                   select _schedulemapping.AutoOrtherType(r, new LessonScheduleViewModel()
+        //                   {
+        //                       ScheduleID = schedule.ID,
+        //                       StartDate = schedule.StartDate,
+        //                       EndDate = schedule.EndDate,
+        //                       IsActive = schedule.IsActive,
+        //                       IsView = lastjoin != null,
+        //                       LastJoin = lastjoin != null ? lastjoin.Time : DateTime.MinValue
+        //                   })).ToList()
+        //    };
 
-            var response = new Dictionary<string, object>
-            {
-                { "Data", classSchedule },
-                { "Model", ID }
-            };
-            return new JsonResult(response);
-        }
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data", classSchedule },
+        //        { "Model", ID }
+        //    };
+        //    return new JsonResult(response);
+        //}
     }
 }

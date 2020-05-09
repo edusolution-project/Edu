@@ -16,9 +16,9 @@ namespace BaseCustomerEntity.Database
         public string ClassID { get; set; }
     }
 
-    public class ClassStudentService : ServiceBase<ClassStudentEntity>
+    public class ClassStudentService_old : ServiceBase<ClassStudentEntity>
     {
-        public ClassStudentService(IConfiguration configuration) : base(configuration)
+        public ClassStudentService_old(IConfiguration configuration) : base(configuration)
         {
 
             var indexs = new List<CreateIndexModel<ClassStudentEntity>>
@@ -43,7 +43,16 @@ namespace BaseCustomerEntity.Database
 
         public ClassStudentEntity GetClassStudent(string ClassID, string StudentID)
         {
-            return Collection.Find(t => t.ClassID == ClassID && t.StudentID == StudentID).SingleOrDefault();
+            try
+            {
+                return Collection.Find(t => t.ClassID == ClassID && t.StudentID == StudentID).SingleOrDefault();
+            }
+            catch //autofix
+            {
+                var firstStudent = Collection.Find(t => t.ClassID == ClassID && t.StudentID == StudentID).FirstOrDefault();
+                Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID && (t.ID != firstStudent.ID));
+                return firstStudent;
+            }
         }
 
         public List<string> GetStudentClasses(string StudentID)

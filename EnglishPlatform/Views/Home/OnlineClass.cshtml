@@ -1,0 +1,11 @@
+﻿
+@{
+    ViewData["Title"] = "OnlineClass";
+    int role = User.FindFirst("Type")?.Value == "teacher" ? 1 : 0;
+    var url = ViewBag.Url as string;
+    //var role = ViewBag.Role as string;
+}
+<body style="margin:0; padding:0;">
+    <iframe src="@url" style="width:100%; height:100%; margin: 0; border:none">
+    </iframe>
+</body>

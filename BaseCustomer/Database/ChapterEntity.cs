@@ -4,43 +4,26 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
-    public class ChapterEntity : EntityBase
+    public class ChapterEntity : CourseChapterEntity
     {
-        [JsonProperty("OriginID")]
-        public string OriginID { get; set; }
-        [JsonProperty("Name")]
-        public string Name { get; set; }
-        [JsonProperty("Code")]
-        public string Code { get; set; }
-        [JsonProperty("CourseID")]
-        public string CourseID { get; set; }
-        [JsonProperty("ParentID")]
-        public string ParentID { get; set; }
-        [JsonProperty("ParentType")]
-        public int ParentType { get; set; }
-        [JsonProperty("CreateUser")]
-        public string CreateUser { get; set; }
-        [JsonProperty("Created")]
-        public DateTime Created { get; set; }
-        [JsonProperty("Updated")]
-        public DateTime Updated { get; set; }
-        [JsonProperty("IsAdmin")]
-        public bool IsAdmin { get; set; }
-        [JsonProperty("IsActive")]
-        public bool IsActive { get; set; }
-        [JsonProperty("Order")]
-        public int Order { get; set; }
-
-        [JsonProperty("Description")]
-        public string Description { get; set; }
+        [JsonProperty("ClassID")]
+        public string ClassID { get; set; }
+        [JsonProperty("ClassSubjectID")]
+        public string ClassSubjectID { get; set; }
     }
     public class ChapterService : ServiceBase<ChapterEntity>
     {
+
+        private CourseService _courseService;
+
         public ChapterService(IConfiguration config) : base(config)
         {
+            _courseService = new CourseService(config);
+
             var indexs = new List<CreateIndexModel<ChapterEntity>>
             {
                 //SubjectID_1_ParentID_1
@@ -56,9 +39,43 @@ namespace BaseCustomerEntity.Database
 
             Collection.Indexes.CreateManyAsync(indexs);
         }
-        public object GetByCode(string code)
+
+        public async Task IncreaseLessonCount(string ID, long increment, List<string> listid = null)//prevent circular ref
         {
-            return CreateQuery().Find(o => o.Code == code)?.SingleOrDefault();
+            var r = await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ChapterEntity>().Inc(t => t.TotalLessons, increment));
+            if (r.ModifiedCount > 0)
+            {
+                if (listid == null)
+                    listid = new List<string> { ID };
+                else
+                    listid.Add(ID);
+                var current = GetItemByID(ID);
+                if (current != null)
+                {
+                    if (!string.IsNullOrEmpty(current.ParentID) && (current.ParentID != "0"))
+                    {
+                        if (listid.IndexOf(current.ParentID) < 0)
+                            _ = IncreaseLessonCount(current.ParentID, increment, listid);
+                        else
+                        {
+                            var e = 1;
+                        }
+                    }
+                    else
+                        _ = _courseService.IncreaseLessonCount(current.CourseID, increment);
+                }
+
+            }
+        }
+
+        public List<ChapterEntity> GetSubChapters(string ClassSubjectID, string ParentID)
+        {
+            return CreateQuery().Find(c => c.ClassSubjectID == ClassSubjectID && c.ParentID == ParentID).SortBy(t => t.Order).ToList();
+        }
+
+        public async Task RemoveClassSubjectChapter(string ClassSubjectID)
+        {
+            await Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
         }
     }
 }

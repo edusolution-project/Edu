@@ -14,7 +14,28 @@
 @*longht add 2020-01-12*@
 <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
 <link href="~/js/calendar/css/style.css" rel="stylesheet" />
-
+<style>
+    .swal-title {
+      margin: 0px;
+      font-size: 16px;
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+      margin-bottom: 28px;
+    }
+    .swal-text {
+      padding: 17px;
+      display: block;
+      margin: auto;
+      text-align: center;
+      color: #61534e;
+    }
+    .swal-footer {
+      text-align:center;
+      background-color: rgb(245, 248, 250);
+      margin-top: 32px;
+      border-top: 1px solid #E9EEF1;
+      overflow: hidden;
+    }
+</style>
 <script>
     setActiveMenu("calendar");
 </script>
@@ -28,7 +49,7 @@
 
 </div>
 <div class="form-event" id="form-event">
-    <div class="header-form-event">Sự kiện</div>
+    <div class="header-form-event">Sự kiện<button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button></div>
     <div class="body-form-event">
         <input type="hidden" name="ID" value="" />
         <div class="item-event">
@@ -48,6 +69,7 @@
         </div>
     </div>
     <div class="footer-form-event">
+        <button class="btn btn-primary btn-goto-event" style="display:none" id="btn-goto-event">Đi đến bài học</button>
         <button class="btn btn-primary btn-save-event" id="btn-save-event">Lưu</button>
         <button class="btn btn-o btn-cancel-event" id="btn-cancel-event">Hủy</button>
         <button class="btn btn-o btn-delete-event btn-danger" id="btn-delete-event">Xóa</button>
@@ -137,6 +159,11 @@
                         if (checkTime(new Date(jsonData.Created), 0)) {
                             // cho phép xóa
                         }
+                        var btnGoTo = formEvent.querySelector("#btn-goto-event");
+                        if (btnGoTo != null) {
+                            btnGoTo.style.display = 'none';
+                            btnGoTo.removeAttribute("data-link");
+                        }
                     }
                     else {
                         var startDate = new Date(jsonData.StartDate);
@@ -144,57 +171,122 @@
                         var monthEvent = startDate.getMonth() + 1 >= 10 ? startDate.getMonth() + 1 : `0${startDate.getMonth() + 1}`;
                         var dayEvent = startDate.getDate() >= 10 ? startDate.getDate() : `0${startDate.getDate()}`;
                         var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
-                        if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != void 0) {
+
+                        if (jsonData.Status == 5) {
                             document.body.classList.remove("open-add-event");
-                            var time = new Date(jsonData.Created);
-                            var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
-                           
+                            var time = new Date(jsonData.StartDate);
+                            var Title = `${jsonData.Title} (${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()} ${timeEvent})`;
                             var str = `Giáo viên : ${jsonData.TeacherName}`;
                             swal({
                                 title: Title,
-                                type: "info",
                                 text: str,
-                                showCancelButton: true,
-                                confirmButtonClass: "btn-sm btn-primary",
-                                confirmButtonText: "Call skype",
-                                cancelButtonClass :"btn-sm",
-                                cancelButtonText:"close",
-                                closeOnConfirm: false
-                            },function () {
-                                swal.close();
-                                var _skype = jsonData.Skype;
-                                if (jsonData.Skype == null) {
-                                    _skype = skype;
+                                buttons: {
+                                    cancel: {
+                                        text: "Đóng",
+                                        value: null,
+                                        visible: true,
+                                        className: "",
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: "Vào lớp",
+                                        value: true,
+                                        visible: true,
+                                        className: "",
+                                        closeModal: true
+                                    },
+                                    roll: {
+                                      text: "Mở bài học",
+                                      value: "roll",
+                                      visible: jsonData.LinkLesson != null && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "" && jsonData.LinkLesson != "null"
+                                    },
                                 }
-                                window.open(`skype:${_skype}?call`, "_blank");
-                            });
+                            }).then(function (value) {
+                                if (value == true) {
+                                    var _skype = jsonData.UrlRoom;
+                                    if (_skype.startsWith('http'))
+                                        window.open(`${_skype}`, "_blank");
+                                    else {
+                                        var link = '@Url.Action("OnlineClass","Home")/' + jsonData.ID
+                                        window.open(`${link}`, "_blank");
+                                    }
+                                }
+                                if (value == "roll") {
+                                    window.open(`${jsonData.LinkLesson}`, "_blank");
+                                }
+                            })
                         } else {
                             document.body.classList.add("open-add-event");
-                            var formEvent = document.getElementById("form-event");
-                            var bodyEvent = formEvent.querySelector(".body-form-event");
-                            bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
-                            if (bodyEvent != null) {
-                                var Title = bodyEvent.querySelector("input[name='Title']");
-                                if (Title != null) {
-                                    Title.value = jsonData.Title;
+                                var formEvent = document.getElementById("form-event");
+                                var bodyEvent = formEvent.querySelector(".body-form-event");
+                                bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
+                                if (bodyEvent != null) {
+                                    var Title = bodyEvent.querySelector("input[name='Title']");
+                                    if (Title != null) {
+                                        Title.value = jsonData.Title;
+                                    }
+                                    var Content = bodyEvent.querySelector("textarea[name='Content']");
+                                    if (Content != null) {
+                                        Content.value = jsonData.Content != void 0
+                                            ? jsonData.Content
+                                            : "";
+                                    }
+                                    var time = bodyEvent.querySelector("input[name='Time']");
+                                    if (time != null) {
+                                        time.value = timeEvent;
+                                    }
+                                    var date = bodyEvent.querySelector("input[name='Date']");
+                                    if (date != null) {
+                                        date.value = dateEvent;
+                                    }
+                                    formEvent.classList.add("edit-form");
+                                    formEvent.classList.add("view-form");
+                                    var btnGoTo = formEvent.querySelector("#btn-goto-event");
+                                    if (btnGoTo != null) {
+                                        if (jsonData.LinkLesson != null && jsonData.LinkLesson != "" && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "null") {
+                                            btnGoTo.setAttribute("data-link", jsonData.LinkLesson);
+                                            btnGoTo.style.display = 'inline-block';
+                                            btnGoTo.onclick = function () {
+                                                var dataLink = btnGoTo.dataset.link;
+
+                                                //TODO: check here
+                                                window.open(`${dataLink}`, "_blank");
+                                                console.log(jsonData);
+                                                document.body.classList.remove("open-add-event");
+                                            }
+                                        }
+                                        else {
+                                            btnGoTo.style.display = 'none';
+                                        }
+                                    }
                                 }
-                                var Content = bodyEvent.querySelector("textarea[name='Content']");
-                                if (Content != null) {
-                                    Content.value = jsonData.Content != void 0
-                                        ? jsonData.Content
-                                        : "";
-                                }
-                                var time = bodyEvent.querySelector("input[name='Time']");
-                                if (time != null) {
-                                    time.value = timeEvent;
-                                }
-                                var date = bodyEvent.querySelector("input[name='Date']");
-                                if (date != null) {
-                                    date.value = dateEvent;
-                                }
-                                formEvent.classList.add("edit-form");
-                                formEvent.classList.add("view-form");
-                            }
+                            //if (jsonData.Skype != "" && jsonData.Skype != null && jsonData.Skype != "null" && jsonData.Skype != void 0) {
+                            //    document.body.classList.remove("open-add-event");
+                            //    var time = new Date(jsonData.Created);
+                            //    var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
+
+                            //    var str = `Giáo viên : ${jsonData.TeacherName}`;
+                            //    swal({
+                            //        title: Title,
+                            //        type: "info",
+                            //        text: str,
+                            //        showCancelButton: true,
+                            //        confirmButtonClass: "btn-sm btn-primary",
+                            //        confirmButtonText: "Call skype",
+                            //        cancelButtonClass: "btn-sm",
+                            //        cancelButtonText: "close",
+                            //        closeOnConfirm: false
+                            //    }, function () {
+                            //        swal.close();
+                            //        var _skype = jsonData.Skype;
+                            //        if (jsonData.Skype == null) {
+                            //            _skype = skype;
+                            //        }
+                            //        window.open(`skype:${_skype}?call`, "_blank");
+                            //    });
+                            //} else {
+                                
+                            //}
                         }
                     }
                 } else {
@@ -273,6 +365,9 @@
                 var Title = bodyEvent.querySelector("input[name='Title']");
                 if (Title != null) {
                     title = Title.value;
+                    if (title.length < 5) {
+                        return swal("", "Tiêu đề không thể bỏ trống.", "warning");
+                    }
                 }
                 var Content = bodyEvent.querySelector("textarea[name='Content']");
                 if (Content != null) {

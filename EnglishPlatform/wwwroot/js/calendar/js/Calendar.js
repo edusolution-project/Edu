@@ -10,6 +10,7 @@ var EduCalendar = (function(){
         this.config = config;
         this.renderCalendar = RenderCalendar;
         this.useEduTemplate = UseEduTemplate;
+        this.useEduTemplateTeacher = UseEduTemplateTeacher;
     }
     var groupConfig = function(options){
         if (options == null || typeof (options) == "undefined") return config;
@@ -147,6 +148,70 @@ var EduCalendar = (function(){
         this.config = groupConfig(optionsTemplate);
         return this;
     }
+
+    var UseEduTemplateTeacher = function () {
+        var _self = this;
+        var optionsTemplate = {
+            useTemplate: true,
+            customButtons: {
+                btnAddEvent: {
+                    text: "Thêm sự kiện",
+                    click: function () {
+                        addEvent(_self);
+                    }
+                },
+                btnAddClass: {
+                    text: "Tạo lớp trực tuyến",
+                    click: function () {
+                        addClassOnline(_self);
+                    }
+                },
+                selectMonth: {
+                    text: (new Date().getMonth() + 1),
+                    icon: "icon",
+                    themeIcon: "themeIcon",
+                    bootstrapFontAwesome: "bootstrapFontAwesome",
+                    click: function () { }
+                },
+                selectYear: {
+                    text: (new Date().getFullYear()),
+                    icon: "",
+                    themeIcon: "",
+                    bootstrapFontAwesome: "",
+                    click: function () { }
+                },
+                prevTime: {
+                    text: "<",
+                    //icon: "right-single-arrow",
+                    click: function () {
+                        prev(_self)
+                    }
+                },
+                nextTime: {
+                    text: ">",
+                    //icon: "right-single-arrow",
+                    click: function () {
+                        next(_self);
+                    }
+                },
+                now: {
+                    text: 'Hôm nay',
+                    icon: "",
+                    themeIcon: "",
+                    bootstrapFontAwesome: "",
+                    click: function () {
+                        today(_self);
+                    }
+                }
+            },
+            header: {
+                left: "prevTime,selectMonth,selectYear,nextTime,now",
+                right: "btnAddClass,btnAddEvent"
+            }
+        }
+        this.config = groupConfig(optionsTemplate);
+        return this;
+    }
     var today = function(self){
         self.schedule.EduCalendar.today();
         var root = document.getElementById(self.config.container_id);
@@ -213,7 +278,7 @@ var EduCalendar = (function(){
             root.querySelector(".fc-now-button").removeAttribute("disabled");
         }
     }
-    var addEvent = function (self, info) {
+    var addClassOnline = function (self, info) {
         var darkbox = document.getElementById("dark-smooke");
         if (darkbox == null) {
             darkbox = document.createElement("div");
@@ -222,6 +287,66 @@ var EduCalendar = (function(){
             document.body.appendChild(darkbox);
         }
         darkbox.onclick = function () {
+            document.body.classList.remove("open-add-event-class");
+            document.body.classList.remove("open-add-event");
+        }
+        document.body.classList.add("open-add-event-class");
+        if (info == void 0) {
+            var formEvent = document.getElementById("form-event-class");
+            if (formEvent != null) {
+                formEvent.classList.remove("edit-form");
+                formEvent.classList.remove("view-form");
+                var bodyEvent = formEvent.querySelector(".body-form-event");
+                if (bodyEvent != null) {
+                    bodyEvent.querySelector('input[name="ID"]').value = "";
+                    var Title = bodyEvent.querySelector("input[name='Title']");
+                    if (Title != null) {
+                        Title.value = '';
+                    }
+                    //var Content = bodyEvent.querySelector("input[name='UrlRoom']");
+                    //if (Content != null) {
+                    //    Content.value = "";
+                    //}
+                    var time = bodyEvent.querySelector("input[name='Time']");
+                    if (time != null) {
+                        time.value = "09:00 AM";
+                    }
+                    var date = bodyEvent.querySelector("input[name='Date']");
+                    if (date != null) {
+                        var now = new Date();
+                        var year = now.getFullYear();
+                        var month = (now.getMonth() + 1) >= 10 ? now.getMonth() + 1 : `0${now.getMonth() + 1}`;
+                        var day = (now.getDate() >= 10) ? now.getDate() : `0${now.getDate()}`;
+                        date.value = `${year}-${month}-${day}`;
+                    }
+                }
+            }
+        }
+    }
+    var addEvent = function (self, info) {
+        var formEventxxx = document.getElementById("form-event-class");
+        if (formEventxxx != null) {
+            formEventxxx.classList.remove("show_go_to_class");
+            var btnMo = formEvent.querySelector("button#btn-mo-bai-hoc");
+            var btnOnline = formEvent.querySelector("button#btn-vao-lop-online");
+            if (btnMo != null) {
+                btnMo.removeAttribute("data-url");
+                btnMo.style.display = "none";
+            }
+            if (btnOnline != null) {
+                btnOnline.removeAttribute("data-url");
+                btnOnline.style.display = "none";
+            }
+        }
+        var darkbox = document.getElementById("dark-smooke");
+        if (darkbox == null) {
+            darkbox = document.createElement("div");
+            darkbox.id = "dark-smooke";
+            darkbox.classList = "dark-smooke";
+            document.body.appendChild(darkbox);
+        }
+        darkbox.onclick = function () {
+            document.body.classList.remove("open-add-event-class");
             document.body.classList.remove("open-add-event");
         }
         document.body.classList.add("open-add-event");
@@ -229,6 +354,11 @@ var EduCalendar = (function(){
             var formEvent = document.getElementById("form-event");
             if (formEvent != null) {
                 formEvent.classList.remove("edit-form");
+                formEvent.classList.remove("view-form");
+                var btnGo = formEvent.querySelector("#btn-goto-event");
+                if (btnGo != null) {
+                    btnGo.style.display = 'none';
+                }
                 var bodyEvent = formEvent.querySelector(".body-form-event");
                 if (bodyEvent != null) {
                     bodyEvent.querySelector('input[name="ID"]').value = "";

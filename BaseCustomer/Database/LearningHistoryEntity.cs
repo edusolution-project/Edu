@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace BaseCustomerEntity.Database
 {
@@ -32,17 +33,25 @@ namespace BaseCustomerEntity.Database
     }
     public class LearningHistoryService : ServiceBase<LearningHistoryEntity>
     {
-        private ClassProgressService _classProgressService;
+
         private LessonProgressService _lessonProgressService;
         private ChapterProgressService _chapterProgressService;
+        private ClassSubjectProgressService _classSubjectProgressService;
+        private ClassProgressService _classProgressService;
 
-        public LearningHistoryService(IConfiguration config, ClassProgressService classProgressService,
+        public LearningHistoryService(IConfiguration config,
             LessonProgressService lessonProgressService,
-            ChapterProgressService chapterProgressService) : base(config)
+            ChapterProgressService chapterProgressService,
+            ClassSubjectProgressService classSubjectProgressService,
+            ClassProgressService classProgressService
+            ) : base(config)
         {
-            _classProgressService = classProgressService;
-            _chapterProgressService = chapterProgressService;
+
+
             _lessonProgressService = lessonProgressService;
+            _chapterProgressService = chapterProgressService;
+            _classSubjectProgressService = classSubjectProgressService;
+            _classProgressService = classProgressService;
 
             var indexs = new List<CreateIndexModel<LearningHistoryEntity>>
             {
@@ -76,9 +85,13 @@ namespace BaseCustomerEntity.Database
         {
             List<LearningHistoryEntity> oldItem = null;
             if (!string.IsNullOrEmpty(item.QuestionID))
+            {
+                //temporay skip exam history
+                return;
                 oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
                     && o.LessonPartID == item.LessonPartID
                     && o.QuestionID == item.QuestionID).ToList();
+            }
             else
                 oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
                 && o.ClassID == item.ClassID
@@ -95,9 +108,12 @@ namespace BaseCustomerEntity.Database
                 item.ViewCount = oldItem.Count;
             }
             CreateOrUpdate(item);
-            await _classProgressService.UpdateLastLearn(item);
             await _lessonProgressService.UpdateLastLearn(item);
-            await _chapterProgressService.UpdateLastLearn(item);
+
+            var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(item.ClassSubjectID, item.StudentID, item.LessonID);
+            await _chapterProgressService.UpdateLastLearn(lessonProgress);
+            await _classSubjectProgressService.UpdateLastLearn(lessonProgress);
+            await _classProgressService.UpdateLastLearn(lessonProgress);
         }
 
         public List<LearningHistoryEntity> SearchHistory(LearningHistoryEntity item)
@@ -136,9 +152,9 @@ namespace BaseCustomerEntity.Database
             });
         }
 
-        public DateTime GetLastLearnt(string StudentID, string LessonID)
+        public LearningHistoryEntity GetLastLearnt(string StudentID, string LessonID, string ClassSubjectID)
         {
-            return Collection.Find(t => t.StudentID == StudentID && t.LessonID == LessonID).SortByDescending(t => t.ID).Project(t => t.Time).FirstOrDefault();
+            return Collection.Find(t => t.StudentID == StudentID && t.LessonID == LessonID && t.ClassSubjectID == ClassSubjectID).FirstOrDefault();
         }
 
         public Task RemoveClassHistory(string ClassID)
@@ -146,26 +162,41 @@ namespace BaseCustomerEntity.Database
             _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID);
             _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
             _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
+            _ = _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
             _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID);
             return Task.CompletedTask;
         }
+
+        public async Task RemoveClassHistory(string[] ClassIDs)
+        {
+            await Collection.DeleteManyAsync(o => ClassIDs.Contains(o.ClassID));
+            await _classProgressService.CreateQuery().DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
+            await _chapterProgressService.CreateQuery().DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
+            await _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
+            await _lessonProgressService.CreateQuery().DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
+        }
+
+
 
         public Task RemoveClassStudentHistory(string ClassID, string StudentID)
         {
             _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
+            _ = _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             return Task.CompletedTask;
         }
 
-        public Task RemoveClassSubjectHistory(string ClassSubjectID)
+        public async Task RemoveClassSubjectHistory(string ClassSubjectID)
         {
-            _ = Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
-            _ = _classProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
-            _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
-            _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
-            return Task.CompletedTask;
+            await Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            var subjectProgresses = _classSubjectProgressService.GetListOfCurrentSubject(ClassSubjectID);
+            foreach (var progress in subjectProgresses)
+                await _classProgressService.DecreaseClassSubject(progress);
+            await _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            await _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+            await _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
         }
 
         public async Task UpdateClassSubject(ClassSubjectEntity classSubject)

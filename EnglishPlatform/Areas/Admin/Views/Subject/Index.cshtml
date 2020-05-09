@@ -102,7 +102,7 @@
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetList", "subject")',
-            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
+            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, PageSize:500},
             dataType:"json",
             success: function (data) {
                 var body = $('#dataTable tbody');

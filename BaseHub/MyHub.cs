@@ -15,6 +15,31 @@ namespace BaseHub
         {
 
         }
+
+        public Task RemoveMessage(string user, string messageId)
+        {
+            var listUser = _connections.GetConnections(user);
+            if (listUser != null && user.Length > 0)
+            {
+                IReadOnlyList<string> listUSerReadOnly = listUser?.ToList()?.AsReadOnly();
+                Clients.Users(listUSerReadOnly).SendAsync("RemoveMessage", new { Message = messageId, Time = DateTime.Now, Type = UserType });
+                Clients.Caller.SendAsync("RemoveMessage", new { Message = messageId, Time = DateTime.Now, Type = UserType });
+            }
+            return Task.CompletedTask;
+        }
+
+        public async Task SendToUser(string user, object message)
+        {
+            var listUser = _connections.GetConnections(user);
+            if(listUser != null && user.Length > 0)
+            {
+                IReadOnlyList<string> listUSerReadOnly = listUser?.ToList()?.AsReadOnly();
+                await Clients.Clients(listUSerReadOnly).SendAsync("ChatToUser", new {UserReciver = user , UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, Receiver = user, Sender = UserID });
+                await Clients.Caller.SendAsync("ChatToUser", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, Receiver = user, Sender = UserID });
+            }
+            await Task.CompletedTask;
+        }
+
         public Task GoToClass(string className)
         {
             try
@@ -24,7 +49,7 @@ namespace BaseHub
                     _groups.Add(Context.ConnectionId, className);
                     Groups.AddToGroupAsync(Context.ConnectionId, className);
                     string message = UserName + " đã vào lớp có tên là : "+className;
-                    return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType });
+                    return Clients.Group(className).SendAsync("JoinGroup", new { UserSend = UserName, Message = message, Time = DateTime.Now, Type = UserType, Sender = UserID });
                 }
                 else
                 {
@@ -39,7 +64,7 @@ namespace BaseHub
 
         public Task SendToGroup(object content, string groupName)
         {
-            return Clients.Group(groupName).SendAsync("ReceiveGroup", new { UserSend = UserName, Message = content, Time = DateTime.Now, Type = UserType });
+            return Clients.Group(groupName).SendAsync("ReceiveGroup", new { UserSend = UserName, Message = content, Time = DateTime.Now, Type = UserType , Sender = UserID ,Receiver = groupName });
         }
 
         public async Task OutOfTheClassroom(string className)
@@ -55,12 +80,18 @@ namespace BaseHub
             // offline
             RemoveAllGroup();
             _connections.Remove(UserID, Context.ConnectionId);
+           if(_connections.GetConnections(UserID) == null || _connections.GetConnections(UserID).Count() == 0)
+            {
+                Clients.All.SendAsync("Offline", UserID);
+            }
             return base.OnDisconnectedAsync(exception);
         }
         public override Task OnConnectedAsync()
         {
             //online
             _connections.Add(UserID, Context.ConnectionId);
+            Clients.All.SendAsync("Online", UserID);
+            Clients.Caller.SendAsync("Online", _connections.GetKeys());
             return base.OnConnectedAsync();
         }
         protected string KeyUser
@@ -117,6 +148,11 @@ namespace BaseHub
             {
                 return _connections.Count;
             }
+        }
+
+        public IEnumerable<T> GetKeys()
+        {
+            return _connections.Keys?.ToList();
         }
 
         public void Add(T key, string connectionId)

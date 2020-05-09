@@ -74,7 +74,7 @@ p {
     .right-content .left-col .main-container {
         position: absolute;
         padding: 0;
-        top: 56px;
+        top: 0;
         bottom: 0;
         right: 0;
         left: 0;
@@ -83,6 +83,16 @@ p {
         z-index: 1000;
         height: auto;
     }
+
+        .right-content .left-col .main-container .card-header {
+            height: 42px;
+            padding: 7px 10px 0;
+        }
+
+            .right-content .left-col .main-container .card-header .lesson-button button {
+                margin: 0 5px;
+            }
+
 
 .uimod_exam .card-body {
     padding-bottom: 56px;
@@ -94,7 +104,7 @@ p {
     left: 0;
     right: 0;
     z-index: 99999;
-    background: #CCC;
+    background: #004085;
 }
 
 footer {
@@ -177,13 +187,11 @@ footer {
     }
 
 .QUIZ1 .answer-item, .QUIZ2 .answer-item {
-    /*max-width: 30%;*/
+    max-width: 30%;
     padding-right: 10px;
     display: inline-block;
+    vertical-align: top;
 }
-
-
-
 
 #nav-menu {
     z-index: 2;

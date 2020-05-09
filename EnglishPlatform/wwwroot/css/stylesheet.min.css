@@ -43,7 +43,7 @@ html, body {
 }
 
 img {
-    width: 100%;
+    width: auto;
     max-width: 100%;
     vertical-align: middle;
     border: none
@@ -188,6 +188,10 @@ button, input, a {
     margin-top: 20px
 }
 
+.margin-15l {
+    margin-left: 15px
+}
+
 .btn-sign {
     border-radius: 36px;
     background: #13A6FB;
@@ -229,8 +233,8 @@ button, input, a {
 }
 
 .good {
-    color: #00D085;
-    font-weight: 600
+    color: #00D085 !important;
+    /*font-weight: 600*/
 }
 
 .right {
@@ -381,12 +385,12 @@ button, input, a {
 }
 
     #sidebar .logo {
-        width: 111px
+        width: 128px
     }
 
     #sidebar .card-header {
         border: none;
-        padding: 25px;
+        padding: 5px;
         margin-bottom: 7px
     }
 
@@ -463,6 +467,10 @@ button, input, a {
 
         .menu-bar li:hover .ic-paper, .menu-bar li.active .ic-paper {
             background-image: url(../images/paper_r.png)
+        }
+
+        .menu-bar li:hover .ic-multi-user, .menu-bar li.active .ic-multi-user {
+            background-image: url(../images/multi_user_r.png)
         }
 
 .ic {
@@ -623,6 +631,24 @@ button, input, a {
     height: 14px
 }
 
+.ic-online-class {
+    background-image: url(../images/online-class.png);
+    width: 32px;
+    margin: 2px 0 0 2px;
+}
+
+.ic-online-class, .ic-clear-schedule {
+    height: 32px;
+    opacity: 0.2;
+}
+
+    .ic-online-class.active,
+    .ic-online-class:hover,
+    .ic-clear-schedule:hover {
+        opacity: 1;
+        cursor: pointer;
+    }
+
 .ic-collapse {
     background-image: url(../images/arrow-up.png);
     width: 14px;
@@ -713,6 +739,12 @@ button, input, a {
     height: 23px
 }
 
+.ic-multi-user {
+    background-image: url(../images/multi_user.png);
+    width: 23px;
+    height: 21px
+}
+
 .fo {
     -webkit-font-smoothing: antialiased;
     display: inline-block;
@@ -731,9 +763,9 @@ button, input, a {
 }
 
 .card-header .title {
-    font-size: 24px;
+    font-size: 16px;
     color: #000;
-    font-weight: 400;
+    font-weight: 700;
     width: 100%
 }
 
@@ -1132,7 +1164,7 @@ button, input, a {
         }
 
         #plan_box .table-detail .tr .c-cl {
-            width: 50%;
+            width: 100%;
             display: flex;
             flex-direction: column;
             padding: 5px
@@ -1416,7 +1448,8 @@ button, input, a {
             font-weight: 600;
             line-height: 20px;
             text-transform: uppercase;
-            padding: 15px 0
+            margin-top: 20px;
+            margin-bottom: 10px
         }
 
         .practice-item .inner .btn-learn {
@@ -1430,11 +1463,16 @@ button, input, a {
             text-align: center
         }
 
+        .practice-item .inner .name {
+            color: #000;
+            margin-bottom: 15px
+        }
+
     .practice-item:nth-child(4n+1)::before {
         border-left: none
     }
 
-    .practice-item:nth-child(4n+1) span, .practice-item:nth-child(4n+1) .title {
+    .practice-item:nth-child(4n+1) .ic, .practice-item:nth-child(4n+1) .title {
         color: #00BBD4
     }
 
@@ -1442,7 +1480,7 @@ button, input, a {
         background: #00BBD4
     }
 
-    .practice-item:nth-child(4n+2) span, .practice-item:nth-child(4n+2) .title {
+    .practice-item:nth-child(4n+2) .ic, .practice-item:nth-child(4n+2) .title {
         color: #00D9A5
     }
 
@@ -1450,7 +1488,7 @@ button, input, a {
         background: #00D9A5
     }
 
-    .practice-item:nth-child(4n+3) span, .practice-item:nth-child(4n+3) .title {
+    .practice-item:nth-child(4n+3) .ic, .practice-item:nth-child(4n+3) .title {
         color: #F7971E
     }
 
@@ -1458,7 +1496,7 @@ button, input, a {
         background: #F7971E
     }
 
-    .practice-item:nth-child(4n+4) span, .practice-item:nth-child(4n+4) .title {
+    .practice-item:nth-child(4n+4) .ic, .practice-item:nth-child(4n+4) .title {
         color: #B70058
     }
 
@@ -1466,7 +1504,7 @@ button, input, a {
         background: #B70058
     }
 
-    .practice-item:nth-child(4n+5) span, .practice-item:nth-child(4n+5) .title {
+    .practice-item:nth-child(4n+5) .ic, .practice-item:nth-child(4n+5) .title {
         color: #D03239
     }
 
@@ -1474,7 +1512,7 @@ button, input, a {
         background: #D03239
     }
 
-    .practice-item:nth-child(4n+6) span, .practice-item:nth-child(4n+6) .title {
+    .practice-item:nth-child(4n+6) .ic, .practice-item:nth-child(4n+6) .title {
         color: #007B83
     }
 
@@ -1564,6 +1602,13 @@ button, input, a {
     margin-right: 25px
 }
 
+.ls-pratice li .title {
+    color: #000;
+    display: block;
+    font-weight: 600;
+    padding: 10px 0
+}
+
 .ls-pratice .card-body {
     background: #F0F3F4;
     border-radius: 10px;
@@ -1607,8 +1652,14 @@ button, input, a {
             margin-right: 5px
         }
 
+    .ls-pratice .sub-practice .schedule {
+        width: 185px
+    }
+
     .ls-pratice .sub-practice .c4 {
-        width: 250px
+        width: 370px;
+        display: flex;
+        justify-content: flex-start
     }
 
     .ls-pratice .sub-practice .c2, .ls-pratice .sub-practice .c3, .ls-pratice .sub-practice .c4, .ls-pratice .sub-practice .c5, .ls-pratice .sub-practice .c60 {
@@ -1641,7 +1692,8 @@ button, input, a {
         border-radius: 23px;
         text-align: center;
         min-width: 95px;
-        color: #fff
+        color: #fff;
+        font-size: 12px
     }
 
         .ls-pratice .sub-practice .btn-act.act {
@@ -1662,11 +1714,13 @@ button, input, a {
     }
 
         .ls-pratice .sub-practice .btn-group .btn-act.btn-edit {
-            color: #13A6FB
+            color: #13A6FB;
+            font-size: 18px
         }
 
         .ls-pratice .sub-practice .btn-group .btn-act.btn-trash {
-            color: #738B99
+            color: #738B99;
+            font-size: 18px
         }
 
     .ls-pratice .sub-practice .date {
@@ -1698,7 +1752,7 @@ button, input, a {
         }
 
 .ls-pratice .list {
-    /*max-height: 300px;*/
+    max-height: 300px;
     overflow-y: auto
 }
 
@@ -2099,7 +2153,7 @@ button, input, a {
             color: #04213F
         }
 
-        .ls-doc .inner .entry .btn-view {
+        /*.ls-doc .inner .entry .btn-view {
             background: #00D085
         }
 
@@ -2107,6 +2161,11 @@ button, input, a {
             background: #13A6FB;
             margin-left: 12px
         }
+
+        .ls-doc .inner .entry .btn-clear {
+            background: #99A1A6;
+            margin-left: 12px
+        }*/
 
         .ls-doc .inner .entry .flex {
             margin-bottom: 5px
@@ -2121,10 +2180,10 @@ button, input, a {
         margin-right: 5px
     }
 
-.btn-view, .btn-download {
+.btn-view, .btn-download, .btn-clear {
     color: #fff;
     border-radius: 20px;
-    width: 80px;
+    min-width: 80px;
     text-align: center;
     padding: 3px 15px;
     font-size: 12px;
@@ -2132,7 +2191,7 @@ button, input, a {
     display: inline-block
 }
 
-    .btn-view:hover, .btn-download:hover {
+    .btn-view:hover, .btn-download:hover, .btn-clear:hover {
         color: #fff
     }
 
@@ -2146,7 +2205,7 @@ button, input, a {
     font-weight: 600;
     border-color: #13A6FB !important;
     text-transform: uppercase;
-    height: 40px
+    height: 34px
 }
 
     .btn-addevent:hover {
@@ -2271,7 +2330,7 @@ button, input, a {
 
             .list-scroll li .c-bot .fo {
                 margin-right: 5px;
-                padding: 2px 5px;
+                padding: 4px 5px;
                 border-radius: 100%;
                 color: #fff;
                 font-size: 12px
@@ -2388,9 +2447,21 @@ button, input, a {
     background: none;
     outline: none;
     border: none;
-    font-size: 20px;
+    font-size: 18px;
     padding: 5px 8px
 }
+
+    .btn-act.btn-secondary {
+        color: #13A6FB;
+        font-size: 16px;
+        font-weight: 600;
+        text-transform: uppercase
+    }
+
+        .btn-act.btn-secondary:hover, .btn-act.btn-secondary:focus {
+            background: transparent;
+            border-color: transparent
+        }
 
 .btn-group {
     justify-content: center
@@ -2440,6 +2511,10 @@ button, input, a {
 
 .ls-overview .c-right .time-line li:first-child {
     margin-left: 0
+}
+
+.ls-overview .flex .btn-group {
+    margin-top: -5px
 }
 
 .height-185 {
@@ -2511,7 +2586,7 @@ button, input, a {
     }
 
 #modal_class .modal-dialog {
-    max-width: 1200px
+    max-width: 750px
 }
 
 #modal_class .vdp-datepicker input {
@@ -2533,10 +2608,15 @@ button, input, a {
     text-transform: uppercase
 }
 
+#modal_class label {
+    font-weight: 600
+}
+
 #thumb_class {
     position: relative;
-    width: 160px;
-    height: 90px;
+    width: 100%;
+    max-width: 225px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2548,8 +2628,8 @@ button, input, a {
     padding: 10px;
     border: 1px solid #eee;
     border-radius: 4px;
-    width: 160px;
-    height: 90px;
+    width: 100%;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center
@@ -2565,24 +2645,34 @@ button, input, a {
         margin-right: 5px
     }
 
-.list-subject li {
-    padding-bottom: 15px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #D0DFE8
+.list-subject {
+    padding-top: 15px;
+    border-top: 1px solid #D0DFE8
 }
 
-    .list-subject li div ~ div {
-        margin-left: 15px
+    .list-subject li {
+        padding-bottom: 15px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #D0DFE8
     }
 
-    .list-subject li .btn-act {
-        margin-top: 20px
-    }
+        .list-subject li .btn-act {
+            color: #839AA6
+        }
 
-    .list-subject li:last-child {
-        border-bottom: none;
-        margin-bottom: 0
-    }
+        .list-subject li:last-child {
+            border-bottom: none;
+            margin-bottom: 0
+        }
+
+        .list-subject li .row {
+            margin-bottom: 15px
+        }
+
+        .list-subject li label.first {
+            color: #13A6FB;
+            line-height: 2
+        }
 
 .btn-add-sub {
     color: #13A6FB;
@@ -2609,3 +2699,64 @@ button, input, a {
 td a {
     color: #13A6FB
 }
+
+#modal_class_edit .modal-footer {
+    justify-content: center
+}
+
+    #modal_class_edit .modal-footer .btn {
+        min-width: 100px;
+        text-transform: uppercase
+    }
+
+    #modal_class_edit .modal-footer .btn-success {
+        background-color: #13A6FB;
+        border-color: #13A6FB
+    }
+
+    #modal_class_edit .modal-footer .btn-danger {
+        background-color: #839AA6;
+        border-color: #839AA6
+    }
+
+#modal_class_edit .frm-upload {
+    width: 200px
+}
+
+#modal_confirm .modal-dialog {
+    max-width: 340px
+}
+
+#modal_subject .modal-dialog {
+    max-width: 508px
+}
+
+#modal_subject .modal-header, #modal_confirm .modal-header, #modal_student .modal-header {
+    justify-content: center;
+    background: #D0DFE8
+}
+
+    #modal_subject .modal-header .close, #modal_confirm .modal-header .close, #modal_student .modal-header .close {
+        position: absolute;
+        right: 14px
+    }
+
+#modal_subject .modal-footer, #modal_confirm .modal-footer, #modal_student .modal-footer {
+    justify-content: center;
+    border-top: none
+}
+
+    #modal_subject .modal-footer .btn, #modal_confirm .modal-footer .btn, #modal_student .modal-footer .btn {
+        min-width: 100px;
+        text-transform: uppercase
+    }
+
+    #modal_subject .modal-footer .btn-danger, #modal_confirm .modal-footer .btn-danger, #modal_student .modal-footer .btn-danger {
+        background-color: #839AA6;
+        border-color: #839AA6
+    }
+
+    #modal_subject .modal-footer .btn-success, #modal_confirm .modal-footer .btn-success, #modal_student .modal-footer .btn-success {
+        background-color: #13A6FB;
+        border-color: #13A6FB
+    }

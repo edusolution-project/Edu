@@ -1,0 +1,380 @@
+﻿@{
+    var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseLessonEntity;
+    var Course = ViewBag.Course as BaseCustomerEntity.Database.CourseEntity;
+}
+<style>
+
+    #sidebar {
+        width: 100%;
+        height: 43px;
+        border-bottom: 1px solid #DEDEDE;
+        background: white;
+    }
+
+    .menu-bar {
+        overflow: visible;
+    }
+
+        .menu-bar li a {
+            padding: 10px 15px;
+            border: solid 1px transparent;
+        }
+
+    .sub-menu a {
+        padding: 5px 5px !important;
+    }
+
+
+    .sub-menu li:hover {
+        background: #DDD;
+    }
+
+    .top-menu a .ic {
+        margin-right: 7px !important;
+    }
+
+    .top-menu {
+        width: 130px;
+        margin-top: 2px;
+    }
+
+        .top-menu:hover a, .top-menu.active a {
+            border-color: transparent;
+            color: #333;
+        }
+
+        .top-menu > a {
+            border: solid 1px transparent;
+        }
+
+    .menu-bar li:hover a {
+        border-color: transparent;
+        color: #333;
+        background: #FFF;
+    }
+
+    .top-menu[for=path_menu].active > a,
+    .top-menu[for=path_menu]:hover > a {
+        border-radius: 10px 10px 0 0;
+        border: solid 1px #CCC !important;
+        border-bottom: transparent !important;
+    }
+
+
+    .top-menu .sub-menu {
+        display: none;
+        min-width: 250px;
+        background: #FFF;
+        margin-top: -1px;
+        border: solid 1px #CCC;
+        border-top: none;
+        max-height: 600px;
+        overflow-y: auto;
+        border-radius: 0 0 0 10px;
+        position: fixed;
+        top: 44px;
+        bottom: 0;
+    }
+
+    .top-menu:hover .sub-menu {
+        display: block;
+    }
+
+    .right-content {
+        top: 44px;
+        left: 0;
+    }
+
+    .top_nav_menu {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        height: 26px;
+        opacity: 0.7;
+        background: #FFF;
+        position: fixed;
+        left: 5px;
+        top: 7px;
+    }
+
+        .top_nav_menu:hover,
+        .top_nav_menu.active {
+            opacity: 1;
+        }
+
+    .les_nav.current {
+        background: rgb(85,230,191);
+    }
+
+    .chap_nav_title,
+    .chap_content a {
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /*.chap_nav_title:hover,
+        .les_nav:hover {
+            text-decoration: underline;
+        }*/
+
+    .right_sidebar > div {
+        height: 100%;
+        /*padding: 10px;*/
+        overflow-y: auto;
+    }
+
+    .chap_content, .p_chap_nav {
+        margin-left: 0px;
+        padding: 3px 0 5px 0;
+        cursor: pointer;
+        /*border-top: solid 1px #CCC;*/
+    }
+
+        .chap_content a {
+            padding: 3px 0 5px 0;
+        }
+
+    .chap_nav_title {
+        margin-left: 0px;
+        padding: 5px 0 5px 12px;
+    }
+
+    .chap_content li {
+        list-style: circle inside;
+        padding: 5px 5px 5px 15px;
+    }
+
+
+    .right_sidebar ul > :first-child,
+    .right_sidebar ul > a:first-child > li {
+        margin-top: -5px;
+    }
+
+
+    ul > ul {
+        margin-bottom: -5px;
+        padding-left: 7px !important;
+    }
+
+    .p_chap_nav .chap_nav_title {
+        margin-bottom: 0;
+    }
+
+
+    .chap_content a:hover {
+        text-decoration: none;
+    }
+
+    .p_chap_nav > .chap_content {
+        display: none;
+    }
+
+    .p_chap_nav.plus > .chap_content {
+        display: block;
+    }
+
+    #QuizNav {
+        position: absolute;
+        top: 44px;
+        background: #FFF;
+        left: 0;
+        right: 0;
+        border: solid 3px #CCC;
+        border-radius: 10px;
+        box-shadow: 1px 2px 7px #999;
+        display: none;
+    }
+
+        #QuizNav.show {
+            display: block;
+        }
+
+    .right-content.showQuiz {
+        top: 97px;
+    }
+
+    #QuizNav .rounded-quiz {
+        width: 28px;
+        height: 28px;
+        display: block;
+        padding: 0px !important;
+    }
+
+    .fullscreenSupport {
+        width: 100%;
+    }
+
+    .embed-frame {
+        width: 100%;
+        /*max-width: 100%;*/
+        height: 400px;
+    }
+    
+    .media_preview .embed-frame {
+        width: 360px;
+        height: 240px;
+    }
+
+    .quiz-item .media-holder img,
+    .tab-pane-quiz img {
+        width: auto;
+    }
+
+    /*@@media (max-width : 1200px) {
+        .embed-frame {
+            width: 100%;
+            max-height: 600px;
+        }
+    }*/
+
+    .tab-content > .main-column:first-child {
+        border-right: dashed 2px #CCC;
+    }
+
+    .menu-bar .btn-primary {
+        border: #FFF;
+        background: #FFF;
+        font-weight: bold;
+        color: #333;
+    }
+
+        .menu-bar .btn-primary:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+
+        .menu-bar .btn-primary.btn-warning {
+            background: #ffc107
+        }
+
+        .menu-bar .btn-primary:hover {
+            color: #007bff;
+        }
+
+        .menu-bar .btn-primary:disabled {
+            color: #999;
+            opacity: 0.4;
+        }
+
+            .menu-bar .btn-primary:disabled:hover {
+                cursor: default;
+            }
+</style>
+<aside class="d-flex justify-content-start bg-white" id="sidebar">
+    <div class="menu-bar w-100">
+        <ul class="d-flex p-0 m-0 h-100">
+            <li for="home" class="top-menu">
+                <a href="@Url.Action("Index", "Home")" title="Trang chủ"><i class="ic fas fa-home"></i>Trang chủ</a>
+            </li>
+            <li for="path_menu" class="top-menu">
+                <a title="Mục lục"><i class="ic fas fa-list-ol"></i>Mục lục</a>
+                <div class="sub-menu">
+                    <div class="content-holder">
+                        <ul class="chap_content"></ul>
+                    </div>
+                </div>
+            </li>
+            <li for="lesson-info" class="top-menu flex-grow-1 d-flex justify-content-end">
+            </li>
+            <div id="QuizNav" style="z-index:-1"></div>
+        </ul>
+    </div>
+</aside>
+<!-- End of Sidebar -->
+<script>
+    var root_nav = $('li[for=path_menu] .content-holder');
+
+    $(document).ready(function () {
+        renderMenu(currentLesson.ChapterID, true);
+    });
+
+    var dataUrl = '@Url.Action("GetContents","Curriculum")';
+
+    var renderMenu = function (parentID, init) {
+
+        //console.log(root_nav);
+
+        var parentPath = root_nav;
+
+        if (parentID != null && parentID.length > 1) {
+            parentPath = $('#chap_nav_' + parentID);
+            if (parentPath.length == 0) {
+                parentPath = $("<ul>", {id: 'chap_nav_' + parentID, class: 'p_chap_nav'});
+                parentPath
+                    .append($("<div>", { class: "chap_nav_title", text: "" }))
+                    .append($("<ul>", { class: "chap_content" }));
+                parentPath.find("> .chap_nav_title").click(function () {toggleChap(this)})
+                root_nav.append(parentPath);
+            }
+            if (init) {
+                parentPath.addClass('plus');
+                parentPath.find(" > .chap_nav_title").addClass('current')
+            }
+
+        }
+
+        //console.log(parentPath);
+
+        $.ajax({
+            type: "POST",
+            url: dataUrl,
+            data: { ID: '@Course.ID', Parent: parentID },
+            success: function (data) {
+                var rootID = data.RootID;
+                var chapters = data.Data;
+                var lessons = data.Lesson;
+                if (chapters != null && chapters.length > 0) {
+                    $.each(chapters, function (i, chapter) {
+                        var chapterPath = $('#chap_nav_' + chapter.ID);
+                        if (chapterPath.length == 0) {
+                            chapterPath = $("<ul>", {
+                                id: 'chap_nav_' + chapter.ID,
+                                class: 'p_chap_nav',
+                                href: '#'
+                            });
+                            chapterPath.append($("<div>", { class: "chap_nav_title", }))
+                                .append($("<ul>", { class: "chap_content" }));
+                            chapterPath.find("> .chap_nav_title").click(function () { toggleChap(this) });
+                        }
+                        chapterPath.find('> .chap_nav_title').text(chapter.Name).attr('title',chapter.Name).prepend($("<i>", { class: "far fa-folder mr-1" }));;
+                        parentPath.find('> .chap_content').append(chapterPath);
+                    })
+                }
+                if (lessons != null && lessons.length > 0) {
+                    $.each(lessons, function (i, lesson) {
+                        var lessonPath = $('#les_nav_' + lesson.ID);
+                        if (lessonPath.length == 0) {
+                            lessonPath =
+                                $("<a>", { id: 'les_nav_' + lesson.ID, title: lesson.Title, href: '@Url.Action("Curriculum","Lesson")/' + lesson.ID + '/' + '@Course.ID' }).append(
+                                    $("<li>", {
+                                        class: 'les_nav',
+                                    }).append($("<i>", { class: "far fa-file-alt mr-1" }))
+                                        .append($("<span>", { text: lesson.Title }))
+                                );
+                            if (lesson.ID == currentLesson.ID)
+                                lessonPath.find("li").addClass('current');
+                        }
+                        parentPath.find('> .chap_content').append(lessonPath);
+                    })
+                }
+                parentPath.attr('loaded', 1);
+                if(parentID != null && parentID.length > 1)
+                    renderMenu(rootID, init);
+            },
+        });
+    }
+
+    var currentLesson = @Html.Raw(Json.Serialize(Data))
+
+    var toggleChap = function (obj) {
+        $(obj).parent().toggleClass('plus');
+        var loaded = $(obj).parent().attr('loaded');
+        if (loaded == 1)
+            return false;
+        var id = $(obj).parent().attr('id').replace('chap_nav_', '');
+        renderMenu(id, false);
+    }
+</script>
