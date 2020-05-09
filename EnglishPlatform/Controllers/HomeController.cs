@@ -39,7 +39,7 @@ namespace EnglishPlatform.Controllers
         private readonly ClassService _classService;
         private readonly StudentHelper _studentHelper;
         private readonly CalendarHelper _calendarHelper;
-
+        private readonly UserAndRoleService _userAndRoleService;
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -67,7 +67,7 @@ namespace EnglishPlatform.Controllers
             _log = log;
             _mailHelper = mailHelper;
             _default = defaultvalue.Value;
-
+            _userAndRoleService = userAndRoleService;
         }
 
         public IActionResult Index()
