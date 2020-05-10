@@ -25,9 +25,10 @@ namespace BaseCustomerMVC.Globals
             var currentUser = context.HttpContext.User;
             if (currentUser != null && currentUser.Identity.IsAuthenticated)
             {
+                string type = currentUser.FindFirst(ClaimTypes.Role)?.Value;
                 // kieerm ta nguon tu cache
                 string keys = $"{currentUser.FindFirst("UserID").Value}_{basis}";
-                if (string.IsNullOrEmpty(area) || ctrlName == "home" || ctrlName == "error")
+                if (string.IsNullOrEmpty(area) || ctrlName == "home" || ctrlName == "error" || type == "superadmin")
                 {
                     base.OnActionExecuting(context);
                 }
@@ -56,17 +57,25 @@ namespace BaseCustomerMVC.Globals
             }
             else
             {
-                if (actName == "index" || actName == "details")
+                if (string.IsNullOrEmpty(area))
                 {
-                    context.Result = new ViewResult();
+                    base.OnActionExecuting(context);
                 }
                 else
                 {
-                    context.Result = new JsonResult(new { code = 405, message = "not accept" });
+                    if (actName == "index" || actName == "details")
+                    {
+                        context.Result = new ViewResult();
+                    }
+                    else
+                    {
+                        context.Result = new JsonResult(new { code = 405, message = "not accept" });
+                    }
                 }
             }
         }
 
+        
         private bool IsValidate(string keys, string area, string ctrl, string act)
         {
             try

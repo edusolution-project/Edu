@@ -87,11 +87,13 @@ namespace EnglishPlatform.Controllers
                 string roleCode = "";
                 var tc = _teacherService.GetItemByID(User.FindFirst("UserID").Value);
                 var st = _studentService.GetItemByID(User.FindFirst("UserID").Value);
+                var user = _accountService.GetItemByID(User.FindFirst("UserID").Value);
                 var defaultUser = new UserModel() { };
-                if (type.Value != ACCOUNT_TYPE.TEACHER && type.Value != ACCOUNT_TYPE.STUDENT)
+                if (type.Value == ACCOUNT_TYPE.ADMIN)
                 {
-                    defaultUser = new UserModel("0", "admin");
+                    defaultUser = new UserModel(User.FindFirst("UserID").Value, "admin");
                     centerCode = center.Code;
+                    roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
                 }
                 else
                 {
@@ -182,8 +184,9 @@ namespace EnglishPlatform.Controllers
                         var defaultUser = new UserModel() { };
                         if(Type == ACCOUNT_TYPE.ADMIN)
                         {
-                            defaultUser = new UserModel("0","admin");
+                            defaultUser = new UserModel(user.ID,"admin");
                             centerCode = center.Code;
+                            roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
                         }
                         else
                         {
