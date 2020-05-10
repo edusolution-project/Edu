@@ -41,7 +41,11 @@ namespace BaseCustomerMVC.Globals
                     {
                         if (actName == "index" || actName == "details")
                         {
-                            context.Result = new ViewResult();
+                            var result = new ViewResult
+                            {
+                                StatusCode = 500
+                            };
+                            context.Result = result;
                         }
                         else
                         {
