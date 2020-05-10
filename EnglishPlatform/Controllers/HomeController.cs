@@ -41,6 +41,7 @@ namespace EnglishPlatform.Controllers
         private readonly CalendarHelper _calendarHelper;
         private readonly UserAndRoleService _userAndRoleService;
         private readonly CenterService _centerService;
+        private readonly AuthorityService _authorityService;
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -54,6 +55,7 @@ namespace EnglishPlatform.Controllers
             , MailHelper mailHelper
             , UserAndRoleService userAndRoleService
             , CenterService centerService
+            , AuthorityService authorityService
             , ILog log)
         {
             _accessesService = accessesService;
@@ -71,23 +73,57 @@ namespace EnglishPlatform.Controllers
             _default = defaultvalue.Value;
             _userAndRoleService = userAndRoleService;
             _centerService = centerService;
+            _authorityService = authorityService;
         }
 
         public IActionResult Index()
         {
+            StartAuthority();
+            var type = User.Claims.GetClaimByType("Type");
+            if (type != null)
+            {
+                var center = _centerService.GetDefault();
+                string centerCode = center.Code;
+                string roleCode = "";
+                var tc = _teacherService.GetItemByID(User.FindFirst("UserID").Value);
+                var st = _studentService.GetItemByID(User.FindFirst("UserID").Value);
+                var defaultUser = new UserModel() { };
+                if (type.Value != ACCOUNT_TYPE.TEACHER && type.Value != ACCOUNT_TYPE.STUDENT)
+                {
+                    defaultUser = new UserModel("0", "admin");
+                    centerCode = center.Code;
+                }
+                else
+                {
+                    if (tc != null)
+                    {
+                        defaultUser = new UserModel(tc.ID, tc.FullName);
+                        centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
+                        roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                    }
+                    if (st != null)
+                    {
+                        defaultUser = new UserModel(st.ID, st.FullName);
+                        centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                        roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                    }
+                }
 
-            return View();
-            //var type = User.Claims.GetClaimByType("Type");
-            //if (type != null)
-            //{
-            //    return Redirect(type.Value);
-            //}
-            //else
-            //{
-            //    _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-            //    HttpContext.SignOutAsync(Cookies.DefaultLogin);
-            //    return RedirectToAction("Login");
-            //}
+                //cache
+
+                var role = _roleService.GetItemByID(roleCode);
+                var listAccess = _accessesService.GetAccessByRole(role.Code);
+                string key = $"{centerCode}_{roleCode}";
+                CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
+                CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
+                return Redirect($"{centerCode}/{type.Value}");
+            }
+            else
+            {
+                _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
+                HttpContext.SignOutAsync(Cookies.DefaultLogin);
+                return RedirectToAction("Login");
+            }
         }
 
 
@@ -135,82 +171,51 @@ namespace EnglishPlatform.Controllers
                     {
                         TempData["success"] = "Hi " + _username;
                         string _token = Guid.NewGuid().ToString();
-                        string FullName, id;
                         HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
-                        var role = _roleService.GetItemByID(user.RoleID);
-                        if (role == null)
+
+                        var center = _centerService.GetDefault();
+                        string centerCode = center.Code;
+                        string roleCode = "";
+                        var tc = _teacherService.GetItemByID(user.UserID);
+                        var st = _studentService.GetItemByID(user.UserID);
+
+                        var defaultUser = new UserModel() { };
+                        if(Type == ACCOUNT_TYPE.ADMIN)
                         {
-                            return Json(new ReturnJsonModel
-                            {
-                                StatusCode = ReturnStatus.ERROR,
-                                StatusDesc = "Có lỗi, không đăng nhập được. Vui lòng liên hệ Admin để được trợ giúp"
-                            });
+                            defaultUser = new UserModel("0","admin");
+                            centerCode = center.Code;
                         }
-                        
-                        switch (Type)
+                        else
                         {
-                            case ACCOUNT_TYPE.TEACHER:
-                                var tc = _teacherService.GetItemByID(user.UserID);
-                                if (tc == null)
-                                    return Json(new ReturnJsonModel
-                                    {
-                                        StatusCode = ReturnStatus.ERROR,
-                                        StatusDesc = "Thông tin tài khoản không đúng",
-                                    });
-                                FullName = tc.FullName;
-                                id = tc.ID;
-                                break;
-                            case ACCOUNT_TYPE.STUDENT:
-                                var st = _studentService.GetItemByID(user.UserID);
-                                if (st == null)
-                                {
-                                    if (role.Type == "teacher")
-                                    {
-                                        //create student account
-                                        st = new StudentEntity()
-                                        {
-                                            FullName = user.Name,
-                                            Email = _username,
-                                            Phone = user.Phone,
-                                            IsActive = true,// active student
-                                            CreateDate = DateTime.Now,
-                                            ID = user.UserID
-                                        };
-                                        _studentService.CreateQuery().InsertOne(st);
-                                    }
-                                    else
-                                        return Json(new ReturnJsonModel
-                                        {
-                                            StatusCode = ReturnStatus.ERROR,
-                                            StatusDesc = "Thông tin tài khoản không đúng",
-                                        });
-                                }
-                                role = _roleService.GetItemByCode("student");
-                                FullName = st.FullName ?? st.Email;
-                                id = st.ID;
-                                break;
-                            default:
-                                FullName = "admin"; id = "0";
-                                break;
+                            if(tc != null)
+                            {
+                                defaultUser = new UserModel(tc.ID, tc.FullName);
+                                centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
+                                roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                            }
+                            if(st != null)
+                            {
+                                defaultUser = new UserModel(st.ID, st.FullName);
+                                centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                                roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                            }
+
+                            var role = _roleService.GetItemByID(roleCode);
+                            var listAccess = _accessesService.GetAccessByRole(role.Code);
+                            string key = $"{centerCode}_{roleCode}";
+                            CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
+                            CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
                         }
 
-                        var listAccess = _accessesService.GetAccessByRole(role.ID);
-                        var listRole = _userAndRoleService.CreateQuery().Find(o => o.UserID == id)?.ToList();
-                        // cache list basis (co so)
-                        CacheExtends.SetObjectFromCache(id, 3600 * 24 * 360, listRole.Select(o => o.Basis)?.ToList());
-                        Dictionary<string, string> Access = new Dictionary<string, string>();
-                        for(int i = 0; listRole != null && i < listRole.Count; i++)
-                        {
-                            var itemRole = listRole[i];
-                            string key = itemRole.Basis + "_" + itemRole.UserID;
-                            // cache role
-                            CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, itemRole.Role);
-                        }
+                        //cache
+                        
+
                         var claims = new List<Claim>{
-                                new Claim("UserID",id),
+                                new Claim("UserID",defaultUser.ID),
                                 new Claim(ClaimTypes.Email, _username),
-                                new Claim(ClaimTypes.Name, FullName),
-                                new Claim("Type", user.Type),};
+                                new Claim(ClaimTypes.Name, defaultUser.Name),
+                                new Claim(ClaimTypes.Role,roleCode),
+                                new Claim("Type", user.Type)};
 
 
                         var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
@@ -235,8 +240,8 @@ namespace EnglishPlatform.Controllers
                         {
                             StatusCode = ReturnStatus.SUCCESS,
                             StatusDesc = "OK",
-                            Location = "/" + user.Type
-                        });
+                            Location = $"{centerCode}/{user.Type}"
+                        }) ;
                     }
                     else
                     {
@@ -350,7 +355,14 @@ namespace EnglishPlatform.Controllers
             }
         }
 
-
+        private void StartAuthority()
+        {
+            if (CacheExtends.GetDataFromCache<List<AuthorityEntity>>(CacheExtends.DefaultPermission) == null)
+            {
+                List<AuthorityEntity> data = _authorityService.GetAll()?.ToList();
+                CacheExtends.SetObjectFromCache(CacheExtends.DefaultPermission, 3600 * 24 * 360, data);
+            }
+        }
         private void startPage()
         {
             var superadminRole = new RoleEntity()
@@ -420,6 +432,7 @@ namespace EnglishPlatform.Controllers
         [Route("/logout")]
         public async Task<IActionResult> LogOut()
         {
+            var basis = HttpContext.Request;
             string keys = User.FindFirst("UserID")?.Value;
             if (!string.IsNullOrEmpty(keys))
             {
@@ -558,5 +571,21 @@ namespace EnglishPlatform.Controllers
             ViewBag.RoomID = roomID;
             return View();
         }
+    }
+
+    public class UserModel
+    {
+        public UserModel()
+        {
+        }
+
+        public UserModel(string iD, string name)
+        {
+            ID = iD;
+            Name = name;
+        }
+
+        public string ID { get; set; }
+        public string Name { get; set; }
     }
 }

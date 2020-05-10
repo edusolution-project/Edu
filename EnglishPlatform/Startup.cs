@@ -127,15 +127,15 @@ namespace EnglishPlatform
                  );
                 routes.MapRoute(
                    name: "areas",
-                   template: "{basis:basis}-{area:exists}/{controller=Home}/{action=Index}"
+                   template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}"
                  );
                 routes.MapRoute(
                    name: "areas",
-                   template: "{basis:basis}_{area:exists}/{controller=Home}/{action=Index}/{id?}"
+                   template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}/{id?}"
                  );
                 routes.MapRoute(
                    name: "areas",
-                   template: "{basis:basis}_{area:exists}/{controller=Home}/{action=Index}/{id?}/{ClassID?}"
+                   template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}/{id?}/{ClassID?}"
                  );
                 routes.MapRoute(
                    name: "default",

@@ -15,6 +15,7 @@ using System.Linq;
 using MongoDB.Bson;
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
+using BaseCustomerEntity.Globals;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -112,6 +113,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
+                item.Code = item.Name.ConvertUnicodeToCode("-",true).Replace(@"","-");
                 _service.CreateQuery().InsertOne(item);
                 Dictionary<string, object> response = new Dictionary<string, object>()
                     {

@@ -26,6 +26,8 @@ namespace BaseCustomerEntity.Database
         public DateTime StartDate { get; set; }
         [JsonProperty("ExpireDate")]
         public DateTime ExpireDate { get; set; }
+        [JsonProperty("IsDefault")]
+        public bool IsDefault { get; set; } = false;
     }
 
     public class CenterService : ServiceBase<CenterEntity>
@@ -43,6 +45,32 @@ namespace BaseCustomerEntity.Database
         public void ChangeStatus(List<string> IDs, bool status)
         {
             CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<CenterEntity>.Update.Set(t => t.Status, status));
+        }
+
+        public CenterEntity GetDefault()
+        {
+            var listItem = CreateQuery().Find(o => o.IsDefault == true)?.ToList();
+            if (listItem != null && listItem.Count > 0) return listItem?.FirstOrDefault();
+            return CreateDefault();
+        }
+
+        private CenterEntity CreateDefault()
+        {
+            var item = new CenterEntity()
+            {
+                Name = "Eduso",
+                Code = "eduso",
+                Created = DateTime.Now,
+                Description = "Default",
+                ExpireDate = DateTime.Now.AddDays(365),
+                StartDate = DateTime.Now,
+                IsDefault = true,
+                Limit = 0,
+                Status = true
+            };
+            Save(item);
+
+            return item;
         }
     }
 }
