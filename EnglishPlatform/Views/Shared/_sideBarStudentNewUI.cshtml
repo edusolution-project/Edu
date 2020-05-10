@@ -1,4 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Http
+@{
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl)
+    {
+        string url = Url.Action(act, ctrl);
+
+        return $"/{center}{url}";
+    }
+}
 <aside class="sidebar" id="sidebar">
     <div class="card-header">
         <a href="/" class="logo" title="educoo"><img src="/images/Logo.png" /></a>
@@ -6,25 +15,25 @@
     <div class="menu-bar">
         <ul>
             <li for="home">
-                <a href="@Url.Action("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
+                <a href="@proccesUrl("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
             </li>
             <li for="profile">
-                <a href="@Url.Action("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
+                <a href="@proccesUrl("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
             </li>
             <li for="class">
-                <a href="@Url.Action("Index" , "Course")" title="Lớp học của tôi"><i class="ic ic-book"></i>Lớp học của tôi</a>
+                <a href="@proccesUrl("Index" , "Course")" title="Lớp học của tôi"><i class="ic ic-book"></i>Lớp học của tôi</a>
             </li>
             <li for="calendar">
-                <a href="@Url.Action("Index" , "Calendar" )" title="Lịch học của tôi"><i class="ic ic-celendar"></i>Lịch học của tôi</a>
+                <a href="@proccesUrl("Index" , "Calendar" )" title="Lịch học của tôi"><i class="ic ic-celendar"></i>Lịch học của tôi</a>
             </li>
             <li for="discussion">
                 <a href="javascript:;;" onclick="$('.fn-box-chat-eduso').focus().click()" title="Thảo luận"><i class="ic ic-discussion"></i>Thảo luận</a>
             </li>
             <li for="reference">
-                <a href="@Url.Action("Index" , "Reference" )" title="Tài liệu tham khảo"><i class="ic ic-file"></i>Tài liệu tham khảo</a>
+                <a href="@proccesUrl("Index" , "Reference" )" title="Tài liệu tham khảo"><i class="ic ic-file"></i>Tài liệu tham khảo</a>
             </li>
             <li for="news">
-                <a href="@Url.Action("Index", "News" )" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>
+                <a href="@proccesUrl("Index", "News" )" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>
             </li>
         </ul>
     </div>
