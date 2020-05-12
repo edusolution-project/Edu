@@ -358,6 +358,9 @@ EnglishPlatform/wwwroot/Files/
 /EnglishPlatform/wwwroot/UPLOADS/NewFeed
 /EnglishPlatform/wwwroot
 /EnglishPlatform/wwwroot/generic_wiris
+/EnglishPlatform/wwwroot/css/chat.min.css
+/EnglishPlatform/wwwroot/css/detail.min.css
+/EnglishPlatform/wwwroot/css/minify.min.css
 EnglishPlatform/Areas/Student/Views/Course/Modules - Copy.cshtml
 Math/cache/
 Math/formulas/2d/e0/85ba5aab70766eec2a4fc52dab10.ini
