@@ -1,6 +1,6 @@
 [
   {
-    "outputFileName": "wwwroot/css/minify.min.css",
+    "outputFileName": "wwwroot/css/minify/minify.min.css",
     "inputFiles": [
       "wwwroot/css/bootstrap.4.3.1.min.css",
       "wwwroot/css/be-vietnam-font.css",
@@ -10,7 +10,7 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/css/detail.min.css",
+    "outputFileName": "wwwroot/css/minify/detail.min.css",
     "inputFiles": [
       "wwwroot/css/custom.css",
       "wwwroot/css/layout.min.css",
@@ -20,7 +20,7 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/css/chat.min.css",
+    "outputFileName": "wwwroot/css/minify/chat.min.css",
     "inputFiles": [
       "wwwroot/css/materialdesignicons.min.css",
       "wwwroot/css/NewChat/app.css",
@@ -28,7 +28,7 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/js/common.min.js",
+    "outputFileName": "wwwroot/js/minify/common.min.js",
     "inputFiles": [
       "wwwroot/js/vue@2.6.0.js",
       "wwwroot/js/axios.min.js",
@@ -44,7 +44,7 @@
     "sourceMap": true
   },
   {
-    "outputFileName": "wwwroot/js/common.lib.min.js",
+    "outputFileName": "wwwroot/js/minify/common.lib.min.js",
     "inputFiles": [
       "wwwroot/js/lib/config.url.base.js",
       "wwwroot/js/lib/notification/notification.js",
@@ -60,7 +60,7 @@
     "sourceMap": true
   },
   {
-    "outputFileName": "wwwroot/js/detail.min.js",
+    "outputFileName": "wwwroot/js/minify/detail.min.js",
     "inputFiles": [
       "wwwroot/js/site.js",
       "wwwroot/vendor/jquery/jquery.min.js",
@@ -81,7 +81,7 @@
     "sourceMap": true
   },
   {
-    "outputFileName": "wwwroot/js/detail.fn.min.js",
+    "outputFileName": "wwwroot/js/minify/detail.fn.min.js",
     "inputFiles": [
       "wwwroot/js/content-render.js"
     ],

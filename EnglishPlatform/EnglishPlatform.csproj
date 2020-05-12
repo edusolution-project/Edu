@@ -2379,4 +2379,9 @@
     </Content>
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="wwwroot\css\minify\" />
+  </ItemGroup>
+
 </Project>
