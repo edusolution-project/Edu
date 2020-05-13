@@ -14,6 +14,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Configuration;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -51,6 +52,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly FileProcess _fileProcess;
         private readonly IHostingEnvironment _env;
+        private string _publisherHost;
 
         private readonly MappingEntity<CourseEntity, CourseViewModel> _courseViewMapping;
 
@@ -100,6 +102,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 , ModLessonPartQuestionService modlessonPartQuestionService
                 , ModLessonExtendService modlessonExtendService
                 , IHostingEnvironment evn
+                , IConfiguration config
                 , FileProcess fileProcess
 
             //use for fixing data
@@ -148,6 +151,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _courseViewMapping = new MappingEntity<CourseEntity, CourseViewModel>();
             _env = evn;
             _fileProcess = new FileProcess(evn);
+            _publisherHost = config.GetValue<string>("SysConfig:PublisherDomain");
 
             //fix
             _classService = classService;
@@ -1438,7 +1442,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             if (item.Media != null && item.Media.Path != null)
                 if (!item.Media.Path.StartsWith("http://"))
-                    item.Media.Path = "http://publisher.edusolution.vn" + item.Media.Path;
+                    item.Media.Path = "http://" + _publisherHost + item.Media.Path;
 
             _lessonService.CreateQuery().InsertOne(item);
 
@@ -1455,7 +1459,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     OriginID = _child.ID,
                     Title = _child.Title,
-                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://publisher.edusolution.vn/") : null,
+                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://" + _publisherHost + "/") : null,
                     IsExam = _child.IsExam,
                     Media = _child.Media,
                     Point = _child.Point,
@@ -1469,7 +1473,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 };
                 if (_item.Media != null && _item.Media.Path != null)
                     if (!_item.Media.Path.StartsWith("http://"))
-                        _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
+                        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneModLessonPart(_item, _userCreate);
             }
         }
@@ -1485,7 +1489,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     OriginID = _child.ID,
                     Content = _child.Content,
                     CreateUser = _userCreate,
-                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://publisher.edusolution.vn/") : null,
+                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://" + _publisherHost + "/") : null,
                     Media = _child.Media,
                     Point = _child.Point,
                     Order = _child.Order,
@@ -1497,7 +1501,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //change Media path
                 if (_item.Media != null && _item.Media.Path != null)
                     if (!_item.Media.Path.StartsWith("http://"))
-                        _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
+                        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneModLessonQuestion(_item, _userCreate);
             }
         }
@@ -1523,7 +1527,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 };
                 if (_item.Media != null && _item.Media.Path != null)
                     if (!_item.Media.Path.StartsWith("http://"))
-                        _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
+                        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneLessonAnswer(_item);
             }
         }
@@ -1582,7 +1586,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             if (item.Media != null && item.Media.Path != null)
                 if (!item.Media.Path.StartsWith("http://"))
-                    item.Media.Path = "http://publisher.edusolution.vn" + item.Media.Path;
+                    item.Media.Path = "http://" + _publisherHost + item.Media.Path;
 
             _lessonService.CreateQuery().InsertOne(item);
 
@@ -1599,7 +1603,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     OriginID = _child.ID,
                     Title = _child.Title,
-                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://publisher.edusolution.vn/") : null,
+                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://"  + _publisherHost + "/") : null,
                     IsExam = _child.IsExam,
                     Media = _child.Media,
                     Point = _child.Point,
@@ -1613,7 +1617,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 };
                 if (_item.Media != null && _item.Media.Path != null)
                     if (!_item.Media.Path.StartsWith("http://"))
-                        _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
+                        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneLessonPart(_item, _userCreate);
             }
         }
@@ -1629,7 +1633,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     OriginID = _child.ID,
                     Content = _child.Content,
                     CreateUser = _userCreate,
-                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://publisher.edusolution.vn/") : null,
+                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://" + _publisherHost + "/") : null,
                     Media = _child.Media,
                     Point = _child.Point,
                     Order = _child.Order,
@@ -1641,7 +1645,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //change Media path
                 if (_item.Media != null && _item.Media.Path != null)
                     if (!_item.Media.Path.StartsWith("http://"))
-                        _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
+                        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneLessonQuestion(_item, _userCreate);
             }
         }
@@ -1667,7 +1671,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 };
                 if (_item.Media != null && _item.Media.Path != null)
                     if (!_item.Media.Path.StartsWith("http://"))
-                        _item.Media.Path = "http://publisher.edusolution.vn" + _item.Media.Path;
+                        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneLessonAnswer(_item);
             }
         }

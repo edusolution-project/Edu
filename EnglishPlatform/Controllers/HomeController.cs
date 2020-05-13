@@ -82,6 +82,7 @@ namespace EnglishPlatform.Controllers
                 HttpContext.SignOutAsync(Cookies.DefaultLogin);
                 return RedirectToAction("Login");
             }
+            //return View();
         }
 
 

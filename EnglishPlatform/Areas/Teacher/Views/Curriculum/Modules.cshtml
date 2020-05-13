@@ -815,23 +815,47 @@
 
     function openLesson(obj) {
         var url = $(obj).attr("href");
+        var title = $(obj).text();
         //console.log($(obj).text());
         $("#lessonFrameModal iframe").attr("src", url + "&frameview=1")
-        window.history.replaceState({ frame: 1 }, $(obj).text(), url);
-        document.title = $(obj).text();
+        window.history.pushState({ frame: 1, url: url, title: title }, title, url);
+        document.title = title;
+        hideModal();
+        //console.log("open");
+        $('#lessonFrameModal').modal('show').show();
     }
 
     function closeLessonFrame() {
         var url = '@Url.Action("Modules", "Curriculum")/@Data.ID';
-        var title = '@Data.Name'
-
-        //window.location.replace(url);
-        window.history.replaceState({ frame: 0 }, title, url);
-        document.title = title
+        var title = '@Data.Name';
+        window.history.pushState({ frame: 0, url: url, title: title }, title, url);
+        console.log("close");
+        hideModal();
+        console.log(window.history);
     }
 
     $(document).ready(function () {
         LoadData();
+    });
+
+    $(window).on('popstate', function (event) {
+        //alert(1);
+        var state = event.originalEvent.state;
+        if (state != null && state.frame == 1) {
+            var url = state.url;
+            $("#lessonFrameModal iframe").attr("src", url + "&frameview=1");
+            document.title = state.title;
+            hideModal();
+            $('#lessonFrameModal').modal('show').show();
+            //console.log("open");
+        }
+        else if (state != null && state.frame == 0) {
+            var url = '@Url.Action("Modules", "Curriculum")/@Data.ID';
+            var title = '@Data.Name';
+            window.history.pushState({ frame: 0, url: url, title: title }, title, url);
+            //console.log("close");
+            hideModal();
+        }
     });
 </script>
 

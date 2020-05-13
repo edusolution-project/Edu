@@ -26,6 +26,8 @@ namespace BaseCustomerEntity.Database
         public DateTime StartDate { get; set; }
         [JsonProperty("ExpireDate")]
         public DateTime ExpireDate { get; set; }
+        [JsonProperty("IsDefault")]
+        public bool IsDefault { get; set; }
     }
 
     public class CenterService : ServiceBase<CenterEntity>
