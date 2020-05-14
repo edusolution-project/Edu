@@ -297,7 +297,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 }
                                 else
                                 {
-                                    var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                                    var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
                                     if (file != null)
                                     {
                                         quiz.Media.Created = DateTime.Now;
