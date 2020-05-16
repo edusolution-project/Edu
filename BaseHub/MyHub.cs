@@ -177,6 +177,7 @@ namespace BaseHub
 
         public IEnumerable<string> GetConnections(T key)
         {
+            if(key == null) return Enumerable.Empty<string>();
             if (_connections.TryGetValue(key, out HashSet<string> connections))
             {
                 return connections;

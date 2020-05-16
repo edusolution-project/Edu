@@ -107,7 +107,13 @@ namespace EnglishPlatform
             app.Use(async (context, next) =>
             {
                 string center = context.Request.Path.Value != "" && context.Request.Path.Value != "/" ? context.Request.Path.Value.Split('/')[1] : string.Empty;
-                if (!string.IsNullOrEmpty(center) && !center.Contains("hub") && !context.Request.Path.Value.Contains("EasyRealTime"))
+                if (!string.IsNullOrEmpty(center) && 
+                !center.Contains("hub") && 
+                !context.Request.Path.Value.Contains("EasyRealTime") &&
+                !context.Request.Path.Value.Contains("home") &&
+                !context.Request.Path.Value.Contains("login") && 
+                !context.Request.Path.Value.Contains("logout") &&
+                !(context.Request.Path.Value == "/"))
                 {
                     string userID = context.User.FindFirst("UserID")?.Value;
                     string roleCode = context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
