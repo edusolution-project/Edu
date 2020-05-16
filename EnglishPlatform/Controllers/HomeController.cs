@@ -109,15 +109,14 @@ namespace EnglishPlatform.Controllers
                         centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
                         roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
                     }
+
+                    var role = _roleService.GetItemByID(roleCode);
+                    var listAccess = _accessesService.GetAccessByRole(role.Code);
+                    string key = $"{centerCode}_{roleCode}";
+                    CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
+                    CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
                 }
-
                 //cache
-
-                var role = _roleService.GetItemByID(roleCode);
-                var listAccess = _accessesService.GetAccessByRole(role.Code);
-                string key = $"{centerCode}_{roleCode}";
-                CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
-                CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
                 return Redirect($"{centerCode}/{type.Value}");
             }
             else

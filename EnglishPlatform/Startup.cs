@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BaseAccess;
+using BaseCustomerEntity.Database;
 using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
 using BaseEasyRealTime.Globals;
 using BaseHub;
 using Core_v2.Globals;
 using EasyZoom;
+using EnglishPlatform.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -97,11 +99,75 @@ namespace EnglishPlatform
             app.UseSession();
             app.UseAuthentication();
             app.GetConfiguration(Configuration);
-            app.UseAuthention(Configuration);
+            //app.UseAuthention(Configuration);
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
-           
-            
+
+            app.Use(async (context, next) =>
+            {
+                string center = context.GetRouteValue("basis")?.ToString();
+                if (!string.IsNullOrEmpty(center))
+                {
+                    string userID = context.User.FindFirst("UserID")?.Value;
+                    string roleCode = context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                    string type = context.User.FindFirst("Type")?.Value;
+                    if(roleCode!= "superadmin")
+                    {
+                        string key = $"{center}_{roleCode}";
+                        string defaultKey = $"{userID}_{center}";
+                        string currentKey = CacheExtends.GetDataFromCache<string>(defaultKey);
+                        if (!string.IsNullOrEmpty(currentKey) && currentKey == key)
+                        {
+                            // some things
+                        }
+                        else
+                        {
+                            CenterService centerService = new CenterService(Configuration);
+                            AccountService _accountService = new AccountService(Configuration);
+                            TeacherService _teacherService = new TeacherService(Configuration);
+                            StudentService _studentService = new StudentService(Configuration);
+                            RoleService _roleService = new RoleService(Configuration);
+                            AccessesService _accessesService = new AccessesService(Configuration);
+
+                            string centerCode = center;
+                            var tc = _teacherService.GetItemByID(userID);
+                            var st = _studentService.GetItemByID(userID);
+                            var user = _accountService.GetItemByID(userID);
+                            var defaultUser = new UserModel() { };
+                            if (type == ACCOUNT_TYPE.ADMIN)
+                            {
+                                defaultUser = new UserModel(user.ID, "admin");
+                                centerCode = center;
+                                roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
+                            }
+                            else
+                            {
+                                if (tc != null)
+                                {
+                                    defaultUser = new UserModel(tc.ID, tc.FullName);
+                                    centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center;
+                                    roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                }
+                                if (st != null)
+                                {
+                                    defaultUser = new UserModel(st.ID, st.FullName);
+                                    centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center;
+                                    roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                }
+
+                                var role = _roleService.GetItemByID(roleCode);
+                                var listAccess = _accessesService.GetAccessByRole(role.Code);
+                                CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
+                                CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
+                            }
+                        }
+                    }
+                }
+                // Do work that doesn't write to the Response.
+                await next.Invoke();
+                // Do logging or other work that doesn't write to the Response.
+            });
+
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ChatHub>("/chatHub");
