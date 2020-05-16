@@ -157,17 +157,20 @@ namespace BaseHub
 
         public void Add(T key, string connectionId)
         {
-            lock (_connections)
+            if (key != null)
             {
-                if (!_connections.TryGetValue(key, out HashSet<string> connections))
+                lock (_connections)
                 {
-                    connections = new HashSet<string>();
-                    _connections.Add(key, connections);
-                }
+                    if (!_connections.TryGetValue(key, out HashSet<string> connections))
+                    {
+                        connections = new HashSet<string>();
+                        _connections.Add(key, connections);
+                    }
 
-                lock (connections)
-                {
-                    connections.Add(connectionId);
+                    lock (connections)
+                    {
+                        connections.Add(connectionId);
+                    }
                 }
             }
         }
@@ -184,20 +187,23 @@ namespace BaseHub
 
         public void Remove(T key, string connectionId)
         {
-            lock (_connections)
+            if (key != null)
             {
-                if (!_connections.TryGetValue(key, out HashSet<string> connections))
+                lock (_connections)
                 {
-                    return;
-                }
-
-                lock (connections)
-                {
-                    connections.Remove(connectionId);
-
-                    if (connections.Count == 0)
+                    if (!_connections.TryGetValue(key, out HashSet<string> connections))
                     {
-                        _connections.Remove(key);
+                        return;
+                    }
+
+                    lock (connections)
+                    {
+                        connections.Remove(connectionId);
+
+                        if (connections.Count == 0)
+                        {
+                            _connections.Remove(key);
+                        }
                     }
                 }
             }

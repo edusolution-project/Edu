@@ -25,16 +25,17 @@ namespace BaseCustomerMVC.Globals
             var currentUser = context.HttpContext.User;
             if (currentUser != null && currentUser.Identity.IsAuthenticated)
             {
+                string userType = currentUser.FindFirst("Type")?.Value;
                 string type = currentUser.FindFirst(ClaimTypes.Role)?.Value;
                 // kieerm ta nguon tu cache
                 string keys = $"{currentUser.FindFirst("UserID").Value}_{basis}";
-                if (string.IsNullOrEmpty(area) || ctrlName == "home" || ctrlName == "error" || type == "superadmin")
+                if (string.IsNullOrEmpty(area) || ctrlName == "home" || ctrlName == "error" || type == "superadmin" || ctrlName == "news")
                 {
                     base.OnActionExecuting(context);
                 }
                 else
                 {
-                    if (IsValidate(keys, area, ctrlName, actName))
+                    if (IsValidate(keys, area, ctrlName, actName, userType))
                     {
                         base.OnActionExecuting(context);
                     }
@@ -76,7 +77,7 @@ namespace BaseCustomerMVC.Globals
         }
 
         
-        private bool IsValidate(string keys, string area, string ctrl, string act)
+        private bool IsValidate(string keys, string area, string ctrl, string act, string userType)
         {
             try
             {
@@ -84,7 +85,12 @@ namespace BaseCustomerMVC.Globals
                 string keypermission = CacheExtends.GetDataFromCache<string>(keys);
                 List<string> permission = CacheExtends.GetDataFromCache<List<string>>(keypermission);
 
-                if(permission == null || permission.Count == 0)
+                if (userType == "student")
+                {
+                    return area == "student";
+                }
+
+                if (permission == null || permission.Count == 0)
                 {
                     return false;
                 }

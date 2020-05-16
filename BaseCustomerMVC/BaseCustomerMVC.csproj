@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
     <PackageReference Include="OfficeOpenXml.Core.ExcelPackage" Version="1.0.0" />
+    <PackageReference Include="System.Runtime.Caching" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,9 +23,6 @@
   <ItemGroup>
     <Reference Include="Microsoft.AspNetCore.SignalR.Core">
       <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.signalr.core\1.1.0\lib\netstandard2.0\Microsoft.AspNetCore.SignalR.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.Caching">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1\System.Runtime.Caching.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -179,6 +179,10 @@ namespace EnglishPlatform
 
             app.UseMvc(routes =>
             {
+                  routes.MapRoute(
+                   name: "default",
+                   template: "{controller=home}/{action=index}/{id?}"
+                 );
                 routes.MapRoute(
                    name: "areas",
                    template: "{area:exists}/{controller=Home}/{action=Index}"
@@ -203,11 +207,6 @@ namespace EnglishPlatform
                    name: "areas",
                    template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}/{id?}/{ClassID?}"
                  );
-                routes.MapRoute(
-                   name: "default",
-                   template: "{controller=home}/{action=index}/{id?}"
-                 );
-
             });
         }
     }
@@ -222,7 +221,7 @@ namespace EnglishPlatform
 
             // kieerm tra co so 
             
-            return true;
+            return routeKey == "basis";
         }
     }
 }
