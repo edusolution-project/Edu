@@ -105,13 +105,13 @@ namespace EnglishPlatform
 
             app.Use(async (context, next) =>
             {
-                string center = context.GetRouteValue("basis")?.ToString();
-                if (!string.IsNullOrEmpty(center))
+                string center = context.Request.Path.Value != "" && context.Request.Path.Value != "/" ? context.Request.Path.Value.Split('/')[1] : string.Empty;
+                if (!string.IsNullOrEmpty(center) && !center.Contains("hub") && !context.Request.Path.Value.Contains("EasyRealTime"))
                 {
                     string userID = context.User.FindFirst("UserID")?.Value;
                     string roleCode = context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
                     string type = context.User.FindFirst("Type")?.Value;
-                    if(roleCode!= "superadmin")
+                    if (roleCode != "superadmin")
                     {
                         string key = $"{center}_{roleCode}";
                         string defaultKey = $"{userID}_{center}";
@@ -134,6 +134,7 @@ namespace EnglishPlatform
                             var st = _studentService.GetItemByID(userID);
                             var user = _accountService.GetItemByID(userID);
                             var defaultUser = new UserModel() { };
+                            bool isRealCenter = false;
                             if (type == ACCOUNT_TYPE.ADMIN)
                             {
                                 defaultUser = new UserModel(user.ID, "admin");
@@ -147,18 +148,34 @@ namespace EnglishPlatform
                                     defaultUser = new UserModel(tc.ID, tc.FullName);
                                     centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center;
                                     roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                    isRealCenter = tc.Centers.Any(o => o.Code == center);
                                 }
                                 if (st != null)
                                 {
                                     defaultUser = new UserModel(st.ID, st.FullName);
                                     centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center;
-                                    roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                    roleCode = "student";
+                                    isRealCenter = st.Centers != null && st.Centers.Any(o => o == center);
                                 }
-
-                                var role = _roleService.GetItemByID(roleCode);
-                                var listAccess = _accessesService.GetAccessByRole(role.Code);
-                                CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
-                                CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
+                                if (isRealCenter)
+                                {
+                                    var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
+                                    var listAccess = _accessesService.GetAccessByRole(role.Code);
+                                    CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
+                                    CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
+                                }
+                                else
+                                {
+                                    var result = new ViewResult()
+                                    {
+                                        ContentType = context.Request.ContentType,
+                                        ViewName = "Error",
+                                        StatusCode = 404,
+                                    };
+                                    context.Response.ContentType = context.Request.ContentType;
+                                    context.Response.StatusCode = 404;
+                                    _ = context.Response.WriteAsync("data not found 404");
+                                }
                             }
                         }
                     }
@@ -208,19 +225,24 @@ namespace EnglishPlatform
                    template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}/{id?}/{ClassID?}"
                  );
             });
+
+            
         }
     }
     public class MyCustomerRoute : IRouteConstraint
     {
+        public MyCustomerRoute()
+        {
+            
+        }
         public bool Match(HttpContext httpContext, IRouter route, string routeKey, RouteValueDictionary values, RouteDirection routeDirection)
         {
             string key = values[routeKey]?.ToString();
             string controller = values["controller"]?.ToString();
             string action = values["action"]?.ToString();
             string area = values["area"]?.ToString();
-
             // kieerm tra co so 
-            
+
             return routeKey == "basis";
         }
     }

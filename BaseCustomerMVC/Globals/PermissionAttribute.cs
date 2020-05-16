@@ -25,10 +25,27 @@ namespace BaseCustomerMVC.Globals
             var currentUser = context.HttpContext.User;
             if (currentUser != null && currentUser.Identity.IsAuthenticated)
             {
+                string userId = currentUser.FindFirst("UserID").Value;
                 string userType = currentUser.FindFirst("Type")?.Value;
                 string type = currentUser.FindFirst(ClaimTypes.Role)?.Value;
+                try
+                {
+                    var ctrl = (Controller)context.Controller;
+                    if (ctrl != null)
+                    {
+                        if (!ctrl.TempData.ContainsKey(userId))
+                        {
+                            ctrl.TempData.Add(userId, basis);
+                        }
+                        else
+                        {
+                            ctrl.TempData[userId] = basis;
+                        }
+                    }
+                }
+                catch { }
                 // kieerm ta nguon tu cache
-                string keys = $"{currentUser.FindFirst("UserID").Value}_{basis}";
+                string keys = $"{userId}_{basis}";
                 if (string.IsNullOrEmpty(area) || ctrlName == "home" || ctrlName == "error" || type == "superadmin" || ctrlName == "news")
                 {
                     base.OnActionExecuting(context);

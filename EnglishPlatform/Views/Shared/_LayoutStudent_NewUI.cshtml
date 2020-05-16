@@ -21,7 +21,8 @@
         const g_CurrentUser = {
             email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
             name: "@User.Identity.Name",
-            id: "@User.FindFirst("UserID")?.Value"
+            id: "@User.FindFirst("UserID")?.Value",
+            center : "@TempData[User.FindFirst("UserID")?.Value]"
         }
 
     </script>

@@ -42,6 +42,12 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+        public CenterEntity GetItemByCode(string code)
+        {
+            var listData = CreateQuery().Find(o => o.Code == code)?.ToList();
+            if (listData == null || listData.Count == 0) return null;
+            return listData?.FirstOrDefault();
+        }
         public void ChangeStatus(List<string> IDs, bool status)
         {
             CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<CenterEntity>.Update.Set(t => t.Status, status));
