@@ -118,7 +118,7 @@
     <None Include="wwwroot\css\layout - Copy.scss" />
     <None Include="wwwroot\css\layout.scss" />
     <None Include="wwwroot\css\newsfeed.scss" />
-    <None Include="wwwroot\css\stylesheet.less" />
+    <None Include="wwwroot\css\stylesheet_o.less" />
     <None Include="wwwroot\css\uivar.scss" />
     <None Include="wwwroot\css\_sidebar.scss" />
     <None Include="wwwroot\easy-real-time\js\easy-real-time.js" />

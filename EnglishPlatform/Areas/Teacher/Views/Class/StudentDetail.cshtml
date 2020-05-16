@@ -110,7 +110,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item,k) in sumarryData">
-                            <td><a href="#" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
+                            <td><a href="#" v-on:click="showSkillSummary('{{item.SubjectID}}')" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
                             <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
                             <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
                             <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>

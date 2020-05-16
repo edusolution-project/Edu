@@ -3,39 +3,471 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Navbar</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Dropdown
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Something else here</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#">Disabled</a>
-                </li>
-            </ul>
-            <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-            </form>
+<div class="top-banner">
+</div>
+<div class="about-us mt-5 mb-5">
+    <div class="content-box">
+        <div class="box-title text-left">
+            Về Eduso
+            <div class="underline w-50"></div>
         </div>
-    </nav>
+        <div class="content">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+        </div>
+    </div>
+</div>
+<div class="how-we-help d-flex mb-5">
+    <div class="content-box text-center">
+        <div class="box-title text-center">
+            Chúng tôi giúp gì cho bạn
+            <div class="underline w-50"></div>
+        </div>
+        <div class="d-flex flex-column flex-md-row" style="width: 100%">
+            <div class="sub-box media-body m-3">
+                <div class="image">
+                    <img src="~/images/hwh1.png" />
+                </div>
+                <div class="title">
+                    Học sinh
+                </div>
+                <div class="content">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </div>
+            </div>
+            <div class="sub-box media-body m-3">
+                <div class="image">
+                    <img src="~/images/hwh2.png" />
+                </div>
+                <div class="title">
+                    Giáo viên
+                </div>
+                <div class="content">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </div>
+            </div>
+            <div class="sub-box media-body m-3">
+                <div class="image">
+                    <img src="~/images/hwh3.png" />
+                </div>
+                <div class="title">
+                    Quản lý
+                </div>
+                <div class="content">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<img src="~/images/temp/Howwehelp.png" />*@
+</div>
+<div class="our-product d-block d-md-flex justify-content-md-between">
+    <div class="media">
+        <img src="~/images/Product.png" />
+    </div>
+    <div class="content-box">
+        <div class="box-title text-left">
+            Sản phẩm
+            <div class="underline w-50"></div>
+        </div>
+        <div class="content">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        </div>
+    </div>
+</div>
+<div class="trial-top d-none d-md-block"></div>
+<div class="trial d-flex justify-content-center">
+    <div class="media d-none d-md-block">
+        <img src="~/images/trial.png" />
+    </div>
+    <div class="content-box text-center">
+        <div class="box-title text-center text-white">
+            Đăng ký dùng thử miễn phí
+        </div>
+        <div class="trial-form">
+            <div>
+                <label>Họ và tên</label>
+                <input type="text" class="form-control" />
+            </div>
+            <div>
+                <label>Số điện thoại</label>
+                <input type="text" class="form-control" />
+            </div>
+            <div>
+                <label>Địa chỉ</label>
+                <input type="text" class="form-control" />
+            </div>
+
+        </div>
+        <div class="text-center">
+            <button> Đăng ký ngay</button>
+        </div>
+    </div>
+
+</div>
+<div class="news mt-5 mb-5">
+    <div class="content-box">
+        <div class="box-title text-left">
+            Tin tức
+            <div class="underline w-50"></div>
+        </div>
+        <div class="categories">
+            <a href="#" class="active">Sự kiện</a> |
+            <a href="#">Ngôi sao đổi mới</a> |
+            <a href="#">Chuyện Nghề </a> |
+            <a href="#">Câu chuyện đối tác</a>
+
+        </div>
+        <div class="news-list">
+            <div class="news-hot">
+                <div class="news-item">
+                    <div class="thumb">
+                        <img src="~/images/news1.png" />
+                    </div>
+                    <div class="news-title">
+                        Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                    </div>
+                    <div class="news-desc">
+                        Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
+                    </div>
+                    <div class="news-time">
+                        12/08/2019
+                    </div>
+                </div>
+                <div class="news-item">
+                    <div class="thumb">
+                        <img src="~/images/news2.png" />
+                    </div>
+                    <div class="news-title">
+                        Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                    </div>
+                    <div class="news-desc">
+                        Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
+                    </div>
+                    <div class="news-time">
+                        12/08/2019
+                    </div>
+                </div>
+            </div>
+            <div class="news-top">
+                <div class="news-item">
+                    <div class="thumb">
+                        <img src="~/images/news3.png" />
+                    </div>
+                    <div class="news-title">
+                        Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                    </div>
+                    <div class="news-desc">
+                        Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
+                    </div>
+                    <div class="news-time">
+                        12/08/2019
+                    </div>
+                </div>
+                <div class="news-item">
+                    <div class="thumb">
+                        <img src="~/images/news4.png" />
+                    </div>
+                    <div class="news-title">
+                        Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                    </div>
+                    <div class="news-desc">
+                        Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
+                    </div>
+                    <div class="news-time">
+                        12/08/2019
+                    </div>
+                </div>
+                <div class="news-item">
+                    <div class="thumb">
+                        <img src="~/images/news5.png" />
+                    </div>
+                    <div class="news-title">
+                        Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                    </div>
+                    <div class="news-desc">
+                        Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
+                    </div>
+                    <div class="news-time">
+                        12/08/2019
+                    </div>
+                </div>
+                <div class="news-item">
+                    <div class="thumb">
+                        <img src="~/images/news6.png" />
+                    </div>
+                    <div class="news-title">
+                        Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                    </div>
+                    <div class="news-desc">
+                        Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
+                    </div>
+                    <div class="news-time">
+                        12/08/2019
+                    </div>
+                </div>
+                <div class="news-item">
+                    <div class="thumb">
+                        <img src="~/images/news7.png" />
+                    </div>
+                    <div class="news-tile">
+                        Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                    </div>
+                    <div class="news-desc">
+                        Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
+                    </div>
+                    <div class="news-time">
+                        12/08/2019
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="partner">
+
+</div>
+<div class="footer">
+
+</div>
+<style>
+    .top-banner {
+        display: block;
+        height: 396px;
+        background-image: url(/images/topbanner.png);
+        background-repeat: no-repeat;
+        background-position: center;
+        margin-top: 2px;
+    }
+
+    @@media ( max-width : 800px) {
+        .top-banner {
+            height: 0;
+            background-size: auto 100%;
+            padding-top: 50%;
+        }
+    }
+
+    .about-us {
+        background-image: url(/images/Aboutus_bg.png);
+        background-repeat: no-repeat;
+        background-position: right center;
+        margin-top: 2px;
+        height: 340px;
+    }
+
+    .our-product {
+        background-image: url(/images/bg_product.png);
+        background-repeat: no-repeat;
+        background-size: 100%;
+        margin-top: 2px;
+        /*height: 340px;*/
+        padding-top: 60px;
+        padding-bottom: 100px;
+    }
+
+        .our-product .media {
+            width: 560px;
+        }
+
+            .our-product .media img {
+                max-width: 100%;
+                max-height: 100%;
+            }
+
+    @@media (max-width: 800px) {
+        .our-product .media {
+            width: 100%;
+            margin-bottom: 24px;
+        }
+    }
+
+    .content-box .box-title {
+        font-size: 32px;
+        line-height: 44px;
+        color: #05517B;
+        display: inline-block;
+        font-weight: 600;
+        margin-bottom: 24px;
+        position: relative;
+    }
+
+        .content-box .box-title .underline {
+            height: 4px;
+            background: #C1272C;
+            position: absolute;
+        }
+
+    .content-box .content {
+        font-size: 16px;
+        font-weight: normal;
+        line-height: 22px;
+        color: #000000;
+    }
+
+    .trial-top {
+        width: 0px;
+        height: 0;
+        border-left: 1140px solid transparent;
+        border-right: 0px solid transparent;
+        border-bottom: 80px solid #08486B;
+        margin-top: -60px;
+    }
+
+
+    .trial {
+        background: #08486B;
+        padding: 20px 0;
+    }
+
+        .trial .box-title {
+            font-size: 24px;
+            line-height: 33px;
+            font-style: normal;
+            font-weight: normal;
+        }
+
+        .trial .media {
+        }
+
+        .trial .content-box {
+            margin-left: 100px;
+        }
+
+        .trial .trial-form {
+            width: 560px;
+            height: 252px;
+            background: #FFFFFF;
+            border-radius: 3px;
+            padding: 24px;
+            text-align: left;
+        }
+
+    @@media (max-width: 800px) {
+        .trial .content-box {
+            margin: 0;
+        }
+
+        .trial .trial-form {
+            width: 100%;
+        }
+    }
+
+    .trial .trial-form label {
+        font-style: normal;
+        font-size: 14px;
+        line-height: 19px;
+    }
+
+    .trial .trial-form input {
+        background: #FFFFFF;
+        border: 0.5px solid #A8A8A8;
+        box-sizing: border-box;
+        border-radius: 3px;
+    }
+
+    .trial button {
+        margin-top: 32px;
+        width: 251px;
+        height: 44px;
+        left: 735px;
+        top: 402px;
+        background: #C1272C;
+        border-radius: 100px;
+        /*font-family: Lato;*/
+        font-style: normal;
+        font-size: 18px;
+        line-height: 22px;
+        /* identical to box height */
+        text-align: center;
+        text-transform: uppercase;
+        color: #FFFFFF;
+        border: none;
+    }
+
+    .news .categories {
+        margin-bottom: 10px;
+        line-height: 16px;
+        color: #CCC;
+    }
+
+        .news .categories a {
+            font-weight: 600;
+            font-size: 20px;
+            line-height: 27px;
+            color: #A0A0A0;
+            margin: 0 16px;
+        }
+
+            .news .categories a:first-child {
+                margin-left: 0
+            }
+
+            .news .categories a:last-child {
+                margin-right: 0
+            }
+
+            .news .categories a.active, .news .categories a:hover {
+                text-decoration: none;
+                color: #05517B;
+            }
+
+            .news-item{
+
+            }
+            .news-item 
+
+    @@media (max-width: 800px) {
+        .news .categories {
+            font-size: 0;
+        }
+
+            .news .categories a {
+                margin: 5px 0;
+                width: 100%;
+                display: inline-block;
+                padding: 0 20px;
+            }
+    }
+
+    .content-box .sub-box .title {
+        font-weight: 600;
+        font-size: 18px;
+        line-height: 25px;
+    }
+
+    .about-us .box-title {
+        text-align: left;
+    }
+
+    .about-us .content,
+    .our-product .content {
+        width: 560px;
+    }
+
+
+    @@media ( max-width : 800px) {
+        .about-us {
+            background-position: center bottom;
+            padding-bottom: 320px;
+            height: auto;
+            margin: 0 20px;
+        }
+
+            .about-us .content,
+            .our-product .content {
+                width: 100%;
+            }
+
+        .our-product {
+            padding: 20px;
+            background-size: 100%;
+            background-position: left bottom;
+        }
+    }
+
+
+    .how-we-help .underline {
+        left: 25%;
+        margin-top: 8px;
+    }
+</style>

@@ -3,46 +3,117 @@
 @{
     var model = ViewBag.Model;
 }
-
-
-
-    <nav class="navbar navbar-default navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">Project name</a>
+<div class="topbar d-flex align-items-center">
+    <div class="container">
+        <div class="d-flex text-light align-items-center justify-content-between">
+            <div>
+                <span class="hotline d-flex align-items-center"><i class="ic ic-phone mr-1"></i> HOTLINE: <a href="tel:+84989085398" class="action-link ml-1">+ 84 989.085.398</a></span>
             </div>
-            <div id="navbar" class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Home</a></li>
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">Action</a></li>
-                            <li><a href="#">Another action</a></li>
-                            <li><a href="#">Something else here</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li class="dropdown-header">Nav header</li>
-                            <li><a href="#">Separated link</a></li>
-                            <li><a href="#">One more separated link</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="../navbar/">Default</a></li>
-                    <li><a href="../navbar-static-top/">Static top</a></li>
-                    <li class="active"><a href="./">Fixed top <span class="sr-only">(current)</span></a></li>
-                </ul>
-            </div><!--/.nav-collapse -->
+            <div class="d-flex">
+                <a href="/login" title="Đăng nhập" class="action-link mr-3">Đăng nhập</a>
+                <span class="divider align-self-lg-stretch bg-light"></span>
+                <a href="/login" class="action-link ml-3">Đăng ký</a>
+            </div>
         </div>
-    </nav>
 
+    </div>
+</div>
+<div class="menubar d-flex align-items-center">
+    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
+        <div>
+            <div class="home">
+                <a href="/" class="logo">
+                    <img src="~/images/LogoTOP.png" />
+                </a>
+            </div>
+            <div class="toggler">
 
+            </div>
+        </div>
+        <div class="nav-link">
+            <a href="#" class="mr-4">Trang chủ</a>
+            <a href="#" class="mr-4 ml-4">Về EDUSO</a>
+            <a href="#" class="mr-4 ml-4">Sản phẩm</a>
+            <a href="#" class="mr-4 ml-4">Sự kiện</a>
+            <a href="#" class="mr-4 ml-4">Tin tức</a>
+            <a href="#" class="ml-4">Tuyển dụng</a>
+        </div>
+    </div>
+</div>
+<style>
+    .topbar {
+        height: 48px;
+        background-color: #03324C !important;
+        font-weight: 600;
+    }
 
+        .topbar .hotline, .topbar .action-link {
+            font-size: 12px;
+            line-height: 20px;
+            text-transform: uppercase;
+            color: #FFFFFF;
+        }
+
+        .topbar .action-link {
+            cursor: pointer;
+        }
+
+            .topbar .action-link:hover {
+                text-decoration: none;
+            }
+
+        .topbar .hotline .ic {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-repeat: no-repeat;
+            background-position: center center;
+        }
+
+        .topbar .hotline .ic-phone {
+            background-image: url('../images/phone_sm.png');
+        }
+
+        .topbar .divider {
+            width: 1px;
+        }
+
+    .menubar {
+        height: 80px;
+        background: #FFFFFF;
+        box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.25);
+        font-weight: 600;
+    }
+
+    @@media(max-width: 800px) {
+        .menubar {
+            height: auto;
+        }
+    }
+
+    .menubar .logo {
+        height: 56px;
+        display: block;
+    }
+
+        .menubar .logo img {
+            width: auto;
+            height: auto;
+            max-height: 100%;
+            max-width: 100%;
+            display: block;
+        }
+
+    .menubar .nav-link a {
+        font-size: 14px;
+        line-height: 20px;
+        color: #08486B;
+    }
+
+        .menubar .nav-link a:hover,
+        .menubar .nav-link a.active {
+            text-decoration: none;
+            cursor: pointer;
+            color: #C1272C;
+        }
+</style>
