@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using BaseAccess;
 using BaseCustomerEntity.Database;
@@ -166,15 +167,10 @@ namespace EnglishPlatform
                                 }
                                 else
                                 {
-                                    var result = new ViewResult()
-                                    {
-                                        ContentType = context.Request.ContentType,
-                                        ViewName = "Error",
-                                        StatusCode = 404,
-                                    };
-                                    context.Response.ContentType = context.Request.ContentType;
-                                    context.Response.StatusCode = 404;
-                                    _ = context.Response.WriteAsync("data not found 404");
+                                    context.Response.ContentType = "text/html;charset=utf-8";
+                                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                                    await context.Response.WriteAsync("<p>Không tìm thấy thông tin</p>");
+                                    await context.Response.WriteAsync("<a href='/'>quay về</a>");
                                 }
                             }
                         }
