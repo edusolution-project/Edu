@@ -1764,7 +1764,7 @@ var Lesson = (function () {
         CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
         CKEDITOR.replace('editor', {
             allowedContent: true,
-            extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+            extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz'
         });
         if (data != null && data.Media != null)
             renderMediaContent(data, contentholder.find(".media_preview:first"), type);

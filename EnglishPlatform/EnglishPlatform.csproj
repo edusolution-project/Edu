@@ -17,6 +17,7 @@
     <Compile Remove="wwwroot\js\plugins\ck4\plugins\embedbase\**" />
     <Compile Remove="wwwroot\js\plugins\ck4\plugins\embed\**" />
     <Compile Remove="wwwroot\js\plugins\ck4\plugins\image2\**" />
+    <Compile Remove="wwwroot\js\plugins\ck4\plugins\textmatch\**" />
     <Compile Remove="wwwroot\js\plugins\ck4\skins\moono-lisa\**" />
     <Content Remove="Areas\Teacher\Controllers\**" />
     <Content Remove="wwwroot\Files\**" />
@@ -27,6 +28,7 @@
     <Content Remove="wwwroot\js\plugins\ck4\plugins\embedbase\**" />
     <Content Remove="wwwroot\js\plugins\ck4\plugins\embed\**" />
     <Content Remove="wwwroot\js\plugins\ck4\plugins\image2\**" />
+    <Content Remove="wwwroot\js\plugins\ck4\plugins\textmatch\**" />
     <Content Remove="wwwroot\js\plugins\ck4\skins\moono-lisa\**" />
     <EmbeddedResource Remove="Areas\Teacher\Controllers\**" />
     <EmbeddedResource Remove="wwwroot\Files\**" />
@@ -37,6 +39,7 @@
     <EmbeddedResource Remove="wwwroot\js\plugins\ck4\plugins\embedbase\**" />
     <EmbeddedResource Remove="wwwroot\js\plugins\ck4\plugins\embed\**" />
     <EmbeddedResource Remove="wwwroot\js\plugins\ck4\plugins\image2\**" />
+    <EmbeddedResource Remove="wwwroot\js\plugins\ck4\plugins\textmatch\**" />
     <EmbeddedResource Remove="wwwroot\js\plugins\ck4\skins\moono-lisa\**" />
     <None Remove="Areas\Teacher\Controllers\**" />
     <None Remove="wwwroot\Files\**" />
@@ -47,6 +50,7 @@
     <None Remove="wwwroot\js\plugins\ck4\plugins\embedbase\**" />
     <None Remove="wwwroot\js\plugins\ck4\plugins\embed\**" />
     <None Remove="wwwroot\js\plugins\ck4\plugins\image2\**" />
+    <None Remove="wwwroot\js\plugins\ck4\plugins\textmatch\**" />
     <None Remove="wwwroot\js\plugins\ck4\skins\moono-lisa\**" />
   </ItemGroup>
 
@@ -334,7 +338,6 @@
     <None Include="wwwroot\js\plugins\ck4\plugins\table\dialogs\table.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\templates\dialogs\templates.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\templates\templates\default.js" />
-    <None Include="wwwroot\js\plugins\ck4\plugins\textmatch\plugin.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\wsc\dialogs\wsc.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\wsc\dialogs\wsc_ie.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\wsc\LICENSE.md" />

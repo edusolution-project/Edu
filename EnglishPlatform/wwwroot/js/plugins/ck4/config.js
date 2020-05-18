@@ -31,6 +31,7 @@ CKEDITOR.editorConfig = function( config ) {
 	config.removeDialogTabs = 'image:advanced;link:advanced';
 	config.extraPlugins = 'uploadimage';
 	config.extraPlugins = 'youtube';
+	config.extraPlugins = 'fillquiz';
 	config.imageUploadUrl = '/Home/UploadImage';
-
+	//config.extraAllowedContent = 'fillquiz';
 };
