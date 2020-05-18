@@ -74,6 +74,7 @@
     <Content Remove="Areas\Teacher\Views\Schedule\Schedule.cshtml" />
     <Content Remove="compilerconfig.json" />
     <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
+    <Content Remove="wwwroot\js\plugins\ck4\plugins\fillquiz\plugin.js" />
   </ItemGroup>
 
   <ItemGroup>
