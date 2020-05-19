@@ -869,15 +869,16 @@ var Lesson = (function () {
                 }
                 break;
             case "QUIZ3":
+                if (data.Description != null) {
+                    itembox.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                }
                 itembox.append(ItemRow);
                 var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 renderMediaContent(data, ItemRow, "");
                 //console.log(ItemRow);
                 ItemRow.append(itemBody);
-                if (data.Description != null) {
-                    ItemRow.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
-                }
+
                 ItemRow.find(".media-holder").addClass("col-12");
                 var answers_box = $("<div>", { "class": "answer-wrapper no-child col-4", "data-part-id": data.ID });
                 ItemRow.append(answers_box);
@@ -1651,8 +1652,8 @@ var Lesson = (function () {
                         addNewQuestion(quiz);
                     }
                 }
-                //else
-                //    addNewQuestion();
+                else
+                    addNewQuestion();
                 break;
             case "QUIZ3"://Trắc nghiệm match
                 var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
