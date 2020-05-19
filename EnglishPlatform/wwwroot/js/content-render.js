@@ -862,9 +862,12 @@ var Lesson = (function () {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
                 }
                 //Render Question
+                console.log("Render Quiz 2 for preview (Curriculum)");
                 totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
+
+                    //Change render here => render quiz into description
                     renderPreviewQuestion(item, data.Type);
                 }
                 break;
@@ -971,6 +974,7 @@ var Lesson = (function () {
         }
         switch (template) {
             case "QUIZ2":
+                //change here
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
@@ -1111,7 +1115,7 @@ var Lesson = (function () {
         var answer = $("<fieldset>", { "class": "answer-item", id: data.ID });
         switch (template) {
             case "QUIZ2":
-
+                //no more use
                 if ($(container).find(".answer-item").length == 0) {
                     answer.append($("<input>", { "type": "text", "class": "input-text answer-text form-control", "placeholder": data.Content }));
                     container.append(answer);
@@ -1642,18 +1646,18 @@ var Lesson = (function () {
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion bnt-primary", "value": "Add question", "tabindex": -1, "onclick": "AddNewQuestion(this)" }));
-                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file'));
+                //contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion bnt-primary", "value": "Add question", "tabindex": -1, "onclick": "AddNewQuestion(this)" }));
+                //contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file'));
 
                 //Add First Question
-                if (data != null && data.Questions != null) {
-                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                        var quiz = data.Questions[i];
-                        addNewQuestion(quiz);
-                    }
-                }
-                else
-                    addNewQuestion();
+                //if (data != null && data.Questions != null) {
+                //    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                //        var quiz = data.Questions[i];
+                //        addNewQuestion(quiz);
+                //    }
+                //}
+                //else
+                //    addNewQuestion();
                 break;
             case "QUIZ3"://Trắc nghiệm match
                 var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
@@ -1763,10 +1767,22 @@ var Lesson = (function () {
         }
         //CKEDITOR.replace("editor");        
         CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
-        CKEDITOR.replace('editor', {
-            allowedContent: true,
-            extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz'
-        });
+
+        switch (type) {
+            case "QUIZ2":
+                CKEDITOR.replace('editor', {
+                    allowedContent: true,
+                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz'
+                });
+                break;
+            default:
+                CKEDITOR.replace('editor', {
+                    allowedContent: true,
+                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                });
+                break;
+        }
+        
         if (data != null && data.Media != null)
             renderMediaContent(data, contentholder.find(".media_preview:first"), type);
     }
@@ -1985,7 +2001,6 @@ var Lesson = (function () {
         if ($(obj).parent().hasClass("selected") != isChecked)
             $(obj).parent().toggleClass("selected");
     }
-
 
     //Navigation
     var prevPart = function () {

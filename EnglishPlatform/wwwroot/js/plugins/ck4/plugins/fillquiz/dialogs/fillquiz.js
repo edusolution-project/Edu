@@ -32,7 +32,6 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                         // Called by the main setupContent method call on dialog initialization.
                         setup: function (element) {
                             var childInp = element.find("input");
-
                             if (childInp.$.length > 0) {
                                 this.setValue(childInp.$[0].getAttribute("plc"));
                             }
@@ -48,6 +47,7 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                                 element.setText("");
                                 var childInp = editor.document.createElement('input');
                                 childInp.setAttribute("type", "text");
+                                childInp.setAttribute("plc", this.getValue());
                                 childInp.setAttribute("value", this.getValue());
                                 childInp.setAttribute("disabled", "disabled");
                                 childInp.setAttribute("class", "fillquiz");
@@ -70,7 +70,13 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
 
                         // Called by the main setupContent method call on dialog initialization.
                         setup: function (element) {
-                            this.setValue(element.getAttribute("ans"));
+                            var childInp = element.find("input");
+                            if (childInp.$.length > 0) {
+                                this.setValue(childInp.$[0].getAttribute("ans"));
+                            }
+                            else {
+                                this.setValue(element.getText());
+                            }
                         },
 
                         // Called by the main commitContent method call on dialog confirmation.
