@@ -868,7 +868,7 @@ var Lesson = (function () {
                     var item = data.Questions[i];
 
                     //Change render here => render quiz into description
-                    renderPreviewQuestion(item, data.Type);
+                    //renderPreviewQuestion(item, data.Type);
                 }
                 break;
             case "QUIZ3":
@@ -1428,6 +1428,15 @@ var Lesson = (function () {
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ID", "value": data.ID }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "Type", "value": data.Type }));
         $('#action').val(config.url.save_part);
+        switch (data.Type) {
+            case "QUIZ2":
+                $("#partModal").find('.btnSaveForm').attr("onclick", "submitQuizFill(event)");
+                break;
+            default:
+                $("#partModal").find('.btnSaveForm').attr("onclick", "submitForm(event)");
+                //$(modalForm).find('.btnSaveForm').unbind().click(function () { return submitForm(event) });
+                break;
+        }
 
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
         $(modalForm).append($("<div>", { "class": "question_template hide" }));
@@ -1646,18 +1655,18 @@ var Lesson = (function () {
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-                //contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion bnt-primary", "value": "Add question", "tabindex": -1, "onclick": "AddNewQuestion(this)" }));
-                //contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file'));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion bnt-primary", "value": "Add question", "tabindex": -1, "onclick": "AddNewQuestion(this)" }));
+                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file'));
 
                 //Add First Question
-                //if (data != null && data.Questions != null) {
-                //    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                //        var quiz = data.Questions[i];
-                //        addNewQuestion(quiz);
-                //    }
-                //}
-                //else
-                //    addNewQuestion();
+                if (data != null && data.Questions != null) {
+                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                        var quiz = data.Questions[i];
+                        addNewQuestion(quiz);
+                    }
+                }
+                else
+                    addNewQuestion();
                 break;
             case "QUIZ3"://Trắc nghiệm match
                 var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
@@ -3321,6 +3330,97 @@ var submitForm = function (event, modalId, callback) {
 
         //formdata.append("Description", myEditor.getData())
         formdata.append("Description", CKEDITOR.instances.editor.getData())
+    }
+    var err = false;
+    var requires = $(Form).find(':required');
+
+    document.activeElement.blur();
+
+    requires.each(function () {
+        var obj = $(this);
+        if ($(this).val() == "" || $(this).val() == null) {
+            Swal.fire({
+                title: 'Lưu ý',
+                text: "Vui lòng điền đầy đủ nội dung",
+                icon: 'warning',
+                confirmButtonText: "Đóng"
+            }).then(() => {
+                $('.btnSaveForm').show();
+                $(obj).focus();
+            });
+            err = true;
+            return false;
+        }
+    });
+    if (err) return false;
+
+    var xhr = new XMLHttpRequest();
+
+    var actionUrl = $("#action").val()
+    if (form.length > 0)
+        actionUrl = form.attr('action');
+
+    $('.btnSaveForm').after($("<div>", { class: "pending", text: "Đang gửi dữ liệu, vui lòng đợi..." }));
+    xhr.open('POST', actionUrl);
+    xhr.send(formdata);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            var data = JSON.parse(xhr.responseText);
+            if (data.Error == null || data.Error == "") {
+                //switch (actionUrl) {
+                //case "Lesson/" + urlLesson.CreateOrUpdate:
+                //render.lesson(data.data);
+                //document.location = urlLesson.Location + data.Data.ID;
+                //document.location = document.location;
+                //    break;
+                //case "LessonPart/" + urlLessonPart.CreateOrUpdate:
+                //    var part = data.Data;
+                //   //render.part(part);
+                if (callback == "addPart") {
+                    var part = data.Data;
+                    window.AddPart(part);
+                }
+                else {
+                    if (callback == null)
+                        window.ReloadData();
+                    else
+                        callback;
+                }
+                hideModal(modalId);
+            }
+            else {
+                alert(data.Error);
+            }
+        }
+        $('.btnSaveForm').siblings('.pending').remove();
+        $('.btnSaveForm').show();
+    }
+}
+
+var submitQuizFill = function (event, modalId, callback) {
+    event.preventDefault();
+    $('.btnSaveForm').hide();
+
+    var form = $(modalId).find('form');
+    var Form = form.length > 0 ? form[0] : window.partForm;
+    var formdata = new FormData(Form);
+
+    if ($('textarea[name="Description"]').length > 0) {
+        formdata.delete("Description");
+
+
+        var description = $.parseHtml(CKEDITOR.instances.editor.getData());
+        var quizs = $(description).find("fillquiz");
+        if (quizs.length > 0) {
+            for (var i = 0; i < quizs.length; i++) {
+
+            }
+        }
+
+        console.log(description);
+
+        debugger;
+        formdata.append("Description", description.html())
     }
     var err = false;
     var requires = $(Form).find(':required');

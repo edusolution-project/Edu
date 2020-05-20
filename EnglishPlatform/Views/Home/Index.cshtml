@@ -69,7 +69,7 @@
             Sản phẩm
             <div class="underline w-50"></div>
         </div>
-        <div class="content">
+        <div class="content text-justify">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
         </div>
     </div>
@@ -237,6 +237,12 @@
         background-repeat: no-repeat;
         background-position: center;
         margin-top: 2px;
+    }
+
+    @@media (min-width: 1200px) {
+        .container {
+            max-width: 1170px;
+        }
     }
 
     @@media ( max-width : 800px) {
@@ -411,22 +417,25 @@
                 color: #05517B;
             }
 
-            .news-item{
+    .news-item {
+    }
 
-            }
-            .news-item 
+        .news-item
 
-    @@media (max-width: 800px) {
-        .news .categories {
-            font-size: 0;
-        }
+        @@media (max-width: 800px) {
+            .news .categories
 
-            .news .categories a {
-                margin: 5px 0;
-                width: 100%;
-                display: inline-block;
-                padding: 0 20px;
-            }
+    {
+        font-size: 0;
+    }
+
+    .news .categories a {
+        margin: 5px 0;
+        width: 100%;
+        display: inline-block;
+        padding: 0 20px;
+    }
+
     }
 
     .content-box .sub-box .title {
