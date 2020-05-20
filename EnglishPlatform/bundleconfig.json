@@ -83,7 +83,7 @@
   {
     "outputFileName": "wwwroot/js/minify/detail.fn.min.js",
     "inputFiles": [
-      "wwwroot/js/content-render.js"
+      "wwwroot/js/content-render.js" 
     ],
     "minify": {
       "enabled": true,

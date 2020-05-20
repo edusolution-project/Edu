@@ -1,5 +1,6 @@
 ﻿/**
  * Copyright (c) 2020, Viet Phung
+ * Last Edit: 2020/05/20
  */
 
 // Our dialog definition.
@@ -7,7 +8,7 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
     return {
 
         // Basic properties of the dialog window: title, minimum size.
-        title: 'Fillquiz Properties',
+        title: 'Câu hỏi điền từ',
         minWidth: 400,
         minHeight: 200,
 
@@ -24,16 +25,16 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                         // Text input field for the Fillquiz Placeholder text.
                         type: 'text',
                         id: 'quizPlc',
-                        label: 'Placeholder',
+                        label: 'Hiển thị của học viên',
 
                         // Validation checking whether the field is not empty.
-                        validate: CKEDITOR.dialog.validate.notEmpty("Placeholder field cannot be empty."),
+                        //validate: CKEDITOR.dialog.validate.notEmpty("Placeholder field cannot be empty."),
 
                         // Called by the main setupContent method call on dialog initialization.
                         setup: function (element) {
                             var childInp = element.find("input");
                             if (childInp.$.length > 0) {
-                                this.setValue(childInp.$[0].getAttribute("plc"));
+                                this.setValue(childInp.$[0].getAttribute("dsp"));
                             }
                             else {
                                 this.setValue(element.getText());
@@ -47,15 +48,15 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                                 element.setText("");
                                 var childInp = editor.document.createElement('input');
                                 childInp.setAttribute("type", "text");
-                                childInp.setAttribute("plc", this.getValue());
-                                childInp.setAttribute("value", this.getValue());
+                                childInp.setAttribute("dsp", this.getValue());
+                                childInp.setAttribute("value", "");
                                 childInp.setAttribute("disabled", "disabled");
                                 childInp.setAttribute("class", "fillquiz");
                                 element.append(childInp);
                             }
                             else {
-                                childInp.$[0].setAttribute("plc", this.getValue());
-                                childInp.$[0].setAttribute("value", this.getValue());
+                                childInp.$[0].setAttribute("dsp", this.getValue());
+                                childInp.$[0].setAttribute("value", "");
                             }
                         }
                     },
@@ -63,16 +64,20 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                         // Text input field for the Fillquiz text.
                         type: 'text',
                         id: 'quizAnswer',
-                        label: 'Answer',
+                        label: 'Đáp án (phân cách bởi dấu |)',
 
                         // Validation checking whether the field is not empty.
-                        validate: CKEDITOR.dialog.validate.notEmpty("Answer field cannot be empty."),
+                        validate: CKEDITOR.dialog.validate.notEmpty("Đáp án không được để trống"),
 
                         // Called by the main setupContent method call on dialog initialization.
                         setup: function (element) {
                             var childInp = element.find("input");
                             if (childInp.$.length > 0) {
-                                this.setValue(childInp.$[0].getAttribute("ans"));
+                                var ans = childInp.$[0].getAttribute("ans");
+                                console.log(ans);
+                                if (ans == null)
+                                    ans = childInp.$[0].getAttribute("placeholder");
+                                this.setValue(ans);
                             }
                             else {
                                 this.setValue(element.getText());
@@ -86,13 +91,13 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                                 element.setText("");
                                 var childInp = editor.document.createElement('input');
                                 childInp.setAttribute("type", "text");
-                                childInp.setAttribute("ans", this.getValue());
-                                var text = "(" + this.getValue() + ")";
+                                
+                                var text = this.getValue();
                                 var i = text.length;
                                 var space = 0;
                                 while (i--) { if (text.charAt(i) == ' ') space++; }
-
-                                childInp.$[0].setAttribute("value", text);
+                                childInp.setAttribute("ans", this.getValue());
+                                childInp.$[0].setAttribute("placeholder", text);
                                 childInp.$[0].setAttribute("size", text.length - space);
                                 childInp.setAttribute("disabled", "disabled");
                                 childInp.setAttribute("class", "fillquiz");
@@ -100,12 +105,12 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                             }
                             else {
                                 childInp.$[0].setAttribute("ans", this.getValue());
-                                var text = childInp.$[0].getAttribute("value") + " (" + this.getValue() + ")";
+                                var text = this.getValue();
                                 var i = text.length;
                                 var space = 0;
                                 while (i--) { if (text.charAt(i) == ' ') space++; }
 
-                                childInp.$[0].setAttribute("value", text);
+                                childInp.$[0].setAttribute("placeholder", text);
                                 childInp.$[0].setAttribute("size", text.length - space);
                             }
                         }
@@ -114,8 +119,8 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                         // Text input field for the Fillquiz title (explanation).
                         type: 'text',
                         id: 'quizExp',
-                        label: 'Explanation',
-                        validate: CKEDITOR.dialog.validate.notEmpty("Explanation field cannot be empty."),
+                        label: 'Giải thích đáp án',
+                        //validate: CKEDITOR.dialog.validate.notEmpty("Explanation field cannot be empty."),
 
                         // Called by the main setupContent method call on dialog initialization.
                         setup: function (element) {

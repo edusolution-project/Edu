@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.ViewFeatures.Internal;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -163,6 +164,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
                 if (item.ID == "0" || item.ID == null) //create
                 {
+                    item.CourseID = parentLesson.CourseID;
                     item.Created = DateTime.Now;
                     var maxItem = _lessonPartService.CreateQuery()
                         .Find(o => o.ParentID == item.ParentID)
@@ -223,6 +225,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.Updated = DateTime.Now;
                     item.Created = olditem.Created;
                     item.Order = olditem.Order;
+                    item.CourseID = parentLesson.CourseID;
                 }
 
                 var lessonpart = item.ToEntity();
@@ -254,24 +257,36 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //_lessonPartService.CreateOrUpdate(lessonpart);
                 item.ID = lessonpart.ID;
 
-                if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+                switch (item.Type)
                 {
-                    _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
+                    case "QUIZ2": //remove all previous question
+                        var oldQuizIds = _questionService.CreateQuery().Find(q => q.ParentID == item.ID).Project(i => i.ID).ToEnumerable();
+                        foreach (var quizid in oldQuizIds)
+                            _answerService.CreateQuery().DeleteMany(a => a.ParentID == quizid);
+                        _questionService.CreateQuery().DeleteMany(q => q.ParentID == item.ID);
+                        break;
+                    default:
+                        if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+                        {
+                            _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
 
-                    foreach (var quizID in RemovedQuestions)
-                    {
-                        _answerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
-                    }
+                            foreach (var quizID in RemovedQuestions)
+                            {
+                                _answerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
+                            }
+                        }
+
+                        if (RemovedAnswers != null & RemovedAnswers.Count > 0)
+                            _answerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
+                        break;
                 }
-
-                if (RemovedAnswers != null & RemovedAnswers.Count > 0)
-                    _answerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
 
                 if (item.Questions != null && item.Questions.Count > 0)
                 {
                     foreach (var questionVM in item.Questions)
                     {
                         questionVM.ParentID = item.ID;
+                        questionVM.CourseID = parentLesson.CourseID;
                         var quiz = questionVM.ToEntity();
 
                         if (questionVM.Media != null && questionVM.Media.Name == null) questionVM.Media = null;
@@ -367,6 +382,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     answer.Order = maxItem != null ? maxItem.Order + 1 : 0;
                                     answer.Created = DateTime.Now;
                                     answer.Updated = DateTime.Now;
+                                    answer.CreateUser = quiz.CreateUser;
+                                    answer.CourseID = quiz.CourseID;
 
                                     if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || (!answer.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == answer.Media.Name))))
                                         answer.Media = null;
@@ -388,6 +405,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                                 answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
                                             }
                                         }
+
                                         //var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
                                         //if (file != null)
                                         //{
@@ -584,6 +602,28 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 throw ex;
             }
+        }
+
+        public JsonResult ConvertFillQuestion()
+        {
+            var fillparts = _lessonPartService.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
+            if (fillparts != null && fillparts.Count > 0)
+            {
+                foreach (var part in fillparts)
+                {
+                    if (part.Description == null)
+                        part.Description = "";
+                    var questions = _questionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
+                    if (questions != null && questions.Count > 0)
+                        for (int i = 0; i < questions.Count; i++)
+                        {
+                            var quiz = questions[i];
+                            part.Description += "<p>" + quiz.Content + " <fillquiz><input class='fillquiz'></input></fillquiz></p>";
+                        }
+                    _lessonPartService.Save(part);
+                }
+            }
+            return new JsonResult("Convert Done");
         }
     }
 }

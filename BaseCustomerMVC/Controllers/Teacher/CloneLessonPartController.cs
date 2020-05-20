@@ -168,6 +168,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                           Answers = _cloneAnswerService.CreateQuery().Find(a => a.ParentID == t.ID).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
                       }).ToList()
             };
+
+            //if(full_item.Questions != null && full_item.Questions.Count > 0)
+            //{
+            //    foreach(var quiz in full_item.Questions)
+            //    {
+            //        var ans = _cloneAnswerService.CreateQuery().Find(a => a.ParentID == quiz.ID).SortBy(o => o.Order).ThenBy(o => o.ID).ToList();
+
+            //        quiz.Answers = ans;
+            //    }    
+            //}    
+
             return new JsonResult(new Dictionary<string, object>
                     {
                         { "Data", full_item },
@@ -257,18 +268,29 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             item.ID = lessonpart.ID;
 
-            if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+            switch (item.Type)
             {
-                _ = _cloneQuestionService.RemoveManyAsync(RemovedQuestions);
+                case "QUIZ2": //remove all previous question
+                    var oldQuizIds = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == item.ID).Project(i => i.ID).ToEnumerable();
+                    foreach (var quizid in oldQuizIds)
+                        _cloneAnswerService.CreateQuery().DeleteMany(a => a.ParentID == quizid);
+                    _cloneQuestionService.CreateQuery().DeleteMany(q => q.ParentID == item.ID);
+                    break;
+                default:
+                    if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+                    {
+                        _ = _cloneQuestionService.RemoveManyAsync(RemovedQuestions);
 
-                foreach (var quizID in RemovedQuestions)
-                {
-                    _ = _cloneAnswerService.RemoveByParentAsync(quizID);
-                }
+                        foreach (var quizID in RemovedQuestions)
+                        {
+                            _ = _cloneAnswerService.RemoveByParentAsync(quizID);
+                        }
+                    }
+
+                    if (RemovedAnswers != null & RemovedAnswers.Count > 0)
+                        _ = _cloneAnswerService.RemoveManyAsync(RemovedAnswers);
+                    break;
             }
-
-            if (RemovedAnswers != null & RemovedAnswers.Count > 0)
-                _ = _cloneAnswerService.RemoveManyAsync(RemovedAnswers);
 
             if (item.Questions != null && item.Questions.Count > 0)
             {

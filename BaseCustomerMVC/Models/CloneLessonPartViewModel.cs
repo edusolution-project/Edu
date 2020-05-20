@@ -50,13 +50,14 @@ namespace BaseCustomerMVC.Models
                 Updated = this.Updated,
                 Media = this.Media,
                 TeacherID = this.TeacherID
-                
+
             };
         }
     }
 
     public class CloneQuestionViewModel : CloneLessonPartQuestionEntity
     {
+        private List<CloneLessonPartAnswerEntity> list;
 
         public CloneQuestionViewModel()
         {
@@ -75,6 +76,11 @@ namespace BaseCustomerMVC.Models
             this.Point = o.Point;
             this.Media = o.Media;
             Answers = new List<CloneLessonPartAnswerEntity>();
+        }
+
+        public CloneQuestionViewModel(LessonPartQuestionEntity o, List<CloneLessonPartAnswerEntity> Answer) : this(o)
+        {
+            this.Answers = Answers;
         }
 
         [JsonProperty("Answers")]

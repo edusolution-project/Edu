@@ -95,7 +95,8 @@ namespace BaseCustomerMVC.Models
                 Order = this.Order,
                 Point = this.Point,
                 Media = this.Media,
-                OriginID = this.OriginID
+                OriginID = this.OriginID,
+                CourseID = this.CourseID
             };
         }
 

@@ -862,13 +862,28 @@ var Lesson = (function () {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
                 }
                 //Render Question
-                console.log("Render Quiz 2 for preview (Curriculum)");
                 totalQuiz = data.Questions.length;
+                var fillquizs = itembox.find("fillquiz");
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
 
-                    //Change render here => render quiz into description
-                    //renderPreviewQuestion(item, data.Type);
+                    var item = data.Questions[i];
+                    //console.log(item);
+                    try {
+                        var input = $(fillquizs[i]).find("input");
+                        $(input).attr("plc", item.Content);
+                        var answers = [];
+                        if (item.Answers.length > 0) {
+                            for (var j = 0; j < item.Answers.length; j++)
+                                answers.push(item.Answers[j].Content);
+                            var content = answers.join(" | ");
+                            var size = 5;
+                            if (content.length > size) size = content.length;
+                            $(input).attr("placeholder", content).attr("size", size);
+                        }
+                    }
+                    catch (e) {
+                        console.log("No placeholder found");
+                    }
                 }
                 break;
             case "QUIZ3":
@@ -1536,12 +1551,15 @@ var Lesson = (function () {
         if (data != null && data.Title != null)
             contentholder.find("[name=Title]").val(data.Title);
 
-        contentholder.append(
-            $("<div>", { class: "mb-2" }).append(
-                $("<textarea>", { "id": "editor", "rows": "5", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung" }))
-        );
+        var desc = $("<textarea>", { "id": "editor", "rows": "5", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung" });
+        contentholder.append($("<div>", { class: "mb-2" }).append(desc));
+
+        var description = "";
+
         if (data != null && data.Description != null)
-            contentholder.find("[name=Description]").val(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"));
+            description = data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn");
+
+        desc.val(description);
         switch (type) {
             case "TEXT"://Text
                 contentholder.append($("<label>", { "class": "title", "text": "Nhập nội dung" }));
@@ -1623,50 +1641,39 @@ var Lesson = (function () {
                 //    addNewQuestion();
                 break;
             case "QUIZ2"://Trắc nghiệm dạng điền từ
-                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
-                var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
-                quizWrapper.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
-                quizWrapper.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
-                quizWrapper.append($("<label>", { "class": "fieldset_title", "text": "" }));
-                quizWrapper.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)" }));
-                quizWrapper.append($("<input>", { "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Position (skip for media content)" }));
-                quizWrapper.append($("<label>", { "class": "input_label mr-1 d-none", "text": "Điểm" }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1" }));
-                quizWrapper.append($("<div>", { "class": "media_holder" }));
-                renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
-                quizWrapper.append($("<div>", { "class": "media_preview" }));
-                questionTemplate.append(quizWrapper);
-
-                var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
-                answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer ml-3", "value": "+", "onclick": "AddNewAnswer(this)" }));
-                questionTemplate.append(answer_wrapper);
-                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explanation" }));
-                question_template_holder.append(questionTemplate);
-
-                var answerTemplate = $("<fieldset>", { "class": "answer-box m-1" });
-                answerTemplate.append($("<input>", { "type": "button", "class": "answer-remove", "value": "X", "tabindex": -1, "onclick": "RemoveAnswer(this)" }));
-                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ID" }));
-                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
-                answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect", "value": true }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer" }));
-                answer_template_holder.append(answerTemplate);
-
-                contentholder.append($("<div>", { "class": "media_holder" }));
-                renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
-                contentholder.append($("<div>", { "class": "media_preview" }));
-                contentholder.append($("<div>", { "class": "part_content " + type }));
-                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion bnt-primary", "value": "Add question", "tabindex": -1, "onclick": "AddNewQuestion(this)" }));
-                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file'));
 
                 //Add First Question
+
+                var quizContent = $.parseHTML("<div>" + description + "</div>");
+                var fillquizs = $(quizContent).find("fillquiz");
+                console.log(data);
                 if (data != null && data.Questions != null) {
                     for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+
                         var quiz = data.Questions[i];
-                        addNewQuestion(quiz);
+                        //console.log(quiz);
+                        var input = $(fillquizs[i]).find("input");
+                        var answers = [];
+                        if (quiz.Answers.length > 0) {
+                            for (var j = 0; j < quiz.Answers.length; j++)
+                                answers.push(quiz.Answers[j].Content);
+                            var content = answers.join(" | ");
+                            var size = 5;
+
+                            if (content.length > size) size = content.length;
+                            $(input).attr("ans", content);
+                            $(input).attr("size", size);
+                            $(input).attr("dsp", "");
+                            $(input).attr("placeholder", content);
+                            $(input).attr("value", "");
+                        }
+                        $(fillquizs[i]).attr("title", quiz.Description == null ? "" : quiz.Description);
                     }
+                    //console.log($(quizContent).prop("innerHTML"));
+                    desc.val($(quizContent).prop("innerHTML"));
                 }
-                else
-                    addNewQuestion();
+                //else
+                //    addNewQuestion();
                 break;
             case "QUIZ3"://Trắc nghiệm match
                 var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
@@ -1720,8 +1727,8 @@ var Lesson = (function () {
                         addNewQuestion(quiz);
                     }
                 }
-                //else
-                //    addNewQuestion();
+                else
+                    addNewQuestion();
                 break;
             case "ESSAY"://Tự luận
                 contentholder.append($("<label>", { "class": "title", "text": "Điểm" }));
@@ -1791,7 +1798,7 @@ var Lesson = (function () {
                 });
                 break;
         }
-        
+
         if (data != null && data.Media != null)
             renderMediaContent(data, contentholder.find(".media_preview:first"), type);
     }
@@ -2609,29 +2616,29 @@ var Lesson = (function () {
         }
         switch (template) {
             case "QUIZ2":
-                var container = $("#" + data.ParentID + " .quiz-wrapper");
-                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
-                var boxHeader = $("<div>", { "class": "quiz-box-header" });
-                boxHeader.append($("<div>", {
-                    "class": "quiz-text", "html": breakLine(data.Content)
-                    //+ point
-                }));
-                renderMediaContent(data, boxHeader);
-                quizitem.append(boxHeader);
+                //var container = $("#" + data.ParentID + " .quiz-wrapper");
+                //var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
+                //var boxHeader = $("<div>", { "class": "quiz-box-header" });
+                //boxHeader.append($("<div>", {
+                //    "class": "quiz-text", "html": breakLine(data.Content)
+                //    //+ point
+                //}));
+                //renderMediaContent(data, boxHeader);
+                //quizitem.append(boxHeader);
 
-                container.append(quizitem);
-                var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
+                //container.append(quizitem);
+                //var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
 
-                quizitem.append(answer_wrapper);
+                //quizitem.append(answer_wrapper);
 
-                if (data.Description !== null) {
-                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
-                    quizitem.append(extend);
-                }
-                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
-                    var item = data.CloneAnswers[i];
-                    renderExamAnswer(item, data.ParentID, template);
-                }
+                //if (data.Description !== null) {
+                //    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
+                //    quizitem.append(extend);
+                //}
+                //for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                //    var item = data.CloneAnswers[i];
+                //    renderExamAnswer(item, data.ParentID, template);
+                //}
                 break;
             case "QUIZ3":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
@@ -3408,19 +3415,41 @@ var submitQuizFill = function (event, modalId, callback) {
     if ($('textarea[name="Description"]').length > 0) {
         formdata.delete("Description");
 
-
-        var description = $.parseHtml(CKEDITOR.instances.editor.getData());
+        var CKEContent = CKEDITOR.instances.editor.getData();
+        var description = $.parseHTML("<div>" + CKEContent + "</div>");
         var quizs = $(description).find("fillquiz");
         if (quizs.length > 0) {
             for (var i = 0; i < quizs.length; i++) {
+                var question = quizs[i];
+                var inp = $(question).find("input");
 
+                var answers = $(inp).attr("ans") == null ? $(inp).attr("placeholder") : $(inp).attr("ans");
+
+                if (answers != null) {
+                    formdata.append("Questions[" + i + "].Order", i);
+                    formdata.append("Questions[" + i + "].Point", 1);
+                    formdata.append("Questions[" + i + "].Content", $(question).find("input").attr("placeholder"));
+                    formdata.append("Questions[" + i + "].Description", $(question).attr("title"));
+
+                    var ans = answers.split("|");
+                    if (ans > 0) {
+                        for (var j = 0; j < ans.length; j++) {
+                            var an = ans[j].trim();
+                            formdata.append("Questions[" + i + "].Answers[" + j + "].Content", an);
+                            formdata.append("Questions[" + i + "].Answers[" + j + "].IsCorrect", true);
+                        }
+                    }
+                    $(question).removeAttr("title");
+                    $(question).find("input").removeAttr("ans");
+                    $(question).find("input").attr("value", "");
+                }
             }
         }
+        //console.log(CKEContent);
+        //console.log($(description).prop("innerHTML"));
 
-        console.log(description);
-
-        debugger;
-        formdata.append("Description", description.html())
+        //formdata.append("Description", CKEContent);
+        formdata.append("Description", $(description).prop("innerHTML"));
     }
     var err = false;
     var requires = $(Form).find(':required');
