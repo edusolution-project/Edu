@@ -50,7 +50,6 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                                 childInp.setAttribute("type", "text");
                                 childInp.setAttribute("dsp", this.getValue());
                                 childInp.setAttribute("value", "");
-                                childInp.setAttribute("disabled", "disabled");
                                 childInp.setAttribute("class", "fillquiz");
                                 element.append(childInp);
                             }
@@ -91,7 +90,7 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                                 element.setText("");
                                 var childInp = editor.document.createElement('input');
                                 childInp.setAttribute("type", "text");
-                                
+
                                 var text = this.getValue();
                                 var i = text.length;
                                 var space = 0;

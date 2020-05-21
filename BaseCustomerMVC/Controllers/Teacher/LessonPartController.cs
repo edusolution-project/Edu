@@ -619,7 +619,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             var quiz = questions[i];
                             part.Description += "<p>" + quiz.Content + " <fillquiz><input class='fillquiz'></input></fillquiz></p>";
+                            quiz.Content = i + ". ";
+                            _questionService.Save(quiz);
                         }
+
+                    _lessonPartService.Save(part);
+                }
+            }
+            var clonefillparts = _lessonPartService.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
+            if (clonefillparts != null && clonefillparts.Count > 0)
+            {
+                foreach (var part in clonefillparts)
+                {
+                    if (part.Description == null)
+                        part.Description = "";
+                    var questions = _questionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
+                    if (questions != null && questions.Count > 0)
+                        for (int i = 0; i < questions.Count; i++)
+                        {
+                            var quiz = questions[i];
+                            part.Description += "<p>" + quiz.Content + " <fillquiz><input class='fillquiz'></input></fillquiz></p>";
+                            quiz.Content = i + ". ";
+                            _questionService.Save(quiz);
+                        }
+
                     _lessonPartService.Save(part);
                 }
             }

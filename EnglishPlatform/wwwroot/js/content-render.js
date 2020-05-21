@@ -2391,7 +2391,7 @@ var Lesson = (function () {
     }
 
     var renderExamDetail = function () {
-        
+
         renderStandardLayout(true);
         $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", value: getLocalData("CurrentExam"), id: "ExamID" }));
         loadLesssonData({
@@ -3437,25 +3437,35 @@ var submitQuizFill = function (event, modalId, callback) {
         var description = $.parseHTML("<div>" + CKEContent + "</div>");
         var quizs = $(description).find("fillquiz");
         if (quizs.length > 0) {
+            var pos = -1;
             for (var i = 0; i < quizs.length; i++) {
                 var question = quizs[i];
                 var inp = $(question).find("input");
+                if (inp.length == 0) {
+                    $(question).attr('bad', 1);
+                    continue; //skip empty fillquiz
+                }
+                pos++;
                 //console.log(inp);
                 var answers = $(inp).attr("ans") == null ? $(inp).attr("placeholder") : $(inp).attr("ans");
+                var display = $(inp).attr("dsp");
+                if (display == null) display = "";
+                var explanation = $(question).attr("title");
+                if (explanation == null) explain = "";
 
                 if (answers != null) {
                     //console.log(answers);    
-                    formdata.append("Questions[" + i + "].Order", i);
-                    formdata.append("Questions[" + i + "].Point", 1);
-                    formdata.append("Questions[" + i + "].Content", $(inp).attr("dsp"));
-                    formdata.append("Questions[" + i + "].Description", $(question).attr("title"));
+                    formdata.append("Questions[" + pos + "].Order", pos);
+                    formdata.append("Questions[" + pos + "].Point", 1);
+                    formdata.append("Questions[" + pos + "].Content", display);
+                    formdata.append("Questions[" + pos + "].Description", explanation);
 
                     var ans = answers.split("|");
                     if (ans.length > 0) {
                         for (var j = 0; j < ans.length; j++) {
                             var an = ans[j].trim();
-                            formdata.append("Questions[" + i + "].Answers[" + j + "].Content", an);
-                            formdata.append("Questions[" + i + "].Answers[" + j + "].IsCorrect", true);
+                            formdata.append("Questions[" + pos + "].Answers[" + j + "].Content", an);
+                            formdata.append("Questions[" + pos + "].Answers[" + j + "].IsCorrect", true);
                         }
                         //console.log(ans);
                     }
@@ -3471,6 +3481,7 @@ var submitQuizFill = function (event, modalId, callback) {
         }
         //console.log(CKEContent);
         //console.log($(description).prop("innerHTML"));
+        $(description).find("[bad=1]").remove();//remove all bad fillquiz;
 
         //console.log("Description", $(description).prop("innerHTML"));
         formdata.append("Description", $(description).prop("innerHTML"));
