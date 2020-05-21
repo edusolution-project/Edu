@@ -420,7 +420,8 @@ namespace BaseCustomerMVC.Controllers.Student
                     Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
                         .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
                         {
-                            CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
+                            CloneAnswers = o.Type == "QUIZ2" ? null : _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
+                            Description = o.Type == "QUIZ2" ? null : z.Description
                         }))?.ToList()
                 })).ToList()
             });

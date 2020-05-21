@@ -74,7 +74,7 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                             var childInp = element.find("input");
                             if (childInp.$.length > 0) {
                                 var ans = childInp.$[0].getAttribute("ans");
-                                console.log(ans);
+                                //console.log(ans);
                                 if (ans == null)
                                     ans = childInp.$[0].getAttribute("placeholder");
                                 this.setValue(ans);

@@ -191,6 +191,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [DisableRequestSizeLimit]
         public async Task<JsonResult> CreateOrUpdate(CloneLessonPartViewModel item, string ClassSubjectID, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
         {
+            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
             var root = _lessonService.GetItemByID(item.ParentID);
             var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
 
@@ -297,6 +298,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 foreach (var questionVM in item.Questions)
                 {
                     questionVM.ParentID = item.ID;
+                    questionVM.CreateUser = _userCreate;
                     var quiz = questionVM.ToEntity();
 
                     if (questionVM.Media != null && questionVM.Media.Name == null) questionVM.Media = null;
@@ -362,7 +364,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         foreach (var answer in questionVM.Answers)
                         {
-
+                            answer.CreateUser = _userCreate;
                             answer.ParentID = questionVM.ID;
                             if (answer.Media != null && answer.Media.Name == null) answer.Media = null;
 

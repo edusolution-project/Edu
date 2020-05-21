@@ -410,6 +410,11 @@ video, audio {
     font-size: 14px;
 }
 
+fillquiz, fillquiz.quiz-item {
+    display: inline-block;
+    width: auto;
+}
+
 .QUIZ3 .answer-wrapper {
     z-index: 1;
     overflow: visible;

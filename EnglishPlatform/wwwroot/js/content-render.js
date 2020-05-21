@@ -266,6 +266,7 @@ var Lesson = (function () {
 
         _totalPart = data.Part != null ? data.Part.length : 0;
         //header
+        console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
                 var headerRow = $("<div>", { "class": "justify-content-between d-none" });
@@ -462,6 +463,7 @@ var Lesson = (function () {
                 }
                 break;
             case mod.STUDENT_EXAM:
+                console.log("student exam");
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
@@ -492,6 +494,7 @@ var Lesson = (function () {
                 }
                 break;
             case mod.STUDENT_LECTURE:
+
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
@@ -548,7 +551,7 @@ var Lesson = (function () {
                                     renderLectureExam(exam, false);
                                 }
                                 else {
-                                    //console.log("Exam Continue")
+                                    console.log("Exam Continue")
                                     setLocalData("CurrentExam", exam.ID);
                                     $('#ExamID').val(exam.ID);
                                     renderLectureExam(exam, true);
@@ -1646,7 +1649,7 @@ var Lesson = (function () {
 
                 var quizContent = $.parseHTML("<div>" + description + "</div>");
                 var fillquizs = $(quizContent).find("fillquiz");
-                console.log(data);
+                //console.log(data);
                 if (data != null && data.Questions != null) {
                     for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
 
@@ -1663,7 +1666,7 @@ var Lesson = (function () {
                             if (content.length > size) size = content.length;
                             $(input).attr("ans", content);
                             $(input).attr("size", size);
-                            $(input).attr("dsp", "");
+                            $(input).attr("dsp", quiz.Content);
                             $(input).attr("placeholder", content);
                             $(input).attr("value", "");
                         }
@@ -2094,6 +2097,7 @@ var Lesson = (function () {
         }
         //get lastest exam data from server
         Ajax(config.url.current, dataform, "POST", true).then(function (res) {
+
             var exam, schedule, limit = 0;
             try {
                 var data = JSON.parse(res);
@@ -2285,6 +2289,7 @@ var Lesson = (function () {
     }
 
     var renderLectureExam = function (data, isContinue) {
+
         var wrapper = $("<div>", { "class": "w-100 text-center" });
         if (data != null) {
             var lastExam = data;
@@ -2351,7 +2356,6 @@ var Lesson = (function () {
         if (obj != null)
             $(obj).prop("disabled", true);
         console.log("Create Exam");
-
         var dataform = new FormData();
         dataform.append("LessonID", config.lesson_id);
         dataform.append("ClassSubjectID", config.class_subject_id);
@@ -2359,12 +2363,12 @@ var Lesson = (function () {
         Ajax(config.url.start, dataform, "POST", false)
             .then(function (res) {
                 var data = JSON.parse(res);
-
                 if (data.Error == null) {
                     //notification("success", "Bắt đầu làm bài", 1500);
-                    console.log("NewID: " + data.Data.ID);
+                    //console.log("NewID: " + data.Data.ID);
                     $("#ExamID").val(data.Data.ID);
                     setLocalData("CurrentExam", data.Data.ID);
+
                     renderExamDetail();
 
                     //console.log(data);
@@ -2387,6 +2391,7 @@ var Lesson = (function () {
     }
 
     var renderExamDetail = function () {
+        
         renderStandardLayout(true);
         $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", value: getLocalData("CurrentExam"), id: "ExamID" }));
         loadLesssonData({
@@ -2397,7 +2402,7 @@ var Lesson = (function () {
     }
 
     var renderStudentPart = function (data) {
-
+        console.log(data);
         var mainContainer = $('#' + config.container);
         var leftCol = mainContainer.find('#leftCol');
         var rightCol = mainContainer.find('#rightCol');
@@ -2511,7 +2516,6 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 break;
             case "QUIZ1":
-            case "QUIZ2":
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
@@ -2526,6 +2530,23 @@ var Lesson = (function () {
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
                     renderExamQuestion(item, data.Type);
+                }
+                break;
+            case "QUIZ2":
+                var itemBody = $("<div>", { "class": "quiz-wrapper" });
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                itembox.append(itemBody);
+                renderMediaContent(data, itemBody, "");
+                container.append(tabsitem);
+                //Render Description
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                }
+                //Render Question
+                totalQuiz = data.Questions.length;
+                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                    var item = data.Questions[i];
+                    renderFillQuestion(item, i);
                 }
                 break;
             case "QUIZ3":
@@ -2615,31 +2636,6 @@ var Lesson = (function () {
             point = " (" + data.Point + "p)";
         }
         switch (template) {
-            case "QUIZ2":
-                //var container = $("#" + data.ParentID + " .quiz-wrapper");
-                //var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
-                //var boxHeader = $("<div>", { "class": "quiz-box-header" });
-                //boxHeader.append($("<div>", {
-                //    "class": "quiz-text", "html": breakLine(data.Content)
-                //    //+ point
-                //}));
-                //renderMediaContent(data, boxHeader);
-                //quizitem.append(boxHeader);
-
-                //container.append(quizitem);
-                //var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
-
-                //quizitem.append(answer_wrapper);
-
-                //if (data.Description !== null) {
-                //    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
-                //    quizitem.append(extend);
-                //}
-                //for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
-                //    var item = data.CloneAnswers[i];
-                //    renderExamAnswer(item, data.ParentID, template);
-                //}
-                break;
             case "QUIZ3":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
@@ -2720,6 +2716,28 @@ var Lesson = (function () {
                 }
                 break;
         }
+    }
+
+    var renderFillQuestion = function (data, pos) {
+
+        var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
+
+        var holder = $(container).find("fillquiz")[pos];
+        if (holder == null) return;
+        //console.log(holder);
+        var input = $(holder).find(".fillquiz");
+        $(holder).addClass("quiz-item").attr("id", data.ID);
+        $(input)
+            .attr("id", "inputQZ2-" + data.ID)
+            .attr("data-part-id", data.ParentID)
+            .attr("data-lesson-id", config.lesson_id)
+            .attr("data-question-id", data.ID)
+            .attr("data-type", "QUIZ2")
+            .attr("autocomplte", "off")
+            .attr("value", "")
+            .blur(function () {
+                AnswerQuestion(this);
+            });
     }
 
     var renderExamAnswer = function (data, partid, template) {
@@ -3029,7 +3047,7 @@ var Lesson = (function () {
         var answerID = "";
         //nội dung câu trả lời
         var value = "";
-
+        console.log(dataset);
         switch (type) {
             case "QUIZ1":
                 partID = dataset.partId;
@@ -3422,25 +3440,31 @@ var submitQuizFill = function (event, modalId, callback) {
             for (var i = 0; i < quizs.length; i++) {
                 var question = quizs[i];
                 var inp = $(question).find("input");
-
+                //console.log(inp);
                 var answers = $(inp).attr("ans") == null ? $(inp).attr("placeholder") : $(inp).attr("ans");
 
                 if (answers != null) {
+                    //console.log(answers);    
                     formdata.append("Questions[" + i + "].Order", i);
                     formdata.append("Questions[" + i + "].Point", 1);
-                    formdata.append("Questions[" + i + "].Content", $(question).find("input").attr("placeholder"));
+                    formdata.append("Questions[" + i + "].Content", $(inp).attr("dsp"));
                     formdata.append("Questions[" + i + "].Description", $(question).attr("title"));
 
                     var ans = answers.split("|");
-                    if (ans > 0) {
+                    if (ans.length > 0) {
                         for (var j = 0; j < ans.length; j++) {
                             var an = ans[j].trim();
                             formdata.append("Questions[" + i + "].Answers[" + j + "].Content", an);
                             formdata.append("Questions[" + i + "].Answers[" + j + "].IsCorrect", true);
                         }
+                        //console.log(ans);
                     }
+
                     $(question).removeAttr("title");
                     $(question).find("input").removeAttr("ans");
+                    $(question).find("input").removeAttr("dsp");
+                    $(question).find("input").attr("placeholder", "");
+                    $(question).find("input").attr("size", "10");
                     $(question).find("input").attr("value", "");
                 }
             }
@@ -3448,7 +3472,7 @@ var submitQuizFill = function (event, modalId, callback) {
         //console.log(CKEContent);
         //console.log($(description).prop("innerHTML"));
 
-        //formdata.append("Description", CKEContent);
+        //console.log("Description", $(description).prop("innerHTML"));
         formdata.append("Description", $(description).prop("innerHTML"));
     }
     var err = false;
