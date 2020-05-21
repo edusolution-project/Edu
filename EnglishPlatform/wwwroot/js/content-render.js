@@ -269,9 +269,8 @@ var Lesson = (function () {
         console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
-                var headerRow = $("<div>", { "class": "justify-content-between d-none" });
+                var headerRow = $("<div>", { "class": "justify-content-between d-none" }).empty();
                 //lessonHeader.show().append(headerRow);
-
                 var title_wrapper = $("<div>", { "class": "lesson-header-title" });
                 var title = $("<h5>");
                 var titleText = $("<span>", { "class": "title-text", "text": data.Title })
@@ -355,7 +354,7 @@ var Lesson = (function () {
                 lesson_action_holder.prepend(lessonButton);
                 break;
             case mod.TEACHEREDIT:
-                var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
+                var headerRow = $("<div>", { "class": "d-flex justify-content-between" }).empty();
                 lessonHeader.show().append(headerRow);
 
                 var title_wrapper = $("<div>", { "class": "lesson-header-title" });
@@ -396,6 +395,7 @@ var Lesson = (function () {
                 lessonButton.append(create);
                 create.append(iconCreate).append("Thêm nội dung");
                 //headerRow.append(lessonButton);
+                lesson_action_holder.find(".lesson-button").remove();
                 lesson_action_holder.append(lessonButton);
                 break;
             case mod.STUDENT_EXAM:
@@ -615,6 +615,7 @@ var Lesson = (function () {
                     var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
                     //_footerCenter.append(btnExplain);
 
+                    lesson_action_holder.find("> button").remove();
                     lesson_action_holder.append(prevtab).append(btnExplain).append(nexttab);
 
                     //lessonFooter.show().append(nav_bottom);
@@ -873,7 +874,7 @@ var Lesson = (function () {
                     //console.log(item);
                     try {
                         var input = $(fillquizs[i]).find("input");
-                        $(input).attr("plc", item.Content);
+                        $(input).attr("dsp", item.Content);
                         var answers = [];
                         if (item.Answers.length > 0) {
                             for (var j = 0; j < item.Answers.length; j++)
@@ -1791,8 +1792,20 @@ var Lesson = (function () {
             case "QUIZ2":
                 CKEDITOR.replace('editor', {
                     allowedContent: true,
-                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz'
+                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz',
+                    removeDialogTabs: 'textfield',
+                    removePlugins:'forms'
                 });
+                CKEDITOR.on('dialogDefinition', function (ev) {
+                    var dialogName = ev.data.name,
+                        dialogDefinition = ev.data.definition;
+                    console.log(ev.data);
+                    if (dialogName === 'textfield') {
+                        console.log(ev.data);
+                        dialogDefinition.removeContents('info');
+                    }
+                });
+
                 break;
             default:
                 CKEDITOR.replace('editor', {
@@ -2290,17 +2303,17 @@ var Lesson = (function () {
 
     var renderLectureExam = function (data, isContinue) {
 
-        var wrapper = $("<div>", { "class": "w-100 text-center" });
+        var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
+        $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
             var lastExam = data;
             this.exam_id = lastExam.ID;
             var lastpoint = (lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0);
-
             if (isContinue) {
                 //alert('here');
                 $('#rightCol').append($(wrapper));
                 var completeButton = $('<div>', {
-                    "class": "btn btn-primary w-50 mt-3",
+                    "class": "btn btn-primary w-50 mt-3 btnCompleteExam",
                     "onclick": 'CompleteLectureExam(\'' + lastExam.ID + '\')',
                     "style": "cursor: pointer"
                 }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");
@@ -2402,7 +2415,7 @@ var Lesson = (function () {
     }
 
     var renderStudentPart = function (data) {
-        console.log(data);
+        //console.log(data);
         var mainContainer = $('#' + config.container);
         var leftCol = mainContainer.find('#leftCol');
         var rightCol = mainContainer.find('#rightCol');
@@ -2543,7 +2556,6 @@ var Lesson = (function () {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
                 }
                 //Render Question
-                totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
                     renderFillQuestion(item, i);

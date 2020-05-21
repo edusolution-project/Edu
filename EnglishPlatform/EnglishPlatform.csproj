@@ -74,7 +74,6 @@
     <Content Remove="Areas\Teacher\Views\Schedule\Schedule.cshtml" />
     <Content Remove="compilerconfig.json" />
     <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
-    <Content Remove="wwwroot\js\plugins\ck4\plugins\fillquiz\plugin.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -253,6 +252,8 @@
     <None Include="wwwroot\js\plugins\ck4\plugins\copyformatting\cursors\cursor.svg" />
     <None Include="wwwroot\js\plugins\ck4\plugins\dialog\dialogDefinition.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\div\dialogs\div.js" />
+    <None Include="wwwroot\js\plugins\ck4\plugins\fillquiz\dialogs\fillquiz.js" />
+    <None Include="wwwroot\js\plugins\ck4\plugins\fillquiz\plugin.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\find\dialogs\find.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\flash\dialogs\flash.js" />
     <None Include="wwwroot\js\plugins\ck4\plugins\forms\dialogs\button.js" />
