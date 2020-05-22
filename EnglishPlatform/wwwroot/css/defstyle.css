@@ -1,0 +1,19 @@
+﻿body {
+    font-family: Open Sans;
+    font-style: normal;
+    font-weight: normal;
+}
+
+.container {
+    padding: 0
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+.navbar-collapse.in {
+    display: block;
+}
