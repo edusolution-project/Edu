@@ -71,17 +71,17 @@ namespace EnglishPlatform.Controllers
 
         public IActionResult Index()
         {
-            //var type = User.Claims.GetClaimByType("Type");
-            //if (type != null)
-            //{
-            //    return Redirect(type.Value);
-            //}
-            //else
-            //{
-            //    _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-            //    HttpContext.SignOutAsync(Cookies.DefaultLogin);
-            //    return RedirectToAction("Login");
-            //}
+            var type = User.Claims.GetClaimByType("Type");
+            if (type != null)
+            {
+                return Redirect(type.Value);
+            }
+            else
+            {
+                _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
+                HttpContext.SignOutAsync(Cookies.DefaultLogin);
+                return RedirectToAction("Login");
+            }
             return View();
         }
 

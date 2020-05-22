@@ -278,7 +278,7 @@
         itemData.append($("<a>", {
             "class": "action-link",
             "name": "Title",
-            "href": "@Url.Action("Lesson", "Curriculum")/" + item.ID + "?CourseID=@Data.ID",
+            "href": "@Url.Action("Lesson", "Curriculum")/" + item.ID + "/@Data.ID",
             "lid": item.ID,
             "text": item.Title,
             "onclick": "openLesson(this)",
@@ -817,7 +817,7 @@
         var url = $(obj).attr("href");
         var title = $(obj).text();
         //console.log($(obj).text());
-        $("#lessonFrameModal iframe").attr("src", url + "&frameview=1")
+        $("#lessonFrameModal iframe").attr("src", url + "?frameview=1")
         window.history.pushState({ frame: 1, url: url, title: title }, title, url);
         document.title = title;
         hideModal();
@@ -843,7 +843,7 @@
         var state = event.originalEvent.state;
         if (state != null && state.frame == 1) {
             var url = state.url;
-            $("#lessonFrameModal iframe").attr("src", url + "&frameview=1");
+            $("#lessonFrameModal iframe").attr("src", url + "?frameview=1");
             document.title = state.title;
             hideModal();
             $('#lessonFrameModal').modal('show').show();

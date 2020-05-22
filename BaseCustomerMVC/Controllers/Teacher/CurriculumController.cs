@@ -296,13 +296,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         //[BaseAccess.Attribule.AccessCtrl("Bài giảng chung", "teacher")]
-        public IActionResult Lesson(DefaultModel model, string CourseID, int frameview = 0)
+        public IActionResult Lesson(DefaultModel model, string CourseID, string ClassID, int frameview = 0)
         {
             //if (!User.IsInRole("head-teacher"))
             //    return Redirect("/");
 
             if (CourseID == null)
-                return RedirectToAction("Index");
+            {
+                if (ClassID == null)
+                    return RedirectToAction("Index");
+                else
+                    CourseID = ClassID;
+            }
             var currentCourse = _service.GetItemByID(CourseID);
             if (currentCourse == null)
                 return RedirectToAction("Index");
@@ -1217,12 +1222,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (string.IsNullOrEmpty(Parent))
                 Parent = "0";
 
+            var TopID = "";
+            if (Parent != "0")
+            {
+                var top = _chapterService.GetItemByID(Parent);
+                if (top == null)
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy chương" }
+                    });
+                TopID = top.ParentID;
+            }
+
             var chapters = _chapterService.CreateQuery().Find(c => c.CourseID == currentClass.ID && c.ParentID == Parent).ToList();
 
             var lessons = _lessonService.CreateQuery().Find(o => o.CourseID == currentClass.ID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList();
 
             var response = new Dictionary<string, object>
                 {
+                    { "RootID", TopID },
                     { "Data", chapters },
                     { "Lesson", lessons }
                 };
@@ -1603,7 +1621,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     OriginID = _child.ID,
                     Title = _child.Title,
-                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://"  + _publisherHost + "/") : null,
+                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://" + _publisherHost + "/") : null,
                     IsExam = _child.IsExam,
                     Media = _child.Media,
                     Point = _child.Point,
