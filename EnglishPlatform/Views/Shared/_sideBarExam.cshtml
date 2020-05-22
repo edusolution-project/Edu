@@ -204,8 +204,7 @@
         padding: 0px !important;
     }
 
-    .fullscreenSupport
-    {
+    .fullscreenSupport {
         width: 100%;
     }
 
@@ -245,7 +244,7 @@
 
         .menu-bar .btn-primary:focus {
             outline: none;
-            box-shadow:none;
+            box-shadow: none;
         }
 
 
@@ -257,22 +256,26 @@
             color: #007bff;
         }
 
-        .menu-bar .btn-primary:disabled
-        {
-            color:#999;
+        .menu-bar .btn-primary:disabled {
+            color: #999;
             opacity: 0.4;
         }
 
-        .menu-bar .btn-primary:disabled:hover {
-            cursor: default;
-        }
+            .menu-bar .btn-primary:disabled:hover {
+                cursor: default;
+            }
 </style>
 <aside class="d-flex justify-content-start bg-white" id="sidebar">
     <div class="menu-bar w-100">
-        <ul class="d-flex p-0 m-0 h-100">
+        <ul class="d-flex p-0 m-0 h-100 align-items-center">
             <li for="home" class="top-menu">
                 <a href="@Url.Action("Index", "Home")" title="Trang chủ"><i class="ic fas fa-home"></i>Trang chủ</a>
             </li>
+            <i class="fa fa-chevron-left mt-1"></i>
+            <li for="class" class="top-menu">
+                <a href="@Url.Action("Detail", "Class")/@Class.ID#module" title="@Class.Name">@Class.Name</a>
+            </li>
+            <i class="fa fa-chevron-left mt-1"></i>
             <li for="path_menu" class="top-menu">
                 <a title="Mục lục"><i class="ic fas fa-list-ol"></i>Mục lục</a>
                 <div class="sub-menu">
@@ -282,13 +285,13 @@
                 </div>
             </li>
             @*<li for="quiz" class="top-menu">
-                    <a title="Câu hỏi">
-                        <i class="ic far fa-question-circle"></i>Câu hỏi
-                    </a>
-                </li>*@
+            <a title="Câu hỏi">
+                <i class="ic far fa-question-circle"></i>Câu hỏi
+            </a>
+        </li>*@
             <li for="lesson-info" class="top-menu flex-grow-1 d-flex justify-content-end">
                 @*<div class="action-holder">
-                    </div>*@
+            </div>*@
             </li>
             <div id="QuizNav" style="z-index:-1"></div>
         </ul>

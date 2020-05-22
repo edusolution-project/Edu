@@ -855,6 +855,22 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 break;
             case "QUIZ1":
+                var itemBody = $("<div>", { "class": "quiz-wrapper" });
+                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                itembox.append(itemBody);
+                renderMediaContent(data, itemBody, "");
+                container.append(tabsitem);
+                //Render Description
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                }
+                //Render Question
+                totalQuiz = data.Questions.length;
+                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                    var item = data.Questions[i];
+                    renderPreviewQuestion(item, data.Type);
+                }
+                break;
             case "QUIZ2":
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
@@ -1794,7 +1810,7 @@ var Lesson = (function () {
                     allowedContent: true,
                     extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz',
                     removeDialogTabs: 'textfield',
-                    removePlugins:'forms'
+                    removePlugins: 'forms'
                 });
                 CKEDITOR.on('dialogDefinition', function (ev) {
                     var dialogName = ev.data.name,
