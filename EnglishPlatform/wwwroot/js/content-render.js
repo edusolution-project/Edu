@@ -1662,6 +1662,11 @@ var Lesson = (function () {
                 break;
             case "QUIZ2"://Trắc nghiệm dạng điền từ
 
+                contentholder.append($("<div>", { "class": "media_holder" }));
+                renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
+                contentholder.append($("<div>", { "class": "media_preview" }));
+                contentholder.append($("<div>", { "class": "part_content " + type }));
+
                 //Add First Question
 
                 var quizContent = $.parseHTML("<div>" + description + "</div>");
@@ -1692,6 +1697,7 @@ var Lesson = (function () {
                     //console.log($(quizContent).prop("innerHTML"));
                     desc.val($(quizContent).prop("innerHTML"));
                 }
+
                 //else
                 //    addNewQuestion();
                 break;

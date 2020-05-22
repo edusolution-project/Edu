@@ -98,8 +98,10 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                                 childInp.setAttribute("ans", this.getValue());
                                 childInp.$[0].setAttribute("placeholder", text);
                                 childInp.$[0].setAttribute("size", text.length - space);
-                                childInp.setAttribute("disabled", "disabled");
-                                childInp.setAttribute("class", "fillquiz");
+                                childInp.$[0].setAttribute("disabled", "disabled");
+                                childInp.$[0].setAttribute("class", "fillquiz");
+                                childInp.$[0].setAttribute("readonly", 1);
+                                childInp.$[0].setAttribute("contenteditable", false);
                                 element.append(childInp);
                             }
                             else {
@@ -111,6 +113,8 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
 
                                 childInp.$[0].setAttribute("placeholder", text);
                                 childInp.$[0].setAttribute("size", text.length - space);
+                                childInp.$[0].setAttribute("readonly", 1);
+                                childInp.$[0].setAttribute("contenteditable", false);
                             }
                         }
                     },
@@ -129,6 +133,8 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                         // Called by the main commitContent method call on dialog confirmation.
                         commit: function (element) {
                             element.setAttribute("title", this.getValue());
+                            element.setAttribute("readonly", 1);
+                            element.setAttribute("contenteditable", false);
                         }
                     }
                 ]
