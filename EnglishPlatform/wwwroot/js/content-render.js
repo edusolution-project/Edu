@@ -2577,7 +2577,9 @@ var Lesson = (function () {
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
                 }
+                
                 //Render Question
+                console.log(data.Questions.length);
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
                     renderFillQuestion(item, i);
@@ -2761,6 +2763,7 @@ var Lesson = (function () {
         //console.log(holder);
         var input = $(holder).find(".fillquiz");
         $(holder).addClass("quiz-item").attr("id", data.ID);
+        //console.log(data);
         $(input)
             .attr("id", "inputQZ2-" + data.ID)
             .attr("data-part-id", data.ParentID)
@@ -2769,6 +2772,10 @@ var Lesson = (function () {
             .attr("data-type", "QUIZ2")
             .attr("autocomplte", "off")
             .attr("value", "")
+            .removeAttr("ans")
+            .removeAttr("readonly")
+            .removeAttr("contenteditable")
+            .attr("placeholder", data.Content)
             .blur(function () {
                 AnswerQuestion(this);
             });
