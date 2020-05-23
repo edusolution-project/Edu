@@ -16,10 +16,10 @@ namespace BaseCustomerMVC.Globals
     {
         private readonly MailLogService _mailLogService;
 
-        private IConfiguration _configuration;
-        private string _defaultSender;
-        private string _defaultSenderName;
-        private string _defaultPassword;
+        private readonly IConfiguration _configuration;
+        private readonly string _defaultSender;
+        private readonly string _defaultSenderName;
+        private readonly string _defaultPassword;
 
         public MailHelper(IConfiguration iConfig,
             MailLogService mailLogService

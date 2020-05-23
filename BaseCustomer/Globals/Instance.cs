@@ -1,4 +1,5 @@
 ﻿using BaseCustomerEntity.Database;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -72,6 +73,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<AccessesService>();
             services.AddSingleton<AuthorityService>();
             services.AddSingleton<MailLogService>();
+            services.AddSingleton<UserAndRoleService>();
             return services;
         }
     }

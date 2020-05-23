@@ -8,7 +8,7 @@ using System.Text;
 namespace BaseCustomerMVC.Globals
 {
     [Area("admin")]
-    [Permission("superadmin")]
+    [Permission]
     public class AdminController : BaseController
     {
         public AdminController()

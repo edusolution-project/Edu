@@ -1,4 +1,5 @@
 ﻿using BaseCustomerEntity.Database;
+using Core_v2.Globals;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
@@ -11,129 +12,114 @@ namespace BaseCustomerMVC.Globals
 {
     public class PermissionAttribute : ActionFilterAttribute
     {
-        private readonly IConfiguration _configuration;
         public PermissionAttribute()
         {
-            _configuration = StartUp.Configuration;
-        }
-        private readonly string _roles;
-        public PermissionAttribute(string Roles)
-        {
-            _roles = Roles;
-            _configuration = StartUp.Configuration;
-        }
-        /// <summary>
-        /// -1 chưa login
-        /// 0 đã login - ko có quyền
-        /// 1 đã login và có quyền
-        /// </summary>
-        /// <param name="controller"></param>
-        /// <param name="ctrlName"></param>
-        /// <param name="actName"></param>
-        /// <returns></returns>
-        private int CheckCtrlAndAct(Controller controller, string type, string ctrlName, string actName)
-        {
 
-            if (controller == null)
-            {
-                string _accessList = StartUp.Configuration.GetSection("AccessList:" + ctrlName.ToLower()).Value;
-                if (string.IsNullOrEmpty(_accessList))
-                {
-                    return -1;
-                }
-                else
-                {
-                    if (_accessList.Split(',').Contains(actName.ToLower()))
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return -1;
-                    }
-                }
-            }
-            else
-            {
-                ClaimsPrincipal user = controller.User;
-                if (user == null || !user.Identity.IsAuthenticated)
-                {
-                    return -1;
-                }
-
-                if (user.IsInRole("superadmin"))
-                {
-                    return 1;
-                }
-                var claimRole = user.FindAll(o => o.Type == "Permission");
-                string _accessList = _configuration.GetSection("AccessListUser:" + ctrlName.ToLower()).Value;
-                string accStr = type == "admin" ? $"{type}*{ctrlName}*{actName}" : $"{type}*{ctrlName}";
-                if (!string.IsNullOrEmpty(_accessList))
-                {
-                    if (_accessList.Split(',').Contains(actName.ToLower()))
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        
-                        if (claimRole != null && claimRole.Count() > 0)
-                        {
-                            var access = claimRole.Where(o => o.Value == accStr)?.FirstOrDefault();
-                            if (access == null) return 0;
-                            return 1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    }
-                }
-                //lấy roleid
-                if (claimRole != null && claimRole.Count() > 0)
-                {
-                    var access = claimRole.Where(o => o.Value == accStr)?.FirstOrDefault();
-                    if (access == null) return 0;
-                    return 1;
-                }
-                else
-                {
-                    
-                    return 0;
-                }
-            }
         }
-
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             string ctrlName = context.RouteData.Values["Controller"].ToString().ToLower();
             string actName = context.RouteData.Values["Action"].ToString().ToLower();
-            string _area = context.RouteData.Values["Area"]?.ToString().ToLower();
-            if (CheckCtrlAndAct(null, _area, ctrlName, actName) > 0)
+            string area = context.RouteData.Values["Area"]?.ToString().ToLower();
+            string basis = context.RouteData.Values["basis"]?.ToString().ToLower();
+            var currentUser = context.HttpContext.User;
+            if (currentUser != null && currentUser.Identity.IsAuthenticated)
             {
-                base.OnActionExecuting(context);
-            }
-            else
-            {
-                Controller ctrl = (Controller)context.Controller;
-                int _number = CheckCtrlAndAct(ctrl, _area, ctrlName, actName);
-                if (_number > 0)
+                string userId = currentUser.FindFirst("UserID").Value;
+                string userType = currentUser.FindFirst("Type")?.Value;
+                string type = currentUser.FindFirst(ClaimTypes.Role)?.Value;
+                try
+                {
+                    var ctrl = (Controller)context.Controller;
+                    if (ctrl != null)
+                    {
+                        if (!ctrl.TempData.ContainsKey(userId))
+                        {
+                            ctrl.TempData.Add(userId, basis);
+                        }
+                        else
+                        {
+                            ctrl.TempData[userId] = basis;
+                        }
+                    }
+                }
+                catch { }
+                // kieerm ta nguon tu cache
+                string keys = $"{userId}_{basis}";
+                if (string.IsNullOrEmpty(area) || ctrlName == "home" || ctrlName == "error" || type == "superadmin" || ctrlName == "news")
                 {
                     base.OnActionExecuting(context);
                 }
                 else
                 {
-                    if (_number == -1)
+                    if (IsValidate(keys, area, ctrlName, actName, userType))
                     {
-                        string _returnUrl = System.Net.WebUtility.UrlEncode(ctrlName + "/" + actName);
-                        context.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "home", action = "login", returnurl = _returnUrl }));
+                        base.OnActionExecuting(context);
                     }
                     else
                     {
-                        ctrl.TempData["Error_Permision"] = "Bạn không có quyền truy cập vào trang web này";
-                        context.Result = new EmptyResult();
+                        if (actName == "index" || actName == "details")
+                        {
+                            var result = new ViewResult
+                            {
+                                StatusCode = 500
+                            };
+                            context.Result = result;
+                        }
+                        else
+                        {
+                            context.Result = new JsonResult(new { code = 405, message = "not accept" });
+                        }
                     }
                 }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(area))
+                {
+                    base.OnActionExecuting(context);
+                }
+                else
+                {
+                    if (actName == "index" || actName == "details")
+                    {
+                        context.Result = new ViewResult();
+                    }
+                    else
+                    {
+                        context.Result = new JsonResult(new { code = 405, message = "not accept" });
+                    }
+                }
+            }
+        }
+
+        
+        private bool IsValidate(string keys, string area, string ctrl, string act, string userType)
+        {
+            try
+            {
+                List<AuthorityEntity> data = CacheExtends.GetDataFromCache<List<AuthorityEntity>>(CacheExtends.DefaultPermission);
+                string keypermission = CacheExtends.GetDataFromCache<string>(keys);
+                List<string> permission = CacheExtends.GetDataFromCache<List<string>>(keypermission);
+
+                if (userType == "student")
+                {
+                    return area == "student";
+                }
+
+                if (permission == null || permission.Count == 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    var item = data?.Where(o => o.CtrlName == ctrl && o.ActName == act && o.Area == area && permission.Contains(o.ID))?.ToList();
+                    return item != null && item.Count > 0;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
     }

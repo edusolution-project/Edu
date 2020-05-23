@@ -1,6 +1,7 @@
 ﻿using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,12 @@ namespace Core_v2.Repositories
             _env = env;
             _configuration = configuration;
             _path = string.IsNullOrEmpty(getPathLog()) ? _env.WebRootPath : getPathLog();
+        }
+
+        public Log(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            _path = string.IsNullOrEmpty(getPathLog()) ? "" : getPathLog();
         }
         public Task Debug(string function, object content)
         {

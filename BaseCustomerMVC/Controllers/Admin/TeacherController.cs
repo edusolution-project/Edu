@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
+using BaseCustomerEntity.Globals;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -39,8 +40,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             , AccountService accountService
             , CenterService centerService
             , IHostingEnvironment evn
-            , SubjectService subjectService
-            , IConfiguration iConfig)
+            , SubjectService subjectService)
         {
             _env = evn;
             _service = service;
@@ -51,8 +51,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             _mapping = new MappingEntity<TeacherEntity, TeacherViewModel>();
 
             _teacherHelper = new TeacherHelper(service, accountService);
-            _configuration = iConfig;
-            _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
         }
 
         public ActionResult Index(DefaultModel model)
@@ -243,6 +241,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (item.Centers != null && item.Centers.Count > 0)
                     foreach (var center in item.Centers)
                     {
+                        center.Code = center.Name.ConvertUnicodeToCode("-", true).Replace(@" ", "-");
                         var idx = centers.FindIndex(t => t.CenterID == center.CenterID);
                         if (idx >= 0)
                         //replace
@@ -320,6 +319,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 centermember = new CenterMemberEntity
                 {
                     Name = _center.Name,
+                    Code = _center.Code,
                     CenterID = _center.ID,
                     RoleID = role.ID
                 };

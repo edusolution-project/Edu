@@ -8,7 +8,7 @@ using System.Text;
 namespace BaseCustomerMVC.Globals
 {
     [Area("teacher")]
-    [Permission("teacher,head-teacher")]
+    [Permission]
     public class TeacherController: BaseController
     {
 

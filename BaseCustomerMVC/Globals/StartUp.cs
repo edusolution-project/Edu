@@ -131,15 +131,7 @@ namespace BaseCustomerMVC.Globals
                             new Claim("Code", irole.Code),
                             new Claim("RoleID", irole.ID.ToString())
                         };
-                        if (listAccess != null && listAccess.Count() > 0)
-                        {
-                            for (int i = 0; i < listAccess.Count(); i++)
-                            {
-                                var accItem = listAccess.ElementAt(i);
-                                if (accItem.Type == "admin") claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}*{accItem.ActName}"));
-                                else claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}"));
-                            }
-                        }
+                        
                         var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
                         ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
                         CacheExtends.SetObjectFromCache(token, Cookies.ExpiresLogin, claim);
