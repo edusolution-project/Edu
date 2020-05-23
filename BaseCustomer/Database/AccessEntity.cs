@@ -9,12 +9,8 @@ namespace BaseCustomerEntity.Database
 {
     public class AccessEntity : EntityBase
     {
-        [JsonProperty("CtrlName")]
-        public string CtrlName { get; set; }
-        [JsonProperty("ActName")]
-        public string ActName { get; set; }
-        [JsonProperty("Type")]
-        public string Type { get; set; }
+        [JsonProperty("Authority")]
+        public string Authority { get; set; }
         [JsonProperty("RoleID")]
         public string RoleID { get; set; }
         [JsonProperty("IsActive")]

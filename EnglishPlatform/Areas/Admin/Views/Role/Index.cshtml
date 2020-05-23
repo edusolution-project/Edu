@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Quản lý role";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    var listData = ViewBag.Data as List<BaseCustomerEntity.Database.RoleEntity>;
+    var data = ViewBag.Data as BaseCustomerEntity.Database.RoleEntity;
 }
 
 @TempData["Error_Permision"]
@@ -15,37 +15,31 @@
             <div class="card-header py-3">
                 <div class="row">
                     <div class="col-lg-6">
-                        <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
+                        <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"] 
+                        @if (data != null)
+                        {
+                            <span style="font-size:0.5em; color:gray">(Quyển hạn của bạn : <b class="font-weight-bold text-primary">@data.Name</b>)</span>
+                        }
+                        </h4>
                     </div>
                     <div class="col-lg-6">
                         <div class="text-right">
-                            <button type="button" class="btn btn-danger" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","role")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>
-                            <button type="button" class="btn btn-primary" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-modal-lg"> <i class="fas fa-upload"></i> </button>
-                            <button type="button" class="btn btn-primary" onclick="Export('FormControl','@Url.Action("Export", "role")')"> <i class="fas fa-file-export"></i> </button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="Add(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-success btn-sm" onclick="Save()"> <i class="fas fa-save"></i> </button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <div class="input-group"><input type="checkbox" aria-label="Checkbox" onclick="toggleAll(this, 'dataTable')"></div>
-                                </th>
-                                <th>STT</th>
-                                <th>Mã môn</th>
-                                <th>tên</th>
-                                <th>Ngày tạo</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="role-wrapper">
+                            <div class="role-content row" id="role-content">
+                                
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -55,82 +49,120 @@
 <!-- Modal Create Form -->
 <div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        @using (Html.BeginForm("Create", "role", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
-        {
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ModalCenterTitle">Tạo môn học</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <input type="hidden" name="Created" value="" />
-                        <input type="hidden" name="ID" />
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="Code" id="inputName" placeholder="mã môn">
-                            </div>
-                            <div class="form-group col-md-6">
-                                <input type="text" class="form-control" name="Name" id="inputText" placeholder="Tên môn">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalCenterTitle">Tạo nhóm</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <div class="form-row">
+                                <label for="staticText" class="col-md-4 col-form-label">Tên nhóm:</label>
+                                <input type="text" class="form-control col-md-8" data-name="name" placeholder="tên group">
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group row col-md-6">
-                                <label for="staticText" class="col-sm-4 col-form-label">Trạng thái:</label>
-                                <div class="col-sm-8">
-                                    <select id="input-option" name="IsActive" class="form-control">
-                                        <option value="true" selected>Hoạt động</option>
-                                        <option value="false">Không hoạt động</option>
+                        <div class="form-group col-md-6">
+                            <div class="form-row">
+                                <label for="staticText" class="col-md-4 col-form-label">Nhóm chính:</label>
+                                <div class="col-md-8">
+                                    <select data-name="parent" class="form-control">
+                                        <option value="" selected>---- Root ----</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Submit('AddForm','@Url.Action("Create", "role")','create',LoadData)">Lưu lại</button>
-                </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group row col-md-6">
+                            <label for="staticText" class="col-md-4 col-form-label">Trạng thái:</label>
+                            <div class="col-md-8">
+                                <select data-name="active" class="form-control">
+                                    <option value="true" selected>Hoạt động</option>
+                                    <option value="false">Không hoạt động</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
-        }
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="clear()">Đóng</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="savedata()">Lưu lại</button>
+            </div>
+        </div>
     </div>
 </div>
 <script>
-    function LoadData() { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
 
+    var g_Ajax = function (url, data, method, async) {
+        var request = new XMLHttpRequest();
+        return new Promise(function (resolve, reject) {
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {
+                    // Process the response
+                    if (request.status >= 200 && request.status < 300) {
+                        // If successful
+                        resolve(request.response);
+                    } else {
+                        var arrStatus = [
+                            "UNSENT	Client has been created.open() not called yet.",
+                            "OPENED	open() has been called.",
+                            "HEADERS_RECEIVED	send() has been called, and headers and status are available.",
+                            "LOADING	Downloading; responseText holds partial data.",
+                            "DONE	The operation is complete."
+                        ];
+                        reject({
+                            status: request.status,
+                            statusText: request.statusText
+                        });
+                    }
+                }
+            }
+            request.open(method || 'POST', url, async || true);
+            //request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;multipart/form-data;application/json');
+            // Send the request
+            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+            request.send(data);
+        });
+    }
+
+    function LoadData(code) { var searchText = $("#searchText").val();var startDate = $("#startDate_sort").val();var endDate = $("#endDate_sort").val();
+        //Code: "truong phong"
+        //CreateDate: "2020-05-03T16:02:59.415Z"
+        //Group: 0
+        //ID: "5eaeeb49e76b17419c44db34"
+        //IsActive: true
+        //Level: 0
+        //Name: "Trưởng phòng"
+        //ParentID: ""
+        //Type: null
+        //UserCreate: "0"
         $.ajax({
             type: "GET",
-            url: '@Url.Action("get", "role")',
+            url: '@Url.Action("get", "role")?code=' + code,
             data: {SearchText: searchText,StartDate: startDate,EndDate: endDate},
             dataType:"json",
             success: function (data) {
-                var body = $('#dataTable tbody');
-                body.html("");
+
                 if (data.data.length > 0)
                 {
+                    var body = code == void 0 || code == "" ? $("#role-content") : $("#" + code + ">.content");
+                    body.html("");
+                    if (code != void 0 && code != "") body.css({ padding: '15px', background: '#e8e4e4cc' });
                     for (i = 0; i < data.data.length; ++i) {
                         item = data.data[i];
-                        console.log(item);
                         var active = "";
                         if (item.IsActive) {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","role")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                            active = "<button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("approved","role")',LoadData);\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button>";
                         } else {
-                            active = "<td><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","role")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("approved","role")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button>";
                         }
-                        var url = '@Url.Action("Detail","Role")';
-                        body.append("<tr>" +
-                            "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
-                            "<td>" + (i + 1) + "</td>" +
-                            "<td>" + item.Code + "</td>" +
-                            "<td><a href='" + url + "/" + item.ID + "'>" + item.Name + "</a></td>" +
-                            "<td>" +  item.Type +"</td>"+active +
-                            "<td><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","role")','@Url.Action("create","role")',this)\" type='button' class='btn btn-primary' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa đối tượng " + item.Code + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","role")',LoadData); else return;\" type='button' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
-                            "</td > " +
-                            "</tr>"
-                        );
+                        body.append("<div class='col-12 p5' id='" + item.Code + "'> <div class='row p-1'><a class='col' href='@Url.Action("Detail","Role")/" + item.Code + "'>" + item.Name + "</a> <button onclick='addNewRole(\"" + item.Code + "\")' type='button' class='btn btn-sm btn-success mr-1'> <i class='fas fa-plus'></i> </button> <button type='button' onclick='LoadData(\"" + item.Code + "\")' class='btn btn-sm btn-success mr-1'> <i class='fas fa-list'></i> </button> <button type='button' class='btn btn-sm btn-danger mr-1'> <i class='fas fa-trash'></i> </button> <button type='button' class='btn btn-sm btn-primary mr-1'> <i class='fas fa-edit'></i> </button>" + active + "</div><div class='addnew'></div><div class='content'></div></div> <hr/>");
+                        LoadData(item.Code);
                     }
                     $('.btn').tooltip({ trigger:'hover' });
                 }
@@ -142,6 +174,89 @@
     };
 
     $(document).ready(function () {
-        LoadData();
+        LoadData("");
     });
+
+    var savedata = function () {
+        var ModalCenter = document.getElementById("ModalCenter");
+        var name = ModalCenter.querySelector('input[data-name="name"]').value;
+        var parent = ModalCenter.querySelector('[data-name="parent"]').value;
+        var active = ModalCenter.querySelector('[data-name="active"]').value;
+        var data = {
+            Name: name,
+            ParentID: parent,
+            IsActive: active
+        };
+        g_Ajax("@Url.Action("Create","Role")", JSON.stringify(data), "POST").then(function (res) {
+            var dataJson = JSON.parse(res);
+            if (dataJson != null && dataJson.code == 200) {
+                //success
+                location.reload();
+                clear();
+            }
+        });
+    }
+    var clear = function () {
+        var ModalCenter = document.getElementById("ModalCenter");
+        ModalCenter.querySelector('input[data-name="name"]').value = "";
+        ModalCenter.querySelector('[data-name="parent"]').value = "";
+    }
+
+
+    var addNewRole = function (code) {
+        var elCode = document.getElementById(code);
+        if (elCode != null) {
+            var content = elCode.querySelector('.addnew');
+            if (content != null) {
+                var btnDelete = "<button type='button' onclick='javascript:this.parentElement.parentElement.remove()' class='btn btn-sm btn-danger ml-1'> <i class='fas fa-trash'></i> </button>";
+                content.innerHTML += "<div class='row'><div class='col item-add-role'><span style='min-width:300px;display:inline-block;border:1px solid' contenteditable='true' data-parent='" + code + "' class='col-md-6 col-xs-12'/></span>" + btnDelete+"</div></div>";
+            }
+        }
+    }
+
+    var Save = function () {
+        var root = document.getElementById('role-content');
+        if (root != null) {
+            var data = [];
+            var listRole = document.querySelectorAll('.item-add-role');
+            for (var i = 0; i < listRole.length; i++) {
+                var item = listRole[i];
+                var el = item.querySelector("[contenteditable='true']");
+                if (el != null && el.innerHTML.trim() != "") {
+                    var dataItem = {
+                        Name: el.innerHTML.trim(),
+                        ParentID: el.dataset.parent,
+                        IsActive: true
+                    };
+                    data.push(dataItem);
+                }
+            }
+            console.log(data);
+            g_Ajax("@Url.Action("Creates", "Role")", JSON.stringify(data), "POST").then(function (res) {
+                var dataJson = JSON.parse(res);
+                if (dataJson != null && dataJson.code == 200) {
+
+                }
+            });
+        }
+    }
+
+    //[JsonProperty("Name")]
+    //    public string Name { get; set; }
+    //[JsonProperty("Code")]
+    //    public string Code { get; set; }
+    //[JsonProperty("Type")]
+    //    public string Type { get; set; }
+    //[JsonProperty("IsActive")]
+    //    public bool IsActive { get; set; }
+    //[JsonProperty("UserCreate")]
+    //    public string UserCreate { get; set; }
+    //[JsonProperty("CreateDate")]
+    //    public DateTime CreateDate { get; set; }
+    //[JsonProperty("ParentID")]
+    //    public string ParentID { get; set; }
+    //[JsonProperty("Level")]
+    //    public int Level { get; set; }
+    //[JsonProperty("Group")]
+    //    public int Group { get; set; }
 </script>

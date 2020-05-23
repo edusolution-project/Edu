@@ -39,7 +39,9 @@ namespace EnglishPlatform.Controllers
         private readonly ClassService _classService;
         private readonly StudentHelper _studentHelper;
         private readonly CalendarHelper _calendarHelper;
-
+        private readonly UserAndRoleService _userAndRoleService;
+        private readonly CenterService _centerService;
+        private readonly AuthorityService _authorityService;
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -51,6 +53,9 @@ namespace EnglishPlatform.Controllers
             , IOptions<DefaultConfigs> defaultvalue
             , CalendarHelper calendarHelper
             , MailHelper mailHelper
+            , UserAndRoleService userAndRoleService
+            , CenterService centerService
+            , AuthorityService authorityService
             , ILog log)
         {
             _accessesService = accessesService;
@@ -66,15 +71,53 @@ namespace EnglishPlatform.Controllers
             _log = log;
             _mailHelper = mailHelper;
             _default = defaultvalue.Value;
-
+            _userAndRoleService = userAndRoleService;
+            _centerService = centerService;
+            _authorityService = authorityService;
         }
 
         public IActionResult Index()
         {
+            StartAuthority();
             var type = User.Claims.GetClaimByType("Type");
             if (type != null)
             {
-                return Redirect(type.Value);
+                var center = _centerService.GetDefault();
+                string centerCode = center.Code;
+                string roleCode = "";
+                var tc = _teacherService.GetItemByID(User.FindFirst("UserID").Value);
+                var st = _studentService.GetItemByID(User.FindFirst("UserID").Value);
+                var user = _accountService.GetItemByID(User.FindFirst("UserID").Value);
+                var defaultUser = new UserModel() { };
+                if (type.Value == ACCOUNT_TYPE.ADMIN)
+                {
+                    defaultUser = new UserModel(User.FindFirst("UserID").Value, "admin");
+                    centerCode = center.Code;
+                    roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
+                }
+                else
+                {
+                    if (tc != null)
+                    {
+                        defaultUser = new UserModel(tc.ID, tc.FullName);
+                        centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
+                        roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                    }
+                    if (st != null)
+                    {
+                        defaultUser = new UserModel(st.ID, st.FullName);
+                        centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                        roleCode = "student";
+                    }
+
+                    var role = roleCode != "student" ? _roleService.GetItemByID(roleCode): _roleService.GetItemByCode(roleCode);
+                    var listAccess = _accessesService.GetAccessByRole(role.Code);
+                    string key = $"{centerCode}_{roleCode}";
+                    CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
+                    CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
+                }
+                //cache
+                return Redirect($"{centerCode}/{type.Value}");
             }
             else
             {
@@ -103,157 +146,126 @@ namespace EnglishPlatform.Controllers
         {
             //var x = HttpContext.Request;
             //_log.Debug("login", new { UserName, PassWord, Type, IsRemmember });
-            var _username = UserName.Trim().ToLower();
-            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
+            try
             {
-                return Json(new ReturnJsonModel
-                {
-                    StatusCode = ReturnStatus.ERROR,
-                    StatusDesc = "Vui lòng điền đầy đủ thông tin",
-                });
-            }
-            else
-            {
-                string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
-                var user = _accountService.GetAccount(_username, _sPass);
-                if (user == null)
+                var _username = UserName.Trim().ToLower();
+                if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
                 {
                     return Json(new ReturnJsonModel
                     {
                         StatusCode = ReturnStatus.ERROR,
-                        StatusDesc = "Thông tin tài khoản không đúng"
+                        StatusDesc = "Vui lòng điền đầy đủ thông tin",
                     });
                 }
                 else
                 {
-                    if (user.IsActive)
-                    {
-                        TempData["success"] = "Hi " + _username;
-                        string _token = Guid.NewGuid().ToString();
-                        string FullName, id;
-                        HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
-                        var role = _roleService.GetItemByID(user.RoleID);
-                        if (role == null)
-                        {
-                            return Json(new ReturnJsonModel
-                            {
-                                StatusCode = ReturnStatus.ERROR,
-                                StatusDesc = "Có lỗi, không đăng nhập được. Vui lòng liên hệ Admin để được trợ giúp"
-                            });
-                        }
-                        switch (Type)
-                        {
-                            case ACCOUNT_TYPE.TEACHER:
-                                var tc = _teacherService.GetItemByID(user.UserID);
-                                if (tc == null)
-                                    return Json(new ReturnJsonModel
-                                    {
-                                        StatusCode = ReturnStatus.ERROR,
-                                        StatusDesc = "Thông tin tài khoản không đúng",
-                                    });
-                                FullName = tc.FullName;
-                                id = tc.ID;
-                                break;
-                            case ACCOUNT_TYPE.STUDENT:
-                                var st = _studentService.GetItemByID(user.UserID);
-                                if (st == null)
-                                {
-                                    if (role.Type == "teacher")
-                                    {
-                                        //create student account
-                                        st = new StudentEntity()
-                                        {
-                                            FullName = user.Name,
-                                            Email = _username,
-                                            Phone = user.Phone,
-                                            IsActive = true,// active student
-                                            CreateDate = DateTime.Now,
-                                            ID = user.UserID
-                                        };
-                                        _studentService.CreateQuery().InsertOne(st);
-                                    }
-                                    else
-                                        return Json(new ReturnJsonModel
-                                        {
-                                            StatusCode = ReturnStatus.ERROR,
-                                            StatusDesc = "Thông tin tài khoản không đúng",
-                                        });
-                                }
-                                role = _roleService.GetItemByCode("student");
-                                FullName = st.FullName ?? st.Email;
-                                id = st.ID;
-                                break;
-                            default:
-                                FullName = "admin"; id = "0";
-                                break;
-                        }
-
-                        var listAccess = _accessesService.GetAccessByRole(role.ID);
-
-                        var claims = new List<Claim>
-                            {
-                                new Claim("UserID",id),
-                                new Claim(ClaimTypes.Email, _username),
-                                new Claim(ClaimTypes.Name, FullName),
-                                new Claim(ClaimTypes.Role, role.Code),
-                                new Claim("Type", role.Type),
-                                new Claim("RoleID", role.ID)
-                            };
-
-                        if (listAccess != null && listAccess.Count() > 0)
-                        {
-                            for (int i = 0; i < listAccess.Count(); i++)
-                            {
-                                var accItem = listAccess.ElementAt(i);
-                                if (accItem.Type == "admin") claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}*{accItem.ActName}"));
-                                else claims.Add(new BaseAccess.Permission($"{accItem.Type}*{accItem.CtrlName}"));
-
-                            }
-                        }
-                        var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
-                        _ = new AuthenticationProperties
-                        {
-                            IsPersistent = true,
-                            ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
-                        };
-                        ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
-
-                        AccountLogEntity login = new AccountLogEntity()
-                        {
-                            IP = HttpContext.Connection.RemoteIpAddress.ToString(),
-                            AccountID = user.ID,
-                            Token = _token,
-                            IsRemember = IsRemmember,
-                            CreateDate = DateTime.Now
-                        };
-                        _logService.CreateQuery().InsertOne(login);
-                        await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
-                        //await HttpContext.SignInAsync(Cookies.DefaultLogin, claim, new AuthenticationProperties()
-                        //{
-                        //    ExpiresUtc = !IsRemmember ? DateTime.Now : DateTime.Now.AddMinutes(Cookies.ExpiresLogin),
-                        //    AllowRefresh = true,
-                        //    RedirectUri = user.Type
-                        //});
-                        return Json(new ReturnJsonModel
-                        {
-                            StatusCode = ReturnStatus.SUCCESS,
-                            StatusDesc = "OK",
-                            Location = "/" + Type
-                        });
-                    }
-                    else
+                    string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
+                    var user = _accountService.GetAccount(_username, _sPass);
+                    if (user == null)
                     {
                         return Json(new ReturnJsonModel
                         {
                             StatusCode = ReturnStatus.ERROR,
-                            StatusDesc = "Tài khoản đang bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
+                            StatusDesc = "Thông tin tài khoản không đúng"
                         });
+                    }
+                    else
+                    {
+                        if (user.IsActive)
+                        {
+                            TempData["success"] = "Hi " + _username;
+                            string _token = Guid.NewGuid().ToString();
+                            HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
+
+                            var center = _centerService.GetDefault();
+                            string centerCode = center.Code;
+                            string roleCode = "";
+                            var tc = _teacherService.GetItemByID(user.UserID);
+                            var st = _studentService.GetItemByID(user.UserID);
+
+                            var defaultUser = new UserModel() { };
+                            if (Type == ACCOUNT_TYPE.ADMIN)
+                            {
+                                defaultUser = new UserModel(user.ID, "admin");
+                                centerCode = center.Code;
+                                roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
+                            }
+                            else
+                            {
+                                if (tc != null)
+                                {
+                                    defaultUser = new UserModel(tc.ID, tc.FullName);
+                                    centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
+                                    roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                }
+                                if (st != null)
+                                {
+                                    defaultUser = new UserModel(st.ID, st.FullName);
+                                    centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                                    roleCode = "student";
+                                }
+
+                                var role = roleCode != "student" ?_roleService.GetItemByID(roleCode): _roleService.GetItemByCode(roleCode);
+                                var listAccess = _accessesService.GetAccessByRole(role.Code);
+                                string key = $"{centerCode}_{roleCode}";
+                                CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
+                                CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
+                            }
+
+                            //cache
+
+
+                            var claims = new List<Claim>{
+                                new Claim("UserID",defaultUser.ID),
+                                new Claim(ClaimTypes.Email, _username),
+                                new Claim(ClaimTypes.Name, defaultUser.Name),
+                                new Claim(ClaimTypes.Role,roleCode),
+                                new Claim("Type", user.Type)};
+
+
+                            var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
+                            _ = new AuthenticationProperties
+                            {
+                                IsPersistent = true,
+                                ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
+                            };
+                            ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
+
+                            AccountLogEntity login = new AccountLogEntity()
+                            {
+                                IP = HttpContext.Connection.RemoteIpAddress.ToString(),
+                                AccountID = user.ID,
+                                Token = _token,
+                                IsRemember = IsRemmember,
+                                CreateDate = DateTime.Now
+                            };
+                            _logService.CreateQuery().InsertOne(login);
+                            await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
+                            return Json(new ReturnJsonModel
+                            {
+                                StatusCode = ReturnStatus.SUCCESS,
+                                StatusDesc = "OK",
+                                Location = $"{centerCode}/{user.Type}"
+                            });
+                        }
+                        else
+                        {
+                            return Json(new ReturnJsonModel
+                            {
+                                StatusCode = ReturnStatus.ERROR,
+                                StatusDesc = "Tài khoản đang bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
+                            });
+                        }
                     }
                 }
             }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
         }
 
-        public async Task<JsonResult> RegisterAPI(string UserName, string Name, string Phone, string PassWord, string Type)
+        public JsonResult RegisterAPI(string UserName, string Name, string Phone, string PassWord, string Type)
         {
             var _username = UserName.Trim().ToLower();
             if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
@@ -353,7 +365,14 @@ namespace EnglishPlatform.Controllers
             }
         }
 
-
+        private void StartAuthority()
+        {
+            if (CacheExtends.GetDataFromCache<List<AuthorityEntity>>(CacheExtends.DefaultPermission) == null)
+            {
+                List<AuthorityEntity> data = _authorityService.GetAll()?.ToList();
+                CacheExtends.SetObjectFromCache(CacheExtends.DefaultPermission, 3600 * 24 * 360, data);
+            }
+        }
         private void startPage()
         {
             var superadminRole = new RoleEntity()
@@ -423,8 +442,15 @@ namespace EnglishPlatform.Controllers
         [Route("/logout")]
         public async Task<IActionResult> LogOut()
         {
+            var basis = HttpContext.Request;
+            string keys = User.FindFirst("UserID")?.Value;
+            if (!string.IsNullOrEmpty(keys))
+            {
+                CacheExtends.ClearCache(keys);
+            }
             await HttpContext.SignOutAsync(Cookies.DefaultLogin);
             HttpContext.Remove(Cookies.DefaultLogin);
+            
             return RedirectToAction("Login");
         }
 
@@ -555,5 +581,21 @@ namespace EnglishPlatform.Controllers
             ViewBag.RoomID = roomID;
             return View();
         }
+    }
+
+    public class UserModel
+    {
+        public UserModel()
+        {
+        }
+
+        public UserModel(string iD, string name)
+        {
+            ID = iD;
+            Name = name;
+        }
+
+        public string ID { get; set; }
+        public string Name { get; set; }
     }
 }
