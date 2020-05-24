@@ -19,6 +19,7 @@ using Core_v2.Interfaces;
 using BaseCustomerEntity.Globals;
 using System.Security.Claims;
 using System.Runtime.Caching;
+using BaseAccess.Services;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -51,6 +52,11 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public ActionResult Detail(string id)
         {
+            var _access = new AccessService();
+            var assembly = Assembly.GetExecutingAssembly();
+            ViewBag.AdminCtrl = _access.GetAccessByAttribue<Globals.AdminController>(assembly, "admin");
+            ViewBag.TeacherCtrl = _access.GetAccessByAttribue<Globals.TeacherController>(assembly, "teacher");
+            ViewBag.StudentCtrl = _access.GetAccessByAttribue<Globals.StudentController>(assembly, "student");
             var access = _accessesService.GetAccessByRole(id);
             if (User != null && User.Identity.IsAuthenticated)
             {

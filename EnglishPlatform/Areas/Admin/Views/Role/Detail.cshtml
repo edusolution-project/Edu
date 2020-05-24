@@ -1,25 +1,36 @@
 ﻿@using BaseCustomerEntity.Database
+@using BaseAccess.Attribule
 @{
     ViewData["Title"] = "Quản lý phân quyền";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     List<AuthorityEntity> Data = ViewBag.Authority as List<AuthorityEntity>;
     List<AccessEntity> Access = ViewBag.Access as List<AccessEntity>;
     List<AccessEntity> ParentAccess = ViewBag.ParentAccess as List<AccessEntity>;
+    List<AccessCtrlAttribute> authorityAdmin = ViewBag.AdminCtrl as List<AccessCtrlAttribute>;
+    List<AccessCtrlAttribute> authorityTeacher = ViewBag.TeacherCtrl as List<AccessCtrlAttribute>;
+    List<AccessCtrlAttribute> authorityStudent = ViewBag.StudentCtrl as List<AccessCtrlAttribute>;
+    string[] over = new string[] { "superadmin", "supperadmin" };
+    string userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
 }
-    <style>
-        .item-access > input[type='checkbox'] {
-            margin-top: 6px;
-        }
-        .item-access {
-            padding: 10px;
-        }
-    </style>
-    <div class="container-fluid">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
+<style>
+    .item-access > input[type='checkbox'] {
+        margin-top: 6px;
+    }
+
+    .item-access {
+        padding: 10px;
+    }
+    .list-item-access {
+        background: #ccc;
+        padding: 20px;
+    }
+</style>
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
                 </div>
                 <div class="col-lg-6">
                     <div class="text-right">
@@ -33,31 +44,150 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="role-wrapper">
-                        <div class="role-content" id="authority-content">
-                            @{ 
-                                string[] over = new string[] { "superadmin", "supperadmin" };
-                                string userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
-                                if (userRole != null)
-                                {
-                                    for (int i = 0; Data != null && Data.Count > 0 && i < Data.Count; i++)
+                        <div class="role-content row" id="authority-content">
+                            <div class="role-content__type admin col-md-4">
+                                <h3>Admin : </h3>
+
+                                @{
+                                    var adminList = Data.Where(o => o.Area == "admin")?.GroupBy(o => o.CtrlName)?.ToList();
+                                    if (userRole != null)
                                     {
-                                        var item = Data[i];
-                                        if (!over.Contains(userRole))
+                                        for (int i = 0; adminList != null && adminList.Count > 0 && i < adminList.Count; i++)
                                         {
-                                            bool isTrue = ParentAccess != null && ParentAccess.Where(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive==true) != null;
-                                            if (!isTrue)
-                                            {
-                                                continue;
-                                            }
+                                            IGrouping<string, AuthorityEntity> group = adminList[i];
+                                            string key = group.Key;
+                                            int count = group.Count();
+                                            if (count <= 0) { continue; }
+                                            var firstItem = group.FirstOrDefault();
+                                            if (firstItem == null) { continue; }
+                                            var rootItem = authorityAdmin.FirstOrDefault(o => o.Module == firstItem.CtrlName && o.Type == "admin");
+                                            <div class="group-access row">
+                                                <div class="root-access col-12">
+                                                    <input type="checkbox" name="admin_@rootItem.Module"  onclick="checkAll(this)"/>
+                                                    <span onclick="openList(this)">@rootItem.Name</span>
+                                                </div>
+                                                <div class="list-item-access hide">
+                                                    @for (int x = 0; x < group.Count(); x++)
+                                                    {
+                                                        var item = group.ElementAt(x);
+                                                        if (!over.Contains(userRole))
+                                                        {
+                                                            bool isTrue = ParentAccess != null && ParentAccess.Where(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive == true) != null;
+                                                            if (!isTrue)
+                                                            {
+                                                                continue;
+                                                            }
+                                                        }
+                                                        bool isActive = Access != null && Access.Count > 0 && Access.FirstOrDefault(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive == true) != null;
+                                                        <div class="item-access row" data-authority="@item.ID">
+                                                            @if (isActive)
+                                                            {<input type="checkbox" name="@item.ID" checked />}
+                                                            else
+                                                            {<input type="checkbox" name="@item.ID" />}
+                                                            <div class="col">@item.Description</div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
                                         }
-                                        bool isActive = Access != null && Access.Count > 0 && Access.FirstOrDefault(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive==true) != null;
-                                        <div class="item-access row" data-authority="@item.ID">
-                                            @if (isActive){<input type="checkbox" name="@item.ID" checked />}else{<input type="checkbox" name="@item.ID" />}
-                                             <div class="col">@item.Description</div>
-                                        </div>
                                     }
                                 }
-                            }
+                            </div>
+                            <div class="role-content__type teacher col-md-4">
+                                <h3>Teacher : </h3>
+
+                                @{
+                                    var teacherList = Data.Where(o => o.Area == "teacher")?.GroupBy(o => o.CtrlName)?.ToList();
+                                    if (userRole != null)
+                                    {
+                                        for (int i = 0; teacherList != null && teacherList.Count > 0 && i < teacherList.Count; i++)
+                                        {
+                                            IGrouping<string, AuthorityEntity> group = teacherList[i];
+                                            string key = group.Key;
+                                            int count = group.Count();
+                                            if (count <= 0) { continue; }
+                                            var firstItem = group.FirstOrDefault();
+                                            if (firstItem == null) { continue; }
+                                            var rootItem = authorityTeacher.FirstOrDefault(o => o.Module == firstItem.CtrlName && o.Type == "teacher");
+                                            <div class="group-access row">
+                                                <div class="root-access col-12">
+                                                    <input type="checkbox" name="teacher_@rootItem.Module"  onclick="checkAll(this)"/>
+                                                    <span onclick="openList(this)">@rootItem.Name</span>
+                                                </div>
+                                                <div class="list-item-access hide">
+                                                    @for (int x = 0; x < group.Count(); x++)
+                                                    {
+                                                        var item = group.ElementAt(x);
+                                                        if (!over.Contains(userRole))
+                                                        {
+                                                            bool isTrue = ParentAccess != null && ParentAccess.Where(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive == true) != null;
+                                                            if (!isTrue)
+                                                            {
+                                                                continue;
+                                                            }
+                                                        }
+                                                        bool isActive = Access != null && Access.Count > 0 && Access.FirstOrDefault(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive == true) != null;
+                                                        <div class="item-access row" data-authority="@item.ID">
+                                                            @if (isActive)
+                                                            {<input type="checkbox" name="@item.ID" checked />}
+                                                            else
+                                                            {<input type="checkbox" name="@item.ID" />}
+                                                            <div class="col">@item.Description</div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                            <div class="role-content__type student col-md-4">
+                                <h3>Student : </h3>
+                                @{
+                                    var studentList = Data.Where(o => o.Area == "student")?.GroupBy(o => o.CtrlName)?.ToList();
+                                    if (userRole != null)
+                                    {
+                                        for (int i = 0; studentList != null && studentList.Count > 0 && i < studentList.Count; i++)
+                                        {
+                                            IGrouping<string, AuthorityEntity> group = studentList[i];
+                                            string key = group.Key;
+                                            int count = group.Count();
+                                            if (count <= 0) { continue; }
+                                            var firstItem = group.FirstOrDefault();
+                                            if (firstItem == null) { continue; }
+                                            var rootItem = authorityStudent.FirstOrDefault(o => o.Module == firstItem.CtrlName && o.Type == "student");
+                                            <div class="group-access row">
+                                                <div class="root-access col-12">
+                                                    <input type="checkbox" name="student_@rootItem.Module" onclick="checkAll(this)"/>
+                                                    <span onclick="openList(this)">@rootItem.Name</span>
+                                                </div>
+                                                <div class="list-item-access hide">
+                                                    @for (int x = 0; x < group.Count(); x++)
+                                                    {
+                                                        var item = group.ElementAt(x);
+                                                        if (!over.Contains(userRole))
+                                                        {
+                                                            bool isTrue = ParentAccess != null && ParentAccess.Where(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive == true) != null;
+                                                            if (!isTrue)
+                                                            {
+                                                                continue;
+                                                            }
+                                                        }
+                                                        bool isActive = Access != null && Access.Count > 0 && Access.FirstOrDefault(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive == true) != null;
+                                                        <div class="item-access row" data-authority="@item.ID">
+                                                            @if (isActive)
+                                                            {<input type="checkbox" name="@item.ID" checked />}
+                                                            else
+                                                            {<input type="checkbox" name="@item.ID" />}
+                                                            <div class="col">@item.Description</div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -65,56 +195,81 @@
         </div>
     </div>
 </div>
-    <script>
-        var g_Ajax = function (url, data, method, async) {
-            var request = new XMLHttpRequest();
-            return new Promise(function (resolve, reject) {
-                request.onreadystatechange = function () {
-                    if (request.readyState == 4) {
-                        // Process the response
-                        if (request.status >= 200 && request.status < 300) {
-                            // If successful
-                            resolve(request.response);
-                        } else {
-                            var arrStatus = [
-                                "UNSENT	Client has been created.open() not called yet.",
-                                "OPENED	open() has been called.",
-                                "HEADERS_RECEIVED	send() has been called, and headers and status are available.",
-                                "LOADING	Downloading; responseText holds partial data.",
-                                "DONE	The operation is complete."
-                            ];
-                            reject({
-                                status: request.status,
-                                statusText: request.statusText
-                            });
-                        }
+<script>
+    var checkAll = function (self) {
+        var listdata = self.parentElement.parentElement.querySelector('.list-item-access');
+        var listCheckbox = listdata.querySelectorAll('input[type="checkbox"]');
+        for (var i = 0; i < listCheckbox.length; i++) {
+            var check = listCheckbox[i];
+            check.checked = self.checked;
+        }
+    }
+    var openList = function (self) {
+        self.parentElement.parentElement.querySelector('.list-item-access').classList.toggle('hide');
+    }
+    var g_Ajax = function (url, data, method, async) {
+        var request = new XMLHttpRequest();
+        return new Promise(function (resolve, reject) {
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {
+                    // Process the response
+                    if (request.status >= 200 && request.status < 300) {
+                        // If successful
+                        resolve(request.response);
+                    } else {
+                        var arrStatus = [
+                            "UNSENT	Client has been created.open() not called yet.",
+                            "OPENED	open() has been called.",
+                            "HEADERS_RECEIVED	send() has been called, and headers and status are available.",
+                            "LOADING	Downloading; responseText holds partial data.",
+                            "DONE	The operation is complete."
+                        ];
+                        reject({
+                            status: request.status,
+                            statusText: request.statusText
+                        });
                     }
                 }
-                request.open(method || 'POST', url, async || true);
-                //request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;multipart/form-data;application/json');
-                // Send the request
-                request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-                request.send(data);
-            });
-        }
-        var Save = function () {
-            var root = document.getElementById('authority-content');
-            var listdata = root.querySelectorAll('.item-access');
-            var data = [];
-            for (var i = 0; listdata != null && i < listdata.length; i++) {
-                var el = listdata[i];
-                var elData = {
-                    Authority: el.dataset.authority,
-                    RoleID: '@ViewBag.Data',
-                    IsActive: el.querySelector('input[type="checkbox"]').checked,
-                };
-                data.push(elData);
             }
-            g_Ajax("@Url.Action("CreateAccess","Role")", JSON.stringify(data), "POST").then(function (res) {
-            var dataJson = JSON.parse(res);
-            if (dataJson != null && dataJson.code == 200) {
-                //success
-                location.reload();
-            }});
+            request.open(method || 'POST', url, async || true);
+            //request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;multipart/form-data;application/json');
+            // Send the request
+            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+            request.send(data);
+        });
+    }
+    var Save = function () {
+        var root = document.getElementById('authority-content');
+        var listdata = root.querySelectorAll('.item-access');
+        var data = [];
+        for (var i = 0; listdata != null && i < listdata.length; i++) {
+            var el = listdata[i];
+            var elData = {
+                Authority: el.dataset.authority,
+                RoleID: '@ViewBag.Data',
+                IsActive: el.querySelector('input[type="checkbox"]').checked,
+            };
+            data.push(elData);
         }
-    </script>
+        g_Ajax("@Url.Action("CreateAccess","Role")", JSON.stringify(data), "POST").then(function (res) {
+        var dataJson = JSON.parse(res);
+        if (dataJson != null && dataJson.code == 200) {
+            //success
+            location.reload();
+        }});
+    }
+    var showData = function () {
+        var root = document.getElementById('authority-content');
+        var listdata = root.querySelectorAll('.item-access > input[type="checkbox"]:checked');
+        for (var i = 0; i < listdata.length; i++) {
+            var item = listdata[i];
+            var elementParent = item.parentElement.parentElement.parentElement.querySelector('.root-access>input[type="checkbox"]');
+            if (!elementParent.checked) {
+                elementParent.checked = true;
+            }
+        }
+    }
+    document.addEventListener("DOMContentLoaded", function (event) {
+        showData();
+    });
+</script>
