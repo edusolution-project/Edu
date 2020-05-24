@@ -107,10 +107,10 @@ namespace EnglishPlatform.Controllers
                     {
                         defaultUser = new UserModel(st.ID, st.FullName);
                         centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
-                        roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                        roleCode = "student";
                     }
 
-                    var role = _roleService.GetItemByID(roleCode);
+                    var role = roleCode != "student" ? _roleService.GetItemByID(roleCode): _roleService.GetItemByCode(roleCode);
                     var listAccess = _accessesService.GetAccessByRole(role.Code);
                     string key = $"{centerCode}_{roleCode}";
                     CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
@@ -145,74 +145,76 @@ namespace EnglishPlatform.Controllers
         {
             //var x = HttpContext.Request;
             //_log.Debug("login", new { UserName, PassWord, Type, IsRemmember });
-            var _username = UserName.Trim().ToLower();
-            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
+            try
             {
-                return Json(new ReturnJsonModel
-                {
-                    StatusCode = ReturnStatus.ERROR,
-                    StatusDesc = "Vui lòng điền đầy đủ thông tin",
-                });
-            }
-            else
-            {
-                string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
-                var user = _accountService.GetAccount(_username, _sPass);
-                if (user == null)
+                var _username = UserName.Trim().ToLower();
+                if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
                 {
                     return Json(new ReturnJsonModel
                     {
                         StatusCode = ReturnStatus.ERROR,
-                        StatusDesc = "Thông tin tài khoản không đúng"
+                        StatusDesc = "Vui lòng điền đầy đủ thông tin",
                     });
                 }
                 else
                 {
-                    if (user.IsActive)
+                    string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
+                    var user = _accountService.GetAccount(_username, _sPass);
+                    if (user == null)
                     {
-                        TempData["success"] = "Hi " + _username;
-                        string _token = Guid.NewGuid().ToString();
-                        HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
-
-                        var center = _centerService.GetDefault();
-                        string centerCode = center.Code;
-                        string roleCode = "";
-                        var tc = _teacherService.GetItemByID(user.UserID);
-                        var st = _studentService.GetItemByID(user.UserID);
-
-                        var defaultUser = new UserModel() { };
-                        if(Type == ACCOUNT_TYPE.ADMIN)
+                        return Json(new ReturnJsonModel
                         {
-                            defaultUser = new UserModel(user.ID,"admin");
-                            centerCode = center.Code;
-                            roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
-                        }
-                        else
+                            StatusCode = ReturnStatus.ERROR,
+                            StatusDesc = "Thông tin tài khoản không đúng"
+                        });
+                    }
+                    else
+                    {
+                        if (user.IsActive)
                         {
-                            if(tc != null)
+                            TempData["success"] = "Hi " + _username;
+                            string _token = Guid.NewGuid().ToString();
+                            HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
+
+                            var center = _centerService.GetDefault();
+                            string centerCode = center.Code;
+                            string roleCode = "";
+                            var tc = _teacherService.GetItemByID(user.UserID);
+                            var st = _studentService.GetItemByID(user.UserID);
+
+                            var defaultUser = new UserModel() { };
+                            if (Type == ACCOUNT_TYPE.ADMIN)
                             {
-                                defaultUser = new UserModel(tc.ID, tc.FullName);
-                                centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
-                                roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                defaultUser = new UserModel(user.ID, "admin");
+                                centerCode = center.Code;
+                                roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
                             }
-                            if(st != null)
+                            else
                             {
-                                defaultUser = new UserModel(st.ID, st.FullName);
-                                centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
-                                roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                if (tc != null)
+                                {
+                                    defaultUser = new UserModel(tc.ID, tc.FullName);
+                                    centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
+                                    roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                }
+                                if (st != null)
+                                {
+                                    defaultUser = new UserModel(st.ID, st.FullName);
+                                    centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                                    roleCode = "student";
+                                }
+
+                                var role = roleCode != "student" ?_roleService.GetItemByID(roleCode): _roleService.GetItemByCode(roleCode);
+                                var listAccess = _accessesService.GetAccessByRole(role.Code);
+                                string key = $"{centerCode}_{roleCode}";
+                                CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
+                                CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
                             }
 
-                            var role = _roleService.GetItemByID(roleCode);
-                            var listAccess = _accessesService.GetAccessByRole(role.Code);
-                            string key = $"{centerCode}_{roleCode}";
-                            CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
-                            CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
-                        }
+                            //cache
 
-                        //cache
-                        
 
-                        var claims = new List<Claim>{
+                            var claims = new List<Claim>{
                                 new Claim("UserID",defaultUser.ID),
                                 new Claim(ClaimTypes.Email, _username),
                                 new Claim(ClaimTypes.Name, defaultUser.Name),
@@ -220,40 +222,45 @@ namespace EnglishPlatform.Controllers
                                 new Claim("Type", user.Type)};
 
 
-                        var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
-                        _ = new AuthenticationProperties
-                        {
-                            IsPersistent = true,
-                            ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
-                        };
-                        ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
+                            var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
+                            _ = new AuthenticationProperties
+                            {
+                                IsPersistent = true,
+                                ExpiresUtc = DateTime.UtcNow.AddMinutes(Cookies.ExpiresLogin)
+                            };
+                            ClaimsPrincipal claim = new ClaimsPrincipal(claimsIdentity);
 
-                        AccountLogEntity login = new AccountLogEntity()
+                            AccountLogEntity login = new AccountLogEntity()
+                            {
+                                IP = HttpContext.Connection.RemoteIpAddress.ToString(),
+                                AccountID = user.ID,
+                                Token = _token,
+                                IsRemember = IsRemmember,
+                                CreateDate = DateTime.Now
+                            };
+                            _logService.CreateQuery().InsertOne(login);
+                            await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
+                            return Json(new ReturnJsonModel
+                            {
+                                StatusCode = ReturnStatus.SUCCESS,
+                                StatusDesc = "OK",
+                                Location = $"{centerCode}/{user.Type}"
+                            });
+                        }
+                        else
                         {
-                            IP = HttpContext.Connection.RemoteIpAddress.ToString(),
-                            AccountID = user.ID,
-                            Token = _token,
-                            IsRemember = IsRemmember,
-                            CreateDate = DateTime.Now
-                        };
-                        _logService.CreateQuery().InsertOne(login);
-                        await _authenService.SignIn(HttpContext, claim, Cookies.DefaultLogin);
-                        return Json(new ReturnJsonModel
-                        {
-                            StatusCode = ReturnStatus.SUCCESS,
-                            StatusDesc = "OK",
-                            Location = $"{centerCode}/{user.Type}"
-                        }) ;
-                    }
-                    else
-                    {
-                        return Json(new ReturnJsonModel
-                        {
-                            StatusCode = ReturnStatus.ERROR,
-                            StatusDesc = "Tài khoản đang bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
-                        });
+                            return Json(new ReturnJsonModel
+                            {
+                                StatusCode = ReturnStatus.ERROR,
+                                StatusDesc = "Tài khoản đang bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
+                            });
+                        }
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                throw ex;
             }
         }
 
