@@ -133,7 +133,7 @@
                                                         string mota = "Chưa biên tập";
                                                         string view = "", update = "", add = "", delete = "", import = "", export = "", other = "", app = "";
                                                         AuthorityType currentType = AuthorityType.UNSET;
-                                                        if (_authorityService.IsExist("admin", ctrlName, act, out AuthorityEntity currentItem))
+                                                        if (_authorityService.IsExist("teacher", ctrlName, act, out AuthorityEntity currentItem))
                                                         {
                                                             mota = currentItem.Description;
                                                             currentType = currentItem.Type;
@@ -195,7 +195,7 @@
                                                         string mota = "Chưa biên tập";
                                                         string view = "", update = "", add = "", delete = "", import = "", export = "", other = "", app = "";
                                                         AuthorityType currentType = AuthorityType.UNSET;
-                                                        if (_authorityService.IsExist("admin", ctrlName, act, out AuthorityEntity currentItem))
+                                                        if (_authorityService.IsExist("student", ctrlName, act, out AuthorityEntity currentItem))
                                                         {
                                                             mota = currentItem.Description;
                                                             currentType = currentItem.Type;
