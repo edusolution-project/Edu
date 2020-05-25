@@ -9,7 +9,7 @@
     var exam = ViewBag.Exam as BaseCustomerMVC.Models.ExamReviewViewModel;
     ViewData["Title"] = currentLesson.Title;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl, Object param = null)
+    string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
 
@@ -146,8 +146,8 @@
         var config = {
             id: "exam-review",
             url: {
-                    exam: '@proccesUrl("Detail", "Lesson")',
-                    list: '@proccesUrl("Modules", "Course")',
+                    exam: '@processUrl("Detail", "Lesson")',
+                    list: '@processUrl("Modules", "Course")',
                 },
             lesson: @Html.Raw(Json.Serialize(currentLesson)),
             exam: @Html.Raw(Json.Serialize(exam))

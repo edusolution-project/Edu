@@ -2,7 +2,7 @@
     ViewData["Title"] = "Trang chủ - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl)
+    string processUrl(string act, string ctrl)
     {
         string url = Url.Action(act, ctrl);
 
@@ -31,17 +31,17 @@
         <div class="box mb-3">
             <div class="heading flex mb-2">
                 <h4 class="box-head">Bài giảng tuần này ({{lesson_week.length}})</h4>
-                <a href="@proccesUrl("Index","Class")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                <a href="@processUrl("Index","Class")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
             </div>
             <div class="box bg-1 padding-15">
                 <ul class="box list-scroll">
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <a :href="'@proccesUrl("Detail","Class")/' + item.classID + '#module'" :title="item.skill.Name" class="title"><h4 class="abc" :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
-                                <a :href="'@proccesUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.title" class="title">{{item.title}}</a>
+                                <a :href="'@processUrl("Detail","Class")/' + item.classID + '#module'" :title="item.skill.Name" class="title"><h4 class="abc" :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
-                                    <a :href="'@proccesUrl("Detail","Class")/' + item.classID" :title="item.className" class="title">{{item.className}}</a>
+                                    <a :href="'@processUrl("Detail","Class")/' + item.classID" :title="item.className" class="title">{{item.className}}</a>
                                     @*<p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>*@
                                     <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
                                 </div>
@@ -56,7 +56,7 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Lớp đang hoạt động</h4>
-                        <a href="@proccesUrl("Index","Class")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="@processUrl("Index","Class")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="box list-scroll">
@@ -67,7 +67,7 @@
                                         <img v-else src="/pictures/ielts1.png" alt="">
                                     </div>
                                     <div class="padding-15 inner">
-                                        <a :href="'@proccesUrl("Detail","Class")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
+                                        <a :href="'@processUrl("Detail","Class")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
                                         <div class="c-bot">
                                             <p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>
                                             <p><i class="ti-time"></i>{{formatDate(item.endDate)}}</p>
@@ -111,14 +111,14 @@
                 <div class="col-md-12 margin-b20">
                     <div class="heading flex">
                         <h4 class="box-head">Lớp đã kết thúc</h4>
-                        <a href="@proccesUrl("Index","Class")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="@processUrl("Index","Class")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
             <ul class="row">
                 <li class="col-md-4 less-done list" v-for="(item,k) in finish_course">
                     <div class="box radius">
-                        <a :href="'@proccesUrl("Detail","Class")/' + item.id" :title="item.title" class="flex">
+                        <a :href="'@processUrl("Detail","Class")/' + item.id" :title="item.title" class="flex">
                             <span class="per checked"><i class="ic ic-checked"></i></span>
                             <div class="info">
                                 <span>{{item.title}}</span>
@@ -165,7 +165,7 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
-                let _url = '@proccesUrl("GetActiveList", "Class")'
+                let _url = '@processUrl("GetActiveList", "Class")'
 
                 axios.post(_url, _form)
                     .then(response => {
@@ -182,7 +182,7 @@
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
                 _form.append('PageSize', 6)
                 _form.append('PageIndex', 1)
-                let _url = '@proccesUrl("GetFinishList", "Class")'
+                let _url = '@processUrl("GetFinishList", "Class")'
 
                 axios.post(_url, _form)
                     .then(response => {
@@ -197,7 +197,7 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
-                let _url = '@proccesUrl("GetThisWeekLesson", "Class")'
+                let _url = '@processUrl("GetThisWeekLesson", "Class")'
 
                 axios.post(_url, _form)
                     .then(response => {

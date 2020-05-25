@@ -4,7 +4,7 @@
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var myClasses = ViewBag.AllClass as List<BaseCustomerEntity.Database.ClassEntity>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl, Object param = null)
+    string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
 
@@ -157,7 +157,7 @@
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
 
-                    let _url = '@proccesUrl("GetList", "Reference")'
+                    let _url = '@processUrl("GetList", "Reference")'
 
                     axios.post(_url, _form)
                         .then(response => {
@@ -172,13 +172,13 @@
                 },
                 openLink(obj) {
                     obj.Viewed = obj.Viewed + 1;
-                    window.open('@proccesUrl("OpenLink", "Reference")/' + obj.ID);
+                    window.open('@processUrl("OpenLink", "Reference")/' + obj.ID);
                 },
                 download(obj) {
                     if (obj.Media == null)
                         return false;
                     obj.Downloaded = obj.Downloaded + 1;
-                    window.open('@proccesUrl("Download", "Reference")/' + obj.ID);
+                    window.open('@processUrl("Download", "Reference")/' + obj.ID);
                 },
                 domDecoder(str) {
                     let parser = new DOMParser();

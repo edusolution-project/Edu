@@ -44,7 +44,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             string code = User.FindFirst(ClaimTypes.Role)?.Value;
             if (!string.IsNullOrEmpty(code))
             {
-               ViewBag.Data = _service.GetItemByCode(code);
+                ViewBag.Data = _service.GetItemByCode(code);
             }
             ViewBag.Model = model;
             return View();
@@ -73,7 +73,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpGet]
         [Obsolete]
-        public JsonResult Get([FromQuery] DefaultModel model,[FromQuery] string code)
+        public JsonResult Get([FromQuery] DefaultModel model, [FromQuery] string code)
         {
             try
             {
@@ -81,13 +81,13 @@ namespace BaseCustomerMVC.Controllers.Admin
                 {
                     string parent = string.IsNullOrEmpty(code) ? User.FindFirst(ClaimTypes.Role)?.Value : code;
                     if (string.IsNullOrEmpty(model.SearchText)) model.SearchText = string.Empty;
-                    long count = _service.CreateQuery().Count(_=>true);
+                    long count = _service.CreateQuery().Count(_ => true);
                     if (count > 0)
                     {
                         if (parent != null && parent != "supperadmin" && parent != "superadmin")
                         {
                             var data = _service.CreateQuery().Find(o =>
-                            (string.IsNullOrEmpty(model.SearchText) || (o.Name.Contains(model.SearchText) || o.Code.Contains(model.SearchText))) && 
+                            (string.IsNullOrEmpty(model.SearchText) || (o.Name.Contains(model.SearchText) || o.Code.Contains(model.SearchText))) &&
                             (string.IsNullOrEmpty(model.ID) || o.ID == model.ID) && (parent != null && o.ParentID == parent) // chỉ lấy data từ thằng cha
                             )?.ToList();
                             if (data != null)
@@ -120,7 +120,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             try
             {
-                if(User != null && User.Identity.IsAuthenticated)
+                if (User != null && User.Identity.IsAuthenticated)
                 {
                     if (!string.IsNullOrEmpty(item.Name))
                     {
@@ -142,7 +142,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
                 return new JsonResult(new { code = 405, msg = "User not found", data = item });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new JsonResult(new { code = 500, msg = ex.Message, data = ex });
             }
@@ -156,15 +156,15 @@ namespace BaseCustomerMVC.Controllers.Admin
                 List<RoleEntity> success = new List<RoleEntity>();
                 if (User != null && User.Identity.IsAuthenticated)
                 {
-                    for(int i = 0; i < listItem.Count; i++)
+                    for (int i = 0; i < listItem.Count; i++)
                     {
                         var item = listItem[i];
                         if (!string.IsNullOrEmpty(item.Name))
                         {
                             item.UserCreate = User.FindFirst("UserID")?.Value;
                             item.CreateDate = DateTime.Now;
-                            string code = item.Name.ConvertUnicodeToCode("_",true);
-                            item.Code = code.Replace(@" ","_");
+                            string code = item.Name.ConvertUnicodeToCode("_", true);
+                            item.Code = code.Replace(@" ", "_");
                             if (_service.GetItemByCode(code) == null)
                             {
                                 _service.CreateNewRole(item);
@@ -172,9 +172,9 @@ namespace BaseCustomerMVC.Controllers.Admin
                             }
                         }
                     }
-                    return new JsonResult(new { code = 200, msg = "success" , data = success });
+                    return new JsonResult(new { code = 200, msg = "success", data = success });
                 }
-                return new JsonResult(new { code = 405, msg = "User not found"});
+                return new JsonResult(new { code = 405, msg = "User not found" });
             }
             catch (Exception ex)
             {
@@ -192,18 +192,18 @@ namespace BaseCustomerMVC.Controllers.Admin
                     if (!string.IsNullOrEmpty(id))
                     {
                         var item = _service.GetItemByID(id);
-                        if(item == null)
+                        if (item == null)
                         {
                             return new JsonResult(new { code = 404, msg = "Data not found" });
                         }
-                        if(item.Code == User.FindFirst(ClaimTypes.Role)?.Value || item.Code == "superadmin")
+                        if (item.Code == User.FindFirst(ClaimTypes.Role)?.Value || item.Code == "superadmin")
                         {
                             return new JsonResult(new { code = 405, msg = "Insufficient authority" });
                         }
                         _service.Remove(id);
                         return new JsonResult(new { code = 200, msg = "delete success", data = item });
                     }
-                    return new JsonResult(new { code = 305, msg = "id empty"});
+                    return new JsonResult(new { code = 305, msg = "id empty" });
                 }
                 return new JsonResult(new { code = 404, msg = "Data not found" });
             }
@@ -264,7 +264,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         {
                             return new JsonResult(new { code = 405, msg = "Insufficient authority" });
                         }
-                        var filter = Builders<RoleEntity>.Filter.Eq(o=>o.ID, item.ID);
+                        var filter = Builders<RoleEntity>.Filter.Eq(o => o.ID, item.ID);
                         var update = Builders<RoleEntity>.Update.Set(o => o.IsActive, !item.IsActive);
                         _service.CreateQuery().UpdateOne(filter, update);
                         return new JsonResult(new { code = 200, msg = "Approved success", data = item });
@@ -292,7 +292,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         var item = listItem[i];
 
                         var oldItem = _accessesService.CreateQuery().Find(o => o.Authority == item.Authority && o.RoleID == item.RoleID)?.ToList();
-                        if(oldItem == null || oldItem.Count == 0)
+                        if (oldItem == null || oldItem.Count == 0)
                         {
                             item.UserCreate = User.FindFirst("UserID")?.Value;
                             item.CreateDate = DateTime.Now;
@@ -327,9 +327,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
         }
 
-        private void UpdateAuthority(string key,Dictionary<string, string> permission)
+        private void UpdateAuthority(string key, Dictionary<string, string> permission)
         {
-            string keys = CacheExtends.DefaultPermission+"_"+key;
+            string keys = CacheExtends.DefaultPermission + "_" + key;
             ObjectCache cache = MemoryCache.Default;
             var data = cache.Get(keys);
             if (data != null)

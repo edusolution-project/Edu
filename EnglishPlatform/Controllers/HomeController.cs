@@ -111,7 +111,7 @@ namespace EnglishPlatform.Controllers
                         roleCode = "student";
                     }
 
-                    var role = roleCode != "student" ? _roleService.GetItemByID(roleCode): _roleService.GetItemByCode(roleCode);
+                    var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
                     var listAccess = _accessesService.GetAccessByRole(role.Code);
                     string key = $"{centerCode}_{roleCode}";
                     CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
@@ -193,20 +193,36 @@ namespace EnglishPlatform.Controllers
                             }
                             else
                             {
-                                if (tc != null)
+                                switch (Type)
                                 {
-                                    defaultUser = new UserModel(tc.ID, tc.FullName);
-                                    centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
-                                    roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
-                                }
-                                if (st != null)
-                                {
-                                    defaultUser = new UserModel(st.ID, st.FullName);
-                                    centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
-                                    roleCode = "student";
+                                    case "teacher":
+                                        if (tc != null)
+                                        {
+                                            defaultUser = new UserModel(tc.ID, tc.FullName);
+                                            centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
+                                            roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                        }
+                                        break;
+                                    case "student":
+                                        if (st != null)
+                                        {
+                                            defaultUser = new UserModel(st.ID, st.FullName);
+                                            centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                                            roleCode = "student";
+                                        }
+                                        break;
                                 }
 
-                                var role = roleCode != "student" ?_roleService.GetItemByID(roleCode): _roleService.GetItemByCode(roleCode);
+                                if (roleCode == "")
+                                {
+                                    return Json(new ReturnJsonModel
+                                    {
+                                        StatusCode = ReturnStatus.ERROR,
+                                        StatusDesc = "Tài khoản chưa được cấp quyền truy cập. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
+                                    });
+                                }
+
+                                var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
                                 var listAccess = _accessesService.GetAccessByRole(role.Code);
                                 string key = $"{centerCode}_{roleCode}";
                                 CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
@@ -260,7 +276,7 @@ namespace EnglishPlatform.Controllers
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }
@@ -451,7 +467,7 @@ namespace EnglishPlatform.Controllers
             }
             await HttpContext.SignOutAsync(Cookies.DefaultLogin);
             HttpContext.Remove(Cookies.DefaultLogin);
-            
+
             return RedirectToAction("Login");
         }
 
