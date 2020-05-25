@@ -85,13 +85,14 @@ namespace EnglishPlatform.Controllers
                 var center = _centerService.GetDefault();
                 string centerCode = center.Code;
                 string roleCode = "";
-                var tc = _teacherService.GetItemByID(User.FindFirst("UserID").Value);
-                var st = _studentService.GetItemByID(User.FindFirst("UserID").Value);
-                var user = _accountService.GetItemByID(User.FindFirst("UserID").Value);
+                string userID = User.FindFirst("UserID").Value;
+                var tc = _teacherService.GetItemByID(userID);
+                var st = _studentService.GetItemByID(userID);
+                var user = _accountService.GetItemByID(userID);
                 var defaultUser = new UserModel() { };
                 if (type.Value == ACCOUNT_TYPE.ADMIN)
                 {
-                    defaultUser = new UserModel(User.FindFirst("UserID").Value, "admin");
+                    defaultUser = new UserModel(userID, "admin");
                     centerCode = center.Code;
                     roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
                 }

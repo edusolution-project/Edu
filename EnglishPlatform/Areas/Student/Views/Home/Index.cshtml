@@ -3,6 +3,13 @@
     ViewData["Title"] = "Trang chủ - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var student = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl)
+    {
+        string url = Url.Action(act, ctrl);
+
+        return $"/{center}{url}";
+    }
 }
 @*<link href="~/css/calendar/core.css" rel="stylesheet" />
     <link href="~/css/calendar/daygrid.css" rel="stylesheet" />
@@ -35,17 +42,17 @@
         <div class="box mb-3">
             <div class="heading flex mb-2">
                 <h4 class="box-head">Bài học tuần này ({{lesson_week.length}})</h4>
-                @*<a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
+                @*<a href="@proccesUrl("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
             </div>
             <div class="box bg-1 padding-15">
                 <ul class="box list-scroll">
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner" v-if="validDate(item)">
-                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
-                                <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title">{{item.title}}</a>
+                                <a :href="'@proccesUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@proccesUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
-                                    <a :href="'@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.className" class="title">{{item.className}}</a>
+                                    <a :href="'@proccesUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.className" class="title">{{item.className}}</a>
                                     <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
                                     <div class="flex">
                                         <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
@@ -73,19 +80,19 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Môn học đang diễn ra</h4>
-                        <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="@proccesUrl("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in active_course">
-                                <a :href="'@Url.Action("Modules","Course")/' + item.id" :title="item.courseName">
+                                <a :href="'@proccesUrl("Modules","Course")/' + item.id" :title="item.courseName">
                                     <div class="box radius">
                                         <div class="thumb">
                                             <img v-if="item.thumb" :src="item.thumb" alt="">
                                             <img v-else src="/pictures/ielts1.png" alt="">
                                         </div>
                                         <div class="padding-15 inner">
-                                            <a :href="'@Url.Action("Modules","Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
+                                            <a :href="'@proccesUrl("Modules","Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
                                             <p><i class="ti-time"></i>{{formatShortDate(item.endDate)}}</p>
                                             <div class="c-bot">
                                                 <div class="flex reverse">
@@ -135,13 +142,13 @@
             <div class="col-md-12 margin-b20">
                 <div class="heading flex">
                     <h4 class="box-head">Lớp học đã kết thúc</h4>
-                    <a href="@Url.Action("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                    <a href="@proccesUrl("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                 </div>
             </div>
             <ul class="row">
                 <li class="col-md-4 less-done list" v-for="(item,k) in finish_course">
                     <div class="box radius">
-                        <a :href="'@Url.Action("Detail", "Course")/' + item.id" class="flex">
+                        <a :href="'@proccesUrl("Detail", "Course")/' + item.id" class="flex">
                             <span class="per">{{item.per + '%'}}</span>
                             <div class="info">
                                 <span>{{item.title}}</span>
@@ -187,7 +194,7 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
-                let _url = '@Url.Action("GetActiveListV2", "Course")'
+                let _url = '@proccesUrl("GetActiveListV2", "Course")'
 
                 axios.post(_url, _form)
                     .then(response => {
@@ -204,7 +211,7 @@
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
                 _form.append('PageSize', 6)
                 _form.append('PageIndex', 1)
-                let _url = '@Url.Action("GetFinishList", "Course")'
+                let _url = '@proccesUrl("GetFinishList", "Course")'
 
                 axios.post(_url, _form)
                     .then(response => {
@@ -219,7 +226,7 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
-                let _url = '@Url.Action("GetThisWeekLesson", "Course")'
+                let _url = '@proccesUrl("GetThisWeekLesson", "Course")'
 
                 axios.post(_url, _form)
                     .then(response => {
@@ -280,7 +287,7 @@
                     });
                 }
                 else {
-                    document.location = '@Url.Action("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID
+                    document.location = '@proccesUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID
                 }
             },
         }

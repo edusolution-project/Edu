@@ -239,7 +239,7 @@ var ExamReview = (function () {
             var title = '<div class="part-box-header pl-3 pr-3"><h5 class="title">' + data.Title + '</h5></div>';
         }
         var html = "<div class='part-column'>" + title + '<div class="content-wrapper p-3">';
-        html += '<div class="doc-content">' + data.Description + '</div>';
+        html += '<div class="doc-content">' + data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '</div>';
         html += '</div></div>';
         return html;
     }
@@ -297,7 +297,7 @@ var ExamReview = (function () {
         if (data.Title != null)
             html += '<h5 class="title">' + data.Title + '</h5 >';
         if (data.Description != null)
-            html += '<div class="description">' + data.Description + '</div>';
+            html += '<div class="description">' + data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '</div>';
         html += renderMedia(data.Media) + toggleButton + '</div></div>';
         html += '<div class="col-md-6 d-inline-block align-top h-100"><div class="quiz-wrapper part-column">';
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -334,7 +334,7 @@ var ExamReview = (function () {
             html += '</div>';
             var description = "";
             if (item.Description != null)
-                description = item.Description.replace(/\n/g, '<br/>');
+                description = item.Description.replace(/\n/g, '<br/>').replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn");
             html += '<div class="explaination d-none text-info p-3"><i>' + description + '</i></div>';
             html += '</div></div>';
         }
@@ -350,7 +350,7 @@ var ExamReview = (function () {
         if (data.Title != null)
             html += '<h5 class="title">' + data.Title + '</h5 >';
         if (data.Description != null)
-            html += '<div class="description">' + data.Description + '</div>';
+            html += '<div class="description">' + data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '</div>';
         html += renderMedia(data.Media) + toggleButton + '</div></div>';
         html += '<div class="col-md-6 d-inline-block align-top h-100"><div class="quiz-wrapper part-column">';
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -372,7 +372,7 @@ var ExamReview = (function () {
             html += '</fieldset>';
             var description = "";
             if (item.Description != null)
-                description = item.Description.replace(/\n/g, '<br/>');
+                description = item.Description.replace(/\n/g, '<br/>').replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn");
             html += '<div class="explaination d-none text-info p-3"><i>' + description + '</i></div>';
             html += '</div></div>';
         }
@@ -387,7 +387,7 @@ var ExamReview = (function () {
         if (data.Title != null)
             html += '<h5 class="title">' + data.Title + '</h5 >';
         if (data.Description != null)
-            html += '<div class="description">' + data.Description + '</div>';
+            html += '<div class="description">' + data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '</div>';
         html += renderMedia(data.Media) + toggleButton + '</div></div>';
         html += '<div class="col-md-6 d-inline-block align-top h-100 p-0">';
         html += '<div class="h-100 align-top p-0"><div class="quiz-wrapper align-top part-column">';
@@ -421,7 +421,7 @@ var ExamReview = (function () {
             html += answers + '</div>';
             var description = "";
             if (item.Description != null)
-                description = item.Description.replace(/\n/g, '<br/>');
+                description = item.Description.replace(/\n/g, '<br/>').replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn");
             html += '<div class="explaination d-none text-info p-3"><i>' + description + '</i></div>';
             html += '</div>';
 
@@ -446,13 +446,13 @@ var ExamReview = (function () {
         if (data == null || data == void 0 || data == "") return "";
         var arr = data.Extension.split('/');
         if (arr.includes("video")) {
-            return '<div class="media-holder "><video controls=""><source src="' + data.Path + '" type="' + data.Extension + '">Your browser does not support the video tag</video></div>';
+            return '<div class="media-holder "><video controls=""><source src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")  + '" type="' + data.Extension + '">Your browser does not support the video tag</video></div>';
         }
         if (arr.includes("audio")) {
-            return '<div class="media-holder "><audio controls=""><source src="' + data.Path + '" type="' + data.Extension + '">Your browser does not support the audio tag</audio></div>'
+            return '<div class="media-holder "><audio controls=""><source src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" type="' + data.Extension + '">Your browser does not support the audio tag</audio></div>'
         }
         if (arr.includes("image")) {
-            return '<div class="media-holder "><img src="' + data.Path + '" class="img-fluid lazy" title="' + data.Name + '"></div>';
+            return '<div class="media-holder "><img src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" class="img-fluid lazy" title="' + data.Name + '"></div>';
         }
         return "";
     }

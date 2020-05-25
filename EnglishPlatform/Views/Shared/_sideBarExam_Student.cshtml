@@ -2,6 +2,13 @@
     var Data = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     var ClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 
 <style>
@@ -274,11 +281,11 @@
     <div class="menu-bar w-100">
         <ul class="d-flex p-0 m-0 h-100 align-items-center">
             <li for="home" class="top-menu">
-                <a href="@Url.Action("Index", "Home")" title="Trang chủ"><i class="ic fas fa-home"></i>Trang chủ</a>
+                <a href="@proccesUrl("Index", "Home")" title="Trang chủ"><i class="ic fas fa-home"></i>Trang chủ</a>
             </li>
             <i class="fa fa-chevron-left mt-1"></i>
             <li for="class" class="top-menu">
-                <a href="@Url.Action("Detail", "Course")/@Class.ID#module" title="@Class.Name">@Class.Name</a>
+                <a href="@proccesUrl("Detail", "Course")/@Class.ID#module" title="@Class.Name">@Class.Name</a>
             </li>
             <i class="fa fa-chevron-left mt-1 mr-1"></i>
             <li for="path_menu" class="top-menu" style="width:130px;">
@@ -310,7 +317,7 @@
         renderMenu(currentLesson.ChapterID, true);
     });
 
-    var dataUrl = '@Url.Action("GetContents","ClassSubject")';
+    var dataUrl = '@proccesUrl("GetContents","ClassSubject")';
 
     var renderMenu = function (parentID, init) {
 
@@ -367,7 +374,7 @@
                         var lessonPath = $('#les_nav_' + lesson.ID);
                         if (lessonPath.length == 0) {
                             lessonPath =
-                                $("<a>", { id: 'les_nav_' + lesson.ID, title: lesson.Title, href: '@Url.Action("Detail","Lesson")/' + lesson.ID + '/' + '@ClassSubject.ID' }).append(
+                                $("<a>", { id: 'les_nav_' + lesson.ID, title: lesson.Title, href: '@proccesUrl("Detail","Lesson")/' + lesson.ID + '/' + '@ClassSubject.ID' }).append(
                                     $("<li>", {
                                         class: 'les_nav',
                                     }).append($("<i>", { class: "far fa-file-alt mr-1" }))

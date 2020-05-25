@@ -5,6 +5,13 @@
     var listClass = ViewBag.ClassList as List<ClassEntity>;
     var currentTeacher = ViewBag.CurrentTeacher as TeacherEntity;
     string ZoomUrl = "";
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 
 <link href="~/css/calendar/core.css" rel="stylesheet" />
@@ -148,7 +155,7 @@
     <script>
         var EduCalendar = new EduCalendar();
         EduCalendar.useEduTemplateTeacher().loadConfig({
-            url: "@Url.Action("GetList","Calendar")",
+            url: "@proccesUrl("GetList","Calendar")",
             type: "teacher",
             isDev: !1,
             height: "parent",
@@ -164,7 +171,7 @@
             else return ((next - now) / 6000 > min) && ((next - now) / 6000 < max);
         }
         var getEventDetails = function (id,skype) {
-            EduCalendar.schedule.Ajax.PostAny("@Url.Action("GetDetail","Calendar")?id=" + id, null).then(function (data) {
+            EduCalendar.schedule.Ajax.PostAny("@proccesUrl("GetDetail","Calendar")?id=" + id, null).then(function (data) {
                 if (data != null) {
                     var jsonData = JSON.parse(data);
 
@@ -519,7 +526,7 @@
             newFormData.append("StartDate", `${date.value} ${timeEvent}`);
             newFormData.append("EndDate", `${date.value} ${timeEvent}`);
             newFormData.append("GroupID", '@User.FindFirst("UserID")?.Value');
-            EduCalendar.schedule.Ajax.PostAny("@Url.Action("Create","Calendar")", newFormData).then(function (data) {
+            EduCalendar.schedule.Ajax.PostAny("@proccesUrl("Create","Calendar")", newFormData).then(function (data) {
                 if (data != null) {
                     var dataJson = JSON.parse(data);
                     if (dataJson.code == 201) {
@@ -600,7 +607,7 @@
                 newFormData.append("StartDate", `${date.value} ${timeEvent}`);
                 newFormData.append("EndDate", `${date.value} ${timeEvent}`);
                 newFormData.append("GroupID", classID);
-                EduCalendar.schedule.Ajax.PostAny("@Url.Action("Create","Calendar")", newFormData).then(function (data) {
+                EduCalendar.schedule.Ajax.PostAny("@proccesUrl("Create","Calendar")", newFormData).then(function (data) {
                     if (data != null) {
                         var dataJson = JSON.parse(data);
                         if (dataJson.code == 201) {
@@ -656,7 +663,7 @@
                     var formEvent = document.getElementById("form-event");
                     var bodyEvent = formEvent.querySelector(".body-form-event");
                     var id = bodyEvent.querySelector("input[name='ID']").value;
-                    EduCalendar.schedule.Ajax.PostAny("@Url.Action("Delete","Calendar")?id=" + id, null).then(function (data) {
+                    EduCalendar.schedule.Ajax.PostAny("@proccesUrl("Delete","Calendar")?id=" + id, null).then(function (data) {
                         if (data == true || data == "true") {
 
                             var event = EduCalendar.schedule.EduCalendar.getEventById(id);
@@ -693,7 +700,7 @@
                     var formEvent = document.getElementById("form-event-class");
                     var bodyEvent = formEvent.querySelector(".body-form-event");
                     var id = bodyEvent.querySelector("input[name='ID']").value;
-                    EduCalendar.schedule.Ajax.PostAny("@Url.Action("Delete","Calendar")?id=" + id, null).then(function (data) {
+                    EduCalendar.schedule.Ajax.PostAny("@proccesUrl("Delete","Calendar")?id=" + id, null).then(function (data) {
                         if (data == true || data == "true") {
 
                             var event = EduCalendar.schedule.EduCalendar.getEventById(id);

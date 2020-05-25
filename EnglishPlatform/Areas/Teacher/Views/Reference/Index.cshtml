@@ -4,6 +4,13 @@
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var myClasses = ViewBag.AllClass as List<BaseCustomerEntity.Database.ClassEntity>;
     var owner = ViewBag.User as string;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 
 <script src="/libs/quill-editor/quill.min.js"></script>
@@ -166,7 +173,7 @@
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
 
-                    let _url = '@Url.Action("GetList", "Reference")'
+                    let _url = '@proccesUrl("GetList", "Reference")'
 
                     axios.post(_url, _form)
                         .then(response => {
@@ -207,13 +214,13 @@
                 },
                 openLink(obj) {
                     obj.Viewed = obj.Viewed + 1;
-                    window.open('@Url.Action("OpenLink", "Reference")/' + obj.ID);
+                    window.open('@proccesUrl("OpenLink", "Reference")/' + obj.ID);
                 },
                 download(obj) {
                     if (obj.Media == null)
                         return false;
                     obj.Downloaded = obj.Downloaded + 1;
-                    window.open('@Url.Action("Download", "Reference")/' + obj.ID);
+                    window.open('@proccesUrl("Download", "Reference")/' + obj.ID);
                 },
                 updateData() {
                     let _that = this
@@ -242,7 +249,7 @@
                     }
 
 
-                    let _url = '@Url.Action("Save", "Reference")'
+                    let _url = '@proccesUrl("Save", "Reference")'
                     axios.post(_url, _form)
                         .then(response => {
                             if (response.Error == null) {
@@ -278,7 +285,7 @@
                         if (result.value == true) {
                             let _form = new FormData()
                             _form.append('ID', obj.ID)
-                            let _url = '@Url.Action("Remove", "Reference")'
+                            let _url = '@proccesUrl("Remove", "Reference")'
                             axios.post(_url, _form)
                                 .then(response => {
                                     if (response.Error == null) {

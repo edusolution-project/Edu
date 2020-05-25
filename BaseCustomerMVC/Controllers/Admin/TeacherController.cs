@@ -57,7 +57,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             ViewBag.Subject = _subjectService.GetAll().ToList();
             var roleList = new List<string> { "teacher", "head-teacher" };
-            ViewBag.Roles = _roleService.CreateQuery().Find(o => roleList.Contains(o.Code)).ToList();
+            ViewBag.Roles = _roleService.GetAll().ToList();
+                //.Find(o => roleList.Contains(o.Code)).ToList();
             ViewBag.Centers = _centerService.GetAll().ToList();
             ViewBag.Model = model;
             return View();

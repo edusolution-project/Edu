@@ -3,6 +3,13 @@
     var currentClass = ViewBag.Class as BaseCustomerMVC.Models.ClassViewModel;
     ViewData["Title"] = currentClass.Name;
     string userid = ViewBag.UserID;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 <script>
     setActiveMenu("class");
@@ -14,7 +21,7 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex pb-2">
-            <h2 class="title"><a href="@Url.Action("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}</h2>
+            <h2 class="title"><a href="@proccesUrl("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}</h2>
             <div class="c-right">
                 <ul class="time-line flex">
                     <li><i class="ti-time"></i>Bắt đầu: {{formatShortDate(startDate)}} </li>
@@ -59,12 +66,12 @@
                 <div class="box">
                     <div class="inner">
                         <span class="ic ic-headphone" :style="'background-image:url(' + item.Image + ')'"></span>
-                        <a :href="'@Url.Action("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">{{item.Title}}</a>
+                        <a :href="'@proccesUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">{{item.Title}}</a>
                         <span class="name center">
                             {{item.Grade}}<br />
                             GV: {{item.Teacher}}
                         </span>
-                        <a :href="'@Url.Action("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
+                        <a :href="'@proccesUrl("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
                     </div>
                 </div>
             </div>
@@ -202,7 +209,7 @@
                     let _that = this
                     let _form = new FormData()
                     _form.append('ID', _that.classID)
-                    let _url = '@Url.Action("GetDetail", "Class")'
+                    let _url = '@proccesUrl("GetDetail", "Course")'
                     axios.post(_url, _form)
                         .then(response => {
                         var _data = response.data.Data;
@@ -218,7 +225,8 @@
                     }).catch(e => { })
                 },
                 loadComment() {
-                    document.location = '@Url.Action("Index","Discuss", new { id = currentClass.ID })'
+                    //document.location = '#comment'
+                    $('.fn-box-chat-eduso').focus().click()
                 },
 
                 //MODULES
@@ -229,7 +237,7 @@
 
                     let _form = new FormData()
                     _form.append('ClassID', _that.classID)
-                    let _url = '@Url.Action("GetClassSubjects", "ClassSubject")'
+                    let _url = '@proccesUrl("GetClassSubjects", "ClassSubject")'
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
@@ -271,7 +279,7 @@
                     _form.append('PageSize', _that.ref.view)
                     _form.append('PageIndex', _that.ref.page)
 
-                    let _url = '@Url.Action("GetClassList", "Reference")'
+                    let _url = '@proccesUrl("GetClassList", "Reference")'
 
                     axios.post(_url, _form)
                         .then(response => {
@@ -286,13 +294,13 @@
                 },
                 openLink(obj) {
                     obj.Viewed = obj.Viewed + 1;
-                    window.open('@Url.Action("OpenLink", "Reference")/' + obj.ID);
+                    window.open('@proccesUrl("OpenLink", "Reference")/' + obj.ID);
                 },
                 download(obj) {
                     if (obj.Media == null)
                         return false;
                     obj.Downloaded = obj.Downloaded + 1;
-                    window.open('@Url.Action("Download", "Reference")/' + obj.ID);
+                    window.open('@proccesUrl("Download", "Reference")/' + obj.ID);
                 },
 
                 //SUPPORT

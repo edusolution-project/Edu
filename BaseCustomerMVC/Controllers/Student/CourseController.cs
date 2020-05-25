@@ -459,7 +459,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         [System.Obsolete]
         [HttpPost]
-        public JsonResult GetDetails(string CourseID, string ClassID)
+        public JsonResult GetDetail(string CourseID, string ClassID)
         {
             try
             {
@@ -481,9 +481,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 var respone = new Dictionary<string, object>
                 {
                     { "Data",
-
-
-
                         DataResponse.Select(
                         o=> _mapping.AutoOrtherType(o,new LessonScheduleViewModel(){
                                 IsActive = _lessonScheduleService.GetItemByID(ClassID) == null ? false: _lessonScheduleService.GetItemByID(ClassID).IsActive,

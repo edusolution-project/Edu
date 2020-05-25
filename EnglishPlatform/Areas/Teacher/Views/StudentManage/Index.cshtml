@@ -9,6 +9,13 @@
     var listClass = ViewBag.Classes as List<BaseCustomerEntity.Database.ClassEntity>;
     var user = ViewBag.User as string;
     var hasManageRole = (bool)(ViewBag.Managable ?? false);
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 <script>
     setActiveMenu("student");
@@ -65,8 +72,8 @@
                 <tr v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td>
-                        <a :href="'@Url.Action("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName" v-if="item.ClassID != null">{{item.FullName}}</a>
-                        <a :href="'@Url.Action("Detail", "StudentManage")/' + item.ID" :title="item.FullName" v-else="item.ClassID != null">{{item.FullName}}</a>
+                        <a :href="'@proccesUrl("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName" v-if="item.ClassID != null">{{item.FullName}}</a>
+                        <a :href="'@proccesUrl("Detail", "StudentManage")/' + item.ID" :title="item.FullName" v-else="item.ClassID != null">{{item.FullName}}</a>
                     </td>
                     <td>{{item.ClassName}}</td>
                     <td>{{item.Email}}</td>
@@ -380,7 +387,7 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('SearchText', _that.searchTerm)
 
-                    let _url = '@Url.Action("GetList", "StudentManage")'
+                    let _url = '@proccesUrl("GetList", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.tableData = response.data.Data;
@@ -398,11 +405,11 @@
                         _form.append('PageSize', 500)
                         @if(!User.IsInRole("head-teacher"))
                         {
-                            @:let _url = '@Url.Action("GetClassList", "Class")'
+                            @:let _url = '@proccesUrl("GetClassList", "Class")'
                         }
                         else
                         {
-                            @:let _url = '@Url.Action("GetManageList", "Class")'
+                            @:let _url = '@proccesUrl("GetManageList", "Class")'
                         }
                         axios.post(_url, _form)
                             .then(response => {
@@ -457,7 +464,7 @@
                             if (_that.loadedTermsST.filter(item => item.term.indexOf(term) > -1).length == 0) {
                                 let _form = new FormData()
                                 _form.append('term', term)
-                                let _url = '@Url.Action("Search","StudentManage")'
+                                let _url = '@proccesUrl("Search","StudentManage")'
                                 axios.post(_url, _form)
                                     .then(response => {
                                         var data = []
@@ -516,7 +523,7 @@
                     _form.append('ClassID', _that.add_student.class_id)
                     _form.append('StudentID', _that.add_student.id)
                     _that.isLoading = true
-                    let _url = '@Url.Action("AddStudent", "StudentManage")'
+                    let _url = '@proccesUrl("AddStudent", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.isLoading = false
@@ -552,7 +559,7 @@
                     _form.append('ClassID', _that.add_student.class_id)
                     _form.append('fileUpload', _that.uploadfile.file)
                     _that.isLoading = true
-                    let _url = '@Url.Action("ImportStudent", "StudentManage")'
+                    let _url = '@proccesUrl("ImportStudent", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.isLoading = false
@@ -584,7 +591,7 @@
                     let _form = new FormData()
                     _form.append('ClassID', student.ClassID)
                     _form.append('StudentID', student.ID)
-                    let _url = '@Url.Action("RemoveStudent", "StudentManage")'
+                    let _url = '@proccesUrl("RemoveStudent", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             if (response.data.error != null) {
@@ -605,7 +612,7 @@
                     this.uploadfile.file = event.target.files[0]
                 },
                 downloadTemplate() {
-                    window.open("@Url.Action("ExportTemplate", "StudentManage")");
+                    window.open("@proccesUrl("ExportTemplate", "StudentManage")");
                 }
             }
         });

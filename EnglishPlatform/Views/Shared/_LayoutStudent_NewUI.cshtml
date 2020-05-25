@@ -1,5 +1,13 @@
 ﻿<!DOCTYPE html>
+@{ 
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl)
+    {
+        string url = Url.Action(act, ctrl);
 
+        return $"/{center}{url}";
+    }
+}
 <html>
 
 <head>
@@ -217,8 +225,8 @@
                 tableDetail.children[5].children[1].classList.remove(clLoadMore);
                 tableDetail.children[6].children[1].classList.remove(clLoadMore);
 
-                _ajax.proccess("GET", "@Url.Action("GetList","Calendar")?start=" + formatDateTime(start,1) + "&end=" + formatDateTime(end,1), {}).then(function (data) {
-                    console.log(data);
+                _ajax.proccess("GET", "@proccesUrl("GetList","Calendar")?start=" + formatDateTime(start,1) + "&end=" + formatDateTime(end,1), {}).then(function (data) {
+                    //console.log(data);
                     if (data != null) {
                         var dataJson = JSON.parse(data);
                         if (dataJson != {} && dataJson.length > 0) {

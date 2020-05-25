@@ -3,6 +3,13 @@
     var currentCs = ViewBag.ClassSubject as BaseCustomerMVC.Models.ClassSubjectViewModel;
     //var completePercent = (int)ViewBag.CompletePercent;
     ViewData["Title"] = currentCs.SkillName + " - " + currentCs.ClassName;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 
 <script>
@@ -16,7 +23,7 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex border-b pb-2">
-            <h2 class="title"><a href="@Url.Action("Detail", "Course")/@currentCs.ClassID#module" title="@currentCs.ClassName" class="text-dark"><i class="ti-arrow-left d-none"></i>@currentCs.ClassName</a> / <span class="end-break">@currentCs.SkillName (@currentCs.CompletedLesssons/@currentCs.TotalLessons)</span></h2>
+            <h2 class="title"><a href="@proccesUrl("Detail", "Course")/@currentCs.ClassID#module" title="@currentCs.ClassName" class="text-dark"><i class="ti-arrow-left d-none"></i>@currentCs.ClassName</a> / <span class="end-break">@currentCs.SkillName (@currentCs.CompletedLesssons/@currentCs.TotalLessons)</span></h2>
             <div class="c-right bad">
                 <div class="flex">
                     <b-progress :value="@currentCs.CompletedLesssons" :max="@currentCs.TotalLessons" class="mb-3"></b-progress>
@@ -99,7 +106,7 @@
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice d-flex flex-column" :id="lesson.ID">
             <div class="d-flex justify-content-between w-100 align-items-center">
-                <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-on:click.prevent="GoLesson(lesson.ID)" class="text-dark font-weight-bold"><i class="ic far fa-file-alt mr-2"></i>{{lesson.Title}}</a>
+                <a :href="'@proccesUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-on:click.prevent="GoLesson(lesson.ID)" class="text-dark font-weight-bold"><i class="ic far fa-file-alt mr-2"></i>{{lesson.Title}}</a>
                 <ul class="time-line flex">
                     <li v-if="isValidTime(lesson.StartDate)"><i class="ti-time"></i>{{formatTime(lesson.StartDate)}} </li>
                     <li v-if="isValidTime(lesson.EndDate)"><i class="ti-time"></i>{{formatTime(lesson.EndDate)}} </li>
@@ -113,22 +120,22 @@
                         <a title="HẾT HẠN" class="btn-act act ml-0 bg-secondary pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" v-else v-on:click="lockNotify(lesson,0)">HẾT HẠN</a>
                     </template>
                     <template v-else-if="lesson.Tried > 0">
-                        <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="lesson.LastExam != null" class="btn-act act ml-0 bg-success pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" title="ĐÃ LÀM">ĐÃ LÀM</a>
-                        <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-else class="btn-act act ml-0 bg-warning pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" title="ĐANG LÀM">ĐANG LÀM</a>
+                        <a :href="'@proccesUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="lesson.LastExam != null" class="btn-act act ml-0 bg-success pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" title="ĐÃ LÀM">ĐÃ LÀM</a>
+                        <a :href="'@proccesUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-else class="btn-act act ml-0 bg-warning pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" title="ĐANG LÀM">ĐANG LÀM</a>
                     </template>
                     <template v-else>
-                        <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="Làm bài" class="btn-act act ml-0 bg-info pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;">CHƯA LÀM</a>
+                        <a :href="'@proccesUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="Làm bài" class="btn-act act ml-0 bg-info pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;">CHƯA LÀM</a>
                     </template>
                     <div v-if="isValidTime(lesson.LastJoin)"  class="text-muted ml-2" style="font-size:90%">
                         @*<span>Làm bài lần cuối</span>*@
                         <span>{{formatTime(lesson.LastJoin)}}</span> - @*Kết quả:*@
                         <span class="bg-transparent text-primary font-weight-bold" v-bind:class="{'text-danger' : parseInt(lesson.DoPoint) < 50, 'text-success' : parseInt(lesson.DoPoint) > 70}">{{lesson.DoPoint.toFixed(2)}}%</span>
                     </div>
-                    <a v-if="lesson.Tried > 0 && lesson.LastExam != null" :href="'@Url.Action("Review", "Lesson")/' + lesson.LastExam" title="Xem đáp án" class="pt-0 pb-0 pl-2 pr-2 ml-1 text-muted" style="min-width:unset; font-size: 90%;"> (Xem đáp án)</a>
+                    <a v-if="lesson.Tried > 0 && lesson.LastExam != null" :href="'@proccesUrl("Review", "Lesson")/' + lesson.LastExam" title="Xem đáp án" class="pt-0 pb-0 pl-2 pr-2 ml-1 text-muted" style="min-width:unset; font-size: 90%;"> (Xem đáp án)</a>
                 </template>
                 <template v-else>
-                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="isValidTime(lesson.LastJoin)" title="ĐÃ HỌC" class="btn-act act ml-0 bg-success pt-0 pb-0 pl-2 pr-2" style=" min-width:unset; font-size:60%;">ĐÃ HỌC</a>
-                    <a :href="'@Url.Action("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-else title="CHƯA HỌC" class="btn-act act ml-0 pt-0 pb-0 pl-2 pr-2 bg-info" style="font-size:60%; min-width: unset;">CHƯA HỌC</a>
+                    <a :href="'@proccesUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-if="isValidTime(lesson.LastJoin)" title="ĐÃ HỌC" class="btn-act act ml-0 bg-success pt-0 pb-0 pl-2 pr-2" style=" min-width:unset; font-size:60%;">ĐÃ HỌC</a>
+                    <a :href="'@proccesUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-else title="CHƯA HỌC" class="btn-act act ml-0 pt-0 pb-0 pl-2 pr-2 bg-info" style="font-size:60%; min-width: unset;">CHƯA HỌC</a>
                     <div v-if="isValidTime(lesson.LastJoin)" class="text-muted" style="font-size:90%">
                         @*<span class="ml-2">Học lần cuối: </span>*@
                         <span class="ml-2">{{formatTime(lesson.LastJoin)}}</span>
@@ -198,7 +205,7 @@
                 let _that = this
                 let _form = new FormData()
                 _form.append('ID', '@currentCs.ID')
-                let _url = '@Url.Action("GetMainChapters", "Course")'
+                let _url = '@proccesUrl("GetMainChapters", "Course")'
                 axios.post(_url, _form)
                     .then(response => {
                         //console.log(response.data.Data)
@@ -232,7 +239,7 @@
                     //_that.list_data[pos].Name = _that.list_data[pos].Name + "...";
                     _form.append('ID', '@currentCs.ID')
                     _form.append('ChapterID', chapterId)
-                    let _url = '@Url.Action("GetChapterContent", "Lesson")'
+                    let _url = '@proccesUrl("GetChapterContent", "Lesson")'
                     axios.post(_url, _form)
                         .then(response => {
                             var chapters = response.data.Data.Chapters;
@@ -286,7 +293,7 @@
             },
             goLesson(ID) {
                 var state = {};
-                var url = '@Url.Action("Detail", "Lesson")/' + ID + '/@currentCs.ID'
+                var url = '@proccesUrl("Detail", "Lesson")/' + ID + '/@currentCs.ID'
                 history.replaceState(state, document.title, '#' + ID);
                 document.location.href = url;
             }

@@ -2,8 +2,16 @@
 @model BaseCustomerEntity.Database.StudentEntity ;
 
 @{
+
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     ViewData["Title"] = "Cập nhật thông tin";
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl)
+    {
+        string url = Url.Action(act, ctrl);
+
+        return $"/{center}{url}";
+    }
 }
 
 
@@ -135,7 +143,7 @@
                     //console.log(s);
                 },
                 getProfile() {
-                     let _url = '@Url.Action("GetProfile","Home")'
+                     let _url = '@proccesUrl("GetProfile","Home")'
                      axios.get(_url)
                          .then(response =>{
                              //console.log(response.data);
@@ -149,7 +157,7 @@
                     //this.avatar.file = this.profile.avatar
                 },
                 updateProfile() {
-                    let _url = '@Url.Action("SaveProfile","Home")'
+                    let _url = '@proccesUrl("SaveProfile","Home")'
                     let _form = new FormData()
                     _form.append("FullName", this.profile.FullName);
                     _form.append("Phone", this.profile.Phone);
@@ -172,7 +180,7 @@
                         }).catch(e => { })
                 },
                 updatePassword() {
-                    let _url = '@Url.Action("ChangePassword","Home")'
+                    let _url = '@proccesUrl("ChangePassword","Home")'
                     let _form = new FormData()
                     _form.append("oldpass", this.password_old);
                     _form.append("newpass", this.password_new);
