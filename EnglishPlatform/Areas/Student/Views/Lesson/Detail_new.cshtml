@@ -9,7 +9,7 @@
     var currentChapter = ViewBag.Chapter as BaseCustomerEntity.Database.ChapterEntity;
     ViewData["Title"] = currentLesson.Title;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl, Object param = null)
+    string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
 
@@ -59,13 +59,13 @@
                 container: "exam-student",
                 mod: @Html.Raw(currentLesson.TemplateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM ? "mod.STUDENT_EXAM" : "mod.STUDENT_LECTURE"),
                 url: {
-                    load: '@proccesUrl("GetLesson", "Lesson")',
-                    current: '@proccesUrl("GetCurrentExam", "Exam")',
-                    start: '@proccesUrl("Create", "Exam")',
-                    answer: '@proccesUrl("CreateDetail", "Exam")',
-                    removeans: '@proccesUrl("RemoveDetail", "Exam")',
-                    end: '@proccesUrl("CompleteExam", "Exam")',
-                    review: '@proccesUrl("Review","Lesson")'
+                    load: '@processUrl("GetLesson", "Lesson")',
+                    current: '@processUrl("GetCurrentExam", "Exam")',
+                    start: '@processUrl("Create", "Exam")',
+                    answer: '@processUrl("CreateDetail", "Exam")',
+                    removeans: '@processUrl("RemoveDetail", "Exam")',
+                    end: '@processUrl("CompleteExam", "Exam")',
+                    review: '@processUrl("Review","Lesson")'
                 },
                 type: @currentLesson.TemplateType,
                 lesson_id: '@currentLesson.ID',

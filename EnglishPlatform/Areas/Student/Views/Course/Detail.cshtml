@@ -4,7 +4,7 @@
     ViewData["Title"] = currentClass.Name;
     string userid = ViewBag.UserID;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl, Object param = null)
+    string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
 
@@ -21,7 +21,7 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex pb-2">
-            <h2 class="title"><a href="@proccesUrl("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}</h2>
+            <h2 class="title"><a href="@processUrl("Index","Course")" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}</h2>
             <div class="c-right">
                 <ul class="time-line flex">
                     <li><i class="ti-time"></i>Bắt đầu: {{formatShortDate(startDate)}} </li>
@@ -66,12 +66,12 @@
                 <div class="box">
                     <div class="inner">
                         <span class="ic ic-headphone" :style="'background-image:url(' + item.Image + ')'"></span>
-                        <a :href="'@proccesUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">{{item.Title}}</a>
+                        <a :href="'@processUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">{{item.Title}}</a>
                         <span class="name center">
                             {{item.Grade}}<br />
                             GV: {{item.Teacher}}
                         </span>
-                        <a :href="'@proccesUrl("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
+                        <a :href="'@processUrl("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
                     </div>
                 </div>
             </div>
@@ -209,7 +209,7 @@
                     let _that = this
                     let _form = new FormData()
                     _form.append('ID', _that.classID)
-                    let _url = '@proccesUrl("GetDetail", "Course")'
+                    let _url = '@processUrl("GetDetail", "Course")'
                     axios.post(_url, _form)
                         .then(response => {
                         var _data = response.data.Data;
@@ -237,7 +237,7 @@
 
                     let _form = new FormData()
                     _form.append('ClassID', _that.classID)
-                    let _url = '@proccesUrl("GetClassSubjects", "ClassSubject")'
+                    let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
@@ -279,7 +279,7 @@
                     _form.append('PageSize', _that.ref.view)
                     _form.append('PageIndex', _that.ref.page)
 
-                    let _url = '@proccesUrl("GetClassList", "Reference")'
+                    let _url = '@processUrl("GetClassList", "Reference")'
 
                     axios.post(_url, _form)
                         .then(response => {
@@ -294,13 +294,13 @@
                 },
                 openLink(obj) {
                     obj.Viewed = obj.Viewed + 1;
-                    window.open('@proccesUrl("OpenLink", "Reference")/' + obj.ID);
+                    window.open('@processUrl("OpenLink", "Reference")/' + obj.ID);
                 },
                 download(obj) {
                     if (obj.Media == null)
                         return false;
                     obj.Downloaded = obj.Downloaded + 1;
-                    window.open('@proccesUrl("Download", "Reference")/' + obj.ID);
+                    window.open('@processUrl("Download", "Reference")/' + obj.ID);
                 },
 
                 //SUPPORT

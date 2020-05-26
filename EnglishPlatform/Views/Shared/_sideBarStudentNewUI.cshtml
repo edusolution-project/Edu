@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Http
 @{
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl)
+    string processUrl(string act, string ctrl)
     {
         string url = Url.Action(act, ctrl);
 
@@ -15,22 +15,22 @@
     <div class="menu-bar">
         <ul>
             <li for="home">
-                <a href="@proccesUrl("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
+                <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
             </li>
             <li for="profile">
-                <a href="@proccesUrl("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
+                <a href="@processUrl("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
             </li>
             <li for="class">
-                <a href="@proccesUrl("Index" , "Course")" title="Lớp học của tôi"><i class="ic ic-book"></i>Lớp học của tôi</a>
+                <a href="@processUrl("Index" , "Course")" title="Lớp học của tôi"><i class="ic ic-book"></i>Lớp học của tôi</a>
             </li>
             <li for="calendar">
-                <a href="@proccesUrl("Index" , "Calendar" )" title="Lịch học của tôi"><i class="ic ic-celendar"></i>Lịch học của tôi</a>
+                <a href="@processUrl("Index" , "Calendar" )" title="Lịch học của tôi"><i class="ic ic-celendar"></i>Lịch học của tôi</a>
             </li>
             <li for="discussion">
                 <a href="javascript:;;" onclick="$('.fn-box-chat-eduso').focus().click()" title="Thảo luận"><i class="ic ic-discussion"></i>Thảo luận</a>
             </li>
             <li for="reference">
-                <a href="@proccesUrl("Index" , "Reference" )" title="Tài liệu tham khảo"><i class="ic ic-file"></i>Tài liệu tham khảo</a>
+                <a href="@processUrl("Index" , "Reference" )" title="Tài liệu tham khảo"><i class="ic ic-file"></i>Tài liệu tham khảo</a>
             </li>
             <li for="news">
                 <a href="#" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>

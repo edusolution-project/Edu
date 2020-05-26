@@ -6,7 +6,7 @@
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl)
+    string processUrl(string act, string ctrl)
     {
         string url = Url.Action(act, ctrl);
 
@@ -55,12 +55,12 @@
         <div class="row row-list">
             <div class="col-md-3 course-item" v-for="(item,k) in list_course">
                 <div class="box radius">
-                    <a :href="'@proccesUrl("Detail", "Course")/' + item.ID" class="thumb"><img :src="item.Thumb" :alt="item.Name"></a>
+                    <a :href="'@processUrl("Detail", "Course")/' + item.ID" class="thumb"><img :src="item.Thumb" :alt="item.Name"></a>
                     <div class="detail box">
-                        <a :href="'@proccesUrl("Detail", "Course")/' + item.ID" title="" class="title">{{item.Name}}</a>
+                        <a :href="'@processUrl("Detail", "Course")/' + item.ID" title="" class="title">{{item.Name}}</a>
                         <p><i class="ti-time"></i>{{formatShortDate(item.EndDate)}}</p>
                         <div class="c-bot flex">
-                            <a :href="'@proccesUrl("Detail", "Course")/' + item.ID" title="Học ngay" class="btn-learn">Học ngay</a>
+                            <a :href="'@processUrl("Detail", "Course")/' + item.ID" title="Học ngay" class="btn-learn">Học ngay</a>
                             <div class="c-right">
                                 {{item.CompletePercent + '%'}}<span class="ic ic-subtag"></span>
                             </div>
@@ -193,7 +193,7 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('StartDate', _that.sDate)
                     _form.append('EndDate', _that.eDate)
-                    let _url = '@proccesUrl("GetList", "Course")'
+                    let _url = '@processUrl("GetList", "Course")'
                     axios.post(_url, _form)
                         .then(response => {
                             console.log(response.data)

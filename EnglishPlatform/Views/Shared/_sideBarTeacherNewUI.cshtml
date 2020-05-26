@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Http
 @{ 
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl)
+    string processUrl(string act, string ctrl)
     {
         string url = Url.Action(act, ctrl);
 
@@ -15,16 +15,16 @@
     <div class="menu-bar">
         <ul>
             <li for="home">
-                <a href="@proccesUrl("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
+                <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
             </li>
             <li for="profile">
-                <a href="@proccesUrl("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
+                <a href="@processUrl("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
             </li>
             <li for="curriculum">
-                <a href="@proccesUrl("Index" , "Curriculum")" title="Quản lý bài giảng"><i class="ic ic-book"></i>Tạo bài giảng</a>
+                <a href="@processUrl("Index" , "Curriculum")" title="Quản lý bài giảng"><i class="ic ic-book"></i>Tạo bài giảng</a>
             </li>
             <li for="course">
-                <a href="@proccesUrl("Index" , "Class")" title="Quản lý lớp học"><i class="ic ic-book-pen"></i>Quản lý lớp học</a>
+                <a href="@processUrl("Index" , "Class")" title="Quản lý lớp học"><i class="ic ic-book-pen"></i>Quản lý lớp học</a>
             </li>
             @if (User.IsInRole("head-teacher"))
             {
@@ -33,19 +33,19 @@
                 </li>
             }
             <li for="student">
-                <a href="@proccesUrl("Index" , "StudentManage")" title="Quản lý học viên"><i class="ic ic-book-pen"></i>Quản lý học viên</a>
+                <a href="@processUrl("Index" , "StudentManage")" title="Quản lý học viên"><i class="ic ic-book-pen"></i>Quản lý học viên</a>
             </li>
             <li for="calendar">
-                <a href="@proccesUrl("Index" , "Calendar" )" title="Quản lý lịch dạy"><i class="ic ic-celendar"></i>Quản lý lịch dạy</a>
+                <a href="@processUrl("Index" , "Calendar" )" title="Quản lý lịch dạy"><i class="ic ic-celendar"></i>Quản lý lịch dạy</a>
             </li>
             <li for="discussion">
                 <a href="javascript:;;" onclick="$('.fn-box-chat-eduso').focus().click()" title="Thảo luận"><i class="ic ic-discussion"></i>Thảo luận</a>
             </li>
             <li for="reference">
-                <a href="@proccesUrl("Index" , "Reference" )" title="Quản lý tài liệu"><i class="ic ic-file"></i>Quản lý tài liệu</a>
+                <a href="@processUrl("Index" , "Reference" )" title="Quản lý tài liệu"><i class="ic ic-file"></i>Quản lý tài liệu</a>
             </li>
             <li for="news">
-                <a href="@proccesUrl("Index", "News" )" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>
+                <a href="@processUrl("Index", "News" )" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>
             </li>
         </ul>
     </div>

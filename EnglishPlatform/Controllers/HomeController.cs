@@ -111,7 +111,7 @@ namespace EnglishPlatform.Controllers
                         roleCode = "student";
                     }
 
-                    var role = roleCode != "student" ? _roleService.GetItemByID(roleCode): _roleService.GetItemByCode(roleCode);
+                    var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
                     var listAccess = _accessesService.GetAccessByRole(role.Code);
                     string key = $"{centerCode}_{roleCode}";
                     CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
@@ -264,7 +264,7 @@ namespace EnglishPlatform.Controllers
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }
@@ -455,7 +455,7 @@ namespace EnglishPlatform.Controllers
             }
             await HttpContext.SignOutAsync(Cookies.DefaultLogin);
             HttpContext.Remove(Cookies.DefaultLogin);
-            
+
             return RedirectToAction("Login");
         }
 

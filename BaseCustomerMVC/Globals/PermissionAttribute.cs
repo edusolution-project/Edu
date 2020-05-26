@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -44,7 +45,9 @@ namespace BaseCustomerMVC.Globals
                         }
                     }
                 }
-                catch { }
+                catch(Exception e) {
+                    Console.WriteLine(e.Message);
+                }
                 // kieerm ta nguon tu cache
                 string keys = $"{userId}_{basis}";
                 if (string.IsNullOrEmpty(area) || ctrlName == "home" || ctrlName == "error" || type == "superadmin" || ctrlName == "news")

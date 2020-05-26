@@ -9,7 +9,7 @@
     var isHeadteacher = User.IsInRole("head-teacher");
     var userid = User.Claims.Single(t => t.Type == "UserID").Value;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl, Object param = null)
+    string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
 
@@ -72,7 +72,7 @@
                 </tr>
                 <tr v-else v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
-                    <td><a :href="'@proccesUrl("Detail", "Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
+                    <td><a :href="'@processUrl("Detail", "Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
                     <td>{{item.SkillName}}</td>
                     <td>{{item.CreatorName}}</td>
                     <td>{{item.Students}}</td>
@@ -517,13 +517,13 @@
 
                     @if(!User.IsInRole("head-teacher"))
                     {
-                        @:let _url = '@proccesUrl("GetClassList", "Class")'
+                        @:let _url = '@processUrl("GetClassList", "Class")'
 
                     }
                     else
                     {
-                        @:let _url = '@proccesUrl("GetManageList", "Class")'
-                        @:if( this.isPrivate) _url = '@proccesUrl("GetClassList", "Class")'
+                        @:let _url = '@processUrl("GetManageList", "Class")'
+                        @:if( this.isPrivate) _url = '@processUrl("GetClassList", "Class")'
                     }
 
                     axios.post(_url, _form)
@@ -542,7 +542,7 @@
                     //let _that = this;
                     //_that.tableData.forEach(function (item, k) {
                     //    if (item.ID === obj.ID) {
-                            let _url = obj.IsActive ? '@proccesUrl("Unpublish", "Class")' : '@proccesUrl("Publish", "Class")'
+                            let _url = obj.IsActive ? '@processUrl("Unpublish", "Class")' : '@processUrl("Publish", "Class")'
                             let _form = new FormData()
                             _form.append('ArrID', obj.ID);
                             axios.post(_url, _form)
@@ -635,7 +635,7 @@
                             return false;
                     }
                      _that.isLoading = true
-                    let _url = '@proccesUrl("Create","Class")'
+                    let _url = '@processUrl("Create","Class")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.isLoading = false;
@@ -666,7 +666,7 @@
                         let _that = this
                         let _form = new FormData()
                         _form.append('ArrID', obj.ID)
-                        let _url = '@proccesUrl("Remove","Class")'
+                        let _url = '@processUrl("Remove","Class")'
                         axios.post(_url, _form)
                             .then(response => {
                                 console.log(response.data);
@@ -721,7 +721,7 @@
 
                         let _form = new FormData()
                         _form.append('ClassID', obj.ID)
-                        let _url = '@proccesUrl("GetClassSubjects", "ClassSubject")'
+                        let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
@@ -815,7 +815,7 @@
                         {
                             @:let _form = new FormData()
                             @:  _form.append('SubjectID', obj.SubjectID)
-                            @:  let _url = '@proccesUrl("GetListTeacher", "Class")'
+                            @:  let _url = '@processUrl("GetListTeacher", "Class")'
                             @:  axios.post(_url, _form)
                             @:      .then(response => {
                             @:          var _data = response.data.Data;
@@ -854,7 +854,7 @@
                     let _form = new FormData()
                     _form.append('SubjectID', obj.SubjectID)
                     _form.append('GradeID', obj.GradeID)
-                    let _url = '@proccesUrl("GetActiveList", "Curriculum")'
+                    let _url = '@processUrl("GetActiveList", "Curriculum")'
                     axios.post(_url, _form)
                         .then(response => {
                             var _data = response.data.Data;
@@ -994,7 +994,7 @@
                     _form.append('PageSize', _that.student_data.view)
                     _form.append('PageIndex', _that.student_data.page)
 
-                    let _url = '@proccesUrl("GetList", "StudentManage")'
+                    let _url = '@processUrl("GetList", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.student_data.data = response.data.Data;
@@ -1036,7 +1036,7 @@
                             if (_that.loadedTermsST.filter(item => item.term.indexOf(term) > -1).length == 0) {
                                 let _form = new FormData()
                                 _form.append('term', term)
-                                let _url = '@proccesUrl("Search","StudentManage")'
+                                let _url = '@processUrl("Search","StudentManage")'
                                 axios.post(_url, _form)
                                     .then(response => {
                                         var data = []
@@ -1077,7 +1077,7 @@
                     _form.append('ClassID', _that.add_student.class_id)
                     _form.append('StudentID', _that.add_student.id)
                     _that.student_data.isLoading = true
-                    let _url = '@proccesUrl("AddStudent", "StudentManage")'
+                    let _url = '@processUrl("AddStudent", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.student_data.isLoading = false
@@ -1113,7 +1113,7 @@
                     _form.append('ClassID', _that.add_student.class_id)
                     _form.append('fileUpload', _that.add_student.uploadfile.file)
                     _that.student_data.isLoading = true
-                    let _url = '@proccesUrl("ImportStudent", "StudentManage")'
+                    let _url = '@processUrl("ImportStudent", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.student_data.isLoading = false
@@ -1142,7 +1142,7 @@
                     let _form = new FormData()
                     _form.append('ClassID', student.ClassID)
                     _form.append('StudentID', student.ID)
-                    let _url = '@proccesUrl("RemoveStudent", "StudentManage")'
+                    let _url = '@processUrl("RemoveStudent", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             if (response.data.error != null) {
@@ -1163,7 +1163,7 @@
                     this.add_student.uploadfile.file = event.target.files[0]
                 },
                 downloadTemplate() {
-                    window.open("@proccesUrl("StudentTemplate", "StudentManage")");
+                    window.open("@processUrl("StudentTemplate", "StudentManage")");
                 },
                 //support
                 formatShortDate(date) {
@@ -1310,7 +1310,7 @@
                     <tbody>
                         <tr v-for="(item,k) in student_data.data">
                             <td>{{k+1}}</td>
-                            <td><a :href="'@proccesUrl("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
+                            <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
                             <td>{{item.Email}}</td>
                             <td>{{item.Phone}}</td>
                             <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
