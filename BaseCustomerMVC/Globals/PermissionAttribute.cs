@@ -31,6 +31,7 @@ namespace BaseCustomerMVC.Globals
                 try
                 {
                     var ctrl = (Controller)context.Controller;
+                    ctrl.TempData.Add("center_router", basis);
                     if (ctrl != null)
                     {
                         if (!ctrl.TempData.ContainsKey(userId))

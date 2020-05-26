@@ -4,13 +4,20 @@
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string proccesUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 <!-- Include vue-quill-editor -->
-<script src="../libs/quill-editor/quill.min.js"></script>
-<script src="../libs/quill-editor/quill-vue.min.js"></script>
-<link href="../libs/quill-editor/quill.core.css" rel="stylesheet">
-<link href="../libs/quill-editor/quill.snow.css" rel="stylesheet">
-<link href="../libs/quill-editor/quill.bubble.css" rel="stylesheet">
+<script src="/libs/quill-editor/quill.min.js"></script>
+<script src="/libs/quill-editor/quill-vue.min.js"></script>
+<link href="/libs/quill-editor/quill.core.css" rel="stylesheet">
+<link href="/libs/quill-editor/quill.snow.css" rel="stylesheet">
+<link href="/libs/quill-editor/quill.bubble.css" rel="stylesheet">
 <script>
     setActiveMenu("curriculum");
 </script>
@@ -53,7 +60,7 @@
                 <tr v-for="(item,k) in list_data" v-if="item.ID">
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td>
-                        <a :href="'@Url.Action("Detail","Curriculum")/' + item.ID" :title="item.Name">
+                        <a :href="'@proccesUrl("Modules","Curriculum")/' + item.ID" :title="item.Name">
                             {{item.Name}}
                         </a>
                     </td>
@@ -231,7 +238,7 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('SearchText', _that.searchTerm)
 
-                    let _url = '@Url.Action("GetList", "Curriculum")'
+                    let _url = '@proccesUrl("GetList", "Curriculum")'
                     axios.post(_url, _form)
                         .then(response => {
                             //console.log(response.data);
@@ -268,7 +275,7 @@
                     let _that = this;
                     _that.list_data.forEach(function (item, k) {
                         if (item.ID === obj.ID) {
-                            let _url = item.IsActive ? '@Url.Action("Unpublish", "Curriculum")' : '@Url.Action("Publish", "Curriculum")'
+                            let _url = item.IsActive ? '@proccesUrl("Unpublish", "Curriculum")' : '@proccesUrl("Publish", "Curriculum")'
                             let _form = new FormData()
                             _form.append('ArrID', item.ID);
                             axios.post(_url, _form)
@@ -351,7 +358,7 @@
                     _form.append('SkillID', _that.addItem.SkillID)
                     _form.append('Name', _that.addItem.Name)
                     _form.append('Description', _that.addItem.Description)
-                    let _url = '@Url.Action("CreateOrUpdate","Curriculum")'
+                    let _url = '@proccesUrl("CreateOrUpdate","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
@@ -399,7 +406,7 @@
                     _form.append('SkillID', _that.cloneItem.SkillID)
                     _form.append('Name', _that.cloneItem.Name)
                     _form.append('Description', _that.cloneItem.Description)
-                    let _url = '@Url.Action("CloneCourse","Curriculum")'
+                    let _url = '@proccesUrl("CloneCourse","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
@@ -449,7 +456,7 @@
                     let _that = this
                     let _form = new FormData()
                     _form.append('ArrID', obj.ID)
-                    let _url = '@Url.Action("Remove","Curriculum")'
+                    let _url = '@proccesUrl("Remove","Curriculum")'
                     axios.post(_url, _form)
                         .then(response => {
                             console.log(response.data);

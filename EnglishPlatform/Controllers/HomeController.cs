@@ -185,28 +185,32 @@ namespace EnglishPlatform.Controllers
                             var st = _studentService.GetItemByID(user.UserID);
 
                             var defaultUser = new UserModel() { };
-                            if (Type == ACCOUNT_TYPE.ADMIN)
-                            {
-                                defaultUser = new UserModel(user.ID, "admin");
-                                centerCode = center.Code;
-                                roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
+                            switch (Type){
+                                case ACCOUNT_TYPE.TEACHER:
+                                    if (tc != null)
+                                    {
+                                        defaultUser = new UserModel(tc.ID, tc.FullName);
+                                        centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
+                                        roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                    }
+                                    break;
+                                case ACCOUNT_TYPE.ADMIN:
+                                    defaultUser = new UserModel(user.ID, "admin");
+                                    centerCode = center.Code;
+                                    roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
+                                    break;
+                                default:
+                                    if (st != null)
+                                    {
+                                        defaultUser = new UserModel(st.ID, st.FullName);
+                                        centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                                        roleCode = "student";
+                                    }
+                                    break;
                             }
-                            else
+                            if (Type != ACCOUNT_TYPE.ADMIN)
                             {
-                                if (tc != null)
-                                {
-                                    defaultUser = new UserModel(tc.ID, tc.FullName);
-                                    centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
-                                    roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
-                                }
-                                if (st != null)
-                                {
-                                    defaultUser = new UserModel(st.ID, st.FullName);
-                                    centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
-                                    roleCode = "student";
-                                }
-
-                                var role = roleCode != "student" ?_roleService.GetItemByID(roleCode): _roleService.GetItemByCode(roleCode);
+                                var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
                                 var listAccess = _accessesService.GetAccessByRole(role.Code);
                                 string key = $"{centerCode}_{roleCode}";
                                 CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
@@ -221,7 +225,7 @@ namespace EnglishPlatform.Controllers
                                 new Claim(ClaimTypes.Email, _username),
                                 new Claim(ClaimTypes.Name, defaultUser.Name),
                                 new Claim(ClaimTypes.Role,roleCode),
-                                new Claim("Type", user.Type)};
+                                new Claim("Type", Type)};
 
 
                             var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
@@ -246,7 +250,7 @@ namespace EnglishPlatform.Controllers
                             {
                                 StatusCode = ReturnStatus.SUCCESS,
                                 StatusDesc = "OK",
-                                Location = $"{centerCode}/{user.Type}"
+                                Location = $"{centerCode}/{Type}"
                             });
                         }
                         else

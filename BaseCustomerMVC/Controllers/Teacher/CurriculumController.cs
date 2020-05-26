@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
+using RestSharp;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -206,41 +207,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Detail(string ID)
         {
-            return Redirect(Url.Action("Modules", "Curriculum") + "/" + ID);
-            if (string.IsNullOrEmpty("ID"))
-                return RedirectToAction("Index");
-
-            //if (!User.IsInRole("head-teacher"))
-            //    return Redirect("/");
-
-            //var data = _service.GetItemByID(ID);
-
-            //if (data == null)
-            //    return RedirectToAction("Index");
-
-            //var usedClass = _classSubjectService.CountByCourseID(data.ID);
-            ////Cap nhat IsUsed
-            //if (data.IsUsed != (usedClass > 0))
-            //{
-            //    data.IsUsed = usedClass > 0;
-            //    _service.Save(data);
-            //}
-
-            //ViewBag.Data = data;
-            //ViewBag.Title = data.Name;
-            //var UserID = User.Claims.GetClaimByType("UserID").Value;
-
-            ////var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
-
-            ////ViewBag.Chapter = chapters;
-            //ViewBag.User = UserID;
-            //ViewBag.Course = data;
-            //ViewBag.Subject = _subjectService.GetItemByID(data.SubjectID);
-            //ViewBag.Grade = _gradeService.GetItemByID(data.GradeID);
-
-            ////ViewBag.RoleCode = "head-teacher";
-
-            //return View();
+            
+            return Redirect($"{HttpContext.Request.Host.Value}/{TempData["center_router"]?.ToString()}/{Url.Action("Modules", "Curriculum")}/{ID}");
         }
 
         public IActionResult Modules(string ID)

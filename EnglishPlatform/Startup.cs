@@ -9,6 +9,7 @@ using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
 using BaseEasyRealTime.Globals;
 using BaseHub;
+using com.wiris.plugin.api;
 using Core_v2.Globals;
 using EasyZoom;
 using EnglishPlatform.Controllers;
@@ -142,28 +143,36 @@ namespace EnglishPlatform
                             var user = _accountService.GetItemByID(userID);
                             var defaultUser = new UserModel() { };
                             bool isRealCenter = false;
-                            if (type == ACCOUNT_TYPE.ADMIN)
+
+                            switch (type)
                             {
-                                defaultUser = new UserModel(user.ID, "admin");
-                                centerCode = center;
-                                roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
+                                case ACCOUNT_TYPE.ADMIN:
+                                    defaultUser = new UserModel(user.ID, "admin");
+                                    centerCode = center;
+                                    roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
+                                    break;
+                                case ACCOUNT_TYPE.TEACHER:
+                                    if (tc != null)
+                                    {
+                                        defaultUser = new UserModel(tc.ID, tc.FullName);
+                                        centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center;
+                                        roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+                                        isRealCenter = tc.Centers.Any(o => o.Code == center);
+                                    }
+                                    break;
+                                default:
+                                    if (st != null)
+                                    {
+                                        defaultUser = new UserModel(st.ID, st.FullName);
+                                        centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center;
+                                        roleCode = "student";
+                                        isRealCenter = st.Centers != null && st.Centers.Any(o => o == center);
+                                    }
+                                    break;
                             }
-                            else
+
+                            if (type != ACCOUNT_TYPE.ADMIN)
                             {
-                                if (tc != null)
-                                {
-                                    defaultUser = new UserModel(tc.ID, tc.FullName);
-                                    centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center;
-                                    roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
-                                    isRealCenter = tc.Centers.Any(o => o.Code == center);
-                                }
-                                if (st != null)
-                                {
-                                    defaultUser = new UserModel(st.ID, st.FullName);
-                                    centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center;
-                                    roleCode = "student";
-                                    isRealCenter = st.Centers != null && st.Centers.Any(o => o == center);
-                                }
                                 if (isRealCenter)
                                 {
                                     var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);

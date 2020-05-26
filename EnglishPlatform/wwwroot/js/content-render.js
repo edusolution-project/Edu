@@ -2577,7 +2577,7 @@ var Lesson = (function () {
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
                 }
-                
+
                 //Render Question
                 console.log(data.Questions.length);
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -2587,13 +2587,14 @@ var Lesson = (function () {
                 break;
             case "QUIZ3":
                 itembox.append(ItemRow);
+                if (data.Description != null) {
+                    ItemRow.before($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                }
                 var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 renderMediaContent(data, ItemRow, "");
                 ItemRow.append(itemBody);
-                if (data.Description != null) {
-                    ItemRow.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
-                }
+
                 ItemRow.find(".media-holder").addClass("col-12");
                 var answers_box = $("<div>", { "class": "answer-wrapper no-child col-4", "data-part-id": data.ID });
                 ItemRow.append(answers_box);
