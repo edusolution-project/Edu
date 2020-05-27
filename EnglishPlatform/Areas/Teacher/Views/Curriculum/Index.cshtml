@@ -5,7 +5,7 @@
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl, Object param = null)
+    string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
 
@@ -60,7 +60,7 @@
                 <tr v-for="(item,k) in list_data" v-if="item.ID">
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td>
-                        <a :href="'@proccesUrl("Modules","Curriculum")/' + item.ID" :title="item.Name">
+                        <a :href="'@processUrl("Modules","Curriculum")/' + item.ID" :title="item.Name">
                             {{item.Name}}
                         </a>
                     </td>
@@ -184,6 +184,7 @@
                 },
                 subject: '',
                 grade: '',
+                center: '@center',
                 view: 10,
                 hPage: 1,
                 totalRec: 0,
@@ -237,8 +238,9 @@
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
                     _form.append('SearchText', _that.searchTerm)
+                    _form.append('Center', _that.center)
 
-                    let _url = '@proccesUrl("GetList", "Curriculum")'
+                    let _url = '@processUrl("GetList", "Curriculum")'
                     axios.post(_url, _form)
                         .then(response => {
                             //console.log(response.data);
@@ -275,7 +277,7 @@
                     let _that = this;
                     _that.list_data.forEach(function (item, k) {
                         if (item.ID === obj.ID) {
-                            let _url = item.IsActive ? '@proccesUrl("Unpublish", "Curriculum")' : '@proccesUrl("Publish", "Curriculum")'
+                            let _url = item.IsActive ? '@processUrl("Unpublish", "Curriculum")' : '@processUrl("Publish", "Curriculum")'
                             let _form = new FormData()
                             _form.append('ArrID', item.ID);
                             axios.post(_url, _form)
@@ -358,7 +360,7 @@
                     _form.append('SkillID', _that.addItem.SkillID)
                     _form.append('Name', _that.addItem.Name)
                     _form.append('Description', _that.addItem.Description)
-                    let _url = '@proccesUrl("CreateOrUpdate","Curriculum")'
+                    let _url = '@processUrl("CreateOrUpdate","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
@@ -406,7 +408,7 @@
                     _form.append('SkillID', _that.cloneItem.SkillID)
                     _form.append('Name', _that.cloneItem.Name)
                     _form.append('Description', _that.cloneItem.Description)
-                    let _url = '@proccesUrl("CloneCourse","Curriculum")'
+                    let _url = '@processUrl("CloneCourse","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
@@ -456,7 +458,7 @@
                     let _that = this
                     let _form = new FormData()
                     _form.append('ArrID', obj.ID)
-                    let _url = '@proccesUrl("Remove","Curriculum")'
+                    let _url = '@processUrl("Remove","Curriculum")'
                     axios.post(_url, _form)
                         .then(response => {
                             console.log(response.data);

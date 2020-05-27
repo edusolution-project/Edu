@@ -207,7 +207,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Detail(string ID)
         {
-            
+
             return Redirect($"{HttpContext.Request.Host.Value}/{TempData["center_router"]?.ToString()}/{Url.Action("Modules", "Curriculum")}/{ID}");
         }
 
@@ -294,20 +294,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Course
 
         [HttpPost]
-        public JsonResult GetList(DefaultModel model, string SubjectID = "", string GradeID = "")
+        public JsonResult GetList(DefaultModel model, string Center = "", string SubjectID = "", string GradeID = "")
         {
             var filter = new List<FilterDefinition<CourseEntity>>();
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(UserID);
-            if (teacher == null)
+
+            if (teacher == null || !teacher.Centers.Any(c => c.CenterID == Center))
             {
                 return new JsonResult(new Dictionary<string, object>
                     {
                         { "Error", "Bạn không được quyền thực hiện thao tác này"}
                     });
             }
-
+            if (!string.IsNullOrEmpty(Center))
+            {
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.Center == Center));
+            }
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
@@ -367,14 +371,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-
         [HttpPost]
-        public JsonResult GetActiveList(DefaultModel model, string SubjectID = "", string GradeID = "", bool cp = false)
+        public JsonResult GetActiveList(DefaultModel model, string Center = "", string SubjectID = "", string GradeID = "", bool cp = false)
         {
             var filter = new List<FilterDefinition<CourseEntity>>();
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
 
+            if (!string.IsNullOrEmpty(Center))
+            {
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.Center == Center));
+            }
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));

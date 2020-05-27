@@ -214,7 +214,8 @@ namespace EnglishPlatform.Controllers
                                 var listAccess = _accessesService.GetAccessByRole(role.Code);
                                 string key = $"{centerCode}_{roleCode}";
                                 CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
-                                CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
+                                var access = listAccess.Select(o => o.Authority)?.ToList();
+                                CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, access);
                             }
 
                             //cache

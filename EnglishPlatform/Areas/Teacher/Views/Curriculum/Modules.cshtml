@@ -6,7 +6,7 @@
     var isLock = Data.IsActive;// || Data.IsUsed;
     var user = ViewBag.User as string;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string proccesUrl(string act, string ctrl, Object param = null)
+    string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
 
@@ -22,7 +22,7 @@
 
 <div class="left-col">
     <div class="page-title">
-        <h1><a href="@proccesUrl("Index","Curriculum")">Bài giảng</a> / @ViewData["Title"]</h1>
+        <h1><a href="@processUrl("Index","Curriculum")">Bài giảng</a> / @ViewData["Title"]</h1>
     </div>
     <div class="main-container">
         @*<div class="sub-sidebar">
@@ -79,7 +79,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="@proccesUrl("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
+                    <form action="@processUrl("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
                         <input type="hidden" name="ID" />
                         <input type="hidden" name="CourseID" value="@Data.ID" />
                         <div class="form-group">
@@ -115,7 +115,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@proccesUrl("CreateOrUpdateChapter","Curriculum")','update' , AddChapterCallback)">Lưu</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@processUrl("CreateOrUpdateChapter","Curriculum")','update' , AddChapterCallback)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -131,7 +131,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="@proccesUrl("CreateOrUpdateLesson","Curriculum")" name="lessonForm" enctype="multipart/form-data" method="post">
+                    <form action="@processUrl("CreateOrUpdateLesson","Curriculum")" name="lessonForm" enctype="multipart/form-data" method="post">
                         <input type="hidden" name="ID" />
                         <input type="hidden" name="CourseID" value="@Data.ID" />
                         <input type="hidden" name="ChapterID" value="" />
@@ -200,7 +200,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@proccesUrl("CreateOrUpdateLesson","Curriculum")','update' , AddLessonCallback)">Lưu</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@processUrl("CreateOrUpdateLesson","Curriculum")','update' , AddLessonCallback)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -229,7 +229,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@proccesUrl("JoinLesson","Curriculum")','join' , MergeLessonCallback)">Lưu</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@processUrl("JoinLesson","Curriculum")','join' , MergeLessonCallback)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -285,7 +285,7 @@
         itemData.append($("<a>", {
             "class": "action-link",
             "name": "Title",
-            "href": "@proccesUrl("Lesson", "Curriculum")/" + item.ID + "/@Data.ID",
+            "href": "@processUrl("Lesson", "Curriculum")/" + item.ID + "/@Data.ID",
             "lid": item.ID,
             "text": item.Title,
             "onclick": "openLesson(this)",
@@ -477,7 +477,7 @@
 
         $.ajax({
             type: "POST",
-            url: '@proccesUrl("GetCourseDetail", "Curriculum")',
+            url: '@processUrl("GetCourseDetail", "Curriculum")',
             data: {ID: "@Data.ID"},
             dataType:"json",
             success: function (data) {
@@ -634,8 +634,8 @@
     {
         if(confirm('Confirm remove?'))
         {
-            ExcuteOnlyItem(ID, '@proccesUrl("Remove", "Curriculum")', function(){
-                 document.location = '@proccesUrl("Index", "Curriculum")';
+            ExcuteOnlyItem(ID, '@processUrl("Remove", "Curriculum")', function(){
+                 document.location = '@processUrl("Index", "Curriculum")';
             });
         }
     }
@@ -681,7 +681,7 @@
             confirmButtonText: 'Đồng ý xóa!'
         }).then((result) => {
             if (result.value) {
-                ExcuteOnlyItem(ID, '@proccesUrl("RemoveChapter", "Curriculum")', DeleteChapterCallback);
+                ExcuteOnlyItem(ID, '@processUrl("RemoveChapter", "Curriculum")', DeleteChapterCallback);
             }
         })
     }
@@ -760,7 +760,7 @@
             confirmButtonText: 'Đồng ý xóa!'
         }).then((result) => {
             if (result.value) {
-                ExcuteOnlyItem(ID, '@proccesUrl("RemoveLesson", "Curriculum")', DeleteLessonCallback);
+                ExcuteOnlyItem(ID, '@processUrl("RemoveLesson", "Curriculum")', DeleteLessonCallback);
             }
         })
     }
@@ -833,7 +833,7 @@
     }
 
     function closeLessonFrame() {
-        var url = '@proccesUrl("Modules", "Curriculum")/@Data.ID';
+        var url = '@processUrl("Modules", "Curriculum")/@Data.ID';
         var title = '@Data.Name';
         window.history.pushState({ frame: 0, url: url, title: title }, title, url);
         console.log("close");
@@ -857,7 +857,7 @@
             //console.log("open");
         }
         else if (state != null && state.frame == 0) {
-            var url = '@proccesUrl("Modules", "Curriculum")/@Data.ID';
+            var url = '@processUrl("Modules", "Curriculum")/@Data.ID';
             var title = '@Data.Name';
             window.history.pushState({ frame: 0, url: url, title: title }, title, url);
             //console.log("close");

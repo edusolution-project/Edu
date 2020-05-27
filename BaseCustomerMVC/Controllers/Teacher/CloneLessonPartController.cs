@@ -605,142 +605,142 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _cloneAnswerService.Collection.InsertOne(item);
         }
 
-        public JsonResult ConvertFillQuestion()
-        {
-            var fillparts = _lessonPartService.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
-            if (fillparts != null && fillparts.Count > 0)
-            {
-                foreach (var part in fillparts)
-                {
-                    if (part.ParentID == "5db92529ab30e73154d7ed56")
-                    {
-                        var a = 1;
-                    }
-                    //normalize Description
-                    part.Description = (part.Description ?? "").Trim();
-                    if (part.Description.IndexOf("fillquiz") >= 0)
-                        continue;
-                    var desc = part.Description;
-                    if (part.Description.Length > 0)
-                    {
-                        desc = NormalizeDescription(desc);
-                        desc = desc.Replace("#", "[FILLREPLACMENT]");
-                        desc = desc.Replace("----", "#");
-                    }
-                    var descArr = desc.Split('#');
-                    var descLen = descArr.Length;
+        //public JsonResult ConvertFillQuestion()
+        //{
+        //    var fillparts = _lessonPartService.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
+        //    if (fillparts != null && fillparts.Count > 0)
+        //    {
+        //        foreach (var part in fillparts)
+        //        {
+        //            if (part.ParentID == "5db92529ab30e73154d7ed56")
+        //            {
+        //                var a = 1;
+        //            }
+        //            //normalize Description
+        //            part.Description = (part.Description ?? "").Trim();
+        //            if (part.Description.IndexOf("fillquiz") >= 0)
+        //                continue;
+        //            var desc = part.Description;
+        //            if (part.Description.Length > 0)
+        //            {
+        //                desc = NormalizeDescription(desc);
+        //                desc = desc.Replace("#", "[FILLREPLACMENT]");
+        //                desc = desc.Replace("----", "#");
+        //            }
+        //            var descArr = desc.Split('#');
+        //            var descLen = descArr.Length;
 
-                    var questions = _lessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
-                    if (questions != null && questions.Count > 0)
-                    {
-                        if (descLen > 1 && descLen >= (questions.Count + 1)) // has place holder
-                        {
-                            var pos = descLen - 1;
-                            desc = descArr[pos];
+        //            var questions = _lessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
+        //            if (questions != null && questions.Count > 0)
+        //            {
+        //                if (descLen > 1 && descLen >= (questions.Count + 1)) // has place holder
+        //                {
+        //                    var pos = descLen - 1;
+        //                    desc = descArr[pos];
 
-                            for (int j = 0; j < questions.Count; j++)
-                            {
-                                var quiz = questions[j];
-                                desc = descArr[--pos] + "<fillquiz><input class='fillquiz'></input></fillquiz>" + desc;
-                                quiz.Content = "";
-                                _lessonPartQuestionService.Save(quiz);
-                            }
-                            for (int k = pos; k > 0; k--)
-                                desc = descArr[k] + "-----" + desc;
-                            part.Description = desc.Replace("[FILLREPLACMENT]", "#");
-                        }
-                        else
-                            for (int i = 0; i < questions.Count; i++)
-                            {
-                                var quiz = questions[i];
-                                var qdesc = (quiz.Content ?? "").Trim();
-                                if (qdesc.Length > 0)
-                                {
-                                    qdesc = NormalizeDescription(qdesc);
-                                    qdesc = qdesc.Replace("#", "[FILLREPLACMENT]");
-                                    qdesc = qdesc.Replace("----", "#");
-                                }
-                                var qdescArr = qdesc.Split('#');
-                                var qdescLen = qdescArr.Length;
-                                if (qdescLen == 2)
-                                {
-                                    part.Description += ("<p>" + qdescArr[0] + " <fillquiz><input class='fillquiz'></input></fillquiz>" + qdescArr[1] + "</p>").Replace("[FILLREPLACMENT]", "#");
-                                }
-                                else
-                                    part.Description += "<p>" + (quiz.Content ?? "").Trim() + " <fillquiz><input class='fillquiz'></input></fillquiz></p>";
-                                quiz.Content = "";
-                                _lessonPartQuestionService.Save(quiz);
-                            }
-                        _lessonPartService.Save(part);
-                    }
+        //                    for (int j = 0; j < questions.Count; j++)
+        //                    {
+        //                        var quiz = questions[j];
+        //                        desc = descArr[--pos] + "<fillquiz><input class='fillquiz'></input></fillquiz>" + desc;
+        //                        quiz.Content = "";
+        //                        _lessonPartQuestionService.Save(quiz);
+        //                    }
+        //                    for (int k = pos; k > 0; k--)
+        //                        desc = descArr[k] + "-----" + desc;
+        //                    part.Description = desc.Replace("[FILLREPLACMENT]", "#");
+        //                }
+        //                else
+        //                    for (int i = 0; i < questions.Count; i++)
+        //                    {
+        //                        var quiz = questions[i];
+        //                        var qdesc = (quiz.Content ?? "").Trim();
+        //                        if (qdesc.Length > 0)
+        //                        {
+        //                            qdesc = NormalizeDescription(qdesc);
+        //                            qdesc = qdesc.Replace("#", "[FILLREPLACMENT]");
+        //                            qdesc = qdesc.Replace("----", "#");
+        //                        }
+        //                        var qdescArr = qdesc.Split('#');
+        //                        var qdescLen = qdescArr.Length;
+        //                        if (qdescLen == 2)
+        //                        {
+        //                            part.Description += ("<p>" + qdescArr[0] + " <fillquiz><input class='fillquiz'></input></fillquiz>" + qdescArr[1] + "</p>").Replace("[FILLREPLACMENT]", "#");
+        //                        }
+        //                        else
+        //                            part.Description += "<p>" + (quiz.Content ?? "").Trim() + " <fillquiz><input class='fillquiz'></input></fillquiz></p>";
+        //                        quiz.Content = "";
+        //                        _lessonPartQuestionService.Save(quiz);
+        //                    }
+        //                _lessonPartService.Save(part);
+        //            }
 
 
-                }
-            }
-            var clonefillparts = _service.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
-            if (clonefillparts != null && clonefillparts.Count > 0)
-            {
-                foreach (var part in clonefillparts)
-                {
-                    part.Description = (part.Description ?? "").Trim();
-                    if (part.Description.IndexOf("fillquiz") >= 0)
-                        continue;
-                    var desc = part.Description;
-                    if (part.Description.Length > 0)
-                    {
-                        desc = NormalizeDescription(desc);
-                        desc = desc.Replace("#", "[FILLREPLACMENT]");
-                        desc = desc.Replace("----", "#");
-                    }
-                    var descArr = desc.Split('#');
-                    var descLen = descArr.Length;
+        //        }
+        //    }
+        //    var clonefillparts = _service.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
+        //    if (clonefillparts != null && clonefillparts.Count > 0)
+        //    {
+        //        foreach (var part in clonefillparts)
+        //        {
+        //            part.Description = (part.Description ?? "").Trim();
+        //            if (part.Description.IndexOf("fillquiz") >= 0)
+        //                continue;
+        //            var desc = part.Description;
+        //            if (part.Description.Length > 0)
+        //            {
+        //                desc = NormalizeDescription(desc);
+        //                desc = desc.Replace("#", "[FILLREPLACMENT]");
+        //                desc = desc.Replace("----", "#");
+        //            }
+        //            var descArr = desc.Split('#');
+        //            var descLen = descArr.Length;
 
-                    var questions = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
-                    if (questions != null && questions.Count > 0)
-                        if (descLen > 1 && descLen >= questions.Count) // has place holder
-                        {
-                            var pos = descLen - 1;
-                            desc = descArr[pos];
+        //            var questions = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
+        //            if (questions != null && questions.Count > 0)
+        //                if (descLen > 1 && descLen >= questions.Count) // has place holder
+        //                {
+        //                    var pos = descLen - 1;
+        //                    desc = descArr[pos];
 
-                            for (int j = 0; j < questions.Count; j++)
-                            {
-                                var quiz = questions[j];
-                                desc = descArr[pos--] + "<fillquiz><input class='fillquiz'></input></fillquiz>" + desc;
-                                quiz.Content = "";
-                                _cloneQuestionService.Save(quiz);
-                            }
-                            for (int k = pos; k >= 0; k--)
-                                desc = descArr[k] + "-----" + desc;
-                            part.Description = desc.Replace("[FILLREPLACMENT]", "#");
-                        }
-                        else
-                            for (int i = 0; i < questions.Count; i++)
-                            {
-                                var quiz = questions[i];
-                                var qdesc = (quiz.Content ?? "").Trim();
-                                if (qdesc.Length > 0)
-                                {
-                                    qdesc = NormalizeDescription(qdesc);
-                                    qdesc = qdesc.Replace("#", "[FILLREPLACMENT]");
-                                    qdesc = qdesc.Replace("----", "#");
-                                }
-                                var qdescArr = qdesc.Split('#');
-                                var qdescLen = qdescArr.Length;
-                                if (qdescLen == 2)
-                                {
-                                    part.Description += ("<p>" + qdescArr[0] + " <fillquiz><input class='fillquiz'></input></fillquiz>" + qdescArr[1] + "</p>").Replace("[FILLREPLACMENT]", "#");
-                                }
-                                else
-                                    part.Description += "<p>" + (quiz.Content ?? "").Trim() + " <fillquiz><input class='fillquiz'></input></fillquiz></p>";
-                                quiz.Content = "";
-                                _cloneQuestionService.Save(quiz);
-                            }
+        //                    for (int j = 0; j < questions.Count; j++)
+        //                    {
+        //                        var quiz = questions[j];
+        //                        desc = descArr[pos--] + "<fillquiz><input class='fillquiz'></input></fillquiz>" + desc;
+        //                        quiz.Content = "";
+        //                        _cloneQuestionService.Save(quiz);
+        //                    }
+        //                    for (int k = pos; k >= 0; k--)
+        //                        desc = descArr[k] + "-----" + desc;
+        //                    part.Description = desc.Replace("[FILLREPLACMENT]", "#");
+        //                }
+        //                else
+        //                    for (int i = 0; i < questions.Count; i++)
+        //                    {
+        //                        var quiz = questions[i];
+        //                        var qdesc = (quiz.Content ?? "").Trim();
+        //                        if (qdesc.Length > 0)
+        //                        {
+        //                            qdesc = NormalizeDescription(qdesc);
+        //                            qdesc = qdesc.Replace("#", "[FILLREPLACMENT]");
+        //                            qdesc = qdesc.Replace("----", "#");
+        //                        }
+        //                        var qdescArr = qdesc.Split('#');
+        //                        var qdescLen = qdescArr.Length;
+        //                        if (qdescLen == 2)
+        //                        {
+        //                            part.Description += ("<p>" + qdescArr[0] + " <fillquiz><input class='fillquiz'></input></fillquiz>" + qdescArr[1] + "</p>").Replace("[FILLREPLACMENT]", "#");
+        //                        }
+        //                        else
+        //                            part.Description += "<p>" + (quiz.Content ?? "").Trim() + " <fillquiz><input class='fillquiz'></input></fillquiz></p>";
+        //                        quiz.Content = "";
+        //                        _cloneQuestionService.Save(quiz);
+        //                    }
 
-                    _service.Save(part);
-                }
-            }
-            return new JsonResult("Convert Done");
-        }
+        //            _service.Save(part);
+        //        }
+        //    }
+        //    return new JsonResult("Convert Done");
+        //}
 
         private string NormalizeDescription(string desc)
         {
