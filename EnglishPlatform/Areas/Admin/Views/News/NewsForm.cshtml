@@ -1,0 +1,212 @@
+﻿@using System.Linq
+@{
+    ViewData["Title"] = "Thêm tin";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var newscategory = ViewBag.newscategory as List<BaseCustomerEntity.Database.NewsCategoryEntity>;
+}
+
+<!-- Modal Create Form -->
+    <div class="container-fluid">
+        @using (Html.BeginForm("CreateNews", "News", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
+        {
+            <input type="hidden" name="ArrID" value="" />
+            <!-- DataTales Example -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="modal-body">
+                    <form>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-8">
+                                <input type="text" class="form-control" name="Title" id="Title" placeholder="Tiêu đề" required>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <div class="form-row">
+                                    <div class="col-sm-12">
+                                        <select id="CategoryID" name="CategoryID" class="form-control" required>
+                                            <option value="">--- Lựa chọn danh mục ---</option>
+                                            @{
+                                                for (int i = 0; newscategory != null && i < newscategory.Count; i++)
+                                                {
+                                                    <option value="@newscategory[i].ID">@newscategory[i].Name</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-sm-12">
+                                <textarea name="Summary" id="Summary" required >Tóm tắt</textarea>
+                                <script language="javascript">
+                                    CKEDITOR.replace("Summary");
+                                </script>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-sm-12">
+                                <textarea name="Content" id="Content" required>Nội dung</textarea>
+                                <script language="javascript">
+                                    CKEDITOR.replace("Content");
+                                </script>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control datepicker" placeholder="Ngày đăng" name="PublishDate" id="PublishDate" required>
+                                @*<input type="hidden" name="PublishDate" class="hiddenDate" id="PublishDate">*@
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="input-group col-md-6">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input form-control" id="Thumbnail" name="Thumbnail" required>
+                                    <label class="custom-file-label form-control" for="inputGroupFile02">Chọn đường dẫn</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <span class="input-group-text" id="">Upload</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="input-group col-md-6">
+                                <div class="col-sm-10">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="IsHot" name="IsHot">
+                                        <label class="form-check-label">Tin Hot</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="input-group col-md-6">
+                                <div class="col-sm-10">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="IsTop" name="IsTop">
+                                        <label class="form-check-label">Tin Top</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+
+                    <div class="form-group row">
+                        <div class="col-sm-10 col-sm-offset-2">
+                            @*<button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>*@
+                            <button type="button" class="btn btn-primary btn-submit" onclick="Submit('AddForm','@Url.Action("CreateNews", "News" )','createnews',LoadData)">Lưu</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        }
+    </div>
+
+<script>
+    $('.datepicker').each(function () {
+        var fieldID = $(this).next().attr("id");
+        $(this).datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: 'dd/mm/yy',
+            altField: '#' + fieldID,
+            altFormat: 'yy-mm-dd'
+        }).val("");
+    })
+
+    function LoadData() {
+        var searchText = $("#searchText").val();
+        var startDate = $("#startDate_sort").val();
+        var endDate = $("#endDate_sort").val();
+        var pageIndex = $('#pageIndex').val();
+        var pageSize = 30;
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetList", "News")',
+            data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex},
+            dataType:"json",
+            success: function (data) {
+                hideModal();
+
+                var body = $('#dataTable tbody');
+                body.html("");
+
+                var option = $('#input-option');
+                option.html("");
+                option.append("<option value='0'>--Danh mục cha--</option>");
+
+                if (data.Data != null && data.Data.length > 0)
+                {
+                    for (i = 0; i < data.Data.length; ++i) {
+                        item = data.Data[i];                        
+                        
+                        var parentName = "";
+                        if (item.ParentName != null && item.ParentName.length > 0) {
+                            for (var j = 0; j < item.ParentName.length; ++j) {
+                                parentName += item.ParentName[j].Name + "<br/>";
+                            }
+                        }
+
+                        body.append("<tr>" +
+                            //"<td class='text-center'><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
+                            "<td class='text-center'>" + (i + 1) + "</td>" +
+                            //"<td class='text-center'>" + (item.StudentId == null? "":item.StudentId) +"</td>" +
+                            "<td>" + item.Name + "</td>" +
+                            "<td class='text-center'>" + parentName + "</td>" +                            
+                            "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","News")','@Url.Action("create","NewsCategory")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa danh mục " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("delete","News")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "</td > " +
+                            "</tr>"
+                        );
+
+                        option.append(
+                            "<option value=" + item.ID +
+                            ">" + item.Name +
+                            "</option>"
+                        );
+                    }
+                    $('.btn').tooltip({ trigger:'hover' });
+                }
+                if (data.Model != null) {
+                    var totalRecord = data.Model.totalRecord;
+                    if (totalRecord == 0) {
+                        $('#pageIndex').html('<option value="1"></option>').val(1);
+                        $('.card-footer').hide()
+                    }
+                    else {
+                        var totalPage = totalRecord / pageSize + totalRecord % pageSize > 0 ? 1 : 0;
+                        $('#totalPage').text(totalPage);
+                        $('#pageIndex').empty();
+                        for (i = 1; i <= totalPage; i++) {
+                            $('#pageIndex').append($('<option>', { value: i, text: i}))
+                        }
+                        var currentPage = data.Model.pageIndex + 1;
+                        if (currentPage > totalPage)
+                            currentPage = totalPage;
+                        console.log(currentPage);
+                        $('#pageIndex').val(currentPage);
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    };
+</script>

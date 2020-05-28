@@ -73,7 +73,10 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<AccessesService>();
             services.AddSingleton<AuthorityService>();
             services.AddSingleton<MailLogService>();
-            services.AddSingleton<UserAndRoleService>();
+
+            services.AddSingleton<NewsCategoryService>();
+            services.AddSingleton<NewsService>();
+			services.AddSingleton<UserAndRoleService>();
             return services;
         }
     }
