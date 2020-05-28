@@ -4,6 +4,13 @@
     var currentClass = ViewBag.Class as BaseCustomerMVC.Models.ClassViewModel;
     ViewData["Title"] = currentClass.Name;
     var currentuser = User.Claims.Single(t => t.Type == "UserID").Value;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 @*<script src="/libs/vuejs-datepicker.min.js"></script>*@
 <link href="~/js/lib/datetimepicker/jq.datetimepicker.css" rel="stylesheet" />
@@ -25,7 +32,7 @@
 
     <div class="card-header" v-cloak>
         <div class="flex mb-2">
-            <h2 class="title"><a href="@Url.Action("Detail", "Class")" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}</h2>
+            <h2 class="title"><a href="@processUrl("Detail", "Class")" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}</h2>
             @*<div class="search-box mr-2" v-if="tab[2]">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
@@ -80,7 +87,7 @@
             <ul class="list ls-pratice">
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parrent" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}</a>
+                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent collapsed" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color"><i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}</a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion" role="tabpanel">
                             <ul class="list">
                                 <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
@@ -105,7 +112,7 @@
                 <tbody>
                     <tr v-for="(item,k) in studentData">
                         <td>{{(k+1)}}</td>
-                        <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
+                        <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
                         <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
                         <td>{{formatTime(item.LastDate)}}</td>
                         <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
@@ -237,7 +244,7 @@
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice pt-1 pb-1">
             <div class="d-flex w-100 justify-content-end align-items-start">
-                <a :href="'@Url.Action("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-fill overflow-hidden" style="text-overflow: ellipsis" :title="data.Title"> <span><i class="ic far fa-file-alt mr-2"></i>{{data.Title}}</span></a>
+                <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-fill overflow-hidden" style="text-overflow: ellipsis" :title="data.Title"> <span><i class="ic far fa-file-alt mr-2"></i>{{data.Title}}</span></a>
                 <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
@@ -362,6 +369,9 @@
                     hash = hash.split('#')[1]
                     //console.log(hash)
                     switch (hash) {
+                        case 'info':
+                            this.tabChange(0);
+                            break;
                         case 'module':
                             this.tabChange(1);
                             break;
@@ -375,6 +385,9 @@
                             this.tabChange(4);
                             break;
                     }
+                }
+                else {
+                    this.tabChange(1);
                 }
             },
             components: {
@@ -400,6 +413,7 @@
                 list_lessons:[],
                 loaded_chapter: [],
                 loaded_subject: [],
+                init: true,
                 fields: [
                     {
                         key: 'stt',
@@ -472,7 +486,7 @@
                     this.tab[a] = true
                     switch (a) {
                         case 0:
-                            history.replaceState({ tab: a }, this.className + " - Tổng quan");
+                            history.replaceState({ tab: a }, this.className + " - Tổng quan", "#info");
                             this.loadClassDetail();
                             break;
                         case 1:
@@ -497,7 +511,8 @@
                     let _that = this
                     let _form = new FormData()
                     _form.append('ID', _that.classID)
-                    let _url = '@Url.Action("GetDetail", "Class")'
+                    let _url = '@processUrl("GetDetail", "Class")'
+                   
                     axios.post(_url, _form)
                         .then(response => {
                             var _data = response.data.Data;
@@ -510,15 +525,16 @@
                             })
                             _that.loaded_teacher.push(obj.SubjectID);
                         }).catch(e => { })
+                    
                 },
                 loadClassSubjects() {
                     let _that = this
                     if (_that.classSubjects.length > 0)
                         return;
-
+                    _that.init = false;
                     let _form = new FormData()
                     _form.append('ClassID', _that.classID)
-                    let _url = '@Url.Action("GetClassSubjects", "ClassSubject")'
+                    let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
                     axios.post(_url, _form)
                         .then(response => {
                             var _data = response.data.Data;
@@ -533,15 +549,22 @@
                                     Color: item.Color,
                                     Chapters: [],
                                     Lessons: []
-                                })
+                                });
+                                loadContent(item.ID);
                                 //_that.changeAddSubject(item)
                                 //_that.changeAddGrade(item)
                             })
+                            _that.init = true;
+                        }).catch(e => { });
 
-                            //_that.$forceUpdate()
-                        }).catch(e => { })
+                    //this.$forceUpdate();
+                    //this.$nextTick(function () {
+                    //    console.log($(".list.ls-pratice > li > .inner > .parent"));
+                    //    $(".list.ls-pratice > li > .inner > .parent").click();
+                    //});
                 },
                 loadContent(subject, chapter) {
+                    
                     let _that = this
                     let key = subject + "_" + chapter
                     if (_that.loaded_chapter.includes(key))
@@ -550,7 +573,7 @@
                     _form.append('ID', subject)
                     if (chapter)
                         _form.append('Parent', chapter)
-                    let _url = '@Url.Action("GetContents", "ClassSubject")'
+                    let _url = '@processUrl("GetContents", "ClassSubject")'
                     axios.post(_url, _form)
                         .then(response => {
                             var _data = response.data.Data;
@@ -593,7 +616,7 @@
                             this.loaded_chapter.push(key);
                             this.list_chapters = _that.list_chapters
                             this.list_lessons = _that.list_lessons
-                            _that.$forceUpdate()
+                            //_that.$forceUpdate()
                         }).catch(e => { })
                 },
                 loadClassStudent() {
@@ -602,7 +625,7 @@
                     _form.append('ClassID', _that.classID)
                     _form.append('PageSize', 1000)
                     _form.append('PageIndex', 1)
-                    let _url = '@Url.Action("GetClassResult", "Class")'
+                    let _url = '@processUrl("GetClassResult", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.studentData = response.data.Data;
@@ -621,7 +644,7 @@
                     _form.append('PageSize', _that.ref.view)
                     _form.append('PageIndex', _that.ref.page)
 
-                    let _url = '@Url.Action("GetClassList", "Reference")'
+                    let _url = '@processUrl("GetClassList", "Reference")'
 
                     axios.post(_url, _form)
                         .then(response => {
@@ -635,7 +658,7 @@
                         }).catch(e => { })
                 },
                 loadComment() {
-                    @*document.location = '@Url.Action("Index","Discuss", new { id = currentClass.ID })'*@
+                    @*document.location = '@processUrl("Index","Discuss", new { id = currentClass.ID })'*@
                     //console.log(5)
                     $('.fn-box-chat-eduso').focus().click()
                 },
@@ -651,7 +674,7 @@
                     _form.append('ID', obj.ScheduleID)
                     _form.append('StartDate', startdate)
                     _form.append('EndDate', enddate)
-                    let _url = '@Url.Action("Update", "LessonSchedule")'
+                    let _url = '@processUrl("Update", "LessonSchedule")'
                     axios.post(_url, _form)
                         .then(response => {
                             obj.IsUpdating = false
@@ -664,7 +687,7 @@
 
                     let _form = new FormData()
                     _form.append('ID', obj.ScheduleID)
-                    let _url = '@Url.Action("Update", "LessonSchedule")'
+                    let _url = '@processUrl("Update", "LessonSchedule")'
                     axios.post(_url, _form)
                         .then(response => {
                             obj.IsUpdating = false
@@ -695,7 +718,7 @@
                     //console.log(obj)
                     //_that.tableData.forEach(function (item, k) {
                     //if (item.ID === obj.ID) {
-                    let _url = obj.IsActive ? '@Url.Action("Unpublish", "LessonSchedule")' : '@Url.Action("Publish", "LessonSchedule")'
+                    let _url = obj.IsActive ? '@processUrl("Unpublish", "LessonSchedule")' : '@processUrl("Publish", "LessonSchedule")'
                     let _form = new FormData()
                     _form.append('ArrID', obj.ScheduleID);
                     axios.post(_url, _form)
@@ -708,7 +731,7 @@
                     //})
                 },
                 toggleOnlineClass(obj) {
-                    let _url = '@Url.Action("ToggleOnline", "LessonSchedule")'
+                    let _url = '@processUrl("ToggleOnline", "LessonSchedule")'
                     let _form = new FormData()
                     _form.append('ID', obj.ScheduleID);
                     axios.post(_url, _form)
@@ -771,13 +794,13 @@
                 },
                 openLink(obj) {
                     obj.Viewed = obj.Viewed + 1;
-                    window.open('@Url.Action("OpenLink", "Reference")/' + obj.ID);
+                    window.open('@processUrl("OpenLink", "Reference")/' + obj.ID);
                 },
                 download(obj) {
                     if (obj.Media == null)
                         return false;
                     obj.Downloaded = obj.Downloaded + 1;
-                    window.open('@Url.Action("Download", "Reference")/' + obj.ID);
+                    window.open('@processUrl("Download", "Reference")/' + obj.ID);
                 },
                 updateRef() {
                     let _that = this
@@ -806,7 +829,7 @@
                     }
 
 
-                    let _url = '@Url.Action("Save", "Reference")'
+                    let _url = '@processUrl("Save", "Reference")'
                     axios.post(_url, _form)
                         .then(response => {
                             if (response.Error == null) {
@@ -842,7 +865,7 @@
                         if (result.value == true) {
                             let _form = new FormData()
                             _form.append('ID', obj.ID)
-                            let _url = '@Url.Action("Remove", "Reference")'
+                            let _url = '@processUrl("Remove", "Reference")'
                             axios.post(_url, _form)
                                 .then(response => {
                                     if (response.Error == null) {
@@ -904,6 +927,14 @@
                         result = a * 100 / b;
                     return result;
                 }
+            },
+            updated: function(){
+                this.$nextTick(function () {
+                    var r = this.loaded_chapter[this.loaded_chapter.length - 1];
+                    if (r != null && r.split('_').length == 2 && r.split('_')[1] == 'undefined')
+                        console.log('.list.ls-pratice > li:eq(' + (this.loaded_chapter.length - 1) + ') > .innner > a');
+                        
+                })
             }
         });
     </script>
