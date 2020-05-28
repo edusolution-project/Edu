@@ -43,7 +43,6 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<GradeService>();
             services.AddSingleton<LessonService>();
             services.AddSingleton<LessonPartService>();
-            //services.AddSingleton<LessonExtendService>();
             services.AddSingleton<LessonPartAnswerService>();
             services.AddSingleton<LessonPartQuestionService>();
             services.AddSingleton<LessonScheduleService>();
@@ -72,6 +71,14 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<AccessesService>();
             services.AddSingleton<AuthorityService>();
             services.AddSingleton<MailLogService>();
+
+            services.AddSingleton<FLessonPartService>();
+            services.AddSingleton<FLessonPartAnswerService>();
+            services.AddSingleton<FLessonPartQuestionService>();
+            services.AddSingleton<FCloneLessonPartService>();
+            services.AddSingleton<FCloneLessonPartAnswerService>();
+            services.AddSingleton<FCloneLessonPartQuestionService>();
+
             return services;
         }
     }

@@ -104,14 +104,16 @@ namespace Core_v2.Repositories
             }
         }
 
-        public T Save(T item)
+        public T Save(T item, bool isUpsert = false)
         {
+            var opt = new UpdateOptions();
+            opt.IsUpsert = isUpsert;
             if (item.ID == "0")
                 item.ID = null;
             if (item.ID == null)
                 _collection.InsertOne(item);
             else
-                _collection.ReplaceOne(t => t.ID == item.ID, item);
+                _collection.ReplaceOne(t => t.ID == item.ID, item, opt);
             return item;
         }
 

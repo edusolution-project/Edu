@@ -35,6 +35,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartAnswerService _cloneAnswerService;
         private readonly CloneLessonPartQuestionService _cloneQuestionService;
 
+        private readonly FLessonPartService _flessonPartService;
+        private readonly FLessonPartAnswerService _flessonPartAnswerService;
+        private readonly FLessonPartQuestionService _flessonPartQuestionService;
+
+        private readonly FCloneLessonPartService _fservice;
+        private readonly FCloneLessonPartAnswerService _fcloneAnswerService;
+        private readonly FCloneLessonPartQuestionService _fcloneQuestionService;
+
+
         private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonpartMapping;
         private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonpartQuestionMapping;
         private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonpartAnswerMapping;
@@ -57,6 +66,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CloneLessonPartService service,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
+
+            FLessonPartService flessonPartService,
+            FLessonPartQuestionService flessonPartQuestionService,
+            FLessonPartAnswerService flessonPartAnswerService,
+            FCloneLessonPartService fservice,
+            FCloneLessonPartAnswerService fcloneLessonPartAnswerService,
+            FCloneLessonPartQuestionService fcloneLessonPartQuestionService,
+
             FileProcess fileProcess
             )
         {
@@ -80,6 +97,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonpartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
             _lessonpartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
             _lessonpartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
+
+
+
+            _flessonPartService = flessonPartService;
+            _flessonPartQuestionService = flessonPartQuestionService;
+            _flessonPartAnswerService = flessonPartAnswerService;
+            _fservice = fservice;
+            _fcloneAnswerService = fcloneLessonPartAnswerService;
+            _fcloneQuestionService = fcloneLessonPartQuestionService;
+
+
             _fileProcess = fileProcess;
         }
 
@@ -605,17 +633,65 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _cloneAnswerService.Collection.InsertOne(item);
         }
 
-        public JsonResult ConvertFillQuestion()
+
+
+        private async Task RemoveOrgLessonPart(string ID)
         {
-            var fillparts = _lessonPartService.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
+            try
+            {
+                var item = _lessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (item == null) return;
+
+                var questionIds = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == ID).Project(t => t.ID).ToList();
+                for (int i = 0; questionIds != null && i < questionIds.Count; i++)
+                    await RemoveOrgQuestion(questionIds[i]);
+                await _lessonPartService.RemoveAsync(ID);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task RemoveOrgQuestion(string ID)
+        {
+            try
+            {
+                var item = _lessonPartQuestionService.CreateQuery().Find(o => o.ID == ID).Project(t => t.ID).FirstOrDefault();
+                if (item == null) return;
+                await _lessonPartAnswerService.CreateQuery().DeleteManyAsync(o => o.ParentID == ID);
+                await _lessonPartQuestionService.RemoveAsync(ID);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        public async Task<JsonResult> ConvertFillQuestion()
+        {
+            var fillparts = _flessonPartService.CreateQuery().Find(p => p.Type == "QUIZ2"
+            //&& p.ID == "5ebb611db6a80a2ab8f34986"
+            ).ToList();
+
+            var clonemapping = new MappingEntity<FCloneLessonPartEntity, CloneLessonPartEntity>();
+            var qclonemapping = new MappingEntity<FCloneLessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
+            var aclonemapping = new MappingEntity<FCloneLessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
+
+            var mapping = new MappingEntity<FLessonPartEntity, LessonPartEntity>();
+            var qmapping = new MappingEntity<FLessonPartQuestionEntity, LessonPartQuestionEntity>();
+            var amapping = new MappingEntity<FLessonPartAnswerEntity, LessonPartAnswerEntity>();
+
             if (fillparts != null && fillparts.Count > 0)
             {
                 foreach (var part in fillparts)
                 {
-                    if (part.ParentID == "5db92529ab30e73154d7ed56")
-                    {
-                        var a = 1;
-                    }
+
+                    var oldpart = _lessonPartService.GetItemByID(part.ID);
+                    if (oldpart == null) continue;//deleted;
+                    await RemoveOrgLessonPart(part.ID);
+
                     //normalize Description
                     part.Description = (part.Description ?? "").Trim();
                     if (part.Description.IndexOf("fillquiz") >= 0)
@@ -624,13 +700,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (part.Description.Length > 0)
                     {
                         desc = NormalizeDescription(desc);
-                        desc = desc.Replace("#", "[FILLREPLACMENT]");
+                        desc = desc.Replace("#", "[FILLREPLACEMENT]");
                         desc = desc.Replace("----", "#");
                     }
                     var descArr = desc.Split('#');
                     var descLen = descArr.Length;
 
-                    var questions = _lessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
+                    var questions = _flessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
                     if (questions != null && questions.Count > 0)
                     {
                         if (descLen > 1 && descLen >= (questions.Count + 1)) // has place holder
@@ -643,11 +719,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 var quiz = questions[j];
                                 desc = descArr[--pos] + "<fillquiz><input class='fillquiz'></input></fillquiz>" + desc;
                                 quiz.Content = "";
-                                _lessonPartQuestionService.Save(quiz);
+                                //_lessonPartQuestionService.Save(quiz, true);
+                                var newquiz = qmapping.AutoOrtherType(quiz, new LessonPartQuestionEntity());
+                                _lessonPartQuestionService.Save(newquiz, true);
+                                var answers = _flessonPartAnswerService.CreateQuery().Find(q => q.ParentID == newquiz.ID).ToList();
+                                if (answers != null && answers.Count > 0)
+                                    foreach (var ans in answers)
+                                    {
+                                        var newans = amapping.AutoOrtherType(ans, new LessonPartAnswerEntity());
+                                        _lessonPartAnswerService.Save(newans, true);
+                                    }
                             }
                             for (int k = pos; k > 0; k--)
                                 desc = descArr[k] + "-----" + desc;
-                            part.Description = desc.Replace("[FILLREPLACMENT]", "#");
+                            part.Description = desc.Replace("[FILLREPLACEMENT]", "#");
                         }
                         else
                             for (int i = 0; i < questions.Count; i++)
@@ -657,31 +742,43 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 if (qdesc.Length > 0)
                                 {
                                     qdesc = NormalizeDescription(qdesc);
-                                    qdesc = qdesc.Replace("#", "[FILLREPLACMENT]");
+                                    qdesc = qdesc.Replace("#", "[FILLREPLACEMENT]");
                                     qdesc = qdesc.Replace("----", "#");
                                 }
                                 var qdescArr = qdesc.Split('#');
                                 var qdescLen = qdescArr.Length;
                                 if (qdescLen == 2)
                                 {
-                                    part.Description += ("<p>" + qdescArr[0] + " <fillquiz><input class='fillquiz'></input></fillquiz>" + qdescArr[1] + "</p>").Replace("[FILLREPLACMENT]", "#");
+                                    part.Description += ("<p>" + qdescArr[0] + " <fillquiz><input class='fillquiz'></input></fillquiz>" + qdescArr[1] + "</p>").Replace("[FILLREPLACEMENT]", "#");
                                 }
                                 else
                                     part.Description += "<p>" + (quiz.Content ?? "").Trim() + " <fillquiz><input class='fillquiz'></input></fillquiz></p>";
                                 quiz.Content = "";
-                                _lessonPartQuestionService.Save(quiz);
+                                var newquiz = qmapping.AutoOrtherType(quiz, new LessonPartQuestionEntity());
+                                _lessonPartQuestionService.Save(newquiz, true);
+                                var answers = _flessonPartAnswerService.CreateQuery().Find(q => q.ParentID == newquiz.ID).ToList();
+                                if (answers != null && answers.Count > 0)
+                                    foreach (var ans in answers)
+                                    {
+                                        var newans = amapping.AutoOrtherType(ans, new LessonPartAnswerEntity());
+                                        _lessonPartAnswerService.Save(newans, true);
+                                    }
                             }
-                        _lessonPartService.Save(part);
                     }
-
+                    var newpart = mapping.AutoOrtherType(part, new LessonPartEntity());
+                    _lessonPartService.Save(newpart, true);
 
                 }
             }
-            var clonefillparts = _service.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
+            return new JsonResult("Convert Done");
+            var clonefillparts = _fservice.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
             if (clonefillparts != null && clonefillparts.Count > 0)
             {
                 foreach (var part in clonefillparts)
                 {
+                    var oldpart = _service.GetItemByID(part.ID);
+                    if (oldpart == null) continue;//deleted
+                    await RemoveLessonPart(part.ID);
                     part.Description = (part.Description ?? "").Trim();
                     if (part.Description.IndexOf("fillquiz") >= 0)
                         continue;
@@ -689,13 +786,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (part.Description.Length > 0)
                     {
                         desc = NormalizeDescription(desc);
-                        desc = desc.Replace("#", "[FILLREPLACMENT]");
+                        desc = desc.Replace("#", "[FILLREPLACEMENT]");
                         desc = desc.Replace("----", "#");
                     }
                     var descArr = desc.Split('#');
                     var descLen = descArr.Length;
 
-                    var questions = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
+                    var questions = _fcloneQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
                     if (questions != null && questions.Count > 0)
                         if (descLen > 1 && descLen >= questions.Count) // has place holder
                         {
@@ -707,11 +804,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 var quiz = questions[j];
                                 desc = descArr[pos--] + "<fillquiz><input class='fillquiz'></input></fillquiz>" + desc;
                                 quiz.Content = "";
-                                _cloneQuestionService.Save(quiz);
+                                var newquiz = qclonemapping.AutoOrtherType(quiz, new CloneLessonPartQuestionEntity());
+                                _cloneQuestionService.Save(quiz, true);
+                                var answers = _fcloneAnswerService.CreateQuery().Find(q => q.ParentID == newquiz.ID).ToList();
+                                if (answers != null && answers.Count > 0)
+                                    foreach (var ans in answers)
+                                    {
+                                        var newans = aclonemapping.AutoOrtherType(ans, new CloneLessonPartAnswerEntity());
+                                        _cloneAnswerService.Save(newans, true);
+                                    }
                             }
                             for (int k = pos; k >= 0; k--)
                                 desc = descArr[k] + "-----" + desc;
-                            part.Description = desc.Replace("[FILLREPLACMENT]", "#");
+                            part.Description = desc.Replace("[FILLREPLACEMENT]", "#");
                         }
                         else
                             for (int i = 0; i < questions.Count; i++)
@@ -721,22 +826,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 if (qdesc.Length > 0)
                                 {
                                     qdesc = NormalizeDescription(qdesc);
-                                    qdesc = qdesc.Replace("#", "[FILLREPLACMENT]");
+                                    qdesc = qdesc.Replace("#", "[FILLREPLACEMENT]");
                                     qdesc = qdesc.Replace("----", "#");
                                 }
                                 var qdescArr = qdesc.Split('#');
                                 var qdescLen = qdescArr.Length;
                                 if (qdescLen == 2)
                                 {
-                                    part.Description += ("<p>" + qdescArr[0] + " <fillquiz><input class='fillquiz'></input></fillquiz>" + qdescArr[1] + "</p>").Replace("[FILLREPLACMENT]", "#");
+                                    part.Description += ("<p>" + qdescArr[0] + " <fillquiz><input class='fillquiz'></input></fillquiz>" + qdescArr[1] + "</p>").Replace("[FILLREPLACEMENT]", "#");
                                 }
                                 else
                                     part.Description += "<p>" + (quiz.Content ?? "").Trim() + " <fillquiz><input class='fillquiz'></input></fillquiz></p>";
                                 quiz.Content = "";
-                                _cloneQuestionService.Save(quiz);
+                                var newquiz = qclonemapping.AutoOrtherType(quiz, new CloneLessonPartQuestionEntity());
+                                _cloneQuestionService.Save(quiz, true);
+                                var answers = _fcloneAnswerService.CreateQuery().Find(q => q.ParentID == newquiz.ID).ToList();
+                                if (answers != null && answers.Count > 0)
+                                    foreach (var ans in answers)
+                                    {
+                                        var newans = aclonemapping.AutoOrtherType(ans, new CloneLessonPartAnswerEntity());
+                                        _cloneAnswerService.Save(newans, true);
+                                    }
                             }
-
-                    _service.Save(part);
+                    var newpart = clonemapping.AutoOrtherType(part, new CloneLessonPartEntity());
+                    _service.Save(newpart, true);
                 }
             }
             return new JsonResult("Convert Done");
@@ -749,7 +862,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var repArr = new List<string> { ".....", "_____", "-----" };
 
-            _result = _result.Replace("&hellip;", ".").Replace("…","...");
+            _result = _result.Replace("&hellip;", ".").Replace("…", "...");
 
             while (_result.IndexOf("__ ") >= 0)
                 _result = _result.Replace("__ ", "__");
@@ -762,7 +875,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _result = _result.Replace(repStr.Substring(0, 4), "----");
             }
 
-            _result = Regex.Replace(_result, "([\\.-]){2,4}\\(.*\\)([\\.-]){2,4}", "----");
+            _result = Regex.Replace(_result, "([\\.-]){2,4}\\([^\\)]*\\)([\\.-]){2,4}", "----");
             return _result;
         }
     }
