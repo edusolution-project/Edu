@@ -1723,33 +1723,38 @@ button, input, a {
             font-size: 18px
         }
 
-    .ls-pratice .sub-practice .date {
-        display: block;
-        width: 140px;
-        background: #fff;
-        border-radius: 4px;
-        padding: 5px 18px
+/*.ls-pratice .sub-practice .date*/
+.ls-pratice .date {
+    display: block;
+    width: 140px;
+    background: #fff;
+    border-radius: 4px;
+    padding: 5px 18px
+}
+
+    /*.ls-pratice .sub-practice .date*/
+    .ls-pratice .date::after {
+        content: "\25BC";
+        margin-left: 10px;
+        position: absolute;
+        top: 2px;
+        right: 8px
     }
 
-        .ls-pratice .sub-practice .date::after {
-            content: "\25BC";
-            margin-left: 10px;
-            position: absolute;
-            top: 2px;
-            right: 8px
-        }
+/*.ls-pratice .sub-practice .date*/
+.ls-pratice .date.st::after {
+    color: #13A6FB
+}
 
-        .ls-pratice .sub-practice .date.st::after {
-            color: #13A6FB
-        }
+/*.ls-pratice .sub-practice .date*/
+.ls-pratice .date.ed::after {
+    color: #D03239
+}
 
-        .ls-pratice .sub-practice .date.ed::after {
-            color: #D03239
-        }
-
-        .ls-pratice .sub-practice .date ~ .date {
-            margin-left: 15px
-        }
+/*.ls-pratice .sub-practice .date*/
+.ls-pratice .date ~ .date {
+    margin-left: 15px
+}
 
 .ls-pratice .list {
     max-height: 300px;

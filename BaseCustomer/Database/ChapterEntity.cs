@@ -14,6 +14,10 @@ namespace BaseCustomerEntity.Database
         public string ClassID { get; set; }
         [JsonProperty("ClassSubjectID")]
         public string ClassSubjectID { get; set; }
+        [JsonProperty("StartDate")]
+        public DateTime StartDate { get; set; }
+        [JsonProperty("EndDate")]
+        public DateTime EndDate { get; set; }
     }
     public class ChapterService : ServiceBase<ChapterEntity>
     {
@@ -64,7 +68,6 @@ namespace BaseCustomerEntity.Database
                     else
                         _ = _courseService.IncreaseLessonCount(current.CourseID, increment);
                 }
-
             }
         }
 

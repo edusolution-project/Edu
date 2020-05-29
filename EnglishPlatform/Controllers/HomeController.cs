@@ -124,9 +124,10 @@ namespace EnglishPlatform.Controllers
             {
                 _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
                 HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                return RedirectToAction("Login");
+                //    return RedirectToAction("Login");
+                return View();
             }
-            return View();
+
         }
 
 
@@ -185,7 +186,8 @@ namespace EnglishPlatform.Controllers
                             var st = _studentService.GetItemByID(user.UserID);
 
                             var defaultUser = new UserModel() { };
-                            switch (Type){
+                            switch (Type)
+                            {
                                 case ACCOUNT_TYPE.TEACHER:
                                     if (tc != null)
                                     {
