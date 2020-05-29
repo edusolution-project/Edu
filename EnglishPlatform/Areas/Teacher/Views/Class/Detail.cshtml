@@ -220,7 +220,7 @@
             }
 
         .sub-practice:hover {
-            background: #CCC;
+            background: #DDD;
         }
 
         .chap-item {
@@ -234,14 +234,14 @@
 
     <script type="text/x-template" id="chapContentTemp">
         <li class="pr-0 ml-3 chap-item">
-            <div class="inner pt-3 pb-0">
+            <div class="inner pt-2 pb-2">
                 <div class="d-flex align-items-center">
                     <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse flex-grow-1 mb-0" v-on:click="loadContent(data.ClassSubject, data.ID)">
                         <span class="align-self-center"><i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></span>
                     </a>
                     <div class="picker-schedule d-flex" v-if="owner == '@currentuser'">
-                        <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateChapSchedule(data)"></datepicker>
-                        <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateChapSchedule(data)"></datepicker>
+                        <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateChapSchedule(data, pos)"></datepicker>
+                        <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateChapSchedule(data, pos)"></datepicker>
                     </div>
                 </div>
                 <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
@@ -262,7 +262,7 @@
     </script>
 
     <script type="text/x-template" id="lessonItemTemp">
-        <li class="sub-practice pt-2 pb-1 pl-2" style="border-left: dashed 1px #CCC">
+        <li class="sub-practice pt-2 pb-1 pl-2 rounded">
             <div class="d-flex w-100 align-items-start">
                 <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-grow-1 overflow-hidden" style="text-overflow: ellipsis" :title="data.Title"> <span><i class="ic far fa-file-alt mr-2"></i>{{data.Title}}</span></a>
                 <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
@@ -310,7 +310,7 @@
         var datepickerComponent = Vue.extend({
           //v-el:select
           template: `<div class="input-group date" ref="inputgroup">` +
-            `<input type="text" class="form-control" v-model="dateVal" readonly="readonly"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>` +
+            `<input type="text" class="form-control" v-model="dateVal" readonly="readonly">` +
             `</div>`,
             props: {
                 obj: '',
@@ -324,8 +324,12 @@
             {
                 dateVal: {
                     get() {
-                        if (this.date == undefined) this.date = '';
-                        return this.date == '' ? '' : moment(this.date).format("DD/MM/YYYY HH:mm");
+                        //var _date = moment(this.date);
+
+                        //if (!_date._isValid || _date <= moment(new Date(1900, 1, 1)))
+                        //    return '';
+                        //return _date.format("DD/MM/YYYY HH:mm");
+                        return formatTime(this.date);
                     },
                     set(value) {
                         var _date = moment(value, "DD/MM/YYYY HH:mm");
@@ -377,7 +381,7 @@
 
         Vue.component('datepicker', datepickerComponent);
 
-        new Vue({
+       var mainInstance = new Vue({
             el: "#main",
             mounted() {
                 this.loadClassDetail()
@@ -616,7 +620,9 @@
                                     Title: chapter.Name,
                                     ClassSubject: subject,
                                     Parent: parent,
-                                    TotalLessons: chapter.TotalLessons
+                                    TotalLessons: chapter.TotalLessons,
+                                    StartDate: chapter.StartDate,
+                                    EndDate: chapter.EndDate
                                 })
                             })
                             _lesson.forEach(function (lesson, k) {
@@ -706,7 +712,7 @@
                             obj.IsUpdating = false
                         }).catch(e => { })
                 },
-                updateChapSchedule(obj) {
+                updateChapSchedule(obj, pos) {
                     obj.IsUpdating = true
                     var startdate = moment(obj.StartDate).format("MM-DD-YYYY HH:mm:ss");
                     var enddate = moment(obj.EndDate).format("MM-DD-YYYY HH:mm:ss");
@@ -715,10 +721,26 @@
                     _form.append('ID', obj.ID)
                     _form.append('StartDate', startdate)
                     _form.append('EndDate', enddate)
+                    let _that = this;
                     let _url = '@processUrl("UpdateChapter", "LessonSchedule")'
+
                     axios.post(_url, _form)
                         .then(response => {
-                            obj.IsUpdating = false
+                            console.log(obj);
+                            obj.IsUpdating = false;
+                            mainInstance.$forceUpdate();
+                            var chapter = response.data.Data;
+                            if (chapter == null) {
+                                alert("có lỗi, vui lòng tải lại trang & thực hiện lại thao tác");
+                                return false;
+                            }
+                            else {
+                                var _container = '#prc-' + chapter.ID + '-' + pos;
+                                var startdate = formatTime(chapter.StartDate);
+                                var enddate = formatTime(chapter.EndDate);
+                                $(_container).find('.input-group.date.st > input').val(startdate);
+                                $(_container).find('.input-group.date.ed > input').val(enddate);
+                            }
                         }).catch(e => { })
                 },
                 clearSchedule(obj) {
@@ -937,14 +959,14 @@
 
                 //SUPPORT
                 formatShortDate(date) {
-                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
-                    return moment(date).format("DD/MM/YYYY")
+                    var _date = moment(date);
+                    if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+                    return _date.format("DD/MM/YYYY")
                 },
                 formatTime(time) {
-                    if(!(moment(time).isValid())) return ""
-                    if (moment(time) < moment(new Date(2000, 1, 1))) return "";
-                    console.log(moment(time))
-                    return moment(time).format("DD/MM/YYYY HH:mm")
+                    var _time = moment(time);
+                    if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
+                    return _time.format("DD/MM/YYYY HH:mm")
                 },
                 domDecoder(str) {
                     let parser = new DOMParser();
@@ -968,14 +990,7 @@
                         result = a * 100 / b;
                     return result;
                 }
-            },
-            updated: function(){
-                this.$nextTick(function () {
-                    var r = this.loaded_chapter[this.loaded_chapter.length - 1];
-                    if (r != null && r.split('_').length == 2 && r.split('_')[1] == 'undefined')
-                        console.log('.list.ls-pratice > li:eq(' + (this.loaded_chapter.length - 1) + ') > .innner > a');
 
-                })
             }
         });
     </script>

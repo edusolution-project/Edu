@@ -39,7 +39,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
-            _session.SetString("userAvatar", teacher.Avatar ?? _default.defaultAvatar);
+            try
+            {
+                _session.SetString("userAvatar", teacher.Avatar ?? _default.defaultAvatar);
+            }
+            catch (Exception e) { 
+
+            }
             return View();
         }
 

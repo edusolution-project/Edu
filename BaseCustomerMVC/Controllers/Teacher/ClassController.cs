@@ -172,23 +172,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public IActionResult References(DefaultModel model)
-        {
-            if (model == null) return null;
-            var currentClass = _service.GetItemByID(model.ID);
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var myClasses = _service.CreateQuery()
-                .Find(t => t.TeacherID == UserID)
-                //.Find(t=> true)
-                //.Project(Builders<ClassEntity>.Projection.Include(t => t.ID).Include(t => t.Name))
-                .ToList();
-            ViewBag.AllClass = myClasses;
-            ViewBag.User = UserID;
-            return View();
-        }
+        //public IActionResult References(DefaultModel model)
+        //{
+        //    if (model == null) return null;
+        //    var currentClass = _service.GetItemByID(model.ID);
+        //    if (currentClass == null)
+        //        return RedirectToAction("Index");
+        //    ViewBag.Class = currentClass;
+        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    var myClasses = _service.CreateQuery()
+        //        .Find(t => t.TeacherID == UserID)
+        //        //.Find(t=> true)
+        //        //.Project(Builders<ClassEntity>.Projection.Include(t => t.ID).Include(t => t.Name))
+        //        .ToList();
+        //    ViewBag.AllClass = myClasses;
+        //    ViewBag.User = UserID;
+        //    return View();
+        //}
 
         public IActionResult Modules(DefaultModel model)
         {
@@ -200,46 +200,46 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public IActionResult Assignments(DefaultModel model)
-        {
-            if (model == null) return null;
-            var currentClass = _service.GetItemByID(model.ID);
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            return View();
-        }
+        //public IActionResult Assignments(DefaultModel model)
+        //{
+        //    if (model == null) return null;
+        //    var currentClass = _service.GetItemByID(model.ID);
+        //    if (currentClass == null)
+        //        return RedirectToAction("Index");
+        //    ViewBag.Class = currentClass;
+        //    return View();
+        //}
 
-        public IActionResult Discussions(DefaultModel model)
-        {
-            if (model == null) return null;
-            var currentClass = _service.GetItemByID(model.ID);
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            return View();
-        }
+        //public IActionResult Discussions(DefaultModel model)
+        //{
+        //    if (model == null) return null;
+        //    var currentClass = _service.GetItemByID(model.ID);
+        //    if (currentClass == null)
+        //        return RedirectToAction("Index");
+        //    ViewBag.Class = currentClass;
+        //    return View();
+        //}
 
-        public IActionResult Announcements(DefaultModel model)
-        {
-            if (model == null) return null;
-            var currentClass = _service.GetItemByID(model.ID);
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            return View();
-        }
+        //public IActionResult Announcements(DefaultModel model)
+        //{
+        //    if (model == null) return null;
+        //    var currentClass = _service.GetItemByID(model.ID);
+        //    if (currentClass == null)
+        //        return RedirectToAction("Index");
+        //    ViewBag.Class = currentClass;
+        //    return View();
+        //}
 
-        public IActionResult Members(DefaultModel model)
-        {
-            if (model == null) return null;
-            var currentClass = _service.GetItemByID(model.ID);
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            ViewBag.Managable = CheckPermission(PERMISSION.MEMBER_COURSE_EDIT);
-            return View();
-        }
+        //public IActionResult Members(DefaultModel model)
+        //{
+        //    if (model == null) return null;
+        //    var currentClass = _service.GetItemByID(model.ID);
+        //    if (currentClass == null)
+        //        return RedirectToAction("Index");
+        //    ViewBag.Class = currentClass;
+        //    ViewBag.Managable = CheckPermission(PERMISSION.MEMBER_COURSE_EDIT);
+        //    return View();
+        //}
 
         public IActionResult StudentDetail(string ID, string ClassID)
         {
@@ -673,7 +673,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region Homepage
-        public JsonResult GetActiveList(DateTime today)
+        public JsonResult GetActiveList(DateTime today, string Center)
         {
             today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
@@ -687,6 +687,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     StatusDesc = "Authentication Error"
                 });
             }
+            if (!String.IsNullOrEmpty(Center))
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == Center));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
@@ -711,7 +713,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return Json(new { Data = std });
         }
 
-        public JsonResult GetFinishList(DefaultModel model, DateTime today)
+        public JsonResult GetFinishList(DefaultModel model, DateTime today, string Center)
         {
             today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
@@ -721,6 +723,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 return null;
             }
+            if (!String.IsNullOrEmpty(Center))
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == Center));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
 
@@ -741,7 +745,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return Json(new { Data = std });
         }
 
-        public JsonResult GetThisWeekLesson(DateTime today)
+        public JsonResult GetThisWeekLesson(DateTime today, string Center)
         {
             today = today.ToUniversalTime();
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
@@ -761,7 +765,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             var classFilter = new List<FilterDefinition<ClassEntity>>();
-            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
+            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId) && o.Center == Center));
             var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
 
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
@@ -814,9 +818,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region Manage
-        public JsonResult GetManageList(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
+        public JsonResult GetManageList(DefaultModel model, string Center, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
-            var returndata = FilterClass(model, SubjectID, GradeID, TeacherID, skipActive);
+            var returndata = FilterClass(model, Center, SubjectID, GradeID, TeacherID, skipActive);
             //model.TotalRecord = totalrec;
 
             var response = new Dictionary<string, object>
@@ -827,9 +831,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        public JsonResult GetClassList(DefaultModel model, string SubjectID = "", string GradeID = "")
+        public JsonResult GetClassList(DefaultModel model, string Center, string SubjectID = "", string GradeID = "")
         {
-            var returndata = FilterClass(model, SubjectID, GradeID, User.Claims.GetClaimByType("UserID").Value, true);
+            var returndata = FilterClass(model, Center, SubjectID, GradeID, User.Claims.GetClaimByType("UserID").Value, true);
             //model.TotalRecord = totalrec;
 
             var response = new Dictionary<string, object>
@@ -840,11 +844,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        private List<Dictionary<string, object>> FilterClass(DefaultModel model, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
+        private List<Dictionary<string, object>> FilterClass(DefaultModel model, string Center, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
             model.TotalRecord = 0;
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
             var classfilter = new List<FilterDefinition<ClassEntity>>();
+            classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == Center));
             var deep_filter = false;
             FilterDefinition<ClassEntity> ownerfilter = null;
             var UserID = User.Claims.GetClaimByType("UserID").Value;
@@ -976,7 +981,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.TeacherID = userId; // creator
                 item.Skills = new List<string>();
                 item.Subjects = new List<string>();
-                item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER} };
+                item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER } };
                 item.TotalLessons = 0;
                 item.IsActive = true;
                 item.StartDate = item.StartDate.ToUniversalTime();

@@ -1550,7 +1550,7 @@ button, input, a {
 
 .ls-pratice li .inner {
     padding: 10px 0;
-    border-bottom: 1px solid #D0DFE8
+    /*border-bottom: 1px solid #D0DFE8*/
 }
 
 .ls-pratice li:last-child .inner {

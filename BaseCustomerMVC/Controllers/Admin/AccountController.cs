@@ -361,6 +361,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             var _currentData = _service.GetAccountByEmail(UserName);
             return _currentData != null;
         }
-       
+
     }
 }

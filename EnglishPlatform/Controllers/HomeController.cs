@@ -84,39 +84,29 @@ namespace EnglishPlatform.Controllers
             {
                 var center = _centerService.GetDefault();
                 string centerCode = center.Code;
-                string roleCode = "";
+                //string roleCode = "";
                 string userID = User.FindFirst("UserID").Value;
                 var tc = _teacherService.GetItemByID(userID);
                 var st = _studentService.GetItemByID(userID);
-                var user = _accountService.GetItemByID(userID);
-                var defaultUser = new UserModel() { };
-                if (type.Value == ACCOUNT_TYPE.ADMIN)
-                {
-                    defaultUser = new UserModel(userID, "admin");
-                    centerCode = center.Code;
-                    roleCode = user.UserName == "supperadmin@gmail.com" ? "superadmin" : "admin";
-                }
-                else
-                {
-                    if (tc != null)
-                    {
-                        defaultUser = new UserModel(tc.ID, tc.FullName);
-                        centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
-                        roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
-                    }
-                    if (st != null)
-                    {
-                        defaultUser = new UserModel(st.ID, st.FullName);
-                        centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
-                        roleCode = "student";
-                    }
+                //var user = _accountService.GetItemByID(userID);
+                //var defaultUser = new UserModel() { };
 
-                    var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
-                    var listAccess = _accessesService.GetAccessByRole(role.Code);
-                    string key = $"{centerCode}_{roleCode}";
-                    CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
-                    CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
+
+                switch (type.Value)
+                {
+                    case ACCOUNT_TYPE.ADMIN:
+                        centerCode = center.Code;
+                        break;
+                    case ACCOUNT_TYPE.TEACHER:
+                        if (tc != null)
+                            centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
+                        break;
+                    default:
+                        if (st != null)
+                            centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                        break;
                 }
+
                 //cache
                 return Redirect($"{centerCode}/{type.Value}");
             }
