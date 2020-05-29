@@ -294,7 +294,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Course
 
         [HttpPost]
-        public JsonResult GetList(DefaultModel model, string Center = "", string SubjectID = "", string GradeID = "")
+        public JsonResult GetList(DefaultModel model, string Center, string SubjectID = "", string GradeID = "")
         {
             var filter = new List<FilterDefinition<CourseEntity>>();
 

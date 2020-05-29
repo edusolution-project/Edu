@@ -157,7 +157,7 @@ namespace EnglishPlatform
                                         defaultUser = new UserModel(tc.ID, tc.FullName);
                                         centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center;
                                         roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
-                                        isRealCenter = tc.Centers.Any(o => o.Code == center);
+                                        isRealCenter = tc.Centers.Any(o => o.Code == centerCode);
                                     }
                                     break;
                                 default:
@@ -166,7 +166,7 @@ namespace EnglishPlatform
                                         defaultUser = new UserModel(st.ID, st.FullName);
                                         centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center;
                                         roleCode = "student";
-                                        isRealCenter = st.Centers != null && st.Centers.Any(o => o == center);
+                                        isRealCenter = st.Centers != null && st.Centers.Any(o => o == centerCode);
                                     }
                                     break;
                             }

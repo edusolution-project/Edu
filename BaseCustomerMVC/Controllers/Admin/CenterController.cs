@@ -113,7 +113,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
-                item.Code = item.Name.ConvertUnicodeToCode("-",true).Replace(@"","-");
+                item.Code = item.Name.ConvertUnicodeToCode("-", true);//.Replace(@" ","-");
                 _service.CreateQuery().InsertOne(item);
                 Dictionary<string, object> response = new Dictionary<string, object>()
                     {

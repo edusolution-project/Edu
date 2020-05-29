@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using System.Text;
 using System.Linq;
 using Core_v2.Globals;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -558,6 +559,65 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {"Data",oldItem },
                         {"Error", null }
                     });
+            }
+        }
+
+
+        [HttpPost]
+        [Obsolete]
+        public JsonResult UpdateChapter(ChapterEntity entity)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            entity.StartDate = entity.StartDate.ToUniversalTime();
+            entity.EndDate = entity.EndDate.ToUniversalTime();
+            if (entity == null || string.IsNullOrEmpty(entity.ID))
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error", "Không tìm thấy chương" }
+                    });
+            }
+            else
+            {
+                var oldItem = _chapterService.GetItemByID(entity.ID);
+                if (oldItem == null)
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error", "Không tìm thấy chương" }
+                    });
+
+                var defDate = new DateTime(1900, 1, 1);
+                oldItem.StartDate = entity.StartDate > defDate ? entity.StartDate : defDate;
+                oldItem.EndDate = entity.EndDate > defDate ? entity.EndDate : defDate;
+
+                _chapterService.Save(oldItem);//Save chapter
+
+                UpdateChapterCalendar(oldItem, UserID);
+
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data", oldItem },
+                    });
+            }
+        }
+
+        private void UpdateChapterCalendar(ChapterEntity entity, string UserID)
+        {
+            var lessonids = _lessonService.CreateQuery().Find(t => t.ChapterID == entity.ID && t.ClassSubjectID == entity.ClassSubjectID).Project(t => t.ID).ToList();
+            foreach (var id in lessonids)
+            {
+                var schedule = _lessonScheduleService.GetItemByLessonID_ClassSubjectID(id, entity.ClassSubjectID);
+                schedule.StartDate = entity.StartDate;
+                schedule.EndDate = entity.EndDate;
+                UpdateCalendar(schedule, UserID);
+                _lessonScheduleService.CreateOrUpdate(schedule);
+            }
+            var subchaps = _chapterService.GetSubChapters(entity.ClassSubjectID, entity.ID);
+            foreach (var subchap in subchaps)
+            {
+                subchap.StartDate = entity.StartDate;
+                subchap.EndDate = entity.EndDate;
+                _chapterService.Save(subchap);
+                UpdateChapterCalendar(subchap, UserID);
             }
         }
 

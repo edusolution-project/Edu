@@ -2,9 +2,9 @@
     ViewData["Title"] = "Trang chủ - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    string processUrl(string act, string ctrl)
+    string processUrl(string act, string ctrl, Object param = null)
     {
-        string url = Url.Action(act, ctrl);
+        string url = Url.Action(act, ctrl, param);
 
         return $"/{center}{url}";
     }
@@ -184,6 +184,7 @@
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
                 _form.append('PageSize', 6)
                 _form.append('PageIndex', 1)
+                _form.append('Center', '@center')
                 let _url = '@processUrl("GetFinishList", "Class")'
 
                 axios.post(_url, _form)
@@ -199,6 +200,7 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('Center', '@center')
                 let _url = '@processUrl("GetThisWeekLesson", "Class")'
 
                 axios.post(_url, _form)
@@ -214,6 +216,7 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 let _url = '@Url.Action("GetLastestMessage", "EasyRealtime")'
+                _form.append('Center', '@center')
 
                 axios.get(_url, _form)
                     .then(response => {
