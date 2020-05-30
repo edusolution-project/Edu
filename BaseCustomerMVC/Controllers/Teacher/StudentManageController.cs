@@ -36,6 +36,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ExamService _examService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly IHostingEnvironment _env;
+        private readonly CenterService _centerService;
 
 
         public StudentManageController(
@@ -55,6 +56,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ScoreStudentService scoreStudentService,
             LessonScheduleService lessonScheduleService,
             StudentService studentService,
+            CenterService centerService,
             IHostingEnvironment evn
             )
         {
@@ -74,6 +76,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classSubjectService = classSubjectService;
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
+            _centerService = centerService;
             _env = evn;
 
             _studentHelper = new StudentHelper(studentService, accountService);
@@ -112,7 +115,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public JsonResult RemoveStudent(string ClassID, string StudentID)
+        public async Task<JsonResult> RemoveStudent(string ClassID, string StudentID)
         {
             if (string.IsNullOrEmpty(ClassID) || string.IsNullOrEmpty(StudentID))
             {
@@ -125,8 +128,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (_studentService.LeaveClass(ClassID, StudentID) > 0)
             {
                 //remove history, exam, exam detail, progress...
-                _learningHistoryService.RemoveClassStudentHistory(ClassID, StudentID);
-                _examService.RemoveClassStudentExam(ClassID, StudentID);
+                await _learningHistoryService.RemoveClassStudentHistory(ClassID, StudentID);
+                await _examService.RemoveClassStudentExam(ClassID, StudentID);
             }
             return Json(new { msg = "đã xóa học viên" });
         }
@@ -141,16 +144,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var student = _studentService.GetItemByID(StudentID);
             if (student == null)
                 return Json(new { error = "Học viên không tồn tại" });
+            if (student.JoinedClasses == null)
+            {
+                student.JoinedClasses = new List<string> { };
+                _studentService.Save(student);//init JoinedClass;
+            }
+            if (student.Centers == null)
+            {
+                student.Centers = new List<string> { };
+                _studentService.Save(student);//init Center;
+            }
             if (_studentService.IsStudentInClass(ClassID, student.ID))
             {
                 return Json(new { data = @class, msg = "Học viên đã có trong lớp" });
             }
-            if (_studentService.JoinClass(ClassID, StudentID) > 0)
+            if (_studentService.JoinClass(ClassID, StudentID, @class.Center) > 0)
                 return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
             return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
         }
 
-        public JsonResult GetList(DefaultModel model, string SubjectID, string ClassID, string TeacherID, string SkillID, string GradeID)
+        public JsonResult GetList(DefaultModel model, string Center, string SubjectID, string ClassID, string TeacherID, string SkillID, string GradeID)
         {
             var filterCs = new List<FilterDefinition<ClassSubjectEntity>>();
             if (User.IsInRole("teacher"))
@@ -182,16 +195,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     { "Model", model }
                 });
-            var list =
-                    string.IsNullOrEmpty(model.SearchText) ?
-                        _studentService.Collection.Find(Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids))
-                        .SortByDescending(t => t.ID)
-                        :
-                        _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(
+
+            var stfilter = new List<FilterDefinition<StudentEntity>>();
+
+            if (!string.IsNullOrEmpty(Center))
+            {
+                var @center = _centerService.GetItemByCode(Center);
+                if (@center == null) return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Error", "Cơ sở không đúng"}
+                    });
+                stfilter.Add(Builders<StudentEntity>.Filter.Where(o => o.Centers.Contains(@center.ID)));
+            }
+
+            if (string.IsNullOrEmpty(model.SearchText))
+                stfilter.Add(Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids));
+            else
+                stfilter.Add(Builders<StudentEntity>.Filter.And(
                         Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids),
-                        Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")))
-                        .SortByDescending(t => t.ID);
-            //var list = _classStudentService.Collection.Find(t => classids.Contains(t.ClassID) && studentids.Contains(t.StudentID)).SortByDescending(t => t.ID);
+                        Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")));
+            var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID);
+
             model.TotalRecord = list.CountDocuments();
 
             var _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
@@ -213,9 +237,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        public JsonResult Search(string term)
+        public JsonResult Search(string term, string Center)
         {
-            return Json(_studentService.Search(term, 100));
+            var stfilter = new List<FilterDefinition<StudentEntity>>();
+            if (!string.IsNullOrEmpty(Center))
+            {
+                var @center = _centerService.GetItemByCode(Center);
+                if (@center == null) return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Error", "Cơ sở không đúng"}
+                    });
+                stfilter.Add(Builders<StudentEntity>.Filter.Where(o => o.Centers.Contains(@center.ID)));
+            }
+            if (!string.IsNullOrEmpty(term))
+                stfilter.Add(Builders<StudentEntity>.Filter.Text("\"" + term + "\""));
+            return Json(_studentService.CreateQuery().Find(Builders<StudentEntity>.Filter.And(stfilter)).Limit(100).ToEnumerable());
+            //return Json(_studentService.Search(term, 100));
         }
 
         #region Batch Import
@@ -248,8 +285,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
                             int totalRows = workSheet.Dimension.Rows;
-                            var classStudents =
-                                _studentService.GetStudentIdsByClassId(ClassID);
+                            var classStudents = _studentService.GetStudentIdsByClassId(ClassID);
                             var keyCol = 4;
                             for (int i = 1; i <= totalRows; i++)
                             {
@@ -261,7 +297,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 if (student == null) continue;
                                 if (classStudents.Any(t => t == student.ID)) continue;
 
-                                _studentService.JoinClass(ClassID, student.ID);
+                                _studentService.JoinClass(ClassID, student.ID, @class.Center);
 
                                 //_classStudentService.Save(new ClassStudentEntity
                                 //{

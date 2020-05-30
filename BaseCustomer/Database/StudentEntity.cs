@@ -60,6 +60,8 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<StudentEntity> Search(string name, int limit = 0)
         {
+
+
             return Collection.Find(Builders<StudentEntity>.Filter.Text("\"" + name + "\"")).Limit(limit).ToEnumerable();
         }
 
@@ -114,12 +116,14 @@ namespace BaseCustomerEntity.Database
             return Collection.UpdateMany(t => t.ID == StudentID, Builders<StudentEntity>.Update.Pull(t => t.JoinedClasses, ClassID)).ModifiedCount;
         }
 
-        public long JoinClass(string ClassID, string StudentID)
+        public long JoinClass(string ClassID, string StudentID, string Center)
         {
-            if (Collection.Find(t => t.ID == StudentID && t.JoinedClasses == null).CountDocuments() > 0)
-                return Collection.UpdateMany(t => t.ID == StudentID, Builders<StudentEntity>.Update.Set(t => t.JoinedClasses, new List<string> { ClassID })).ModifiedCount;
-            else
-                return Collection.UpdateMany(t => t.ID == StudentID, Builders<StudentEntity>.Update.AddToSet(t => t.JoinedClasses, ClassID)).ModifiedCount;
+            //if (Collection.Find(t => t.ID == StudentID && t.JoinedClasses == null).CountDocuments() > 0)
+            //    return Collection.UpdateMany(t => t.ID == StudentID, Builders<StudentEntity>.Update.Set(t => t.JoinedClasses, new List<string> { ClassID })).ModifiedCount;
+            //else
+            return Collection.UpdateMany(t => t.ID == StudentID, Builders<StudentEntity>.Update
+                .AddToSet(t => t.JoinedClasses, ClassID)
+                .AddToSet(t => t.Centers, Center)).ModifiedCount;
         }
 
         public StudentEntity GetStudentByEmail(string studentEmail)

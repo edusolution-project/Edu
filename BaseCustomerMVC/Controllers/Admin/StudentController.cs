@@ -117,7 +117,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             var filter = Builders<StudentEntity>.Filter.Where(o => o.ID == id);
             var data = _service.Collection.Find(filter);
             var student = data == null || data.Count() <= 0 ? null : data.First();
-            var account = _accountService.CreateQuery().Find(o => o.UserID == student.ID && o.Type == ACCOUNT_TYPE.STUDENT).First();
+            var account = _accountService.CreateQuery().Find(o => o.UserID == student.ID
+            //&& o.Type == ACCOUNT_TYPE.STUDENT
+            ).First();
             var response = new Dictionary<string, object>
             {
                 { "Data", _mapping.AutoOrtherType(student, new StudentViewModel()

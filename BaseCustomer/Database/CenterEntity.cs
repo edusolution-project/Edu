@@ -44,9 +44,9 @@ namespace BaseCustomerEntity.Database
 
         public CenterEntity GetItemByCode(string code)
         {
-            var listData = CreateQuery().Find(o => o.Code == code)?.ToList();
-            if (listData == null || listData.Count == 0) return null;
-            return listData?.FirstOrDefault();
+            //var listData = CreateQuery().Find(o => o.Code == code)?.ToList();
+            //if (listData == null || listData.Count == 0) return null;
+            return CreateQuery().Find(o => o.Code == code)?.FirstOrDefault();
         }
         public void ChangeStatus(List<string> IDs, bool status)
         {

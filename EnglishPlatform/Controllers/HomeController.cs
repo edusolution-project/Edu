@@ -195,7 +195,7 @@ namespace EnglishPlatform.Controllers
                                     if (st != null)
                                     {
                                         defaultUser = new UserModel(st.ID, st.FullName);
-                                        centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                                        centerCode = (st.Centers != null && st.Centers.Count > 0) ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
                                         roleCode = "student";
                                     }
                                     break;

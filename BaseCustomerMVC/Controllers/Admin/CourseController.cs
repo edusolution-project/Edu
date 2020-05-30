@@ -30,7 +30,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly StudentService _studentService;
         private readonly LessonService _lessonService;
         private readonly LearningHistoryService _learningHistoryService;
-
+        
         //private readonly LessonPartService _lessonPartService;
         //private readonly LessonPartAnswerService _lessonPartAnswerService;
         //private readonly LessonPartQuestionService _lessonPartQuestionService;
@@ -55,6 +55,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly IHostingEnvironment _env;
 
         private readonly LessonHelper _lessonHelper;
+        private readonly CenterService _centerService;
+        private readonly AccountService _accountService;
 
         public CourseController(ClassService service,
             ClassSubjectService classSubjectService,
@@ -80,6 +82,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
             FileProcess fileProcess,
             CalendarHelper calendarHelper,
+            CenterService centerService,
+            AccountService accountService,
             IHostingEnvironment evn)
         {
             _service = service;
@@ -110,6 +114,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                cloneLessonPartQuestionService
                );
 
+            _centerService = centerService;
+            _accountService = accountService;
             _env = evn;
         }
 
@@ -509,10 +515,10 @@ namespace BaseCustomerMVC.Controllers.Admin
                 {
                     //remove Schedule, Part, Question, Answer
                     _ = _lessonScheduleService.RemoveManyClass(ids);
-                        //CreateQuery().DeleteMany(o => ids.Contains(o.ClassID));
+                    //CreateQuery().DeleteMany(o => ids.Contains(o.ClassID));
                     _ = _lessonHelper.RemoveClone(ids);
                     _ = _examService.RemoveManyClassExam(ids);
-                        //Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    //Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     //_examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     var delete = _service.Collection.DeleteMany(o => ids.Contains(o.ID));
                     return new JsonResult(delete);
@@ -601,6 +607,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var file = form.Files[0];
             var filePath = Path.Combine(_env.WebRootPath, itemCourse.ID + "_" + file.FileName + DateTime.Now.ToString("ddMMyyyyhhmmss"));
             List<StudentEntity> studentList = null;
+            var defCenter = _centerService.GetItemByCode("eduso");
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
@@ -628,7 +635,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             itemCourse.Students = itemCourse.Students.Distinct().ToList();
                             foreach (var student in itemCourse.Students)
                             {
-                                _studentService.JoinClass(itemCourse.ID, student);
+                                _studentService.JoinClass(itemCourse.ID, student, defCenter.ID);
                             }
                             _service.CreateQuery().ReplaceOne(o => o.ID == itemCourse.ID, itemCourse);
                         }
@@ -647,5 +654,31 @@ namespace BaseCustomerMVC.Controllers.Admin
             return new JsonResult(response);
         }
 
+
+        public JsonResult FixDefCenter()
+        {
+            var defCenter = _centerService.GetItemByCode("eduso");
+            var defCenters = new List<string> { defCenter.ID };
+            _studentService.CreateQuery().UpdateMany(t => true, Builders<StudentEntity>.Update.Set(t => t.Centers, defCenters));//student
+            _service.CreateQuery().UpdateMany(t => true, Builders<ClassEntity>.Update.Set(t => t.Center, defCenter.ID));//class
+            _courseService.CreateQuery().UpdateMany(t => true, Builders<CourseEntity>.Update.Set(t => t.Center, defCenter.ID));//course
+            var defCenterMember = new List<CenterMemberEntity> { new CenterMemberEntity { CenterID = defCenter.ID, Code = defCenter.Code, Name = defCenter.Name } };
+            var teachers = _teacherService.GetAll().ToList();
+            var teacherrole = "5d808d08cf9a821bdc9daf7b";
+            var headrole = "5d808d08cf9a821bdc9daf79";
+            foreach (var teacher in teachers)
+            {
+                if (teacher.Centers != null && teacher.Centers.Count > 0) continue;
+                var acc = _accountService.GetAccountByEmail(teacher.Email);
+                if (acc == null) continue;
+                teacher.Centers = defCenterMember;
+                if (acc.Type == "teacher")
+                    teacher.Centers[0].RoleID = teacherrole;
+                else
+                    teacher.Centers[0].RoleID = headrole;
+                _teacherService.Save(teacher);
+            }
+            return Json("OK");
+        }
     }
 }

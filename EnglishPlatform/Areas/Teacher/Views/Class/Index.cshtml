@@ -514,7 +514,7 @@
                     _form.append('StartDate', _that.sDate)
                     _form.append('EndDate', _that.eDate)
                     _form.append('SearchText', _that.searchTerm)
-
+                    _form.append('Center', '@center')
                     @if(!User.IsInRole("head-teacher"))
                     {
                         @:let _url = '@processUrl("GetClassList", "Class")'
@@ -601,6 +601,7 @@
                     _form.append('Name', _that.class_info.Name)
                     _form.append('StartDate', _startdate)
                     _form.append('EndDate', _enddate)
+                    _form.append('CenterCode', '@center')
 
                     if(_that.class_info.Description != null)
                         _form.append('Description', _that.class_info.Description)
@@ -816,6 +817,7 @@
                             @:let _form = new FormData()
                             @:  _form.append('SubjectID', obj.SubjectID)
                             @:  let _url = '@processUrl("GetListTeacher", "Class")'
+                            @:  _form.append('Center', '@center')
                             @:  axios.post(_url, _form)
                             @:      .then(response => {
                             @:          var _data = response.data.Data;
@@ -854,6 +856,7 @@
                     let _form = new FormData()
                     _form.append('SubjectID', obj.SubjectID)
                     _form.append('GradeID', obj.GradeID)
+                    _form.append('Center', '@center')
                     let _url = '@processUrl("GetActiveList", "Curriculum")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -993,7 +996,7 @@
                     _form.append('ClassID', _that.class_info.ID)
                     _form.append('PageSize', _that.student_data.view)
                     _form.append('PageIndex', _that.student_data.page)
-
+                    _form.append('Center', '@center')
                     let _url = '@processUrl("GetList", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -1036,6 +1039,7 @@
                             if (_that.loadedTermsST.filter(item => item.term.indexOf(term) > -1).length == 0) {
                                 let _form = new FormData()
                                 _form.append('term', term)
+                                _form.append('Center', '@center')
                                 let _url = '@processUrl("Search","StudentManage")'
                                 axios.post(_url, _form)
                                     .then(response => {

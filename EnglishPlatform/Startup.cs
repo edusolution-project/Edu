@@ -108,11 +108,11 @@ namespace EnglishPlatform
             app.Use(async (context, next) =>
             {
                 string center = context.Request.Path.Value != "" && context.Request.Path.Value != "/" ? context.Request.Path.Value.Split('/')[1] : string.Empty;
-                if (!string.IsNullOrEmpty(center) && 
-                !center.Contains("hub") && 
+                if (!string.IsNullOrEmpty(center) &&
+                !center.Contains("hub") &&
                 !context.Request.Path.Value.Contains("EasyRealTime") &&
                 !context.Request.Path.Value.Contains("home") &&
-                !context.Request.Path.Value.Contains("login") && 
+                !context.Request.Path.Value.Contains("login") &&
                 !context.Request.Path.Value.Contains("logout") &&
                 !(context.Request.Path.Value == "/"))
                 {
@@ -130,7 +130,7 @@ namespace EnglishPlatform
                         }
                         else
                         {
-                            CenterService centerService = new CenterService(Configuration);
+                            CenterService _centerService = new CenterService(Configuration);
                             AccountService _accountService = new AccountService(Configuration);
                             TeacherService _teacherService = new TeacherService(Configuration);
                             StudentService _studentService = new StudentService(Configuration);
@@ -164,7 +164,7 @@ namespace EnglishPlatform
                                     if (st != null)
                                     {
                                         defaultUser = new UserModel(st.ID, st.FullName);
-                                        centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center;
+                                        centerCode = (st.Centers != null && st.Centers.Count > 0) ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center;
                                         roleCode = "student";
                                         isRealCenter = st.Centers != null && st.Centers.Any(o => o == centerCode);
                                     }
@@ -207,10 +207,10 @@ namespace EnglishPlatform
 
             app.UseMvc(routes =>
             {
-                  routes.MapRoute(
-                   name: "default",
-                   template: "{controller=home}/{action=index}/{id?}"
-                 );
+                routes.MapRoute(
+                 name: "default",
+                 template: "{controller=home}/{action=index}/{id?}"
+               );
                 routes.MapRoute(
                    name: "areas",
                    template: "{area:exists}/{controller=Home}/{action=Index}"
@@ -237,14 +237,14 @@ namespace EnglishPlatform
                  );
             });
 
-            
+
         }
     }
     public class MyCustomerRoute : IRouteConstraint
     {
         public MyCustomerRoute()
         {
-            
+
         }
         public bool Match(HttpContext httpContext, IRouter route, string routeKey, RouteValueDictionary values, RouteDirection routeDirection)
         {

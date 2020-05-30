@@ -38,13 +38,10 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                @*<a :href="'@processUrl("Detail","Class")/' + item.classID + '#module'" :title="item.skill.Name" class="title"><h4 class="abc" :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>*@
-                                <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID'" :title="item.skill.Name" class="title"><h4 class="abc" :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.skill.Name" class="title"><h4 class="abc" :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
                                 <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
-                                    @*<a :href="'@processUrl("Detail","Class")/' + item.classID" :title="item.className" class="title">{{item.className}}</a>*@
                                     <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.className" class="title">{{item.className}}</a>
-                                    @*<p><i class="icofont icofont-user"></i>{{item.students}} học viên</p>*@
                                     <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
                                 </div>
                             </div>
@@ -167,6 +164,7 @@
                 // Truyen param vào đây
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('Center', '@center')
                 let _url = '@processUrl("GetActiveList", "Class")'
 
                 axios.post(_url, _form)
@@ -208,7 +206,7 @@
                         //console.log("Week")
                         //console.log(response.data)
                         _that.lesson_week = response.data.data;
-                        //console.log(_that.lesson_week);
+                        console.log(_that.lesson_week.length);
                     }).catch(e => { })
             },
             getNewFeed() {

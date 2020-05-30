@@ -72,6 +72,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
+        private readonly CenterService _centerService;
 
         private readonly MappingEntity<ChapterEntity, CourseChapterEntity> _chapterMappingRev = new MappingEntity<ChapterEntity, CourseChapterEntity>();
         private readonly MappingEntity<CourseChapterEntity, ChapterEntity> _chapterMapping = new MappingEntity<CourseChapterEntity, ChapterEntity>();
@@ -120,6 +121,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , LessonScheduleService lessonScheduleService
             , ExamDetailService examDetailService
             , StudentService studentService
+            , CenterService centerService
                  )
         {
             _service = service;
@@ -169,6 +171,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _examDetailService = examDetailService;
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
+            _centerService = centerService;
         }
 
         public IActionResult Index(DefaultModel model, int old = 0)
@@ -301,7 +304,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(UserID);
 
-            if (teacher == null || !teacher.Centers.Any(c => c.CenterID == Center))
+            if (teacher == null || !teacher.Centers.Any(c => c.Code == Center))
             {
                 return new JsonResult(new Dictionary<string, object>
                     {
@@ -310,7 +313,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             if (!string.IsNullOrEmpty(Center))
             {
-                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.Center == Center));
+                var @center = _centerService.GetItemByCode(Center);
+                if (@center == null) return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Error", "Cơ sở không đúng"}
+                    });
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.Center == @center.ID));
             }
             if (!string.IsNullOrEmpty(SubjectID))
             {
@@ -380,7 +388,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (!string.IsNullOrEmpty(Center))
             {
-                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.Center == Center));
+                var @center = _centerService.GetItemByCode(Center);
+                if (@center == null) return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Error", "Cơ sở không đúng"}
+                    });
+                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.Center == @center.ID));
             }
             if (!string.IsNullOrEmpty(SubjectID))
             {
@@ -451,7 +464,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        public JsonResult CreateOrUpdate(CourseEntity item)
+        public JsonResult CreateOrUpdate(CourseEntity item, string CenterCode)
         {
             try
             {
@@ -459,6 +472,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var olditem = _service.CreateQuery().Find(o => o.ID == item.ID).SingleOrDefault();
                 if (olditem == null)
                 {
+                    var center = _centerService.GetItemByCode(CenterCode);
+                    if (string.IsNullOrEmpty(CenterCode) || center == null)
+                        return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Cơ sở không đúng" }
+                    });
+                    item.Center = center.ID;
                     item.Created = DateTime.Now;
                     item.CreateUser = UserID;
                     item.IsAdmin = true;

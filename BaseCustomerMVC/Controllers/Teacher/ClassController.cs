@@ -55,6 +55,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
 
+        private readonly CenterService _centerService;
+
 
         public ClassController(
             AccountService accountService,
@@ -87,7 +89,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonHelper lessonHelper,
             StudentHelper studentHelper,
 
-            ChapterProgressService chapterProgressService
+            ChapterProgressService chapterProgressService,
+            CenterService centerService
 
             )
         {
@@ -130,6 +133,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
             _chapterProgressService = chapterProgressService;
+            _centerService = centerService;
         }
 
         public IActionResult Index(DefaultModel model, int old = 0)
@@ -684,11 +688,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Json(new ReturnJsonModel
                 {
                     StatusCode = ReturnStatus.ERROR,
-                    StatusDesc = "Authentication Error"
+                    StatusDesc = "Phiên làm việc đã kết thúc, yêu cầu đăng nhập lại"
                 });
             }
-            if (!String.IsNullOrEmpty(Center))
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == Center));
+            if (!string.IsNullOrEmpty(Center))
+            {
+                var @center = _centerService.GetItemByCode(Center);
+                if (@center == null) return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Cơ sở không đúng"}
+                });
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == @center.ID));
+            }
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
@@ -723,8 +734,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 return null;
             }
-            if (!String.IsNullOrEmpty(Center))
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == Center));
+            if (!string.IsNullOrEmpty(Center))
+            {
+                var @center = _centerService.GetItemByCode(Center);
+                if (@center == null) return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Cơ sở không đúng"}
+                });
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == @center.ID));
+            }
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
 
@@ -765,7 +783,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             var classFilter = new List<FilterDefinition<ClassEntity>>();
-            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId) && o.Center == Center));
+            if (!string.IsNullOrEmpty(Center))
+            {
+                var @center = _centerService.GetItemByCode(Center);
+                if (@center == null) return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Cơ sở không đúng"}
+                });
+                classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId) && o.Center == @center.ID));
+            }
+
             var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
 
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
@@ -820,7 +847,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Manage
         public JsonResult GetManageList(DefaultModel model, string Center, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
-            var returndata = FilterClass(model, Center, SubjectID, GradeID, TeacherID, skipActive);
+            var center = new CenterEntity();
+            if (!string.IsNullOrEmpty(Center))
+            {
+                center = _centerService.GetItemByCode(Center);
+                if (@center == null) return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Cơ sở không đúng"}
+                });
+            }
+
+            var returndata = FilterClass(model, center.ID, SubjectID, GradeID, TeacherID, skipActive);
             //model.TotalRecord = totalrec;
 
             var response = new Dictionary<string, object>
@@ -833,7 +870,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult GetClassList(DefaultModel model, string Center, string SubjectID = "", string GradeID = "")
         {
-            var returndata = FilterClass(model, Center, SubjectID, GradeID, User.Claims.GetClaimByType("UserID").Value, true);
+            var center = new CenterEntity();
+            if (!string.IsNullOrEmpty(Center))
+            {
+                center = _centerService.GetItemByCode(Center);
+                if (@center == null) return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Cơ sở không đúng"}
+                });
+            }
+            var returndata = FilterClass(model, center.ID, SubjectID, GradeID, User.Claims.GetClaimByType("UserID").Value, true);
             //model.TotalRecord = totalrec;
 
             var response = new Dictionary<string, object>
@@ -849,7 +895,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             model.TotalRecord = 0;
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
             var classfilter = new List<FilterDefinition<ClassEntity>>();
-            classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == Center));
+            if (!string.IsNullOrEmpty(Center))
+                classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == Center));
             var deep_filter = false;
             FilterDefinition<ClassEntity> ownerfilter = null;
             var UserID = User.Claims.GetClaimByType("UserID").Value;
@@ -955,13 +1002,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Create(ClassEntity item, List<ClassSubjectEntity> classSubjects, IFormFile fileUpload)
+        public JsonResult Create(ClassEntity item, string CenterCode, List<ClassSubjectEntity> classSubjects, IFormFile fileUpload)
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.ID = null;
                 item.Created = DateTime.Now;
                 var userId = User.Claims.GetClaimByType("UserID").Value;
+
                 if (string.IsNullOrEmpty(userId))
                 {
                     return new JsonResult(new Dictionary<string, object>()
@@ -969,12 +1017,28 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {"Error", "Vui lòng đăng nhập lại" }
                         });
                 }
-
+                var teacher = _teacherService.GetItemByID(userId);
+                if(teacher == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Vui lòng đăng nhập lại" }
+                        });
+                }
                 if (classSubjects == null || classSubjects.Count == 0)
                 {
                     return new JsonResult(new Dictionary<string, object>()
                         {
                             {"Error", "Cần chọn ít nhất một môn học" }
+                        });
+                }
+                
+                var center = _centerService.GetItemByCode(CenterCode);
+                if (center == null || teacher.Centers.Count(t=> t.Code == CenterCode) == 0)
+                {
+                    return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Cơ sở không đúng" }
                         });
                 }
 
@@ -986,6 +1050,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.IsActive = true;
                 item.StartDate = item.StartDate.ToUniversalTime();
                 item.EndDate = item.EndDate.ToUniversalTime();
+                item.Center = center.ID;
 
                 if (fileUpload != null)
                 {
@@ -1539,6 +1604,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
         #region Fix Data
+
         #endregion
     }
 }
