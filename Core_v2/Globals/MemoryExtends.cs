@@ -133,6 +133,11 @@ namespace Core_v2.Globals
                 cache.Remove(item.Key);
             }
         }
+        public static List<string> Keys()
+        {
+            var cache = MemoryCache.Default;
+            return cache.Count() == 0 ? null : cache.Select(o => o.Key)?.ToList();
+        }
         #endregion
     }
     public static class Cookies

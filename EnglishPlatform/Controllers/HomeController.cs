@@ -79,6 +79,7 @@ namespace EnglishPlatform.Controllers
         public IActionResult Index()
         {
             StartAuthority();
+            
             var type = User.Claims.GetClaimByType("Type");
             if (type != null)
             {
@@ -103,7 +104,7 @@ namespace EnglishPlatform.Controllers
                         break;
                     default:
                         if (st != null)
-                            centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                            centerCode = st.Centers != null && st.Centers.Count > 0 ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
                         break;
                 }
 
@@ -114,8 +115,7 @@ namespace EnglishPlatform.Controllers
             {
                 _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
                 HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                //    return RedirectToAction("Login");
-                return View();
+                return RedirectToAction("Login");
             }
 
         }
@@ -203,11 +203,25 @@ namespace EnglishPlatform.Controllers
                             if (Type != ACCOUNT_TYPE.ADMIN)
                             {
                                 var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
-                                var listAccess = _accessesService.GetAccessByRole(role.Code);
-                                string key = $"{centerCode}_{roleCode}";
-                                CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
-                                var access = listAccess.Select(o => o.Authority)?.ToList();
-                                CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, access);
+                                if (role != null)
+                                {
+                                    var listAccess = _accessesService.GetAccessByRole(role.Code);
+                                    string key = $"{roleCode}";
+                                    CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
+                                    if (CacheExtends.GetDataFromCache<List<string>>(key) == null)
+                                    {
+                                        var access = listAccess.Select(o => o.Authority)?.ToList();
+                                        CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, access);
+                                    }
+                                }
+                                else
+                                {
+                                    return Json(new ReturnJsonModel
+                                    {
+                                        StatusCode = ReturnStatus.ERROR,
+                                        StatusDesc = "Tài khoản đang bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
+                                    });
+                                }
                             }
 
                             //cache

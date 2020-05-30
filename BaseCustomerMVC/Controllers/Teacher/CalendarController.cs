@@ -27,6 +27,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassService _classService;
         private readonly LessonScheduleService _scheduleService;
         private readonly TeacherService _teacherService;
+        private readonly CenterService _centerService;
         public CalendarController(
             CalendarService calendarService,
             CalendarLogService calendarLogService,
@@ -34,7 +35,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CalendarHelper calendarHelper,
             ClassService classService,
             LessonScheduleService scheduleService,
-            TeacherService teacherService
+            TeacherService teacherService,
+            CenterService centerService
             )
         {
             this._calendarService = calendarService;
@@ -44,6 +46,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classService = classService;
             _scheduleService = scheduleService;
             _teacherService = teacherService;
+            _centerService = centerService;
         }
 
         public IActionResult Index(DefaultModel model)
@@ -60,12 +63,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [Obsolete]
         public Task<JsonResult> GetList(DefaultModel model, DateTime start, DateTime end)
         {
-            var userId = User?.FindFirst("UserID").Value;
-            var listClass = _classService.Collection.Find(o => o.TeacherID == userId)?.ToList();
-            if (listClass == null) return Task.FromResult(new JsonResult(null));
-            var data = _calendarHelper.GetListEvent(start, end, listClass.Select(o => o.ID).ToList(), userId);
-            if (data == null) return Task.FromResult(new JsonResult(new { }));
-            return Task.FromResult(new JsonResult(data));
+            if (TempData["center_router"] != null)
+            {
+                var userId = User?.FindFirst("UserID").Value;
+                var listClass = _classService.Collection.Find(o => o.TeacherID == userId && o.Center == _centerService.GetItemByCode(TempData["center_router"].ToString()).ID)?.ToList();
+                if (listClass == null || listClass.Count <= 0) return Task.FromResult(new JsonResult(new { }));
+                var data = _calendarHelper.GetListEvent(start, end, listClass.Select(o => o.ID).ToList(), userId);
+                if (data == null) return Task.FromResult(new JsonResult(new { }));
+                return Task.FromResult(new JsonResult(data));
+            }
+            return Task.FromResult(new JsonResult(new { }));
         }
 
         [HttpPost]

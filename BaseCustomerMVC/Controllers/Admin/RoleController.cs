@@ -285,12 +285,13 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 Dictionary<string, string> permission = new Dictionary<string, string>();
                 List<AccessEntity> success = new List<AccessEntity>();
+                string role = "";
                 if (User != null && User.Identity.IsAuthenticated)
                 {
                     for (int i = 0; i < listItem.Count; i++)
                     {
                         var item = listItem[i];
-
+                        role = item.RoleID;
                         var oldItem = _accessesService.CreateQuery().Find(o => o.Authority == item.Authority && o.RoleID == item.RoleID)?.ToList();
                         if (oldItem == null || oldItem.Count == 0)
                         {
@@ -314,9 +315,13 @@ namespace BaseCustomerMVC.Controllers.Admin
                                 permission.Add(item.Authority, "");
                             }
                         }
-
-
                     }
+                    var currentRole = _service.GetItemByCode(role);
+                    if(currentRole != null)
+                    {
+                        CacheExtends.SetObjectFromCache(currentRole.ID, 3600 * 24 * 360, permission.Select(o=>o.Key)?.ToList());
+                    }
+
                     return new JsonResult(new { code = 200, msg = "success", data = success });
                 }
                 return new JsonResult(new { code = 405, msg = "User not found" });
@@ -327,9 +332,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
         }
 
-        private void UpdateAuthority(string key, Dictionary<string, string> permission)
+        private void UpdateAuthority(string key, List<string> permission)
         {
-            string keys = CacheExtends.DefaultPermission + "_" + key;
+            string keys = key;
             ObjectCache cache = MemoryCache.Default;
             var data = cache.Get(keys);
             if (data != null)
