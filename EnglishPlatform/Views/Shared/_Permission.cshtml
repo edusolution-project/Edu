@@ -1,0 +1,29 @@
+﻿@using Core_v2.Globals
+@{
+    ViewData["Title"] = "_Permission";
+    var listkey = CacheExtends.Keys();
+    var listdata = CacheExtends.GetDataFromCache<List<string>>("5d808d08cf9a821bdc9daf79");
+}
+
+<h1>
+    @{ 
+        if(listdata != null)
+        {
+            for(int i=0; i < listdata.Count; i++)
+            {
+                <p>@listdata[i]</p>
+            }
+        }
+        if(listkey != null)
+        {
+            for(int x = 0; x < listkey.Count; x++)
+            {
+                string key = listkey[x];
+                object obj = CacheExtends.GetDataFromCache<object>(key);
+                <p>@key </p>
+            }
+        }
+    }
+
+</h1>
+

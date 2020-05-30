@@ -203,11 +203,25 @@ namespace EnglishPlatform.Controllers
                             if (Type != ACCOUNT_TYPE.ADMIN)
                             {
                                 var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
-                                var listAccess = _accessesService.GetAccessByRole(role.Code);
-                                string key = $"{centerCode}_{roleCode}";
-                                CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
-                                var access = listAccess.Select(o => o.Authority)?.ToList();
-                                CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, access);
+                                if (role != null)
+                                {
+                                    var listAccess = _accessesService.GetAccessByRole(role.Code);
+                                    string key = $"{roleCode}";
+                                    CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
+                                    if (CacheExtends.GetDataFromCache<List<string>>(key) == null)
+                                    {
+                                        var access = listAccess.Select(o => o.Authority)?.ToList();
+                                        CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, access);
+                                    }
+                                }
+                                else
+                                {
+                                    return Json(new ReturnJsonModel
+                                    {
+                                        StatusCode = ReturnStatus.ERROR,
+                                        StatusDesc = "Tài khoản đang bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
+                                    });
+                                }
                             }
 
                             //cache

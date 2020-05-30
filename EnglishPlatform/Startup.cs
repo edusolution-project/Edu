@@ -73,7 +73,7 @@ namespace EnglishPlatform
             });
 
             services.AddSession();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.Configure<FormOptions>(x =>
             {
                 x.ValueLengthLimit = int.MaxValue;
@@ -121,7 +121,7 @@ namespace EnglishPlatform
                     string type = context.User.FindFirst("Type")?.Value;
                     if (roleCode != "superadmin")
                     {
-                        string key = $"{center}_{roleCode}";
+                        string key = $"{roleCode}";
                         string defaultKey = $"{userID}_{center}";
                         string currentKey = CacheExtends.GetDataFromCache<string>(defaultKey);
                         if (!string.IsNullOrEmpty(currentKey) && currentKey == key)
@@ -155,7 +155,7 @@ namespace EnglishPlatform
                                     if (tc != null)
                                     {
                                         defaultUser = new UserModel(tc.ID, tc.FullName);
-                                        centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center;
+                                        centerCode = string.IsNullOrEmpty(center) && tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center;
                                         roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
                                         isRealCenter = tc.Centers.Any(o => o.Code == centerCode);
                                     }
@@ -164,7 +164,7 @@ namespace EnglishPlatform
                                     if (st != null)
                                     {
                                         defaultUser = new UserModel(st.ID, st.FullName);
-                                        centerCode = (st.Centers != null && st.Centers.Count > 0) ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center;
+                                        centerCode = (string.IsNullOrEmpty(center) && st.Centers != null && st.Centers.Count > 0) ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center;
                                         roleCode = "student";
                                         isRealCenter = st.Centers != null && st.Centers.Any(o => o == centerCode);
                                     }
@@ -176,9 +176,13 @@ namespace EnglishPlatform
                                 if (isRealCenter)
                                 {
                                     var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
-                                    var listAccess = _accessesService.GetAccessByRole(role.Code);
                                     CacheExtends.SetObjectFromCache($"{defaultUser.ID}_{centerCode}", 3600 * 24 * 360, key);
-                                    CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, listAccess.Select(o => o.Authority)?.ToList());
+                                    if (CacheExtends.GetDataFromCache<List<string>>(key) == null)
+                                    {
+                                        var listAccess = _accessesService.GetAccessByRole(role.Code);
+                                        var access = listAccess.Select(o => o.Authority)?.ToList();
+                                        CacheExtends.SetObjectFromCache(key, 3600 * 24 * 360, access);
+                                    }
                                 }
                                 else
                                 {
