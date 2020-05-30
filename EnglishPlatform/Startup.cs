@@ -166,7 +166,7 @@ namespace EnglishPlatform
                                         defaultUser = new UserModel(st.ID, st.FullName);
                                         centerCode = (string.IsNullOrEmpty(center) && st.Centers != null && st.Centers.Count > 0) ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center;
                                         roleCode = "student";
-                                        isRealCenter = st.Centers != null && st.Centers.Any(o => o == centerCode);
+                                        isRealCenter = st.Centers != null && st.Centers.Any(o => o == _centerService.GetItemByCode(centerCode).ID);
                                     }
                                     break;
                             }

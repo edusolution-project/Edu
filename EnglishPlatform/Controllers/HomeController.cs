@@ -79,6 +79,7 @@ namespace EnglishPlatform.Controllers
         public IActionResult Index()
         {
             StartAuthority();
+            
             var type = User.Claims.GetClaimByType("Type");
             if (type != null)
             {
@@ -103,7 +104,7 @@ namespace EnglishPlatform.Controllers
                         break;
                     default:
                         if (st != null)
-                            centerCode = st.Centers != null && st.Centers.Count > 0 ? st.Centers.FirstOrDefault() : center.Code;
+                            centerCode = st.Centers != null && st.Centers.Count > 0 ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
                         break;
                 }
 
