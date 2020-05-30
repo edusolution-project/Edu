@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 
 namespace EnglishPlatform
 {
@@ -107,6 +108,12 @@ namespace EnglishPlatform
 
             app.Use(async (context, next) =>
             {
+                if (CacheExtends.GetDataFromCache<List<AuthorityEntity>>(CacheExtends.DefaultPermission) == null)
+                {
+                    AuthorityService authorityService = new AuthorityService(Configuration);
+                    List<AuthorityEntity> data = authorityService.GetAll()?.ToList();
+                    CacheExtends.SetObjectFromCache(CacheExtends.DefaultPermission, 3600 * 24 * 360, data);
+                }
                 string center = context.Request.Path.Value != "" && context.Request.Path.Value != "/" ? context.Request.Path.Value.Split('/')[1] : string.Empty;
                 if (!string.IsNullOrEmpty(center) &&
                 !center.Contains("hub") &&
