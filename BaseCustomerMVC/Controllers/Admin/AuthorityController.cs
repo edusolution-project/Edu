@@ -63,8 +63,14 @@ namespace BaseCustomerMVC.Controllers.Admin
                         default:break;
                     }
                 }
+                UpdateCache();
             }
             return new JsonResult(authorities);
+        }
+        private void UpdateCache()
+        {
+            List<AuthorityEntity> data = _authorityService.GetAll()?.ToList();
+            CacheExtends.SetObjectFromCache(CacheExtends.DefaultPermission, 3600 * 24 * 360, data);
         }
         private Assembly GetAssembly()
         {
