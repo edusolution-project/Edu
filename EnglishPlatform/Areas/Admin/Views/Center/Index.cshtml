@@ -30,12 +30,10 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                @*<th class='text-center'>
-                                    <div class="input-group"><input type="checkbox" aria-label="Checkbox" onclick="toggleAll(this, 'dataTable')"></div>
-                                </th>*@
                                 <th class='text-center'>STT</th>
-                                @*<th class='text-center'>Mã học viên</th>*@
                                 <th class='text-center'>Tên cơ sở</th>
+                                <th class='text-center'>Ảnh đại diện</th>
+                                <th class='text-center'>Giới thiệu</th>
                                 <th class='text-center'>Ngày bắt đầu</th>
                                 <th class='text-center'>Ngày hết hạn</th>
                                 <th class='text-center'>Hạn mức tài khoản</th>
@@ -83,6 +81,15 @@
                             <div class="form-group col-md-12">
                                 <input type="text" class="form-control" name="Description" placeholder="Mô tả">
                             </div>
+                        </div>
+                        <div>
+                            Ảnh đại diện
+                        </div>
+                        <div class="form-row mb-2 ml-2 mr-2">
+                            <div style="height: 150px;" class="mb-1">
+                                <img name="Image" class="thumbnail" src="~/images/Logo.png" style="max-height:100%; max-width:100%; border: double 2px #CCC;"/>
+                            </div>
+                            <input type="file" name="upload" class="w-100" />
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
@@ -166,6 +173,8 @@
                             "<td class='text-center'>" + (i + 1) + "</td>" +
                             //"<td class='text-center'>" + (item.StudentId == null? "":item.StudentId) +"</td>" +
                             "<td>" + item.Name + "</td>" +
+                            "<td><img src='" + (item.Image == null ? "/images/logo.png": item.Image) + "' style='max-width:100px; max-height: 100px' /></td>" +
+                            "<td>" + (item.Description == null ? "": item.Description) + "</td>" +
                             "<td class='text-center'>" + fdate + "</td>" +
                             "<td class='text-center'>" + edate + "</td>" +
                             "<td class='text-center'>" + item.Limit + "</td>" +

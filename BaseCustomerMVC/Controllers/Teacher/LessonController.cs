@@ -27,6 +27,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonPartQuestionService _questionService;
         private readonly LessonPartAnswerService _answerService;
         private readonly LessonScheduleService _lessonScheduleService;
+        private readonly CenterService _centerService;
 
         public LessonController(
             GradeService gradeservice,
@@ -40,7 +41,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonPartService lessonPartService,
             LessonPartQuestionService questionService,
             LessonPartAnswerService answerService,
-            LessonScheduleService lessonScheduleService)
+            LessonScheduleService lessonScheduleService,
+            CenterService centerService)
         {
             _gradeService = gradeservice;
             _subjectService = subjectService;
@@ -54,10 +56,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _questionService = questionService;
             _answerService = answerService;
             _lessonScheduleService = lessonScheduleService;
+            _centerService = centerService;
         }
 
-        public IActionResult Detail(DefaultModel model, string ClassID, int frameview = 0)
+        public IActionResult Detail(DefaultModel model, string basis, string ClassID, int frameview = 0)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
+
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             if (model == null) return null;
             if (ClassID == null)

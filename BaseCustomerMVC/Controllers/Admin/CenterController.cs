@@ -16,6 +16,11 @@ using MongoDB.Bson;
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using BaseCustomerEntity.Globals;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -49,6 +54,8 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public ActionResult Index(DefaultModel model)
         {
+            
+
             ViewBag.Model = model;
             return View();
         }
@@ -108,32 +115,79 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Create(CenterEntity item)
+        public JsonResult Create(CenterEntity item, IFormFile upload)
         {
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.Code = item.Name.ConvertUnicodeToCode("-", true);//.Replace(@" ","-");
-                _service.CreateQuery().InsertOne(item);
-                Dictionary<string, object> response = new Dictionary<string, object>()
-                    {
-                        {"Data",item },
-                        {"Error",null },
-                        {"Msg","Thêm thành công" }
-                    };
-                return new JsonResult(response);
             }
             else
             {
-                _service.Save(item);
-                Dictionary<string, object> response = new Dictionary<string, object>()
+                var oldItem = _service.GetItemByID(item.ID);
+                if (oldItem == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>()
+                    {
+                        {"Error", "Không tìm thấy cơ sở" },
+                    });
+                }
+                item.Code = oldItem.Code;
+                item.IsDefault = oldItem.IsDefault;
+                item.Image = oldItem.Image;
+            }
+
+            if (upload != null && upload.Length > 0)
+            {
+                var fileName = item.Code + "_" + Guid.NewGuid() + Path.GetExtension(upload.FileName).ToLower();
+                var dirPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/upload/center");
+                var path = Path.Combine(dirPath, fileName);
+
+                if (!Directory.Exists(dirPath))
+                    Directory.CreateDirectory(dirPath);
+
+                var standardSize = new SixLabors.Primitives.Size(512, 384);
+
+                using (Stream inputStream = upload.OpenReadStream())
+                {
+                    using (var image = Image.Load<Rgba32>(inputStream))
+                    {
+                        var imageEncoder = new JpegEncoder()
+                        {
+                            Quality = 90,
+                            Subsample = JpegSubsample.Ratio444
+                        };
+
+                        int width = image.Width;
+                        int height = image.Height;
+                        if ((width > standardSize.Width) || (height > standardSize.Height))
+                        {
+                            ResizeOptions options = new ResizeOptions
+                            {
+                                Mode = ResizeMode.Max,
+                                Size = standardSize,
+                            };
+                            image.Mutate(x => x
+                             .Resize(options));
+
+                            //.Grayscale());
+                        }
+                        image.Save(path, imageEncoder); // Automatic encoder selected based on extension.
+                    }
+                }
+                var url = $"{"/upload/center/"}{fileName}";
+                item.Image = url;
+            }
+
+            _service.Save(item);
+            Dictionary<string, object> response = new Dictionary<string, object>()
                     {
                         {"Data",item },
                         {"Error",null },
                         {"Msg","Cập nhật thành công" }
                     };
-                return new JsonResult(response);
-            }
+            return new JsonResult(response);
+
         }
 
         [HttpPost]

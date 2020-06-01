@@ -136,8 +136,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _centerService = centerService;
         }
 
-        public IActionResult Index(DefaultModel model, int old = 0)
+        public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
@@ -158,8 +164,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public IActionResult Detail(DefaultModel model)
+        public IActionResult Detail(DefaultModel model, string basis)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)
@@ -194,8 +206,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    return View();
         //}
 
-        public IActionResult Modules(DefaultModel model)
+        public IActionResult Modules(DefaultModel model, string basis)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)
@@ -245,8 +263,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    return View();
         //}
 
-        public IActionResult StudentDetail(string ID, string ClassID)
+        public IActionResult StudentDetail(string basis, string ID, string ClassID)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             if (string.IsNullOrEmpty(ClassID))
                 return RedirectToAction("Index");
             var currentClass = _service.GetItemByID(ClassID);
@@ -266,79 +290,79 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public IActionResult StudentModules(string ID, string ClassID)
-        {
-            var currentClass = _service.GetItemByID(ClassID);
-            //var UserID = User.Claims.GetClaimByType("UserID").Value;
-            if (currentClass == null)
-                return null;
-            if (currentClass.Students.IndexOf(ID) < 0)
-                return null;
-            var student = _studentService.GetItemByID(ID);
-            if (student == null)
-                return null;
+        //public IActionResult StudentModules(string ID, string ClassID)
+        //{
+        //    var currentClass = _service.GetItemByID(ClassID);
+        //    //var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    if (currentClass == null)
+        //        return null;
+        //    if (currentClass.Students.IndexOf(ID) < 0)
+        //        return null;
+        //    var student = _studentService.GetItemByID(ID);
+        //    if (student == null)
+        //        return null;
 
-            ViewBag.Class = currentClass;
-            string courseid = currentClass.CourseID;
-            var course = _courseService.GetItemByID(courseid);
+        //    ViewBag.Class = currentClass;
+        //    string courseid = currentClass.CourseID;
+        //    var course = _courseService.GetItemByID(courseid);
 
-            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID
-                           //&& o.TemplateType == LESSON_TEMPLATE.LECTURE
-                           ).ToList()
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == currentClass.ID).FirstOrDefault()
-                           where schedule != null
-                           let lessonProgress = new LessonProgressEntity()
-                           //_lessonProgressService.GetByClassID_StudentID_LessonID(currentClass.ID, student.ID, r.ID)
-                           //where lessonProgress != null
-                           select _moduleViewMapping.AutoOrtherType(r, new StudentModuleViewModel()
-                           {
-                               ScheduleID = schedule.ID,
-                               ScheduleStart = schedule.StartDate,
-                               ScheduleEnd = schedule.EndDate,
-                               IsActive = schedule.IsActive,
-                               LearnCount = lessonProgress.TotalLearnt,
-                               TemplateType = r.TemplateType,
-                               LearnLast = lessonProgress.LastDate
-                           })).OrderBy(r => r.LearnStart).ThenBy(r => r.ChapterID).ThenBy(r => r.ID).ToList();
-            ViewBag.Lessons = lessons;
-            return View();
-        }
+        //    var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID
+        //                   //&& o.TemplateType == LESSON_TEMPLATE.LECTURE
+        //                   ).ToList()
+        //                   let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == currentClass.ID).FirstOrDefault()
+        //                   where schedule != null
+        //                   let lessonProgress = new LessonProgressEntity()
+        //                   //_lessonProgressService.GetByClassID_StudentID_LessonID(currentClass.ID, student.ID, r.ID)
+        //                   //where lessonProgress != null
+        //                   select _moduleViewMapping.AutoOrtherType(r, new StudentModuleViewModel()
+        //                   {
+        //                       ScheduleID = schedule.ID,
+        //                       ScheduleStart = schedule.StartDate,
+        //                       ScheduleEnd = schedule.EndDate,
+        //                       IsActive = schedule.IsActive,
+        //                       LearnCount = lessonProgress.TotalLearnt,
+        //                       TemplateType = r.TemplateType,
+        //                       LearnLast = lessonProgress.LastDate
+        //                   })).OrderBy(r => r.LearnStart).ThenBy(r => r.ChapterID).ThenBy(r => r.ID).ToList();
+        //    ViewBag.Lessons = lessons;
+        //    return View();
+        //}
 
-        public IActionResult StudentAssignment(string ID, string ClassID)
-        {
-            var currentClass = _service.GetItemByID(ClassID);
-            //var UserID = User.Claims.GetClaimByType("UserID").Value;
-            if (currentClass == null)
-                return null;
-            if (currentClass.Students.IndexOf(ID) < 0)
-                return null;
-            var student = _studentService.GetItemByID(ID);
-            if (student == null)
-                return null;
+        //public IActionResult StudentAssignment(string ID, string ClassID)
+        //{
+        //    var currentClass = _service.GetItemByID(ClassID);
+        //    //var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    if (currentClass == null)
+        //        return null;
+        //    if (currentClass.Students.IndexOf(ID) < 0)
+        //        return null;
+        //    var student = _studentService.GetItemByID(ID);
+        //    if (student == null)
+        //        return null;
 
-            ViewBag.Class = currentClass;
-            string courseid = currentClass.CourseID;
-            var course = _courseService.GetItemByID(courseid);
+        //    ViewBag.Class = currentClass;
+        //    string courseid = currentClass.CourseID;
+        //    var course = _courseService.GetItemByID(courseid);
 
-            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.TemplateType == LESSON_TEMPLATE.EXAM).ToList()
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == currentClass.ID).FirstOrDefault()
-                           where schedule != null
-                           let exam = _examService.CreateQuery().Find(x => x.StudentID == student.ID && x.LessonID == r.ID && x.ClassID == currentClass.ID).SortByDescending(x => x.Created).FirstOrDefault()
-                           //where exam != null
-                           //let lastjoin = lessonProgress != null ? lessonProgress.LastDate : DateTime.MinValue
-                           select _assignmentViewMapping.AutoOrtherType(r, new StudentAssignmentViewModel()
-                           {
-                               ScheduleID = schedule.ID,
-                               ScheduleStart = schedule.StartDate,
-                               ScheduleEnd = schedule.EndDate,
-                               IsActive = schedule.IsActive,
-                               LearnCount = exam == null ? 0 : exam.Number,
-                               LearnLast = exam == null ? DateTime.MinValue : exam.Updated,
-                               Point = exam == null ? 0 : exam.Point
-                           })).OrderBy(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
-            ViewBag.Lessons = lessons;
-            return View();
-        }
+        //    var lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.TemplateType == LESSON_TEMPLATE.EXAM).ToList()
+        //                   let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == currentClass.ID).FirstOrDefault()
+        //                   where schedule != null
+        //                   let exam = _examService.CreateQuery().Find(x => x.StudentID == student.ID && x.LessonID == r.ID && x.ClassID == currentClass.ID).SortByDescending(x => x.Created).FirstOrDefault()
+        //                   //where exam != null
+        //                   //let lastjoin = lessonProgress != null ? lessonProgress.LastDate : DateTime.MinValue
+        //                   select _assignmentViewMapping.AutoOrtherType(r, new StudentAssignmentViewModel()
+        //                   {
+        //                       ScheduleID = schedule.ID,
+        //                       ScheduleStart = schedule.StartDate,
+        //                       ScheduleEnd = schedule.EndDate,
+        //                       IsActive = schedule.IsActive,
+        //                       LearnCount = exam == null ? 0 : exam.Number,
+        //                       LearnLast = exam == null ? DateTime.MinValue : exam.Updated,
+        //                       Point = exam == null ? 0 : exam.Point
+        //                   })).OrderBy(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+        //    ViewBag.Lessons = lessons;
+        //    return View();
+        //}
 
         #region ClassDetail
         [HttpPost]

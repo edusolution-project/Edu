@@ -174,8 +174,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _centerService = centerService;
         }
 
-        public IActionResult Index(DefaultModel model, int old = 0)
+        public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();//: new TeacherEntity();
 
@@ -208,14 +214,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         }
 
-        public IActionResult Detail(string ID)
+        public IActionResult Detail(string basis, string ID)
         {
-
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             return Redirect($"{HttpContext.Request.Host.Value}/{TempData["center_router"]?.ToString()}/{Url.Action("Modules", "Curriculum")}/{ID}");
         }
 
-        public IActionResult Modules(string ID)
+        public IActionResult Modules(string basis, string ID)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             if (string.IsNullOrEmpty("ID"))
                 return RedirectToAction("Index");
 
@@ -244,33 +261,39 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public IActionResult Assignments(string ID)
-        {
-            if (string.IsNullOrEmpty("ID"))
-                return RedirectToAction("Index");
+        //public IActionResult Assignments(string ID)
+        //{
+        //    if (string.IsNullOrEmpty("ID"))
+        //        return RedirectToAction("Index");
 
-            var data = _service.GetItemByID(ID);
-            if (data == null)
-                return RedirectToAction("Index");
+        //    var data = _service.GetItemByID(ID);
+        //    if (data == null)
+        //        return RedirectToAction("Index");
 
-            ViewBag.Data = data;
-            ViewBag.Title = data.Name;
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    ViewBag.Data = data;
+        //    ViewBag.Title = data.Name;
+        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
 
-            var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
+        //    var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
 
-            ViewBag.Chapter = chapters;
-            ViewBag.User = UserID;
-            ViewBag.Course = data;
+        //    ViewBag.Chapter = chapters;
+        //    ViewBag.User = UserID;
+        //    ViewBag.Course = data;
 
-            return View();
-        }
+        //    return View();
+        //}
 
         //[BaseAccess.Attribule.AccessCtrl("Bài giảng chung", "teacher")]
-        public IActionResult Lesson(DefaultModel model, string CourseID, string ClassID, int frameview = 0)
+        public IActionResult Lesson(DefaultModel model, string basis, string CourseID, string ClassID, int frameview = 0)
         {
             //if (!User.IsInRole("head-teacher"))
             //    return Redirect("/");
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
 
             if (CourseID == null)
             {

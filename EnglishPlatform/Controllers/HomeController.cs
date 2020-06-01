@@ -377,6 +377,7 @@ namespace EnglishPlatform.Controllers
             }
         }
 
+        
         private void StartAuthority()
         {
             if (CacheExtends.GetDataFromCache<List<AuthorityEntity>>(CacheExtends.DefaultPermission) == null)
@@ -385,6 +386,7 @@ namespace EnglishPlatform.Controllers
                 CacheExtends.SetObjectFromCache(CacheExtends.DefaultPermission, 3600 * 24 * 360, data);
             }
         }
+        
         private void startPage()
         {
             var superadminRole = new RoleEntity()

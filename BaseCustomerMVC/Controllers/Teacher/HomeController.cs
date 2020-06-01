@@ -19,40 +19,62 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly FileProcess _fileProcess;
         private readonly TeacherService _teacherService;
         private readonly AccountService _accountService;
+        private readonly CenterService _centerService;
         private readonly ISession _session;
 
         public DefaultConfigs _default { get; }
 
-        public HomeController(FileProcess fileProcess, TeacherService teacherService, AccountService accountService,
+        public HomeController(
+            FileProcess fileProcess,
+            TeacherService teacherService,
+            AccountService accountService,
+            CenterService centerService,
             IHttpContextAccessor httpContextAccessor,
             IOptions<DefaultConfigs> defaultvalue)
         {
             _teacherService = teacherService;
             _accountService = accountService;
             _fileProcess = fileProcess;
+            _centerService = centerService;
             _session = httpContextAccessor.HttpContext.Session;
             _default = defaultvalue.Value;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string basis)
         {
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
+
+            ViewBag.AllCenters = teacher.Centers;
+
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             try
             {
                 _session.SetString("userAvatar", teacher.Avatar ?? _default.defaultAvatar);
             }
-            catch (Exception e) { 
+            catch (Exception e)
+            {
 
             }
             return View();
         }
 
-        public IActionResult Profile()
+        public IActionResult Profile(string basis)
         {
             string _teacherid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
             var account = _teacherService.GetItemByID(_teacherid);
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;
             _session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
             return View(account);

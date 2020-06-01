@@ -19,6 +19,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassService _classService;
         private readonly FileProcess _fileProcess;
         private readonly ReferenceService _referenceService;
+        private readonly CenterService _centerService;
         private readonly IHostingEnvironment _env;
 
         public ReferenceController(
@@ -26,18 +27,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassService classService,
             FileProcess fileProcess,
             IHostingEnvironment env,
-            ReferenceService referenceService
+            ReferenceService referenceService,
+            CenterService centerService
             )
         {
             _teacherService = teacherService;
             _classService = classService;
             _referenceService = referenceService;
             _fileProcess = fileProcess;
+            _centerService = centerService;
             _env = env;
         }
 
-        public IActionResult Index(DefaultModel model, int old = 0)
+        public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var myClasses = _classService.CreateQuery()
                 .Find(t => t.Members.Any(o => o.TeacherID == UserID)

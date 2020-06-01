@@ -155,7 +155,9 @@ function Edit(id, urlGetData, urlPostData, _this) {
     Ajax(urlGetData, "POST", data, true).then(function (res) {
 
         var item = JSON.parse(res);
-        var listinput = $(form).find('input');
+        $(form).find('input[type=file]').val('');
+
+        var listinput = $(form).find('input[type!=file]');
 
         for (var i = 0; i < listinput.length; i++) {
             //console.log(listinput[i].name);
@@ -170,6 +172,16 @@ function Edit(id, urlGetData, urlPostData, _this) {
                     altFormat: 'yy-mm-dd'
                 });
             }
+        }
+
+        var listimg = $(form).find('img.thumbnail');
+        for (var i = 0; i < listimg.length; i++) {
+            console.log(listimg[i].name);
+            var src = item.Data[listimg[i].name];
+            if (src != null)
+                $(listimg[i]).show().attr("src", item.Data[listimg[i].name]);
+            else
+                $(listimg[i]).hide();
         }
 
         var listselect = $(form).find('select');

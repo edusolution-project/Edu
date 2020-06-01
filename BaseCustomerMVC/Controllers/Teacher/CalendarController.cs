@@ -49,8 +49,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _centerService = centerService;
         }
 
-        public IActionResult Index(DefaultModel model)
+        public IActionResult Index(DefaultModel model, string basis)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             var userId = User?.FindFirst("UserID").Value;
             var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId) && o.IsActive == true)?
                 .SortBy(o => o.EndDate)

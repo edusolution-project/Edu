@@ -82,8 +82,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _studentHelper = new StudentHelper(studentService, accountService);
         }
 
-        public IActionResult Index(DefaultModel model)
+        public IActionResult Index(DefaultModel model, string basis)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
@@ -106,8 +112,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public IActionResult Detail(DefaultModel model)
+        public IActionResult Detail(DefaultModel model, string basis)
         {
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             var student = _studentService.GetItemByID(model.ID);
             if (student == null)
                 return RedirectToAction("Index");
