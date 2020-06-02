@@ -22,6 +22,7 @@ using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace EnglishPlatform.Controllers
 {
@@ -78,8 +79,10 @@ namespace EnglishPlatform.Controllers
 
         public IActionResult Index()
         {
+
+
             StartAuthority();
-            
+
             var type = User.Claims.GetClaimByType("Type");
             if (type != null)
             {
@@ -100,23 +103,30 @@ namespace EnglishPlatform.Controllers
                         break;
                     case ACCOUNT_TYPE.TEACHER:
                         if (tc != null)
+                        {
                             centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
+                            ViewBag.AllCenters = tc.Centers.Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
+                        }
                         break;
                     default:
                         if (st != null)
+                        {
                             centerCode = st.Centers != null && st.Centers.Count > 0 ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
+                            ViewBag.AllCenters = st.Centers.Select(t => _centerService.GetItemByID(t)).ToList();
+                        }
                         break;
                 }
-
+                ViewBag.Type = type.Value;
                 //cache
-                return Redirect($"{centerCode}/{type.Value}");
+                //return Redirect($"{centerCode}/{type.Value}");
             }
             else
             {
                 _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
                 HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                return RedirectToAction("Login");
+                //return RedirectToAction("Login");
             }
+            return View();
 
         }
 
@@ -377,7 +387,7 @@ namespace EnglishPlatform.Controllers
             }
         }
 
-        
+
         private void StartAuthority()
         {
             if (CacheExtends.GetDataFromCache<List<AuthorityEntity>>(CacheExtends.DefaultPermission) == null)
@@ -386,7 +396,7 @@ namespace EnglishPlatform.Controllers
                 CacheExtends.SetObjectFromCache(CacheExtends.DefaultPermission, 3600 * 24 * 360, data);
             }
         }
-        
+
         private void startPage()
         {
             var superadminRole = new RoleEntity()

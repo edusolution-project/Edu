@@ -117,11 +117,11 @@
             <a href="#">Câu chuyện đối tác</a>
 
         </div>
-        <div class="news-list">
-            <div class="news-hot">
-                <div class="news-item">
-                    <div class="thumb">
-                        <img src="~/images/news1.png" />
+        <div class="news-list d-flex pt-3" style="border-top:solid 0.5px #CCC">
+            <div class="news-hot flex-fill pr-md-4" style="border-right:solid 0.5px #CCC">
+                <div class="news-item w-100 pb-3">
+                    <div class="thumb w-100 pb-2">
+                        <img src="~/images/news1.png" class="w-100" />
                     </div>
                     <div class="news-title">
                         Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
@@ -133,8 +133,8 @@
                         12/08/2019
                     </div>
                 </div>
-                <div class="news-item">
-                    <div class="thumb">
+                <div class="news-item w-100 pb-3 pt-3">
+                    <div class="thumb w-100 pb-2">
                         <img src="~/images/news2.png" />
                     </div>
                     <div class="news-title">
@@ -148,8 +148,8 @@
                     </div>
                 </div>
             </div>
-            <div class="news-top">
-                <div class="news-item">
+            <div class="news-top flex-fill pl-md-4">
+                <div class="news-item pb-3 pt-3">
                     <div class="thumb">
                         <img src="~/images/news3.png" />
                     </div>
@@ -163,7 +163,7 @@
                         12/08/2019
                     </div>
                 </div>
-                <div class="news-item">
+                <div class="news-item pb-3 pt-3">
                     <div class="thumb">
                         <img src="~/images/news4.png" />
                     </div>
@@ -177,7 +177,7 @@
                         12/08/2019
                     </div>
                 </div>
-                <div class="news-item">
+                <div class="news-item pb-3 pt-3">
                     <div class="thumb">
                         <img src="~/images/news5.png" />
                     </div>
@@ -191,7 +191,7 @@
                         12/08/2019
                     </div>
                 </div>
-                <div class="news-item">
+                <div class="news-item pb-3 pt-3">
                     <div class="thumb">
                         <img src="~/images/news6.png" />
                     </div>
@@ -205,7 +205,7 @@
                         12/08/2019
                     </div>
                 </div>
-                <div class="news-item">
+                <div class="news-item pb-3 pt-3">
                     <div class="thumb">
                         <img src="~/images/news7.png" />
                     </div>
@@ -412,24 +412,52 @@
             }
 
     .news-item {
+        border-bottom: solid 1px #CCC;
     }
 
-        .news-item
-
-        @@media (max-width: 800px) {
-            .news .categories
-
-    {
-        font-size: 0;
+    .news-hot .news-item:first-child,
+    .news-top .news-item:first-child {
+        padding-top: 0 !important;
     }
 
-    .news .categories a {
-        margin: 5px 0;
-        width: 100%;
-        display: inline-block;
-        padding: 0 20px;
+    .news-hot .news-item:last-child,
+    .news-top .news-item:last-child {
+        border-bottom: none;
     }
 
+    .news-item .news-title {
+        font-weight: bold;
+        padding-bottom: 10px;
+        font-size: 16px;
+    }
+
+    .news-item .news-desc {
+        font-size: 14px;
+    }
+
+    .news-item .news-time {
+        font-size: 14px;
+        color: #99A1A6;
+    }
+
+        .news-item .news-time::before {
+            background: url('/images/icon/clock.png');
+            content:url('/images/icon/clock.png');
+            width: 14px;
+            height: 14px;
+        }
+
+    @@media (max-width: 800px) {
+        .news .categories {
+            font-size: 0;
+        }
+
+            .news .categories a {
+                margin: 5px 0;
+                width: 100%;
+                display: inline-block;
+                padding: 0 20px;
+            }
     }
 
     .content-box .sub-box .title {
