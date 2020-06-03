@@ -438,6 +438,13 @@ fillquiz, fillquiz.quiz-item {
     font-size: 1rem;
 }
 
+.part-box-header .title {
+    font-size: 1.1rem;
+}
+
+
+
+
 .QUIZ1 .quiz-wrapper .answer-wrapper .media-holder .img-fluid {
     margin-left: 20px;
 }

@@ -87,8 +87,8 @@
             <ul class="list ls-pratice">
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent collapsed show" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color"><i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}</a>
-                        <div class="collapse show" :id="`collapse-${i}`" accordion="my-accordion" role="tabpanel">
+                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color"><i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}</a>
+                        <b-collapse visible :id="`collapse-${i}`" role="tabpanel">
                             <ul class="list">
                                 <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
                                               v-bind:data="item"
@@ -97,7 +97,7 @@
                                               v-bind:owner="obj.TeacherID"
                                               v-bind:subchaps="list_chapters"></chap-content>
                             </ul>
-                        </div>
+                        </b-collapse>
                     </div>
                 </li>
             </ul>
@@ -236,9 +236,9 @@
 
     <script type="text/x-template" id="chapContentTemp">
         <li class="pr-0 ml-3 chap-item">
-            <div class="inner pt-2 pb-2">
+            <div class="inner pt-3 pb-3">
                 <div class="d-flex align-items-center">
-                    <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse flex-grow-1 mb-0" v-on:click="loadContent(data.ClassSubject, data.ID)">
+                    <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color btn-collapse flex-grow-1 mb-0" v-on:click="loadContent(data.ClassSubject, data.ID)">
                         <span class="align-self-center"><i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></span>
                     </a>
                     <div class="picker-schedule d-flex" v-if="owner == '@currentuser'">
@@ -266,7 +266,7 @@
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice pt-2 pb-1 pl-2 rounded">
             <div class="d-flex w-100 align-items-start">
-                <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-grow-1 overflow-hidden" style="text-overflow: ellipsis" :title="data.Title"> <span><i class="ic far fa-file-alt mr-2"></i>{{data.Title}}</span></a>
+                <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title"> <span><i class="ic far fa-file-alt mr-2"></i>{{data.Title}}</span></a>
                 <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>

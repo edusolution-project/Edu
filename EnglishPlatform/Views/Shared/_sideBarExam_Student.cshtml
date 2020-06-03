@@ -330,7 +330,7 @@
             if (parentPath.length == 0) {
                 parentPath = $("<ul>", {id: 'chap_nav_' + parentID, class: 'p_chap_nav'});
                 parentPath
-                    .append($("<div>", { class: "chap_nav_title", text: "" }))
+                    .append($("<div>", { class: "chap_nav_title blue-color", text: "" }))
                     .append($("<ul>", { class: "chap_content" }));
                 parentPath.find("> .chap_nav_title").click(function () {toggleChap(this)})
                 root_nav.append(parentPath);
@@ -361,7 +361,7 @@
                                 class: 'p_chap_nav',
                                 href: '#'
                             });
-                            chapterPath.append($("<div>", { class: "chap_nav_title", }))
+                            chapterPath.append($("<div>", { class: "chap_nav_title blue-color", }))
                                 .append($("<ul>", { class: "chap_content" }));
                             chapterPath.find("> .chap_nav_title").click(function () { toggleChap(this) });
                         }
@@ -374,7 +374,12 @@
                         var lessonPath = $('#les_nav_' + lesson.ID);
                         if (lessonPath.length == 0) {
                             lessonPath =
-                                $("<a>", { id: 'les_nav_' + lesson.ID, title: lesson.Title, href: '@processUrl("Detail","Lesson")/' + lesson.ID + '/' + '@ClassSubject.ID' }).append(
+                                $("<a>", {
+                                    id: 'les_nav_' + lesson.ID,
+                                    class: 'font-weight-normal',
+                                    title: lesson.Title,
+                                    href: '@processUrl("Detail","Lesson")/' + lesson.ID + '/' + '@ClassSubject.ID'
+                                }).append(
                                     $("<li>", {
                                         class: 'les_nav',
                                     }).append($("<i>", { class: "far fa-file-alt mr-1" }))

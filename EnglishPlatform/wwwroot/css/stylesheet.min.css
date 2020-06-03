@@ -33,6 +33,39 @@
     transition: ease all .3s
 }
 
+.red-color {
+    color: #D03239 !important;
+}
+
+.red-bg {
+    background-color: #D03239 !important;
+}
+
+.blue-color {
+    color: #00314c !important;
+}
+
+.blue-bg {
+    background-color: #00314c !important;
+}
+
+.green-color {
+    color: #2b8464 !important;
+}
+
+.green-bg {
+    background-color: #2b8464 !important;
+}
+
+.yellow-color {
+    color: #F7971E !important;
+}
+
+.yellow-bg {
+    background-color: #F7971E !important;
+}
+
+
 html, body {
     background: #fff;
     color: #00314C;
@@ -1741,20 +1774,20 @@ button, input, a {
         right: 8px
     }
 
-/*.ls-pratice .sub-practice .date*/
-.ls-pratice .date.st::after {
-    color: #13A6FB
-}
+    /*.ls-pratice .sub-practice .date*/
+    .ls-pratice .date.st::after {
+        color: #13A6FB
+    }
 
-/*.ls-pratice .sub-practice .date*/
-.ls-pratice .date.ed::after {
-    color: #D03239
-}
+    /*.ls-pratice .sub-practice .date*/
+    .ls-pratice .date.ed::after {
+        color: #D03239
+    }
 
-/*.ls-pratice .sub-practice .date*/
-.ls-pratice .date ~ .date {
-    margin-left: 15px
-}
+    /*.ls-pratice .sub-practice .date*/
+    .ls-pratice .date ~ .date {
+        margin-left: 15px
+    }
 
 .ls-pratice .list {
     max-height: 300px;

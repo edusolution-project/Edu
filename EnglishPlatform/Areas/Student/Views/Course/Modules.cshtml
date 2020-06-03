@@ -16,7 +16,39 @@
     setActiveMenu("course");
 </script>
 
+<style>
+    .red-color {
+        color: #D03239 !important;
+    }
 
+    .red-bg {
+        background-color: #D03239 !important;
+    }
+
+    .blue-color {
+        color: #00314c !important;
+    }
+
+    .blue-bg {
+        background-color: #00314c !important;
+    }
+
+    .green-color {
+        color: #2b8464 !important;
+    }
+
+    .green-bg {
+        background-color: #2b8464 !important;
+    }
+
+    .yellow-color {
+        color: #F7971E !important;
+    }
+
+    .yellow-bg {
+        background-color: #F7971E !important;
+    }
+</style>
 <section class="module" id="dashboard_content">
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
@@ -86,8 +118,8 @@
     <script type="text/x-template" id="chapContentTemp">
         <li class="col-md-12">
             <div class="inner">
-                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="btn-collapse" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}<i class="ic ic-collapse"></i></a>
-                <b-collapse visible :id="`prc-${data.ID}-${pos}`" @*:accordion="`my-accordion-${data.ParentID}`"*@ :title="`my-accordion-${data.ParentID}`" role="tabpanel">
+                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color btn-collapse" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}<i class="ic ic-collapse"></i></a>
+                <b-collapse :id="`prc-${data.ID}-${pos}`" @*:accordion="`my-accordion-${data.ParentID}`"*@ :title="`my-accordion-${data.ParentID}`" role="tabpanel">
                     <b-card-body>
                         <ul class="list">
                             <chap-content v-for="(item,k) in subchaps"
@@ -106,7 +138,7 @@
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice d-flex flex-column" :id="lesson.ID">
             <div class="d-flex justify-content-between w-100 align-items-center">
-                <a :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-on:click.prevent="GoLesson(lesson.ID)" class="text-dark font-weight-bold"><i class="ic far fa-file-alt mr-2"></i>{{lesson.Title}}</a>
+                <a :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-on:click.prevent="GoLesson(lesson.ID)" class="text-dark"><i class="ic far fa-file-alt mr-2"></i>{{lesson.Title}}</a>
                 <ul class="time-line flex">
                     <li v-if="isValidTime(lesson.StartDate)"><i class="ti-time"></i>{{formatTime(lesson.StartDate)}} </li>
                     <li v-if="isValidTime(lesson.EndDate)"><i class="ti-time"></i>{{formatTime(lesson.EndDate)}} </li>
@@ -126,7 +158,7 @@
                     <template v-else>
                         <a :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" title="Làm bài" class="btn-act act ml-0 bg-info pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;">CHƯA LÀM</a>
                     </template>
-                    <div v-if="isValidTime(lesson.LastJoin)"  class="text-muted ml-2" style="font-size:90%">
+                    <div v-if="isValidTime(lesson.LastJoin)" class="text-muted ml-2" style="font-size:90%">
                         @*<span>Làm bài lần cuối</span>*@
                         <span>{{formatTime(lesson.LastJoin)}}</span> - @*Kết quả:*@
                         <span class="bg-transparent text-primary font-weight-bold" v-bind:class="{'text-danger' : parseInt(lesson.DoPoint) < 50, 'text-success' : parseInt(lesson.DoPoint) > 70}">{{lesson.DoPoint.toFixed(2)}}%</span>
@@ -211,7 +243,7 @@
                         //console.log(response.data.Data)
                         _that.list_data = response.data.Data;
                         var data = response.data.Data;
-                        data.forEach(function (item) { getSubList(item.ID)});
+                        //data.forEach(function (item) { getSubList(item.ID)});
                         if (window.location.hash != "")
                         {
 

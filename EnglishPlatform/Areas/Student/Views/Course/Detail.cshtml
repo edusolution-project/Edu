@@ -150,7 +150,13 @@
                         case 'discuss':
                             this.tabChange(3);
                             break;
+                        default:
+                            this.tabChange(0);
+                            break;
                     }
+                }
+                else {
+                    this.tabChange(1);
                 }
             },
             data: {
@@ -187,7 +193,7 @@
                     this.tab[a] = true
                     switch (a) {
                         case 0:
-                            history.replaceState({ tab: a }, this.className + " - Tổng quan");
+                            history.replaceState({ tab: a }, this.className + " - Tổng quan", "#info");
                             this.loadClassDetail();
                             break;
                         case 1:

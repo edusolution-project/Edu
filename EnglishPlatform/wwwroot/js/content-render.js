@@ -775,7 +775,7 @@ var Lesson = (function () {
             case mod.PREVIEW:
             case mod.TEACHEREDIT:
                 boxHeader.append($("<h5>", {
-                    "class": "title col-md-10 font-weight-bold", "text": (data.Title == null ? "" : data.Title) + time
+                    "class": "title col-md-10 green-color", "text": (data.Title == null ? "" : data.Title) + time
                     //+ point
                 }));
 
@@ -789,7 +789,7 @@ var Lesson = (function () {
                 break;
             default:
                 boxHeader.append($("<h5>", {
-                    "class": "title col-md-12", "text": (data.Title == null ? "" : data.Title) + time
+                    "class": "title col-md-12 green-color", "text": (data.Title == null ? "" : data.Title) + time
                     //+ point
                 }));
                 break;
@@ -1100,7 +1100,7 @@ var Lesson = (function () {
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
                     boxHeader.append($("<h5>", {
-                        "class": "title", "html": breakLine(data.Content)
+                        "class": "title green-color", "html": breakLine(data.Content)
                         //+ point
                     }));
                 else
@@ -2486,7 +2486,7 @@ var Lesson = (function () {
         var boxHeader = $("<div>", { "class": "part-box-header row" });
 
         boxHeader.append($("<h5>", {
-            "class": "title col-md-12", "text": (data.Title == null ? "" : data.Title) + time
+            "class": "title col-md-12 green-color", "text": (data.Title == null ? "" : data.Title) + time
             //+ point
         }));
 

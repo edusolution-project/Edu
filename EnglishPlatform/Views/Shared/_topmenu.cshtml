@@ -6,9 +6,9 @@
     string mtype = ViewBag.Type as string;
 }
 <div class="topbar d-flex align-items-center">
-    <div class="container">
+    <div class="container bg-transparent">
         <div class="d-flex text-light align-items-center justify-content-between">
-            <div>
+            <div class="ml-2 ml-md-0">
                 <span class="hotline d-flex align-items-center"><i class="ic ic-phone mr-1"></i> HOTLINE: <a href="tel:+84989085398" class="action-link ml-1">+ 84 989.085.398</a></span>
             </div>
             <div class="d-flex">
@@ -44,22 +44,21 @@
 <div class="menubar d-flex align-items-center">
     <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
         <div>
-            <div class="home">
+            <div class="home d-none d-md-block">
                 <a href="/" class="logo">
                     <img src="~/images/LogoTOP.png" />
                 </a>
             </div>
             <div class="toggler">
-
             </div>
         </div>
-        <div class="nav-link">
-            <a href="#" class="mr-4">Trang chủ</a>
-            <a href="#" class="mr-4 ml-4">Về EDUSO</a>
-            <a href="#" class="mr-4 ml-4">Sản phẩm</a>
-            <a href="#" class="mr-4 ml-4">Sự kiện</a>
-            <a href="#" class="mr-4 ml-4">Tin tức</a>
-            <a href="#" class="ml-4">Tuyển dụng</a>
+        <div class="nav-link d-flex flex-wrap">
+            <a href="#" class="m-1 mr-md-4">Trang chủ</a>
+            <a href="#" class="m-1 mr-md-4 ml-md-4">Về EDUSO</a>
+            <a href="#" class="m-1 mr-md-4 ml-md-4">Sản phẩm</a>
+            <a href="#" class="m-1 mr-md-4 ml-md-4">Sự kiện</a>
+            <a href="#" class="m-1 mr-md-4 ml-md-4">Tin tức</a>
+            <a href="#" class="m-1 ml-md-4">Tuyển dụng</a>
         </div>
     </div>
 </div>
@@ -134,10 +133,17 @@
         color: #08486B;
     }
 
-        .menubar .nav-link a:hover,
-        .menubar .nav-link a.active {
-            text-decoration: none;
-            cursor: pointer;
-            color: #C1272C;
+    @@media(max-width: 800px) {
+        .nav-link a {
+            display: inline-block;
+            width: 100px;
+            text-align: center;
         }
+    }
+
+    .menubar .nav-link a:hover, .menubar .nav-link a.active {
+        text-decoration: none;
+        cursor: pointer;
+        color: #C1272C;
+    }
 </style>

@@ -125,7 +125,7 @@
                 <a href="#">Câu chuyện đối tác</a>
 
             </div>
-            <div class="news-list flex-column d-md-flex pt-3" style="border-top:solid 0.5px #CCC">
+            <div class="news-list d-flex flex-column flex-md-row pt-3" style="border-top:solid 0.5px #CCC">
                 <div class="news-hot media-body pr-md-4" style="border-right:solid 0.5px #CCC">
                     <div class="news-item w-100 pb-3">
                         <div class="thumb w-100 pb-2">
@@ -296,8 +296,8 @@
     </div>
 </div>
 <div class="footer pt-5 pb-5">
-    <div class="inner-content flex-column d-md-flex">
-        <div class="logo mr-4 media-body">
+    <div class="inner-content d-flex flex-column flex-md-row">
+        <div class="logo mr-4 media-body d-none d-md-block">
             <img src="~/images/bottom-logo.png" />
         </div>
         <div class="mr-4 media-body">
@@ -545,14 +545,16 @@
         border-bottom: solid 1px #CCC;
     }
 
-    .news-hot .news-item:first-child,
-    .news-top .news-item:first-child {
-        padding-top: 0 !important;
-    }
+    @@media(min-width : 800px) {
+        .news-hot .news-item:first-child,
+        .news-top .news-item:first-child {
+            padding-top: 0 !important;
+        }
 
-    .news-hot .news-item:last-child,
-    .news-top .news-item:last-child {
-        border-bottom: none;
+        .news-hot .news-item:last-child,
+        .news-top .news-item:last-child {
+            border-bottom: none;
+        }
     }
 
     .news-top .news-item .thumb {
@@ -561,6 +563,7 @@
         width: 40%;
         margin-right: 12px;
     }
+
 
     .thumb img {
         max-width: 100%;
@@ -602,6 +605,10 @@
         }
 
     @@media (max-width: 800px) {
+        .content-box .box-title {
+            /*font-size: 16px;*/
+        }
+
         .news {
             padding: 0 20px;
         }
@@ -612,16 +619,14 @@
 
                 .news .categories a {
                     margin: 5px 0;
-                    width: 100%;
                     display: inline-block;
-                    padding: 0 20px;
+                    padding: 0px 5px;
+                    font-size: 14px;
+                    line-height: 14px;
                 }
 
-                .news .news-hot{
-                    border:none !important;
-                }
-            .news .news-item {
-                border: none;
+            .news .news-hot {
+                border: none !important;
             }
     }
 
@@ -674,24 +679,31 @@
         padding: 0 84px;
     }
 
-        .partner .underline {
-            left: 25%;
-            margin-top: 8px;
+    @@media ( max-width : 800px) {
+        .partner,
+        .footer {
+            padding: 0 20px;
         }
+    }
+
+    .partner .underline {
+        left: 25%;
+        margin-top: 8px;
+    }
 
 
 
-        .footer .footer-title {
-            color: #03324C;
-            font-weight: bold;
-            font-size: 16px;
-            border-bottom: solid 1px #000;
-            line-height: 20px;
-            padding-bottom: 7px;
-            margin-bottom: 7px;
-        }
+    .footer .footer-title {
+        color: #03324C;
+        font-weight: bold;
+        font-size: 16px;
+        border-bottom: solid 1px #000;
+        line-height: 20px;
+        padding-bottom: 7px;
+        margin-bottom: 7px;
+    }
 
-        .footer a {
-            color: #000;
-        }
+    .footer a {
+        color: #000;
+    }
 </style>

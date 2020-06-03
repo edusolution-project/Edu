@@ -4,6 +4,13 @@
     var Data = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     var ClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 <div class="left-col">
     <div class="main-container">
@@ -30,12 +37,12 @@
         container: "lessonContainer",
         mod: mod.TEACHERVIEW,
         url: {
-            load: '@Url.Action("GetDetailsLesson", "Lesson")',
-            list_part: '@Url.Action("GetList", "CloneLessonPart")',
-            load_part: '@Url.Action("GetDetail", "CloneLessonPart")',
-            save_part: '@Url.Action("CreateOrUpdate", "CloneLessonPart")',
-            del_part: '@Url.Action("Remove", "CloneLessonPart")',
-            move_part: '@Url.Action("ChangePosition","CloneLessonPart")'
+            load: '@processUrl("GetDetailsLesson", "Lesson")',
+            list_part: '@processUrl("GetList", "CloneLessonPart")',
+            load_part: '@processUrl("GetDetail", "CloneLessonPart")',
+            save_part: '@processUrl("CreateOrUpdate", "CloneLessonPart")',
+            del_part: '@processUrl("Remove", "CloneLessonPart")',
+            move_part: '@processUrl("ChangePosition","CloneLessonPart")'
         },
         type: @Data.TemplateType,
         lesson_id: '@Data.ID',
