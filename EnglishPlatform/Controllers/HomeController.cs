@@ -112,7 +112,7 @@ namespace EnglishPlatform.Controllers
                         if (st != null)
                         {
                             centerCode = st.Centers != null && st.Centers.Count > 0 ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
-                            ViewBag.AllCenters = st.Centers.Select(t => _centerService.GetItemByID(t)).ToList();
+                            ViewBag.AllCenters = st.Centers != null ? st.Centers.Select(t => _centerService.GetItemByID(t)).ToList() : null;
                         }
                         break;
                 }

@@ -144,6 +144,7 @@
     <None Include="wwwroot\fonts\Simple-Line-Icons.svg" />
     <None Include="wwwroot\fonts\Simple-Line-Icons.woff2" />
     <None Include="wwwroot\fonts\themify.svg" />
+    <None Include="wwwroot\images\bottom-logo.png" />
     <None Include="wwwroot\js\bootstrap-tagsinput.js" />
     <None Include="wwwroot\js\bootstrap-vue.min.js" />
     <None Include="wwwroot\js\calendar\js\Calendar.js" />
