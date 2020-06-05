@@ -1,0 +1,101 @@
+﻿
+@{
+    var category = ViewBag.Category as BaseCustomerEntity.Database.NewsCategoryEntity;
+    var firstPage = ViewBag.FirstPage as List<BaseCustomerEntity.Database.NewsEntity>;
+    var initTotalRec = (double)ViewBag.TotalRec;
+    ViewData["Title"] = category.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script src="~/js/minify/common.min.js?20200604"></script>
+<script src="~/js/minify/common.lib.min.js?20200604"></script>
+
+<script>
+    if($('.nav-link [for=@category.Code]').length > 0)
+        $('.nav-link [for=@category.Code]').addClass('active');
+    else
+        $('.nav-link [for=news]').addClass('active');
+</script>
+<style>
+    .news-item {
+        border: none;
+    }
+</style>
+<div class="category-box pt-5 pb-5">
+    <div class="inner-content">
+        <div class="content-box">
+            <div class="box-title d-flex justify-content-center mb-5">
+                @category.Name
+                <div class="underline"></div>
+            </div>
+            <div class="news-list flex-md-row pb-3">
+                <div v-for="(item,k) in tableData" class="news-item pb-3 pt-3 d-flex">
+                    <div class="thumb">
+                        <a :href="'tin-tuc/@category.Code/' + item.Code">
+                            <img src="~/images/news3.png" />
+                        </a>
+                    </div>
+                    <div class="ml-3 media-body">
+                        <div class="news-title">
+                            <a href="#">
+                                Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                            </a>
+                        </div>
+                        <div class="news-desc">
+                            Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
+                        </div>
+                        <div class="news-time">
+                            12/08/2019
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="page-control d-flex justify-content-lg-center">
+        <b-pagination v-model="page"
+                      :total-rows="totalRec"
+                      :per-page="view"
+                      v-on:input="getData()"></b-pagination>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        new Vue({
+            el: ".category-box",
+            mounted() {
+            },
+            data: {
+                isLoading: false,
+                catID: '@category.ID',
+                tableData: @Html.Raw(Json.Serialize(firstPage)),
+                view: 20,
+                totalRec: @initTotalRec,
+                page: 1
+            },
+            methods: {
+                getData() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('catID', _that.catID)
+                    _form.append('PageSize', _that.view)
+                    _form.append('PageIndex', _that.page)
+                    _form.append('SearchText', _that.searchTerm)
+                    let _url = '@Url.Action("GetList", "News")'
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.tableData = response.data.Data;
+                            this.tableData = _that.tableData
+                            this.totalRec = response.data.Model.totalRecord
+                            console.log(totalRec)
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
+                            //console.log(_that.active_course);
+                        }).catch(e => { })
+                },
+            }
+        });
+    </script>
+}

@@ -178,7 +178,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public JsonResult GetList(DefaultModel model, string Center, string SubjectID, string ClassID, string TeacherID, string SkillID, string GradeID)
         {
             var filterCs = new List<FilterDefinition<ClassSubjectEntity>>();
-            if (User.IsInRole("teacher"))
+            if (!HasRole(User.Claims.GetClaimByType("UserID").Value, Center, "head-teacher"))
             {
                 TeacherID = User.Claims.GetClaimByType("UserID").Value;
             }
@@ -359,6 +359,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
         #endregion
+
+        private bool HasRole(string userid, string center, string role)
+        {
+            var teacher = _teacherService.GetItemByID(userid);
+            if (teacher == null) return false;
+            var centerMember = teacher.Centers.Find(t => t.Code == center);
+            if (centerMember == null) return false;
+            if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
+            return true;
+        }
 
         //public async Task<JsonResult> ConvertStudent()
         //{

@@ -12,32 +12,397 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <title>@ViewData["Title"] - Eduso</title>
 
-
-
     <link rel="icon" href="/favicon.ico">
 
     <!-- Bootstrap core CSS -->
     <link href="~/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-
     <link href="~/css/defstyle.css" rel="stylesheet" />
+    <!-- Vue JS + support lib-->
+    <script src="~/js/minify/common.min.js?20200604"></script>
+    <script src="~/js/minify/common.lib.min.js?20200604"></script>
 </head>
 <body>
+    <style>
+        .inner-content {
+            max-width: 1140px;
+            margin: auto;
+        }
+
+        .top-banner {
+            display: block;
+            height: 396px;
+            background-image: url(/images/topbanner.png);
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-top: 2px;
+        }
+
+        @@media ( max-width : 800px) {
+            .top-banner {
+                height: 0;
+                background-size: auto 100%;
+                padding-top: 50%;
+            }
+        }
+
+        .about-us {
+            background-image: url(/images/Aboutus_bg.png);
+            background-repeat: no-repeat;
+            background-position: right 84px center;
+            margin-top: 2px;
+            height: 340px;
+        }
+
+        .our-product {
+            background-image: url(/images/bg_product.png);
+            background-repeat: no-repeat;
+            background-size: 100%;
+            /*height: 340px;*/
+            padding-top: 120px;
+            padding-bottom: 120px;
+        }
+
+            .our-product .media {
+                width: 560px;
+            }
+
+                .our-product .media img {
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+
+        @@media (max-width: 800px) {
+            .our-product .media {
+                width: 100%;
+                margin-bottom: 24px;
+            }
+        }
+
+        .content-box .box-title {
+            font-size: 32px;
+            line-height: 44px;
+            color: #05517B;
+            display: inline-block;
+            font-weight: 600;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+            .content-box .box-title .underline {
+                height: 4px;
+                background: #C1272C;
+                position: absolute;
+                bottom: -10px;
+                max-width: 100px;
+                min-width: 50px;
+            }
+
+        .content-box .content {
+            font-size: 16px;
+            font-weight: normal;
+            line-height: 22px;
+            color: #000000;
+        }
+
+        .our-product-top {
+            width: 0px;
+            height: 0;
+            border-right: 1366px solid transparent;
+            border-left: 0px solid transparent;
+            border-top: 60px solid #F2F2F2;
+            margin-bottom: -60px;
+        }
+
+        .trial-top {
+            width: 0px;
+            height: 0;
+            border-left: 1366px solid transparent;
+            border-right: 0px solid transparent;
+            border-bottom: 60px solid #08486B;
+            margin-top: -60px;
+        }
+
+
+        .trial {
+            background: #08486B;
+            padding: 20px 0;
+        }
+
+            .trial .box-title {
+                font-size: 24px;
+                line-height: 33px;
+                font-style: normal;
+                font-weight: normal;
+            }
+
+            .trial .media {
+            }
+
+            .trial .content-box {
+                margin-left: 100px;
+            }
+
+            .trial .trial-form {
+                width: 560px;
+                height: 252px;
+                background: #FFFFFF;
+                border-radius: 3px;
+                padding: 24px;
+                text-align: left;
+            }
+
+        @@media (max-width: 800px) {
+            .trial .content-box {
+                margin: 0;
+            }
+
+            .trial .trial-form {
+                width: 100%;
+            }
+        }
+
+        .trial .trial-form label {
+            font-style: normal;
+            font-size: 14px;
+            line-height: 19px;
+        }
+
+        .trial .trial-form input {
+            background: #FFFFFF;
+            border: 0.5px solid #A8A8A8;
+            box-sizing: border-box;
+            border-radius: 3px;
+        }
+
+        .trial button {
+            margin-top: 32px;
+            width: 251px;
+            height: 44px;
+            left: 735px;
+            top: 402px;
+            background: #C1272C;
+            border-radius: 100px;
+            /*font-family: Lato;*/
+            font-style: normal;
+            font-size: 18px;
+            line-height: 22px;
+            /* identical to box height */
+            text-align: center;
+            text-transform: uppercase;
+            color: #FFFFFF;
+            border: none;
+        }
+
+        .how-we-help,
+        .news,
+        .footer {
+            background-color: #F2F2F2;
+        }
+
+            .news .categories {
+                margin-bottom: 10px;
+                line-height: 16px;
+                color: #CCC;
+            }
+
+                .news .categories a {
+                    font-weight: 600;
+                    font-size: 20px;
+                    line-height: 27px;
+                    color: #A0A0A0;
+                    margin: 0 16px;
+                }
+
+                    .news .categories a:first-child {
+                        margin-left: 0
+                    }
+
+                    .news .categories a:last-child {
+                        margin-right: 0
+                    }
+
+                    .news .categories a.active, .news .categories a:hover {
+                        text-decoration: none;
+                        color: #05517B;
+                    }
+
+        .news-item {
+            border-bottom: solid 1px #CCC;
+        }
+
+        @@media(min-width : 800px) {
+            .news-hot .news-item:first-child,
+            .news-top .news-item:first-child {
+                padding-top: 0 !important;
+            }
+
+            .news-hot .news-item:last-child,
+            .news-top .news-item:last-child {
+                border-bottom: none;
+            }
+        }
+
+        .news-top .news-item .thumb {
+            border-bottom: none;
+            height: 120px;
+            width: 40%;
+            margin-right: 12px;
+        }
+
+
+        .thumb img {
+            max-width: 100%;
+        }
+
+        .news-item .news-title {
+            font-weight: bold;
+            padding-bottom: 10px;
+            font-size: 16px;
+        }
+
+            .news-item .news-title a {
+                color: #333;
+                text-decoration: none;
+            }
+
+                .news-item .news-title a:hover {
+                    text-decoration: underline;
+                }
+
+        .news-item .news-desc {
+            font-size: 14px;
+            margin-bottom: 3px;
+            text-align: justify;
+        }
+
+        .news-item .news-time {
+            font-size: 14px;
+            color: #99A1A6;
+            padding-left: 21px;
+            position: relative;
+        }
+
+            .news-item .news-time::before {
+                content: url(/images/icon/clock.png);
+                position: absolute;
+                left: 1px;
+                top: 4px;
+            }
+
+        @@media (max-width: 800px) {
+            .content-box .box-title {
+                /*font-size: 16px;*/
+            }
+
+            .news {
+                padding: 0 20px;
+            }
+
+                .news .categories {
+                    font-size: 0;
+                }
+
+                    .news .categories a {
+                        margin: 5px 0;
+                        display: inline-block;
+                        padding: 0px 5px;
+                        font-size: 14px;
+                        line-height: 14px;
+                    }
+
+                .news .news-hot {
+                    border: none !important;
+                }
+        }
+
+        .content-box .sub-box .title {
+            font-weight: 600;
+            font-size: 18px;
+            line-height: 25px;
+        }
+
+        .about-us .box-title {
+            text-align: left;
+        }
+
+        .about-us .content,
+        .our-product .content {
+            width: 560px;
+            text-align: justify;
+        }
+
+
+        @@media ( max-width : 800px) {
+            .about-us {
+                background-position: center bottom;
+                padding-bottom: 320px;
+                height: auto;
+                margin: 0 20px;
+            }
+
+                .about-us .content,
+                .our-product .content {
+                    width: 100%;
+                }
+
+            .our-product {
+                padding: 20px;
+                background-size: 100%;
+                background-position: left bottom;
+            }
+        }
+
+
+
+        .how-we-help .underline {
+            left: 25%;
+            margin-top: 8px;
+        }
+
+        .partner,
+        .footer {
+            padding: 0 84px;
+        }
+
+        @@media ( max-width : 800px) {
+            .partner,
+            .footer {
+                padding: 0 20px;
+            }
+        }
+
+        .partner .underline {
+            left: 25%;
+            margin-top: 8px;
+        }
+
+
+
+        .footer .footer-title {
+            color: #03324C;
+            font-weight: bold;
+            font-size: 16px;
+            border-bottom: solid 1px #000;
+            line-height: 20px;
+            padding-bottom: 7px;
+            margin-bottom: 7px;
+        }
+
+        .footer a {
+            color: #000;
+        }
+    </style>
     <div>
         @await Html.PartialAsync("_CookieConsentPartial")
         @await Html.PartialAsync("_Topmenu")
         <main class="container">
             @RenderBody()
         </main>
+        @await Html.PartialAsync("_footerinfo")
         @await Html.PartialAsync("_deffooter")
     </div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
-
-
-
     @RenderSection("Scripts", required: false)
+
 </body>
 </html>

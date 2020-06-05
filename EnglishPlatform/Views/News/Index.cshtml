@@ -3,133 +3,18 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="top-banner">
-</div>
-<div class="about-us mt-5 mb-5">
+<div class="category-box pt-5 pb-5">
     <div class="inner-content">
         <div class="content-box">
-            <div class="box-title text-left">
-                Về Eduso
-                <div class="underline w-50"></div>
-            </div>
-            <div class="content">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
-            </div>
-        </div>
-    </div>
-</div>
-<div class="how-we-help pt-5 pb-5">
-    <div class="inner-content d-flex">
-        <div class="content-box text-center">
-            <div class="box-title text-center">
-                Chúng tôi giúp gì cho bạn
-                <div class="underline w-50"></div>
-            </div>
-            <div class="d-flex flex-column flex-md-row" style="width: 100%">
-                <div class="sub-box media-body m-3">
-                    <div class="image">
-                        <img src="~/images/hwh1.png" />
-                    </div>
-                    <div class="title">
-                        Học sinh
-                    </div>
-                    <div class="content">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </div>
-                </div>
-                <div class="sub-box media-body m-3">
-                    <div class="image">
-                        <img src="~/images/hwh2.png" />
-                    </div>
-                    <div class="title">
-                        Giáo viên
-                    </div>
-                    <div class="content">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </div>
-                </div>
-                <div class="sub-box media-body m-3">
-                    <div class="image">
-                        <img src="~/images/hwh3.png" />
-                    </div>
-                    <div class="title">
-                        Quản lý
-                    </div>
-                    <div class="content">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="our-product-top d-none d-md-block"></div>
-<div class="our-product">
-    <div class="inner-content d-block d-md-flex justify-content-md-between" style="width:100%;">
-        <div class="media">
-            <img src="~/images/Product.png" />
-        </div>
-        <div class="content-box">
-            <div class="box-title text-left">
-                Sản phẩm
-                <div class="underline w-50"></div>
-            </div>
-            <div class="content text-justify">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            </div>
-        </div>
-    </div>
-</div>
-<div class="trial-top d-none d-md-block"></div>
-<div class="trial">
-    <div class="inner-content d-flex justify-content-center">
-        <div class="media d-none d-md-block">
-            <img src="~/images/trial.png" />
-        </div>
-        <div class="content-box text-center">
-            <div class="box-title text-center text-white">
-                Đăng ký dùng thử miễn phí
-            </div>
-            <div class="trial-form">
-                <div>
-                    <label>Họ và tên</label>
-                    <input type="text" class="form-control" />
-                </div>
-                <div>
-                    <label>Số điện thoại</label>
-                    <input type="text" class="form-control" />
-                </div>
-                <div>
-                    <label>Địa chỉ</label>
-                    <input type="text" class="form-control" />
-                </div>
-
-            </div>
-            <div class="text-center">
-                <button> Đăng ký ngay</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="news pt-5 pb-5">
-    <div class="inner-content">
-        <div class="content-box">
-            <div class="box-title text-left">
-                Tin tức
-                <div class="underline w-50"></div>
-            </div>
-            <div class="categories">
-                <a href="#" class="active">Sự kiện</a> |
-                <a href="#">Ngôi sao đổi mới</a> |
-                <a href="#">Chuyện Nghề </a> |
-                <a href="#">Câu chuyện đối tác</a>
-
+            <div class="box-title d-flex justify-content-center mb-5">
+                {{mainTitle}}
+                <div class="underline"></div>
             </div>
             <div class="news-list d-flex flex-column flex-md-row pt-3" style="border-top:solid 0.5px #CCC">
                 <div class="news-hot media-body pr-md-4" style="border-right:solid 0.5px #CCC">
                     <div class="news-item w-100 pb-3">
                         <div class="thumb w-100 pb-2">
-                            <a href="#">
+                            <a href="@Url.RouteUrl("news-about-us")">
                                 <img src="~/images/news1.png" class="w-100" />
                             </a>
                         </div>
@@ -270,28 +155,24 @@
         </div>
     </div>
 </div>
-<div class="partner pt-5 pb-5">
-    <div class="inner-content">
-        <div class="content-box text-center">
-            <div class="box-title text-center">
-                Đối tác
-                <div class="underline w-50"></div>
-            </div>
-            <div class="d-flex flex-column flex-md-row justify-content-between" style="width: 100%">
-                <div class="media-body m-2">
-                    <img src="~/images/PN-1.png" />
-                </div>
-                <div class="media-body m-2">
-                    <img src="~/images/PN-2.png" />
-                </div>
-                <div class="media-body m-2">
-                    <img src="~/images/PN-3.png" />
-                </div>
-                <div class="media-body m-2">
-                    <img src="~/images/PN-4.png" />
-                </div>
 
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+    $('.nav-link [for=news]').addClass('active');
+</script>
+
+@section Scripts{
+    <script>
+        new Vue({
+            el: ".category-box",
+            mounted() {
+            },
+            data: {
+                mainTitle: 'Tin tức',
+                catID: '0',
+                listnews: []
+            },
+            methods: {
+            }
+        });
+    </script>
+}

@@ -26,19 +26,19 @@
     }
 
     .blue-color {
-        color: #00314c !important;
+        color: #0194e4 !important;
     }
 
     .blue-bg {
-        background-color: #00314c !important;
+        background-color: #0194e4 !important;
     }
 
     .green-color {
-        color: #2b8464 !important;
+        color: #00bf7a !important;
     }
 
     .green-bg {
-        background-color: #2b8464 !important;
+        background-color: #00bf7a !important;
     }
 
     .yellow-color {
@@ -83,6 +83,7 @@
                               v-if="item.ParentID == '0'"
                               v-bind:subchaps="list_data">
                 </chap-content>
+                <lesson-item v-for="lesson in filterLesson({ID:'0'})" v-bind:data="lesson" v-bind:classSubject="`@currentCs.ID`"></lesson-item>
             </ul>
         </div>
     </div>
@@ -241,13 +242,23 @@
                 axios.post(_url, _form)
                     .then(response => {
                         //console.log(response.data.Data)
-                        _that.list_data = response.data.Data;
-                        var data = response.data.Data;
+                        _that.list_data = response.data.Data.Chapters;
+                        //var data = response.data.Data;
                         //data.forEach(function (item) { getSubList(item.ID)});
+                        var lessons = response.data.Data.Lessons;
+                        //console.log(lessons)
+                        lessons.forEach(function (lesson) {
+                            if (_that.list_lessons.findIndex(t => t.ID == lesson.ID) == -1)
+                                _that.list_lessons.push(lesson)
+                        })
+                        this.list_data = _that.list_data;
+                        console.log(this.list_data);
+                        this.list_lessons = _that.list_lessons;                        
                         if (window.location.hash != "")
                         {
 
                         }
+
                         //console.log(_that.active_course);
                     }).catch(e => { })
             },
@@ -257,8 +268,8 @@
                 })
             },
             filterLesson(ID) {
-                //console.log(ID);
-                //console.log(this.list_lessons);
+                console.log(ID);
+                console.log(this.list_lessons);
                 return this.list_lessons.filter((p) => {
         	        return p.ChapterID == ID
                 })

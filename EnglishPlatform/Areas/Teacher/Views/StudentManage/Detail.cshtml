@@ -3,6 +3,13 @@
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var currentStudent = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
     ViewData["Title"] = "Học viên " + currentStudent.FullName + " - Thông tin chi tiết";
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
@@ -17,7 +24,7 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex mb-2">
-            <h2 class="title"><a href="@Url.Action("Index", "StudentManage")" title="Quản lý học viên"><i class="ti-arrow-left d-none"></i>Quản lý Học viên</a> / @currentStudent.FullName</h2>
+            <h2 class="title"><a href="@processUrl("Index", "StudentManage")" title="Quản lý học viên"><i class="ti-arrow-left d-none"></i>Quản lý Học viên</a> / @currentStudent.FullName</h2>
             @*<div class="search-box">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
@@ -38,12 +45,12 @@
                             <tr :class="item.ClassName != null ? 'font-weight-bold bg-light' : ''">
                                 <template v-if="item.ClassName != null">
                                     <td colspan="2">
-                                        <a :href="'@Url.Action("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.ClassName}}</a>
+                                        <a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.ClassName}}</a>
                                     </td>
                                 </template>
                                 <template v-else>
                                     <td></td>
-                                    <td><a :href="'@Url.Action("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID + '#' + item.ClassSubjectID" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
+                                    <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID + '#' + item.ClassSubjectID" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
                                 </template>
                                 <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
                                 <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
@@ -107,7 +114,7 @@
                     let _that = this
                     let _form = new FormData()
                     _form.append('ID', '@currentStudent.ID')
-                    let _url = '@Url.Action("GetStudentSummary", "Class")'
+                    let _url = '@processUrl("GetStudentSummary", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.sumarryData = response.data.Data;

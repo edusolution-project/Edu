@@ -1,0 +1,20 @@
+﻿
+@{
+    var news = ViewBag.News as BaseCustomerEntity.Database.NewsEntity;
+    ViewData["Title"] = news.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script>
+    @if(news.Code == "ve-eduso")
+    {
+        @:$('.nav-link [for=aboutus]').addClass('active');
+    }
+    else
+    {
+        @:$('.nav-link [for=news]').addClass('active');
+    }
+</script>
+<div class="content">
+    @Html.Raw(news.Content)
+</div>
+

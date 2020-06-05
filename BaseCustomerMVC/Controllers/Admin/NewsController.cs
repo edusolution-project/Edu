@@ -11,18 +11,20 @@ using Core_v2.Globals;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using BaseCustomerEntity.Globals;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
     [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", "admin", 2)]
-    public class NewsController: AdminController
+    public class NewsController : AdminController
     {
         private readonly NewsCategoryService _serviceNewCate;
         private readonly NewsService _serviceNews;
         private readonly IHostingEnvironment _env;
         private readonly MappingEntity<NewsCategoryEntity, NewsCategoryViewModel> _mapping;
         private readonly MappingEntity<NewsEntity, NewsViewModel> _mappings;
-        public NewsController(NewsCategoryService newsCategoryService,NewsService newsService, IHostingEnvironment evn)
+        public NewsController(NewsCategoryService newsCategoryService, NewsService newsService, IHostingEnvironment evn)
         {
             _serviceNewCate = newsCategoryService;
             _serviceNews = newsService;
@@ -33,7 +35,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public ActionResult Index()
         {
-            return View(); 
+            return View();
         }
 
         #region NewsCategory
@@ -49,6 +51,13 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
+                item.Code = item.Name.ConvertUnicodeToCode("-", true);
+                int pos = 0;
+                while (_serviceNewCate.GetItemByCode(item.Code) != null)
+                {
+                    pos++;
+                    item.Code += ("-" + pos);
+                }
                 _serviceNewCate.CreateQuery().InsertOne(item);
                 Dictionary<string, object> response = new Dictionary<string, object>()
                     {
@@ -89,7 +98,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             //    filter.Add(Builders<StudentEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             //}
             //var data = (filter.Count > 0 ? _serviceNewCate.Collection.Find(Builders<CenterEntity>.Filter.And(filter)) : _serviceNewCate.GetAll())
-            var data= _serviceNewCate.GetAll()
+            var data = _serviceNewCate.GetAll()
                 .SortByDescending(t => t.ID);
             model.TotalRecord = data.CountDocuments();
             var newsCate = data == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
@@ -147,7 +156,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         #region News
         public IActionResult News()
         {
-            ViewBag.news = _serviceNews.GetAll().ToList();
+            //ViewBag.news = _serviceNews.GetAll().ToList();
             ViewBag.newscategory = _serviceNewCate.GetAll().ToList();
             return View("News");
         }
@@ -163,9 +172,19 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.CreateDate = DateTime.UtcNow;
+                if (item.PublishDate < new DateTime(1900, 1, 1))
+                    item.PublishDate = item.CreateDate;//publish now
+                item.Code = item.Title.ConvertUnicodeToCode("-", true);
+                var pos = 0;
+                while (_serviceNews.GetItemByCode(item.Code) != null)
+                {
+                    pos++;
+                    item.Code += ("-" + pos);
+                }
+
                 if (Thumbnail != null)
                 {
-                    item.Thumbnail = urlThumbnai(Thumbnail);
+                    item.Thumbnail = urlThumbnail(Thumbnail);
                 }
                 _serviceNews.CreateQuery().InsertOne(item);
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -178,15 +197,29 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             else
             {
-                var thumbnail=_serviceNews.GetItemByID(item.ID).Thumbnail;
-                item.LastEdit = DateTime.UtcNow;
-                item.CreateDate = _serviceNews.GetItemByID(item.ID).CreateDate;
+                var olditem = _serviceNews.GetItemByID(item.ID);
+
+                item.Code = item.Title.ConvertUnicodeToCode("-", true);
+                item.CreateDate = olditem.CreateDate;
+                item.LastEdit = DateTime.Now;
+
+                var pos = 0;
+                var sameUrl = _serviceNews.GetItemByCode(item.Code);
+                while (sameUrl != null && sameUrl.ID != item.ID)
+                {
+                    pos++;
+                    item.Code += ("-" + pos);
+                    sameUrl = _serviceNews.GetItemByCode(item.Code);
+                }
+
                 if (Thumbnail != null)
                 {
-                    removeThumbnail(thumbnail);
-                    item.Thumbnail = urlThumbnai(Thumbnail);
+                    removeThumbnail(olditem.Thumbnail);
+                    item.Thumbnail = urlThumbnail(Thumbnail);
                 }
-                else item.Thumbnail = thumbnail;
+                else
+                    item.Thumbnail = olditem.Thumbnail;
+
                 _serviceNews.Save(item);
                 Dictionary<string, object> response = new Dictionary<string, object>()
                     {
@@ -224,7 +257,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             //===========
             var hasfilter = _serviceNews.Collection.Find(Builders<NewsEntity>.Filter.And(filter));/*.Sort(Builders<NewsEntity>.Sort.Descending(tbl=>tbl.CreateDate));*/
             var nofilter = _serviceNews.GetAll().SortByDescending(tbl => tbl.ID);
-           
+
             //============
 
             var data = (filter.Count > 0 ? hasfilter : nofilter);
@@ -237,7 +270,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 else
                     data = data.SortBy(tbl => tbl.CreateDate);
             }
-                
+
             //    && 
             //{
             //    sort.SortByDescending(tbl => tbl.CreateDate);
@@ -305,12 +338,12 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Publish(DefaultModel model,string Check)
+        public JsonResult Publish(DefaultModel model, string Check)
         {
             if (string.IsNullOrEmpty(model.ArrID) || model.ArrID.Length <= 0)
                 return new JsonResult(null);
 
-            _serviceNews.ChangeStatus(model.ArrID.Split(',').ToList(), true,Check);
+            _serviceNews.ChangeStatus(model.ArrID.Split(',').ToList(), true, Check);
             return new JsonResult("Publish OK");
         }
 
@@ -325,12 +358,17 @@ namespace BaseCustomerMVC.Controllers.Admin
             return new JsonResult("UnPublish OK");
         }
 
-        public string urlThumbnai(IFormFile Thumbnail)
+        public string urlThumbnail(IFormFile Thumbnail)
         {
             string _fileName = Thumbnail.FileName;
             var timestamp = DateTime.Now.ToFileTime();
             _fileName = timestamp + "_" + _fileName;
-            string _path = Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload/News", _fileName));
+
+            var _dirPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload/News");
+            if (!Directory.Exists(_dirPath))
+                Directory.CreateDirectory(_dirPath);
+
+            string _path = Path.Combine(Path.Combine(_dirPath, _fileName));
             using (var stream = new FileStream(_path, FileMode.Create))
             {
                 Thumbnail.CopyTo(stream);

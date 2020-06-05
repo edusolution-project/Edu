@@ -11,6 +11,8 @@ namespace BaseCustomerEntity.Database
 {
     public class NewsEntity : EntityBase
     {
+        //[JsonProperty("UID")]
+        //public string UID { get; set; }
         [JsonProperty("CategoryID")]
         public string CategoryID { get; set; }
         [JsonProperty("Title")]
@@ -36,15 +38,32 @@ namespace BaseCustomerEntity.Database
 
     }
 
-    public class NewsService:ServiceBase<NewsEntity>
+    public class NewsService : ServiceBase<NewsEntity>
     {
-        public NewsService(IConfiguration config) :base(config)
+        private readonly IndexService _indexService;
+
+        public NewsService(IConfiguration config, IndexService indexService) : base(config)
         {
+            _indexService = indexService;
             var indexs = new List<CreateIndexModel<NewsEntity>> { };
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public void ChangeStatus(List<string> IDs, bool status,string check)
+        //public new NewsEntity Save(NewsEntity entity)
+        //{
+        //    if (entity.ID == null || entity.ID == "")
+        //    {
+        //        entity.UID = _indexService.GetNewIndex("News").ToString();
+        //        Collection.InsertOne(entity);
+        //    }
+        //    else
+        //    {
+        //        Collection.ReplaceOne(t => t.ID == entity.ID, entity);
+        //    }
+        //    return entity;
+        //}
+
+        public void ChangeStatus(List<string> IDs, bool status, string check)
         {
             if (check.Equals("IsTop"))
             {
@@ -55,5 +74,7 @@ namespace BaseCustomerEntity.Database
                 CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsHot, status));
             }
         }
+
+        public NewsEntity GetItemByCode(string Code) => Collection.Find<NewsEntity>(x => x.Code.Equals(Code)).FirstOrDefault();
     }
 }

@@ -752,7 +752,12 @@ namespace BaseCustomerMVC.Controllers.Student
                 var chapters = _chapterService.GetSubChapters(currentCs.ID, "0");
                 var chapterExtends = _chapterExtendService.Search(currentCs.ID);
 
-                var listProgress = new List<ChapterProgressViewModel>();
+                var listProgress = new ClassScheduleViewModel(new CourseEntity())
+                {
+
+                    Chapters = new List<ChapterEntity>(),
+                    Lessons = new List<LessonScheduleViewModel>()
+                };
 
                 foreach (var chapter in chapters)
                 {
@@ -768,8 +773,31 @@ namespace BaseCustomerMVC.Controllers.Student
                         viewModel.LastDate = progress.LastDate;
                         viewModel.LastLessonID = progress.LastLessonID;
                     }
-                    listProgress.Add(viewModel);
+                    listProgress.Chapters.Add(viewModel);
                 }
+                var _schedulemapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
+
+                listProgress.Lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == "0").SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                               let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
+                               let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == userId && x.LessonID == r.ID && x.ClassSubjectID == ID).SortByDescending(o => o.ID).FirstOrDefault()
+                               let lastexam = r.TemplateType == LESSON_TEMPLATE.EXAM ? _examService.CreateQuery().Find(x => x.StudentID == userId && x.LessonID == r.ID && x.ClassSubjectID == ID
+                               //&& x.Status
+                               ).SortByDescending(o => o.ID).FirstOrDefault() : null //get lastest exam
+                               select _schedulemapping.AutoOrtherType(r, new LessonScheduleViewModel()
+                               {
+                                   ScheduleID = schedule.ID,
+                                   StartDate = schedule.StartDate,
+                                   EndDate = schedule.EndDate,
+                                   IsActive = schedule.IsActive,
+                                   IsView = r.TemplateType == LESSON_TEMPLATE.EXAM ? lastexam != null : lastjoin != null,
+                                   LastJoin = r.TemplateType == LESSON_TEMPLATE.EXAM ? (lastexam != null ? lastexam.Updated : DateTime.MinValue) :
+                                        lastjoin != null ? lastjoin.Time : DateTime.MinValue,
+                                   DoPoint = (lastexam != null && lastexam.Status) ? (lastexam.MaxPoint > 0 ? lastexam.Point * 100 / lastexam.MaxPoint : 0) : 0,//completed exam only
+                                   Tried = lastexam != null ? lastexam.Number : 0,
+                                   LastExam = (lastexam != null && lastexam.Status
+                                   ) ? lastexam.ID : null
+                               })).ToList();
+
                 var response = new Dictionary<string, object>
                 {
                     { "Data", listProgress }

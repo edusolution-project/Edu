@@ -38,6 +38,7 @@
                                 <th class='text-center'>STT</th>
                                 @*<th class='text-center'>Mã học viên</th>*@
                                 <th class='text-center'>Tên danh mục</th>
+                                <th class='text-center'>Url</th>
                                 <th class='text-center'>Danh mục cha</th>
                                 @*<th class='text-center'>Ngày bắt đầu</th>
         <th class='text-center'>Ngày hết hạn</th>
@@ -151,6 +152,7 @@
                             "<td class='text-center'>" + (i + 1) + "</td>" +
                             //"<td class='text-center'>" + (item.StudentId == null? "":item.StudentId) +"</td>" +
                             "<td>" + item.Name + "</td>" +
+                            "<td>" + item.Code + "</td>" +
                             "<td class='text-center'>" + parentName + "</td>" +                            
                             "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","News")','@Url.Action("create","NewsCategory")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa danh mục " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("Delete","News")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +

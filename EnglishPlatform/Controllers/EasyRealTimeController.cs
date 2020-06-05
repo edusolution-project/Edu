@@ -85,7 +85,7 @@ namespace EnglishPlatform.Controllers
                 if (IsAuthenticated())
                 {
                     Dictionary<string, bool> req = new Dictionary<string, bool>();
-                    var listClass = !_typeUser.Contains(Teacher) ? _studentService.GetItemByID(_userID).JoinedClasses : null;
+                    var listClass = !_typeUser.Contains(Teacher) ? (_studentService.GetItemByID(_userID) ?? new StudentEntity()).JoinedClasses : null;
                     var realClass = listClass != null
                         ? _classService.CreateQuery().Find(o => listClass.Contains(o.ID))?.ToList()
                         : _classService.CreateQuery().Find(o => o.TeacherID == _userID)?.ToList();
@@ -123,7 +123,7 @@ namespace EnglishPlatform.Controllers
                 {
                     var listClass = !_typeUser.Contains(Teacher) ?
                         //_classStudentService.GetStudentClasses(_userID) 
-                        _studentService.GetItemByID(_userID).JoinedClasses
+                        (_studentService.GetItemByID(_userID) ?? new StudentEntity()).JoinedClasses
                         : null;
                     var realClass = listClass != null
                         ? _classService.CreateQuery().Find(o => listClass.Contains(o.ID))?.ToList()

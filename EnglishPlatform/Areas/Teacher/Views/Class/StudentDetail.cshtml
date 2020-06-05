@@ -4,6 +4,13 @@
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     var currentStudent = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
     ViewData["Title"] = currentClass.Name + " / " + currentStudent.FullName;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
@@ -18,7 +25,7 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex mb-2">
-            <h2 class="title"><a href="@Url.Action("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i>{{domDecoder(className)}}</a>/ @currentStudent.FullName</h2>
+            <h2 class="title"><a href="@processUrl("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i>{{domDecoder(className)}}</a>/ @currentStudent.FullName</h2>
             @*<div class="search-box">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
@@ -278,7 +285,7 @@
                     _form.append('StartDate', moment(_that.startdate).format("MM/DD/YYYY"))
                     _form.append('EndDate',  moment(_that.enddate).format("MM/DD/YYYY"))
 
-                    let _url = '@Url.Action("GetLearningResult", "Class")'
+                    let _url = '@processUrl("GetLearningResult", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.resultData = response.data.Data;
@@ -303,7 +310,7 @@
                     _form.append('StartDate', moment(_that.startdate).format("MM/DD/YYYY"))
                     _form.append('EndDate',  moment(_that.enddate).format("MM/DD/YYYY"))
 
-                    let _url = '@Url.Action("GetLearningProgress", "Class")'
+                    let _url = '@processUrl("GetLearningProgress", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.progressData = response.data.Data;
@@ -314,7 +321,7 @@
                     let _form = new FormData()
                     _form.append('ClassID', _that.classID)
                     _form.append('ID', '@currentStudent.ID')
-                    let _url = '@Url.Action("GetLearningSummary", "Class")'
+                    let _url = '@processUrl("GetLearningSummary", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.sumarryData = response.data.Data;
@@ -329,7 +336,7 @@
 
                     let _form = new FormData()
                     _form.append('ClassID', _that.classID)
-                    let _url = '@Url.Action("GetClassSubjects", "ClassSubject")'
+                    let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
                     axios.post(_url, _form)
                         .then(response => {
                             var _data = response.data.Data;

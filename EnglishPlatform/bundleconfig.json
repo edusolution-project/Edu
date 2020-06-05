@@ -4,8 +4,7 @@
     "inputFiles": [
       "wwwroot/css/bootstrap.4.3.1.min.css",
       "wwwroot/css/be-vietnam-font.css",
-      "wwwroot/css/fonts.css",
-      "wwwroot/css/stylesheet.min.css",
+      "wwwroot/css/fonts.css",      
       "wwwroot/vendor/fontawesome-free/css/all.css"
     ]
   },

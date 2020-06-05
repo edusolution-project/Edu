@@ -16,6 +16,7 @@ using OfficeOpenXml;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using RestSharp;
+using System.Data;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -73,6 +74,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
         private readonly CenterService _centerService;
+        private readonly RoleService _roleService;
 
         private readonly MappingEntity<ChapterEntity, CourseChapterEntity> _chapterMappingRev = new MappingEntity<ChapterEntity, CourseChapterEntity>();
         private readonly MappingEntity<CourseChapterEntity, ChapterEntity> _chapterMapping = new MappingEntity<CourseChapterEntity, ChapterEntity>();
@@ -94,7 +96,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  ModCourseService modservice,
                  //ClassService classService,
                  ClassSubjectService classSubjectService
-
+                , RoleService roleService
                 , ModSubjectService modsubjectService
                 , ModChapterService modchapterService
                 , ModGradeService modgradeService
@@ -172,6 +174,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
             _centerService = centerService;
+            _roleService = roleService;
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -325,15 +328,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var filter = new List<FilterDefinition<CourseEntity>>();
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var teacher = _teacherService.GetItemByID(UserID);
-
-            if (teacher == null || !teacher.Centers.Any(c => c.Code == Center))
-            {
-                return new JsonResult(new Dictionary<string, object>
-                    {
-                        { "Error", "Bạn không được quyền thực hiện thao tác này"}
-                    });
-            }
             if (!string.IsNullOrEmpty(Center))
             {
                 var @center = _centerService.GetItemByCode(Center);
@@ -343,6 +337,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.Center == @center.ID));
             }
+
+            var teacher = _teacherService.GetItemByID(UserID);
+            CenterMemberEntity memberEntity = null;
+
+            if (teacher == null )
+            {
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Error", "Bạn không được quyền thực hiện thao tác này"}
+                    });                
+            }
+            memberEntity = teacher.Centers.FirstOrDefault(t => t.Code == Center);
+            if(memberEntity == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Error", "Bạn không được quyền thực hiện thao tác này"}
+                    });
+            }    
+            
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
@@ -356,7 +370,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
-            if (User.Claims.GetClaimByType(ClaimTypes.Role).Value == "teacher")
+            
+            if(_roleService.GetItemByID(memberEntity.RoleID).Code != "head-teacher")
+            
+            //if (User.Claims.GetClaimByType(ClaimTypes.Role).Value == "teacher")
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
 
             if (!string.IsNullOrEmpty(model.SearchText))

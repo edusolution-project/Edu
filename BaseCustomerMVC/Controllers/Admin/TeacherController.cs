@@ -242,7 +242,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (item.Centers != null && item.Centers.Count > 0)
                     foreach (var center in item.Centers)
                     {
-                        center.Code = center.Name.ConvertUnicodeToCode("-", true).Replace(@" ", "-");
+                        center.Code = center.Name.ConvertUnicodeToCode("-", true);
                         var idx = centers.FindIndex(t => t.CenterID == center.CenterID);
                         if (idx >= 0)
                         //replace

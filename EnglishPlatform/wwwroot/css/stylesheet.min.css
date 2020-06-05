@@ -42,19 +42,19 @@
 }
 
 .blue-color {
-    color: #00314c !important;
+    color: #0194e4 !important;
 }
 
 .blue-bg {
-    background-color: #00314c !important;
+    background-color: #0194e4 !important;
 }
 
 .green-color {
-    color: #2b8464 !important;
+    color: #00bf7a !important;
 }
 
 .green-bg {
-    background-color: #2b8464 !important;
+    background-color: #00bf7a !important;
 }
 
 .yellow-color {
@@ -63,6 +63,11 @@
 
 .yellow-bg {
     background-color: #F7971E !important;
+}
+
+input.fillquiz {
+    min-width: 80px;
+    max-width: 200px;
 }
 
 
@@ -2798,3 +2803,5 @@ td a {
         background-color: #13A6FB;
         border-color: #13A6FB
     }
+
+

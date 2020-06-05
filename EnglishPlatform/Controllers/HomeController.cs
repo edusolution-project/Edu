@@ -79,10 +79,7 @@ namespace EnglishPlatform.Controllers
 
         public IActionResult Index()
         {
-
-
             StartAuthority();
-
             var type = User.Claims.GetClaimByType("Type");
             if (type != null)
             {
@@ -118,13 +115,13 @@ namespace EnglishPlatform.Controllers
                 }
                 ViewBag.Type = type.Value;
                 //cache
-                //return Redirect($"{centerCode}/{type.Value}");
+                return Redirect($"{centerCode}/{type.Value}");
             }
             else
             {
                 _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
                 HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                //return RedirectToAction("Login");
+                return RedirectToAction("Login");
             }
             return View();
 
@@ -386,7 +383,6 @@ namespace EnglishPlatform.Controllers
                 }
             }
         }
-
 
         private void StartAuthority()
         {

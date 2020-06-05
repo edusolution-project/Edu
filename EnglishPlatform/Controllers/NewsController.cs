@@ -23,63 +23,26 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using com.wiris.std;
 
 namespace EnglishPlatform.Controllers
 {
     public class NewsController : Controller
     {
         private readonly NewsService _newsService;
-        private readonly IAuthenService _authenService;
-        private readonly AccountService _accountService;
-        private readonly RoleService _roleService;
-        private readonly AccountLogService _logService;
-        private readonly TeacherService _teacherService;
-        private readonly StudentService _studentService;
-        private readonly ILog _log;
-        private readonly MailHelper _mailHelper;
-        private readonly ClassService _classService;
-        private readonly StudentHelper _studentHelper;
-        private readonly CalendarHelper _calendarHelper;
-        private readonly UserAndRoleService _userAndRoleService;
-        private readonly CenterService _centerService;
-        private readonly AuthorityService _authorityService;
-        public DefaultConfigs _default { get; }
+        private readonly NewsCategoryService _newsCategoryService;
 
-        public NewsController(AccountService accountService, RoleService roleService, AccountLogService logService
-            , TeacherService teacherService
-            , StudentService studentService
-            , IAuthenService authenService
-            , AccessesService accessesService
-            , ClassService classService
-            , IOptions<DefaultConfigs> defaultvalue
-            , CalendarHelper calendarHelper
-            , MailHelper mailHelper
-            , UserAndRoleService userAndRoleService
-            , CenterService centerService
-            , AuthorityService authorityService
-            , ILog log)
+        public NewsController(
+            NewsService newsService,
+            NewsCategoryService newsCategoryService
+            )
         {
-            _authenService = authenService;
-            _accountService = accountService;
-            _roleService = roleService;
-            _logService = logService;
-            _teacherService = teacherService;
-            _studentService = studentService;
-            _classService = classService;
-            _studentHelper = new StudentHelper(studentService, accountService);
-            _calendarHelper = calendarHelper;
-            _log = log;
-            _mailHelper = mailHelper;
-            _default = defaultvalue.Value;
-            _userAndRoleService = userAndRoleService;
-            _centerService = centerService;
-            _authorityService = authorityService;
+            _newsService = newsService;
+            _newsCategoryService = newsCategoryService;
         }
-
+        //[Route("tin-tuc")]
         public IActionResult Index()
         {
-
-
             //StartAuthority();
 
             //var type = User.Claims.GetClaimByType("Type");
@@ -129,6 +92,73 @@ namespace EnglishPlatform.Controllers
 
         }
 
+        public IActionResult Category(DefaultModel model, string catcode)
+        {
+            var cat = _newsCategoryService.GetItemByCode(catcode);
+            ViewBag.Category = cat;
+            if (cat == null)
+                return RedirectToRoute("news-default");
+
+            var filter = new List<FilterDefinition<NewsEntity>>();
+            filter.Add(Builders<NewsEntity>.Filter.Where(t => t.CategoryID == cat.ID));
+            filter.Add(Builders<NewsEntity>.Filter.Lte(t => t.PublishDate, DateTime.Now));
+
+            var data = _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter))
+                .SortByDescending(t => t.PublishDate);
+            ViewBag.TotalRec = data.CountDocuments();
+            model.TotalRecord = ViewBag.TotalRec;
+            ViewBag.FirstPage = data.Limit(model.PageSize).ToList();
+            return View();
+        }
+
+        public IActionResult Detail(string catcode, string newscode)
+        {
+            var cat = _newsCategoryService.GetItemByCode(catcode);
+            ViewBag.Category = cat;
+            var news = _newsService.GetItemByCode(newscode);
+            ViewBag.News = news;
+            if (news == null)
+            {
+                if (cat == null)
+                    return RedirectToRoute("news-default");
+                else
+                    return RedirectToRoute("news-category", new { catcode = cat.Code });
+            }
+            return View();
+        }
+
+        public JsonResult GetList(DefaultModel model, string catID, bool isHot = false, bool isTop = false)
+        {
+            var filter = new List<FilterDefinition<NewsEntity>>();
+
+            if (!string.IsNullOrEmpty(catID))
+            {
+                filter.Add(Builders<NewsEntity>.Filter.Where(t => t.CategoryID == catID));
+            }
+            if (isHot)
+            {
+                filter.Add(Builders<NewsEntity>.Filter.Where(t => t.IsHot));
+            }
+            if (isTop)
+            {
+                filter.Add(Builders<NewsEntity>.Filter.Where(t => t.IsTop));
+            }
+            filter.Add(Builders<NewsEntity>.Filter.Lte(t => t.PublishDate, DateTime.Now));
+
+            var data = (filter.Count > 0 ? _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter)) : _newsService.GetAll())
+                .SortByDescending(t => t.PublishDate);
+            model.TotalRecord = data.CountDocuments();
+            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
+                ? data.ToList()
+                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", DataResponse },
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
 
         //[Route("/login")]
         //public IActionResult Login()

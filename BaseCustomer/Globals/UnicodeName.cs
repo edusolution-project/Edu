@@ -8,11 +8,11 @@
         }
         public static string ConvertUnicodeToCode(this string text, string replaceWhiteSpace)
         {
-            return string.IsNullOrEmpty(replaceWhiteSpace) ? RemoveUnicode(text) : RemoveUnicode(text).Replace(@" ", replaceWhiteSpace);
+            return string.IsNullOrEmpty(replaceWhiteSpace) ? RemoveUnicode(text) : RemoveUnicode(text).Replace(" ", replaceWhiteSpace);
         }
         public static string ConvertUnicodeToCode(this string text, string replaceWhiteSpace, bool isLowerCase)
         {
-            return isLowerCase ? RemoveUnicode(text).ToLower() : RemoveUnicode(text).Replace(@" ", replaceWhiteSpace).ToLower();
+            return isLowerCase ? RemoveUnicode(text).Replace(" ", replaceWhiteSpace).ToLower() : RemoveUnicode(text).Replace(" ", replaceWhiteSpace);
         }
         private static string RemoveUnicode(string text)
         {

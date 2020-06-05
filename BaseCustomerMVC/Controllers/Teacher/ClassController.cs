@@ -56,6 +56,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
 
         private readonly CenterService _centerService;
+        private readonly RoleService _roleService;
 
 
         public ClassController(
@@ -90,7 +91,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             StudentHelper studentHelper,
 
             ChapterProgressService chapterProgressService,
-            CenterService centerService
+            CenterService centerService,
+            RoleService roleService
 
             )
         {
@@ -134,13 +136,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             _chapterProgressService = chapterProgressService;
             _centerService = centerService;
+            _roleService = roleService;
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
+            var center = new CenterEntity();
             if (!string.IsNullOrEmpty(basis))
             {
-                var center = _centerService.GetItemByCode(basis);
+                center = _centerService.GetItemByCode(basis);
                 if (center != null)
                     ViewBag.Center = center;
             }
@@ -155,6 +159,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ViewBag.Subjects = subject;
                 ViewBag.Skills = _skillService.GetList();
             }
+
+            ViewBag.IsHeadTeacher = HasRole(UserID, center.ID, "head-teacher");
 
             ViewBag.User = UserID;
             ViewBag.Model = model;
@@ -894,6 +900,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult GetClassList(DefaultModel model, string Center, string SubjectID = "", string GradeID = "")
         {
+            string TeacherID = "";
             var center = new CenterEntity();
             if (!string.IsNullOrEmpty(Center))
             {
@@ -903,6 +910,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     { "Error", "Cơ sở không đúng"}
                 });
             }
+
             var returndata = FilterClass(model, center.ID, SubjectID, GradeID, User.Claims.GetClaimByType("UserID").Value, true);
             //model.TotalRecord = totalrec;
 
@@ -925,6 +933,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             FilterDefinition<ClassEntity> ownerfilter = null;
             var UserID = User.Claims.GetClaimByType("UserID").Value;
 
+
+            //if (!HasRole(UserID, Center, "head-teacher"))
+            //{
+            //    TeacherID = UserID;
+            //}
+
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 deep_filter = true;
@@ -942,10 +956,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 deep_filter = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
+
+
+
             if (!string.IsNullOrEmpty(TeacherID))
             {
                 deep_filter = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == TeacherID));
             }
 
             if (!deep_filter)
@@ -1042,7 +1060,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         });
                 }
                 var teacher = _teacherService.GetItemByID(userId);
-                if(teacher == null)
+                if (teacher == null)
                 {
                     return new JsonResult(new Dictionary<string, object>()
                         {
@@ -1056,9 +1074,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {"Error", "Cần chọn ít nhất một môn học" }
                         });
                 }
-                
+
                 var center = _centerService.GetItemByCode(CenterCode);
-                if (center == null || teacher.Centers.Count(t=> t.Code == CenterCode) == 0)
+                if (center == null || teacher.Centers.Count(t => t.Code == CenterCode) == 0)
                 {
                     return new JsonResult(new Dictionary<string, object>()
                         {
@@ -1625,6 +1643,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         #endregion
+
+        private bool HasRole(string userid, string center, string role)
+        {
+            var teacher = _teacherService.GetItemByID(userid);
+            if (teacher == null) return false;
+            var centerMember = teacher.Centers.Find(t => t.CenterID == center);
+            if (centerMember == null) return false;
+            if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
+            return true;
+        }
 
 
         #region Fix Data

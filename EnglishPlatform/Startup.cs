@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using BaseAccess;
 using BaseCustomerEntity.Database;
@@ -18,11 +19,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
+using RestSharp;
 
 namespace EnglishPlatform
 {
@@ -114,14 +117,17 @@ namespace EnglishPlatform
                     List<AuthorityEntity> data = authorityService.GetAll()?.ToList();
                     CacheExtends.SetObjectFromCache(CacheExtends.DefaultPermission, 3600 * 24 * 360, data);
                 }
-                string center = context.Request.Path.Value != "" && context.Request.Path.Value != "/" ? context.Request.Path.Value.Split('/')[1] : string.Empty;
+
+                var contextPath = context.Request.Path.Value.ToLower();
+
+                string center = contextPath != "" && contextPath != "/" ? contextPath.Split('/')[1] : string.Empty;
                 if (!string.IsNullOrEmpty(center) &&
                 !center.Contains("hub") &&
-                !context.Request.Path.Value.Contains("EasyRealTime") &&
-                !context.Request.Path.Value.Contains("home") &&
-                !context.Request.Path.Value.Contains("login") &&
-                !context.Request.Path.Value.Contains("logout") &&
-                !(context.Request.Path.Value == "/"))
+                !contextPath.Contains("easyrealtime") &&
+                !contextPath.Contains("home") &&
+                !contextPath.Contains("login") &&
+                !contextPath.Contains("logout") &&
+                !(contextPath == "/"))
                 {
                     string userID = context.User.FindFirst("UserID")?.Value;
                     string roleCode = context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
@@ -219,9 +225,44 @@ namespace EnglishPlatform
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
+                    name: "news-default",
+                    template: "tin-tuc",
+                    defaults: new { controller = "News", action = "Index" }
+                );
+                routes.MapRoute(
+                    name: "news-recruitment",
+                    template: "tuyen-dung",
+                    defaults: new { controller = "News", action = "Category", catcode = "tuyen-dung" }
+                );
+                routes.MapRoute(
+                   name: "news-event",
+                   template: "su-kien",
+                   defaults: new { controller = "News", action = "Category", catcode = "su-kien" }
+               );
+                routes.MapRoute(
+                    name: "news-product",
+                    template: "san-pham",
+                    defaults: new { controller = "News", action = "Category", catcode = "san-pham" }
+                );
+                routes.MapRoute(
+                    name: "news-about-us",
+                    template: "ve-eduso",
+                    defaults: new { controller = "News", action = "Detail", catcode = "gioi-thieu", newscode = "ve-eduso" }
+                );
+                routes.MapRoute(
+                    name: "news-category",
+                    template: "tin-tuc/{catcode}",
+                    defaults: new { controller = "News", action = "Category" }
+                );
+                routes.MapRoute(
+                    name: "news-detail",
+                    template: "tin-tuc/{catcode}/{newscode}",
+                    defaults: new { controller = "News", action = "Detail" }
+                );
+                routes.MapRoute(
                  name: "default",
                  template: "{controller=home}/{action=index}/{id?}"
-               );
+                );
                 routes.MapRoute(
                    name: "areas",
                    template: "{area:exists}/{controller=Home}/{action=Index}"
@@ -247,8 +288,6 @@ namespace EnglishPlatform
                    template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}/{id?}/{ClassID?}"
                  );
             });
-
-
         }
     }
     public class MyCustomerRoute : IRouteConstraint

@@ -20,6 +20,12 @@ var UIMode = {
     BOTH: "both"
 }
 
+$.fn.textWidth = function (text, font) {
+    if (!$.fn.textWidth.fakeEl) $.fn.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
+    $.fn.textWidth.fakeEl.text(text || this.val() || this.text() || this.attr('placeholder')).css('font', font || this.css('font'));
+    return $.fn.textWidth.fakeEl.width() + 3;//addition padding
+};
+
 var Lesson = (function () {
 
     var _totalPart = 0;
@@ -2779,6 +2785,12 @@ var Lesson = (function () {
             .attr("placeholder", data.Content)
             .blur(function () {
                 AnswerQuestion(this);
+            })
+            .keyup(function () {
+                var inputWidth = $(this).textWidth();
+                $(this).css({
+                    width: inputWidth
+                })
             });
     }
 
@@ -3613,3 +3625,4 @@ var toggleExpand = function (obj) {
     }
 
 }
+

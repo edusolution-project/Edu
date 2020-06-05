@@ -4,7 +4,8 @@
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     var newscategory = ViewBag.newscategory as List<BaseCustomerEntity.Database.NewsCategoryEntity>;
 }
-
+<script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js">
+</script>
 <!-- Begin Page Content -->
 <div class="container-fluid">
     @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
@@ -20,7 +21,7 @@
                     <div class="col-lg-6">
                         <div class="float-right">
                             @*<button type="button" class="btn btn-primary" onclick="window.location.href='/admin/News/NewsForm'" title="Thêm tin"> <i class="fas fa-plus"></i> </button>*@
-                            <button type="button" class="btn btn-primary" data-placement="top" title="Thêm tin" onclick="Adds(this)" data-toggle="modal" data-target="#ModalCenter"> <i class="fas fa-plus"></i> </button>
+                            <button type="button" class="btn btn-primary" data-placement="top" title="Thêm tin" onclick="Adds(this)" data-toggle="modal" data-target="#ModalNews"> <i class="fas fa-plus"></i> </button>
                             <button type="button" class="btn btn-primary" data-toggle="modal" data-placement="top" title="Nhập file dữ liệu" data-target="#importModal"> <i class="fas fa-upload"></i> </button>
                             <button type="button" class="btn btn-primary" data-placement="top" title="Xuất file dữ liệu" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>
                             @*<button type="button" class="btn btn-danger" data-placement="top" title="Xóa" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","News")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>*@
@@ -60,6 +61,7 @@
                                 <th class='text-center'>STT</th>
                                 <th class='text-center'>Ảnh</th>
                                 <th class='text-center'>Tiêu đề</th>
+                                <th class='text-center'>Url</th>
                                 <th class='text-center'>Tóm tắt</th>
                                 <th class='text-center'>Ngày tạo</th>
                                 <th class='text-center'>Ngày đăng</th>
@@ -84,13 +86,13 @@
 </div>
 
 <!-- Modal Create Form -->
-<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle" aria-hidden="true">
+<div class="modal fade" id="ModalNews" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         @using (Html.BeginForm("CreateNews", "News", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
         {
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="ModalCenterTitle">Thêm tin</h5>
+                    <h5 class="modal-title" id="ModalNewsTitle">Thêm tin</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -138,7 +140,7 @@
                             <div class="form-group col-md-8">
                                 <div class="form-row">
                                     <div class="form-group col-md-12">
-                                        <input type="datetime-local" class="form-control" placeholder="Ngày đăng" name="PublishDate" id="PublishDate" required>
+                                        <input type="datetime-local" class="form-control" placeholder="Ngày đăng" name="PublishDate" id="PublishDate">
                                         <input type="hidden" name="PublishDate" class="hiddenDate" id="PublishDate">
                                         <input type="hidden" name="CreateDate" class="CreateDate" id="CreateDate">
                                     </div>
@@ -195,7 +197,7 @@
 </div>
 
 <style>
-    #ModalCenter {
+    #ModalNews {
         opacity: 1 !important;
         overflow: auto !important;
     }
@@ -260,12 +262,13 @@
                             "<img src='/Upload/News/"+item.Thumbnail+"' style='max-height:50px;max-width:50px;' />"+
                             "</td>" +
                             "<td 'text-center'>" + item.Title + "</td>" +
+                            "<td 'text-center'>" + item.Code + "</td>" +
                             "<td class='text-center' stye='max-height:'>" + item.Summary + "</td>" +
                             "<td class='text-center'>"+createdate+"</td>" +
                             "<td class='text-center'>" + publishdate + "</td>" +
                             activeTop +
                             activeHot+
-                            "<td class='text-center' style='width: 130px;'><button onclick=\"Edits('" + item.ID + "','@Url.Action("GetDetailsNews","News")','@Url.Action("createnews","news")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
+                            "<td class='text-center' style='width: 130px;'><button onclick=\"Edits('" + item.ID + "','@Url.Action("GetDetailsNews","News")','@Url.Action("createnews","news")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalNews'> <i class='fas fa-edit'></i> </button>" +
                             //"<td class='text-center'>"+
                             "<button onclick=\"var result = confirm('bạn muốn tin " + item.Title + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("deletenews","News")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
@@ -426,8 +429,10 @@
 
         for(n in CKEDITOR.instances)
         {
-            CKEDITOR.instances[n].destroy(true);
+            console.log(CKEDITOR.instances[n]);
+            CKEDITOR.instances[n].destroy();
         }
+        if (CKEDITOR.instances.Content) CKEDITOR.instances.Content.destroy();
         CKEDITOR.replace("Content");
 
     });
@@ -461,7 +466,7 @@
         if (txtarea.value != null) {
             txtarea.value = "";
         }
-        
+
         $(form).find('#linkImage').attr('class', 'hide');
         $(form).find('#img').removeAttr('src');
 

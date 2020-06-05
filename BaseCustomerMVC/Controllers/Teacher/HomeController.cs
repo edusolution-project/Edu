@@ -45,8 +45,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
-
-            ViewBag.AllCenters = teacher.Centers;
+            if (teacher != null)
+                ViewBag.AllCenters = teacher.Centers;
 
             if (!string.IsNullOrEmpty(basis))
             {

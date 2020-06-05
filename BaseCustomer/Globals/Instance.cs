@@ -74,6 +74,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<AuthorityService>();
             services.AddSingleton<MailLogService>();
 
+            services.AddSingleton<IndexService>();
             services.AddSingleton<NewsCategoryService>();
             services.AddSingleton<NewsService>();
 			services.AddSingleton<UserAndRoleService>();

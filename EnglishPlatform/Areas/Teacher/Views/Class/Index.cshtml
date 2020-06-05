@@ -6,7 +6,7 @@
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
-    var isHeadteacher = User.IsInRole("head-teacher");
+    var isHeadteacher = ViewBag.IsHeadTeacher;
     var userid = User.Claims.Single(t => t.Type == "UserID").Value;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     List<BaseCustomerEntity.Database.CenterMemberEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterMemberEntity>;
@@ -516,15 +516,14 @@
                     _form.append('EndDate', _that.eDate)
                     _form.append('SearchText', _that.searchTerm)
                     _form.append('Center', '@center')
-                    @if(!User.IsInRole("head-teacher"))
+                    @if(!isHeadteacher)
                     {
-                        @:let _url = '@processUrl("GetClassList", "Class")'
-
+                    @:let _url = '@processUrl("GetClassList", "Class")'
                     }
                     else
                     {
-                        @:let _url = '@processUrl("GetManageList", "Class")'
-                        @:if( this.isPrivate) _url = '@processUrl("GetClassList", "Class")'
+                    @:let _url = '@processUrl("GetManageList", "Class")'
+                    @:if( this.isPrivate) _url = '@processUrl("GetClassList", "Class")'
                     }
 
                     axios.post(_url, _form)
