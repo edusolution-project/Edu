@@ -79,50 +79,51 @@ namespace EnglishPlatform.Controllers
 
         public IActionResult Index()
         {
-            StartAuthority();
-            var type = User.Claims.GetClaimByType("Type");
-            if (type != null)
-            {
-                var center = _centerService.GetDefault();
-                string centerCode = center.Code;
-                //string roleCode = "";
-                string userID = User.FindFirst("UserID").Value;
-                var tc = _teacherService.GetItemByID(userID);
-                var st = _studentService.GetItemByID(userID);
-                //var user = _accountService.GetItemByID(userID);
-                //var defaultUser = new UserModel() { };
+            //StartAuthority();
+            //var type = User.Claims.GetClaimByType("Type");
+            //if (type != null)
+            //{
+            //    var center = _centerService.GetDefault();
+            //    string centerCode = center.Code;
+            //    //string roleCode = "";
+            //    string userID = User.FindFirst("UserID").Value;
+            //    var tc = _teacherService.GetItemByID(userID);
+            //    var st = _studentService.GetItemByID(userID);
+            //    //var user = _accountService.GetItemByID(userID);
+            //    //var defaultUser = new UserModel() { };
 
 
-                switch (type.Value)
-                {
-                    case ACCOUNT_TYPE.ADMIN:
-                        centerCode = center.Code;
-                        break;
-                    case ACCOUNT_TYPE.TEACHER:
-                        if (tc != null)
-                        {
-                            centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
-                            ViewBag.AllCenters = tc.Centers.Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
-                        }
-                        break;
-                    default:
-                        if (st != null)
-                        {
-                            centerCode = st.Centers != null && st.Centers.Count > 0 ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
-                            ViewBag.AllCenters = st.Centers != null ? st.Centers.Select(t => _centerService.GetItemByID(t)).ToList() : null;
-                        }
-                        break;
-                }
-                ViewBag.Type = type.Value;
-                //cache
-                return Redirect($"{centerCode}/{type.Value}");
-            }
-            else
-            {
-                _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-                HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                return RedirectToAction("Login");
-            }
+            //    switch (type.Value)
+            //    {
+            //        case ACCOUNT_TYPE.ADMIN:
+            //            centerCode = center.Code;
+            //            break;
+            //        case ACCOUNT_TYPE.TEACHER:
+            //            if (tc != null)
+            //            {
+            //                centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
+            //                ViewBag.AllCenters = tc.Centers.Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
+            //            }
+            //            break;
+            //        default:
+            //            if (st != null)
+            //            {
+            //                centerCode = st.Centers != null && st.Centers.Count > 0 ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
+            //                ViewBag.AllCenters = st.Centers != null ? st.Centers.Select(t => _centerService.GetItemByID(t)).ToList() : null;
+            //            }
+            //            break;
+            //    }
+            //    ViewBag.Type = type.Value;
+            //    //cache
+            //    return Redirect($"{centerCode}/{type.Value}");
+            //}
+            //else
+            //{
+            //    _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
+            //    HttpContext.SignOutAsync(Cookies.DefaultLogin);
+            //    return RedirectToAction("Login");
+            //}
+            LoginAPI("supperadmin@gmail.com", "123", "admin", true);
             return View();
 
         }

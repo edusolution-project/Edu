@@ -55,40 +55,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\EasyRealTimeController.cs" />
     <Compile Remove="Controllers\HomeController_2.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="Areas\Student\Views\Course\Assignment.cshtml" />
-    <Content Remove="Areas\Student\Views\Course\Calendar.cshtml" />
-    <Content Remove="Areas\Student\Views\Course\Modules_o.cshtml" />
-    <Content Remove="Areas\Student\Views\Course\References.cshtml" />
-    <Content Remove="Areas\Student\Views\Course\Syllabus.cshtml" />
-    <Content Remove="Areas\Student\Views\Lesson\Detail.cshtml" />
-    <Content Remove="Areas\Student\Views\Lesson\Exam.cshtml" />
-    <Content Remove="Areas\Student\Views\Lesson\Index.cshtml" />
-    <Content Remove="Areas\Student\Views\Lesson\Lecture.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Calendar\CheckList.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Calendar\CheckTeacher.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Calendar\CheckTeacherStudent.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Calendar\Detail.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Calendar\Index - Copy.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Calendar\Index_o.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Calendar\Lesson.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Class\Announcements.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Class\Assignments.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Class\Detail - Copy.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Class\Detail_o.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Class\Discussions.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Class\Index_o.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Class\References.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Class\Schedule.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Class\StudentDetail - o.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Home\Index_o.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Home\Profile_o.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Reference\Index_o.cshtml" />
-    <Content Remove="Areas\Teacher\Views\Schedule\Schedule.cshtml" />
-    <Content Remove="Areas\Teacher\Views\StudentManage\Index - o.cshtml" />
     <Content Remove="compilerconfig.json" />
     <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
   </ItemGroup>
@@ -111,24 +82,6 @@
     <None Include="Areas\Admin\Views\Student\Index.cshtml" />
     <None Include="Areas\Admin\Views\Subject\Index.cshtml" />
     <None Include="Areas\Admin\Views\Teacher\Index.cshtml" />
-    <None Include="Areas\Student\Views\Home\Index.cshtml" />
-    <None Include="Areas\Student\Views\Lesson\Detail_new.cshtml" />
-    <None Include="Areas\Student\Views\Course\Detail.cshtml" />
-    <None Include="Areas\Student\Views\Course\Index.cshtml" />
-    <None Include="Areas\Teacher\Views\Schedule\CheckList.cshtml" />
-    <None Include="Areas\Teacher\Views\Schedule\CheckTeacher.cshtml" />
-    <None Include="Areas\Teacher\Views\Schedule\CheckTeacherStudent.cshtml" />
-    <None Include="Areas\Teacher\Views\Schedule\Detail.cshtml" />
-    <None Include="Areas\Teacher\Views\Schedule\Index.cshtml" />
-    <None Include="Areas\Teacher\Views\Schedule\Lesson.cshtml" />
-    <None Include="Areas\Teacher\Views\Class\Detail.cshtml" />
-    <None Include="Areas\Teacher\Views\Class\Index.cshtml" />
-    <None Include="Areas\Teacher\Views\Curriculum\Detail.cshtml" />
-    <None Include="Areas\Teacher\Views\Curriculum\Index.cshtml" />
-    <None Include="Areas\Teacher\Views\Curriculum\Lesson.cshtml" />
-    <None Include="Areas\Teacher\Views\Discuss\Index_o.cshtml" />
-    <None Include="Areas\Teacher\Views\Home\Index.cshtml" />
-    <None Include="Areas\Teacher\Views\News\Index.cshtml" />
     <None Include="compilerconfig.json" />
     <None Include="wwwroot\css\layout - Copy.scss" />
     <None Include="wwwroot\css\layout.scss" />
@@ -2231,30 +2184,12 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Update="Areas\Teacher\Views\Class\Index.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="Areas\Teacher\Views\Curriculum\Index.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="Areas\Teacher\Views\Home\Profile.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="Areas\Teacher\Views\News\Index.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="Areas\Teacher\Views\Reference\Index.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
   </ItemGroup>
 
 
   <ItemGroup>
+    <Folder Include="Areas\Student\Views\" />
+    <Folder Include="Areas\Teacher\Views\" />
     <Folder Include="wwwroot\css\minify\" />
   </ItemGroup>
 
