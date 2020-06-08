@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
@@ -32,10 +33,16 @@ namespace BaseCustomerEntity.Database
         public long ExamDone { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
-        [JsonProperty("PracticePoint")]//Avg Point of Non-exam lesson
-        public double PracticePoint { get; set; }
         [JsonProperty("TotalPoint")]
         public double TotalPoint { get; set; }
+        [JsonProperty("PracticeCount")]//Count of Completed Non-exam lesson 
+        public double PracticeCount { get; set; }
+        [JsonProperty("PracticeAvgPoint")]//Avg Point of Non-exam lesson
+        public double PracticeAvgPoint { get; set; }
+        [JsonProperty("PracticePoint")]//Total Point of Non-exam lesson
+        public double PracticePoint { get; set; }
+
+
     }
 
     public class ChapterProgressService : ServiceBase<ChapterProgressEntity>
@@ -114,10 +121,70 @@ namespace BaseCustomerEntity.Database
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
                     progress.ExamDone++;
-
                 progress.TotalPoint += item.PointChange;
                 progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
+            }
+        }
+
+        public async Task UpdatePracticePoint(LessonProgressEntity item)
+        {
+            var progress = GetItemByChapterID(item.ChapterID, item.StudentID, item.ClassSubjectID);
+            if (progress == null)
+            {
+                return;
+            }
+            else
+            {
+                if (item.Tried == 1 || progress.ExamDone == 0)//new
+                    progress.PracticeCount++;
+                var init = !(progress.PracticePoint > 0); 
+                progress.PracticePoint += item.PointChange;
+                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
+                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
+                await UpdatePracticePoint(progress, item.PointChange);
+            }
+        }
+
+        public async Task UpdatePracticePoint(ChapterProgressEntity item, double pointchange)
+        {
+            var progress = GetItemByChapterID(item.ParentID, item.StudentID, item.ClassSubjectID);
+            if (progress == null)
+            {
+                var parentChap = _chapterService.GetItemByID(item.ParentID);
+                if (parentChap == null) return;
+
+                await Collection.InsertOneAsync(new ChapterProgressEntity
+                {
+                    PracticePoint = pointchange,
+                    ChapterID = item.ParentID,
+                    ClassSubjectID = item.ClassSubjectID,
+                    ClassID = item.ClassID,
+                    LastDate = item.LastDate,
+                    ParentID = parentChap.ParentID,
+                    StudentID = item.StudentID,
+                    TotalLessons = _lessonService.CountChapterLesson(parentChap.ID)
+                });
+                return;
+            }
+            else
+            {
+                //Practice Point = All Subchap Practice Point + All direct lesson practice Point
+                //var supchaps_count = _chapterService.GetSubChapters(item.ClassSubjectID, item.ID).Count;
+                //var supchaps_point = Collection.Aggregate()
+                //    .Match(t=> t.ParentID == item.ID)
+                //    .Group(
+                //        t => t.ParentID,
+                //        group => new
+                //        {
+                //            ParentID = group.Key,
+                //            Sum = group.Sum(t => t.PracticePoint)
+                //        }
+                //    ).Project(t=> t.Sum);
+                progress.PracticePoint += pointchange;
+                //progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
+                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
+                await UpdatePracticePoint(progress, pointchange);
             }
         }
 

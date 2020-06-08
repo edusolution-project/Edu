@@ -183,6 +183,8 @@ namespace EnglishPlatform
                                         centerCode = (string.IsNullOrEmpty(center) && st.Centers != null && st.Centers.Count > 0) ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center;
                                         roleCode = "student";
                                         isRealCenter = st.Centers != null && st.Centers.Any(o => o == _centerService.GetItemByCode(centerCode).ID);
+                                        //var avatar = st != null && !string.IsNullOrEmpty(st.Avatar) ? st.Avatar : null;
+                                        //HttpContext.Session.SetString("userAvatar", avatar);
                                     }
                                     break;
                             }

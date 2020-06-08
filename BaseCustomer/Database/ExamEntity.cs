@@ -211,12 +211,23 @@ namespace BaseCustomerEntity.Database
             var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
             //_lessonProgressService.GetByClassSubjectID_StudentID_LessonID(exam.ClassSubjectID, exam.StudentID, exam.LessonID);
 
-            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM
+            //&& lesson.Etype != LESSON_ETYPE.PRACTICE
+            )
             {
                 var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
                 var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
                 var ctask = _classProgressService.UpdatePoint(lessonProgress);
                 Task.WhenAll(cttask, cstask, ctask);
+            }
+            else
+            {
+                var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
+                //var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
+                //var ctask = _classProgressService.UpdatePoint(lessonProgress);
+                Task.WhenAll(cttask
+                    //, cstask, ctask
+                    );
             }
             Save(exam);
             return exam;

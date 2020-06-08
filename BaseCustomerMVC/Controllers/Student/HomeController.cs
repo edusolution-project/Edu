@@ -40,8 +40,8 @@ namespace BaseCustomerMVC.Controllers.Student
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
             ViewBag.Student = student;
-            var avatar = student != null && !string.IsNullOrEmpty(student.Avatar) ? student.Avatar : _default.defaultAvatar;
-            HttpContext.Session.SetString("userAvatar", avatar);
+            //var avatar = student != null && !string.IsNullOrEmpty(student.Avatar) ? student.Avatar : _default.defaultAvatar;
+            //HttpContext.Session.SetString("userAvatar", avatar);
             return View();
         }
 
