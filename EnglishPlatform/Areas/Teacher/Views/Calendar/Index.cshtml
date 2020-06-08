@@ -246,7 +246,7 @@
                             var btnOnline = formEvent.querySelector("button#btn-vao-lop-online");
                             if (jsonData.LinkLesson != null && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "" && jsonData.LinkLesson != "null") {
                                 if (btnMo != null) {
-                                    btnMo.setAttribute("data-url", jsonData.LinkLesson);
+                                    btnMo.setAttribute("data-url", `/@center${jsonData.LinkLesson}`);
                                     btnMo.removeAttribute("style");
                                 }
                             } else {

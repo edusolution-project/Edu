@@ -348,6 +348,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     {"Error", "Password blank"}
                 });
             account.PassWord = Core_v2.Globals.Security.Encrypt(Pass);
+            account.PassTemp = account.PassWord;
             _service.CreateQuery().ReplaceOne(t => t.ID == AccountID, account);
             return new JsonResult(new Dictionary<string, object>()
                 {

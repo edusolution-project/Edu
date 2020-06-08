@@ -730,7 +730,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == @center.ID));
             }
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId && t.Type == ClassMemberType.TEACHER)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
             var data = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);
@@ -773,7 +773,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == @center.ID));
             }
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId)));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId && t.Type == ClassMemberType.TEACHER)));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
@@ -963,11 +963,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 deep_filter = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
-                classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                //classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
             }
 
-            if (!deep_filter)
-                ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == UserID);
+            //if (!deep_filter)
+                ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == TeacherID);
 
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
@@ -978,18 +978,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var data = _classSubjectService.Collection
                 .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
             //filter by classsubject
-            if (ownerfilter != null)
-            {
+            //if (ownerfilter != null)
+            //{
                 if (data.Count > 0)
                     classfilter.Add(
                         Builders<ClassEntity>.Filter.Or(ownerfilter,
                         Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive))));
                 else
                     classfilter.Add(ownerfilter);
-            }
-            else
-                if (data.Count > 0)
-                classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
+            //}
+            //else
+            //    if (data.Count > 0)
+            //    classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
 
             //if (data.Count > 0)
             //{
@@ -1087,7 +1087,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.TeacherID = userId; // creator
                 item.Skills = new List<string>();
                 item.Subjects = new List<string>();
-                item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER } };
+                item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER, Name = teacher.FullName } };
                 item.TotalLessons = 0;
                 item.IsActive = true;
                 item.StartDate = item.StartDate.ToUniversalTime();

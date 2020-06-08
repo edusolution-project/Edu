@@ -163,7 +163,7 @@
                             active = "<button type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger' onclick=\"ExcuteOnlyItem('" + item.ScheduleID + "','@Url.Action("publish", "LessonSchedule")',ToggleStatus(this))\"> <div class='handle'></div> </button>";
                         }
                         var startdate = "---";
-                        console.log(item.StartDate);
+                        //console.log(item.StartDate);
                         if(moment(item.StartDate) > new Date(2018,1,1)) startdate = moment(item.StartDate).format('DD/MM/YYYY HH:mm');
                         var enddate = "---";
                         if(moment(item.EndDate) > new Date(2018,1,1)) enddate = moment(item.EndDate).format('DD/MM/YYYY HH:mm');
@@ -235,8 +235,8 @@
         var scheduleid = $(obj).attr("sid");
         var startdate = moment($(obj).parent().parent().find("[target=StartDate]").val(),"DD/MM/YYYY HH:mm").format("MM-DD-YYYY HH:mm:ss");
         var enddate = moment($(obj).parent().parent().find("[target=EndDate]").val(),"DD/MM/YYYY HH:mm").format("MM-DD-YYYY HH:mm:ss");
-        console.log(startdate);
-        console.log(enddate);
+        //console.log(startdate);
+        //console.log(enddate);
 
         $(obj).val(currentval + "...")
         $.ajax({

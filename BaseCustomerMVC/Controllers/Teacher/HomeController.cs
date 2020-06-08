@@ -75,6 +75,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (center != null)
                     ViewBag.Center = center;
             }
+            if (account == null)
+                return Redirect("/login");
             ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;
             _session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
             return View(account);

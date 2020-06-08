@@ -101,6 +101,10 @@
             border: none;
         }
 
+        .ls-pratice .card-body {
+            padding-right: 0;
+        }
+
         .btn-collapse {
             border-bottom: .5px solid #D0DFE8;
             margin-bottom: 0;
@@ -119,7 +123,13 @@
     <script type="text/x-template" id="chapContentTemp">
         <li class="col-md-12">
             <div class="inner">
-                <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color btn-collapse" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}<i class="ic ic-collapse"></i></a>
+                <div class="d-flex justify-content-between w-100 align-items-center btn-collapse">
+                    <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}<i class="ic ic-collapse"></i></a>
+                    <ul class="time-line flex">
+                        <li v-if="isValidTime(data.StartDate)"><i class="ti-time"></i>{{formatTime(data.StartDate)}} </li>
+                        <li v-if="isValidTime(data.EndDate)"><i class="ti-time"></i>{{formatTime(data.EndDate)}} </li>
+                    </ul>
+                </div>
                 <b-collapse :id="`prc-${data.ID}-${pos}`" @*:accordion="`my-accordion-${data.ParentID}`"*@ :title="`my-accordion-${data.ParentID}`" role="tabpanel">
                     <b-card-body>
                         <ul class="list">
@@ -252,8 +262,8 @@
                                 _that.list_lessons.push(lesson)
                         })
                         this.list_data = _that.list_data;
-                        console.log(this.list_data);
-                        this.list_lessons = _that.list_lessons;                        
+                        //console.log(this.list_data);
+                        this.list_lessons = _that.list_lessons;
                         if (window.location.hash != "")
                         {
 
@@ -268,8 +278,8 @@
                 })
             },
             filterLesson(ID) {
-                console.log(ID);
-                console.log(this.list_lessons);
+                //console.log(ID);
+                //console.log(this.list_lessons);
                 return this.list_lessons.filter((p) => {
         	        return p.ChapterID == ID
                 })

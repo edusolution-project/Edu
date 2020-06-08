@@ -188,8 +188,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();//: new TeacherEntity();
 
-            //if (!User.IsInRole("head-teacher"))
-            //    return Redirect("/");
+            if (teacher == null)
+                return Redirect("/login");
 
             if (teacher != null && teacher.Subjects != null)
             {
@@ -201,6 +201,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ViewBag.Skills = skills;
             }
 
+            ViewBag.AllCenters = teacher.Centers.Select(t => new CenterEntity { Code = t.Code, Name = t.Name, ID = t.CenterID }).ToList();
 
             var modsubject = _modsubjectService.GetAll().ToList();
             var modgrade = _modgradeService.GetAll().ToList();
@@ -341,22 +342,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var teacher = _teacherService.GetItemByID(UserID);
             CenterMemberEntity memberEntity = null;
 
-            if (teacher == null )
-            {
-                return new JsonResult(new Dictionary<string, object>
-                    {
-                        { "Error", "Bạn không được quyền thực hiện thao tác này"}
-                    });                
-            }
-            memberEntity = teacher.Centers.FirstOrDefault(t => t.Code == Center);
-            if(memberEntity == null)
+            if (teacher == null)
             {
                 return new JsonResult(new Dictionary<string, object>
                     {
                         { "Error", "Bạn không được quyền thực hiện thao tác này"}
                     });
-            }    
-            
+            }
+            memberEntity = teacher.Centers.FirstOrDefault(t => t.Code == Center);
+            if (memberEntity == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Error", "Bạn không được quyền thực hiện thao tác này"}
+                    });
+            }
+
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
@@ -370,10 +371,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
-            
-            if(_roleService.GetItemByID(memberEntity.RoleID).Code != "head-teacher")
-            
-            //if (User.Claims.GetClaimByType(ClaimTypes.Role).Value == "teacher")
+
+            if (_roleService.GetItemByID(memberEntity.RoleID).Code != "head-teacher")
+
+                //if (User.Claims.GetClaimByType(ClaimTypes.Role).Value == "teacher")
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.CreateUser == UserID));
 
             if (!string.IsNullOrEmpty(model.SearchText))
@@ -591,19 +592,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {"Error", null }
                             });
                 }
+
+
                 if (course.CreateUser != UserID)
-                    return new JsonResult(new Dictionary<string, object>
+                {
+                    var center = course.Center;
+                    if (!HasRole(UserID, center, "head-teacher"))
+                        return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
                                 {"Error", "Bạn không có quyền thực hiện thao tác này" }
                             });
-                var used = CountUsedClassSubject(ID);
-                if (used > 0)
-                    return new JsonResult(new Dictionary<string, object>
-                            {
-                                { "Data", null },
-                                {"Error", "Thao tác không thực hiện được! Bài giảng đang được sử dụng trong " + used + " lớp học." }
-                            });
+                }
+                //var used = CountUsedClassSubject(ID);
+                //if (used > 0)
+                //    return new JsonResult(new Dictionary<string, object>
+                //            {
+                //                { "Data", null },
+                //                {"Error", "Thao tác không thực hiện được! Bài giảng đang được sử dụng trong " + used + " lớp học." }
+                //            });
 
                 _chapterService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
                 _lessonService.CreateQuery().DeleteMany(o => o.CourseID == course.ID);
@@ -1311,6 +1318,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 GradeID = newcourse.GradeID,
                 SubjectID = newcourse.SubjectID,
                 CreateUser = _userCreate,
+                Center = newcourse.Center ?? course.Center,
                 SkillID = newcourse.SkillID,
                 Created = DateTime.Now,
                 Updated = DateTime.Now,
@@ -1898,7 +1906,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     var answer = new LessonPartAnswerEntity
                                     {
                                         Content = workSheet.Cells[i, contentCol].Value.ToString().Trim(),
-                                        IsCorrect = workSheet.Cells[i, 4].Value.ToString() == "TRUE",
+                                        IsCorrect = workSheet.Cells[i, 4].Value.ToString().ToLower() == "true",
                                     };
                                     if (workSheet.Cells[i, 3].Value != null)
                                     {
@@ -1942,6 +1950,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             return contentType;
         }
+
+        private bool HasRole(string userid, string center, string role)
+        {
+            var teacher = _teacherService.GetItemByID(userid);
+            if (teacher == null) return false;
+            var centerMember = teacher.Centers.Find(t => t.CenterID == center);
+            if (centerMember == null) return false;
+            if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
+            return true;
+        }
+
 
         #region Fix resources
 

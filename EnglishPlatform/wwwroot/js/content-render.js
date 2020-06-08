@@ -1222,7 +1222,7 @@ var Lesson = (function () {
                     }
                     else {
                         if (data.Media != null)
-                            mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "#view=FitH", "class": "embed-frame" }));
+                            mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH", "class": "embed-frame" }));
                     }
                     break;
                 default:
@@ -1242,7 +1242,7 @@ var Lesson = (function () {
                                 mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path + "", "class": "embed-frame", "frameborder": "0" }));
                             }
                             else
-                                mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "#view=FitH" }));
+                                mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH" }));
                         }
 
                     break;

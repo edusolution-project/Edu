@@ -63,13 +63,13 @@
                         <label for="email">Địa chỉ email</label>
                         <input type="text" v-model="profile.Email" class="form-control" placeholder="Email" id="email">
                     </div>
-                    <div class="form-group" v-if="isInfo">
+                    @*<div class="form-group" v-if="isInfo">
                         <label for="password">Mật khẩu</label>
                         <div class="relative">
                             <input :type="pass_type" v-model="password" class="form-control" placeholder="Mật khẩu" id="password">
                             <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
                         </div>
-                    </div>
+                    </div>*@
                     <!--  -->
                     <div class="form-group" v-if="isPass">
                         <label for="password_old">Mật khẩu cũ*</label>

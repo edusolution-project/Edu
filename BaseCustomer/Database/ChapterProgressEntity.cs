@@ -32,6 +32,8 @@ namespace BaseCustomerEntity.Database
         public long ExamDone { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
+        [JsonProperty("PracticePoint")]//Avg Point of Non-exam lesson
+        public double PracticePoint { get; set; }
         [JsonProperty("TotalPoint")]
         public double TotalPoint { get; set; }
     }

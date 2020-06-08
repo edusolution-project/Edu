@@ -123,8 +123,11 @@ namespace EnglishPlatform
                 string center = contextPath != "" && contextPath != "/" ? contextPath.Split('/')[1] : string.Empty;
                 if (!string.IsNullOrEmpty(center) &&
                 !center.Contains("hub") &&
-                !contextPath.Contains("easyrealtime") &&
-                !contextPath.Contains("home") &&
+                !center.Contains("files") &&
+                !contextPath.Contains("easyrealtime") && //easyrealtime controller
+                !center.Contains("tin-tuc") &&//news controller
+                !center.Contains("news") &&//news controller
+                !center.Contains("home") &&//home controller
                 !contextPath.Contains("login") &&
                 !contextPath.Contains("logout") &&
                 !(contextPath == "/"))

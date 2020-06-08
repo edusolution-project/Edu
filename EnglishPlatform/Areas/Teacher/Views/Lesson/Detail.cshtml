@@ -42,7 +42,9 @@
             load_part: '@processUrl("GetDetail", "CloneLessonPart")',
             save_part: '@processUrl("CreateOrUpdate", "CloneLessonPart")',
             del_part: '@processUrl("Remove", "CloneLessonPart")',
-            move_part: '@processUrl("ChangePosition","CloneLessonPart")'
+            move_part: '@processUrl("ChangePosition","CloneLessonPart")',
+            export_quiztemp: '@processUrl("ExportQuestionTemplate", "Curriculum")',
+            import_quiz: '@processUrl("ImportQuestion", "Curriculum")',
         },
         type: @Data.TemplateType,
         lesson_id: '@Data.ID',

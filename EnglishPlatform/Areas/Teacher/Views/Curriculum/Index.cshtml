@@ -4,6 +4,7 @@
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
+    var allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl, Object param = null)
     {
@@ -165,6 +166,7 @@
                 list_data: [],
                 list_subject: [],
                 list_grades_full: [],
+                list_centers: @Html.Raw(Json.Serialize(allcenters)),
                 addItem: {
                     ID: '',
                     Name: '',
@@ -180,7 +182,8 @@
                     SubjectID: '',
                     GradeID: '',
                     SkillID: '',
-                    Description: ''
+                    Description: '',
+                    Center: ''
                 },
                 subject: '',
                 grade: '',
@@ -322,10 +325,10 @@
                         _that.cloneItem.SubjectID = obj.SubjectID;
                         _that.$nextTick(() => {
                             _that.cloneItem.GradeID = obj.GradeID;
-                            })
+                        })
                         _that.cloneItem.Description = obj.Description;
                         _that.cloneItem.Name = obj.Name + " _ " + moment().format("DD-MM-YY");
-                        _that.cloneItem.SkillID = obj.SkillID == null ? '': obj.SkillID;
+                        _that.cloneItem.SkillID = obj.SkillID == null ? '' : obj.SkillID;
                     }
                     _that.$bvModal.show('clone_event')
                 },
@@ -403,11 +406,16 @@
                         return false;
                     }
 
+                    if (_that.cloneItem.Center == '') {
+                        alert("Chưa chọn cơ sở");
+                        return false;
+                    }
+
                     _form.append('CourseID', _that.cloneItem.OriginID)
                     _form.append('GradeID', _that.cloneItem.GradeID)
                     _form.append('SubjectID', _that.cloneItem.SubjectID)
                     _form.append('SkillID', _that.cloneItem.SkillID)
-                    _form.append('Center', '@center')
+                    _form.append('Center', _that.cloneItem.Center)
                     _form.append('Name', _that.cloneItem.Name)
                     _form.append('Description', _that.cloneItem.Description)
                     let _url = '@processUrl("CloneCourse","Curriculum")'
@@ -561,6 +569,15 @@
                     <option v-for="(item,k) in list_skills" :value="item.ID">{{item.Name}}</option>
                 </select>
             </b-col>
+
+            <b-col class="form-group">
+                <label for="">Cơ sở</label>
+                <select class="form-control" v-model="cloneItem.Center">
+                    <option value="">Chọn cơ sở</option>
+                    <option v-for="(item,k) in list_centers" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </b-col>
+
         </div>
         <b-col class="form-group">
             <label for="">Mô tả</label>

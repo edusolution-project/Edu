@@ -124,7 +124,6 @@ namespace EnglishPlatform.Controllers
                 return RedirectToAction("Login");
             }
             return View();
-
         }
 
 

@@ -214,12 +214,12 @@
                                     if (_skype.startsWith('http'))
                                         window.open(`${_skype}`, "_blank");
                                     else {
-                                        var link = '@processUrl("OnlineClass","Home")/' + jsonData.ID
+                                        var link = '@Url.Action("OnlineClass","Home")/' + jsonData.ID
                                         window.open(`${link}`, "_blank");
                                     }
                                 }
                                 if (value == "roll") {
-                                    window.open(`${jsonData.LinkLesson}`, "_blank");
+                                    window.open(`/@center${jsonData.LinkLesson}`, "_blank");
                                 }
                             })
                         } else {
@@ -251,7 +251,7 @@
                                     var btnGoTo = formEvent.querySelector("#btn-goto-event");
                                     if (btnGoTo != null) {
                                         if (jsonData.LinkLesson != null && jsonData.LinkLesson != "" && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "null") {
-                                            btnGoTo.setAttribute("data-link", jsonData.LinkLesson);
+                                            btnGoTo.setAttribute("data-link", `/@center${jsonData.LinkLesson}`);
                                             btnGoTo.style.display = 'inline-block';
                                             btnGoTo.onclick = function () {
                                                 var dataLink = btnGoTo.dataset.link;
