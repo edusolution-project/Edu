@@ -2341,7 +2341,7 @@ var Lesson = (function () {
                 //alert('here');
                 $('#rightCol').append($(wrapper));
                 var completeButton = $('<div>', {
-                    "class": "btn btn-primary w-50 mt-3 btnCompleteExam",
+                    "class": "btn btn-primary mt-3 mb-3 btnCompleteExam",
                     "onclick": 'CompleteLectureExam(\'' + lastExam.ID + '\')',
                     "style": "cursor: pointer"
                 }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");
@@ -2588,7 +2588,7 @@ var Lesson = (function () {
                 console.log(data.Questions.length);
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
-                    renderFillQuestion(item, i);
+                    renderFillQuestionStudent(item, i);
                 }
                 break;
             case "QUIZ3":
@@ -2761,37 +2761,46 @@ var Lesson = (function () {
         }
     }
 
-    var renderFillQuestion = function (data, pos) {
+    var renderFillQuestionStudent = function (data, pos) {
 
         var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
 
         var holder = $(container).find("fillquiz")[pos];
         if (holder == null) return;
         //console.log(holder);
-        var input = $(holder).find(".fillquiz");
+        var input = $("<span>", { class: "fillquiz" });
+        $(holder).find(".fillquiz").remove();
         $(holder).addClass("quiz-item").attr("id", data.ID);
         //console.log(data);
+        var plcholder = data.Content;
+        if (plcholder == null || plcholder.length == 0)
+            plcholder = "Nhập câu trả lời...";
         $(input)
             .attr("id", "inputQZ2-" + data.ID)
             .attr("data-part-id", data.ParentID)
             .attr("data-lesson-id", config.lesson_id)
             .attr("data-question-id", data.ID)
             .attr("data-type", "QUIZ2")
-            .attr("autocomplte", "off")
-            .attr("value", "")
-            .removeAttr("ans")
+            .attr("autocomplete", "off")
+            //.attr("value", "")
+            //.removeAttr("ans")
             .removeAttr("readonly")
-            .removeAttr("contenteditable")
-            .attr("placeholder", data.Content)
+            .attr("contenteditable", "true")
+            //.removeAttr("contenteditable")
+            .attr("data-placeholder", plcholder)
             .blur(function () {
-                AnswerQuestion(this);
-            })
-            .keyup(function () {
-                var inputWidth = $(this).textWidth();
-                $(this).css({
-                    width: inputWidth
-                })
+                AnswerFillQuestion("inputQZ2-" + data.ID);
             });
+        //.keyup(function () {
+        //    console.log(this);
+        //});
+        $(holder).append(input)
+        //.keyup(function () {
+        //    var inputWidth = $(this).textWidth();
+        //    $(this).css({
+        //        width: inputWidth
+        //    })
+        //});
     }
 
     var renderExamAnswer = function (data, partid, template) {
@@ -3101,6 +3110,7 @@ var Lesson = (function () {
         var answerID = "";
         //nội dung câu trả lời
         var value = "";
+        //console.log(dataset);
         console.log(dataset);
         switch (type) {
             case "QUIZ1":
@@ -3114,7 +3124,8 @@ var Lesson = (function () {
                 questionId = dataset.questionId;
                 //answerID = dataset.id;
                 // value là data động tự điền
-                value = _this.value;
+                debugger;
+                value = _this.text;
                 break;
             case "QUIZ3":
                 partID = dataset.partId;
@@ -3160,6 +3171,32 @@ var Lesson = (function () {
             delAnswerForStudent(questionId);
         } else {
             saveAnswerForStudent(questionId, answerID, value, type);
+        }
+    }
+
+    var AnswerFillQuestion = function (spanID) {
+        var _this = $('#' + spanID)[0];
+        var dataset = _this.dataset;
+        var partID = dataset.partId;
+        var type = dataset.type;
+        var questionId = dataset.questionId;
+        var value = $('#' + spanID).text();
+        var dataform = new FormData();
+
+        dataform.append("ExamID", $("input[name=ExamID]").val());
+        dataform.append("LessonPartID", partID);
+        dataform.append("QuestionID", questionId);
+        dataform.append("AnswerValue", value);
+
+        Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
+        })
+            .catch(function (err) {
+                notification("error", err, 3000);
+            });
+        if (value == "") {
+            delAnswerForStudent(questionId);
+        } else {
+            saveAnswerForStudent(questionId, "", value, type);
         }
     }
 
@@ -3528,8 +3565,8 @@ var submitQuizFill = function (event, modalId, callback) {
                     $(question).find("input").removeAttr("ans");
                     $(question).find("input").removeAttr("dsp");
                     $(question).find("input").attr("placeholder", "");
-                    $(question).find("input").attr("size", "10");
-                    $(question).find("input").attr("value", "");
+                    //$(question).find("input").attr("size", "10");
+                    //$(question).find("input").attr("value", "");
                 }
             }
         }

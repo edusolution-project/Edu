@@ -107,7 +107,7 @@ namespace BaseCustomerMVC.Globals
         {
             _cloneLessonPartService.Collection.InsertOne(item);
             var list = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
-            if (list != null)
+            if (list != null && list.Count > 0)
             {
                 foreach (var question in list)
                 {

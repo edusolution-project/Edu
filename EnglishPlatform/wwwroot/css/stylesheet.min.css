@@ -66,8 +66,11 @@
 }
 
 input.fillquiz {
-    min-width: 80px;
-    max-width: 200px;
+    background: #e6712d4d;
+    border: solid 1px #CCC;
+    padding: 3px;
+    border-radius: 3px;
+    margin: 0 2px;
 }
 
 
@@ -2803,5 +2806,3 @@ td a {
         background-color: #13A6FB;
         border-color: #13A6FB
     }
-
-

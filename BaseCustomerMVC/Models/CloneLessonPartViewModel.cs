@@ -50,15 +50,12 @@ namespace BaseCustomerMVC.Models
                 Updated = this.Updated,
                 Media = this.Media,
                 TeacherID = this.TeacherID
-
             };
         }
     }
 
     public class CloneQuestionViewModel : CloneLessonPartQuestionEntity
     {
-        private List<CloneLessonPartAnswerEntity> list;
-
         public CloneQuestionViewModel()
         {
         }

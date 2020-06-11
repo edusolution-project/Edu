@@ -192,8 +192,9 @@ namespace BaseCustomerEntity.Database
         {
             await Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             var subjectProgresses = _classSubjectProgressService.GetListOfCurrentSubject(ClassSubjectID);
-            foreach (var progress in subjectProgresses)
-                await _classProgressService.DecreaseClassSubject(progress);
+            if (subjectProgresses != null)
+                foreach (var progress in subjectProgresses)
+                    await _classProgressService.DecreaseClassSubject(progress);
             await _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             await _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             await _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);

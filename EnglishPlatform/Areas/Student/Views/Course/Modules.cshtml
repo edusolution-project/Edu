@@ -149,7 +149,10 @@
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice d-flex flex-column" :id="lesson.ID">
             <div class="d-flex justify-content-between w-100 align-items-center">
-                <a :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-on:click.prevent="GoLesson(lesson.ID)" class="text-dark"><i class="ic far fa-file-alt mr-2"></i>{{lesson.Title}}</a>
+                <a :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-on:click.prevent="GoLesson(lesson.ID)" class="text-dark">
+                <i v-if="lesson.TemplateType === 2" class="ic far fa-edit mr-2"></i>
+                <i v-else class="ic far fa-file-alt mr-2"></i>
+                {{lesson.Title}}</a>
                 <ul class="time-line flex">
                     <li v-if="isValidTime(lesson.StartDate)"><i class="ti-time"></i>{{formatTime(lesson.StartDate)}} </li>
                     <li v-if="isValidTime(lesson.EndDate)"><i class="ti-time"></i>{{formatTime(lesson.EndDate)}} </li>

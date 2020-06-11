@@ -269,7 +269,13 @@
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice pt-2 pb-1 pl-2 rounded">
             <div class="d-flex w-100 align-items-start">
-                <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title"> <span><i class="ic far fa-file-alt mr-2"></i>{{data.Title}}</span></a>
+                <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
+                    <span>
+                        <i v-if="data.TemplateType === 2" class="ic far fa-edit mr-2"></i>
+                        <i v-else class="ic far fa-file-alt mr-2"></i>
+                        {{data.Title}}
+                    </span>
+                </a>
                 <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
@@ -641,6 +647,7 @@
                                     ID: lesson.ID,
                                     ScheduleID: lesson.ScheduleID,
                                     Title: lesson.Title,
+                                    TemplateType: lesson.TemplateType,
                                     ClassSubject: subject,
                                     Parent: parent,
                                     StartDate: moment(lesson.StartDate) > moment(new Date(1900, 1, 1)) ? lesson.StartDate : "",
