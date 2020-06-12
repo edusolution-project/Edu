@@ -496,16 +496,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Description = quiz.GetAttributeValue("title", null),//phần giải thích đáp án
                     Answers = new List<LessonPartAnswerEntity>
                     {
-                        new LessonPartAnswerEntity
+
+                    }
+
+                };
+
+                var ansArr = ans.Split('|');
+                foreach(var answer in ansArr)
+                {
+                    if(!string.IsNullOrEmpty(answer.Trim()))
+                    {
+                        Question.Answers.Add(new LessonPartAnswerEntity
                         {
                             CourseID = item.CourseID,
                             CreateUser = creator,
                             IsCorrect = true,
-                            Content = ans
-                        }
+                            Content = answer.Trim()
+                        });
                     }
-
-                };
+                }
+               
                 questionList.Add(Question);
                 var clearnode = HtmlNode.CreateNode("<input></input>");
                 clearnode.AddClass("fillquiz");

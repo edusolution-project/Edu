@@ -93,11 +93,11 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
 
                                 var text = this.getValue();
                                 var i = text.length;
-                                var space = 0;
-                                while (i--) { if (text.charAt(i) == ' ') space++; }
+                                //var space = 0;
+                                //while (i--) { if (text.charAt(i) == ' ')  }
                                 childInp.setAttribute("ans", this.getValue());
                                 childInp.$[0].setAttribute("placeholder", text);
-                                childInp.$[0].setAttribute("size", text.length - space);
+                                childInp.$[0].setAttribute("size", text.length);
                                 childInp.$[0].setAttribute("disabled", "disabled");
                                 childInp.$[0].setAttribute("class", "fillquiz");
                                 childInp.$[0].setAttribute("readonly", 1);
@@ -107,12 +107,12 @@ CKEDITOR.dialog.add('fillquizDialog', function (editor) {
                             else {
                                 childInp.$[0].setAttribute("ans", this.getValue());
                                 var text = this.getValue();
-                                var i = text.length;
-                                var space = 0;
-                                while (i--) { if (text.charAt(i) == ' ') space++; }
+                                //var i = text.length;
+                                //var space = 0;
+                                //while (i--) { if (text.charAt(i) == ' ') space++; }
 
                                 childInp.$[0].setAttribute("placeholder", text);
-                                childInp.$[0].setAttribute("size", text.length - space);
+                                childInp.$[0].setAttribute("size", text.length);
                                 childInp.$[0].setAttribute("readonly", 1);
                                 childInp.$[0].setAttribute("contenteditable", false);
                             }

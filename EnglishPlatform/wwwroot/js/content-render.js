@@ -895,17 +895,35 @@ var Lesson = (function () {
                     var item = data.Questions[i];
                     //console.log(item);
                     try {
-                        var input = $(fillquizs[i]).find("input");
-                        $(input).attr("dsp", item.Content);
+                        //var input = $(fillquizs[i]).find("input");
+                        //$(input).attr("dsp", item.Content);
+                        //var answers = [];
+                        //if (item.Answers.length > 0) {
+                        //    for (var j = 0; j < item.Answers.length; j++)
+                        //        answers.push(item.Answers[j].Content);
+                        //    var content = answers.join(" | ");
+                        //    var size = 5;
+                        //    if (content.length > size) size = content.length;
+                        //    $(input).attr("placeholder", content).attr("size", size);
+                        //}
+
+
+                        var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
+
+                        var holder = fillquizs[i];
+
+                        var input = $("<span>", { class: "fillquiz" });
+                        $(holder).find(".fillquiz").remove();
+
                         var answers = [];
                         if (item.Answers.length > 0) {
                             for (var j = 0; j < item.Answers.length; j++)
                                 answers.push(item.Answers[j].Content);
                             var content = answers.join(" | ");
-                            var size = 5;
-                            if (content.length > size) size = content.length;
-                            $(input).attr("placeholder", content).attr("size", size);
+
+                            $(input).text(content)
                         }
+                        $(holder).append(input);
                     }
                     catch (e) {
                         console.log("No placeholder found");
@@ -958,7 +976,6 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itembox.append(itemBody);
-
                 renderMediaContent(data, itemBody, "");
                 totalQuiz = data.Questions.length;
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -1099,6 +1116,8 @@ var Lesson = (function () {
                     renderPreviewAnswer(item, template);
                 }
                 break;
+            case "ESSAY":
+                break;
             default:
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
@@ -1126,27 +1145,11 @@ var Lesson = (function () {
 
                 container.append(itembox);
 
-                if (template == "ESSAY") {
-                    itembox.append(
-                        $("<div>", { class: "mb-2" }).append(
-                            $("<textarea>", { "id": "editor", "rows": "5", "name": "Description", "class": "input-text form-control", "placeholder": "Enter content" }))
-                    );
-                    if (data != null && data.Description != null)
-                        itembox.find("[name=Description]").val(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"));
-                    CKEDITOR.replace("editor");
-                    itembox.append($("<div>", { class: "mb-2 text-right" })
-                        .append($('<button>', { 'class': 'btn btn-primary mr-2', text: 'File đính kèm', disabled: true }))
-                        .append($('<button>', { 'class': 'btn btn-primary', text: 'Lưu', disabled: true }))
-                    );
+                //Render Answer
+                for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
+                    var item = data.Answers[i];
+                    renderPreviewAnswer(item, template);
                 }
-                else {
-                    //Render Answer
-                    for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                        var item = data.Answers[i];
-                        renderPreviewAnswer(item, template);
-                    }
-                }
-
                 break;
         }
     }
@@ -1453,7 +1456,7 @@ var Lesson = (function () {
         $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn đáp án đúng</option>")
             .append("<option value='QUIZ2'>QUIZ: Điền từ</option>")
             .append("<option value='QUIZ3'>QUIZ: Nối đáp án</option>")
-        //.append("<option value='ESSAY'>QUIZ: Essay</option>");
+            .append("<option value='ESSAY'>QUIZ: Essay</option>");
         //}
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
         $(modalForm).append($("<div>", { "class": "question_template hide" }));
@@ -1689,15 +1692,17 @@ var Lesson = (function () {
                             for (var j = 0; j < quiz.Answers.length; j++)
                                 answers.push(quiz.Answers[j].Content);
                             var content = answers.join(" | ");
-                            var size = 5;
+                            //var size = 5;
 
-                            if (content.length > size) size = content.length;
+                            //if (content.length > size) size = content.length;
                             $(input).attr("ans", content);
-                            $(input).attr("size", size);
+                            //$(input).attr("size", size);
                             $(input).attr("dsp", quiz.Content);
                             $(input).attr("placeholder", content);
-                            $(input).attr("value", "");
+                            $(input).attr("value", content);
+
                         }
+                        //alert(1);
                         $(fillquizs[i]).attr("title", quiz.Description == null ? "" : quiz.Description);
                     }
                     //console.log($(quizContent).prop("innerHTML"));
@@ -1763,8 +1768,9 @@ var Lesson = (function () {
                     addNewQuestion();
                 break;
             case "ESSAY"://Tự luận
-                contentholder.append($("<label>", { "class": "title", "text": "Điểm" }));
-                contentholder.append($("<input>", { "type": "text", "name": "Point", "class": "input-text form-control", "placeholder": "Điểm", "required": "required", value: data.Point }));
+
+                //alert(1);
+                //contentholder.append($("<input>", { "type": "text", "name": "Point", "class": "input-text form-control", "placeholder": "Điểm", "required": "required", value: data.Point }));
                 ////contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Description" }));
                 //if (data != null && data.description != null)
                 //    contentholder.find("[name=Description]").val(data.description);
@@ -1800,14 +1806,22 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
 
+
                 if (data != null && data.Questions != null) {
-                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                        var quiz = data.Questions[i];
-                        addNewQuestion(quiz);
+                    //only 1 question
+                    console.log(data.Questions);
+                    contentholder.append($("<label>", { "class": "title", "text": "Điểm" }));
+                    if (data.Questions.length == 1) {
+                        contentholder.append($("<input>", { "name": "Point", "class": "input-text quiz-text form-control", "placeholder": ">= 0", type: "number", value: data.Questions[0].Point}));
                     }
+
+                    //for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                    //    var quiz = data.Questions[i];
+                    //    addNewQuestion(quiz);
+                    //}
                 }
-                //else
-                //    addNewQuestion();
+                else
+                    addNewQuestion();
                 break;
             default:
                 alert("Not implement");
@@ -2791,16 +2805,7 @@ var Lesson = (function () {
             .blur(function () {
                 AnswerFillQuestion("inputQZ2-" + data.ID);
             });
-        //.keyup(function () {
-        //    console.log(this);
-        //});
-        $(holder).append(input)
-        //.keyup(function () {
-        //    var inputWidth = $(this).textWidth();
-        //    $(this).css({
-        //        width: inputWidth
-        //    })
-        //});
+        $(holder).append(input);
     }
 
     var renderExamAnswer = function (data, partid, template) {
