@@ -272,7 +272,7 @@ var Lesson = (function () {
 
         _totalPart = data.Part != null ? data.Part.length : 0;
         //header
-        console.log(config.mod);
+        //console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
                 var headerRow = $("<div>", { "class": "justify-content-between d-none" }).empty();
@@ -429,7 +429,7 @@ var Lesson = (function () {
                     switchUIMode(UIMode.LECTURE_ONLY);
             }
         }
-        console.log(_UImode);
+        //console.log(_UImode);
         $('.mod_' + config.mod).addClass("uimod_" + _UImode);
         //body
         switch (config.mod) {
@@ -463,7 +463,7 @@ var Lesson = (function () {
                         html = $(this).find(".part-description");
                         $(this).addClass("m-0");
                         $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
-                            .empty().append($(this).find('.part-box-header')).append(media).append(html)
+                            .empty().append($(this).find('.part-box-header')).append(html).append(media)
                             .appendTo('#leftCol')
                     })
                 }
@@ -500,7 +500,6 @@ var Lesson = (function () {
                 }
                 break;
             case mod.STUDENT_LECTURE:
-
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
@@ -509,7 +508,7 @@ var Lesson = (function () {
                 lessontabs.append(tabs);
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
-                    renderStudentPart(item);
+                    renderStudentPart(item, false);
                 }
                 if (data.Part != null && data.Part.length == 1) {
                     $('.fas.fa-caret-down:first').click();
@@ -553,7 +552,7 @@ var Lesson = (function () {
                                     //console.log(data);
                                     localStorage.clear();
                                     console.log("New Exam");
-                                    //console.log(getLocalData("CurrentExam"))
+                                    //console.log(getLocalData("CurrentExam"))                                    
                                     renderLectureExam(exam, false);
                                 }
                                 else {
@@ -730,6 +729,7 @@ var Lesson = (function () {
     }
 
     var renderPreviewPart = function (data) {
+
         var mainContainer = $('#' + config.container);
         var leftCol = mainContainer.find('#leftCol');
         var rightCol = mainContainer.find('#rightCol');
@@ -878,6 +878,7 @@ var Lesson = (function () {
                 }
                 break;
             case "QUIZ2":
+                console.log(itembox);
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
@@ -895,19 +896,7 @@ var Lesson = (function () {
                     var item = data.Questions[i];
                     //console.log(item);
                     try {
-                        //var input = $(fillquizs[i]).find("input");
-                        //$(input).attr("dsp", item.Content);
-                        //var answers = [];
-                        //if (item.Answers.length > 0) {
-                        //    for (var j = 0; j < item.Answers.length; j++)
-                        //        answers.push(item.Answers[j].Content);
-                        //    var content = answers.join(" | ");
-                        //    var size = 5;
-                        //    if (content.length > size) size = content.length;
-                        //    $(input).attr("placeholder", content).attr("size", size);
-                        //}
-
-
+                      
                         var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
 
                         var holder = fillquizs[i];
@@ -921,7 +910,7 @@ var Lesson = (function () {
                                 answers.push(item.Answers[j].Content);
                             var content = answers.join(" | ");
 
-                            $(input).text(content)
+                            $(input).text(content);
                         }
                         $(holder).append(input);
                     }
@@ -967,36 +956,42 @@ var Lesson = (function () {
                 }
                 break;
             case "ESSAY":
-                var itemBody = $("<div>", { "class": "content-wrapper" });
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                    itembox.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
                 }
+                
+                itembox.append(ItemRow);
+                
+                var itemBody = $("<div>", { "class": "quiz-wrapper col-8 pl-3" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                itembox.append(itemBody);
-                container.append(tabsitem);
-                var itemBody = $("<div>", { "class": "quiz-wrapper" });
-                itembox.append(itemBody);
+
                 renderMediaContent(data, itemBody, "");
-                totalQuiz = data.Questions.length;
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    renderPreviewQuestion(item, data.Type);
+                //console.log(ItemRow);
+                ItemRow.append(itemBody);
+                ItemRow.find(".media-holder").addClass("col-12");
+                
+                //renderMediaContent(data, itemBody, "");
+                container.append(tabsitem);
+                console.log(data.Questions);
+
+                //totalQuiz = data.Questions.length;
+                if (data.Questions.length > 0) {
+                    var esid = "inputES-" + data.Questions[0].ID;
+                    itemBody.append($("<label>", { text: "Trả lời: " }));
+                    itemBody.append($("<textarea>", { id: esid, class: "w-100" }));
+                    CKEDITOR.replace(esid);
+                    itemBody.append($("<button>", { text: "Đính kèm file", class: "btn btn-primary mt-2 btnAddfile", disabled:"disabled"}));
+                    itemBody.append($("<button>", { text: "Lưu đáp án", class: "btn btn-primary mt-2 ml-2", disabled: "disabled" }));
                 }
                 break;
         }
 
         itembox.find('iframe,embed,video').each(function (i, item) {
-            //if (!$(item)[0].hasAttribute('allow')) {
-            //    $(item).attr('allow', 'fullscreen');
-            //    $(item).attr('allowfullscreen', 'true');
-            //}
             $(item).wrap($('<div>', {
                 class: 'fullscreenSupport d-inline-block'
             }));
             $(item).parent().append($('<div>').append($('<button>', {
-                class: "btn btn-primary mt-1", click: function () {
-                    ShowFullScreen(this)
-                }
+                class: "btn btn-primary mt-1", onclick: "ShowFullScreen(this)"
             }).append('<i class="ic fa fa-expand mr-2"></i>').append('Xem toàn màn hình')))
         });
 
@@ -1200,7 +1195,7 @@ var Lesson = (function () {
     }
 
     var renderMediaContent = function (data, wrapper, type = "") {
-        //console.log('renderMedia');
+        //console.log(wrapper);
         //console.log(data);
         if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder mt-2 mb-2 " + type });
@@ -1812,7 +1807,7 @@ var Lesson = (function () {
                     console.log(data.Questions);
                     contentholder.append($("<label>", { "class": "title", "text": "Điểm" }));
                     if (data.Questions.length == 1) {
-                        contentholder.append($("<input>", { "name": "Point", "class": "input-text quiz-text form-control", "placeholder": ">= 0", type: "number", value: data.Questions[0].Point}));
+                        contentholder.append($("<input>", { "name": "Point", "class": "input-text quiz-text form-control", "placeholder": ">= 0", type: "number", value: data.Questions[0].Point }));
                     }
 
                     //for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -2030,7 +2025,7 @@ var Lesson = (function () {
     }
 
     var renderAddMedia = function (wrapper, prefix, type = "", data = null) {
-        console.log(data);
+        //console.log(data);
         wrapper.empty();
         wrapper.append($("<input>", { "type": "hidden", "name": prefix + "Media.Name", "for": "medianame" }));
         wrapper.append($("<input>", { "type": "hidden", "name": prefix + "Media.OriginalName", "for": "mediaorgname" }));
@@ -2269,7 +2264,6 @@ var Lesson = (function () {
                 }).append('<i class="fas fa-play mr-2"></i>').append('Làm bài');
             }
         }
-
         if (isNull(data)) {
             //var backButton = $('<div>', {
             //    "class": "btn btn-primary m-3",
@@ -2344,7 +2338,6 @@ var Lesson = (function () {
     }
 
     var renderLectureExam = function (data, isContinue) {
-
         var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
         $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
@@ -2456,7 +2449,7 @@ var Lesson = (function () {
         }, renderLessonData);
     }
 
-    var renderStudentPart = function (data) {
+    var renderStudentPart = function (data, _defshow = true) {
         //console.log(data);
         var mainContainer = $('#' + config.container);
         var leftCol = mainContainer.find('#leftCol');
@@ -2645,15 +2638,29 @@ var Lesson = (function () {
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
-                var itemBody = $("<div>", { "class": "quiz-wrapper" });
+                //var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itembox.append(itemBody);
 
                 renderMediaContent(data, itemBody, "");
-                totalQuiz = data.Questions.length;
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    renderExamQuestion(item, data.Type);
+
+                //totalQuiz = data.Questions.length;
+                if (data.Questions.length > 0) {
+                    var esid = "inputES-" + data.Questions[0].ID;
+                    itembox.append($("<label>", { text: "Trả lời: " }));
+                    itembox.append($("<textarea>", { id: esid, class: "w-100" }));
+                    CKEDITOR.replace(esid);
+                    itembox.append($("<button>", { text: "Đính kèm file", class: "btn btn-primary mt-2 btnAddfile", onclick: "AddAttachment(this)" }));
+                    itembox.append($("<button>", { text: "Lưu đáp án", class: "btn btn-primary mt-2 ml-2", onclick: "SaveEssay('" + data.Questions[0].ID + "')" }));
+                    itembox.append($("<input>", { type: "file", name: "ESF_" + data.Questions[0].ID, class: "hide", accept: " audio/*, .doc, .docx", onchange: "UpdateFilename(this)" }));
                 }
+
+
+
+                //for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+
+                //    var item = data.Questions[i];
+                //    renderExamQuestion(item, data.Type);
+                //}
                 break;
         }
 
@@ -2672,10 +2679,11 @@ var Lesson = (function () {
             }).append('<i class="ic fa fa-expand mr-2"></i>').append('Xem toàn màn hình')))
         });
 
-        if (listPartContainer.find(".nav-item").length == 1) {
-            itemtitle.addClass("active");
-            tabsitem.addClass("show active");
-        }
+        if (_defshow)
+            if (listPartContainer.find(".nav-item").length == 1) {
+                itemtitle.addClass("active");
+                tabsitem.addClass("show active");
+            }
         //$('.btn[title]').tooltip({
         //    trigger: 'hover'
         //});
@@ -3359,6 +3367,18 @@ var Lesson = (function () {
         }
     }
 
+    var AddAttachment = function (obj) {
+        $(obj).siblings("input[type=file]").focus().click();
+    }
+
+    var UpdateFilename = function (obj) {
+        $(obj).siblings(".btnAddfile").text(obj.files[0].name);
+    }
+
+    var SaveEssay = function (id) {
+        saveAnswerForStudent
+    }
+
     window.LessonInstance = {} || Lesson;
 
     LessonInstance.onReady = onReady;
@@ -3372,6 +3392,10 @@ var Lesson = (function () {
     window.DoLectureExam = doLectureExam;
     window.GoBack = goBack;
     window.GoQuiz = goQuiz;
+
+    window.AddAttachment = AddAttachment;
+    window.UpdateFilename = UpdateFilename;
+    window.SaveEssay = SaveEssay;
 
     window.EditLesson = modalEditLesson;
     window.EditPart = modalEditPart;
@@ -3530,57 +3554,58 @@ var submitQuizFill = function (event, modalId, callback) {
         formdata.delete("Description");
 
         var CKEContent = CKEDITOR.instances.editor.getData();
-        var description = $.parseHTML("<div>" + CKEContent + "</div>");
-        var quizs = $(description).find("fillquiz");
-        if (quizs.length > 0) {
-            var pos = -1;
-            for (var i = 0; i < quizs.length; i++) {
-                var question = quizs[i];
-                var inp = $(question).find("input");
-                if (inp.length == 0) {
-                    $(question).attr('bad', 1);
-                    continue; //skip empty fillquiz
-                }
-                pos++;
-                //console.log(inp);
-                var answers = $(inp).attr("ans") == null ? $(inp).attr("placeholder") : $(inp).attr("ans");
-                var display = $(inp).attr("dsp");
-                if (display == null) display = "";
-                var explanation = $(question).attr("title");
-                if (explanation == null) explain = "";
+        //var description = $.parseHTML("<div>" + CKEContent + "</div>");
+        //var quizs = $(description).find("fillquiz");
+        //if (quizs.length > 0) {
+        //    var pos = -1;
+        //    for (var i = 0; i < quizs.length; i++) {
+        //        var question = quizs[i];
+        //        var inp = $(question).find("input");
+        //        if (inp.length == 0) {
+        //            $(question).attr('bad', 1);
+        //            continue; //skip empty fillquiz
+        //        }
+        //        pos++;
+        //        //console.log(inp);
+        //        var answers = $(inp).attr("ans") == null ? $(inp).attr("placeholder") : $(inp).attr("ans");
+        //        var display = $(inp).attr("dsp");
+        //        if (display == null) display = "";
+        //        var explanation = $(question).attr("title");
+        //        if (explanation == null) explain = "";
 
-                if (answers != null) {
-                    //console.log(answers);    
-                    formdata.append("Questions[" + pos + "].Order", pos);
-                    formdata.append("Questions[" + pos + "].Point", 1);
-                    formdata.append("Questions[" + pos + "].Content", display);
-                    formdata.append("Questions[" + pos + "].Description", explanation);
+        //        if (answers != null) {
+        //            //console.log(answers);    
+        //            formdata.append("Questions[" + pos + "].Order", pos);
+        //            formdata.append("Questions[" + pos + "].Point", 1);
+        //            formdata.append("Questions[" + pos + "].Content", display);
+        //            formdata.append("Questions[" + pos + "].Description", explanation);
 
-                    var ans = answers.split("|");
-                    if (ans.length > 0) {
-                        for (var j = 0; j < ans.length; j++) {
-                            var an = ans[j].trim();
-                            formdata.append("Questions[" + pos + "].Answers[" + j + "].Content", an);
-                            formdata.append("Questions[" + pos + "].Answers[" + j + "].IsCorrect", true);
-                        }
-                        //console.log(ans);
-                    }
+        //            var ans = answers.split("|");
+        //            if (ans.length > 0) {
+        //                for (var j = 0; j < ans.length; j++) {
+        //                    var an = ans[j].trim();
+        //                    formdata.append("Questions[" + pos + "].Answers[" + j + "].Content", an);
+        //                    formdata.append("Questions[" + pos + "].Answers[" + j + "].IsCorrect", true);
+        //                }
+        //                //console.log(ans);
+        //            }
 
-                    $(question).removeAttr("title");
-                    $(question).find("input").removeAttr("ans");
-                    $(question).find("input").removeAttr("dsp");
-                    $(question).find("input").attr("placeholder", "");
-                    //$(question).find("input").attr("size", "10");
-                    //$(question).find("input").attr("value", "");
-                }
-            }
-        }
-        //console.log(CKEContent);
-        //console.log($(description).prop("innerHTML"));
-        $(description).find("[bad=1]").remove();//remove all bad fillquiz;
+        //            $(question).removeAttr("title");
+        //            $(question).find("input").removeAttr("ans");
+        //            $(question).find("input").removeAttr("dsp");
+        //            $(question).find("input").attr("placeholder", "");
+        //            //$(question).find("input").attr("size", "10");
+        //            //$(question).find("input").attr("value", "");
+        //        }
+        //    }
+        //}
+        ////console.log(CKEContent);
+        ////console.log($(description).prop("innerHTML"));
+        //$(description).find("[bad=1]").remove();//remove all bad fillquiz;
 
         //console.log("Description", $(description).prop("innerHTML"));
-        formdata.append("Description", $(description).prop("innerHTML"));
+        //formdata.append("Description", $(description).prop("innerHTML"));
+        formdata.append("Description", CKEContent);
     }
     var err = false;
     var requires = $(Form).find(':required');

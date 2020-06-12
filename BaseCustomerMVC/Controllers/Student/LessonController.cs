@@ -243,19 +243,19 @@ namespace BaseCustomerMVC.Controllers.Student
         /// <param name="id">LessonID</param>
         /// <param name="ClassID">ClassID</param>
         /// <returns></returns>
-        public IActionResult Detail(DefaultModel model, string ClassID, int newui = 0)
+        public IActionResult Detail(DefaultModel model, string basis, string ClassID, int newui = 0)
         {
             if (ClassID == null)
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             var currentCs = _classSubjectService.GetItemByID(ClassID);
             if (currentCs == null)
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             var currentClass = _classService.GetItemByID(currentCs.ClassID);
             if (currentClass == null)
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             var lesson = _lessonService.GetItemByID(model.ID);
             if (lesson == null)
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             var chapter = _chapterService.GetItemByID(lesson.ChapterID);
 
@@ -272,36 +272,36 @@ namespace BaseCustomerMVC.Controllers.Student
             //return View();
         }
 
-        public IActionResult Review(DefaultModel model)
+        public IActionResult Review(DefaultModel model, string basis)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
 
             if (string.IsNullOrEmpty(model.ID))
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             var exam = _examService.GetItemByID(model.ID);
             if (exam == null)
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             if (!exam.Status)
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             if (exam.StudentID != UserID && exam.TeacherID != UserID)
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             var lesson = _lessonService.GetItemByID(exam.LessonID);
             if (lesson == null)
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
 
             var currentCs = _classSubjectService.GetItemByID(exam.ClassSubjectID);
             if (currentCs == null)
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             var currentClass = _classService.GetItemByID(currentCs.ClassID);
             if (currentClass == null)
-                return RedirectToAction("Index", "Course");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             var chapter = _chapterService.GetItemByID(lesson.ChapterID);
 
@@ -600,9 +600,12 @@ namespace BaseCustomerMVC.Controllers.Student
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == model.ID).FirstOrDefault()
                            let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID).SortByDescending(o => o.ID).FirstOrDefault()
-                           let lastexam = r.TemplateType == LESSON_TEMPLATE.EXAM ? _examService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID
+                           let lastexam =
+                           //r.TemplateType == LESSON_TEMPLATE.EXAM ? 
+                           _examService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID
                            //&& x.Status
-                           ).SortByDescending(o => o.ID).FirstOrDefault() : null //get lastest exam
+                           ).SortByDescending(o => o.ID).FirstOrDefault()
+                           //: null //get lastest exam
                            select _schedulemapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
                                ScheduleID = schedule.ID,
@@ -612,7 +615,10 @@ namespace BaseCustomerMVC.Controllers.Student
                                IsView = r.TemplateType == LESSON_TEMPLATE.EXAM ? lastexam != null : lastjoin != null,
                                LastJoin = r.TemplateType == LESSON_TEMPLATE.EXAM ? (lastexam != null ? lastexam.Updated : DateTime.MinValue) :
                                     lastjoin != null ? lastjoin.Time : DateTime.MinValue,
-                               DoPoint = (lastexam != null && lastexam.Status) ? (lastexam.MaxPoint > 0 ? lastexam.Point * 100 / lastexam.MaxPoint : 0) : 0,//completed exam only
+                               DoPoint = 
+                               (lastexam != null && lastexam.Status) ?
+                               r.TemplateType == LESSON_TEMPLATE.EXAM ? (lastexam.MaxPoint > 0 ? lastexam.Point * 100 / lastexam.MaxPoint : 0) :
+                                    (lastexam.QuestionsTotal > 0 ? lastexam.QuestionsPass * 100 / lastexam.QuestionsTotal : 0) : 0,//completed exam only
                                Tried = lastexam != null ? lastexam.Number : 0,
                                LastExam = (lastexam != null && lastexam.Status
                                ) ? lastexam.ID : null

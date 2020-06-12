@@ -16,8 +16,10 @@
 
 <div class="left-col">
     <div class="page-title">
-        <h1><a href="@processUrl("Modules","Curriculum")/@Course.ID">@Course.Name</a> /
-        @Data.Title</h1>
+        <h1>
+            <a href="@processUrl("Modules","Curriculum")/@Course.ID">@Course.Name</a> /
+            @Data.Title
+        </h1>
     </div>
     <div class="main-container">
         <div id="lessonContainer" class="h-100">
@@ -47,22 +49,21 @@
     }
 
     fillquiz {
-            margin: 0 3px;
-        }
+        margin: 0 3px;
+    }
 
-        .fillquiz {
-            background: #e6712d4d;
-            display: inline;
-            width: 40px;
-            padding: 3px 8px;
-            border-radius: 3px;
-            /*line-height: 36px;*/
-            border: solid 1px #999;
-        }
+    .fillquiz {
+        background: #e6712d4d;
+        display: inline;
+        padding: 3px 8px;
+        border-radius: 3px;
+        line-height: 33px;
+        border: solid 1px #999;
+    }
 </style>
 
 @section Scripts{
-    <script src="~/js/content-render.js"></script>
+    <script src="~/js/content-render.js?20200612"></script>
     <script src="/generic_wiris/integration/WIRISplugins.js?viewer=image"></script>
     @*<script src="~/js/minify/detail.fn.min.js?20200609"></script>*@
     <script>

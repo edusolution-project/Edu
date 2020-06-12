@@ -243,6 +243,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     _lessonPartService.CreateQuery().InsertOne(lessonpart);
                 }
+                item.ID = lessonpart.ID;
 
                 if (lessonpart.Type == "ESSAY")
                 {
@@ -259,53 +260,52 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     };
                     _questionService.Save(question);
                 }
-
-                //_lessonPartService.CreateOrUpdate(lessonpart);
-                item.ID = lessonpart.ID;
-
-                switch (item.Type)
+                else
                 {
-                    case "QUIZ2": //remove all previous question
-                        var oldQuizIds = _questionService.CreateQuery().Find(q => q.ParentID == item.ID).Project(i => i.ID).ToEnumerable();
-                        foreach (var quizid in oldQuizIds)
-                            _answerService.CreateQuery().DeleteMany(a => a.ParentID == quizid);
-                        _questionService.CreateQuery().DeleteMany(q => q.ParentID == item.ID);
+                    switch (item.Type)
+                    {
+                        case "QUIZ2": //remove all previous question
+                            var oldQuizIds = _questionService.CreateQuery().Find(q => q.ParentID == lessonpart.ID).Project(i => i.ID).ToEnumerable();
+                            foreach (var quizid in oldQuizIds)
+                                _answerService.CreateQuery().DeleteMany(a => a.ParentID == quizid);
+                            _questionService.CreateQuery().DeleteMany(q => q.ParentID == lessonpart.ID);
 
-                        if (!String.IsNullOrEmpty(item.Description) && item.Description.ToLower().IndexOf("<fillquiz>") >= 0)
-                        {
-                            var newdescription = "";
-                            if (item.Questions == null && item.Questions.Count == 0)
-                                item.Questions = ExtractFillQuestionList(item, createduser, out newdescription);
-                            lessonpart.Description = newdescription;
-                            _lessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
-                        }
-                        else
-                        {
-                            //No Question
-                        }
-
-                        break;
-                    default:
-                        if (RemovedQuestions != null & RemovedQuestions.Count > 0)
-                        {
-                            _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
-
-                            foreach (var quizID in RemovedQuestions)
+                            if (!String.IsNullOrEmpty(item.Description) && item.Description.ToLower().IndexOf("<fillquiz ") >= 0)
                             {
-                                _answerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
+                                var newdescription = "";
+                                if (item.Questions == null || item.Questions.Count == 0)
+                                    item.Questions = ExtractFillQuestionList(item, createduser, out newdescription);
+                                lessonpart.Description = newdescription;
+                                _lessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
                             }
-                        }
+                            else
+                            {
+                                //No Question
+                            }
 
-                        if (RemovedAnswers != null & RemovedAnswers.Count > 0)
-                            _answerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
-                        break;
-                }
+                            break;
+                        default:
+                            if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+                            {
+                                _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
 
-                item.CourseID = parentLesson.CourseID;
+                                foreach (var quizID in RemovedQuestions)
+                                {
+                                    _answerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
+                                }
+                            }
 
-                if (item.Questions != null && item.Questions.Count > 0)
-                {
-                    await SaveQuestionFromView(item, createduser, files);
+                            if (RemovedAnswers != null & RemovedAnswers.Count > 0)
+                                _answerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
+                            break;
+                    }
+
+                    item.CourseID = parentLesson.CourseID;
+
+                    if (item.Questions != null && item.Questions.Count > 0)
+                    {
+                        await SaveQuestionFromView(item, createduser, files);
+                    }
                 }
 
                 IDictionary<string, object> valuePairs = new Dictionary<string, object>
@@ -502,9 +502,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 };
 
                 var ansArr = ans.Split('|');
-                foreach(var answer in ansArr)
+                foreach (var answer in ansArr)
                 {
-                    if(!string.IsNullOrEmpty(answer.Trim()))
+                    if (!string.IsNullOrEmpty(answer.Trim()))
                     {
                         Question.Answers.Add(new LessonPartAnswerEntity
                         {
@@ -515,7 +515,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         });
                     }
                 }
-               
+
                 questionList.Add(Question);
                 var clearnode = HtmlNode.CreateNode("<input></input>");
                 clearnode.AddClass("fillquiz");
@@ -541,7 +541,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 questionVM.ParentID = item.ID;
                 questionVM.CourseID = item.CourseID;
-                
+
                 var quiz = questionVM.ToEntity();
 
                 if (questionVM.Media != null && questionVM.Media.Name == null) questionVM.Media = null;

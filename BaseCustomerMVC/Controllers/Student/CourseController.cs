@@ -612,26 +612,26 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public IActionResult Calendar(DefaultModel model, string id, string ClassID)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                TempData["Error"] = "Bạn chưa chọn khóa học";
-                return RedirectToAction("Index");
-            }
-            ViewBag.CourseID = id;
-            ViewBag.ClassID = ClassID;
-            ViewBag.Model = model;
-            return View();
-        }
+        //public IActionResult Calendar(DefaultModel model, string id, string ClassID)
+        //{
+        //    if (string.IsNullOrEmpty(id))
+        //    {
+        //        TempData["Error"] = "Bạn chưa chọn khóa học";
+        //        return RedirectToAction("Index");
+        //    }
+        //    ViewBag.CourseID = id;
+        //    ViewBag.ClassID = ClassID;
+        //    ViewBag.Model = model;
+        //    return View();
+        //}
 
-        public IActionResult Detail(string id)
+        public IActionResult Detail(string id, string basis)
         {
             //return Redirect(Url.Action("Modules", "Course") + "/" + id);
             var currentClass = _service.GetItemByID(id);
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (currentClass == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
             if (!_studentService.IsStudentInClass(currentClass.ID, userId))
                 return RedirectToAction("Index");
@@ -646,40 +646,40 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public IActionResult Syllabus(DefaultModel model, string id)
-        {
-            if (model == null) return null;
-            var currentClass = _service.GetItemByID(id);
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            if (currentClass.Students.IndexOf(userId) < 0)
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            return View();
-        }
+        //public IActionResult Syllabus(DefaultModel model, string id)
+        //{
+        //    if (model == null) return null;
+        //    var currentClass = _service.GetItemByID(id);
+        //    var userId = User.Claims.GetClaimByType("UserID").Value;
+        //    if (currentClass == null)
+        //        return RedirectToAction("Index");
+        //    if (currentClass.Students.IndexOf(userId) < 0)
+        //        return RedirectToAction("Index");
+        //    ViewBag.Class = currentClass;
+        //    return View();
+        //}
 
-        public IActionResult Modules(string id, int old = 0)
+        public IActionResult Modules(string basis, string id, int old = 0)
         {
             //if (model == null) return null;
             var currentCs = _classSubjectService.GetItemByID(id);
             if (currentCs == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             var userId = User.Claims.GetClaimByType("UserID").Value;
             var currentClass = _service.GetItemByID(currentCs.ClassID);
             if (currentClass == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
             //if (classStudent == null)
             if (!_studentService.IsStudentInClass(currentClass.ID, userId))
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             var progress = _classSubjectProgressService.GetItemByClassSubjectID(id, userId);
             //long completed = 0;
             //if (progress != null && progress.TotalLessons > 0)
             //    completed = progress.Completed;
             var subject = _subjectService.GetItemByID(currentCs.SubjectID);
             if (subject == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             //ViewBag.Completed = completed;
             ViewBag.ClassSubject = new ClassSubjectViewModel()
             {
@@ -696,44 +696,44 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public IActionResult Assignment(DefaultModel model, string id)
-        {
-            if (model == null) return null;
-            var currentClass = _service.GetItemByID(id);
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
-            //if (classStudent == null)
-            //    return RedirectToAction("Index");
-            if (!_studentService.IsStudentInClass(currentClass.ID, userId))
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            return View();
-        }
+        //public IActionResult Assignment(DefaultModel model, string id)
+        //{
+        //    if (model == null) return null;
+        //    var currentClass = _service.GetItemByID(id);
+        //    var userId = User.Claims.GetClaimByType("UserID").Value;
+        //    if (currentClass == null)
+        //        return RedirectToAction("Index");
+        //    //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
+        //    //if (classStudent == null)
+        //    //    return RedirectToAction("Index");
+        //    if (!_studentService.IsStudentInClass(currentClass.ID, userId))
+        //        return RedirectToAction("Index");
+        //    ViewBag.Class = currentClass;
+        //    return View();
+        //}
 
-        public IActionResult References(DefaultModel model, string id)
-        {
-            if (model == null) return null;
-            var currentClass = _service.GetItemByID(id);
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            if (!_studentService.IsStudentInClass(currentClass.ID, userId))
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            return View();
-        }
+        //public IActionResult References(DefaultModel model, string id)
+        //{
+        //    if (model == null) return null;
+        //    var currentClass = _service.GetItemByID(id);
+        //    var userId = User.Claims.GetClaimByType("UserID").Value;
+        //    if (currentClass == null)
+        //        return RedirectToAction("Index");
+        //    if (!_studentService.IsStudentInClass(currentClass.ID, userId))
+        //        return RedirectToAction("Index");
+        //    ViewBag.Class = currentClass;
+        //    return View();
+        //}
 
-        public IActionResult Discussions(DefaultModel model)
-        {
-            if (model == null) return null;
-            var currentClass = _service.GetItemByID(model.ID);
-            if (currentClass == null)
-                return RedirectToAction("Index");
-            ViewBag.Class = currentClass;
-            return View();
-        }
+        //public IActionResult Discussions(DefaultModel model)
+        //{
+        //    if (model == null) return null;
+        //    var currentClass = _service.GetItemByID(model.ID);
+        //    if (currentClass == null)
+        //        return RedirectToAction("Index");
+        //    ViewBag.Class = currentClass;
+        //    return View();
+        //}
 
         [HttpPost]
         public JsonResult GetMainChapters(string ID)
@@ -817,23 +817,23 @@ namespace BaseCustomerMVC.Controllers.Student
 
 
         //TODO: FIX DATA ONLY
-        public JsonResult FixProgress()
-        {
-            var lhs = _learningHistoryService.Collection.Find(t => true).ToList();
-            foreach (var lh in lhs)
-            {
-                _ = _learningHistoryService.CreateHist(lh);
-            }
-            var exams = _examService.GetAll().ToList();
-            foreach (var exam in exams)
-            {
-                var lesson = _lessonService.GetItemByID(exam.LessonID);
-                if (lesson == null)
-                    _ = _examService.RemoveAsync(exam.ID);
-                else
-                    _ = _examService.Complete(exam, lesson, out _);
-            }
-            return Json("Fixed");
-        }
+        //public JsonResult FixProgress()
+        //{
+        //    var lhs = _learningHistoryService.Collection.Find(t => true).ToList();
+        //    foreach (var lh in lhs)
+        //    {
+        //        _ = _learningHistoryService.CreateHist(lh);
+        //    }
+        //    var exams = _examService.GetAll().ToList();
+        //    foreach (var exam in exams)
+        //    {
+        //        var lesson = _lessonService.GetItemByID(exam.LessonID);
+        //        if (lesson == null)
+        //            _ = _examService.RemoveAsync(exam.ID);
+        //        else
+        //            _ = _examService.Complete(exam, lesson, out _);
+        //    }
+        //    return Json("Fixed");
+        //}
     }
 }

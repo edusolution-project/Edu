@@ -436,13 +436,15 @@ namespace BaseCustomerMVC.Controllers.Student
                 //    Time = DateTime.Now,
                 //    StudentID = User.Claims.GetClaimByType("UserID").Value
                 //});
-                var deleted = await _examDetailService.CreateQuery().DeleteManyAsync(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID);
+                if (exam != null)
+                {
+                    var deleted = await _examDetailService.CreateQuery().DeleteManyAsync(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID);
+                    exam.Updated = DateTime.Now;
+                    if (deleted.DeletedCount > 0 && exam.QuestionsDone > 0)
+                        exam.QuestionsDone -= 1;
 
-                exam.Updated = DateTime.Now;
-                if (deleted.DeletedCount > 0 && exam.QuestionsDone > 0)
-                    exam.QuestionsDone -= 1;
-
-                _examService.CreateOrUpdate(exam);
+                    _examService.CreateQuery().ReplaceOne(t=> t.ID == exam.ID, exam);
+                }
                 return new JsonResult(item);
             }
             else

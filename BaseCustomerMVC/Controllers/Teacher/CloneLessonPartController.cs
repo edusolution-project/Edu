@@ -283,10 +283,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         _cloneAnswerService.CreateQuery().DeleteMany(a => a.ParentID == quizid);
                     _cloneQuestionService.CreateQuery().DeleteMany(q => q.ParentID == item.ID);
 
-                    if (!String.IsNullOrEmpty(item.Description) && item.Description.ToLower().IndexOf("<fillquiz>") >= 0)
+                    if (!String.IsNullOrEmpty(item.Description) && item.Description.ToLower().IndexOf("<fillquiz ") >= 0)
                     {
                         var newdescription = "";
-                        if (item.Questions == null && item.Questions.Count == 0)
+                        if (item.Questions == null || item.Questions.Count == 0)
                             item.Questions = ExtractFillQuestionList(item, User.Claims.GetClaimByType("UserID").Value, out newdescription);
                         lessonpart.Description = newdescription;
                         _service.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);

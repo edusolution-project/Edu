@@ -185,6 +185,9 @@
                     <div v-if="isValidTime(lesson.LastJoin)" class="text-muted" style="font-size:90%">
                         @*<span class="ml-2">Học lần cuối: </span>*@
                         <span class="ml-2">{{formatTime(lesson.LastJoin)}}</span>
+                        <template v-if="lesson.Tried > 0">
+                            - <span class="bg-transparent text-primary font-weight-bold" v-bind:class="{'text-danger' : parseInt(lesson.DoPoint) < 50, 'text-success' : parseInt(lesson.DoPoint) > 70}">{{lesson.DoPoint.toFixed(2)}}%</span>
+                        </template>
                     </div>
                 </template>
             </div>
