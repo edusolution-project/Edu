@@ -25,7 +25,6 @@ namespace BaseCustomerEntity.Database
         public string NameCampaign { get; set; }
         [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }
-
     }
 
     public class AdsService : ServiceBase<AdsEntity>
@@ -43,6 +42,8 @@ namespace BaseCustomerEntity.Database
         {
             CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<AdsEntity>.Update.Set(t => t.IsActive, status));
         }
+
+        public AdsEntity GetItemByCode(string Code) => Collection.Find<AdsEntity>(x => x.Code.Equals(Code) && x.IsActive == true).FirstOrDefault();
     }
 
 }

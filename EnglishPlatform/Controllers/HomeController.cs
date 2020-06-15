@@ -644,7 +644,7 @@ namespace EnglishPlatform.Controllers
             filter.Add(Builders<AdsEntity>.Filter.Where(tbl => tbl.PublishDate <= DateTime.UtcNow));
             filter.Add(Builders<AdsEntity>.Filter.Where(tbl => tbl.EndDate >= DateTime.UtcNow));
             filter.Add(Builders<AdsEntity>.Filter.Where(tbl => tbl.IsActive ==true));
-            var data = _adsService.Collection.Find(Builders<AdsEntity>.Filter.And(filter)).Project(tbl => tbl.Banner).ToList();
+            var data = _adsService.Collection.Find(Builders<AdsEntity>.Filter.And(filter)).ToList();
             Dictionary<string, object> Response = new Dictionary<string, object>
             {
                 {"Data",data }

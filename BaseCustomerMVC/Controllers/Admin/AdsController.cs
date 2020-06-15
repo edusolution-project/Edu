@@ -17,6 +17,7 @@ using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using Microsoft.AspNetCore.Razor.Language;
+using BaseCustomerEntity.Globals;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -49,6 +50,14 @@ namespace BaseCustomerMVC.Controllers.Admin
                 {
                     camp.Banner=urlBanner(Banner);
                 }
+
+                camp.Code = camp.NameCampaign.ConvertUnicodeToCode("-", true);
+                var pos = 0;
+                while (_servicesAds.GetItemByCode(camp.Code) != null)
+                {
+                    pos++;
+                    camp.Code += ("-" + pos);
+                }
                 _servicesAds.CreateQuery().InsertOne(camp);
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -61,6 +70,17 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 var oldCamp = _servicesAds.GetItemByID(camp.ID);
                 camp.CreateDate= oldCamp.CreateDate;
+
+                camp.Code = camp.NameCampaign.ConvertUnicodeToCode("-", true);
+                var pos = 0;
+                var sameUrl = _servicesAds.GetItemByCode(camp.Code);
+                while (sameUrl != null && sameUrl.ID != camp.ID)
+                {
+                    pos++;
+                    camp.Code += ("-" + pos);
+                    sameUrl = _servicesAds.GetItemByCode(camp.Code);
+                }
+
                 if (Banner != null)
                 {
                  removeBanner(oldCamp.Banner);
