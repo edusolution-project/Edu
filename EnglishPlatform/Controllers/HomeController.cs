@@ -43,6 +43,9 @@ namespace EnglishPlatform.Controllers
         private readonly UserAndRoleService _userAndRoleService;
         private readonly CenterService _centerService;
         private readonly AuthorityService _authorityService;
+        private readonly NewsService _newsService;
+        private readonly NewsCategoryService _newsCategoryService;
+        private readonly AdsService _adsService;
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -57,7 +60,11 @@ namespace EnglishPlatform.Controllers
             , UserAndRoleService userAndRoleService
             , CenterService centerService
             , AuthorityService authorityService
-            , ILog log)
+            , ILog log
+            , NewsService newsService
+            ,NewsCategoryService newsCategoryService
+            ,AdsService adsService
+            )
         {
             _accessesService = accessesService;
             _authenService = authenService;
@@ -75,6 +82,9 @@ namespace EnglishPlatform.Controllers
             _userAndRoleService = userAndRoleService;
             _centerService = centerService;
             _authorityService = authorityService;
+            _newsService = newsService;
+            _newsCategoryService = newsCategoryService;
+            _adsService = adsService;
         }
 
         public IActionResult Index()
@@ -602,6 +612,46 @@ namespace EnglishPlatform.Controllers
             ViewBag.RoomID = roomID;
             return View();
         }
+
+        #region LoadNews
+        [HttpPost]
+        [Route("/home/getnewslist")]
+        public JsonResult getNewsList()
+        {
+            var NewsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true && tbl.PublishDate < DateTime.Now && tbl.IsActive==true).Limit(5);
+            var NewsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && tbl.PublishDate < DateTime.Now && tbl.IsActive == true).Limit(2);
+            var response = new Dictionary<string, object>
+            {
+                {"NewsTop",NewsTop.ToList() },
+                {"NewsHot",NewsHot.ToList() }
+            };
+
+            return Json(response);
+        }
+
+        public JsonResult getDataForPartner(string CatCode)
+        {
+            var catID = _newsCategoryService.Collection.Find(tbl => tbl.Code.Equals(CatCode)).FirstOrDefault().ID;
+            var data = _newsService.Collection.Find(tbl => tbl.CategoryID.Equals(catID)).Limit(10).SortByDescending(tbl => tbl.PublishDate);
+            return Json(data.ToList());
+        }
+        #endregion
+
+        #region load Banner
+        public JsonResult getDataForBanner()
+        {
+            var filter = new List<FilterDefinition<AdsEntity>>();
+            filter.Add(Builders<AdsEntity>.Filter.Where(tbl => tbl.PublishDate <= DateTime.UtcNow));
+            filter.Add(Builders<AdsEntity>.Filter.Where(tbl => tbl.EndDate >= DateTime.UtcNow));
+            filter.Add(Builders<AdsEntity>.Filter.Where(tbl => tbl.IsActive ==true));
+            var data = _adsService.Collection.Find(Builders<AdsEntity>.Filter.And(filter)).Project(tbl => tbl.Banner).ToList();
+            Dictionary<string, object> Response = new Dictionary<string, object>
+            {
+                {"Data",data }
+            };
+            return new JsonResult(Response);
+        }
+        #endregion
     }
 
     public class UserModel
@@ -619,4 +669,5 @@ namespace EnglishPlatform.Controllers
         public string ID { get; set; }
         public string Name { get; set; }
     }
+
 }

@@ -23,7 +23,7 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
-using com.wiris.std;
+//using com.wiris.std;
 
 namespace EnglishPlatform.Controllers
 {
@@ -43,57 +43,15 @@ namespace EnglishPlatform.Controllers
         //[Route("tin-tuc")]
         public IActionResult Index()
         {
-            //StartAuthority();
-
-            //var type = User.Claims.GetClaimByType("Type");
-            //if (type != null)
-            //{
-            //    var center = _centerService.GetDefault();
-            //    string centerCode = center.Code;
-            //    //string roleCode = "";
-            //    string userID = User.FindFirst("UserID").Value;
-            //    var tc = _teacherService.GetItemByID(userID);
-            //    var st = _studentService.GetItemByID(userID);
-            //    //var user = _accountService.GetItemByID(userID);
-            //    //var defaultUser = new UserModel() { };
-
-
-            //    switch (type.Value)
-            //    {
-            //        case ACCOUNT_TYPE.ADMIN:
-            //            centerCode = center.Code;
-            //            break;
-            //        case ACCOUNT_TYPE.TEACHER:
-            //            if (tc != null)
-            //            {
-            //                centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
-            //                ViewBag.AllCenters = tc.Centers.Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
-            //            }
-            //            break;
-            //        default:
-            //            if (st != null)
-            //            {
-            //                centerCode = st.Centers != null && st.Centers.Count > 0 ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
-            //                ViewBag.AllCenters = st.Centers != null ? st.Centers.Select(t => _centerService.GetItemByID(t)).ToList() : null;
-            //            }
-            //            break;
-            //    }
-            //    ViewBag.Type = type.Value;
-            //    //cache
-            //    //return Redirect($"{centerCode}/{type.Value}");
-            //}
-            //else
-            //{
-            //    _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-            //    HttpContext.SignOutAsync(Cookies.DefaultLogin);
-            //    //return RedirectToAction("Login");
-            //}
+            ViewBag.newsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true&& tbl.IsActive==true).SortByDescending(tbl => tbl.PublishDate).Limit(5).ToList();
+            ViewBag.newsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && tbl.IsActive == true).SortByDescending(tbl => tbl.PublishDate).Limit(2).ToList();
             return View();
 
         }
 
         public IActionResult Category(DefaultModel model, string catcode)
         {
+            model.PageSize = 12;
             var cat = _newsCategoryService.GetItemByCode(catcode);
             ViewBag.Category = cat;
             if (cat == null)
@@ -102,13 +60,20 @@ namespace EnglishPlatform.Controllers
             var filter = new List<FilterDefinition<NewsEntity>>();
             filter.Add(Builders<NewsEntity>.Filter.Where(t => t.CategoryID == cat.ID));
             filter.Add(Builders<NewsEntity>.Filter.Lte(t => t.PublishDate, DateTime.Now));
+            filter.Add(Builders<NewsEntity>.Filter.Where(t => t.IsActive==true));
 
             var data = _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter))
                 .SortByDescending(t => t.PublishDate);
             ViewBag.TotalRec = data.CountDocuments();
             model.TotalRecord = ViewBag.TotalRec;
-            ViewBag.FirstPage = data.Limit(model.PageSize).ToList();
-            return View();
+            ViewBag.FirstPage = data.Any()==true? data.Limit(model.PageSize).ToList(): _newsService.GetAll().ToList();
+            //ViewBag.Data = _newsService.Collection.Find(tbl => tbl.CategoryID.Equals(cat.ID)).ToList();
+            if (catcode.Equals("ve-eduso")){
+                return View("AboutEduso");
+            }
+            else {
+                return View();
+            }
         }
 
         public IActionResult Detail(string catcode, string newscode)
@@ -127,6 +92,8 @@ namespace EnglishPlatform.Controllers
             return View();
         }
 
+        [HttpPost]
+        [Route("/news/getlist")]
         public JsonResult GetList(DefaultModel model, string catID, bool isHot = false, bool isTop = false)
         {
             var filter = new List<FilterDefinition<NewsEntity>>();
@@ -144,6 +111,7 @@ namespace EnglishPlatform.Controllers
                 filter.Add(Builders<NewsEntity>.Filter.Where(t => t.IsTop));
             }
             filter.Add(Builders<NewsEntity>.Filter.Lte(t => t.PublishDate, DateTime.Now));
+            filter.Add(Builders<NewsEntity>.Filter.Where(t => t.IsActive==true));
 
             var data = (filter.Count > 0 ? _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter)) : _newsService.GetAll())
                 .SortByDescending(t => t.PublishDate);

@@ -35,6 +35,8 @@ namespace BaseCustomerEntity.Database
         public DateTime LastEdit { get; set; }
         [JsonProperty("PublishDate")]
         public DateTime PublishDate { get; set; }
+        [JsonProperty("IsActive")]
+        public bool IsActive { get; set; }
 
     }
 
@@ -73,8 +75,17 @@ namespace BaseCustomerEntity.Database
             {
                 CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsHot, status));
             }
+            if (check.Equals("IsActive"))
+            {
+                CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsActive, status));
+            }
         }
 
-        public NewsEntity GetItemByCode(string Code) => Collection.Find<NewsEntity>(x => x.Code.Equals(Code)).FirstOrDefault();
+        public void ChangeActive(List<string> IDs, bool isActive)
+        {
+            CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsActive, isActive));
+        }
+
+        public NewsEntity GetItemByCode(string Code) => Collection.Find<NewsEntity>(x => x.Code.Equals(Code) && x.IsActive==true).FirstOrDefault();
     }
 }

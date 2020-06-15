@@ -1,0 +1,429 @@
+﻿@using System.Linq
+@{ ViewData["Title"] = "Quản lý quảng cáo";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml"; }
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
+    {
+<input type="hidden" name="ArrID" value="" /> <!-- DataTales Example -->
+                                <div class="card shadow mb-4">
+                                    <div class="card-header py-3">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="float-right">
+                                                    <button type="button" class="btn btn-primary" data-placement="top" title="Thêm chiến dịch" onclick="Adds(this)" data-toggle="modal" data-target="#ModalNews"> <i class="fas fa-plus"></i> </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+
+
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                                <thead>
+                                                    <tr>
+                                                        <th class='text-center'>STT</th>
+                                                        <th class='text-center'>Ảnh đại diện</th>
+                                                        <th class='text-center'>Tên chiến dịch</th>
+                                                        <th class='text-center'>Ngày bắt đầu</th>
+                                                        <th class='text-center'>Ngày kết thúc</th>
+                                                        <th class='text-center'>Trạng thái hoạt động</th>
+                                                        <th class='text-center'></th>
+                                                        @*<th class='text-center'></th>*@
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-footer">
+                                        Trang
+                                        <select id="pageIndex" onchange="LoadData()">
+                                        </select> / <span id="totalPage"></span>
+                                    </div>
+                                </div>}
+</div>
+
+<!-- Modal Create Form -->
+<div class="modal fade" id="ModalNews" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        @using (Html.BeginForm("CreateCampaign", "ads", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
+        {
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title" id="ModalNewsTitle">Thêm chiến dịch</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+            <form>
+
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="form-group col-md-12">
+                            <input type="text" class="form-control" name="NameCampaign" id="NameCampaign" placeholder="Tên chiến dịch" required>
+                        </div>
+
+
+                        <div class="form-group col-md-12">
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <label>Ngày bắt đầu</label>
+                                    <input type="datetime-local" class="form-control" name="PublishDate" id="PublishDate" required>
+                                    <input type="hidden" name="PublishDate" class="hiddenDate" id="PublishDate">
+                                    <input type="hidden" name="CreateDate" class="CreateDate" id="CreateDate">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <label>Ngày kết thúc</label>
+                                    <input type="datetime-local" class="form-control" name="EndDate" id="EndDate" required>
+                                    @*<input type="hidden" name="PublishDate" class="hiddenDate" id="PublishDate">*@
+                                    @*<input type="hidden" name="CreateDate" class="CreateDate" id="CreateDate">*@
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="input-group col-md-12">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input form-control" id="Banner" name="Banner" >
+                                        <label class="custom-file-label form-control" for="inputGroupFile02">Chọn đường dẫn</label>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="">Upload</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="input-group col-md-6">
+                                    <div class="col-sm-10">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive">
+                                            <label class="form-check-label">Trạng thái hoạt động</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-row"><img id="img" style="max-height:200px;max-width:200px;margin:auto" /></div>
+                        <div class="form-row"><a class="hide" id="linkImage" href="" target="_blank" style="margin:auto">Link ảnh</a></div>
+                    </div>
+                </div>
+            </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary btn-submit" onclick="Submits('AddForm','@Url.Action("CreateCampaign", "ads")','CreateCampaign',LoadData)">Lưu</button>
+    </div>
+</div>}
+    </div>
+</div>
+
+<style>
+    #ModalNews {
+        opacity: 1 !important;
+        overflow: auto !important;
+    }
+</style>
+
+<script>
+
+    function LoadData() {
+        var searchText = $('#searchText').val();
+        var categoryID = $('#categoryID').val();
+        var startDate = $("#startDate_sort").val();
+        var endDate = $("#endDate_sort").val();
+        var pageIndex = $('#pageIndex').val();
+        var sort = $('#sortNews').val();
+        var pageSize = 6;
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("getAllCampaign", "ads", new { Area = "admin" })',
+            data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex, Sort: sort},
+            dataType:"json",
+            success: function (data) {
+                hideModal();
+                var body = $('#dataTable tbody');
+                body.html("");
+                //var option = $('#input-option');
+                //option.html("");
+                //option.append("<option value=''>--Danh mục cha--</option>");
+                if (data.Data != null && data.Data.length > 0)
+                {
+                    for (i = 0; i < data.Data.length; ++i) {
+                        item = data.Data[i];
+
+                        var publishdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.PublishDate));
+                        var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
+
+                        var action = "";
+                        var isActive = "";
+                        if (item.IsActive) {
+                            if (publishdate <= new Date().toLocaleDateString() && enddate >= new Date().toLocaleDateString()) {
+                                isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("unpublish","ads")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' name='isActive'> <div class='handle'></div> </button></td>";
+                                action =
+                                    "<td class='text-center' style='width: 130px;'><button onclick=\"Edits('" + item.ID + "','@Url.Action("getDetailAds", "ads")','@Url.Action("getDetailAds", "ads")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalNews'> <i class='fas fa-edit'></i> </button>" +
+                                    "<button onclick=\"var result = confirm('bạn muốn tin " + item.NameCampaign + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("DeleteCampaign", "ads")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                                    "</td > ";
+                            }
+                            else {
+                                isActive = "<td class='text-center'><button disabled type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isActive'> <div class='handle'></div> </button></td>";
+                                action =
+                                    "<td class='text-center' style='width: 130px;'><button disabled type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalNews'> <i class='fas fa-edit'></i> </button>" +
+                                    "<button disabled type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                                    "</td > ";
+                            }
+                        }
+                        else {
+                            isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "ads")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isActive'> <div class='handle'></div> </button></td>";
+                            action =
+                                    "<td class='text-center' style='width: 130px;'><button onclick=\"Edits('" + item.ID + "','@Url.Action("getDetailAds", "ads")','@Url.Action("getDetailAds", "ads")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalNews'> <i class='fas fa-edit'></i> </button>" +
+                                    "<button onclick=\"var result = confirm('bạn muốn tin " + item.NameCampaign + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("DeleteCampaign", "ads")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                                    "</td > ";
+                        }
+
+                        //var createdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.CreateDate));
+
+                        body.append("<tr>" +
+                            "<td class='text-center'>" + (data.Model.pageSize * data.Model.pageIndex + i + 1) + "</td>" +
+                            "<td class='text-center'>" +
+                            "<img src='/Upload/Image_Ads/" + item.Banner+"' style='max-height:50px;max-width:50px;' />"+
+                            "</td>" +
+                            "<td 'text-center'>" + item.NameCampaign + "</td>" +
+
+
+                            "<td class='text-center'>" + publishdate+"</td>" +
+                            "<td class='text-center'>" + enddate + "</td>" +
+                            isActive +
+                            @*"<td class='text-center' style='width: 130px;'><button onclick=\"Edits('" + item.ID + "','@Url.Action("getDetailAds", "ads")','@Url.Action("getDetailAds", "ads")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalNews'> <i class='fas fa-edit'></i> </button>" +
+                                    "<button onclick=\"var result = confirm('bạn muốn tin " + item.NameCampaign + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("DeleteCampaign", "ads")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                                    "</td > "*@
+                            action +
+                            "</tr>"
+                        );
+                    }
+                    $('.btn').tooltip({ trigger:'hover' });
+                }
+                if (data.Model != null) {
+                    var totalRecord = data.Model.totalRecord;
+                    if (totalRecord == 0) {
+                        $('#pageIndex').html('<option value="1"></option>').val(1);
+                        $('.card-footer').hide()
+                    }
+                    else {
+                        //if (totalRecord < pageSize) {
+                        //    var totalPage = 1;
+                        //}
+                        //else {
+                        var totalPage = totalRecord > pageSize ? (totalRecord % pageSize == 0 ? (Math.trunc(totalRecord / pageSize)) : (Math.trunc(totalRecord / pageSize) + 1)) : 1;
+
+                        //}
+                        $('#totalPage').text(totalPage);
+                            $('#pageIndex').empty();
+                            for (i = 1; i <= totalPage; i++) {
+                                $('#pageIndex').append($('<option>', { value: i, text: i }))
+                            }
+                            var currentPage = data.Model.pageIndex + 1;
+                            if (currentPage > totalPage)
+                                currentPage = totalPage;
+                            //console.log(currentPage);
+                            $('#pageIndex').val(currentPage);
+                    }
+                }
+            },
+            error: function() {
+                alert("Error");
+            }
+        });
+    };
+
+    $(document).ready(function () {
+        LoadData();
+    });
+
+    function Submits(formName, url, actionName, fn) {
+
+    var form = document.querySelector('form[name="' + formName + '"]');
+    var _url = url == "" || url == void 0 || url == null ? form.action : url;
+    var _method = form.method;
+    var requires = $(form).find(':required');
+    var err = false;
+
+    requires.each(function () {
+        if ($(this).val() == "" || $(this).val() == null) {
+            alert("Vui lòng điền đủ thông tin");
+            $(this).focus();
+            err = true;
+            return false;
+        }
+    });
+
+    if (err) return false;
+
+    if (actionName.toLowerCase() == "delete" || actionName.toLowerCase() == "publish" || actionName.toLowerCase == "unpublish") {
+        var arr_input = form.querySelector('input[name="ArrID"]');
+        var listCheckBox = form.querySelectorAll('input[name="cid"]');
+        if (arr_input != null) {
+            for (var i = 0; listCheckBox != null && listCheckBox.length > 0 && i < listCheckBox.length; i++) {
+                if (listCheckBox[i].checked) {
+                    arr_input.value += arr_input.value == ""
+                        ? listCheckBox[i].value
+                        : "," + listCheckBox[i].value;
+                }
+            }
+        }
+    }
+
+        var fileInput = $('#Banner')[0],
+            file = fileInput.files && fileInput.files[0];
+
+    $(form).find("input:disabled").removeAttr("disabled");
+
+        var data = new FormData(form);
+        data.delete("IsActive");
+        data.append("IsActive", $(form).find("#IsActive").prop("checked"));
+                
+        showLoading("Sending data ...");
+
+        if (file) {
+            var img = new Image();
+
+            img.src = window.URL.createObjectURL(file);
+
+            img.onload = function () {
+                var width = img.naturalWidth,
+                    height = img.naturalHeight;
+                var ratio = Math.round(width / height * 1000) / 1000;
+                window.URL.revokeObjectURL(img.src);
+
+
+                if (ratio >= Math.round(16 / 9 * 1000) / 1000) {
+                    Ajax(_url, _method, data, true)
+                        .then(function (res) {
+                            hideLoading();
+                            if (fn != void 0) fn(res);
+                        }).catch(function (res) {
+                            hideLoading();
+                            //notification("err", "Có lỗi, vui lòng thực hiện lại", 2000);
+                            alert('Có lỗi, vui lòng thực hiện lại');
+                            //console.log(actionName, res);
+                        });
+                }
+                else {
+                    //fail
+                    alert("Ảnh cần đúng tỉ lệ 16/9");
+                    hideLoading();
+                }
+            };
+        }
+        else { //No file was input or browser doesn't support client side reading
+            Ajax(_url, _method, data, true)
+                .then(function (res) {
+                    hideLoading();
+                    if (fn != void 0) fn(res);
+                }).catch(function (res) {
+                    hideLoading();
+                    //notification("err", "Có lỗi, vui lòng thực hiện lại", 2000);
+                    alert('Có lỗi, vui lòng thực hiện lại');
+                    //console.log(actionName, res);
+                });
+        }               
+    }
+
+    function Edits(id, urlGetData, urlPostData, _this) {
+    var modal = document.querySelector(_this.getAttribute("data-target"));
+    var form = modal.querySelector('form');
+    var inputID = form.querySelector('input[name="ID"]');
+    if (inputID == null) {
+        inputID = "<input name='ID' type='hidden' value='" + id + "' />";
+        form.innerHTML += inputID;
+    }
+    else {
+        inputID.value = id;
+    }
+    $(form).find("input[locked]").attr("disabled", "disabled");
+    var data = new FormData();
+    data.append("ID", id);
+    data.delete("Content");
+    Ajax(urlGetData, "POST", data, true).then(function (res) {
+
+        var item = JSON.parse(res);
+        var listinput = $(form).find('input');
+
+        for (var i = 0; i < listinput.length; i++) {
+            if ($(listinput[i]).attr("type") == "file") continue;
+            if ($(listinput[i]).attr("type") == "checkbox" && item.Data[listinput[i].name] == true) {
+                $(listinput[i]).prop('checked',true);
+            }
+            if ($(listinput[i]).attr("type") == "checkbox" && item.Data[listinput[i].name] == false) {
+                $(listinput[i]).prop('checked', false);
+            }
+            listinput[i].value = item.Data[listinput[i].name];
+        }
+
+        var listselect = $(form).find('select');
+        for (var i = 0; i < listselect.length; i++) {
+
+             $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
+        }
+
+        $(form).find('#img').attr('src', '/Upload/Image_Ads/' + item.Data.Banner);
+        $(form).find('#linkImage').removeClass('hide');
+        $(form).find('#linkImage').attr('href', '/Upload/Image_Ads/' + item.Data.Banner);
+
+        var time = item.Data.PublishDate.toLocaleString().toString().substring(0, item.Data.PublishDate.toLocaleString().toString().length - 1);
+        document.getElementById("PublishDate").value = time;
+
+        var enddate = item.Data.EndDate.toLocaleString().toString().substring(0, item.Data.EndDate.toLocaleString().toString().length - 1);
+        document.getElementById("EndDate").value = enddate;
+
+    });
+    }
+
+    function Adds(_this) {
+        var modal = document.querySelector(_this.getAttribute("data-target"));
+        var form = modal.querySelector('form');
+        var inputID = form.querySelector('input[name="ID"]');
+        if (inputID != null) {
+            inputID.value = "0";
+        }
+        var listinput = form.querySelectorAll('input');
+        for (var i = 0; i < listinput.length; i++) {
+            listinput[i].value = "";
+            if ($(listinput[i]).attr("type") == "checkbox") {
+                $(listinput[i]).prop('checked', false);
+            }
+        }
+        var listselect = form.querySelectorAll('select');
+        for (var i = 0; i < listselect.length; i++) {
+            listselect[i].value = $(listselect[i]).find('option:first').attr("value");
+        }
+
+        $(form).find('#linkImage').attr('class', 'hide');
+        $(form).find('#img').removeAttr('src');
+
+        $(form).find("input:disabled").removeAttr("disabled");
+    }
+
+    function ExcuteOnlyItems(id, url, fn) {
+    var data = new FormData();
+        data.append("ArrID", id);
+    //data.append("LangID", "1346");
+    Ajax(url, "POST", data, true).then(function (res) {
+        if (fn != void 0) fn(res);
+        //console.log(res);
+        return false;
+    })
+}
+</script>

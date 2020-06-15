@@ -10,7 +10,7 @@ using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
 using BaseEasyRealTime.Globals;
 using BaseHub;
-using com.wiris.plugin.api;
+//using com.wiris.plugin.api;
 using Core_v2.Globals;
 using EasyZoom;
 using EnglishPlatform.Controllers;
@@ -247,7 +247,7 @@ namespace EnglishPlatform
                 routes.MapRoute(
                     name: "news-about-us",
                     template: "ve-eduso",
-                    defaults: new { controller = "News", action = "Detail", catcode = "gioi-thieu", newscode = "ve-eduso" }
+                    defaults: new { controller = "News", action = "Detail", catcode = "ve-eduso", newscode = "ve-eduso" }
                 );
                 routes.MapRoute(
                     name: "news-category",
@@ -255,9 +255,19 @@ namespace EnglishPlatform
                     defaults: new { controller = "News", action = "Category" }
                 );
                 routes.MapRoute(
+                    name: "news-partner",
+                    template: "doi-tac",
+                    defaults: new { controller = "News", action = "Category", catcode = "doi-tac" }
+                );
+                routes.MapRoute(
                     name: "news-detail",
                     template: "tin-tuc/{catcode}/{newscode}",
                     defaults: new { controller = "News", action = "Detail" }
+                );
+                routes.MapRoute(
+                    name: "helper",
+                    template: "chung-toi-giup-gi-cho-ban",
+                    defaults: new { controller = "News", action = "Category", catcode = "chung-toi-giup-gi-cho-ban" }
                 );
                 routes.MapRoute(
                  name: "default",

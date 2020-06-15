@@ -2191,6 +2191,7 @@
     <Folder Include="Areas\Student\Views\" />
     <Folder Include="Areas\Teacher\Views\" />
     <Folder Include="wwwroot\css\minify\" />
+    <Folder Include="wwwroot\Upload\Image_Ads\" />
   </ItemGroup>
 
 </Project>

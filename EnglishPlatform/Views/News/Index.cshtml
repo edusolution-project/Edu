@@ -1,5 +1,6 @@
-﻿
-@{
+﻿@{
+    var newshot = ViewBag.newsHot as List<BaseCustomerEntity.Database.NewsEntity>;
+    var newstop = ViewBag.newsTop as List<BaseCustomerEntity.Database.NewsEntity>;
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -11,145 +12,53 @@
                 <div class="underline"></div>
             </div>
             <div class="news-list d-flex flex-column flex-md-row pt-3" style="border-top:solid 0.5px #CCC">
-                <div class="news-hot media-body pr-md-4" style="border-right:solid 0.5px #CCC">
-                    <div class="news-item w-100 pb-3">
-                        <div class="thumb w-100 pb-2">
-                            <a href="@Url.RouteUrl("news-about-us")">
-                                <img src="~/images/news1.png" class="w-100" />
-                            </a>
+                <div class="news-hot media-body pr-md-4" style="border-right:solid 0.5px #CCC" id="newshot">
+                    @foreach (var item in newshot)
+                    {
+                        <div class="news-item w-100 pb-3">
+                            <div class="thumb w-100 pb-2" >
+                                <a href="/tin-tuc/tin-tuc/@item.Code">
+                                    <img src="/Upload/News/@item.Thumbnail" class="w-100" style="max-width:100%;max-height:100%"/>
+                                </a>
+                            </div>
+                            <div class="news-title">
+                                <a href="/tin-tuc/tin-tuc/@item.Code">
+                                    @item.Title
+                                </a>
+                            </div>
+                            <div class="news-desc">
+                               @item.Summary
+                            </div>
+                            <div class="news-time">
+                               @item.PublishDate.ToString("dd-MM-yyyy")
+                            </div>
                         </div>
-                        <div class="news-title">
-                            <a href="#">
-                                Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                            </a>
-                        </div>
-                        <div class="news-desc">
-                            Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                        </div>
-                        <div class="news-time">
-                            12/08/2019
-                        </div>
-                    </div>
-                    <div class="news-item w-100 pb-3 pt-3">
-                        <div class="thumb w-100 pb-2">
-                            <a href="#">
-                                <img src="~/images/news2.png" />
-                            </a>
-                        </div>
-                        <div class="news-title">
-                            <a href="#">
-                                Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                            </a>
-                        </div>
-                        <div class="news-desc">
-                            Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                        </div>
-                        <div class="news-time">
-                            12/08/2019
-                        </div>
-                    </div>
+                    }
                 </div>
                 <div class="news-top  media-body pl-md-4">
-                    <div class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb">
-                            <a href="#">
-                                <img src="~/images/news3.png" />
-                            </a>
-                        </div>
-                        <div class=" media-body">
-                            <div class="news-title">
-                                <a href="#">
-                                    Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                    @foreach (var item in newstop)
+                    {
+                        <div class="news-item pb-3 pt-3 d-flex">
+                            <div class="thumb" >
+                                <a href="/tin-tuc/tin-tuc/@item.Code">
+                                    <img src="/Upload/News/@item.Thumbnail" style="max-width:100%;max-height:100%"/>
                                 </a>
                             </div>
-                            <div class="news-desc">
-                                Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                            </div>
-                            <div class="news-time">
-                                12/08/2019
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb">
-                            <a href="#">
-                                <img src="~/images/news4.png" />
-                            </a>
-                        </div>
-                        <div class=" media-body">
-                            <div class="news-title">
-                                <a href="#">
-                                    Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                                </a>
-                            </div>
-                            <div class="news-desc">
-                                Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                            </div>
-                            <div class="news-time">
-                                12/08/2019
+                            <div class=" media-body">
+                                <div class="news-title">
+                                    <a href="/tin-tuc/tin-tuc/@item.Code">
+                                       @item.Title
+                                    </a>
+                                </div>
+                                <div class="news-desc">
+                                    @item.Summary
+                                </div>
+                                <div class="news-time">
+                                    @item.PublishDate.ToString("dd-MM-yyyy")
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb">
-                            <a href="#">
-                                <img src="~/images/news5.png" />
-                            </a>
-                        </div>
-                        <div class=" media-body">
-                            <div class="news-title">
-                                <a href="#">
-                                    Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                                </a>
-                            </div>
-                            <div class="news-desc">
-                                Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                            </div>
-                            <div class="news-time">
-                                12/08/2019
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb">
-                            <a href="#">
-                                <img src="~/images/news6.png" />
-                            </a>
-                        </div>
-                        <div class=" media-body">
-                            <div class="news-title">
-                                <a href="#">
-                                    Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                                </a>
-                            </div>
-                            <div class="news-desc">
-                                Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                            </div>
-                            <div class="news-time">
-                                12/08/2019
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb">
-                            <a href="#">
-                                <img src="~/images/news7.png" />
-                            </a>
-                        </div>
-                        <div class=" media-body">
-                            <div class="news-title">
-                                <a href="#">
-                                    Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                                </a>
-                            </div>
-                            <div class="news-desc">
-                                Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                            </div>
-                            <div class="news-time">
-                                12/08/2019
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
             </div>
         </div>
@@ -174,5 +83,32 @@
             methods: {
             }
         });
+
+        function loadData() {
+           $.ajax({
+                url: '@Url.Action("getnewslist", "home")',
+                type: "post",
+                dataType: "json",
+               success: function (result) {
+
+                    var data=new Vue({
+                        el: '#newshot',
+                        data: {
+
+                            newshot: result.NewsHot
+                        },
+
+                        el: '#newstop',
+                        data: {
+                            newstop: result.NewsTop
+                        }
+                    })
+                }
+            });
+    };
+
+    $(document).ready(function () {
+        loadData();
+    });
     </script>
 }
