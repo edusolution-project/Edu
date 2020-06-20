@@ -14,6 +14,8 @@ using HtmlAgilityPack;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using Microsoft.CodeAnalysis.CSharp;
 using MongoDB.Bson.Serialization.Serializers;
+using System.Net;
+using System.IO;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -32,6 +34,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonPartQuestionService _questionService;
         private readonly LessonPartAnswerService _answerService;
         private readonly FileProcess _fileProcess;
+        private readonly VocabularyService _vocabularyService;
 
         public LessonPartController(
             //GradeService gradeservice,
@@ -46,7 +49,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonPartService lessonPartService,
             LessonPartQuestionService questionService,
             LessonPartAnswerService answerService,
-            FileProcess fileProcess
+            FileProcess fileProcess,
+            VocabularyService vocabularyService
             )
         {
             //_gradeService = gradeservice;
@@ -62,6 +66,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _questionService = questionService;
             _answerService = answerService;
             _fileProcess = fileProcess;
+            _vocabularyService = vocabularyService;
         }
 
         [HttpPost]
@@ -245,67 +250,84 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 item.ID = lessonpart.ID;
 
-                if (lessonpart.Type == "ESSAY")
+                switch (lessonpart.Type)
                 {
-                    _questionService.CreateQuery().DeleteMany(t => t.ParentID == lessonpart.ID);
-                    var question = new LessonPartQuestionEntity
-                    {
-                        CourseID = lessonpart.CourseID,
-                        Content = "",
-                        Description = "",
-                        ParentID = lessonpart.ID,
-                        CreateUser = createduser,
-                        Point = lessonpart.Point,
-                        Created = lessonpart.Created,
-                    };
-                    _questionService.Save(question);
-                }
-                else
-                {
-                    switch (item.Type)
-                    {
-                        case "QUIZ2": //remove all previous question
-                            var oldQuizIds = _questionService.CreateQuery().Find(q => q.ParentID == lessonpart.ID).Project(i => i.ID).ToEnumerable();
-                            foreach (var quizid in oldQuizIds)
-                                _answerService.CreateQuery().DeleteMany(a => a.ParentID == quizid);
-                            _questionService.CreateQuery().DeleteMany(q => q.ParentID == lessonpart.ID);
+                    case "ESSAY":
 
-                            if (!String.IsNullOrEmpty(item.Description) && item.Description.ToLower().IndexOf("<fillquiz ") >= 0)
+                        _questionService.CreateQuery().DeleteMany(t => t.ParentID == lessonpart.ID);
+                        var question = new LessonPartQuestionEntity
+                        {
+                            CourseID = lessonpart.CourseID,
+                            Content = "",
+                            Description = "",
+                            ParentID = lessonpart.ID,
+                            CreateUser = createduser,
+                            Point = lessonpart.Point,
+                            Created = lessonpart.Created,
+                        };
+                        _questionService.Save(question);
+                        break;
+                    case "VOCAB":
+                        if (lessonpart.Description != null && lessonpart.Description.Length > 0)
+                        {
+                            var vocabArr = lessonpart.Description.Split('|');
+                            if (vocabArr != null && vocabArr.Length > 0)
                             {
-                                var newdescription = "";
-                                if (item.Questions == null || item.Questions.Count == 0)
-                                    item.Questions = ExtractFillQuestionList(item, createduser, out newdescription);
-                                lessonpart.Description = newdescription;
-                                _lessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
-                            }
-                            else
-                            {
-                                //No Question
-                            }
-
-                            break;
-                        default:
-                            if (RemovedQuestions != null & RemovedQuestions.Count > 0)
-                            {
-                                _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
-
-                                foreach (var quizID in RemovedQuestions)
+                                foreach (var vocab in vocabArr)
                                 {
-                                    _answerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
+                                    var vocabulary = vocab.Trim();
+                                    _ = GetVocab(vocabulary);
                                 }
                             }
+                        }
+                        break;
+                    case "QUIZ2": //remove all previous question
+                        var oldQuizIds = _questionService.CreateQuery().Find(q => q.ParentID == lessonpart.ID).Project(i => i.ID).ToEnumerable();
+                        foreach (var quizid in oldQuizIds)
+                            _answerService.CreateQuery().DeleteMany(a => a.ParentID == quizid);
+                        _questionService.CreateQuery().DeleteMany(q => q.ParentID == lessonpart.ID);
 
-                            if (RemovedAnswers != null & RemovedAnswers.Count > 0)
-                                _answerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
-                            break;
-                    }
+                        if (!String.IsNullOrEmpty(item.Description) && item.Description.ToLower().IndexOf("<fillquiz ") >= 0)
+                        {
+                            var newdescription = "";
+                            if (item.Questions == null || item.Questions.Count == 0)
+                                item.Questions = ExtractFillQuestionList(item, createduser, out newdescription);
+                            lessonpart.Description = newdescription;
+                            _lessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
+                        }
+                        else
+                        {
+                            //No Question
+                        }
 
-                    item.CourseID = parentLesson.CourseID;
+                        item.CourseID = parentLesson.CourseID;
 
-                    if (item.Questions != null && item.Questions.Count > 0)
-                    {
-                        await SaveQuestionFromView(item, createduser, files);
-                    }
+                        if (item.Questions != null && item.Questions.Count > 0)
+                        {
+                            await SaveQuestionFromView(item, createduser, files);
+                        }
+
+                        break;
+                    default:
+                        if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+                        {
+                            _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
+
+                            foreach (var quizID in RemovedQuestions)
+                            {
+                                _answerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
+                            }
+                        }
+
+                        if (RemovedAnswers != null & RemovedAnswers.Count > 0)
+                            _answerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
+                        item.CourseID = parentLesson.CourseID;
+
+                        if (item.Questions != null && item.Questions.Count > 0)
+                        {
+                            await SaveQuestionFromView(item, createduser, files);
+                        }
+                        break;
                 }
 
                 IDictionary<string, object> valuePairs = new Dictionary<string, object>
@@ -328,17 +350,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {"Error", "Parent Item Not found" }
                             });
             }
-
-
-            //}
-            //catch (Exception ex)
-            //{
-            //    return new JsonResult(new Dictionary<string, object>
-            //                {
-            //                    { "Data", null },
-            //                    {"Error", ex.Message }
-            //                });
-            //}
         }
 
         [Obsolete]
@@ -354,13 +365,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (listLessonPart != null && listLessonPart.Count > 0)
                 {
                     var result = new List<LessonPartViewModel>();
-                    result.AddRange(listLessonPart.Select(o => new LessonPartViewModel(o)
+                    foreach (var part in listLessonPart)
                     {
-                        Questions = _questionService.CreateQuery().Find(q => q.ParentID == o.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new QuestionViewModel(q)
+                        switch (part.Type)
                         {
-                            Answers = _answerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
-                        }).ToList()
-                    }));
+                            case "QUIZ1":
+                            case "QUIZ2":
+                            case "QUIZ3":
+                            case "ESSAY":
+                                result.Add(new LessonPartViewModel(part)
+                                {
+                                    Questions = _questionService.CreateQuery().Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList().Select(q => new QuestionViewModel(q)
+                                    {
+                                        Answers = _answerService.CreateQuery().Find(a => a.ParentID == q.ID).SortBy(a => a.Order).ThenBy(a => a.ID).ToList()
+                                    }).ToList()
+                                });
+                                break;
+                            case "VOCAB":
+                                result.Add(new LessonPartViewModel(part)
+                                {
+                                    Description = RenderVocab(part.Description)
+                                });
+                                break;
+                            default:
+                                result.Add(new LessonPartViewModel(part));
+                                break;
+                        }
+                    }
                     data = new Dictionary<string, object>
                     {
                         { "Data", result }
@@ -369,6 +400,32 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             return new JsonResult(data);
+        }
+
+        private string RenderVocab(string description)
+        {
+            string result = "";
+            var vocabs = description.Split('|');
+            if (vocabs == null || vocabs.Count() == 0)
+                return description;
+            foreach (var vocab in vocabs)
+            {
+                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace("-", ""));
+                if (vocabularies != null && vocabularies.Count > 0)
+                {
+                    result +=
+                        $"<div class='vocab-box'>" +
+                            $"<b class='word-title'>{vocab.Trim()}</b><span class='word-pron'>{vocabularies[0].Pronunciation}</span>" +
+                            $"<div class='vocab-audio'>" +
+                                $"<button onclick='PlayPronun(this)'><i class='ic fas fa-volume-up'></i></button>" +
+                                $"<audio class='d-none' id='audio' controls><source src='{vocabularies[0].PronunAudioPath}' type='audio/mpeg' />Your browser does not support the audio tag</audio>" +
+                            $"</div>" +
+                            //$"<div class='vocab-type'>{string.Join(",", vocabularies.Select(t => t.WordType).ToList())}<div/>" +
+                            $"<div class='vocab-meaning'>{string.Join("<br/>", vocabularies.Where(t => !string.IsNullOrEmpty(t.Description)).Select(t => "<b>" + WordType.GetShort(t.WordType) + "</b>: " + t.Description).ToList())}</div>" +
+                        $"</div>";
+                }
+            }
+            return result;
         }
 
         [HttpPost]
@@ -454,6 +511,103 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 throw ex;
             }
+        }
+
+        private async Task GetVocab(string vocab)
+        {
+            //check if vocab is exist
+            var code = vocab.ToLower().Replace(" ", "-");
+            var olditems = _vocabularyService.GetItemByCode(code);
+            if (olditems != null && olditems.Count > 0)
+                return;
+
+            var listVocab = new List<VocabularyEntity>();
+            var pronUrl = "https://dictionary.cambridge.org/vi/dictionary/english/" + code;
+            var dictUrl = "https://dictionary.cambridge.org/vi/dictionary/english-vietnamese/" + code;
+            var listExp = new List<PronunExplain>();
+
+            using (var expclient = new WebClient())
+            {
+                var expDoc = new HtmlDocument();
+                string expHtml = expclient.DownloadString(dictUrl);
+                expDoc.LoadHtml(expHtml);
+                var expContents = expDoc.DocumentNode.SelectNodes("//div[contains(@class,\"english-vietnamese kdic\")]");
+                if (expContents != null && expContents.Count() > 0)
+                {
+                    foreach (var expContent in expContents)
+                    {
+                        var typeNode = expContent.SelectSingleNode(".//span[contains(@class,\"pos dpos\")]");
+                        if (typeNode == null) continue;
+                        var type = typeNode.InnerText;
+                        if (listExp.Any(t => t.WordType == type))
+                            continue;
+                        var expNodes = expContent.SelectNodes(".//span[contains(@class,\"trans dtrans\")]");
+                        if (expNodes != null && expNodes.Count() > 0)
+                        {
+                            foreach (var node in expNodes)
+                            {
+                                listExp.Add(new PronunExplain
+                                {
+                                    WordType = type,
+                                    Meaning = node.InnerText
+                                });
+                            }
+                        }
+
+                    }
+                }
+            }
+            if (listExp == null || listExp.Count == 0)
+                return;
+
+            using (var client = new WebClient())
+            {
+                HtmlDocument doc = new HtmlDocument();
+                string html = client.DownloadString(pronUrl);
+                doc.LoadHtml(html);
+
+                var contentHolder = doc.DocumentNode.SelectNodes("//div[contains(@class, \"pos-header\")]");
+                if (contentHolder != null && contentHolder.Count() > 0)
+                {
+                    foreach (var content in contentHolder)
+                    {
+                        var type = content.SelectSingleNode(".//span[contains(@class,\"pos dpos\")]").InnerText;
+
+                        if (listVocab.Any(t => t.WordType == type))
+                            continue;
+                        try
+                        {
+
+                            var pronun = content.SelectSingleNode(".//span[contains(@class,\"us dpron-i\")]");
+                            var pronunText = pronun.SelectSingleNode(".//span[contains(@class,\"pron dpron\")]").InnerText;
+                            var pronunPath = pronun.SelectSingleNode(".//source[1]").GetAttributeValue("src", null);
+                            pronunPath = "https://dictionary.cambridge.org" + pronunPath;
+                            var vocabulary = new VocabularyEntity
+                            {
+                                Name = vocab,
+                                Code = code,
+                                Language = "en-us",
+                                WordType = type,
+                                Pronunciation = pronunText,
+                                PronunAudioPath = pronunPath,
+                                Created = DateTime.Now,
+                                Description = string.Join(", ", listExp.Where(t => t.WordType == type).Select(t => t.Meaning))
+                            };
+                            listVocab.Add(vocabulary);
+
+                        }
+                        catch (Exception e)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            if (listVocab.Count() == 0) return;
+            foreach (var vocal in listVocab)
+                _vocabularyService.Save(vocal);
+            return;
         }
 
         private List<QuestionViewModel> ExtractFillQuestionList(LessonPartEntity item, string creator, out string Description)
@@ -710,6 +864,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             }
         }
+    }
 
+    public class PronunExplain
+    {
+        public string WordType { get; set; }
+        public string Meaning { get; set; }
+        //public string EG { get; set; }
     }
 }

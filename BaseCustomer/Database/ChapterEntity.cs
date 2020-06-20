@@ -14,6 +14,8 @@ namespace BaseCustomerEntity.Database
         public string ClassID { get; set; }
         [JsonProperty("ClassSubjectID")]
         public string ClassSubjectID { get; set; }
+        [JsonProperty("BasePoint")]
+        public double BasePoint { get; set; }
         [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]

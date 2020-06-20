@@ -1,5 +1,6 @@
 ﻿using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
@@ -49,6 +50,7 @@ namespace BaseCustomerEntity.Database
     {
         private ChapterService _chapterService;
         private LessonService _lessonService;
+        private CloneLessonPartService _lessonPartService;
 
         public ChapterProgressService(IConfiguration config
             //, ChapterService chapterService, LessonService lessonService
@@ -58,6 +60,7 @@ namespace BaseCustomerEntity.Database
             //_lessonService = lessonService;
             _chapterService = new ChapterService(config);
             _lessonService = new LessonService(config);
+            _lessonPartService = new CloneLessonPartService(config);
 
             var indexs = new List<CreateIndexModel<ChapterProgressEntity>>
             {
@@ -84,19 +87,10 @@ namespace BaseCustomerEntity.Database
 
             if (progress == null)
             {
+                progress = NewProgressEntity(currentObj, item.StudentID);
+                progress.LastLessonID = item.ID;
                 //create new progress
-                await Collection.InsertOneAsync(new ChapterProgressEntity
-                {
-                    StudentID = item.StudentID,
-                    Completed = 1,
-                    TotalLessons = _lessonService.CountChapterLesson(currentObj.ID),
-                    ClassID = item.ClassID,
-                    ClassSubjectID = item.ClassSubjectID,
-                    ChapterID = currentObj.ID,
-                    ParentID = currentObj.ParentID,
-                    LastDate = DateTime.Now,
-                    LastLessonID = item.LessonID
-                });
+                await Collection.InsertOneAsync(progress);
             }
             else
             {
@@ -105,7 +99,6 @@ namespace BaseCustomerEntity.Database
                       .Set(t => t.LastLessonID, item.LessonID);
                 if (item.TotalLearnt == 1) //new
                     update = update.Inc(t => t.Completed, 1);
-
                 await Collection.UpdateManyAsync(t => t.ChapterID == currentObj.ID && t.StudentID == item.StudentID && t.ClassSubjectID == item.ClassSubjectID, update);
             }
         }
@@ -132,18 +125,20 @@ namespace BaseCustomerEntity.Database
             var progress = GetItemByChapterID(item.ChapterID, item.StudentID, item.ClassSubjectID);
             if (progress == null)
             {
-                return;
+                progress = NewProgressEntity(_chapterService.GetItemByID(item.ChapterID), item.StudentID);
+                progress.LastLessonID = item.ID;
+                progress.PracticePoint += item.PointChange;
+                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
+                await Collection.InsertOneAsync(progress);
             }
             else
             {
-                if (item.Tried == 1 || progress.ExamDone == 0)//new
-                    progress.PracticeCount++;
-                var init = !(progress.PracticePoint > 0); 
+                var init = !(progress.PracticePoint > 0);
                 progress.PracticePoint += item.PointChange;
                 progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
-                await UpdatePracticePoint(progress, item.PointChange);
             }
+            await UpdatePracticePoint(progress, item.PointChange);
         }
 
         public async Task UpdatePracticePoint(ChapterProgressEntity item, double pointchange)
@@ -153,19 +148,11 @@ namespace BaseCustomerEntity.Database
             {
                 var parentChap = _chapterService.GetItemByID(item.ParentID);
                 if (parentChap == null) return;
-
-                await Collection.InsertOneAsync(new ChapterProgressEntity
-                {
-                    PracticePoint = pointchange,
-                    ChapterID = item.ParentID,
-                    ClassSubjectID = item.ClassSubjectID,
-                    ClassID = item.ClassID,
-                    LastDate = item.LastDate,
-                    ParentID = parentChap.ParentID,
-                    StudentID = item.StudentID,
-                    TotalLessons = _lessonService.CountChapterLesson(parentChap.ID)
-                });
-                return;
+                progress = NewProgressEntity(parentChap, item.StudentID);
+                progress.PracticePoint += pointchange;
+                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
+                await Collection.InsertOneAsync(progress);
+                await UpdatePracticePoint(progress, pointchange);
             }
             else
             {
@@ -182,7 +169,8 @@ namespace BaseCustomerEntity.Database
                 //        }
                 //    ).Project(t=> t.Sum);
                 progress.PracticePoint += pointchange;
-                //progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
+                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
+
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
                 await UpdatePracticePoint(progress, pointchange);
             }
@@ -196,6 +184,46 @@ namespace BaseCustomerEntity.Database
         public async Task UpdateClassSubject(ClassSubjectEntity classSubject)
         {
             await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ChapterProgressEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+        }
+
+        public ChapterProgressEntity NewProgressEntity(ChapterEntity chapter, string StudentID)
+        {
+            return new ChapterProgressEntity
+            {
+                StudentID = StudentID,
+                Completed = 1,
+                TotalLessons = _lessonService.CountChapterLesson(chapter.ID),
+                PracticeCount = CountChapterPractice(chapter.ID, chapter.ClassSubjectID),
+                ClassID = chapter.ClassID,
+                ClassSubjectID = chapter.ClassSubjectID,
+                ChapterID = chapter.ID,
+                ParentID = chapter.ParentID,
+                LastDate = DateTime.Now,
+                //LastLessonID = lessonPrg.LessonID
+            };
+        }
+
+        private int CountChapterPractice(string chapterID, string classSubjectID)
+        {
+            var result = 0;
+            var lessonids = _lessonService.CreateQuery().Find(t => t.TemplateType == LESSON_TEMPLATE.LECTURE && t.ChapterID == chapterID).Project(t => t.ID).ToEnumerable();
+            if (lessonids != null && lessonids.Count() > 0)
+            {
+                var quizList = new List<string> { "QUIZ1", "QUIZ2", "QUZI3", "ESSAY" };
+                foreach (var id in lessonids)
+                {
+                    if (_lessonPartService.CreateQuery().Find(t => t.ParentID == id && quizList.Contains(t.Type)).CountDocuments() > 0)
+                        result++;
+                }
+            }
+            var subchaps = _chapterService.GetSubChapters(classSubjectID, chapterID);
+            if (subchaps != null && subchaps.Count > 0)
+            {
+                foreach (var chap in subchaps)
+                    result += CountChapterPractice(chap.ID, chap.ClassSubjectID);
+            }
+            return result;
+
         }
     }
 }

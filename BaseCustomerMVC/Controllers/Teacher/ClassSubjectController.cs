@@ -162,7 +162,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               SubjectID = r.SubjectID,
                               SkillID = r.SkillID,
                               SkillName = skill != null ? skill.Name : "",
-                              SkillImage = skill != null ? skill.Image : "",
+                              SkillImage = !string.IsNullOrEmpty(course.Image) ? course.Image : (skill != null ? skill.Image : ""),
                               Color = skill != null? skill.Color : "",
                               SubjectName = subject.Name,
                               GradeID = r.GradeID,
@@ -170,7 +170,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               CourseID = r.CourseID,
                               CourseName = course.Name,
                               TeacherID = r.TeacherID,
-                              TeacherName = teacher.FullName
+                              TeacherName = teacher.FullName                              
                           }).ToList()
                 },
             };

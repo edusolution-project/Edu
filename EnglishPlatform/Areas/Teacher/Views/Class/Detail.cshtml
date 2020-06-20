@@ -234,6 +234,10 @@
         ul > .chap-item:last-child {
             border-bottom: none;
         }
+
+        .basepoint::placeholder {
+            color: #CCC;
+        }
     </style>
 
     <script type="text/x-template" id="chapContentTemp">
@@ -242,11 +246,15 @@
                 <div class="d-flex align-items-center">
                     <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color btn-collapse flex-grow-1 mb-0" v-on:click="loadContent(data.ClassSubject, data.ID)">
                         <span class="align-self-center"><i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></span>
+
                     </a>
-                    <div class="picker-schedule d-flex" v-if="owner == '@currentuser'">
-                        <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateChapSchedule(data, pos)"></datepicker>
-                        <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateChapSchedule(data, pos)"></datepicker>
-                        <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" title="Xóa lịch" v-on:click="clearChapSchedule(data, pos)"></i>
+                    <div class="d-flex">
+                        <div class="picker-schedule d-flex" v-if="owner == '@currentuser'">
+                            <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateChapSchedule(data, pos)"></datepicker>
+                            <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateChapSchedule(data, pos)"></datepicker>
+                            <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" title="Xóa lịch" v-on:click="clearChapSchedule(data, pos)"></i>
+                        </div>
+                        <input type="text" v-if="owner == '@currentuser'" class="form-control bg-light text-right basepoint" style="margin: 2px 13.5px; width: 60px;" v-model="data.BasePoint" placeholder="0-100" v-on:blur="updateChapPoint(data)">
                     </div>
                 </div>
                 <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
@@ -398,6 +406,7 @@
                 this.loadClassDetail()
                 window.loadContent = this.loadContent
                 window.updateSchedule = this.updateSchedule
+                window.updateChapPoint = this.updateChapPoint
                 window.updateChapSchedule = this.updateChapSchedule
                 window.clearSchedule = this.clearSchedule
                 window.clearChapSchedule = this.clearChapSchedule
@@ -634,7 +643,8 @@
                                     Parent: parent,
                                     TotalLessons: chapter.TotalLessons,
                                     StartDate: chapter.StartDate,
-                                    EndDate: chapter.EndDate
+                                    EndDate: chapter.EndDate,
+                                    BasePoint: chapter.BasePoint
                                 })
                             })
                             _lesson.forEach(function (lesson, k) {
@@ -723,6 +733,30 @@
                     axios.post(_url, _form)
                         .then(response => {
                             obj.IsUpdating = false
+                        }).catch(e => { })
+                },
+                updateChapPoint(obj) {
+                    console.log(obj);
+                    if (!(obj.BasePoint > 0 && obj.BasePoint < 100)) {
+                        obj.BasePoint = 0;
+                        return false;
+                    }
+                    obj.IsUpdating = true;
+                    let _form = new FormData()
+                    _form.append('ID', obj.ID)
+                    _form.append('BasePoint', obj.BasePoint)
+                    let _url = '@processUrl("UpdateChapterPoint", "Lesson")'
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            console.log(obj);
+                            obj.IsUpdating = false;
+                            mainInstance.$forceUpdate();
+                            var chapter = response.data.Data;
+                            if (chapter == null) {
+                                alert("có lỗi, vui lòng tải lại trang & thực hiện lại thao tác");
+                                return false;
+                            }
                         }).catch(e => { })
                 },
                 updateChapSchedule(obj, pos) {

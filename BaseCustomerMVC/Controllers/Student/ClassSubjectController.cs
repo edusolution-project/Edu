@@ -158,7 +158,7 @@ namespace BaseCustomerMVC.Controllers.Student
                               SubjectID = r.SubjectID,
                               SkillID = r.SkillID,
                               SkillName = skill != null ? skill.Name : "",
-                              SkillImage = skill != null ? skill.Image : "",
+                              SkillImage = !string.IsNullOrEmpty(course.Image) ? course.Image : (skill != null ? skill.Image : ""),
                               Color = skill != null ? skill.Color : "",
                               SubjectName = subject.Name,
                               GradeID = r.GradeID,

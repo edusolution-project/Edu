@@ -40,6 +40,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             , AccountService accountService
             , CenterService centerService
             , IHostingEnvironment evn
+            , IConfiguration iConfig
+            , TeacherHelper teacherHelper
             , SubjectService subjectService)
         {
             _env = evn;
@@ -49,8 +51,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             _accountService = accountService;
             _subjectService = subjectService;
             _mapping = new MappingEntity<TeacherEntity, TeacherViewModel>();
-
-            _teacherHelper = new TeacherHelper(service, accountService);
+            _configuration = iConfig;
+            _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
+            _teacherHelper = teacherHelper;
         }
 
         public ActionResult Index(DefaultModel model)

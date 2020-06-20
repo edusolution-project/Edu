@@ -15,6 +15,34 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("ClassSubjectID")]
         public string ClassSubjectID { get; set; }
 
+        public LessonEntity()
+        {
+
+        }
+
+        public LessonEntity(CourseLessonEntity o)
+        {
+            Media = o.Media;
+            ChapterID = o.ChapterID;
+            CreateUser = o.CreateUser;
+            Code = o.Code;
+            OriginID = o.ID;
+            CourseID = o.CourseID;
+            IsParentCourse = o.IsParentCourse;
+            IsAdmin = o.IsAdmin;
+            Timer = o.Timer;
+            Point = o.Point;
+            IsActive = o.IsActive;
+            Title = o.Title + " (Copy)";
+            TemplateType = o.TemplateType;
+            Order = o.Order;
+            Created = DateTime.Now;
+            Updated = DateTime.Now;
+            Etype = o.Etype;
+            Limit = o.Limit;
+            Multiple = o.Multiple;
+        }
+
     }
 
     public class LESSON_TEMPLATE

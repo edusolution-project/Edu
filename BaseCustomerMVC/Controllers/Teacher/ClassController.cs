@@ -51,6 +51,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly FileProcess _fileProcess;
         private readonly StudentHelper _studentHelper;
+        private readonly TeacherHelper _teacherHelper;
         private readonly LessonHelper _lessonHelper;
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
@@ -89,6 +90,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             FileProcess fileProcess,
             LessonHelper lessonHelper,
             StudentHelper studentHelper,
+            TeacherHelper teacherHelper,
 
             ChapterProgressService chapterProgressService,
             CenterService centerService,
@@ -127,6 +129,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _fileProcess = fileProcess;
 
             _studentHelper = studentHelper;
+            _teacherHelper = teacherHelper;
 
             _lessonHelper = lessonHelper;
 
@@ -160,7 +163,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ViewBag.Skills = _skillService.GetList();
             }
 
-            ViewBag.IsHeadTeacher = HasRole(UserID, center.ID, "head-teacher");
+            ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
 
             ViewBag.User = UserID;
             ViewBag.Model = model;
@@ -177,6 +180,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var center = _centerService.GetItemByCode(basis);
                 if (center != null)
                     ViewBag.Center = center;
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
             }
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
@@ -967,7 +972,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             //if (!deep_filter)
-                ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == TeacherID);
+            ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == TeacherID);
 
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
@@ -980,12 +985,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //filter by classsubject
             //if (ownerfilter != null)
             //{
-                if (data.Count > 0)
-                    classfilter.Add(
-                        Builders<ClassEntity>.Filter.Or(ownerfilter,
-                        Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive))));
-                else
-                    classfilter.Add(ownerfilter);
+            if (data.Count > 0)
+                classfilter.Add(
+                    Builders<ClassEntity>.Filter.Or(ownerfilter,
+                    Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive))));
+            else
+                classfilter.Add(ownerfilter);
             //}
             //else
             //    if (data.Count > 0)
@@ -1608,7 +1613,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-
         private List<StudentSummaryViewModel> GetClassSubjectSummary(ClassEntity @class, string StudentID, long total_students)
         {
             var data = new List<StudentSummaryViewModel>();
@@ -1644,15 +1648,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #endregion
 
-        private bool HasRole(string userid, string center, string role)
-        {
-            var teacher = _teacherService.GetItemByID(userid);
-            if (teacher == null) return false;
-            var centerMember = teacher.Centers.Find(t => t.CenterID == center);
-            if (centerMember == null) return false;
-            if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
-            return true;
-        }
+        //private bool HasRole(string userid, string center, string role)
+        //{
+        //    var teacher = _teacherService.GetItemByID(userid);
+        //    if (teacher == null) return false;
+        //    var centerMember = teacher.Centers.Find(t => t.CenterID == center);
+        //    if (centerMember == null) return false;
+        //    if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
+        //    return true;
+        //}
 
 
         #region Fix Data

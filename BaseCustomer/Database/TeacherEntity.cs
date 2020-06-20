@@ -62,5 +62,10 @@ namespace BaseCustomerEntity.Database
 
             Collection.Indexes.CreateManyAsync(indexs);
         }
+
+        public TeacherEntity GetItemByEmail(string email)
+        {
+            return Collection.Find(t => t.Email == email).SingleOrDefault();
+        }
     }
 }

@@ -348,6 +348,7 @@
         {
         @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
+@:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "tooltip", "data-placement": "top", "title": "Nhân bản", "onclick": "CloneLesson('" + item.ID + "'); return false;" }));
         }
         rowData.append(leftPart);
         rowData.append(rightPart);
@@ -797,6 +798,10 @@
                 ExcuteOnlyItem(ID, '@processUrl("RemoveLesson", "Curriculum")', DeleteLessonCallback);
             }
         })
+    }
+
+    function CloneLesson(ID) {
+        ExcuteOnlyItem(ID, '@processUrl("CopyLesson", "Curriculum")', LoadData);
     }
 
     function DeleteLessonCallback(res) {

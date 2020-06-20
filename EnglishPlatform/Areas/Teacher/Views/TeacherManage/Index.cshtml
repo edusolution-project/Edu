@@ -7,8 +7,16 @@
     var listTeacher = ViewBag.Teacher as List<BaseCustomerEntity.Database.TeacherEntity>;
     var listSkills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
     var listClass = ViewBag.Classes as List<BaseCustomerEntity.Database.ClassEntity>;
+    var roles = ViewBag.Roles as List<BaseCustomerEntity.Database.RoleEntity>;
     var user = ViewBag.User as string;
-    var hasManageRole = (bool)(ViewBag.Managable ?? false);
+    //var hasManageRole = (bool)(ViewBag.Managable ?? false);
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
 }
 <script>
     setActiveMenu("teacher");
@@ -20,29 +28,22 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25 justify-content-between">
-            <div class="flex">
+            <div class="flex width-100">
                 @*<div class="box filter-box w-152">
-                        <select name="" v-model="search_class_id">
-                            <option value="">Lớp</option>
-                            <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
+                        <select name="" v-model="search_skill_id">
+                            <option value="">Chuyên môn</option>
+                            <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
                         </select>
                     </div>*@
-                <div class="box filter-box w-152">
-                    <select name="" v-model="search_subject_id">
-                        <option value="">Chương trình</option>
-                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="box filter-box w-152">
-                    <select name="" v-model="search_skill_id">
-                        <option value="">Môn học</option>
-                        <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                    </select>
+                <div class="search-box mr-2">
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" v-model="searchTerm" placeholder="Tên giáo viên">
                 </div>
             </div>
+
             <div class="flex">
                 <b-button class="btn-addevent btn-student btn-sm" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
-                <b-button class="btn-addevent btn-student btn-sm" style="margin-left:5px" v-on:click="showUploadModal()"><i class="ti-zip"></i></b-button>
+                <b-button class="btn-addevent btn-student btn-sm" style="margin-left:5px" v-on:click="showUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
             </div>
         </div>
     </div>
@@ -57,14 +58,16 @@
                 <tr v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td><a href="#" :title="item.FullName">{{item.FullName}}</a></td>
-                    <td>{{item.ClassName}}</td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
-                    @*<td v-bind:class="{good : (item.Percent > 50)}">{{item.Percent + '%'}}</td>
-                        <td>{{item.last_update}}</td>
-                        <td v-bind:class="{good : (item.score > 5)}">{{item.Score == null ? '---' : (item.Score.AutoAvgPoint + ' điểm')}}</td>*@
-
-                    <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
+                    <td>{{item.RoleName}}</td>
+                    <td>
+                        <template v-if="item.ID != '@user'">
+                            <button class="btn-act btn-trash" v-on:click="showAddModal(item)"><i class="ti-pencil-alt"></i></button>
+                            <button class="btn-act btn-trash" v-on:click="showPassModal(item)"><i class="ti-key"></i></button>
+                            <button class="btn-act btn-trash" v-on:click="removeMember(item)"><i class="ti-trash"></i></button>
+                        </template>
+                    </td>
                 </tr>
 
             </tbody>
@@ -79,13 +82,6 @@
                 </select>
             </div>
             <div class="page-control">
-                @*<div class="inner">
-                        <button v-on:click="goPage(0)"><i class="ti-angle-left"></i></button>
-                        <button v-on:click="goPage(page - 1)"><i class="ti-angle-double-left"></i></button>
-                        <input type="text" v-model="page" v-on:change="getData()" />
-                        <button v-on:click="goPage(page + 1)"><i class="ti-angle-double-right"></i></button>
-                        <button v-on:click="goPage(max_page)"><i class="ti-angle-right"></i></button>
-                    </div>*@
                 <div class="right">
                     <b-pagination v-model="page"
                                   :total-rows="totalRec"
@@ -155,130 +151,11 @@
     </style>
 
     <script>
-        Vue.component("autocomplete",
-            {
-                template: "#autocomplete",
-                props: {
-                    items: {
-                        type: Array,
-                        required: false,
-                        default: () => []
-                    }
-                },
-                data() {
-                    return {
-                        isOpen: false,
-                        results: [],
-                        search: "",
-                        isLoading: false,
-                        arrowCounter: 0,
-                        loadedTerms: [],
-                    };
-                },
-                methods: {
-                    onChange() {
-                        // Let's warn the parent that a change was made
-                        this.$emit("input", this.search);
-                        //console.log("change");
-                        if (this.search.length >= 2) {
-                            //checkifTerm is loaded
-                            //clearTimeout(this.timeout)
-                            var _that = this
-                            var term = _that.search.toLowerCase()
-                            //this.timeout = setTimeout(function () {
-                            if (this.loadedTerms.filter(item => item.term.indexOf(term) > -1).length == 0) {
-                                this.isLoading = true;
-                                let _form = new FormData()
-                                _form.append('term', term)
-                                let _url = '@Url.Action("Search","StudentManage")'
-                                axios.post(_url, _form)
-                                    .then(response => {
-                                        this.isLoading = false
-                                        this.items = response.data
-                                        this.loadedTerms.push({
-                                            term: term,
-                                            data: response.data
-                                        })
-                                        this.isOpen = true
-                                        this.$forceUpdate();
-                                    }).catch(e => { })
-                            } else {
-                                this.items = this.loadedTerms.filter(item => item.term.indexOf(term) > -1)[0].data;
-                                this.filterResults();
-                                this.isOpen = true;
-                                this.$forceUpdate();
-                            }
-                            //}, 200)
-                            // Is the data given by an outside ajax request?
-
-                        }
-                        else {
-                            this.isOpen = false
-                        }
-                    },
-                    filterResults() {
-                        // first uncapitalize all the things
-                        this.results = this.items.filter(item => {
-                            return item.FullName.toLowerCase().indexOf(this.search.toLowerCase()) > -1;
-                        });
-                    },
-                    setResult(result) {
-                        this.search = result.FullName;
-                        this.isOpen = false;
-                        this.arrowCounter = -1;
-                        this.$emit("chooseitem", result);
-                    },
-                    onArrowDown(evt) {
-                        if (this.arrowCounter < this.results.length) {
-                            this.arrowCounter = this.arrowCounter + 1;
-                        }
-                    },
-                    onArrowUp() {
-                        if (this.arrowCounter > 0) {
-                            this.arrowCounter = this.arrowCounter - 1;
-                        }
-                    },
-                    onEnter() {
-                        if (this.arrowCounter < 0 || this.arrowCounter > this.results.length)
-                            return false;
-                        this.setResult(this.results[this.arrowCounter])
-                        //this.search = this.results[this.arrowCounter].FullName;
-                        //this.isOpen = false;
-                        //this.arrowCounter = -1;
-                        //this.$emit("chooseStudent", result);
-                    },
-                    handleClickOutside(evt) {
-                        if (!this.$el.contains(evt.target)) {
-                            this.isOpen = false;
-                            this.arrowCounter = -1;
-                        }
-                    }
-                },
-                watch: {
-                    items: function (val, oldValue) {
-                        // actually compare them
-                        if (val.length !== oldValue.length) {
-                            this.results = val;
-                            this.isLoading = false;
-                        }
-                    }
-                },
-                mounted() {
-                    document.addEventListener("click", this.handleClickOutside);
-                },
-                destroyed() {
-                    document.removeEventListener("click", this.handleClickOutside);
-                }
-            }
-        )
-    </script>
-
-    <script>
         new Vue({
             el: "#main",
             mounted() {
                 this.getData()
-                this.getActiveClass()
+                //this.getActiveClass()
                 this.list_subject = @Html.Raw(Json.Serialize(listSubject));
                 this.list_grades_full = @Html.Raw(Json.Serialize(listGrade));
                 this.list_skill = @Html.Raw(Json.Serialize(listSkills));
@@ -288,11 +165,13 @@
                 editorOption: {
                     theme: 'snow'
                 },
-                add_student: {
+                add_member: {
                     id: "",
                     name: "",
                     email: "",
-                    class_id: ""
+                    phone: "",
+                    role: "",
+                    pass: ""
                 },
                 fields: [
                     {
@@ -304,10 +183,6 @@
                         label: 'Họ tên'
                     },
                     {
-                        key: 'class',
-                        label: 'Lớp'
-                    },
-                    {
                         key: 'email',
                         label: 'Email'
                     },
@@ -315,18 +190,10 @@
                         key: 'phone',
                         label: 'SĐT'
                     },
-                    //{
-                    //    key: 'per',
-                    //    label: 'Tiến độ'
-                    //},
-                    //{
-                    //    key: 'last_update',
-                    //    label: 'Lần học cuối'
-                    //},
-                    //{
-                    //    key: 'score',
-                    //    label: 'Kết quả'
-                    //},
+                    {
+                        key: 'pos',
+                        label: 'Chức danh'
+                    },
                     {
                         key: 'actions',
                         label: 'Tác vụ'
@@ -334,51 +201,51 @@
                 ],
                 tableData: [
                 ],
-                list_subject: [],
-                list_skill: [],
-                list_grades_full: [],
-                teacherSource: [],
-                courseSource: [],
-                list_active_class: [],
-                week: '',
+                //list_subject: [],
+                //list_skill: [],
+                list_roles: @Html.Raw(Json.Serialize(roles)),
+                //list_grades_full: [],
+                //teacherSource: [],
+                //courseSource: [],
+                //list_active_class: [],
+                //week: '',
                 view: 30,
                 page: 1,
-                search_class_id: '',
-                search_subject_id: '',
-                search_grade_id: '',
-                search_teacher_id: '',
-                search_skill_id: '',
+                //search_class_id: '',
+                //search_subject_id: '',
+                //search_grade_id: '',
+                //search_teacher_id: '',
+                //search_skill_id: '',
+                searchTerm: '',
                 totalRec: 0,
                 uploadfile: {
                     file: null,
                 },
             },
             watch: {
-                search_subject_id: function () {
-                    this.getData()
+                searchTerm: function () {
+                    if (this.searchTimeout != null)
+                        clearTimeout(this.searchTimeout)
+                    var fn = this.getData
+                    this.searchTimeout = setTimeout(function () {
+                        fn()
+                        fn = null
+                    }, 500)
                 },
-                search_grade_id: function () {
-                    this.getData()
-                },
-                search_skill_id: function () {
-                    this.getData()
-                },
-                search_class_id: function () {
-                    this.getData()
-                }
             },
             methods: {
                 getData() {
                     let _that = this
                     let _form = new FormData()
-                    _form.append('SubjectID', _that.search_subject_id)
-                    _form.append('ClassID', _that.search_class_id)
-                    _form.append('SkillID', _that.search_skill_id)
-                    _form.append('GradeID', _that.search_grade_id)
+                    //_form.append('SubjectID', _that.search_subject_id)
+                    //_form.append('ClassID', _that.search_class_id)
+                    //_form.append('SkillID', _that.search_skill_id)
+                    //_form.append('GradeID', _that.search_grade_id)
                     _form.append('TeacherID', _that.search_teacher_id)
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
-                    let _url = '@Url.Action("GetList", "TeacherManage")'
+                    _form.append('SearchText', _that.searchTerm)
+                    let _url = '@processUrl("GetList", "TeacherManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.tableData = response.data.Data;
@@ -387,34 +254,6 @@
                             //var tt = response.data.Model.totalRecord;
                             //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
                         }).catch(e => { })
-                },
-                getActiveClass() {
-                    if (this.list_active_class.length == 0) {
-                        let _that = this
-                        let _form = new FormData()
-                        _form.append('skipActive', false)
-                        _form.append('PageSize', 500)
-                        @if(!User.IsInRole("head-teacher"))
-                        {
-                            @:let _url = '@Url.Action("GetClassList", "Class")'
-                        }
-                        else
-                        {
-                            @:let _url = '@Url.Action("GetManageList", "Class")'
-                        }
-                        axios.post(_url, _form)
-                            .then(response => {
-                                var _data = response.data.Data;
-                                _data.forEach(function (item, k) {
-                                    console.log(item);
-                                    _that.list_active_class.push({
-                                        ID: item.ID,
-                                        Name: item.Name
-                                    })
-                                })
-                            }).catch(e => { })
-                    }
-                    this.add_student.class_id = ''
                 },
                 destroy(id) {
                     this.tableData.forEach(function (item, k) {
@@ -434,40 +273,59 @@
                         }
                     })
                 },
-                matchGrade(item) {
-                    return item.SubjectID == this.search_subject_id
-                },
                 hideModal() {
                     $('.close').click();
                 },
-                showAddModal() {
-                    this.add_student.class_id = this.search_class_id
+                showAddModal(data) {
+                    if (data != null) {
+                        this.add_member.id = data.ID
+                        this.add_member.email = data.Email
+                        this.add_member.name = data.FullName
+                        this.add_member.phone = data.Phone
+                        this.add_member.role = data.RoleID
+                    }
+                    else {
+                        this.add_member.id = ''
+                        this.add_member.email = ''
+                        this.add_member.name = ''
+                        this.add_member.phone = ''
+                        this.add_member.role = ''
+                    }
+
                     this.$bvModal.show('modal_event')
                 },
                 showUploadModal() {
-                    this.add_student.class_id = this.search_class_id
                     this.$bvModal.show('modal_upload')
                 },
-                chooseStudent(student) {
-                    this.add_student.name = student.Name
-                    this.add_student.email = student.Email
-                    this.add_student.id = student.ID
+                showPassModal(data) {
+                    this.add_member.id = data.ID
+                    this.add_member.pass = ''
+                    this.$bvModal.show('modal_pass')
                 },
-                createStudent() {
+                createMember() {
                     let _that = this
                     let _form = new FormData()
-                    if (_that.add_student.class_id == '') {
-                        Swal.fire('Chưa chọn lớp học','','warning');
+                    if (_that.add_member.name.trim() == '') {
+                        Swal.fire('Chưa nhập tên', '', 'warning');
+                        _that.add_member.name = '';
                         return false;
                     }
-                    if (_that.add_student.id == '') {
-                        alert('Vui lòng chọn lại học viên')
+                    if (_that.add_member.email.trim() == '') {
+                        Swal.fire('Chưa nhập email', '', 'warning');
+                        _that.add_member.email = '';
                         return false;
                     }
-                    _form.append('ClassID', _that.add_student.class_id)
-                    _form.append('StudentID', _that.add_student.id)
+                    if (_that.add_member.role == '') {
+                        Swal.fire('Chưa chọn chức danh', '', 'warning');
+                        return false;
+                    }
+                    _form.append('ID', _that.add_member.id)
+                    _form.append('FullName', _that.add_member.name)
+                    _form.append('Email', _that.add_member.email)
+                    _form.append('Phone', _that.add_member.phone)
+                    _form.append('RoleID', _that.add_member.role)
                     _that.isLoading = true
-                    let _url = '@Url.Action("AddStudent", "StudentManage")'
+                    let _url = '@processUrl("AddMember", "TeacherManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.isLoading = false
@@ -477,10 +335,10 @@
                             }
                             else {
                                 alert(response.data.msg)
-                                this.search_class_id = _that.add_student.class_id
-                                this.search_grade_id = ''
-                                this.search_skill_id = ''
-                                this.search_subject_id = ''
+                                //this.search_class_id = _that.add_student.class_id
+                                //this.search_grade_id = ''
+                                //this.search_skill_id = ''
+                                //this.search_subject_id = ''
                                 this.getData()
                                 this.hideModal()
                             }
@@ -489,21 +347,17 @@
                             console.log(e)
                         })
                 },
-                uploadStudent() {
+                uploadMember() {
                     let _that = this
                     let _form = new FormData()
-                    if (_that.add_student.class_id == '') {
-                        alert('Chưa chọn lớp học');
-                        return false;
-                    }
                     if (!_that.uploadfile.file) {
-                         alert('Chưa chọn danh sách học viên');
+                         alert('Chưa chọn danh sách');
                         return false;
                     }
-                    _form.append('ClassID', _that.add_student.class_id)
+                    //_form.append('ClassID', _that.add_student.class_id)
                     _form.append('fileUpload', _that.uploadfile.file)
                     _that.isLoading = true
-                    let _url = '@Url.Action("ImportStudent", "StudentManage")'
+                    let _url = '@processUrl("ImportMember", "TeacherManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.isLoading = false
@@ -513,10 +367,10 @@
                             }
                             else {
                                 alert(response.data.msg)
-                                this.search_class_id = _that.add_student.class_id
-                                this.search_grade_id = ''
-                                this.search_skill_id = ''
-                                this.search_subject_id = ''
+                                //this.search_class_id = _that.add_student.class_id
+                                //this.search_grade_id = ''
+                                //this.search_skill_id = ''
+                                //this.search_subject_id = ''
                                 this.getData()
                                 this.hideModal()
                             }
@@ -527,15 +381,44 @@
                             console.log(e)
                         })
                 },
-                removeStudent(student) {
-                    if (!confirm('Xác nhận xóa học viên ' + student.FullName + ' khỏi lớp ' + student.ClassName + '?')) {
+                changePass() {
+                    let _that = this
+                    let _form = new FormData()
+                    if (_that.add_member.pass.trim() == '') {
+                        Swal.fire('Chưa nhập mật khẩu', '', 'warning');
+                        _that.add_member.pass = '';
+                        return false;
+                    }
+                    _form.append('ID', _that.add_member.id)
+                    _form.append('Password', _that.add_member.pass)
+                    _that.isLoading = true
+                    let _url = '@processUrl("ChangePass", "TeacherManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.isLoading = false
+                            if (response.data.error != null) {
+                                alert(response.data.error);
+                                return false;
+                            }
+                            else {
+                                alert(response.data.msg)
+                                //this.getData()
+                                this.hideModal()
+                            }
+                        }).catch(e => {
+                            _that.isLoading = false
+                            console.log(e)
+                        })
+                },
+                removeMember(member) {
+                    console.log(member);
+                    if (!confirm('Xác nhận xóa giáo viên ' + member.FullName + ' khỏi cơ sở?')) {
                         return false;
                     }
                     let _that = this
                     let _form = new FormData()
-                    _form.append('ClassID', student.ClassID)
-                    _form.append('StudentID', student.ID)
-                    let _url = '@Url.Action("RemoveStudent", "StudentManage")'
+                    _form.append('ID', member.ID)
+                    let _url = '@processUrl("RemoveMember", "TeacherManage")'
                     axios.post(_url, _form)
                         .then(response => {
                             if (response.data.error != null) {
@@ -556,7 +439,7 @@
                     this.uploadfile.file = event.target.files[0]
                 },
                 downloadTemplate() {
-                    window.open("@Url.Action("StudentTemplate", "StudentManage")");
+                    window.open("@processUrl("ExportTemplate", "TeacherManage")");
                 }
             }
         });
@@ -567,37 +450,42 @@
 @section Modals{
     <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm giáo viên">
         <b-col class="form-group">
-            <label for="">Lớp</label>
-            <select v-model="add_student.class_id" class="form-control">
-                <option value="">Chọn lớp</option>
-                <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
-            </select>
+            <label for="">Họ tên</label>
+            <input class="form-control" v-model="add_member.name" />
         </b-col>
         <b-col class="form-group">
-            <label for="">Học viên</label>
-            <autocomplete v-on:chooseitem="chooseStudent" />
+            <label for="">Email</label>
+            <input class="form-control" v-model="add_member.email" v-if="add_member.id == ''" />
+            <input class="form-control" v-model="add_member.email" disabled="disabled" v-else />
         </b-col>
+        <b-col class="form-group">
+            <label for="">Điện thoại</label>
+            <input class="form-control" v-model="add_member.phone" />
+        </b-col>
+        <b-col class="form-group">
+            <label for="">Chọn chức danh</label>
+            <select v-model="add_member.role" class="form-control">
+                <option value="">Chọn chức danh</option>
+                <option v-for="(item,k) in list_roles" :value="item.ID">{{item.Name}}</option>
+            </select>
+        </b-col>
+
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">
                 <b-button>Đang thực hiện...</b-button>
             </template>
             <template v-else>
-                <b-button variant="success" v-on:click="createStudent()">Lưu</b-button>
-                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+                <b-button variant="success" v-on:click="createMember()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
             </template>
         </template>
+
     </b-modal>
 
-    <b-modal :no-close-on-backdrop="true" id="modal_upload" centered title="Nhập học viên từ file">
+    <!-- Modal choose file -->
+    <b-modal :no-close-on-backdrop="true" id="modal_upload" centered title="Thêm danh sách từ file">
         <b-col class="form-group">
-            <label for="">Lớp</label>
-            <select v-model="add_student.class_id" class="form-control">
-                <option value="">Chọn lớp</option>
-                <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
-            </select>
-        </b-col>
-        <b-col class="form-group">
-            <label for="">Chọn danh sách học viên (excel)</label>
+            <label for="">Chọn danh sách giáo viên (excel)</label>
             <input type="file" class="btn btn-info" :ref="`uploadfile`" accept=".xls,.xlsx" v-on:change="changeFile()" /><br />
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
@@ -606,7 +494,25 @@
                 <b-button>Đang thực hiện...</b-button>
             </template>
             <template v-else>
-                <b-button variant="success" v-on:click="uploadStudent()">Lưu</b-button>
+                <b-button variant="success" v-on:click="uploadMember()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
+
+    <!-- Modal change pass -->
+    <b-modal :no-close-on-backdrop="true" id="modal_pass" centered title="Đổi mật khẩu">
+
+        <b-col class="form-group">
+            <label for="">Nhập mật khẩu mới</label>
+            <input class="form-control" v-model="add_member.pass" />
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="changePass()">Lưu</b-button>
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
             </template>
         </template>

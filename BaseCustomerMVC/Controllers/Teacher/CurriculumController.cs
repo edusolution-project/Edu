@@ -505,7 +505,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        public JsonResult CreateOrUpdate(CourseEntity item, string CenterCode)
+        public async Task<JsonResult> CreateOrUpdate(CourseEntity item, string CenterCode)
         {
             try
             {
@@ -525,6 +525,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.IsAdmin = true;
                     item.IsActive = false;
                     item.Updated = DateTime.Now;
+
+                    var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
+                    if (files != null && files.Count > 0)
+                    {
+                        var file = files[0];
+
+                        var filename = DateTime.Now.ToUniversalTime().ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                        item.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER");
+                    }
+
+
                     _service.Save(item);
                 }
                 else
@@ -547,6 +558,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     olditem.GradeID = item.GradeID;
                     olditem.SkillID = item.SkillID;
                     olditem.Name = item.Name;
+                    var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
+                    if (files != null && files.Count > 0)
+                    {
+                        var file = files[0];
+
+                        var filename = DateTime.Now.ToUniversalTime().ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                        olditem.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER");
+                    }
                     _service.Save(olditem);
                     //update class subject using this course, temporary use
                     //_classSubjectService.UpdateCourseSkill(olditem.ID, olditem.SkillID);
@@ -1320,6 +1339,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 CreateUser = _userCreate,
                 Center = newcourse.Center ?? course.Center,
                 SkillID = newcourse.SkillID,
+                Image = course.Image,
                 Created = DateTime.Now,
                 Updated = DateTime.Now,
                 IsActive = true,
@@ -1350,24 +1370,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             foreach (var o in lesson_root.ToEnumerable())
             {
-                await CloneLesson(new LessonEntity()
+                await CloneLesson(new LessonEntity(o)
                 {
-                    Media = o.Media,
                     ChapterID = "0",
                     CreateUser = _userCreate,
-                    Code = o.Code,
-                    OriginID = o.ID,
                     CourseID = CourseID,
-                    IsParentCourse = o.IsParentCourse,
                     IsAdmin = false,
-                    Timer = o.Timer,
-                    Point = o.Point,
-                    IsActive = o.IsActive,
-                    Title = o.Title,
-                    TemplateType = o.TemplateType,
-                    Order = o.Order,
-                    Created = DateTime.Now,
-                    Updated = DateTime.Now
                 }, _userCreate);
             }
             return new JsonResult("OK");
@@ -1446,6 +1454,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }, _userCreate);
                 }
             }
+            return new JsonResult("OK");
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> CopyLesson(string ArrID)
+        {
+            var orgLesson = _lessonService.GetItemByID(ArrID);
+            if (orgLesson == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy bài học" }
+                    });
+            }
+
+            await CloneLesson(new LessonEntity(orgLesson)
+            {
+                Order = (int)_lessonService.CountChapterLesson(orgLesson.ChapterID) + 1,
+            }, orgLesson.CreateUser);
+            await _chapterService.IncreaseLessonCount(orgLesson.ID, 1);
             return new JsonResult("OK");
         }
 
@@ -1601,24 +1629,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             foreach (var o in lessons.ToEnumerable())
             {
-                await CloneLesson(new LessonEntity()
+                await CloneLesson(new LessonEntity(o)
                 {
-                    Media = o.Media,
-                    ChapterID = item.ID,
                     CreateUser = _userCreate,
-                    Code = o.Code,
-                    OriginID = o.ID,
                     CourseID = item.CourseID,
-                    IsParentCourse = o.IsParentCourse,
-                    IsAdmin = false,
-                    Timer = o.Timer,
-                    Point = o.Point,
-                    IsActive = o.IsActive,
-                    Title = o.Title,
-                    TemplateType = o.TemplateType,
-                    Order = o.Order,
-                    Created = DateTime.Now,
-                    Updated = DateTime.Now
+                    IsAdmin = false
                 }, _userCreate);
             }
 
@@ -1674,7 +1689,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Type = _child.Type,
                     Updated = DateTime.Now,
                     Created = DateTime.Now,
-                    CourseID = item.CourseID
+                    CourseID = item.CourseID,
                 };
                 if (_item.Media != null && _item.Media.Path != null)
                     if (!_item.Media.Path.StartsWith("http://"))

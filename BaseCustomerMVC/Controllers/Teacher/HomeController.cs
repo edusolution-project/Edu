@@ -18,6 +18,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
     {
         private readonly FileProcess _fileProcess;
         private readonly TeacherService _teacherService;
+        private readonly TeacherHelper _teacherHelper;
         private readonly AccountService _accountService;
         private readonly CenterService _centerService;
         private readonly ISession _session;
@@ -30,9 +31,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             AccountService accountService,
             CenterService centerService,
             IHttpContextAccessor httpContextAccessor,
+            TeacherHelper teacherHelper,
             IOptions<DefaultConfigs> defaultvalue)
         {
             _teacherService = teacherService;
+            _teacherHelper = teacherHelper;
             _accountService = accountService;
             _fileProcess = fileProcess;
             _centerService = centerService;
@@ -42,7 +45,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Index(string basis)
         {
-            ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
+            //ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
             if (teacher != null)
@@ -53,6 +56,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var center = _centerService.GetItemByCode(basis);
                 if (center != null)
                     ViewBag.Center = center;
+                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(_teacherid, center.ID, "head-teacher");
             }
             try
             {
@@ -160,7 +164,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(
                 new Dictionary<string, object>
                     {
-                        { "Error", "Password is not correct" }
+                        { "Error", "Mật khẩu không đúng" }
                     });
             }
 
@@ -169,7 +173,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(
                 new Dictionary<string, object>
                     {
-                        { "Error", "Password's length must be over 6 " }
+                        { "Error", "Mật khẩu phải có độ dài từ 6 ký tự" }
                     });
             }
 
@@ -178,7 +182,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(
                 new Dictionary<string, object>
                     {
-                        { "Error", "Retype password is not matched" }
+                        { "Error", "Xác nhận mật khẩu không đúng" }
                     });
             }
 
@@ -192,7 +196,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(
                 new Dictionary<string, object>
                  {
-                        { "Error", "Old password not correct" }
+                        { "Error", "Mật khẩu cũ không đúng" }
                  });
             }
 
@@ -202,7 +206,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(
                 new Dictionary<string, object>
                  {
-                        { "Error", "New password can not be the same as old password" }
+                        { "Error", "Mật khẩu mới không được trùng với mật khẩu cũ" }
                  });
             }
 
@@ -211,7 +215,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(
             new Dictionary<string, object>
                     {
-                        { "Message", "Password Updated Successfully" }
+                        { "Message", "Cập nhật mật khẩu thành công" }
                     });
         }
 
@@ -267,6 +271,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
         }
+
         //[HttpPost]
         //public JsonResult ChangePassword(string oldpass, string newpass, string retypepass)
         //{
