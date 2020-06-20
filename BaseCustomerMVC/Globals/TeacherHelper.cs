@@ -33,7 +33,7 @@ namespace BaseCustomerMVC.Globals
                 var updateAcc = Builders<AccountEntity>.Update.Set("IsActive", status);
                 _accountService.CreateQuery().UpdateManyAsync(filterAcc, updateAcc);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //log exception
             }

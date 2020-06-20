@@ -85,14 +85,14 @@ namespace BaseCustomerEntity.Database
 
         public async Task IncDownload(string ID, int increment)
         {
-            _ = Collection.UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ReferenceEntity>()
+            await Collection.UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ReferenceEntity>()
                 .Inc(t => t.Downloaded, 1)
                 .Set(t => t.LastDownload, DateTime.Now));
         }
 
         public async Task IncView(string ID, int increment)
         {
-            _ = Collection.UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ReferenceEntity>()
+            await Collection.UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ReferenceEntity>()
                 .Inc(t => t.Viewed, 1)
                 .Set(t => t.LastView, DateTime.Now));
         }

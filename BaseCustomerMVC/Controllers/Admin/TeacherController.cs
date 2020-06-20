@@ -496,7 +496,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpGet]
         [Obsolete]
-        public async Task<IActionResult> ExportTemplate(DefaultModel model)
+        public IActionResult ExportTemplate(DefaultModel model)
         {
 
             var list = new List<TeacherEntity>() { new TeacherEntity() {

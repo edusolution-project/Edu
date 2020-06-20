@@ -15,7 +15,6 @@ namespace BaseCustomerMVC.Models
     }
     public class LessonScheduleTodayViewModel : StudentLessonViewModel
     {
-        [JsonProperty("ClassID")]
-        public string ClassID { get; set; }
+      
     }
 }

@@ -84,10 +84,6 @@ namespace BaseCustomerEntity.Database
                     {
                         if (listid.IndexOf(current.ParentID) < 0)
                             _ = IncreaseLessonCount(current.ParentID, increment, listid);
-                        else
-                        {
-                            var e = 1;
-                        }
                     }
                     else
                         _ = _courseService.IncreaseLessonCount(current.CourseID, increment);

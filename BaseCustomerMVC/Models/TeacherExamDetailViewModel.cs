@@ -24,7 +24,5 @@ namespace BaseCustomerMVC.Models
         public List<CloneLessonPartAnswerEntity> CorrectAnswer { get; set; }
         //[JsonProperty("Point")]
         //public double Point{get;set;}
-        [JsonProperty("MaxPoint")]
-        public double MaxPoint{get;set;}
     }
 }

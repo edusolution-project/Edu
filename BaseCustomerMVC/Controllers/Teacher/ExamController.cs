@@ -64,6 +64,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [Obsolete]
+        [HttpGet]
         [HttpPost]
         public JsonResult GetListStudents(DefaultModel model, string ClassID)
         {

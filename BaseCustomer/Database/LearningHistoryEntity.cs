@@ -88,9 +88,9 @@ namespace BaseCustomerEntity.Database
             {
                 //temporay skip exam history
                 return;
-                oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
-                    && o.LessonPartID == item.LessonPartID
-                    && o.QuestionID == item.QuestionID).ToList();
+                //oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID
+                //    && o.LessonPartID == item.LessonPartID
+                //    && o.QuestionID == item.QuestionID).ToList();
             }
             else
                 oldItem = CreateQuery().Find(o => o.StudentID == item.StudentID

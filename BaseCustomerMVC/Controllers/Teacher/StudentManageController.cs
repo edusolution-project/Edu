@@ -330,7 +330,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        public async Task<IActionResult> ExportTemplate(DefaultModel model)
+        public IActionResult ExportTemplate(DefaultModel model)
         {
             var list = new List<StudentEntity>() { new StudentEntity() {
                 ID = "undefined"

@@ -37,7 +37,7 @@ namespace BaseCustomerMVC.Globals
                "</div>";
 
 
-        public async Task<int> SendBaseEmail(List<string> toAddresses, string subject, string body, int action_type, List<string> ccAddresses = null, List<string> bccAddressses = null, string fromMail = "", string fromPass = "", string fromName = "", List<AFile> files = null)
+        public int SendBaseEmail(List<string> toAddresses, string subject, string body, int action_type, List<string> ccAddresses = null, List<string> bccAddressses = null, string fromMail = "", string fromPass = "", string fromName = "", List<AFile> files = null)
         {
             string senderID = _defaultSender;
             if (!String.IsNullOrEmpty(fromMail)) senderID = fromMail;
@@ -99,7 +99,7 @@ namespace BaseCustomerMVC.Globals
                 _mailLogService.Save(maillog);
                 return ResultState.OK;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return ResultState.ERR;
             }
@@ -118,7 +118,7 @@ namespace BaseCustomerMVC.Globals
             message.Attachments.Add(attachment);
         }
 
-        public async Task SendRegisterEmail(AccountEntity user, string Password)
+        public void SendRegisterEmail(AccountEntity user, string Password)
         {
             string subject = "Chúc mừng " + user.Name + " đã đăng ký tài khoản thành công tại Eduso";
             string body = "Chào " + user.Name + "," +
@@ -129,10 +129,10 @@ namespace BaseCustomerMVC.Globals
                 "<p>Đăng nhập để trải nghiệm ngay hàng trăm khóa học hấp dẫn & hữu ích nhé.<p>" +
                 "<p>Đến ngay <a href='https://eduso.vn'>Eduso.vn</a><p>";
             var toAddress = new List<string> { user.UserName };
-            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.REGISTER, bccAddressses: new List<string> { _defaultSender });
+            _ = SendBaseEmail(toAddress, subject, body, MailPhase.REGISTER, bccAddressses: new List<string> { _defaultSender });
         }
 
-        public async Task SendResetPass(string userID)
+        public void SendResetPass(string userID)
         {
 
         }

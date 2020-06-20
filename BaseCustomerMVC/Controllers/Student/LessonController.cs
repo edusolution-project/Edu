@@ -188,7 +188,6 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public JsonResult GetTodayLessons(DefaultModel model, DateTime date, string UserID = "")
         {
-            TeacherEntity teacher = null;
             if (string.IsNullOrEmpty(UserID))
                 UserID = User.Claims.GetClaimByType("UserID").Value;
 

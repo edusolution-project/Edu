@@ -32,7 +32,7 @@ namespace BaseCustomerEntity.Database
                 item = CreateQuery().Find(o => o.Area == area && o.CtrlName == ctrlName && o.ActName == actName)?.FirstOrDefault();
                 return item != null;
             }
-            catch(Exception ex)
+            catch (Exception)
             {
                 item = null;
                 return false;
