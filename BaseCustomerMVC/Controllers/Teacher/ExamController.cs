@@ -68,60 +68,80 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult GetListStudents(DefaultModel model, string ClassID)
         {
-            var lessonid = model.ID;
-            var lesson = _lessonService.GetItemByID(lessonid);
-            if (lesson == null)
+            if (!string.IsNullOrEmpty(model.ID))
             {
-                return new JsonResult(new Dictionary<string, object>{
+                var lessonid = model.ID;
+                var lesson = _lessonService.GetItemByID(lessonid);
+                if (lesson == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>{
                     {"Error", "Bài kiểm tra không tồn tại" }
                     });
+                }
+
+                var list = _service.CreateQuery().AsQueryable()
+                .Where(o => o.ClassID == ClassID && o.LessonID == lessonid)
+                .GroupBy(o => new { o.StudentID, o.LessonID }).Select(r => new ExamEntity { ID = r.Max(t => t.ID), StudentID = r.Key.StudentID, LessonID = r.Key.LessonID }).ToList();
+                var returnData = (from r in list
+                                  let student = _studentService.GetItemByID(r.StudentID)
+                                  let exam = _service.GetItemByID(r.ID)
+                                  select new ExamViewModel
+                                  {
+                                      ID = r.ID,
+                                      StudentID = student.ID,
+                                      StudentName = student.FullName,
+                                      Created = exam.Created,
+                                      Status = exam.Status,
+                                      Marked = exam.Marked,
+                                      Point = exam.Point,
+                                      MaxPoint = exam.MaxPoint,
+                                      Number = exam.Number
+                                  }).ToList();
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", returnData },
+                    { "Model", model },
+                    { "Error", null }
+                };
+                return new JsonResult(response);
             }
-
-            var list = _service.CreateQuery().AsQueryable()
-            .Where(o => o.ClassID == ClassID && o.LessonID == lessonid)
-            .GroupBy(o => o.StudentID).Select(r => new ExamEntity { ID = r.Max(t => t.ID), StudentID = r.Key }).ToList();
-            var returnData = (from r in list
-                              let student = _studentService.GetItemByID(r.StudentID)
-                              let exam = _service.GetItemByID(r.ID)
-                              select new ExamViewModel
-                              {
-                                  ID = r.ID,
-                                  StudentID = student.ID,
-                                  StudentName = student.FullName,
-                                  Created = exam.Created,
-                                  Status = exam.Status,
-                                  Marked = exam.Marked,
-                                  Point = exam.Point,
-                                  MaxPoint = exam.MaxPoint
-                              }).ToList();
-
-
-
-            //var filter = new List<FilterDefinition<ExamEntity>>();
-            //var data = filter.Count > 0 ? _service.Collection.Find(Builders<ExamEntity>.Filter.And(filter)) : _service.GetAll();
-            //model.TotalRecord = data.Count();
-            //var DataResponse = data == null || data.Count() <= 0 || data.Count() < model.PageSize
-            //    ? data.ToList()
-            //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize).ToList();
-            //var mapping = new MappingEntity<ExamEntity, ExamViewModel>();
-            //var std = DataResponse.Select(o => mapping.AutoOrtherType(o, new ExamViewModel()
-            //{
-            //    LessonScheduleName = _lessonService.GetItemByID(_lessonScheduleService.GetItemByID(o.LessonScheduleID).LessonID).Title,
-            //    StudentName = _studentService.GetItemByID(o.StudentID).FullName
-            //})).ToList();
-
-            var response = new Dictionary<string, object>
+            else
             {
-                { "Data", returnData },
-                { "Model", model },
-                { "Error", null }
-            };
-            return new JsonResult(response);
+                // 1 - lay danh sach lesson 
+                // 2 - lay danh sach student theo lesson
+                // 3 - lay chi tiet bai 
+                var list = _service.CreateQuery().Find(o => o.ClassID == ClassID)?.ToList()?
+                    .GroupBy(o => new { o.LessonID }).Select(r => new ExamEntity { ID = r.Max(t => t.ID), LessonID = r.Key.LessonID })?.ToList();
+                var returnData = (from r in list
+                                  //let student = _studentService.GetItemByID(r.StudentID)
+                                  //let exam = _service.GetItemByID(r.ID)
+                                  let lesson = _lessonService.GetItemByID(r.LessonID)
+                                  select new ExamViewModel
+                                  {
+                                      LessonID = r.LessonID,
+                                      LessonScheduleName = lesson.Title,
+                                      ID = r.ID,
+                                      //StudentID = student.ID,
+                                      //StudentName = student.FullName,
+                                      //Created = exam.Created,
+                                      //Status = exam.Status,
+                                      //Marked = exam.Marked,
+                                      //Point = exam.Point,
+                                      //MaxPoint = exam.MaxPoint,
+                                      //Number = exam.Number
+                                  }).ToList()?.OrderBy(z => z.Status);
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", returnData },
+                    { "Model", model },
+                    { "Error", null }
+                };
+                return new JsonResult(response);
+            }
         }
-
-
         [System.Obsolete]
         [HttpPost]
+        [HttpGet]
         public JsonResult GetDetail(string ID)
         {
             try
@@ -139,13 +159,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         { "Data", null },
                         {"Error", "Data Error" }
                     });
+                var examdetails = _examDetailService.Collection.Find(o=>o.ExamID == exam.ID)?.ToList();
 
-
-
-                var filter = Builders<ExamDetailEntity>.Filter.Where(o => o.ExamID == ID);
-                var examdetails = _examDetailService.Collection.Find(filter);
-
-                if (examdetails.Count() == 0)
+                if (examdetails == null || examdetails.Count() == 0)
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
