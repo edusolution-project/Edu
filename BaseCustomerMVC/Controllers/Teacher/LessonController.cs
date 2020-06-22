@@ -372,6 +372,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         }
 
+
+        //public JsonResult FixChapterPracticeCount()
+        //{
+        //    var chapters = _chapterService.CreateQuery().Find(t=> t.ParentID == "0").ToList();
+        //    foreach(var chapter in chapters)
+        //    {
+        //        chapter.PracticeCount = _chapterService.CountChapterPractice(chapter.ID, chapter.ClassSubjectID);
+        //    }
+        //    return new JsonResult("OK");
+        //}
+
+
         [HttpPost]
         public JsonResult CreateOrUpdate(LessonEntity item)
         {
