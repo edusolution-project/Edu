@@ -1460,7 +1460,7 @@ var Lesson = (function () {
         $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn đáp án đúng</option>")
             .append("<option value='QUIZ2'>QUIZ: Điền từ</option>")
             .append("<option value='QUIZ3'>QUIZ: Nối đáp án</option>")
-            .append("<option value='ESSAY'>QUIZ: Essay</option>");
+        //.append("<option value='ESSAY'>QUIZ: Essay</option>");
         //}
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
         $(modalForm).append($("<div>", { "class": "question_template hide" }));
@@ -1633,9 +1633,9 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)" }));
-                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style":"right:40px" }));
-                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
+                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px" }));
 
+                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(questionTemplate.find(".media_holder"), "Questions.");
                 questionTemplate.append($("<div>", { "class": "media_preview" }));

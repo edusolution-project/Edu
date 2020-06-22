@@ -330,6 +330,49 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
+        public JsonResult UpdateConditionChapter(DefaultModel model, string ConditionChapter)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (!string.IsNullOrEmpty(ConditionChapter))
+            {
+                var targetChap = _chapterService.GetItemByID(ConditionChapter);
+                if (targetChap == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Thông tin không đúng" },
+                    { "Model", model }
+                });
+                }
+            }
+            if (string.IsNullOrEmpty(model.ID))
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Thông tin không đúng" },
+                    { "Model", model }
+                });
+            }
+
+            var chapter = _chapterService.GetItemByID(model.ID);
+            if (chapter == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Thông tin không đúng" },
+                    { "Model", model }
+                });
+            }
+            chapter.ConditionChapter = ConditionChapter;
+            _chapterService.Save(chapter);
+            return new JsonResult(new Dictionary<string, object> {
+                        {"Data", chapter },
+                        {"Msg","Cập nhật thành công" }
+                    });
+
+        }
+
+        [HttpPost]
         public JsonResult CreateOrUpdate(LessonEntity item)
         {
             try
