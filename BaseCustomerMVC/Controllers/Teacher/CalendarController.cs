@@ -28,6 +28,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonScheduleService _scheduleService;
         private readonly TeacherService _teacherService;
         private readonly CenterService _centerService;
+        private readonly TeacherHelper _teacherHelper;
         public CalendarController(
             CalendarService calendarService,
             CalendarLogService calendarLogService,
@@ -36,7 +37,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassService classService,
             LessonScheduleService scheduleService,
             TeacherService teacherService,
-            CenterService centerService
+            CenterService centerService,
+            TeacherHelper teacherHelper
             )
         {
             this._calendarService = calendarService;
@@ -47,21 +49,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _scheduleService = scheduleService;
             _teacherService = teacherService;
             _centerService = centerService;
+            _teacherHelper = teacherHelper;
         }
 
         public IActionResult Index(DefaultModel model, string basis)
         {
+            string _teacherid = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.GetItemByID(_teacherid);
+            if (teacher != null)
+                ViewBag.AllCenters = teacher.Centers;
+
             if (!string.IsNullOrEmpty(basis))
             {
                 var center = _centerService.GetItemByCode(basis);
                 if (center != null)
                     ViewBag.Center = center;
+                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(_teacherid, center.ID, "head-teacher");
             }
-            var userId = User?.FindFirst("UserID").Value;
-            var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId) && o.IsActive == true)?
+            var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == _teacherid) && o.IsActive == true)?
                 .SortBy(o => o.EndDate)
                 .ToList();
-            ViewBag.CurrentTeacher = _teacherService.GetItemByID(userId);
+            ViewBag.CurrentTeacher = teacher;
             ViewBag.ClassList = listClass;
             ViewBag.Model = model;
             return View();

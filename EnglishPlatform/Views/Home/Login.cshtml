@@ -28,9 +28,9 @@
                         <div class="card-header">
                             <h3 v-if="signin">Đăng nhập với tài khoản</h3>
                             <h3 v-if="forgot"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button> Quên mật khẩu</h3>
-                            <h3 v-if="signup"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button>Đăng ký</h3>
-                            <div class="note" v-if="signin">Chưa có tài khoản? <a href="javascript:;" title="Đăng ký ngay!" v-on:click="changeState()">Đăng ký ngay!</a> </div>
-                            <div class="note" v-if="forgot">Vui lòng nhập địa chỉ Email để đặt lại mật khẩu mới.</div>
+                            @*<h3 v-if="signup"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button>Đăng ký</h3>*@
+                            @*<div class="note" v-if="signin">Chưa có tài khoản? <a href="javascript:;" title="Đăng ký ngay!" v-on:click="changeState()">Đăng ký ngay!</a> </div>*@
+                            <div class="note" v-if="forgot">Vui lòng nhập địa chỉ Email để nhận mật khẩu mới.</div>
                         </div>
                         <div class="card-body">
                             <div class="form-group">

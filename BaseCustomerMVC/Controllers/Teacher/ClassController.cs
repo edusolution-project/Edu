@@ -907,6 +907,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             string TeacherID = "";
             var center = new CenterEntity();
+
+
             if (!string.IsNullOrEmpty(Center))
             {
                 center = _centerService.GetItemByCode(Center);
@@ -914,9 +916,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     { "Error", "Cơ sở không đúng"}
                 });
+
             }
 
-            var returndata = FilterClass(model, center.ID, SubjectID, GradeID, User.Claims.GetClaimByType("UserID").Value, true);
+            var returndata = FilterClass(model, center.ID, SubjectID, GradeID, "", true);
             //model.TotalRecord = totalrec;
 
             var response = new Dictionary<string, object>
@@ -937,8 +940,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var deep_filter = false;
             FilterDefinition<ClassEntity> ownerfilter = null;
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-
-
+            var teacher = _teacherService.GetItemByID(UserID);
+            var isHeadTeacher = _teacherHelper.HasRole(UserID, Center, "head-teacher");
+            if (!isHeadTeacher)
+                TeacherID = teacher.ID;
             //if (!HasRole(UserID, Center, "head-teacher"))
             //{
             //    TeacherID = UserID;
@@ -951,9 +956,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             else
             {
-                var teacher = _teacherService.GetItemByID(UserID);
-                if (teacher == null)
-                    return null;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
             }
             if (!string.IsNullOrEmpty(GradeID))
@@ -962,17 +964,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
 
-
-
             if (!string.IsNullOrEmpty(TeacherID))
             {
                 deep_filter = true;
-                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
-                //classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
+                //filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
+                ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == TeacherID);
             }
 
             //if (!deep_filter)
-            ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == TeacherID);
+
 
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
@@ -983,18 +984,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var data = _classSubjectService.Collection
                 .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
             //filter by classsubject
-            //if (ownerfilter != null)
-            //{
-            if (data.Count > 0)
-                classfilter.Add(
-                    Builders<ClassEntity>.Filter.Or(ownerfilter,
-                    Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive))));
+            if (ownerfilter != null)
+            {
+                if (data.Count > 0)
+                    classfilter.Add(
+                        Builders<ClassEntity>.Filter.Or(ownerfilter,
+                        Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive))));
+                else
+                    classfilter.Add(ownerfilter);
+            }
             else
-                classfilter.Add(ownerfilter);
-            //}
-            //else
-            //    if (data.Count > 0)
-            //    classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
+                if (data.Count > 0)
+                classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
 
             //if (data.Count > 0)
             //{

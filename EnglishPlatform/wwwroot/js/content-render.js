@@ -26,6 +26,8 @@ $.fn.textWidth = function (text, font) {
     return $.fn.textWidth.fakeEl.width() + 3;//addition padding
 };
 
+var _openingPart = '';
+
 var Lesson = (function () {
 
     var _totalPart = 0;
@@ -251,8 +253,6 @@ var Lesson = (function () {
                 break;
         }
 
-
-
         lessonBody.append(partsHolder);
         $('.main-column').addClass('scrollbar-outer').scrollbar();
     }
@@ -429,7 +429,7 @@ var Lesson = (function () {
                     switchUIMode(UIMode.LECTURE_ONLY);
             }
         }
-        //console.log(_UImode);
+        console.log(_UImode);
         $('.mod_' + config.mod).addClass("uimod_" + _UImode);
         //body
         switch (config.mod) {
@@ -445,10 +445,11 @@ var Lesson = (function () {
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
                     renderPreviewPart(item);
+                    console.log(item);
                 }
-                if (data.Part != null && data.Part.length == 1) {
-                    $('.fas.fa-caret-down:first').click();
-                }
+                //if (data.Part != null && data.Part.length == 1) {
+                //    $('.fas.fa-caret-down:first').click();
+                //}
                 if (_UImode == UIMode.EXAM_ONLY) {
                     $('#rightCol .tab-pane').each(function () {
                         var media = null;
@@ -465,7 +466,7 @@ var Lesson = (function () {
                         $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
                             .empty().append($(this).find('.part-box-header')).append(html).append(media)
                             .appendTo('#leftCol')
-                    })
+                    });
                 }
                 break;
             case mod.STUDENT_EXAM:
@@ -508,6 +509,7 @@ var Lesson = (function () {
                 lessontabs.append(tabs);
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
+
                     renderStudentPart(item, false);
                 }
                 if (data.Part != null && data.Part.length == 1) {
@@ -681,6 +683,18 @@ var Lesson = (function () {
             case mod.REVIEW:
                 break;
         }
+        //console.log('init' + _openingPart);
+        if (_openingPart == '') {
+            $('#leftCol .fa-caret-down:first()').focus().click()
+        }
+        else {
+            $('#leftCol .fa-caret-down[part=' + _openingPart + ']').focus().click()
+        }
+        if ($('.tab-pane.show .QUIZ2').length > 0) {
+            $('.tab-pane.show .QUIZ2').parent().parent().addClass("d-none");
+            $('.tab-pane-quiz.show').parent().parent().addClass("col-md-12");
+        }
+
     }
 
     var switchUIMode = function (mode) {
@@ -803,7 +817,7 @@ var Lesson = (function () {
         itembox.append(boxHeader);
 
 
-        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", style: "cursor:pointer", onclick: "toggleExpand(this)" });
+        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", style: "cursor:pointer", part: data.ID, onclick: "toggleExpand(this)" });
         //$(collapseSwitch).click(function () {
         //    toggleExpand(this);
         //});
@@ -811,6 +825,7 @@ var Lesson = (function () {
         //itembox.append(ItemRow);
         switch (data.Type) {
             case "TEXT":
+            default:
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "content-wrapper collapsable collapse" });
                 if (data.Description != null) {
@@ -1633,7 +1648,7 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)" }));
-                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style":"right:40px" }));
+                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px" }));
                 questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
 
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
@@ -2393,6 +2408,7 @@ var Lesson = (function () {
 
     var doLectureExam = function (obj) {
         $(obj).parent().remove();
+        console.log(_openingPart);
         redoExam(obj);
         $('#rightCol').find('.tab-pane').hide();
     }
@@ -2502,15 +2518,16 @@ var Lesson = (function () {
 
         itembox.append(boxHeader);
 
-        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", style: "cursor:pointer" });
+        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer"});
         $(collapseSwitch).click(function () {
             toggleExpand(this);
         });
         //itembox.append(ItemRow);
         switch (data.Type) {
             case "TEXT":
-                boxHeader.append(collapseSwitch);
+                boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "content-wrapper collapsable collapse" });
+                //console.log(itemBody);
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
@@ -2754,10 +2771,9 @@ var Lesson = (function () {
                     }
                 });
 
-                console.log(data);
+                //console.log(data);
                 for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
                     var item = data.CloneAnswers[i];
-
                     renderExamAnswer(item, data.ParentID, template);
                 }
                 break;
@@ -3698,14 +3714,18 @@ var toggleExpand = function (obj) {
     {
         $('.title > .fa-caret-up').removeClass("fa-caret-up");
         $(obj).addClass("fa-caret-up");
+        console.log($(obj).parent().parent());
         $(obj).parent().parent().siblings('.collapse').removeClass("collapse");
 
         $('#leftCol').animate({
             scrollTop: $(obj).parent().parent().parent().parent().offset().top - 60
         }, 500);
+        _openingPart = $(obj).attr('part');
+        console.log(_openingPart);
     }
     else {
         $(obj).removeClass("fa-caret-up");
+        _openingPart = '';
     }
 
 }

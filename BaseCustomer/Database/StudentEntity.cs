@@ -130,6 +130,11 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(o => o.Email == studentEmail).SingleOrDefault();
         }
+
+        public long CountByCenter(string CenterID)
+        {
+            return Collection.Find(t => t.Centers.Contains(CenterID)).CountDocuments();
+        }
     }
 
     public class StudentRanking

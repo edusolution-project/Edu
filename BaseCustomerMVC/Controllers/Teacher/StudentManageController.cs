@@ -13,6 +13,10 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using System.Globalization;
+using Microsoft.Extensions.Configuration;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using Microsoft.AspNetCore.Razor.Language;
+using OfficeOpenXml.ConditionalFormatting;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -23,6 +27,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly RoleService _roleService;
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
+        private readonly TeacherHelper _teacherHelper;
         private readonly SkillService _skillService;
         private readonly ClassService _classService;
         //private readonly ClassStudentService _classStudentService;
@@ -35,8 +40,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LearningHistoryService _learningHistoryService;
         private readonly ExamService _examService;
         private readonly LessonScheduleService _lessonScheduleService;
-        private readonly IHostingEnvironment _env;
         private readonly CenterService _centerService;
+        private readonly IHostingEnvironment _env;
+        private IConfiguration _configuration;
+        private readonly string _defaultPass;
 
 
         public StudentManageController(
@@ -45,6 +52,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             GradeService gradeservice,
             SubjectService subjectService,
             TeacherService teacherService,
+            TeacherHelper teacherHelper,
             ClassService classService,
             SkillService skillService,
             ExamService examService,
@@ -57,7 +65,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonScheduleService lessonScheduleService,
             StudentService studentService,
             CenterService centerService,
-            IHostingEnvironment evn
+            IHostingEnvironment evn,
+            IConfiguration iConfig
             )
         {
             _accountService = accountService;
@@ -65,6 +74,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _gradeService = gradeservice;
             _subjectService = subjectService;
             _teacherService = teacherService;
+            _teacherHelper = teacherHelper;
             _examService = examService;
             _learningHistoryService = learningHistoryService;
             _classService = classService;
@@ -78,20 +88,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _studentService = studentService;
             _centerService = centerService;
             _env = evn;
+            _configuration = iConfig;
+            _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
 
             _studentHelper = new StudentHelper(studentService, accountService);
         }
 
         public IActionResult Index(DefaultModel model, string basis)
         {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            if (teacher == null)
+                return Redirect("/login");
             if (!string.IsNullOrEmpty(basis))
             {
                 var center = _centerService.GetItemByCode(basis);
                 if (center != null)
                     ViewBag.Center = center;
+                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
             }
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
             var subject = new List<SubjectEntity>();
             var grade = new List<GradeEntity>();
@@ -270,14 +285,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Batch Import
         [HttpPost]
         [Obsolete]
-        public async Task<JsonResult> ImportStudent(string ClassID)
+        public async Task<JsonResult> ImportStudent(string basis, string ClassID)
         {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(UserID))
+                return null;
             var form = HttpContext.Request.Form;
             if (string.IsNullOrEmpty(ClassID))
                 return Json(new { error = "Không có thông tin lớp" });
             var @class = _classService.GetItemByID(ClassID);
             if (@class == null)
                 return Json(new { error = "Không có thông tin lớp" });
+            var center = new CenterEntity();
+            long left = 0;
+            if (!string.IsNullOrEmpty(basis))
+            {
+                center = _centerService.GetItemByCode(basis);
+                if (center == null)
+                    return null;
+                var totalStudent = _studentService.CountByCenter(center.ID);
+                if (center.Limit > 0)
+                    left = center.Limit - totalStudent;
+                else
+                    left = long.MaxValue;
+            }
 
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
@@ -290,7 +321,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 try
                 {
                     var counter = 0;
-
                     using (var readStream = new FileStream(filePath, FileMode.Open))
                     {
                         using (ExcelPackage package = new ExcelPackage(readStream))
@@ -301,27 +331,89 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             var keyCol = 4;
                             for (int i = 1; i <= totalRows; i++)
                             {
+                                if (left <= 0) continue;
                                 if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                                var studentEmail = workSheet.Cells[i, keyCol].Value == null ? "" : workSheet.Cells[i, keyCol].Value.ToString();
-                                if (string.IsNullOrEmpty(studentEmail)) continue;
-                                var student = _studentService.GetStudentByEmail(studentEmail);
+                                var email = workSheet.Cells[i, keyCol].Value == null ? "" : workSheet.Cells[i, keyCol].Value.ToString();
+                                if (string.IsNullOrEmpty(email)) continue;
+                                string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
+                                string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
+                                var birthdate = new DateTime();
+                                DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
+                                                   DateTimeStyles.None,
+                                                   out birthdate);
+                                var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
 
-                                if (student == null) continue;
-                                if (classStudents.Any(t => t == student.ID)) continue;
+                                var student = _studentService.GetStudentByEmail(email);
 
-                                _studentService.JoinClass(ClassID, student.ID, @class.Center);
-
-                                //_classStudentService.Save(new ClassStudentEntity
-                                //{
-                                //    StudentID = student.ID,
-                                //    ClassID = @class.ID
-                                //});
+                                if (student == null)
+                                {
+                                    //create student
+                                    var acc = _accountService.GetAccountByEmail(email);
+                                    student = new StudentEntity
+                                    {
+                                        //StudentId = code,
+                                        FullName = name,
+                                        DateBorn = birthdate,
+                                        Email = email,
+                                        Phone = phone,
+                                        //Skype = skype,
+                                        CreateDate = DateTime.Now,
+                                        UserCreate = UserID,
+                                        IsActive = true,
+                                        Centers = new List<string> { center.ID },
+                                        JoinedClasses = new List<string> { @class.ID}
+                                    };
+                                    if (acc == null)
+                                    {
+                                        await _studentService.CreateQuery().InsertOneAsync(student);
+                                        left--;
+                                        //counter++;
+                                        var account = new AccountEntity()
+                                        {
+                                            CreateDate = DateTime.Now,
+                                            IsActive = true,
+                                            PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                                            PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                                            UserCreate = student.UserCreate,
+                                            Type = ACCOUNT_TYPE.STUDENT,
+                                            UserID = student.ID,
+                                            UserName = student.Email.ToLower().Trim(),
+                                            RoleID = _roleService.GetItemByCode("student").ID
+                                        };
+                                        _accountService.CreateQuery().InsertOne(account);
+                                    }
+                                    else
+                                    {
+                                        if (acc.Type != ACCOUNT_TYPE.STUDENT)
+                                        {
+                                            await _studentService.CreateQuery().InsertOneAsync(student);
+                                            //counter++;
+                                        }
+                                        else //acc = student & student not found ????
+                                        {
+                                            //unknown Err;                                            
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (student.Centers == null) student.Centers = new List<string> { center.ID };
+                                    else if (!student.Centers.Contains(center.ID))
+                                        student.Centers.Add(center.ID);
+                                    _studentService.Save(student);
+                                    if (classStudents.Any(t => t == student.ID)) continue;
+                                    _studentService.JoinClass(ClassID, student.ID, @class.Center);
+                                }
                                 counter++;
+                                
                             }
                         }
                     }
                     System.IO.File.Delete(filePath);
-                    return Json(new { msg = "Đã thêm mới " + counter + " học viên" });
+                    var message = "Đã thêm mới " + counter + " học viên!";
+                    if (center.Limit > 0)
+                        message += " Hạn mức hiện tại còn " + left + " tài khoản trống!";
+                    return Json(new { msg = message });
                 }
                 catch (Exception ex)
                 {
@@ -341,8 +433,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 Ho_ten = "Nguyễn Văn A",
                 Ngay_sinh = "dd/mm/yyyy",
                 Email = "email@gmail.com",
-                SDT = "0123456789",
-                SkypeId = "skypeid",
+                SDT = "0123456789"
             });
             var stream = new MemoryStream();
 

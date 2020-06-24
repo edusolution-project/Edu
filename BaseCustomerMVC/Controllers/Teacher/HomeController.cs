@@ -71,14 +71,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Profile(string basis)
         {
-            string _teacherid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
-            var account = _teacherService.GetItemByID(_teacherid);
+            string _teacherid = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.GetItemByID(_teacherid);
+            if (teacher != null)
+                ViewBag.AllCenters = teacher.Centers;
+            if (teacher == null)
+                return Redirect("/login");
+
             if (!string.IsNullOrEmpty(basis))
             {
                 var center = _centerService.GetItemByCode(basis);
                 if (center != null)
                     ViewBag.Center = center;
+                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(_teacherid, center.ID, "head-teacher");
             }
+            var account = _teacherService.GetItemByID(_teacherid);
             if (account == null)
                 return Redirect("/login");
             ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;

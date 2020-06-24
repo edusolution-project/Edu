@@ -30,30 +30,28 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header" v-cloak>
-        <div class="flex border-b padding-b25 justify-content-between">
-            <div class="flex">
-                <div class="box filter-box">
-                    <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
-                    <span class="ic ic-picker inactive"></span>
-                </div>
-                <div class="box filter-box w-152">
-                    <select v-model="subject">
-                        <option value="">Chọn chương trình</option>
-                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="search-box">
-                    <button><i class="ic ic-find"></i></button>
-                    <input type="text" name="" v-model="searchTerm" placeholder="Tên lớp cần tìm">
-                </div>
-                @if (isHeadteacher)
-                {
-                    <div class="box private_box">
-                        <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
-                    </div>
-                }
+        <div class="flex border-b  border-b flex-wrap">
+            <div class="box filter-box  m-1">
+                <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
+                <span class="ic ic-picker inactive"></span>
             </div>
-            <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+            <div class="box filter-box w-152  m-1">
+                <select v-model="subject">
+                    <option value="">Chọn chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="search-box  m-1">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" v-model="searchTerm" placeholder="Tên lớp cần tìm">
+            </div>
+            @if (isHeadteacher)
+            {
+                <div class="box private_box  m-1">
+                    <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
+                </div>
+            }
+            <b-button class="btn-addevent btn-sm ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
         </div>
     </div>
     <div class="card-body" v-cloak>

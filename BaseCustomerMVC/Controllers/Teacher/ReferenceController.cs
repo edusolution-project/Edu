@@ -16,6 +16,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
     public class ReferenceController : TeacherController
     {
         private readonly TeacherService _teacherService;
+        private readonly TeacherHelper _teacherHelper;
         private readonly ClassService _classService;
         private readonly FileProcess _fileProcess;
         private readonly ReferenceService _referenceService;
@@ -24,6 +25,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public ReferenceController(
             TeacherService teacherService,
+            TeacherHelper teacherHelper,
             ClassService classService,
             FileProcess fileProcess,
             IHostingEnvironment env,
@@ -36,6 +38,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _referenceService = referenceService;
             _fileProcess = fileProcess;
             _centerService = centerService;
+            _teacherHelper = teacherHelper;
             _env = env;
         }
 
@@ -48,6 +51,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ViewBag.Center = center;
             }
             var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
+            }
             var myClasses = _classService.CreateQuery()
                 .Find(t => t.Members.Any(o => o.TeacherID == UserID)
                 //&& t.IsActive
