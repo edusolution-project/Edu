@@ -19,6 +19,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly StudentService _studentService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly ChapterService _chapterService;
+        private readonly ChapterProgressService _chapterProgressService;
         private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly LessonService _lessonService;
@@ -50,6 +51,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , StudentService studentService
             , ClassSubjectService classSubjectService
             , ChapterService chapterService
+            , ChapterProgressService chapterProgressService
             , LessonScheduleService lessonScheduleService
             , LearningHistoryService learningHistoryService
 
@@ -73,6 +75,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _studentService = studentService;
             _classSubjectService = classSubjectService;
             _chapterService = chapterService;
+            _chapterProgressService = chapterProgressService;
             _lessonScheduleService = lessonScheduleService;
             _learningHistoryService = learningHistoryService;
 
@@ -249,6 +252,7 @@ namespace BaseCustomerMVC.Controllers.Student
         /// <returns></returns>
         public IActionResult Detail(DefaultModel model, string basis, string ClassID, int newui = 0)
         {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
             if (ClassID == null)
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             var currentCs = _classSubjectService.GetItemByID(ClassID);
@@ -262,15 +266,48 @@ namespace BaseCustomerMVC.Controllers.Student
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             var chapter = _chapterService.GetItemByID(lesson.ChapterID);
-
-            var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
-
-            ViewBag.Class = currentClass;
-            ViewBag.Subject = currentCs;
+            var pass = true;
             ViewBag.Lesson = lesson;
-            ViewBag.NextLesson = nextLesson;
-            ViewBag.Chapter = chapter;
             ViewBag.Type = lesson.TemplateType;
+            string condChap = "";
+            if (!String.IsNullOrEmpty(chapter.ConditionChapter))//has condition
+            {
+                var conditionchap = _chapterService.GetItemByID(chapter.ConditionChapter);
+                if (conditionchap != null)
+                {
+                    condChap = conditionchap.Name;
+                    if (conditionchap.BasePoint > 0 && chapter.PracticeCount > 0)
+                    {
+                        //check condition
+                        var progress = _chapterProgressService.GetItemByChapterID(conditionchap.ID, UserID, conditionchap.ClassSubjectID);
+                        if (progress == null)
+                        {
+                            pass = false;
+                        }
+                        else
+                        {
+                            pass = progress.PracticePoint * chapter.PracticeCount >= conditionchap.BasePoint;
+                        }
+                    }
+                }
+                else
+                {
+                    //????
+                }
+            }
+            if (pass == false)
+            {
+                ViewBag.FailPass = true;
+                ViewBag.CondChap = condChap;
+            }
+            else
+            {
+                var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
+                ViewBag.Class = currentClass;
+                ViewBag.Subject = currentCs;
+                ViewBag.NextLesson = nextLesson;
+                ViewBag.Chapter = chapter;
+            }
             //if (newui == 1)
             return View("Detail_new");
             //return View();

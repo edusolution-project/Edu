@@ -7,6 +7,7 @@
     var currentLesson = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
     var nextLesson = ViewBag.NextLesson as BaseCustomerEntity.Database.LessonEntity;
     var currentChapter = ViewBag.Chapter as BaseCustomerEntity.Database.ChapterEntity;
+    var failpass = ViewBag.FailPass ?? false;
     ViewData["Title"] = currentLesson.Title;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl, Object param = null)
@@ -16,39 +17,53 @@
         return $"/{center}{url}";
     }
 }
-@section Sidebar
+
+@if (failpass)
 {
-    @await Html.PartialAsync("_sidebarExam_Student")
-}
-<div class="left-col">
-    <div class="main-container">
-        <!-- Begin Page Content -->
-        <div id="exam-student" class="h-100">
+    @section Sidebar
+    {
+        @await Html.PartialAsync("_sideBarStudentNewUI")
+    }
+
+    <section id="dashboard_content" class="module">
+        <div class="h-100 m-5">
+            Bài học sẽ được mở khi hoàn thành điều kiện <b class="text-danger"> @ViewBag.CondChap</b>
         </div>
-        <!-- End of Main Content -->
-        @*<input type="hidden" name="ExamID" id="ExamID" value="" />*@
+    </section>
+}
+else
+{
+    @section Sidebar
+    {
+        @await Html.PartialAsync("_sidebarExam_Student")
+    }
+    <div class="left-col">
+        <div class="main-container">
+            <!-- Begin Page Content -->
+            <div id="exam-student" class="h-100">
+            </div>
+            <!-- End of Main Content -->
+            @*<input type="hidden" name="ExamID" id="ExamID" value="" />*@
+        </div>
+
+        <div id="lessonSummary" class="shadow">
+        </div>
+
     </div>
+    @section Footer{}
+    @section Scripts{
+        <style>
+            .card-header[style*="display:none"] ~ .card-body {
+                top: 0 !important;
+            }
 
-    <div id="lessonSummary" class="shadow">
-    </div>
-
-</div>
-@section Footer{}
-@section Scripts{
-    <style>
-        .card-header[style*="display:none"] ~ .card-body {
-            top: 0 !important;
-        }
-
-        .uimod_exam .card-body {
-            padding-bottom: 7px !important;
-        }
-
-        
-    </style>
-    @*<script src="~/js/minify/detail.fn.min.js?20200615"></script>*@
-    <script src="~/js/content-render.js"></script>
-    <script>
+            .uimod_exam .card-body {
+                padding-bottom: 7px !important;
+            }
+        </style>
+        @*<script src="~/js/minify/detail.fn.min.js?20200615"></script>*@
+        <script src="~/js/content-render.js"></script>
+        <script>
             var config = {
                 container: "exam-student",
                 mod: @Html.Raw(currentLesson.TemplateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM ? "mod.STUDENT_EXAM" : "mod.STUDENT_LECTURE"),
@@ -59,7 +74,7 @@
                     answer: '@processUrl("CreateDetail", "Exam")',
                     removeans: '@processUrl("RemoveDetail", "Exam")',
                     end: '@processUrl("CompleteExam", "Exam")',
-                    review: '@processUrl("Review","Lesson")'
+                    review: '@processUrl("Review", "Lesson")'
                 },
                 type: @currentLesson.TemplateType,
                 lesson_id: '@currentLesson.ID',
@@ -68,7 +83,7 @@
                 chap_id: '@currentLesson.ChapterID'
             }
             var widget = new Lesson.onReady(config);
-    </script>
-    <link href="~/css/detailui.css?20191512" rel="stylesheet" />
+        </script>
+        <link href="~/css/detailui.css?20191512" rel="stylesheet" />
+    }
 }
-

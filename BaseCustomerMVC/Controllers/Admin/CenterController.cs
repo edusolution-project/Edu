@@ -55,7 +55,6 @@ namespace BaseCustomerMVC.Controllers.Admin
         public ActionResult Index(DefaultModel model)
         {
             
-
             ViewBag.Model = model;
             return View();
         }
