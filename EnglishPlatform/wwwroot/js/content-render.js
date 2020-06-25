@@ -26,6 +26,8 @@ $.fn.textWidth = function (text, font) {
     return $.fn.textWidth.fakeEl.width() + 3;//addition padding
 };
 
+var _openingPart = '';
+
 var Lesson = (function () {
 
     var _totalPart = 0;
@@ -251,8 +253,6 @@ var Lesson = (function () {
                 break;
         }
 
-
-
         lessonBody.append(partsHolder);
         $('.main-column').addClass('scrollbar-outer').scrollbar();
     }
@@ -429,7 +429,7 @@ var Lesson = (function () {
                     switchUIMode(UIMode.LECTURE_ONLY);
             }
         }
-        //console.log(_UImode);
+        console.log(_UImode);
         $('.mod_' + config.mod).addClass("uimod_" + _UImode);
         //body
         switch (config.mod) {
@@ -445,10 +445,11 @@ var Lesson = (function () {
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
                     renderPreviewPart(item);
+                    console.log(item);
                 }
-                if (data.Part != null && data.Part.length == 1) {
-                    $('.fas.fa-caret-down:first').click();
-                }
+                //if (data.Part != null && data.Part.length == 1) {
+                //    $('.fas.fa-caret-down:first').click();
+                //}
                 if (_UImode == UIMode.EXAM_ONLY) {
                     $('#rightCol .tab-pane').each(function () {
                         var media = null;
@@ -465,7 +466,7 @@ var Lesson = (function () {
                         $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
                             .empty().append($(this).find('.part-box-header')).append(html).append(media)
                             .appendTo('#leftCol')
-                    })
+                    });
                 }
                 break;
             case mod.STUDENT_EXAM:
@@ -508,6 +509,7 @@ var Lesson = (function () {
                 lessontabs.append(tabs);
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
+
                     renderStudentPart(item, false);
                 }
                 if (data.Part != null && data.Part.length == 1) {
@@ -681,6 +683,18 @@ var Lesson = (function () {
             case mod.REVIEW:
                 break;
         }
+        //console.log('init' + _openingPart);
+        if (_openingPart == '') {
+            $('#leftCol .fa-caret-down:first()').focus().click()
+        }
+        else {
+            $('#leftCol .fa-caret-down[part=' + _openingPart + ']').focus().click()
+        }
+        if ($('.tab-pane.show .QUIZ2').length > 0) {
+            $('.tab-pane.show .QUIZ2').parent().parent().addClass("d-none");
+            $('.tab-pane-quiz.show').parent().parent().addClass("col-md-12");
+        }
+
     }
 
     var switchUIMode = function (mode) {
@@ -729,7 +743,6 @@ var Lesson = (function () {
     }
 
     var renderPreviewPart = function (data) {
-
         var mainContainer = $('#' + config.container);
         var leftCol = mainContainer.find('#leftCol');
         var rightCol = mainContainer.find('#rightCol');
@@ -804,7 +817,7 @@ var Lesson = (function () {
         itembox.append(boxHeader);
 
 
-        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", style: "cursor:pointer", onclick: "toggleExpand(this)" });
+        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", style: "cursor:pointer", part: data.ID, onclick: "toggleExpand(this)" });
         //$(collapseSwitch).click(function () {
         //    toggleExpand(this);
         //});
@@ -812,10 +825,11 @@ var Lesson = (function () {
         //itembox.append(ItemRow);
         switch (data.Type) {
             case "TEXT":
-                //boxHeader.find(".title").append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "content-wrapper" });
+            default:
+                boxHeader.find(".title").append(collapseSwitch);
+                var itemBody = $("<div>", { "class": "content-wrapper collapsable collapse" });
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
                 itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
                 itembox.append(itemBody);
@@ -824,7 +838,7 @@ var Lesson = (function () {
             case "IMG":
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
-                if (data.Description != null) itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"))));
+                if (data.Description != null) itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"))));
                 renderMediaContent(data, itemBody, "IMG");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
                 itembox.append(itemBody);
@@ -834,7 +848,7 @@ var Lesson = (function () {
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"))));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"))));
                 renderMediaContent(data, itemBody, "AUDIO");
                 itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
                 itembox.append(itemBody);
@@ -844,7 +858,7 @@ var Lesson = (function () {
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"))));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"))));
                 renderMediaContent(data, itemBody, "VIDEO");
                 itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
                 itembox.append(itemBody);
@@ -854,9 +868,19 @@ var Lesson = (function () {
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"))));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"))));
                 renderMediaContent(data, itemBody, "DOC");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "VOCAB":
+                boxHeader.find(".title").append(collapseSwitch);
+                var itemBody = $("<div>", { "class": "content-wrapper collapsable collapse" });
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description));
+                }
+                itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
@@ -868,7 +892,7 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 //Render Description
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
                 //Render Question
                 totalQuiz = data.Questions.length;
@@ -878,7 +902,7 @@ var Lesson = (function () {
                 }
                 break;
             case "QUIZ2":
-                console.log(itembox);
+                //console.log(itembox);
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
@@ -886,7 +910,7 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 //Render Description
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
                 //Render Question
                 totalQuiz = data.Questions.length;
@@ -896,7 +920,7 @@ var Lesson = (function () {
                     var item = data.Questions[i];
                     //console.log(item);
                     try {
-                      
+
                         var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
 
                         var holder = fillquizs[i];
@@ -921,7 +945,7 @@ var Lesson = (function () {
                 break;
             case "QUIZ3":
                 if (data.Description != null) {
-                    itembox.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                    itembox.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
                 itembox.append(ItemRow);
                 var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
@@ -957,11 +981,11 @@ var Lesson = (function () {
                 break;
             case "ESSAY":
                 if (data.Description != null) {
-                    itembox.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                    itembox.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
-                
+
                 itembox.append(ItemRow);
-                
+
                 var itemBody = $("<div>", { "class": "quiz-wrapper col-8 pl-3" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
 
@@ -969,7 +993,7 @@ var Lesson = (function () {
                 //console.log(ItemRow);
                 ItemRow.append(itemBody);
                 ItemRow.find(".media-holder").addClass("col-12");
-                
+
                 //renderMediaContent(data, itemBody, "");
                 container.append(tabsitem);
                 console.log(data.Questions);
@@ -980,7 +1004,7 @@ var Lesson = (function () {
                     itemBody.append($("<label>", { text: "Trả lời: " }));
                     itemBody.append($("<textarea>", { id: esid, class: "w-100" }));
                     CKEDITOR.replace(esid);
-                    itemBody.append($("<button>", { text: "Đính kèm file", class: "btn btn-primary mt-2 btnAddfile", disabled:"disabled"}));
+                    itemBody.append($("<button>", { text: "Đính kèm file", class: "btn btn-primary mt-2 btnAddfile", disabled: "disabled" }));
                     itemBody.append($("<button>", { text: "Lưu đáp án", class: "btn btn-primary mt-2 ml-2", disabled: "disabled" }));
                 }
                 break;
@@ -1005,7 +1029,7 @@ var Lesson = (function () {
         //$('.btn[title]').tooltip({
         //    trigger: 'hover'
         //});
-
+        ApplyAdditionVocabStyle();
         $('.Q3_absrow .quiz-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
         $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
 
@@ -1203,44 +1227,44 @@ var Lesson = (function () {
             switch (type) {
                 case "IMG":
                     mediaHolder.append(
-                        $("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") }));
+                        $("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") }));
                     break;
                 case "VIDEO":
-                    mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                    mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                     break;
                 case "AUDIO":
-                    mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                    mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                     break;
                 case "DOC":
                     if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
                         data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
                         data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
                     ) {
-                        mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path + "", "class": "embed-frame", "frameborder": "0" }));
+                        mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path.replace("http:///", "/") + "", "class": "embed-frame", "frameborder": "0" }));
                     }
                     else {
                         if (data.Media != null)
-                            mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH", "class": "embed-frame" }));
+                            mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH", "class": "embed-frame" }));
                     }
                     break;
                 default:
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
                             mediaHolder.append(
-                                $("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") }));
+                                $("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
-                            mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
+                            mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
-                            mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
+                            mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else {
                             if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
                                 data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
                                 data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
                             ) {
-                                mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path + "", "class": "embed-frame", "frameborder": "0" }));
+                                mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path.replace("http:///", "/") + "", "class": "embed-frame", "frameborder": "0" }));
                             }
                             else
-                                mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH" }));
+                                mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH" }));
                         }
 
                     break;
@@ -1445,13 +1469,13 @@ var Lesson = (function () {
             .append("<option value='AUDIO'>Audio</option>")
             .append("<option value='IMG'>Hình ảnh</option>")
             .append("<option value='DOC'>File văn bản (PDF, DOC, PPT, XLS)</option>")
-        //.append("<option value='VOCAB'>Vocabulary</option>")
+            .append("<option value='VOCAB'>Từ vựng tiếng Anh</option>")
         //}
         //else {
         $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn đáp án đúng</option>")
             .append("<option value='QUIZ2'>QUIZ: Điền từ</option>")
             .append("<option value='QUIZ3'>QUIZ: Nối đáp án</option>")
-            .append("<option value='ESSAY'>QUIZ: Essay</option>");
+        //.append("<option value='ESSAY'>QUIZ: Essay</option>");
         //}
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
         $(modalForm).append($("<div>", { "class": "question_template hide" }));
@@ -1581,7 +1605,7 @@ var Lesson = (function () {
         var description = "";
 
         if (data != null && data.Description != null)
-            description = data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn");
+            description = data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/");
 
         desc.val(description);
         switch (type) {
@@ -1613,14 +1637,20 @@ var Lesson = (function () {
                 renderAddMedia(contentholder.find(".media_holder"), "", "DOC", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 break;
+            case "VOCAB":
+                desc.remove();
+                contentholder.append($("<label>", { "class": "title", "text": "Nhập danh sách từ vựng, cách nhau bởi dấu |" }));
+                contentholder.append($("<input>", { "type": "text", "name": "Description", "class": "input-text form-control", "placeholder": "Danh sách từ vựng" }).val(description));
+                break;
             case "QUIZ1"://Trắc nghiệm chuẩn
                 var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)" }));
-                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
+                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px" }));
 
+                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(questionTemplate.find(".media_holder"), "Questions.");
                 questionTemplate.append($("<div>", { "class": "media_preview" }));
@@ -1672,7 +1702,6 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "part_content " + type }));
 
                 //Add First Question
-
                 var quizContent = $.parseHTML("<div>" + description + "</div>");
                 var fillquizs = $(quizContent).find("fillquiz");
                 //console.log(data);
@@ -1713,6 +1742,7 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)" }));
+                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px" }));
 
                 var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
                 quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control input-sm", "placeholder": "Question", "tabindex": 0 }));
@@ -1764,38 +1794,6 @@ var Lesson = (function () {
                 break;
             case "ESSAY"://Tự luận
 
-                //alert(1);
-                //contentholder.append($("<input>", { "type": "text", "name": "Point", "class": "input-text form-control", "placeholder": "Điểm", "required": "required", value: data.Point }));
-                ////contentholder.append($("<textarea>", { "id": "editor", "rows": "15", "name": "Description", "class": "input-text form-control", "placeholder": "Description" }));
-                //if (data != null && data.description != null)
-                //    contentholder.find("[name=Description]").val(data.description);
-                //console.log(data);
-                //CKEDITOR.replace("editor");
-
-                //ClassicEditor
-                //    .create(document.querySelector('#editor'))
-                //    .then(newEditor => {
-                //        myEditor = newEditor;
-                //    })
-                //    .catch(error => {
-                //        console.error(error);
-                //    });
-
-                //var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
-                //questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
-                //questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
-                //questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
-
-                //var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
-                //quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question", "tabindex": 0 }));
-                //quizWrapper.append($("<div>", { "class": "media_holder" }));
-                //renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
-                //quizWrapper.append($("<div>", { "class": "media_preview" }));
-                //quizWrapper.append($("<label>", { "class": "input_label", "text": "Point" }));
-                //quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1", "tabindex": 0 }));
-                //questionTemplate.append(quizWrapper);
-
-
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
@@ -1819,7 +1817,7 @@ var Lesson = (function () {
                     addNewQuestion();
                 break;
             default:
-                alert("Not implement");
+
                 break;
         }
         //CKEDITOR.replace("editor");        
@@ -1842,7 +1840,8 @@ var Lesson = (function () {
                         dialogDefinition.removeContents('info');
                     }
                 });
-
+                break;
+            case "VOCAB":
                 break;
             default:
                 CKEDITOR.replace('editor', {
@@ -1872,7 +1871,7 @@ var Lesson = (function () {
             if (data.Content != null)
                 $(clone).find("[name='Questions.Content']").val(data.Content);
             if (data.Description != null)
-                $(clone).find("[name='Questions.Description']").val(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"));
+                $(clone).find("[name='Questions.Description']").val(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"));
             if (data.Media != null) {
                 renderAddMedia(clone.find(".media_holder"), "Questions.", "", data.Media);
                 renderMediaContent(data, clone.find(".media_preview:first"), "");
@@ -2109,8 +2108,21 @@ var Lesson = (function () {
         $('.tab-pane-quiz.show.active').removeClass('show active');
         $(panes[idx]).addClass('show active');
         $(quizpanes[idx]).addClass('show active');
+        //toggle width baseon mod & type
         $('.prevtab').prop('disabled', idx == 0);
         $('.nexttab').prop('disabled', idx == _totalPart - 1);
+        //console.log($(panes[idx]).find('.QUIZ2').length);
+        //console.log(_UImode);
+        if (_UImode === UIMode.EXAM_ONLY) {
+            if ($(panes[idx]).find('.QUIZ2').length > 0) {
+                $('#pills-tabContent>.scroll-wrapper:first').addClass('col-md-12');
+                $('#pills-tabContent>.scroll-wrapper:last').addClass('d-none');
+            }
+            else {
+                $('#pills-tabContent>.scroll-wrapper:first').removeClass('col-md-12');
+                $('#pills-tabContent>.scroll-wrapper:last').removeClass('d-none');
+            }
+        }
     }
 
     var toggleNav = function (obj) {
@@ -2396,6 +2408,7 @@ var Lesson = (function () {
 
     var doLectureExam = function (obj) {
         $(obj).parent().remove();
+        console.log(_openingPart);
         redoExam(obj);
         $('#rightCol').find('.tab-pane').hide();
     }
@@ -2505,18 +2518,18 @@ var Lesson = (function () {
 
         itembox.append(boxHeader);
 
-        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", style: "cursor:pointer" });
+        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer"});
         $(collapseSwitch).click(function () {
             toggleExpand(this);
         });
-
         //itembox.append(ItemRow);
         switch (data.Type) {
             case "TEXT":
-                //boxHeader.append(collapseSwitch);
-                var itemBody = $("<div>", { "class": "content-wrapper" });
+                boxHeader.find(".title").append(collapseSwitch);
+                var itemBody = $("<div>", { "class": "content-wrapper collapsable collapse" });
+                //console.log(itemBody);
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
                 itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
                 itembox.append(itemBody);
@@ -2526,7 +2539,7 @@ var Lesson = (function () {
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"))));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"))));
                 }
                 renderMediaContent(data, itemBody, "IMG");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-image" }));
@@ -2537,7 +2550,7 @@ var Lesson = (function () {
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"))));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"))));
                 renderMediaContent(data, itemBody, "AUDIO");
                 itemtitle.prepend($("<i>", { "class": "fas fa-music" }));
                 itembox.append(itemBody);
@@ -2547,7 +2560,7 @@ var Lesson = (function () {
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"))));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"))));
                 renderMediaContent(data, itemBody, "VIDEO");
                 itemtitle.prepend($("<i>", { "class": "far fa-play-circle" }));
                 itembox.append(itemBody);
@@ -2557,9 +2570,19 @@ var Lesson = (function () {
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "media-wrapper collapsable collapse" });
                 if (data.Description != null)
-                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn"))));
+                    itemBody.append($("<div>", { "class": "d-flex justify-content-center" }).append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"))));
                 renderMediaContent(data, itemBody, "DOC");
                 itemtitle.prepend($("<i>", { "class": "fas fa-file-word" }));
+                itembox.append(itemBody);
+                container.append(tabsitem);
+                break;
+            case "VOCAB":
+                boxHeader.find(".title").append(collapseSwitch);
+                var itemBody = $("<div>", { "class": "content-wrapper collapsable collapse" });
+                if (data.Description != null) {
+                    itemBody.append($("<div>", { "class": "doc-content" }).html(data.Description.replace("http:///", "/")));
+                }
+                itemtitle.prepend($("<i>", { "class": "far fa-file-word" }));
                 itembox.append(itemBody);
                 container.append(tabsitem);
                 break;
@@ -2571,7 +2594,7 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 //Render Description
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
                 //Render Question
                 totalQuiz = data.Questions.length;
@@ -2587,12 +2610,13 @@ var Lesson = (function () {
                 renderMediaContent(data, itemBody, "");
                 container.append(tabsitem);
                 //Render Description
+                console.log("quiz2");
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
 
                 //Render Question
-                console.log(data.Questions.length);
+                //console.log(data.Questions.length);
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
                     renderFillQuestionStudent(item, i);
@@ -2601,7 +2625,7 @@ var Lesson = (function () {
             case "QUIZ3":
                 itembox.append(ItemRow);
                 if (data.Description != null) {
-                    ItemRow.before($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                    ItemRow.before($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
                 var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
@@ -2633,7 +2657,7 @@ var Lesson = (function () {
             case "ESSAY":
                 var itemBody = $("<div>", { "class": "content-wrapper" });
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
@@ -2687,7 +2711,7 @@ var Lesson = (function () {
         //$('.btn[title]').tooltip({
         //    trigger: 'hover'
         //});
-
+        ApplyAdditionVocabStyle();
         $('.Q3_absrow .quiz-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
         $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
 
@@ -2747,6 +2771,7 @@ var Lesson = (function () {
                     }
                 });
 
+                //console.log(data);
                 for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
                     var item = data.CloneAnswers[i];
                     renderExamAnswer(item, data.ParentID, template);
@@ -3379,6 +3404,10 @@ var Lesson = (function () {
         saveAnswerForStudent
     }
 
+    var ApplyAdditionVocabStyle = function () {
+        $('.part-box.VOCAB .vocab-box').each(function (i, item) { $(item).prepend($("<b>", { text: (i + 1), class: 'vocab-pos' })) })
+    }
+
     window.LessonInstance = {} || Lesson;
 
     LessonInstance.onReady = onReady;
@@ -3426,6 +3455,10 @@ var Lesson = (function () {
     window.SwitchMode = switchMode;
     return LessonInstance;
 }());
+
+function PlayPronun(obj) {
+    $(obj).siblings("audio")[0].play();
+}
 
 function chooseFile(obj) {
     $(obj).siblings("input[type=file]").focus().click();
@@ -3681,14 +3714,18 @@ var toggleExpand = function (obj) {
     {
         $('.title > .fa-caret-up').removeClass("fa-caret-up");
         $(obj).addClass("fa-caret-up");
+        console.log($(obj).parent().parent());
         $(obj).parent().parent().siblings('.collapse').removeClass("collapse");
 
         $('#leftCol').animate({
             scrollTop: $(obj).parent().parent().parent().parent().offset().top - 60
         }, 500);
+        _openingPart = $(obj).attr('part');
+        console.log(_openingPart);
     }
     else {
         $(obj).removeClass("fa-caret-up");
+        _openingPart = '';
     }
 
 }

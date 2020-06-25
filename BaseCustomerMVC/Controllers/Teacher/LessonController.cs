@@ -287,6 +287,103 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
+        [Obsolete]
+        [HttpPost]
+        public JsonResult UpdateChapterPoint(DefaultModel model, double BasePoint)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            if (!(BasePoint >= 0 && BasePoint <= 100))
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Điểm tối thiểu không đúng (0 - 100)" },
+                    { "Model", model }
+                });
+            }
+
+            if (string.IsNullOrEmpty(model.ID))
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Thông tin không đúng" },
+                    { "Model", model }
+                });
+            }
+
+            var chapter = _chapterService.GetItemByID(model.ID);
+            if (chapter == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Thông tin không đúng" },
+                    { "Model", model }
+                });
+            }
+            chapter.BasePoint = BasePoint;
+            _chapterService.Save(chapter);
+            return new JsonResult(new Dictionary<string, object> {
+                        {"Data", chapter },
+                        {"Msg","Cập nhật thành công" }
+                    });
+
+        }
+
+        [HttpPost]
+        public JsonResult UpdateConditionChapter(DefaultModel model, string ConditionChapter)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (!string.IsNullOrEmpty(ConditionChapter))
+            {
+                var targetChap = _chapterService.GetItemByID(ConditionChapter);
+                if (targetChap == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Thông tin không đúng" },
+                    { "Model", model }
+                });
+                }
+            }
+            if (string.IsNullOrEmpty(model.ID))
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Thông tin không đúng" },
+                    { "Model", model }
+                });
+            }
+
+            var chapter = _chapterService.GetItemByID(model.ID);
+            if (chapter == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Thông tin không đúng" },
+                    { "Model", model }
+                });
+            }
+            chapter.ConditionChapter = ConditionChapter;
+            _chapterService.Save(chapter);
+            return new JsonResult(new Dictionary<string, object> {
+                        {"Data", chapter },
+                        {"Msg","Cập nhật thành công" }
+                    });
+
+        }
+
+
+        //public JsonResult FixChapterPracticeCount()
+        //{
+        //    var chapters = _chapterService.CreateQuery().Find(t=> t.ParentID == "0").ToList();
+        //    foreach(var chapter in chapters)
+        //    {
+        //        chapter.PracticeCount = _chapterService.CountChapterPractice(chapter.ID, chapter.ClassSubjectID);
+        //    }
+        //    return new JsonResult("OK");
+        //}
+
+
         [HttpPost]
         public JsonResult CreateOrUpdate(LessonEntity item)
         {

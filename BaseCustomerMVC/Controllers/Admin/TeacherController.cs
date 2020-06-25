@@ -40,6 +40,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             , AccountService accountService
             , CenterService centerService
             , IHostingEnvironment evn
+            , IConfiguration iConfig
+            , TeacherHelper teacherHelper
             , SubjectService subjectService)
         {
             _env = evn;
@@ -49,8 +51,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             _accountService = accountService;
             _subjectService = subjectService;
             _mapping = new MappingEntity<TeacherEntity, TeacherViewModel>();
-
-            _teacherHelper = new TeacherHelper(service, accountService);
+            _configuration = iConfig;
+            _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
+            _teacherHelper = teacherHelper;
         }
 
         public ActionResult Index(DefaultModel model)
@@ -72,7 +75,10 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             if (!string.IsNullOrEmpty(model.SearchText))
             {
-                filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.FullName.ToLower().Contains(model.SearchText.ToLower()) || o.Email.ToLower().Contains(model.SearchText.ToLower()) || o.Subjects.Contains(model.SearchText) || o.TeacherId.ToLower().Contains(model.SearchText.ToLower())));
+                var text = model.SearchText.ToLower();
+                filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.FullName.ToLower().Contains(text) || o.Email.Contains(text))
+                //|| o.TeacherId.ToLower().Contains(model.SearchText.ToLower()))
+                );
             }
             if (model.StartDate > DateTime.MinValue)
             {
@@ -107,13 +113,13 @@ namespace BaseCustomerMVC.Controllers.Admin
                 from t in teachers.ToList()
                 let account = _accountService.CreateQuery().Find(o => o.UserID == t.ID && o.Type == ACCOUNT_TYPE.TEACHER).FirstOrDefault()
                 where account != null
-                let role = roles.Find(r => r.ID == account.RoleID)
-                where role != null
+                //let role = roles.Find(r => r.ID == account.RoleID)
+                //where role != null
                 select _mapping.AutoOrtherType(t, new TeacherViewModel()
                 {
                     SubjectList = t.Subjects == null ? null : _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList(),
-                    RoleID = role.ID,
-                    RoleName = role.Name,
+                    //RoleID = role.ID,
+                    //RoleName = role.Name,
                     AccountID = account.ID
                 });
 
@@ -242,15 +248,23 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (item.Centers != null && item.Centers.Count > 0)
                     foreach (var center in item.Centers)
                     {
-                        center.Code = center.Name.ConvertUnicodeToCode("-", true);
-                        var idx = centers.FindIndex(t => t.CenterID == center.CenterID);
-                        if (idx >= 0)
-                        //replace
+                        var ct = _centerService.GetItemByID(center.CenterID);
+                        if (ct != null)
                         {
-                            centers[idx].RoleID = center.RoleID;
+                            center.Code = ct.Code;
+                            center.Name = ct.Name;
+                            var idx = centers.FindIndex(t => t.CenterID == center.CenterID);
+                            if (idx >= 0)
+                            //replace
+                            {
+                                centers[idx].RoleID = center.RoleID;
+                            }
+                            else
+                                centers.Add(center);
                         }
-                        else
-                            centers.Add(center);
+                        //center.Code = center.Code;
+                        //center.Code = center.Name.ConvertUnicodeToCode("-", true);
+
                     }
                 item.Centers = centers;
 

@@ -26,39 +26,38 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header" v-cloak>
-        <div class="flex border-b padding-b25 justify-content-between">
-            <div class="flex width-100">
-                <div class="box filter-box w-152">
-                    <autocomplete v-on:chooseitem="chooseClass" :items="list_ac_class" v-on:input="autocompleteClass" :plhd="'Nhập để tìm lớp'" />
-                </div>
-                <div class="box filter-box w-152">
-                    <select name="" v-model="search_subject_id">
-                        <option value="">Chương trình</option>
-                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="box filter-box w-152">
-                    <select name="" v-model="search_skill_id">
-                        <option value="">Môn học</option>
-                        <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="box filter-box w-152">
-                    <select name="" v-model="search_grade_id">
-                        <option value="">Cấp độ</option>
-                        <option v-for="(item,k) in list_grades_full" v-if="matchGrade(item)" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="search-box mr-2">
-                    <button><i class="ic ic-find"></i></button>
-                    <input type="text" name="" v-model="searchTerm" placeholder="Tên học viên">
-                </div>
+        <div class="flex border-b flex-wrap">
+            @*<div class="flex flex-grow-1 mb-2">*@
+            <div class="box filter-box w-152 m-1">
+                <autocomplete v-on:chooseitem="chooseClass" :items="list_ac_class" v-on:input="autocompleteClass" :plhd="'Nhập để tìm lớp'" />
             </div>
-
-            <div class="flex">
-                <b-button class="btn-addevent btn-student btn-sm" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
-                <b-button class="btn-addevent btn-student btn-sm" style="margin-left:5px" v-on:click="showStudentUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
+            <div class="box filter-box w-152 m-1 ">
+                <select name="" v-model="search_subject_id">
+                    <option value="">Chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
             </div>
+            <div class="box filter-box w-152 m-1">
+                <select name="" v-model="search_skill_id">
+                    <option value="">Môn học</option>
+                    <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box w-152 m-1">
+                <select name="" v-model="search_grade_id">
+                    <option value="">Cấp độ</option>
+                    <option v-for="(item,k) in list_grades_full" v-if="matchGrade(item)" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="search-box m-1">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" v-model="searchTerm" placeholder="Tên học viên">
+            </div>
+            @*</div>
+                <div class="flex mb-2">*@
+            <b-button class="btn-addevent btn-student btn-sm m-1" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
+            <b-button class="btn-addevent btn-student btn-sm m-1" style="margin-left:5px" v-on:click="showStudentUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
+            @*</div>*@
         </div>
     </div>
     <div class="card-body" v-cloak>

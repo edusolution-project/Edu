@@ -1,4 +1,4 @@
-@font-face {
+﻿@font-face {
     font-family: 'Be Vietnam';
     font-style: normal;
     font-weight: 400;
@@ -64,15 +64,6 @@
 .yellow-bg {
     background-color: #F7971E !important;
 }
-
-input.fillquiz {
-    background: #e6712d4d;
-    border: solid 1px #CCC;
-    padding: 3px;
-    border-radius: 3px;
-    margin: 0 2px;
-}
-
 
 html, body {
     background: #fff;
@@ -2806,3 +2797,91 @@ td a {
         background-color: #13A6FB;
         border-color: #13A6FB
     }
+
+fillquiz {
+    margin: 0 3px;
+}
+
+.fillquiz {
+    background: #e6712d4d;
+    display: inline;
+    padding: 5px 8px;
+    border-radius: 3px;
+    line-height: 33px;
+    border: solid 1px #999;
+}
+
+fillquiz, fillquiz.quiz-item {
+    display: inline-block !important;
+    width: auto;
+}
+
+.fillquiz:empty::before {
+    content: attr(data-placeholder);
+    display: inline-block;
+    color: #AAA;
+}
+
+.fillquiz:focus {
+    background: #FFF;
+}
+
+.fillquiz:empty:focus::before {
+    content: 'Nhập câu trả lời...';
+}
+
+
+.vocab-box {
+    display: inline-block;
+    border: solid 1px #CCC;
+    border-radius: 10px;
+    margin: 10px;
+    padding: 10px;
+    position: relative;
+    vertical-align: top;
+    width: 46%;
+    background: #FFF;
+}
+
+    .vocab-box:hover {
+        background: #ffe5e5;
+    }
+
+    .vocab-box .vocab-pos {
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        background-color: #ffa500;
+        border-radius: 10px;
+        width: 20px;
+        height: 20px;
+        text-align: center;
+        font-weight: bold;
+        color: #FFF;
+        line-height: 17px;
+    }
+
+    .vocab-box .word-title {
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .vocab-box .word-pron {
+        color: orange;
+        margin: 5px;
+    }
+
+    .vocab-box .vocab-audio {
+        display: inline-block;
+    }
+
+        .vocab-box .vocab-audio button {
+            background: none;
+            border: none;
+            outline: none;
+        }
+
+.vocab-meaning b {
+    color: green;
+    font-weight: 700;
+}

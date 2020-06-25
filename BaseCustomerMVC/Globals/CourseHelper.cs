@@ -80,12 +80,13 @@ namespace BaseCustomerMVC.Globals
                 newchapter.ClassSubjectID = classSubject.ID;
                 newchapter.ID = null;
                 _chapterService.Save(newchapter);
+
                 newID = newchapter.ID;
             }
 
             var lessons = _courseLessonService.CreateQuery().Find(o => o.CourseID == classSubject.CourseID && o.ChapterID == orgID).ToList();
             if (lessons != null && lessons.Count > 0)
-            { 
+            {
                 foreach (var courselesson in lessons)
                 {
                     LessonEntity lesson = _lessonMapping.AutoOrtherType(courselesson, new LessonEntity());
@@ -110,7 +111,6 @@ namespace BaseCustomerMVC.Globals
                 }
                 lessoncounter = lessons.Count;
             }
-            
 
             var subchaps = _courseChapterService.GetSubChapters(classSubject.CourseID, orgID);
             if (subchaps.Count > 0)
@@ -122,6 +122,7 @@ namespace BaseCustomerMVC.Globals
             if (newchapter != null)
             {
                 newchapter.TotalLessons = lessoncounter;
+                newchapter.PracticeCount = _chapterService.CountChapterPractice(newchapter.ID, newchapter.ClassSubjectID);
                 _chapterService.Save(newchapter);
             }
             return lessoncounter;

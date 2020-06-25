@@ -750,7 +750,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
 
                 var chapters = _chapterService.GetSubChapters(currentCs.ID, "0");
-                var chapterExtends = _chapterExtendService.Search(currentCs.ID);
+                //var chapterExtends = _chapterExtendService.Search(currentCs.ID);
 
                 var listProgress = new ClassScheduleViewModel(new CourseEntity())
                 {
@@ -761,9 +761,9 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 foreach (var chapter in chapters)
                 {
-                    var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
+                    //var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
                     var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, userId, currentCs.ID);
-                    if (extend != null) chapter.Description = extend.Description;
+                    //if (extend != null) chapter.Description = extend.Description;
                     var viewModel = new MappingEntity<ChapterEntity, ChapterProgressViewModel>().AutoOrtherType(chapter, new ChapterProgressViewModel());
                     viewModel.TotalLessons = chapter.TotalLessons;
                     if (progress != null)
@@ -772,6 +772,8 @@ namespace BaseCustomerMVC.Controllers.Student
                         viewModel.CompletedLessons = progress.Completed;
                         viewModel.LastDate = progress.LastDate;
                         viewModel.LastLessonID = progress.LastLessonID;
+                        viewModel.PracticeAvgPoint = chapter.PracticeCount > 0 ? progress.PracticePoint / chapter.PracticeCount : 0;
+                            //progress.PracticeAvgPoint;
                     }
                     listProgress.Chapters.Add(viewModel);
                 }

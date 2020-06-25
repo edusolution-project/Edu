@@ -19,6 +19,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly StudentService _studentService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly ChapterService _chapterService;
+        private readonly ChapterProgressService _chapterProgressService;
         private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly LessonService _lessonService;
@@ -36,6 +37,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _schedulemapping;
+        private readonly VocabularyService _vocabularyService;
+
         //private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
         //private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
         //private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
@@ -48,6 +51,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , StudentService studentService
             , ClassSubjectService classSubjectService
             , ChapterService chapterService
+            , ChapterProgressService chapterProgressService
             , LessonScheduleService lessonScheduleService
             , LearningHistoryService learningHistoryService
 
@@ -61,6 +65,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , CloneLessonPartService cloneLessonPartService
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
+            , VocabularyService vocabularyService
             )
         {
             _subjectService = subjectService;
@@ -70,6 +75,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _studentService = studentService;
             _classSubjectService = classSubjectService;
             _chapterService = chapterService;
+            _chapterProgressService = chapterProgressService;
             _lessonScheduleService = lessonScheduleService;
             _learningHistoryService = learningHistoryService;
 
@@ -83,6 +89,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
 
             _schedulemapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
+            _vocabularyService = vocabularyService;
         }
 
         public IActionResult Index()
@@ -244,6 +251,7 @@ namespace BaseCustomerMVC.Controllers.Student
         /// <returns></returns>
         public IActionResult Detail(DefaultModel model, string basis, string ClassID, int newui = 0)
         {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
             if (ClassID == null)
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             var currentCs = _classSubjectService.GetItemByID(ClassID);
@@ -257,15 +265,48 @@ namespace BaseCustomerMVC.Controllers.Student
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             var chapter = _chapterService.GetItemByID(lesson.ChapterID);
-
-            var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
-
-            ViewBag.Class = currentClass;
-            ViewBag.Subject = currentCs;
+            var pass = true;
             ViewBag.Lesson = lesson;
-            ViewBag.NextLesson = nextLesson;
-            ViewBag.Chapter = chapter;
             ViewBag.Type = lesson.TemplateType;
+            string condChap = "";
+            if (!String.IsNullOrEmpty(chapter.ConditionChapter))//has condition
+            {
+                var conditionchap = _chapterService.GetItemByID(chapter.ConditionChapter);
+                if (conditionchap != null)
+                {
+                    condChap = conditionchap.Name;
+                    if (conditionchap.BasePoint > 0 && chapter.PracticeCount > 0)
+                    {
+                        //check condition
+                        var progress = _chapterProgressService.GetItemByChapterID(conditionchap.ID, UserID, conditionchap.ClassSubjectID);
+                        if (progress == null)
+                        {
+                            pass = false;
+                        }
+                        else
+                        {
+                            pass = progress.PracticePoint / chapter.PracticeCount >= conditionchap.BasePoint;
+                        }
+                    }
+                }
+                else
+                {
+                    //????
+                }
+            }
+            if (pass == false)
+            {
+                ViewBag.FailPass = true;
+                ViewBag.CondChap = condChap;
+            }
+            else
+            {
+                var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
+                ViewBag.Class = currentClass;
+                ViewBag.Subject = currentCs;
+                ViewBag.NextLesson = nextLesson;
+                ViewBag.Chapter = chapter;
+            }
             //if (newui == 1)
             return View("Detail_new");
             //return View();
@@ -412,17 +453,56 @@ namespace BaseCustomerMVC.Controllers.Student
             var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
             var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
 
+
+
+            var result = new List<PartViewModel>();
+            foreach (var part in listParts)
+            {
+                var convertedPart = mapPart.AutoOrtherType(part, new PartViewModel());
+                switch (part.Type)
+                {
+                    case "QUIZ1":
+                    case "QUIZ3":
+                    case "ESSAY":
+                        convertedPart.Questions = _cloneLessonPartQuestionService.CreateQuery()
+                            .Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList()
+                            .Select(q => new QuestionViewModel(q)
+                            {
+                                CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == q.ID).ToList(),
+                                Description = q.Description
+                            }).ToList();
+                        break;
+                    case "QUIZ2":
+                        convertedPart.Questions = _cloneLessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID)
+                            //.SortBy(q => q.Order).ThenBy(q => q.ID)
+                            .ToList()
+                            .Select(q => new QuestionViewModel(q)
+                            {
+                                CloneAnswers = null,
+                                Description = null
+                            }).ToList();
+                        break;
+                    case "VOCAB":
+                        convertedPart.Description = RenderVocab(part.Description);
+                        break;
+                    default:
+                        break;
+                }
+                result.Add(convertedPart);
+            }
+
             var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
             {
-                Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
-                {
-                    Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
-                        .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
-                        {
-                            CloneAnswers = o.Type == "QUIZ2" ? null : _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
-                            Description = o.Type == "QUIZ2" ? null : z.Description
-                        }))?.ToList()
-                })).ToList()
+                Part = result
+                //listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                //{
+                //    Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                //        .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                //        {
+                //            CloneAnswers = o.Type == "QUIZ2" ? null : _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
+                //            Description = o.Type == "QUIZ2" ? null : z.Description
+                //        }))?.ToList()
+                //})).ToList()
             });
 
             var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
@@ -463,6 +543,33 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
             }
         }
+
+        private string RenderVocab(string description)
+        {
+            string result = "";
+            var vocabs = description.Split('|');
+            if (vocabs == null || vocabs.Count() == 0)
+                return description;
+            foreach (var vocab in vocabs)
+            {
+                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace("-", ""));
+                if (vocabularies != null && vocabularies.Count > 0)
+                {
+                    result +=
+                        $"<div class='vocab-box'>" +
+                            $"<b class='word-title'>{vocab.Trim()}</b><span class='word-pron'>{vocabularies[0].Pronunciation}</span>" +
+                            $"<div class='vocab-audio'>" +
+                                $"<button onclick='PlayPronun(this)'><i class='ic fas fa-volume-up'></i></button>" +
+                                $"<audio class='d-none' id='audio' controls><source src='{vocabularies[0].PronunAudioPath}' type='audio/mpeg' />Your browser does not support the audio tag</audio>" +
+                            $"</div>" +
+                            //$"<div class='vocab-type'>{string.Join(",", vocabularies.Select(t => t.WordType).ToList())}<div/>" +
+                            $"<div class='vocab-meaning'>{string.Join("<br/>", vocabularies.Where(t => !string.IsNullOrEmpty(t.Description)).Select(t => "<b>" + WordType.GetShort(t.WordType) + "</b>: " + t.Description).ToList())}</div>" +
+                        $"</div>";
+                }
+            }
+            return result;
+        }
+
 
         [Obsolete]
         [HttpPost]
@@ -614,10 +721,10 @@ namespace BaseCustomerMVC.Controllers.Student
                                IsView = r.TemplateType == LESSON_TEMPLATE.EXAM ? lastexam != null : lastjoin != null,
                                LastJoin = r.TemplateType == LESSON_TEMPLATE.EXAM ? (lastexam != null ? lastexam.Updated : DateTime.MinValue) :
                                     lastjoin != null ? lastjoin.Time : DateTime.MinValue,
-                               DoPoint = 
+                               DoPoint =
                                (lastexam != null && lastexam.Status) ?
-                               r.TemplateType == LESSON_TEMPLATE.EXAM ? (lastexam.MaxPoint > 0 ? lastexam.Point * 100 / lastexam.MaxPoint : 0) :
-                                    (lastexam.QuestionsTotal > 0 ? lastexam.QuestionsPass * 100 / lastexam.QuestionsTotal : 0) : 0,//completed exam only
+                               r.TemplateType == LESSON_TEMPLATE.EXAM ? (lastexam.MaxPoint > 0 ? lastexam.Point * 100.00 / lastexam.MaxPoint : 0) :
+                                    (lastexam.QuestionsTotal > 0 ? lastexam.QuestionsPass * 100.00 / lastexam.QuestionsTotal : 0) : 0,//completed exam only
                                Tried = lastexam != null ? lastexam.Number : 0,
                                LastExam = (lastexam != null && lastexam.Status
                                ) ? lastexam.ID : null

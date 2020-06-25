@@ -2,6 +2,7 @@
 @{
     BaseCustomerEntity.Database.CenterEntity _center = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity ?? new BaseCustomerEntity.Database.CenterEntity();
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    var isHeadTeacher = ViewBag.IsHeadTeacher ?? false;
     string processUrl(string act, string ctrl)
     {
         string url = Url.Action(act, ctrl);
@@ -27,10 +28,10 @@
             <li for="course">
                 <a href="@processUrl("Index" , "Class")" title="Quản lý lớp học"><i class="ic ic-book-pen"></i>Quản lý lớp học</a>
             </li>
-            @if (User.IsInRole("head-teacher"))
+            @if (isHeadTeacher)
             {
                 <li for="teacher">
-                    <a href="#" title="Quản lý giáo viên"><i class="ic ic-multi-user"></i>Quản lý giáo viên</a>
+                    <a href="@processUrl("Index" , "TeacherManage")" title="Quản lý giáo viên"><i class="ic ic-multi-user"></i>Quản lý giáo viên</a>
                 </li>
             }
             <li for="student">

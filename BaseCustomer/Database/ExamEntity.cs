@@ -210,7 +210,7 @@ namespace BaseCustomerEntity.Database
 
             var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
             //_lessonProgressService.GetByClassSubjectID_StudentID_LessonID(exam.ClassSubjectID, exam.StudentID, exam.LessonID);
-
+            Save(exam);
             if (lesson.TemplateType == LESSON_TEMPLATE.EXAM
             //&& lesson.Etype != LESSON_ETYPE.PRACTICE
             )
@@ -222,14 +222,14 @@ namespace BaseCustomerEntity.Database
             }
             else
             {
-                var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
+                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
                 //var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
                 //var ctask = _classProgressService.UpdatePoint(lessonProgress);
                 Task.WhenAll(cttask
                     //, cstask, ctask
                     );
             }
-            Save(exam);
+            
             return exam;
         }
 

@@ -10,6 +10,7 @@ using Core_v2.Globals;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -51,6 +52,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly FileProcess _fileProcess;
         private readonly StudentHelper _studentHelper;
+        private readonly TeacherHelper _teacherHelper;
         private readonly LessonHelper _lessonHelper;
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
@@ -89,6 +91,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             FileProcess fileProcess,
             LessonHelper lessonHelper,
             StudentHelper studentHelper,
+            TeacherHelper teacherHelper,
 
             ChapterProgressService chapterProgressService,
             CenterService centerService,
@@ -127,6 +130,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _fileProcess = fileProcess;
 
             _studentHelper = studentHelper;
+            _teacherHelper = teacherHelper;
 
             _lessonHelper = lessonHelper;
 
@@ -160,7 +164,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ViewBag.Skills = _skillService.GetList();
             }
 
-            ViewBag.IsHeadTeacher = HasRole(UserID, center.ID, "head-teacher");
+            ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
 
             ViewBag.User = UserID;
             ViewBag.Model = model;
@@ -177,6 +181,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var center = _centerService.GetItemByCode(basis);
                 if (center != null)
                     ViewBag.Center = center;
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
             }
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
@@ -887,7 +893,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
 
-            var returndata = FilterClass(model, center.ID, SubjectID, GradeID, TeacherID, skipActive);
+            var returndata = FilterClass(model, center.ID, SubjectID, GradeID, "", skipActive, true);
             //model.TotalRecord = totalrec;
 
             var response = new Dictionary<string, object>
@@ -901,6 +907,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public JsonResult GetClassList(DefaultModel model, string Center, string SubjectID = "", string GradeID = "")
         {
             var center = new CenterEntity();
+
+
             if (!string.IsNullOrEmpty(Center))
             {
                 center = _centerService.GetItemByCode(Center);
@@ -908,6 +916,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     { "Error", "Cơ sở không đúng"}
                 });
+
             }
 
             var returndata = FilterClass(model, center.ID, SubjectID, GradeID, User.Claims.GetClaimByType("UserID").Value, true);
@@ -921,52 +930,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        private List<Dictionary<string, object>> FilterClass(DefaultModel model, string Center, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
+        private List<Dictionary<string, object>> FilterClass(DefaultModel model, string Center, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true, bool isManager = false)
         {
             model.TotalRecord = 0;
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
             var classfilter = new List<FilterDefinition<ClassEntity>>();
-            if (!string.IsNullOrEmpty(Center))
-                classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == Center));
-            var deep_filter = false;
+
+            //var deep_filter = false;
             FilterDefinition<ClassEntity> ownerfilter = null;
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-
-
-            //if (!HasRole(UserID, Center, "head-teacher"))
-            //{
-            //    TeacherID = UserID;
-            //}
+            var teacher = _teacherService.GetItemByID(UserID);
 
             if (!string.IsNullOrEmpty(SubjectID))
             {
-                deep_filter = true;
+                //deep_filter = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
             else
             {
-                var teacher = _teacherService.GetItemByID(UserID);
-                if (teacher == null)
-                    return null;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
             }
             if (!string.IsNullOrEmpty(GradeID))
             {
-                deep_filter = true;
+                //deep_filter = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
-
-
-
-            if (!string.IsNullOrEmpty(TeacherID))
-            {
-                deep_filter = true;
-                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
-                //classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
-            }
-
-            //if (!deep_filter)
-                ownerfilter = new FilterDefinitionBuilder<ClassEntity>().Where(o => o.TeacherID == TeacherID);
 
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.EndDate >= model.StartDate));
@@ -974,32 +962,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
 
-            var data = _classSubjectService.Collection
-                .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty).ToList();
-            //filter by classsubject
-            //if (ownerfilter != null)
-            //{
-                if (data.Count > 0)
-                    classfilter.Add(
-                        Builders<ClassEntity>.Filter.Or(ownerfilter,
-                        Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive))));
-                else
-                    classfilter.Add(ownerfilter);
-            //}
-            //else
-            //    if (data.Count > 0)
-            //    classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
+            var dCursor = _classSubjectService.Collection
+                .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty);
+            var data = dCursor.ToList();
+               
+            if (!string.IsNullOrEmpty(TeacherID))
+            {
+                classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
+                ownerfilter = Builders<ClassEntity>.Filter.Where(o => o.TeacherID == TeacherID);
+            }
+            else
+                ownerfilter = Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID);
 
-            //if (data.Count > 0)
-            //{
-            //    if (ownerfilter != null)
+            if (!skipActive)
+                classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
 
-            //    else
-            //        classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID) && (t.IsActive || skipActive)));
-            //}
-
-            //if (ownerfilter != null && filter.Count <= 1)//no filter
-            //    classfilter.Add(ownerfilter);
+            if (data.Count > 0)
+                classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID)));
 
             if (!string.IsNullOrEmpty(model.SearchText))
                 classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
@@ -1007,7 +986,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (classfilter.Count == 0)
                 return null;
 
-            var classResult = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classfilter));
+            var classResult = _service.Collection.Find(
+                Builders<ClassEntity>.Filter.And(
+                    Builders<ClassEntity>.Filter.Where(o => o.Center == Center),
+                    Builders<ClassEntity>.Filter.Or(
+                        Builders<ClassEntity>.Filter.And(ownerfilter),
+                        Builders<ClassEntity>.Filter.And(classfilter)
+                        )
+                    )
+                );
 
             model.TotalRecord = classResult.CountDocuments();
 
@@ -1146,7 +1133,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 oldData.Skills = new List<string>();
                 oldData.Subjects = new List<string>();
-                oldData.Members = new List<ClassMemberEntity>();
+                var creator = _teacherService.GetItemByID(oldData.TeacherID);
+                oldData.Members = new List<ClassMemberEntity> { };
+                if (creator != null)
+                    oldData.Members.Add(new ClassMemberEntity { TeacherID = creator.ID, Type = ClassMemberType.TEACHER, Name = creator.FullName });
                 oldData.TotalLessons = 0;
 
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
@@ -1607,7 +1597,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-
         private List<StudentSummaryViewModel> GetClassSubjectSummary(ClassEntity @class, string StudentID, long total_students)
         {
             var data = new List<StudentSummaryViewModel>();
@@ -1643,15 +1632,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #endregion
 
-        private bool HasRole(string userid, string center, string role)
-        {
-            var teacher = _teacherService.GetItemByID(userid);
-            if (teacher == null) return false;
-            var centerMember = teacher.Centers.Find(t => t.CenterID == center);
-            if (centerMember == null) return false;
-            if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
-            return true;
-        }
+        //private bool HasRole(string userid, string center, string role)
+        //{
+        //    var teacher = _teacherService.GetItemByID(userid);
+        //    if (teacher == null) return false;
+        //    var centerMember = teacher.Centers.Find(t => t.CenterID == center);
+        //    if (centerMember == null) return false;
+        //    if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
+        //    return true;
+        //}
 
 
         #region Fix Data

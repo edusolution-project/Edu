@@ -13,5 +13,7 @@ namespace BaseCustomerMVC.Models
         public string LastLessonID { get; set; }
         [JsonProperty("LastDate")]
         public DateTime LastDate { get; set; }
+        [JsonProperty("PracticeAvgPoint")]
+        public double PracticeAvgPoint { get; set; }
     }
 }

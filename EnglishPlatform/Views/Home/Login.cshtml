@@ -27,10 +27,10 @@
                     <div class="box" id="box_login">
                         <div class="card-header">
                             <h3 v-if="signin">Đăng nhập với tài khoản</h3>
-                            <h3 v-if="forgot"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button> Quên mật khẩu</h3>
-                            <h3 v-if="signup"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button>Đăng ký</h3>
-                            <div class="note" v-if="signin">Chưa có tài khoản? <a href="javascript:;" title="Đăng ký ngay!" v-on:click="changeState()">Đăng ký ngay!</a> </div>
-                            <div class="note" v-if="forgot">Vui lòng nhập địa chỉ Email để đặt lại mật khẩu mới.</div>
+                            <h3 v-if="forgot"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button>Quên mật khẩu</h3>
+                            <h3 v-if="signup"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button>Đăng ký tài khoản giáo viên</h3>
+                            <div class="note" v-if="signin">Bạn là giáo viên & chưa có tài khoản? <a href="javascript:;" title="Đăng ký ngay!" v-on:click="changeState()">Đăng ký ngay!</a> </div>
+                            <div class="note" v-if="forgot">Vui lòng nhập địa chỉ Email để nhận mật khẩu mới.</div>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
@@ -49,12 +49,12 @@
                                 <label for="password">Mật khẩu</label>
                                 <input type="password" v-model="password" class="form-control" placeholder="Nhập mật khẩu" id="password">
                             </div>
-                            <div class="form-group" v-if="!forgot">
+                            <div class="form-group" v-if="signin">
                                 <label for="username">Tài khoản đăng nhập</label>
                                 <select class="form-control" name="Type" id="usertype" v-model="usertype">
-                                    <option value="student" selected>Student</option>
-                                    <option value="teacher">Teacher</option>
-                                    <option v-if="signin" value="admin">Administrator</option>
+                                    <option value="student" selected>Học viên</option>
+                                    <option value="teacher">Giáo viên</option>
+                                    <option value="admin">Quản trị hệ thống</option>
                                 </select>
                             </div>
                             <div class="center">
@@ -97,7 +97,9 @@
                         _that.signup = true
                         _that.signin = false
                         _that.forgot = false
+                        _that.usertype = 'teacher'
                         _that.action = '@Url.Action("RegisterAPI","Home")'
+
                         break;
                     case 2:
                         _that.signup = false

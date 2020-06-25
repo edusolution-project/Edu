@@ -65,6 +65,11 @@
                             {{item.Name}}
                         </a>
                     </td>
+                    <td>
+                        <template v-if="item.Image">
+                            <img :src="item.Image" style="max-width:100px; max-height:100px;" />
+                        </template>
+                    </td>
                     <td>{{item.SubjectName}}</td>
                     <td>{{item.SkillName}}</td>
                     <td>{{item.GradeName}}</td>
@@ -108,12 +113,15 @@
         Vue.use(VueQuillEditor)
         new Vue({
             el: "#main",
-             mounted() {
+            mounted() {
                  this.list_subject = @Html.Raw(Json.Serialize(subjects));
                  this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                  this.list_skills = @Html.Raw(Json.Serialize(skills));
                  //this.changeSubject()
-                 this.getData();
+                this.getData();
+                window.chooseFile = this.chooseFile
+                window.updateFile = this.updateFile
+                window.readURL = this.readURL
             },
             components: {
           	    LocalQuillEditor: VueQuillEditor.quillEditor
@@ -131,6 +139,10 @@
                     {
                         key: 'lesson_name',
                         label: 'Tên bài giảng'
+                    },
+                    {
+                        key: 'lesson_image',
+                        label: 'Ảnh bìa'
                     },
                     {
                         key: 'subject_name',
@@ -174,7 +186,8 @@
                     GradeID: '',
                     SkillID: '',
                     Description: '',
-                    Init: false
+                    Init: false,
+                    Image: ''
                 },
                 cloneItem: {
                     OriginID: '',
@@ -293,6 +306,7 @@
                     })
                 },
                 showEditItem(obj) {
+                    console.log(obj);
                     let _that = this;
                     if (obj == null) {
                         _that.addItem.ID = '';
@@ -301,6 +315,7 @@
                         _that.addItem.Description = '';
                         _that.addItem.Name = '';
                         _that.addItem.SkillID = '';
+                        _that.addItem.Image = '';
                     }
                     else {
                         _that.addItem.ID = obj.ID;
@@ -310,7 +325,8 @@
                         })
                         _that.addItem.Description = obj.Description;
                         _that.addItem.Name = obj.Name;
-                        _that.addItem.SkillID = obj.SkillID == null ? '': obj.SkillID;
+                        _that.addItem.SkillID = obj.SkillID == null ? '' : obj.SkillID;
+                        _that.addItem.Image = obj.Image == null ? '' : obj.Image
                     }
                     _that.$bvModal.show('modal_event')
                 },
@@ -356,6 +372,10 @@
                         alert("Chưa chọn cấp độ");
                         return false;
                     }
+                    console.log($('input[name=cover]'));
+
+                    if ($('input[name=cover]')[0].files.length > 0)
+                        _form.append('cover', $('input[name=cover]')[0].files[0])
 
                     _form.append('ID', _that.addItem.ID)
                     _form.append('GradeID', _that.addItem.GradeID)
@@ -483,6 +503,26 @@
                         })
                     }
                 },
+                errorImgUrl() {
+                 
+                },
+                chooseFile(obj) {
+                    $(obj).siblings("input[type=file]").focus().click()
+                },
+                updateFile(obj) {
+                    //$(obj).siblings(".btnAddfile").text(obj.files[0].name);
+                    readURL(obj);
+                },
+                readURL(input) {
+                    if(input.files && input.files[0]) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $(input).siblings("img").attr('src', e.target.result);
+                        }
+                        reader.readAsDataURL(input.files[0]); // convert to base64 string
+                    }
+                }
+
             }
         });
     </script>
@@ -514,6 +554,16 @@
                     <option value="">Chọn môn học</option>
                     <option v-for="(item,k) in list_skills" :value="item.ID">{{item.Name}}</option>
                 </select>
+            </b-col>
+        </div>
+        <div>
+            <b-col class="form-group">
+                <label for="">Bìa sách</label>
+                <div>
+                    <button class="btn btn-info" onclick="chooseFile(this)">Chọn file</button>
+                    <input type="file" name="cover" class="d-none" onchange="updateFile(this)" accept="image/*">
+                    <img :src="addItem.Image" />
+                </div>
             </b-col>
         </div>
         <b-col class="form-group">
@@ -577,7 +627,6 @@
                     <option v-for="(item,k) in list_centers" :value="item.ID">{{item.Name}}</option>
                 </select>
             </b-col>
-
         </div>
         <b-col class="form-group">
             <label for="">Mô tả</label>

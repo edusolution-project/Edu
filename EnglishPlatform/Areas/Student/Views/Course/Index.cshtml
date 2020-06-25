@@ -21,7 +21,6 @@
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
 
-
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b padding-b25">
@@ -55,7 +54,7 @@
         <div class="row row-list">
             <div class="col-md-3 course-item" v-for="(item,k) in list_course">
                 <div class="box radius">
-                    <a :href="'@processUrl("Detail", "Course")/' + item.ID" class="thumb"><img :src="item.Thumb" :alt="item.Name"></a>
+                    <a :href="'@processUrl("Detail", "Course")/' + item.ID" class="thumb"><img :src="item.Thumb" :alt="item.Name" class="w-100"></a>
                     <div class="detail box">
                         <a :href="'@processUrl("Detail", "Course")/' + item.ID" title="" class="title">{{item.Name}}</a>
                         <p><i class="ti-time"></i>{{formatShortDate(item.EndDate)}}</p>

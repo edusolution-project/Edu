@@ -124,7 +124,11 @@
         <li class="col-md-12">
             <div class="inner">
                 <div class="d-flex justify-content-between w-100 align-items-center btn-collapse">
-                    <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color" v-on:click="getSubList(data.ID, pos)" :id="data.ID"><i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}<i class="ic ic-collapse"></i></a>
+                    <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color" v-on:click="getSubList(data.ID, pos)" :id="data.ID">
+                        <i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}
+                    <span class="bg-transparent text-primary font-weight-bold" v-if="data.BasePoint > 0" v-bind:class="{'text-danger' : parseInt(data.PracticeAvgPoint) < data.BasePoint, 'text-success' : data.PracticeAvgPoint > data.BasePoint}">{{Math.floor(data.PracticeAvgPoint) + '/' + data.BasePoint.toFixed(0)}}</span>
+                        <i class="ic ic-collapse"></i>
+                    </a>
                     <ul class="time-line flex">
                         <li v-if="isValidTime(data.StartDate)"><i class="ti-time"></i>{{formatTime(data.StartDate)}} </li>
                         <li v-if="isValidTime(data.EndDate)"><i class="ti-time"></i>{{formatTime(data.EndDate)}} </li>
