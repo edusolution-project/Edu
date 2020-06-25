@@ -231,8 +231,6 @@ namespace EnglishPlatform.Controllers
                             }
 
                             //cache
-
-
                             var claims = new List<Claim>{
                                 new Claim("UserID",defaultUser.ID),
                                 new Claim(ClaimTypes.Email, _username),

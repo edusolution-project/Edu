@@ -772,7 +772,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         viewModel.CompletedLessons = progress.Completed;
                         viewModel.LastDate = progress.LastDate;
                         viewModel.LastLessonID = progress.LastLessonID;
-                        viewModel.PracticeAvgPoint = chapter.PracticeCount > 0 ? progress.PracticePoint * 100d / chapter.PracticeCount : 0;
+                        viewModel.PracticeAvgPoint = chapter.PracticeCount > 0 ? progress.PracticePoint / chapter.PracticeCount : 0;
                             //progress.PracticeAvgPoint;
                     }
                     listProgress.Chapters.Add(viewModel);

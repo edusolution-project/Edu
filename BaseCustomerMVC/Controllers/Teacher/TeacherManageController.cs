@@ -38,6 +38,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CenterService _centerService;
         private readonly TeacherHelper _teacherHelper;
         private readonly string _defaultPass;
+        private readonly MailHelper _mailHelper;
         private readonly IHostingEnvironment _env;
         private IConfiguration _configuration;
 
@@ -60,6 +61,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             StudentService studentService,
             CenterService centerService,
             TeacherHelper teacherHelper,
+            MailHelper mailHelper,
             IHostingEnvironment evn
             , IConfiguration iConfig
             )
@@ -81,6 +83,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _studentService = studentService;
             _teacherHelper = teacherHelper;
             _centerService = centerService;
+            _mailHelper = mailHelper;
             _env = evn;
             _configuration = iConfig;
             _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
@@ -282,6 +285,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Type = ACCOUNT_TYPE.TEACHER,
                     UserID = teacher.ID,
                     UserName = teacher.Email,
+                    Name = teacher.FullName,
                     RoleID = teacher.ID
                 };
                 _accountService.CreateQuery().InsertOne(account);
@@ -417,7 +421,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 var name = workSheet.Cells[i, 2].Value.ToString();
                                 var phone = workSheet.Cells[i, 4].Value.ToString();
                                 var role = (workSheet.Cells[i, 5].Value != null && workSheet.Cells[i, 5].Value.ToString() == "x") ? headTeacherRole.ID : teacherRole.ID;
-                                
+
                                 var teacher = _teacherService.GetItemByEmail(email);
 
                                 AccountEntity acc = null;
@@ -472,6 +476,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         Type = ACCOUNT_TYPE.TEACHER,
                                         UserID = teacher.ID,
                                         UserName = teacher.Email,
+                                        Name = teacher.FullName,
                                         RoleID = teacher.ID
                                     };
                                     _accountService.CreateQuery().InsertOne(account);
@@ -523,6 +528,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var _currentData = _teacherService.CreateQuery().Find(o => o.Email == email);
             return _currentData.CountDocuments() > 0;
+        }
+
+        public async Task<JsonResult> FixAccName()
+        {
+            var accs = _accountService.GetAll().ToList();
+            foreach (var acc in accs)
+            {
+                if (acc.Name == null)
+                {
+                    if (acc.Type == "teacher")
+                    {
+                        var tc = _teacherService.GetItemByID(acc.UserID);
+                        if (tc != null)
+                        {
+                            acc.Name = tc.FullName;
+                            _accountService.Save(acc);
+                        }
+                    }
+                }
+            }
+            return Json("OK");
         }
     }
 }

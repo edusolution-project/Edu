@@ -286,7 +286,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         }
                         else
                         {
-                            pass = progress.PracticePoint * chapter.PracticeCount >= conditionchap.BasePoint;
+                            pass = progress.PracticePoint / chapter.PracticeCount >= conditionchap.BasePoint;
                         }
                     }
                 }
