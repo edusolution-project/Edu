@@ -937,14 +937,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
             var classfilter = new List<FilterDefinition<ClassEntity>>();
 
-            //var deep_filter = false;
+            var skip_owned = false;
             FilterDefinition<ClassEntity> ownerfilter = null;
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(UserID);
 
             if (!string.IsNullOrEmpty(SubjectID))
             {
-                //deep_filter = true;
+                skip_owned = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
             else
@@ -953,7 +953,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             if (!string.IsNullOrEmpty(GradeID))
             {
-                //deep_filter = true;
+                skip_owned = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
 
@@ -990,6 +990,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var classResult = _service.Collection.Find(
                 Builders<ClassEntity>.Filter.And(
                     Builders<ClassEntity>.Filter.Where(o => o.Center == Center),
+                    skip_owned ?
+                    Builders<ClassEntity>.Filter.And(classfilter) :
                     Builders<ClassEntity>.Filter.Or(
                         Builders<ClassEntity>.Filter.And(ownerfilter),
                         Builders<ClassEntity>.Filter.And(classfilter)
