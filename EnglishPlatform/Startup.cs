@@ -64,6 +64,7 @@ namespace EnglishPlatform
             services.AddSingleton<CourseHelper>();
             services.AddSingleton<StudentHelper>();
             services.AddSingleton<LessonHelper>();
+            services.AddSingleton<TeacherHelper>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddMvc(options =>
             {
