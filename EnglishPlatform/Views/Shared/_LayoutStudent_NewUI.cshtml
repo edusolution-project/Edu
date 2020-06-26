@@ -102,6 +102,23 @@
                     </div>
                 </div>
             </div>
+            <div class="box padding-15" style="margin: 10px;border-radius: 15px;background: #00304b;">
+                <div class="heading flex">
+                    <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmcZ3GdRT1PdHOLvp1LrtamL"><h4 class="box-head text-danger" style="font-size:135%">Hướng dẫn sử dụng</h4></a>
+                </div>
+                <ul class="list list-news">
+                    <li class="d-flex">
+                        <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmcZ3GdRT1PdHOLvp1LrtamL" title="Hướng dẫn sử dụng" target="_blank" class="thumb w-25">
+                            <img src="https://yt3.ggpht.com/a/AATXAJxE5ypJQ4Sgh69zWU7WNWx1wL7J4fbFvARxUyT_=s48-c-k-c0xffffffff-no-rj-mo">
+                        </a>
+                        <div class="info w-75">
+                            <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmcZ3GdRT1PdHOLvp1LrtamL" title="Hướng dẫn sử dụng" target="_blank">
+                                <p style="font-size:12px;color: #FFF;">Tổng hợp video hướng dẫn sử dụng platform Eduso.vn</p>
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
             <div class="adv">
                 <img src="/pictures/adv1.png" alt="">
             </div>
@@ -110,7 +127,7 @@
                     <h4 class="box-head">Tin tức nổi bật</h4>
                     <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                 </div>
-                <ul class="list list-news">
+                <ul class="list list-news list-articles">
                     <li v-for="(item,k) in list_news" class="d-flex">
                         <a :href="item.href" :title="item.title" target="_blank" class="thumb w-25"><img :src="item.thumbnail" /></a>
                         <div class="info w-75">
@@ -126,7 +143,7 @@
 
     <script>
         new Vue({
-            el: ".list-news",
+            el: ".list-articles",
             mounted() {
             },
             data: {
@@ -135,12 +152,12 @@
                         href: 'https://www.facebook.com/utcelearning/?hc_ref=ARQzn875E9EnzJl0pDOIsk-T6UjYmWEn8oE0bsjwjNISY5FfbD6PgeCUIPWrnvXcc9o&ref=nf_target&__tn__=kC-R',
                         title: 'Hướng dẫn đào tạo trực tuyến',
                         description: 'Tổng hợp tài liệu & video hướng dẫn đào tạo trực tuyến cập nhật các tính năng mới',
-                        thumbnail: 'https://scontent.fhan4-1.fna.fbcdn.net/v/t1.0-0/p370x247/71767146_116313109773262_2458809184288768000_n.jpg?_nc_cat=104&_nc_sid=85a577&_nc_ohc=YBpwjKJSJLAAX9HDnwb&_nc_ht=scontent.fhan4-1.fna&_nc_tp=6&oh=73d15dd234f902d1aadd61170ef6dda0&oe=5EBD1FB8'
+                        thumbnail: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t1.0-1/p200x200/71767146_116313109773262_2458809184288768000_n.jpg?_nc_cat=104&_nc_sid=dbb9e7&_nc_ohc=HtGhdLTf2WYAX_NwoRT&_nc_ht=scontent.fhan2-4.fna&_nc_tp=6&oh=1b66286b43372fa674c031fa25b5d11c&oe=5F1AAE01'
                     },
                     {
                         href: 'http://educoo.vn',
                         title: 'Khóa học tiếng Anh 1 - 1',
-                        description: 'Khóa học tiếng Anh 1 - 1: Educoo.vn',
+                        description: 'Tổng hợp tài liệu & video hướng dẫn đào tạo trực tuyến cập nhật các tính năng mới',
                         thumbnail: 'http://educoo.vn/Content/v-637088577654292784/img/banner.png'
                     },
                 ]

@@ -520,7 +520,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 return Json(new { error = "Thông tin không đúng" });
             }
-
             schedule.IsOnline = !schedule.IsOnline;
             _lessonScheduleService.Save(schedule);
             UpdateCalendar(schedule, UserID);
@@ -552,6 +551,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 oldItem.StartDate = entity.StartDate.ToUniversalTime();
                 oldItem.EndDate = entity.EndDate.ToUniversalTime();
+
+                if (oldItem.StartDate < DateTime.Now)
+                    oldItem.IsOnline = false;
+
                 UpdateCalendar(oldItem, UserID);
                 _lessonScheduleService.CreateOrUpdate(oldItem);
 
@@ -623,9 +626,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private void UpdateCalendar(LessonScheduleEntity entity, string userid)
         {
-            var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
-            if (oldcalendar != null)
-                _calendarHelper.Remove(oldcalendar.ID);
+            //var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
+            //if (oldcalendar != null)
+            _calendarHelper.Remove(entity.ID);
             if (entity.IsActive)
                 _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
         }
