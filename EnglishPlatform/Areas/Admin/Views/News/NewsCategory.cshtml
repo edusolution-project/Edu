@@ -122,7 +122,7 @@
         var pageSize = 30;
         $.ajax({
             type: "POST",
-            url: '@Url.Action("GetList", "News")',
+            url: '@Url.Action("GetList", "News", new { Area = "admin" })',
             data: {SearchText: searchText,StartDate: startDate,EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex},
             dataType:"json",
             success: function (data) {

@@ -67,6 +67,7 @@
                                 <th class='text-center'>Ngày đăng</th>
                                 <th class='text-center'>Top</th>
                                 <th class='text-center'>Hot</th>
+                                <th class='text-center'>Hoạt động</th>
                                 <th class='text-center'></th>
                                 @*<th class='text-center'></th>*@
                             </tr>
@@ -179,6 +180,17 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                @*<div class="form-row">
+                                    <div class="input-group col-md-6">
+                                        <div class="col-sm-10">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive">
+                                                <label class="form-check-label">Hoạt động</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>*@
                             </div>
                             <div class="form-group col-md-4">
                                 <div class="form-row"><img id="img" style="max-height:200px;max-width:200px;margin:auto" /></div>
@@ -225,7 +237,7 @@
         var pageSize = 6;
         $.ajax({
             type: "POST",
-            url: '@Url.Action("GetListNews", "News")',
+            url: '@Url.Action("GetListNews", "News", new { Area = "admin" })',
             data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex, CategoryID: categoryID, Sort: sort},
             dataType:"json",
             success: function (data) {
@@ -254,6 +266,14 @@
                             activeHot = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "News")',LoadData,'IsHot')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
 
+                        var isActive = "";
+                        if (item.IsActive) {
+                            isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("unpublish","News")',LoadData,'IsActive')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' name='isActive'> <div class='handle'></div> </button></td>";
+                        }
+                        else {
+                            isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "News")',LoadData,'IsActive')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isActive'> <div class='handle'></div> </button></td>";
+                        }
+
                         var createdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.CreateDate));
                         var publishdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.PublishDate));
                         body.append("<tr>" +
@@ -267,10 +287,11 @@
                             "<td class='text-center'>"+createdate+"</td>" +
                             "<td class='text-center'>" + publishdate + "</td>" +
                             activeTop +
-                            activeHot+
+                            activeHot +
+                            isActive+
                             "<td class='text-center' style='width: 130px;'><button onclick=\"Edits('" + item.ID + "','@Url.Action("GetDetailsNews","News")','@Url.Action("createnews","news")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalNews'> <i class='fas fa-edit'></i> </button>" +
                             //"<td class='text-center'>"+
-                            "<button onclick=\"var result = confirm('bạn muốn tin " + item.Title + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("deletenews","News")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            "<button onclick=\"var result = confirm('bạn muốn xóa " + item.Title + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("deletenews","News")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                         );
@@ -360,6 +381,8 @@
         data.append("IsHot", $(form).find("#IsHot").prop("checked"));
         data.delete("IsTop");
         data.append("IsTop", $(form).find("#IsTop").prop("checked"));
+        data.delete("IsActive");
+        data.append("IsActive", $(form).find("#IsActive").prop("checked"));
         data.delete("Content");
         data.append("Content", CKEDITOR.instances.Content.getData());
 

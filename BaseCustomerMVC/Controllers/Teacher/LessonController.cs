@@ -71,16 +71,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             if (model == null) return null;
             if (ClassID == null)
-                return RedirectToAction("Index", "Class");
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
             var currentClassSubject = _classSubjectService.GetItemByID(ClassID);
             if (currentClassSubject == null)
-                return RedirectToAction("Index", "Class");
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
             var currentClass = _classService.GetItemByID(currentClassSubject.ClassID);
             if (currentClass == null)
-                return RedirectToAction("Index", "Class");
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
             var Data = _lessonService.GetItemByID(model.ID);
             if (Data == null)
-                return RedirectToAction("Index", "Class");
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
             ViewBag.Class = currentClass;
             ViewBag.Subject = currentClassSubject;
             ViewBag.Lesson = Data;
@@ -363,8 +363,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     { "Model", model }
                 });
             }
-            chapter.ConditionChapter = ConditionChapter;
-            _chapterService.Save(chapter);
+            UpdateConditionChapter(chapter, ConditionChapter);
+
+
             return new JsonResult(new Dictionary<string, object> {
                         {"Data", chapter },
                         {"Msg","Cập nhật thành công" }
@@ -605,6 +606,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _lessonService.CreateQuery().ReplaceOne(o => o.ID == part.ID, part);
             }
             return pos;
+        }
+
+        private void UpdateConditionChapter(ChapterEntity chapter, string ConditionChapter)
+        {
+            chapter.ConditionChapter = ConditionChapter;
+            _chapterService.Save(chapter);
+            var subchaps = _chapterService.GetSubChapters(chapter.ClassSubjectID, chapter.ID);
+            if (subchaps != null && subchaps.Count > 0)
+                subchaps.ForEach((ChapterEntity item) => UpdateConditionChapter(item, ConditionChapter));
         }
 
     }

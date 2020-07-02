@@ -43,6 +43,9 @@ namespace EnglishPlatform.Controllers
         private readonly UserAndRoleService _userAndRoleService;
         private readonly CenterService _centerService;
         private readonly AuthorityService _authorityService;
+        private readonly NewsService _newsService;
+        private readonly NewsCategoryService _newsCategoryService;
+        private readonly QCService _QCService;
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -57,7 +60,11 @@ namespace EnglishPlatform.Controllers
             , UserAndRoleService userAndRoleService
             , CenterService centerService
             , AuthorityService authorityService
-            , ILog log)
+            , ILog log
+            , NewsService newsService
+            , NewsCategoryService newsCategoryService
+            , QCService QCService
+            )
         {
             _accessesService = accessesService;
             _authenService = authenService;
@@ -75,6 +82,9 @@ namespace EnglishPlatform.Controllers
             _userAndRoleService = userAndRoleService;
             _centerService = centerService;
             _authorityService = authorityService;
+            _newsService = newsService;
+            _newsCategoryService = newsCategoryService;
+            _QCService = QCService;
         }
 
         public IActionResult Index()
@@ -91,7 +101,6 @@ namespace EnglishPlatform.Controllers
                 var st = _studentService.GetItemByID(userID);
                 //var user = _accountService.GetItemByID(userID);
                 //var defaultUser = new UserModel() { };
-
 
                 switch (type.Value)
                 {
@@ -115,14 +124,14 @@ namespace EnglishPlatform.Controllers
                 }
                 ViewBag.Type = type.Value;
                 //cache
-                return Redirect($"{centerCode}/{type.Value}");
+                //return Redirect($"{centerCode}/{type.Value}");
             }
-            else
-            {
-                _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-                HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                return RedirectToAction("Login");
-            }
+            //else
+            //{
+            //    _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
+            //    HttpContext.SignOutAsync(Cookies.DefaultLogin);
+            //    return RedirectToAction("Login");
+            //}
             return View();
         }
 
@@ -578,7 +587,7 @@ namespace EnglishPlatform.Controllers
                     if (teacher.ZoomID == @event.UrlRoom)
                     {
                         //var roomID = "6725744943";//test
-                        ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "") + "/join";
+                        ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "").Replace(" ", "") + "/join";
                         //ViewBag.URL = Url.Action("ZoomClass", "Home", new { roomID });
                     }
                     else
@@ -587,7 +596,7 @@ namespace EnglishPlatform.Controllers
                 else
                 {
                     //ViewBag.Role = "0";
-                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "") });
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "").Replace(" ", "") });
                 }
             }
             return View();
@@ -598,6 +607,48 @@ namespace EnglishPlatform.Controllers
             ViewBag.RoomID = roomID;
             return View();
         }
+
+        #region LoadNews
+        [HttpPost]
+        [Route("/home/getnewslist")]
+        public JsonResult getNewsList()
+        {
+            var NewsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true && tbl.PublishDate < DateTime.Now && tbl.IsActive == true).Limit(5);
+            var NewsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && tbl.PublishDate < DateTime.Now && tbl.IsActive == true).Limit(2);
+            var response = new Dictionary<string, object>
+            {
+                {"NewsTop",NewsTop.ToList() },
+                {"NewsHot",NewsHot.ToList() }
+            };
+
+            return Json(response);
+        }
+
+        public JsonResult getDataForPartner(string CatCode)
+        {
+            var category = _newsCategoryService.Collection.Find(tbl => tbl.Code.Equals(CatCode)).FirstOrDefault();
+            List<NewsEntity> data = null;
+            if (category != null)
+                data = _newsService.Collection.Find(tbl => tbl.CategoryID.Equals(category.ID)).Limit(10).SortByDescending(tbl => tbl.PublishDate).ToList();
+            return Json(data);
+        }
+        #endregion
+
+        #region load Banner
+        public JsonResult getDataForBanner()
+        {
+            var filter = new List<FilterDefinition<QCEntity>>();
+            filter.Add(Builders<QCEntity>.Filter.Where(tbl => tbl.PublishDate <= DateTime.UtcNow));
+            filter.Add(Builders<QCEntity>.Filter.Where(tbl => tbl.EndDate >= DateTime.UtcNow));
+            filter.Add(Builders<QCEntity>.Filter.Where(tbl => tbl.IsActive == true));
+            var data = _QCService.Collection.Find(Builders<QCEntity>.Filter.And(filter)).Project(tbl => tbl.Banner).ToList();
+            Dictionary<string, object> Response = new Dictionary<string, object>
+            {
+                {"Data",data }
+            };
+            return new JsonResult(Response);
+        }
+        #endregion
     }
 
     public class UserModel

@@ -582,12 +582,12 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public IActionResult Details(DefaultModel model, string id, string ClassID)
+        public IActionResult Details(DefaultModel model, string id, string ClassID, string basis)
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["Error"] = "Bạn chưa chọn khóa học";
-                return RedirectToAction("Index");
+                TempData["Error"] = "Bài học không đúng";
+                return Redirect($"/{basis}{Url.Action("Index")}");
             }
             ViewBag.CourseID = id;
             ViewBag.ClassID = ClassID;

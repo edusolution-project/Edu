@@ -340,81 +340,89 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult GetThisWeekLesson(DateTime today)
         {
-            if (today < new DateTime(1900, 1, 1))
-                return Json(new { });
-            today = today.ToUniversalTime();
-            var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
-            var endWeek = startWeek.AddDays(7);
+            //try
+            //{
+                if (today < new DateTime(1900, 1, 1))
+                    return Json(new { });
+                today = today.ToUniversalTime();
+                var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
+                var endWeek = startWeek.AddDays(7);
 
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Json(new ReturnJsonModel
+                var userId = User.Claims.GetClaimByType("UserID").Value;
+                if (string.IsNullOrEmpty(userId))
                 {
-                    StatusCode = ReturnStatus.ERROR,
-                    StatusDesc = "Authentication Error"
-                });
-            }
-            var currentStudent = _studentService.GetItemByID(userId);
-            if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
-                return Json(new { });
+                    return Json(new ReturnJsonModel
+                    {
+                        StatusCode = ReturnStatus.ERROR,
+                        StatusDesc = "Authentication Error"
+                    });
+                }
+                var currentStudent = _studentService.GetItemByID(userId);
 
-            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ClassID)));
+                if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
+                    return Json(new { });
 
-            //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+                var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ClassID)));
 
-            //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
+                //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
 
-            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+                //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
 
-            var std = (from o in data
-                       let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
-                       where _lesson != null
-                       let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-                       where _class != null
-                       let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
-                       where _cs != null
-                       let skill = _skillService.GetItemByID(_cs.SkillID)
-                       let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
-                       where _subject != null
-                       let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID, o.ClassSubjectID) != null
-                       let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
-                       let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
-                       select new
-                       {
-                           id = o.ID,
-                           classID = _class.ID,
-                           className = _class.Name,
-                           classSubjectID = _cs.ID,
-                           subjectName = _subject.Name,
-                           title = _lesson.Title,
-                           lessonID = _lesson.ID,
-                           startDate = o.StartDate,
-                           endDate = o.EndDate,
-                           skill = skill,
-                           isLearnt = isLearnt,
-                           type = _lesson.TemplateType,
-                           onlineUrl = o.IsOnline ? onlineUrl : ""
-                       }).OrderBy(t => t.startDate).ToList();
-            //var std = (from o in data.ToList()
-            //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-            //           where _class != null
-            //           let skill = _skillService.GetItemByID(o.SkillID)
-            //           //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
-            //           select new
-            //           {
-            //               id = o.ID,
-            //               classID = _class.ID,
-            //               className = _class.Name,
-            //               endDate = o.EndDate,
-            //               students = _class.Students.Count,
-            //               skill = skill
-            //               //isLearnt = isLearnt
-            //           }).ToList();
-            return Json(new { Data = std });
+                var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+
+                var std = (from o in data
+                           let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
+                           where _lesson != null
+                           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+                           where _class != null
+                           let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
+                           where _cs != null
+                           let skill = _skillService.GetItemByID(_cs.SkillID)
+                           let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
+                           where _subject != null
+                           let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID, o.ClassSubjectID) != null
+                           let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
+                           let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
+                           select new
+                           {
+                               id = o.ID,
+                               classID = _class.ID,
+                               className = _class.Name,
+                               classSubjectID = _cs.ID,
+                               subjectName = _subject.Name,
+                               title = _lesson.Title,
+                               lessonID = _lesson.ID,
+                               startDate = o.StartDate,
+                               endDate = o.EndDate,
+                               skill = skill,
+                               isLearnt = isLearnt,
+                               type = _lesson.TemplateType,
+                               onlineUrl = o.IsOnline ? onlineUrl : ""
+                           }).OrderBy(t => t.startDate).ToList();
+                //var std = (from o in data.ToList()
+                //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+                //           where _class != null
+                //           let skill = _skillService.GetItemByID(o.SkillID)
+                //           //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
+                //           select new
+                //           {
+                //               id = o.ID,
+                //               classID = _class.ID,
+                //               className = _class.Name,
+                //               endDate = o.EndDate,
+                //               students = _class.Students.Count,
+                //               skill = skill
+                //               //isLearnt = isLearnt
+                //           }).ToList();
+                return Json(new { Data = std });
+            //}
+            //catch (Exception e)
+            //{
+            //    return Json(new { Err = e.Message });
+            //}
         }
 
         [Obsolete]
@@ -618,7 +626,7 @@ namespace BaseCustomerMVC.Controllers.Student
         //    if (string.IsNullOrEmpty(id))
         //    {
         //        TempData["Error"] = "Bạn chưa chọn khóa học";
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    }
         //    ViewBag.CourseID = id;
         //    ViewBag.ClassID = ClassID;
@@ -635,7 +643,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
             if (!_studentService.IsStudentInClass(currentClass.ID, userId))
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             var vm = new ClassViewModel(currentClass);
             var subjects = _classSubjectService.GetByClassID(currentClass.ID);
             var skillIDs = subjects.Select(t => t.SkillID).Distinct();
@@ -653,9 +661,9 @@ namespace BaseCustomerMVC.Controllers.Student
         //    var currentClass = _service.GetItemByID(id);
         //    var userId = User.Claims.GetClaimByType("UserID").Value;
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    if (currentClass.Students.IndexOf(userId) < 0)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    return View();
         //}
@@ -703,12 +711,12 @@ namespace BaseCustomerMVC.Controllers.Student
         //    var currentClass = _service.GetItemByID(id);
         //    var userId = User.Claims.GetClaimByType("UserID").Value;
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
         //    //if (classStudent == null)
-        //    //    return RedirectToAction("Index");
+        //    //    return Redirect($"/{basis}{Url.Action("Index");
         //    if (!_studentService.IsStudentInClass(currentClass.ID, userId))
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    return View();
         //}
@@ -719,9 +727,9 @@ namespace BaseCustomerMVC.Controllers.Student
         //    var currentClass = _service.GetItemByID(id);
         //    var userId = User.Claims.GetClaimByType("UserID").Value;
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    if (!_studentService.IsStudentInClass(currentClass.ID, userId))
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    return View();
         //}
@@ -731,7 +739,7 @@ namespace BaseCustomerMVC.Controllers.Student
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    return View();
         //}

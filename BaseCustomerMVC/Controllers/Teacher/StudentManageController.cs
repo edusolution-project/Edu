@@ -137,7 +137,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             var student = _studentService.GetItemByID(model.ID);
             if (student == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             ViewBag.Student = student;
             return View();
         }

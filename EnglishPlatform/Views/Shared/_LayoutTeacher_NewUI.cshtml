@@ -16,7 +16,7 @@
     <title>@ViewBag.Title</title>
 
     <link href="~/css/minify/minify.min.css" rel="stylesheet" />
-
+    <link href="~/css/stylesheet.min.css" rel="stylesheet" />
     @*longht them*@
     <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
     <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
@@ -112,7 +112,7 @@
             </div>
             <div class="box padding-15" style="margin: 10px;border-radius: 15px;background: #00304b;">
                 <div class="heading flex">
-                    <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmcZ3GdRT1PdHOLvp1LrtamL"><h4 class="box-head text-danger" style="font-size:135%">Hướng dẫn sử dụng</h4></a>
+                    <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmcZ3GdRT1PdHOLvp1LrtamL"><h4 class="box-head text-danger" style="font-size:110%">Hướng dẫn sử dụng</h4></a>
                 </div>
                 <ul class="list list-news">
                     <li class="d-flex">
@@ -130,7 +130,7 @@
             <div class="adv">
                 <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
             </div>
-            <div class="box padding-15">
+            <div class="box padding-15 d-none">
                 <div class="heading flex">
                     <h4 class="box-head">Tin tức nổi bật</h4>
                     <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
@@ -158,18 +158,18 @@
             },
             data: {
                 list_news: [
-                    {
-                        href: 'https://www.facebook.com/utcelearning/?hc_ref=ARQzn875E9EnzJl0pDOIsk-T6UjYmWEn8oE0bsjwjNISY5FfbD6PgeCUIPWrnvXcc9o&ref=nf_target&__tn__=kC-R',
-                        title: 'Hướng dẫn đào tạo trực tuyến',
-                        description: 'Tổng hợp tài liệu & video hướng dẫn đào tạo trực tuyến cập nhật các tính năng mới',
-                        thumbnail: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t1.0-1/p200x200/71767146_116313109773262_2458809184288768000_n.jpg?_nc_cat=104&_nc_sid=dbb9e7&_nc_ohc=HtGhdLTf2WYAX_NwoRT&_nc_ht=scontent.fhan2-4.fna&_nc_tp=6&oh=1b66286b43372fa674c031fa25b5d11c&oe=5F1AAE01'
-                    },
-                    {
-                        href: 'http://educoo.vn',
-                        title: 'Khóa học tiếng Anh 1 - 1',
-                        description: 'Tổng hợp tài liệu & video hướng dẫn đào tạo trực tuyến cập nhật các tính năng mới',
-                        thumbnail: 'http://educoo.vn/Content/v-637088577654292784/img/banner.png'
-                    },
+                    //{
+                    //    href: 'https://www.facebook.com/utcelearning/?hc_ref=ARQzn875E9EnzJl0pDOIsk-T6UjYmWEn8oE0bsjwjNISY5FfbD6PgeCUIPWrnvXcc9o&ref=nf_target&__tn__=kC-R',
+                    //    title: 'Hướng dẫn đào tạo trực tuyến',
+                    //    description: 'Tổng hợp tài liệu & video hướng dẫn đào tạo trực tuyến cập nhật các tính năng mới',
+                    //    thumbnail: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t1.0-1/p200x200/71767146_116313109773262_2458809184288768000_n.jpg?_nc_cat=104&_nc_sid=dbb9e7&_nc_ohc=HtGhdLTf2WYAX_NwoRT&_nc_ht=scontent.fhan2-4.fna&_nc_tp=6&oh=1b66286b43372fa674c031fa25b5d11c&oe=5F1AAE01'
+                    //},
+                    //{
+                    //    href: 'http://educoo.vn',
+                    //    title: 'Khóa học tiếng Anh 1 - 1',
+                    //    description: 'Tổng hợp tài liệu & video hướng dẫn đào tạo trực tuyến cập nhật các tính năng mới',
+                    //    thumbnail: 'http://educoo.vn/Content/v-637088577654292784/img/banner.png'
+                    //},
                 ]
             }
         });
@@ -207,10 +207,12 @@
                 ? `${day}/${month}/${year}`
                 : `${year}-${month}-${day}`;
         }
+
         var caculatorDate = function (dt, number) {
             dt.setDate(dt.getDate() - number)
             return dt;
         }
+
         var loadCalendar = function (start, end) {
             if (start == void 0) {
                 start = caculatorDate(new Date(), (new Date().getDay() - 1));
@@ -229,6 +231,7 @@
                     week.innerHTML = formatDateTime(start) + " - " + formatDateTime(end);
                 }
             }
+
             var tableDetail = plan_box.querySelector(".table-detail");
             if (tableDetail != null) {
                 tableDetail.children[0].children[1].innerHTML = "";
@@ -284,6 +287,7 @@
             }
 
         }
+
         loadCalendar();
 
         var showAllEvent = function (self) {

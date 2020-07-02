@@ -78,7 +78,7 @@ var Lesson = (function () {
 
     var onReady = function (yourConfig) {
         config = groupConfig(yourConfig);
-        console.log(config.mod);
+        //console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
             case mod.TEACHEREDIT:
@@ -141,7 +141,7 @@ var Lesson = (function () {
         return data == null || data == void 0 || data == "" || data == typeof (void 0);
     }
 
-    var countdown = function () {
+    var countdown = function (isExam = true) {
         clearTimeout(exam_timeout);
         var time = $(".time-counter").text().trim();
         if (time == "" || time == null) return;
@@ -156,14 +156,17 @@ var Lesson = (function () {
                 second = 59;
             }
             else {
-                CompleteExam(true);
+                if (isExam)
+                    CompleteExam(true);
+                else
+                    completeLectureExam();
                 return;
             }
         }
         var text = (minutes < 10 ? ("0" + minutes) : minutes) + ":" + (second < 10 ? ("0" + second) : second);
         $(".time-counter").text(text);
         exam_timeout = setTimeout(function () {
-            countdown();
+            countdown(isExam);
         }, 1000);
     }
 
@@ -561,7 +564,30 @@ var Lesson = (function () {
                                     console.log("Exam Continue")
                                     setLocalData("CurrentExam", exam.ID);
                                     $('#ExamID').val(exam.ID);
-                                    renderLectureExam(exam, true);
+
+                                    var current = exam.CurrentDoTime;
+                                    var start = exam.Created;
+                                    var timer = moment(current) - moment(start);
+
+                                    console.log(timer);
+                                    if ((exam.Timer > 0)  && moment(timer).minutes() >= exam.Timer)//Timeout
+                                    {
+                                        console.log("Exam Timeout")
+                                        setLocalData("Timer", "00:00");
+                                        CompleteLectureExam(true);
+                                    }
+                                    else {
+                                        setLocalData("CurrentExam", exam.ID);
+                                        $('#ExamID').val(exam.ID);
+                                        //render Exam
+                                        var _sec = 59 - moment(timer).second();
+                                        var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
+                                        var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
+                                        setLocalData("Timer", _timer);
+                                        console.log(_timer);
+                                        renderLectureExam(exam, true);
+                                        countdown(false);
+                                    }
                                 }
                             }
                         });
@@ -630,6 +656,7 @@ var Lesson = (function () {
                 else {
                     lessonFooter.hide();
                 }
+
                 break;
             case mod.STUDENT_EXAM:
 
@@ -667,6 +694,7 @@ var Lesson = (function () {
                 nav_bottom.append(quiz_counter);
 
                 var complete_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "CompleteExam()" }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");;
+
                 var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
                     .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
                     .append($("<span>", { class: "time-counter " }));
@@ -681,9 +709,65 @@ var Lesson = (function () {
                 //}
                 break;
             case mod.REVIEW:
+                var nav_bottom = lesson_action_holder
+                nav_bottom.empty();
+
+                var prevtab = $("<button>", { "class": "prevtab btn btn-primary m-2", "title": "Câu trước", "onclick": "PrevPart()" });
+                var iconprev = $("<i>", { "class": "fas fa-arrow-circle-left mr-2" });
+                var nexttab = $("<button>", { "class": "nexttab btn btn-primary m-2", "title": "Câu tiếp", "onclick": "NextPart()" });
+                var iconnext = $("<i>", { "class": "fas fa-arrow-circle-right mr-2" });
+                prevtab.append(iconprev).append("Câu trước");;
+                nexttab.append(iconnext).append("Câu sau");;
+
+
+                prevtab.prop("disabled", true);
+
+                if (_totalPart <= 1)
+                    nexttab.prop("disabled", true);
+
+                //var _footerLeft = $('<div>', { "class": "text-left" });
+                //_footerLeft.append(prevtab);
+                //var _footerRight = $('<div>', { "class": "text-right" });
+                //_footerRight.append(nexttab);
+                //var _footerCenter = $('<div>', { "class": "text-center" });
+
+                nav_bottom.append(prevtab);
+
+                //lessonFooter.show().append(nav_bottom);
+                lessonFooter.append($('<div>', { id: 'quizIdx_holder' }));
+                lessonFooter.addClass('expand');
+
+                var quiz_counter = $('<div>', { id: 'quiz-counter-holder', class: "text-white font-weight-bold align-middle" });
+                nav_bottom.append(quiz_counter);
+
+                var complete_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "CompleteExam()" }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");;
+
+                var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
+                    .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
+                    .append($("<span>", { class: "time-counter " }));
+
+
+                nav_bottom.prepend(timer).append(complete_btn);
+
+                renderQuizCounter();
+                $(".time-counter").html(getLocalData("Timer"));
+                //countdown();
+                nav_bottom.append(nexttab);
+                break;
+            case mod.STUDENT_LECTURE:
+                if (data.Timer > 0) {
+                    var nav_bottom = lesson_action_holder
+                    nav_bottom.empty();
+                    var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
+                        .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
+                        .append($("<span>", { class: "time-counter " }));
+
+                    nav_bottom.prepend(timer);
+                    $(".time-counter").html(getLocalData("Timer"));
+                    //countdown(false);
+                }
                 break;
         }
-        //console.log('init' + _openingPart);
         if (_openingPart == '') {
             $('#leftCol .fa-caret-down:first()').focus().click()
         }
@@ -1726,7 +1810,6 @@ var Lesson = (function () {
                             $(input).attr("value", content);
 
                         }
-                        //alert(1);
                         $(fillquizs[i]).attr("title", quiz.Description == null ? "" : quiz.Description);
                     }
                     //console.log($(quizContent).prop("innerHTML"));
@@ -2147,6 +2230,7 @@ var Lesson = (function () {
 
     //Exam
     var renderExam = function () {
+
         //load lastest exam state from server
         var dataform = new FormData();
         dataform.append("ClassID", config.class_id);
@@ -2208,6 +2292,7 @@ var Lesson = (function () {
                         }
                         else {
                             $('#ExamID').val(exam.ID);
+
                             var current = exam.CurrentDoTime;
                             var start = exam.Created;
                             var timer = moment(current) - moment(start);
@@ -2224,8 +2309,8 @@ var Lesson = (function () {
                                 //render Exam
                                 var _sec = 59 - moment(timer).second();
                                 var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
-                                var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
-                                setLocalData("Timer", timer);
+                                var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
+                                setLocalData("Timer", _timer);
                                 renderExamDetail();
                                 countdown();
                             }
@@ -2350,6 +2435,7 @@ var Lesson = (function () {
     }
 
     var renderLectureExam = function (data, isContinue) {
+
         var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
         $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
@@ -2432,12 +2518,12 @@ var Lesson = (function () {
 
                     renderExamDetail();
 
-                    //console.log(data);
+                    console.log(data);
                     if (data.Data.Timer > 0) {
                         var _minutes = data.Data.Timer;
                         //console.log(_minutes);
-                        var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
-                        setLocalData("Timer", timer);
+                        var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
+                        setLocalData("Timer", _timer);
                         //console.log($(".time-counter"));
                     }
                 } else {
@@ -2518,7 +2604,7 @@ var Lesson = (function () {
 
         itembox.append(boxHeader);
 
-        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer"});
+        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer" });
         $(collapseSwitch).click(function () {
             toggleExpand(this);
         });
@@ -3714,14 +3800,14 @@ var toggleExpand = function (obj) {
     {
         $('.title > .fa-caret-up').removeClass("fa-caret-up");
         $(obj).addClass("fa-caret-up");
-        console.log($(obj).parent().parent());
+        //console.log($(obj).parent().parent());
         $(obj).parent().parent().siblings('.collapse').removeClass("collapse");
 
         $('#leftCol').animate({
             scrollTop: $(obj).parent().parent().parent().parent().offset().top - 60
         }, 500);
         _openingPart = $(obj).attr('part');
-        console.log(_openingPart);
+        //console.log(_openingPart);
     }
     else {
         $(obj).removeClass("fa-caret-up");

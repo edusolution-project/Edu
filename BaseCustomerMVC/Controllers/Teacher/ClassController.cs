@@ -54,6 +54,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly StudentHelper _studentHelper;
         private readonly TeacherHelper _teacherHelper;
         private readonly LessonHelper _lessonHelper;
+        private readonly MailHelper _mailHelper;
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
 
@@ -92,6 +93,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonHelper lessonHelper,
             StudentHelper studentHelper,
             TeacherHelper teacherHelper,
+            MailHelper mailHelper,
 
             ChapterProgressService chapterProgressService,
             CenterService centerService,
@@ -131,12 +133,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             _studentHelper = studentHelper;
             _teacherHelper = teacherHelper;
-
             _lessonHelper = lessonHelper;
+            _mailHelper = mailHelper;
 
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
-
 
             _chapterProgressService = chapterProgressService;
             _centerService = centerService;
@@ -187,7 +188,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             var vm = new ClassViewModel(currentClass);
             var subjects = _classSubjectService.GetByClassID(currentClass.ID);
             var skillIDs = subjects.Select(t => t.SkillID).Distinct();
@@ -205,7 +206,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    var UserID = User.Claims.GetClaimByType("UserID").Value;
         //    var myClasses = _service.CreateQuery()
@@ -229,7 +230,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             ViewBag.Class = currentClass;
             return View();
         }
@@ -239,7 +240,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    return View();
         //}
@@ -249,7 +250,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    return View();
         //}
@@ -259,7 +260,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    return View();
         //}
@@ -269,7 +270,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    ViewBag.Managable = CheckPermission(PERMISSION.MEMBER_COURSE_EDIT);
         //    return View();
@@ -284,18 +285,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ViewBag.Center = center;
             }
             if (string.IsNullOrEmpty(ClassID))
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             var currentClass = _service.GetItemByID(ClassID);
             if (currentClass == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             ViewBag.Class = currentClass;
 
             if (string.IsNullOrEmpty(ID))
-                return RedirectToAction("Member", "Class", new { ID = ClassID });
+                return Redirect($"/{basis}{Url.Action("Member", "Class", new { ID = ClassID })}");
 
             var student = _studentService.GetItemByID(ID);
             if (student == null)
-                return RedirectToAction("Member", "Class", new { ID = ClassID });
+                return Redirect($"/{basis}{Url.Action("Member", "Class", new { ID = ClassID })}");
 
             ViewBag.Student = student;
 
@@ -1292,8 +1293,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 nSbj.LearningOutcomes = course.LearningOutcomes;
                 nSbj.TotalLessons = course.TotalLessons;
 
+                var skill = _skillService.GetItemByID(nSbj.SkillID);
+
                 _classSubjectService.Save(nSbj);
 
+                _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate);
                 //Clone Course
                 _courseHelper.CloneForClassSubject(nSbj);
 

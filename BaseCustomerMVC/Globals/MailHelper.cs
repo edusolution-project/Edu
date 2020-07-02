@@ -156,34 +156,48 @@ namespace BaseCustomerMVC.Globals
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.RESET_PASS, bccAddressses: new List<string> { _defaultSender });
         }
 
-        public async Task SendTeacherRegisterNotify(AccountEntity user, string VisiblePassword, ClassSubjectEntity classSubject, ClassEntity joinClass)
+
+        public async Task SendTeacherJoinCenterNotify(string Name, string Email, string VisiblePassword, string centerName)
         {
-            string subject = "Chúc mừng " + user.Name + " đã khởi tạo tài khoản thành công tại Eduso";
-            string body = "Chào " + user.Name + "," +
-                "<p>Tài khoản của bạn đã khởi tạo thành công trên nền tảng hỗ trợ học tập của <a href='https://eduso.vn'>Eduso</a></p>" +
+            string subject = "";
+            string body = "Chào " + Name + ",";
+            if (!String.IsNullOrEmpty(VisiblePassword))//register
+            {
+                subject = "Chúc mừng " + Name + " đã trở thành giáo viên của " + centerName;
+                body = "<p>Bạn vừa được đăng ký làm giáo viên của " + centerName + "!</p>" +
                 "<p>Thông tin đăng nhập như sau</p>" +
-                "<p>Tên đăng nhập: <b>" + user.UserName + "</b></p>" +
-                "<p>Mật khẩu: <b>" + user.PassWord + "</b></p>" +
-                "<p>Bạn vừa được phân công dạy lớp <b>" + joinClass.Name + "</b></p>" +
-                "<p>Đăng nhập để trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
-            var toAddress = new List<string> { user.UserName };
+                "<p>Tên đăng nhập: <b>" + Email + "</b></p>" +
+                "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
+                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            }
+            else
+            {
+                subject = "Chúc mừng " + Name + " đã trở thành giáo viên của " + centerName;
+                body = "<p>Bạn vừa được đăng ký làm giáo viên của " + centerName + "!</p>" +
+                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            }
+            var toAddress = new List<string> { Email };
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
         }
 
-        public async Task SendTeacherJoinClassNotify(AccountEntity user, ClassEntity joinClass)
+        public async Task SendTeacherJoinClassNotify(string Name, string Email, string className, string skillname, DateTime startdate, DateTime enddate)
         {
-            string subject =  user.Name + " đã được phân công dạy lớp " + joinClass.Name;
-            string body = "Chào " + user.Name + "," +
-                "<p>Bạn vừa được phân công dạy lớp <b>" + joinClass.Name + "</b></p>" +
-                "<p>Đăng nhập để trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
-            var toAddress = new List<string> { user.UserName };
+            string subject = "";
+            string body = "Chào " + Name + ",";
+
+            if (!string.IsNullOrEmpty(className) && !(string.IsNullOrEmpty(skillname)))
+            {
+                body += ("<p>Bạn vừa được phân công dạy môn: <b>" + skillname + "</b> - lớp <b>" + className + "</b></p>");
+                body += ("<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>");
+            }
+            else
+                return;
+
+            //body += "<p>Đăng nhập để trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            var toAddress = new List<string> { Email };
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
         }
 
-        public async Task SendStudentRegisterNotify(StudentEntity student, string VisiblePassword, ClassEntity joinClass = null)
-        {
-
-        }
 
         public async Task SendStudentJoinClassNotify(StudentEntity student, ClassEntity joinClass)
         {

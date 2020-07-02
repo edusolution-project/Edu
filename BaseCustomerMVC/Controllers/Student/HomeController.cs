@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -18,6 +19,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private StudentService _studentService;
         private readonly FileProcess _fileProcess;
         private readonly AccountService _accountService;
+        private readonly CenterService _centerService;
         private readonly ISession _session;
         private readonly IHttpContextAccessor _httpContextAccessor;
         public DefaultConfigs _default { get; }
@@ -25,21 +27,32 @@ namespace BaseCustomerMVC.Controllers.Student
         public HomeController(FileProcess fileProcess, AccountService accountService,
             IHttpContextAccessor httpContextAccessor,
             IOptions<DefaultConfigs> defaultvalue,
+            CenterService centerService,
             StudentService studentService)
         {
             _studentService = studentService;
             _accountService = accountService;
+            _centerService = centerService;
             _fileProcess = fileProcess;
             _httpContextAccessor = httpContextAccessor;
             _session = _httpContextAccessor.HttpContext.Session;
             _default = defaultvalue.Value;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string basis)
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
             ViewBag.Student = student;
+            if (student != null)
+                ViewBag.AllCenters = student.Centers.Select(t => _centerService.GetItemByID(t));
+
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             //var avatar = student != null && !string.IsNullOrEmpty(student.Avatar) ? student.Avatar : _default.defaultAvatar;
             //HttpContext.Session.SetString("userAvatar", avatar);
             return View();

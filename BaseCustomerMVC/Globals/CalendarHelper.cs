@@ -214,7 +214,7 @@ namespace BaseCustomerMVC.Globals
 
         public CalendarEntity GetByScheduleId(string scheduleID)
         {
-            return _calendarService.CreateQuery().Find(t => t.ScheduleID == scheduleID).SingleOrDefault();
+            return _calendarService.CreateQuery().Find(t => t.ScheduleID == scheduleID).SortByDescending(t => t.ID).FirstOrDefault();
         }
 
         public CalendarEntity GetByEventID(string eventID)
@@ -255,59 +255,57 @@ namespace BaseCustomerMVC.Globals
             var ourClass = _classService.GetItemByID(item.ClassID);
             if (ourClass == null)
                 return false;
-            var teacher = _teacherService.GetItemByID(ourClass.TeacherID);
+            var classSbj = _classSubjectService.GetItemByID(item.ClassSubjectID);
+            if (classSbj == null)
+                return false;
+            var teacher = _teacherService.GetItemByID(classSbj.TeacherID);
             if (teacher == null)
                 return false;
             CalendarEntity oldItem = _calendarService.CreateQuery().Find(o => o.ScheduleID == item.ID && o.GroupID == item.ClassID)?.FirstOrDefault();
             CalendarEntity calendar;
-
-            if (item.StartDate > DateTime.Now)
+            if (oldItem == null)
             {
-                if (oldItem == null)
+                calendar = new CalendarEntity()
                 {
-                    calendar = new CalendarEntity()
-                    {
-                        Created = DateTime.Now,
-                        CreateUser = userCreate,
-                        EndDate = item.StartDate,
-                        StartDate = item.StartDate,
-                        GroupID = item.ClassID,
-                        Title = lesson.Title,
-                        TeacherID = teacher.ID,
-                        TeacherName = teacher.FullName,
-                        Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
-                        Status = item.IsOnline ? 5 : 0,
-                        LimitNumberUser = 0,
-                        UrlRoom = item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(lesson.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
-                        UserBook = new List<string>(),
-                        ScheduleID = item.ID
-                    };
-                }
-                else
-                {
-                    calendar = new CalendarEntity()
-                    {
-                        ID = oldItem.ID,
-                        Created = oldItem.Created,
-                        CreateUser = userCreate,
-                        EndDate = item.StartDate,
-                        StartDate = item.StartDate,
-                        GroupID = item.ClassID,
-                        Title = lesson.Title,
-                        TeacherID = teacher.ID,
-                        TeacherName = teacher.FullName,
-                        Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
-                        Status = item.IsOnline ? 5 : 0,
-                        LimitNumberUser = oldItem.LimitNumberUser,
-                        UrlRoom = (item.IsOnline && oldItem.Status == 5) ? oldItem.UrlRoom : //not change => keep event
-                            item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(lesson.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
-                        UserBook = oldItem.UserBook,
-                        ScheduleID = item.ID
-                    };
-                }
-                _calendarService.CreateOrUpdate(calendar);
+                    Created = DateTime.Now,
+                    CreateUser = userCreate,
+                    EndDate = item.StartDate,
+                    StartDate = item.StartDate,
+                    GroupID = item.ClassID,
+                    Title = lesson.Title,
+                    TeacherID = teacher.ID,
+                    TeacherName = teacher.FullName,
+                    Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
+                    Status = item.IsOnline ? 5 : 0,
+                    LimitNumberUser = 0,
+                    UrlRoom = item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(lesson.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
+                    UserBook = new List<string>(),
+                    ScheduleID = item.ID
+                };
             }
-
+            else
+            {
+                calendar = new CalendarEntity()
+                {
+                    ID = oldItem.ID,
+                    Created = oldItem.Created,
+                    CreateUser = userCreate,
+                    EndDate = item.StartDate,
+                    StartDate = item.StartDate,
+                    GroupID = item.ClassID,
+                    Title = lesson.Title,
+                    TeacherID = teacher.ID,
+                    TeacherName = teacher.FullName,
+                    Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
+                    Status = item.IsOnline ? 5 : 0,
+                    LimitNumberUser = oldItem.LimitNumberUser,
+                    UrlRoom = (item.IsOnline && oldItem.Status == 5) ? oldItem.UrlRoom : //not change => keep event
+                        item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(lesson.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
+                    UserBook = oldItem.UserBook,
+                    ScheduleID = item.ID
+                };
+            }
+            _calendarService.CreateOrUpdate(calendar);
             return true;
         }
     }

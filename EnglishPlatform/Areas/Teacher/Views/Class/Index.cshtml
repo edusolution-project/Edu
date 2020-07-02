@@ -6,7 +6,7 @@
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
-    var isHeadteacher = ViewBag.IsHeadTeacher;
+    var isHeadteacher = ViewBag.IsHeadTeacher ?? false;
     var userid = User.Claims.Single(t => t.Type == "UserID").Value;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     List<BaseCustomerEntity.Database.CenterMemberEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterMemberEntity>;
@@ -617,7 +617,7 @@
                                 valid = false
                                 return false;
                             }
-                            if (item.ID != null && item.ID != '')
+                            if (item.OldID != null && item.OldID != '')
                                 notify = true
                             _form.append('ClassSubjects[' + k + '].ID', item.ID)
                             _form.append('ClassSubjects[' + k + '].SubjectID', item.SubjectID)
@@ -905,15 +905,16 @@
                 refreshSubject(k, obj) {
                     if (this.class_info.subject[k].ID != "") {
                         $(obj.target).attr('oldID', this.class_info.subject[k].ID);
-                        $(obj.target).addClass('text-danger')
+                        $(obj.target).addClass('text-danger');
+                        this.class_info.subject[k].OldID = this.class_info.subject[k].ID;
                         this.class_info.subject[k].ID = "";
                     }
                     else {
                         var oldId = $(obj.target).attr('oldID');
                         this.class_info.subject[k].ID = oldId;
                         $(obj.target).removeClass('text-danger');
+                        this.class_info.subject[k].OldID = null;
                     }
-
                 },
                 errorImgUrl() {
                     this.class_info.thumbnail.src = null;

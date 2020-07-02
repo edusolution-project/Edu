@@ -239,7 +239,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return Json(new { error = "Thông tin giáo viên không đúng" });
                 oldobj.FullName = tc.FullName;
                 oldobj.Phone = tc.Phone;
-                oldobj.Centers.RemoveAll(t => t.CenterID == center.ID);
+                var exist = oldobj.Centers.RemoveAll(t => t.CenterID == center.ID) > 0;
                 oldobj.Centers.Add(new CenterMemberEntity
                 {
                     CenterID = center.ID,
@@ -248,6 +248,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     RoleID = RoleID
                 });
                 _teacherService.Save(oldobj);
+                if (!exist)
+                    _ = _mailHelper.SendTeacherJoinCenterNotify(tc.FullName, tc.Email, "", center.Name);
             }
             else
             {

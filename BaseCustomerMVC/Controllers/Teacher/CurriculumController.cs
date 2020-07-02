@@ -58,7 +58,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly CenterService _centerService;
         private readonly RoleService _roleService;
-        
+
         private readonly MappingEntity<CourseEntity, CourseViewModel> _courseViewMapping;
 
 
@@ -97,8 +97,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  //LessonExtendService lessonExtendService,
                  TeacherService teacherService,
                  ModCourseService modservice
-                 //ClassService classService,
-                 //ClassSubjectService classSubjectService
+                //ClassService classService,
+                //ClassSubjectService classSubjectService
                 , RoleService roleService
                 , ModSubjectService modsubjectService
                 , ModChapterService modchapterService
@@ -180,7 +180,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //_lessonScheduleService = lessonScheduleService;
             //_studentService = studentService;
 
-            
+
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -244,11 +244,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ViewBag.Center = center;
             }
             if (string.IsNullOrEmpty("ID"))
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
 
             var data = _service.GetItemByID(ID);
             if (data == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
 
             //var isUsed = isCourseUsed(data.ID);
             //Cap nhat IsUsed
@@ -274,11 +274,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //public IActionResult Assignments(string ID)
         //{
         //    if (string.IsNullOrEmpty("ID"))
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
 
         //    var data = _service.GetItemByID(ID);
         //    if (data == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
 
         //    ViewBag.Data = data;
         //    ViewBag.Title = data.Name;
@@ -308,16 +308,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (CourseID == null)
             {
                 if (ClassID == null)
-                    return RedirectToAction("Index");
+                    return Redirect($"/{basis}{Url.Action("Index")}");
                 else
                     CourseID = ClassID;
             }
             var currentCourse = _service.GetItemByID(CourseID);
             if (currentCourse == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             var Data = _lessonService.GetItemByID(model.ID);
             if (Data == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
 
             ViewBag.Course = currentCourse;
             ViewBag.Data = Data;
@@ -1357,7 +1357,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             foreach (var chapter in chapter_root.ToEnumerable())
             {
-                await CloneChapter(new ChapterEntity()
+                await CloneChapter(new CourseChapterEntity()
                 {
                     OriginID = chapter.ID,
                     Name = chapter.Name,
@@ -1371,7 +1371,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     IsActive = true,
                     IsAdmin = false,
                     Order = chapter.Order
-                }, _userCreate);
+                }, _userCreate, CourseID);
             }
 
             foreach (var o in lesson_root.ToEnumerable())
@@ -1475,7 +1475,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
             }
 
-            await CloneLesson(new LessonEntity(orgLesson)
+            await CloneLesson(new LessonEntity(orgLesson, "(Copy)")
             {
                 Order = (int)_lessonService.CountChapterLesson(orgLesson.ChapterID) + 1,
             }, orgLesson.CreateUser);
@@ -1627,11 +1627,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private async Task CloneChapter(ChapterEntity item, string _userCreate)
+        private async Task CloneChapter(CourseChapterEntity item, string _userCreate, string orgCourseID)
         {
             _chapterService.Collection.InsertOne(item);
 
-            var lessons = _lessonService.CreateQuery().Find(o => o.ChapterID == item.OriginID);
+            var lessons = _lessonService.CreateQuery().Find(o => o.ChapterID == item.OriginID && o.CourseID == orgCourseID);
 
             foreach (var o in lessons.ToEnumerable())
             {
@@ -1639,14 +1639,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     CreateUser = _userCreate,
                     CourseID = item.CourseID,
+                    ChapterID = item.ID,
                     IsAdmin = false
                 }, _userCreate);
             }
 
-            var subChapters = _chapterService.Collection.Find(o => o.ParentID == item.OriginID);
+            var subChapters = _chapterService.Collection.Find(o => o.ParentID == item.OriginID && o.CourseID == orgCourseID);
             foreach (var o in subChapters.ToEnumerable())
             {
-                await CloneChapter(new ChapterEntity()
+                await CloneChapter(new CourseChapterEntity()
                 {
                     OriginID = o.ID,
                     Name = o.Name,
@@ -1660,7 +1661,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     IsActive = true,
                     IsAdmin = false,
                     Order = o.Order
-                }, _userCreate);
+                }, _userCreate, orgCourseID);
             }
         }
 

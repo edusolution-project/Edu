@@ -11,7 +11,7 @@
             <div class="ml-2 ml-md-0">
                 <span class="hotline d-flex align-items-center"><i class="ic ic-phone mr-1"></i> HOTLINE: <a href="tel:+84989085398" class="action-link ml-1">+ 84 989.085.398</a></span>
             </div>
-            <div class="d-flex">
+            <div class="d-flex align-items-center">
                 @if (allcenters == null)
                 {
                     if (mtype == "admin")
@@ -40,7 +40,10 @@
                                 <option value="@ct.Code">@ct.Name</option>
                             }
                         </select>
+                        <a href="/logout" title="Đăng xuất" class="action-link ml-3">Đăng xuất</a>
                         @:<script>var changeCenter = function () { document.location = "/" + $('#owncenter').val() + "/teacher" }</script>
+
+
                     }
                 }
             </div>

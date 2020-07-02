@@ -521,8 +521,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Json(new { error = "Thông tin không đúng" });
             }
             schedule.IsOnline = !schedule.IsOnline;
-            _lessonScheduleService.Save(schedule);
+
             UpdateCalendar(schedule, UserID);
+            _lessonScheduleService.Save(schedule);
             return Json(new { isOnline = schedule.IsOnline });
         }
 

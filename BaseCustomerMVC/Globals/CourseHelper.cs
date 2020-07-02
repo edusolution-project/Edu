@@ -80,7 +80,6 @@ namespace BaseCustomerMVC.Globals
                 newchapter.ClassSubjectID = classSubject.ID;
                 newchapter.ID = null;
                 _chapterService.Save(newchapter);
-
                 newID = newchapter.ID;
             }
 
