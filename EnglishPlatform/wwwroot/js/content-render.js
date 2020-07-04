@@ -1,6 +1,8 @@
 ﻿var Debug = true;
 var mod = {
     PREVIEW: "preview",
+    TEACHERPREVIEW: "teacherpreview",
+    TEACHERPREVIEWEXAM: "teacherpreviewexam",
     TEACHERVIEW: "teacherview",
     TEACHEREDIT: "teacheredit",
     EDIT: "edit",
@@ -86,9 +88,11 @@ var Lesson = (function () {
                 renderStandardLayout();
                 renderPreview();
                 break;
+            case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
                 renderExam();
                 break;
+            case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
                 renderStandardLayout();
                 renderLecture();
@@ -100,6 +104,7 @@ var Lesson = (function () {
         }
         window.getLocalData = getLocalData
         window.ShowFullScreen = showFullScreen;
+        window.openPreview = openPreview;
         var hash = window.location.hash;
         if (hash.startsWith('#')) {
             hash = hash.split('#')[1]
@@ -179,10 +184,11 @@ var Lesson = (function () {
     }
 
     //Load Data
-    var loadLesssonData = function (param, callback) {
+    var loadLessonData = function (param, callback) {
         var formData = new FormData();
         if (param != null)
             Object.keys(param).forEach(e => formData.append(e, param[e]));
+
         Ajax(config.url.load, formData, "POST", true).then(function (res) {
             if (!isNull(res)) {
                 _data = JSON.parse(res).Data;
@@ -261,6 +267,7 @@ var Lesson = (function () {
     }
 
     var renderLessonData = function () {
+
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         if (isNull(_data)) {
             throw "No data";
@@ -268,12 +275,13 @@ var Lesson = (function () {
         var data = _data;
 
         var mainContainer = $('#' + config.container);
-
         var lessonHeader = mainContainer.find('.card-header');
         var lessonBody = mainContainer.find('.card-body');
         var lessonFooter = mainContainer.find('.card-footer');
 
         _totalPart = data.Part != null ? data.Part.length : 0;
+
+
         //header
         //console.log(config.mod);
         switch (config.mod) {
@@ -332,6 +340,7 @@ var Lesson = (function () {
 
                 break;
             case mod.TEACHERVIEW:
+
                 var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
                 //lessonHeader.show().append(headerRow);
 
@@ -359,6 +368,12 @@ var Lesson = (function () {
 
                 lessonButton.append(toggleMode);
                 toggleMode.append(iconToggle).append("Sửa");
+
+                var previewMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Học thử", "onclick": "openPreview()" });
+                var iconPreview = $("<i>", { "class": "far fa-paper-plane mr-2" });
+
+                lessonButton.append(previewMode);
+                previewMode.append(iconPreview).append("Học thử");
                 //headerRow.append(lessonButton);
                 lesson_action_holder.prepend(lessonButton);
                 break;
@@ -407,6 +422,7 @@ var Lesson = (function () {
                 lesson_action_holder.find(".lesson-button").remove();
                 lesson_action_holder.append(lessonButton);
                 break;
+            case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
             case mod.STUDENT_REVIEW:
                 lessonBody.css('top', 0);
@@ -472,6 +488,8 @@ var Lesson = (function () {
                     });
                 }
                 break;
+
+            case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
                 console.log("student exam");
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
@@ -503,6 +521,94 @@ var Lesson = (function () {
                     })
                 }
                 break;
+            case mod.TEACHERPREVIEW:
+            //var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
+            //lessonBody.append(partMenu);
+            //var lessontabs = $("<div>", { "class": "lesson-tabs" });
+            //partMenu.append(lessontabs);
+            //var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
+            //lessontabs.append(tabs);
+            //for (var i = 0; data.Part != null && i < data.Part.length; i++) {
+            //    var item = data.Part[i];
+            //        renderStudentPart(item, false);
+            //}
+            //if (data.Part != null && data.Part.length == 1) {
+            //    $('.fas.fa-caret-down:first').click();
+            //}
+            //switch (_UImode) {
+            //    case UIMode.EXAM_ONLY:
+            //    case UIMode.BOTH:
+            //        var dataform = new FormData();
+            //        dataform.append("ClassID", config.class_id);
+            //        dataform.append("ClassSubjectID", config.class_subject_id);
+            //        dataform.append("LessonID", config.lesson_id);
+            //        if ($('#' + config.container).find("#ExamID").length == 0) {
+            //            $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", id: "ExamID" }));
+            //        }
+            //        if (!checkExam()) {
+            //            localStorage.clear();
+            //        }
+            //        var continue_exam = false;
+
+            //        //get lastest exam data from server
+            //        Ajax(config.url.current, dataform, "POST", true).then(function (res) {
+            //            var exam;
+            //            try {
+            //                var data = JSON.parse(res);
+            //                exam = data.exam
+            //            } catch (e) {
+            //                console.log(e)
+            //            }
+            //            //console.log(exam);
+            //            //console.log(getLocalData("CurrentExam"));
+            //            //if no data is found => new attempt => clear all local storage
+            //            if (exam == null) {
+            //                localStorage.clear();
+            //                console.log("New Fresh Exam");
+            //                renderLectureExam(exam, false);
+            //            }
+            //            else {
+            //                //
+            //                if (isNull(getLocalData("CurrentExam")) || (getLocalData("CurrentExam") != exam.ID)) //display last result & render new exam
+            //                {
+            //                    //console.log(data);
+            //                    localStorage.clear();
+            //                    console.log("New Exam");
+            //                    //console.log(getLocalData("CurrentExam"))                                    
+            //                    renderLectureExam(exam, false);
+            //                }
+            //                else {
+            //                    console.log("Exam Continue")
+            //                    setLocalData("CurrentExam", exam.ID);
+            //                    $('#ExamID').val(exam.ID);
+
+            //                    var current = exam.CurrentDoTime;
+            //                    var start = exam.Created;
+            //                    var timer = moment(current) - moment(start);
+
+            //                    console.log(timer);
+            //                    if ((exam.Timer > 0) && moment(timer).minutes() >= exam.Timer)//Timeout
+            //                    {
+            //                        console.log("Exam Timeout")
+            //                        setLocalData("Timer", "00:00");
+            //                        CompleteLectureExam(true);
+            //                    }
+            //                    else {
+            //                        setLocalData("CurrentExam", exam.ID);
+            //                        $('#ExamID').val(exam.ID);
+            //                        //render Exam
+            //                        var _sec = 59 - moment(timer).second();
+            //                        var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
+            //                        var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
+            //                        setLocalData("Timer", _timer);
+            //                        console.log(_timer);
+            //                        renderLectureExam(exam, true);
+            //                        countdown(false);
+            //                    }
+            //                }
+            //            }
+            //        });
+            //        break;
             case mod.STUDENT_LECTURE:
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
@@ -510,9 +616,9 @@ var Lesson = (function () {
                 partMenu.append(lessontabs);
                 var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
                 lessontabs.append(tabs);
+
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
-
                     renderStudentPart(item, false);
                 }
                 if (data.Part != null && data.Part.length == 1) {
@@ -531,8 +637,8 @@ var Lesson = (function () {
                         if (!checkExam()) {
                             localStorage.clear();
                         }
-
                         var continue_exam = false;
+
                         //get lastest exam data from server
                         Ajax(config.url.current, dataform, "POST", true).then(function (res) {
                             var exam;
@@ -548,17 +654,21 @@ var Lesson = (function () {
                             if (exam == null) {
                                 localStorage.clear();
                                 console.log("New Fresh Exam");
-                                renderLectureExam(exam, false);
+
                             }
                             else {
+
                                 //
                                 if (isNull(getLocalData("CurrentExam")) || (getLocalData("CurrentExam") != exam.ID)) //display last result & render new exam
                                 {
                                     //console.log(data);
                                     localStorage.clear();
                                     console.log("New Exam");
-                                    //console.log(getLocalData("CurrentExam"))                                    
-                                    renderLectureExam(exam, false);
+                                    //console.log(getLocalData("CurrentExam"))    
+                                    if (config.mod == mod.STUDENT_LECTURE)
+                                        renderLectureExam(exam, false);
+                                    else
+                                        renderLectureExam(exam, true);
                                 }
                                 else {
                                     console.log("Exam Continue")
@@ -570,7 +680,7 @@ var Lesson = (function () {
                                     var timer = moment(current) - moment(start);
 
                                     console.log(timer);
-                                    if ((exam.Timer > 0)  && moment(timer).minutes() >= exam.Timer)//Timeout
+                                    if ((exam.Timer > 0) && moment(timer).minutes() >= exam.Timer)//Timeout
                                     {
                                         console.log("Exam Timeout")
                                         setLocalData("Timer", "00:00");
@@ -658,6 +768,7 @@ var Lesson = (function () {
                 }
 
                 break;
+            case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
 
                 //if (_UImode == UIMode.EXAM_ONLY) {
@@ -754,6 +865,7 @@ var Lesson = (function () {
                 //countdown();
                 nav_bottom.append(nexttab);
                 break;
+            case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
                 if (data.Timer > 0) {
                     var nav_bottom = lesson_action_holder
@@ -814,11 +926,15 @@ var Lesson = (function () {
         reloadData();
     }
 
+    var openPreview = function () {
+        window.open(document.location.href.replace("/Detail/", "/Preview/"));
+    }
+
     //Preview: view + edit
     var renderPreview = function () {
         //Prepare data
         if (isNull(_data)) {
-            loadLesssonData({ ID: config.lesson_id }, renderLessonData);
+            loadLessonData({ ID: config.lesson_id }, renderLessonData);
         }
         else {
             //Render Content
@@ -2256,6 +2372,7 @@ var Lesson = (function () {
             //console.log(exam.ID);
             //console.log(getLocalData("CurrentExam"));
             //if no data is found => new attempt => clear all local storage
+            console.log(exam);
             if (exam == null) {
                 localStorage.clear();
                 console.log("New Fresh Exam");
@@ -2272,8 +2389,11 @@ var Lesson = (function () {
                     renderNewExam(exam, schedule, limit);
                 }
                 else {
+
+
                     if (getLocalData("CurrentExam") != exam.ID) //unmatched id => complete exam
                     {
+
                         console.log(getLocalData("CurrentExam"))
                         console.log(exam.ID)
                         console.log("Unmatched Exam");
@@ -2288,6 +2408,7 @@ var Lesson = (function () {
                             localStorage.clear();
                             console.log("New Exam");
                             //console.log(getLocalData("CurrentExam"))
+
                             renderNewExam(exam, schedule, limit);
                         }
                         else {
@@ -2361,7 +2482,7 @@ var Lesson = (function () {
                 }).append('<i class="fas fa-play mr-2"></i>').append('Làm bài');
             }
         }
-        if (isNull(data)) {
+        if (isNull(data) || config.mod == mod.TEACHERPREVIEWEXAM) {
             //var backButton = $('<div>', {
             //    "class": "btn btn-primary m-3",
             //    "onclick": "GoBack()",
@@ -2443,7 +2564,63 @@ var Lesson = (function () {
             this.exam_id = lastExam.ID;
             var lastpoint = (lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0);
             if (isContinue) {
-                //alert('here');
+                $('#rightCol').append($(wrapper));
+                var completeButton = $('<div>', {
+                    "class": "btn btn-primary mt-3 mb-3 btnCompleteExam",
+                    "onclick": 'CompleteLectureExam(\'' + lastExam.ID + '\')',
+                    "style": "cursor: pointer"
+                }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");
+                wrapper.append(completeButton);
+                $('#rightCol').find('.tab-pane').show();
+                renderQuizCounter();
+            }
+            else {
+                $('#rightCol').prepend($(wrapper));
+                var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
+                lastExamResult =
+                    $("<div>", { id: "last-result", class: "text-center" })
+                        .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+                wrapper.append(lastExamResult);
+
+                var reviewButton = $('<div>', {
+                    "class": "btn btn-primary m-2 lesson-action",
+                    "onclick": 'Review(\'' + lastExam.ID + '\')',
+                    "style": "cursor: pointer"
+                }).append('<i class="fas fa-poll mr-2"></i>').append("Xem đáp án");
+
+                var doButton = $('<div>', {
+                    "class": "btn btn-primary m-2 lesson-action",
+                    "onclick": "$(this).prop('disabled',true); DoLectureExam(this); ",
+                    "style": "cursor: pointer"
+                }).append('<i class="fas fa-play mr-2"></i>').append("Làm lại bài");
+                wrapper.append(doButton)
+                    .append(reviewButton);
+                $('#rightCol').find('.tab-pane').hide().removeClass("show");
+            }
+        }
+        else {
+            $('#rightCol').prepend($(wrapper));
+            var doButton = $('<div>', {
+                "class": "btn btn-primary m-3",
+                "onclick": "$(this).prop('disabled',true); DoLectureExam(this); ",
+                "style": "cursor: pointer",
+                "text": 'Luyện tập'
+            });
+            wrapper.append(doButton);
+            $('#rightCol').find('.tab-pane').hide();
+        }
+    }
+
+    var renderPreviewLectureExam = function (data, isContinue) {
+
+        var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
+        $('#rightCol').find(".partWrapper").remove();
+        if (data != null) {
+            var lastExam = data;
+            this.exam_id = lastExam.ID;
+            var lastpoint = (lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0);
+            if (isContinue) {
                 $('#rightCol').append($(wrapper));
                 var completeButton = $('<div>', {
                     "class": "btn btn-primary mt-3 mb-3 btnCompleteExam",
@@ -2503,6 +2680,7 @@ var Lesson = (function () {
         if (obj != null)
             $(obj).prop("disabled", true);
         console.log("Create Exam");
+
         var dataform = new FormData();
         dataform.append("LessonID", config.lesson_id);
         dataform.append("ClassSubjectID", config.class_subject_id);
@@ -2541,7 +2719,7 @@ var Lesson = (function () {
 
         renderStandardLayout(true);
         $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", value: getLocalData("CurrentExam"), id: "ExamID" }));
-        loadLesssonData({
+        loadLessonData({
             "LessonID": config.lesson_id,
             "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
@@ -2696,7 +2874,7 @@ var Lesson = (function () {
                 renderMediaContent(data, itemBody, "");
                 container.append(tabsitem);
                 //Render Description
-                console.log("quiz2");
+                //console.log("quiz2");
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
@@ -3008,41 +3186,68 @@ var Lesson = (function () {
         if (isOvertime || true) {
             //var exam = document.querySelector("input[name='ExamID']");
             //var exam = getLocalData("CurrentExam");
+            if (config.mod != mod.TEACHERPREVIEWEXAM) {
+                var dataform = new FormData();
+                //console.log("Complete :" + $('#ExamID').val());
+                dataform.append("ExamID", $('#ExamID').val());
+                Ajax(config.url.end, dataform, "POST", true)
+                    .then(function (res) {
+                        stopCountdown();
+                        var data = JSON.parse(res);
+                        //if (isOvertime)
+                        //    notification("success", "Thời gian làm bài đã hết", 1500);
+                        //else
+                        //    notification("success", "Đã nộp bài", 1500);
+                        localStorage.clear();
+                        renderCompleteExam(data);
+                    })
+                    .catch(function (err) {
+                        console.log(err);
+                    });
+            }
+            else {
+                stopCountdown();
+                //if (isOvertime)
+                //    notification("success", "Thời gian làm bài đã hết", 1500);
+                //else
+                //    notification("success", "Đã nộp bài", 1500);
+                localStorage.clear();
+                renderCompleteExam({
+                    maxPoint: 100, point: 1, limit: 0, number: 1,
+                    questionPass: document.querySelectorAll("button.completed").length,
+                    questionsTotal: document.querySelectorAll(".quiz-item").length
+                });
+            }
+        }
+    }
+
+    var completeLectureExam = function () {
+
+        if (config.mod != mod.TEACHERPREVIEW) {
             var dataform = new FormData();
-            //console.log("Complete :" + $('#ExamID').val());
+            console.log("Complete :" + $('#ExamID').val());
             dataform.append("ExamID", $('#ExamID').val());
             Ajax(config.url.end, dataform, "POST", true)
                 .then(function (res) {
                     stopCountdown();
                     var data = JSON.parse(res);
-                    //if (isOvertime)
-                    //    notification("success", "Thời gian làm bài đã hết", 1500);
-                    //else
-                    //    notification("success", "Đã nộp bài", 1500);
+                    //notification("success", "Đã nộp bài", 3000);
                     localStorage.clear();
-                    renderCompleteExam(data);
+                    document.location.href = window.location.href.substr(0, window.location.href.indexOf('#'));
                 })
                 .catch(function (err) {
                     console.log(err);
                 });
         }
-    }
-
-    var completeLectureExam = function () {
-        var dataform = new FormData();
-        console.log("Complete :" + $('#ExamID').val());
-        dataform.append("ExamID", $('#ExamID').val());
-        Ajax(config.url.end, dataform, "POST", true)
-            .then(function (res) {
-                stopCountdown();
-                var data = JSON.parse(res);
-                //notification("success", "Đã nộp bài", 3000);
-                localStorage.clear();
-                document.location.href = window.location.href.substr(0, window.location.href.indexOf('#'));
-            })
-            .catch(function (err) {
-                console.log(err);
+        else {
+            stopCountdown();
+            //calculateResult();
+            renderCompleteExam({
+                maxPoint: 100, point: 1, limit: 0, number: 1, 
+                questionPass: 0,
+                questionsTotal: document.querySelectorAll(".quiz-item").length
             });
+        }
     }
 
     var renderCompleteExam = function (data) {
@@ -3076,8 +3281,18 @@ var Lesson = (function () {
             console.log(lastExam);
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
-                    .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.questionsPass == null ? 0 : lastExam.questionsPass) + "/" + lastExam.questionsTotal }));
+                    .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }));
+
+            if (config.mod == mod.TEACHERPREVIEW || config.mod == mod.TEACHERPREVIEWEXAM)
+                lastExamResult =
+                    $("<div>", { id: "last-result", class: "text-center" })
+                        .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra" }))
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Tổng số câu hỏi: " + lastExam.questionsTotal }));
+            else
+                lastExamResult =
+                    $("<div>", { id: "last-result", class: "text-center" })
+                        .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.questionsPass == null ? 0 : lastExam.questionsPass) + "/" + lastExam.questionsTotal }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -3117,8 +3332,9 @@ var Lesson = (function () {
                 }).append('<i class="fas fa-play mr-2"></i>').append('Làm lại bài');
             }
             console.log(doButton);
-            $(lesson_action_holder).append(doButton)
-                .append(reviewButton);
+            $(lesson_action_holder).append(doButton);
+            if(config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM)
+                $(lesson_action_holder).append(reviewButton);
             console.log(lesson_action_holder);
             //.append(backButton);
         }
@@ -3126,7 +3342,7 @@ var Lesson = (function () {
 
     //student review
     var renderStudentReview = function (data) {
-        loadLesssonData({
+        loadLessonData({
             "LessonID": config.lesson_id,
             "ClassID": config.class_id,
             "ExamID": config.exam_id
@@ -3134,7 +3350,7 @@ var Lesson = (function () {
     }
 
     var renderLecture = function () {
-        loadLesssonData({
+        loadLessonData({
             "LessonID": config.lesson_id,
             "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
@@ -3146,6 +3362,7 @@ var Lesson = (function () {
     }
 
     var redoExam = function (obj) {
+
         var lesson_action_holder = $('.top-menu[for=lesson-info]')
         lesson_action_holder.empty()
         console.log("Redo Exam");
@@ -3286,11 +3503,14 @@ var Lesson = (function () {
             dataform.append("LessonPartID", partID);
             dataform.append("AnswerValue", value);
         }
-        Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
-        })
-            .catch(function (err) {
-                notification("error", err, 3000);
-            });
+
+        if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
+            Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
+            })
+                .catch(function (err) {
+                    notification("error", err, 3000);
+                });
+        }
         if (value == "") {
             delAnswerForStudent(questionId);
         } else {
@@ -3311,12 +3531,13 @@ var Lesson = (function () {
         dataform.append("LessonPartID", partID);
         dataform.append("QuestionID", questionId);
         dataform.append("AnswerValue", value);
-
-        Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
-        })
-            .catch(function (err) {
-                notification("error", err, 3000);
-            });
+        if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
+            Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
+            })
+                .catch(function (err) {
+                    notification("error", err, 3000);
+                });
+        }
         if (value == "") {
             delAnswerForStudent(questionId);
         } else {
@@ -3326,22 +3547,31 @@ var Lesson = (function () {
 
     var delAnswerForStudent = function (quizID) {
         removeLocalData(quizID);
+        if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
+            var dataform = new FormData();
+            dataform.append("ExamID", $('#ExamID').val());
+            dataform.append("QuestionID", quizID);
+            Ajax(config.url.removeans, dataform, "POST", false)
+                .then(function (res) {
 
-        var dataform = new FormData();
-        dataform.append("ExamID", $('#ExamID').val());
-        dataform.append("QuestionID", quizID);
-        Ajax(config.url.removeans, dataform, "POST", false)
-            .then(function (res) {
+                    renderQuizCounter();
+                    var xxx = document.getElementById("quizNav" + quizID);
+                    if (xxx != null) {
+                        xxx.classList.remove("completed");
+                    }
+                })
+                .catch(function (err) {
+                    notification("error", err, 3000);
+                });
+        }
+        else {
+            renderQuizCounter();
+            var xxx = document.getElementById("quizNav" + quizID);
+            if (xxx != null) {
+                xxx.classList.remove("completed");
+            }
 
-                renderQuizCounter();
-                var xxx = document.getElementById("quizNav" + quizID);
-                if (xxx != null) {
-                    xxx.classList.remove("completed");
-                }
-            })
-            .catch(function (err) {
-                notification("error", err, 3000);
-            });
+        }
     }
 
     var delAnswerForStudentNoRender = function (quizID) {

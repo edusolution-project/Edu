@@ -110,28 +110,43 @@ namespace EnglishPlatform.Controllers
                     case ACCOUNT_TYPE.TEACHER:
                         if (tc != null)
                         {
-                            centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
-                            ViewBag.AllCenters = tc.Centers.Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
+                            var centers = tc.Centers
+                                .Where(ct => _centerService.GetItemByID(ct.CenterID)?.ExpireDate > DateTime.Now)
+                                .Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
+                            if (centers != null)
+                                centerCode = centers.FirstOrDefault().Code;
+                            else
+                                centerCode = center.Code;
                         }
                         break;
                     default:
                         if (st != null)
                         {
-                            centerCode = st.Centers != null && st.Centers.Count > 0 ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
-                            ViewBag.AllCenters = st.Centers != null ? st.Centers.Select(t => _centerService.GetItemByID(t)).ToList() : null;
+                            if (st.Centers != null && st.Centers.Count > 0)
+                            {
+                                var allcenters = tc.Centers
+                                    .Where(ct => _centerService.GetItemByID(ct.CenterID)?.ExpireDate > DateTime.Now)
+                                    .Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
+                                centerCode = allcenters.Count > 0 ? allcenters.FirstOrDefault().Code : center.Code;
+                                ViewBag.AllCenters = allcenters;
+                            }
+                            else
+                            {
+                                centerCode = center.Code;
+                            }
                         }
                         break;
                 }
                 ViewBag.Type = type.Value;
                 //cache
-                //return Redirect($"{centerCode}/{type.Value}");
+                return Redirect($"{centerCode}/{type.Value}");
             }
-            //else
-            //{
-            //    _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-            //    HttpContext.SignOutAsync(Cookies.DefaultLogin);
-            //    return RedirectToAction("Login");
-            //}
+            else
+            {
+                _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
+                HttpContext.SignOutAsync(Cookies.DefaultLogin);
+                return RedirectToAction("Login");
+            }
             return View();
         }
 
@@ -190,6 +205,9 @@ namespace EnglishPlatform.Controllers
                             var tc = _teacherService.GetItemByID(user.UserID);
                             var st = _studentService.GetItemByID(user.UserID);
 
+
+
+
                             var defaultUser = new UserModel() { };
                             switch (Type)
                             {
@@ -197,8 +215,34 @@ namespace EnglishPlatform.Controllers
                                     if (tc != null)
                                     {
                                         defaultUser = new UserModel(tc.ID, tc.FullName);
-                                        centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
-                                        roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+
+                                        if (tc.Centers != null && tc.Centers.Count > 0)//return to first valid center
+                                        {
+                                            foreach (var ct in tc.Centers)
+                                            {
+                                                var _ct = _centerService.GetItemByID(ct.CenterID);
+                                                if (_ct == null || _ct.ExpireDate <= DateTime.Now)
+                                                {
+                                                    continue;
+                                                    //return Json(new ReturnJsonModel
+                                                    //{
+                                                    //    StatusCode = ReturnStatus.ERROR,
+                                                    //    StatusDesc = "Cơ sở không hoạt động hoặc đã hết hạn, vui lòng liên hệ quản trị để được hỗ trợ"
+                                                    //});
+                                                }
+                                                else
+                                                {
+                                                    centerCode = _ct.Code;
+                                                    roleCode = _roleService.GetItemByID(ct.RoleID).Code;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            centerCode = center.Code;
+                                            roleCode = "";
+                                        }
                                     }
                                     break;
                                 case ACCOUNT_TYPE.ADMIN:
@@ -217,7 +261,9 @@ namespace EnglishPlatform.Controllers
                             }
                             if (Type != ACCOUNT_TYPE.ADMIN)
                             {
-                                var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
+                                var role =
+                                    //roleCode != "student" ? _roleService.GetItemByID(roleCode) : 
+                                    _roleService.GetItemByCode(roleCode);
                                 if (role != null)
                                 {
                                     var listAccess = _accessesService.GetAccessByRole(role.Code);
@@ -314,6 +360,8 @@ namespace EnglishPlatform.Controllers
                 }
                 else
                 {
+                    var defCenter = _centerService.GetItemByCode("eduso");
+
                     var user = new AccountEntity()
                     {
                         PassWord = _sPass,
@@ -346,13 +394,15 @@ namespace EnglishPlatform.Controllers
                                 Email = _username,
                                 Phone = user.Phone,
                                 IsActive = false,
-                                CreateDate = DateTime.Now
+                                CreateDate = DateTime.Now,
+                                Centers = new List<CenterMemberEntity> { new CenterMemberEntity { CenterID = defCenter.ID, Code = defCenter.Code, Name = defCenter.Name, RoleID = user.RoleID } }
                             };
                             _teacherService.CreateQuery().InsertOne(teacher);
                             user.UserID = teacher.ID;
                             //send email for teacher
+                            _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, PassWord, defCenter.Name);
                             break;
-                        default:
+                        default: //temporary block
                             //create student
                             var student = new StudentEntity()
                             {

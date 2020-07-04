@@ -88,7 +88,7 @@ namespace EnglishPlatform.Controllers
                     var listClass = !_typeUser.Contains(Teacher) ? (_studentService.GetItemByID(_userID) ?? new StudentEntity()).JoinedClasses : null;
                     var realClass = listClass != null
                         ? _classService.CreateQuery().Find(o => listClass.Contains(o.ID))?.ToList()
-                        : _classService.CreateQuery().Find(o => o.TeacherID == _userID)?.ToList();
+                        : _classService.CreateQuery().Find(o => o.Members.Any(t => t.TeacherID == _userID))?.ToList();
                     for (int i = 0; realClass != null && i < realClass.Count; i++)
                     {
                         var item = realClass[i];
@@ -127,7 +127,8 @@ namespace EnglishPlatform.Controllers
                         : null;
                     var realClass = listClass != null
                         ? _classService.CreateQuery().Find(o => listClass.Contains(o.ID))?.ToList()
-                        : _classService.CreateQuery().Find(o => o.TeacherID == _userID)?.ToList();
+                        : _classService.CreateQuery().Find(o => o.Members.Any(t => t.TeacherID == _userID))?.ToList();
+                    //: _classService.CreateQuery().Find(o => o.TeacherID == _userID)?.ToList();
                     var listMembers = new HashSet<MemberGroupInfo>();
                     var listMemberTeacher = new HashSet<MemberGroupInfo>();
                     if (realClass != null)

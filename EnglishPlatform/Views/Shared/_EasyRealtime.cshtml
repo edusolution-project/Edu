@@ -1025,6 +1025,7 @@
         }
         return data;
     }
+
     var loadDataGroup = function () {
         var dataStored = getDataFromLocalStored();
         if (dataStored == false) {
@@ -1427,6 +1428,10 @@
             listFooterReply.innerHTML += item;
             var elItem = listFooterReply.querySelector(`div#reply_${data.ID}`);
             listFooterReply.insertBefore(elItem, listFooterReply.childNodes[0]);
+            if (!listFooterReply.classList.contains("open")) {
+                var toggleButton = footer.querySelector("a.btn.btn-sm.btn-blue");
+                toggleButton.click();
+            }
             if (isGoto) {
                 gotoView(elItem);
             }
@@ -1466,7 +1471,9 @@
             rootForm.querySelector('input[type="file"]').click();
         }
     }
+
     var fileReply = {};
+
     var ReplyAddFile = function (self, code, group) {
         if(fileReply[code] == void 0) fileReply[code] = {};
         if (fileReply[code][group] == void 0); fileReply[code][group] = {};
@@ -1510,7 +1517,8 @@
             }
         }
     }
-    var RemoveFileReply = function (id, self,code,group) {
+
+    var RemoveFileReply = function (id, self, code, group) {
         var item = self.parentElement;
         if (item != null) {
             item.classList.add("disabled");
@@ -1563,9 +1571,11 @@
     var CacheMessage = function (key,end,start,messages) {
 
     }
+
     var renderMessage = function () {
 
     }
+
     var sendData = function (isUpMedia) {
         if (isUpMedia == void 0) isUpMedia = false;
         var form = getFormRealTimeApp();
@@ -1673,6 +1683,7 @@
         }
         return true;
     }
+
     var addFileFromListFile = function (frmData) {
         var keys = Object.keys(filesList);
         if (keys.length > 0) {

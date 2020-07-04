@@ -291,6 +291,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     RoleID = teacher.ID
                 };
                 _accountService.CreateQuery().InsertOne(account);
+                _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
             }
             return Json(new { msg = "Giáo viên đã được cập nhật" });
         }
@@ -431,7 +432,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {
                                     teacher.FullName = name;
                                     teacher.Phone = phone;
-                                    teacher.Centers.RemoveAll(t => t.CenterID == center.ID);
+
+
+                                    var exist = teacher.Centers.RemoveAll(t => t.CenterID == center.ID) > 0;
                                     teacher.Centers.Add(new CenterMemberEntity
                                     {
                                         CenterID = center.ID,
@@ -444,6 +447,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     acc.Name = teacher.FullName;
                                     acc.Phone = teacher.Phone;
                                     _accountService.Save(acc);
+                                    if (!exist)
+                                        _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, "", center.Name);
                                 }
                                 else
                                 {
@@ -482,6 +487,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         RoleID = teacher.ID
                                     };
                                     _accountService.CreateQuery().InsertOne(account);
+                                    _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
                                 }
                                 counter++;
                             }

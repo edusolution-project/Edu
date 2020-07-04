@@ -164,7 +164,7 @@ namespace BaseCustomerMVC.Globals
             if (!String.IsNullOrEmpty(VisiblePassword))//register
             {
                 subject = "Chúc mừng " + Name + " đã trở thành giáo viên của " + centerName;
-                body = "<p>Bạn vừa được đăng ký làm giáo viên của " + centerName + "!</p>" +
+                body = "<p>Bạn vừa được đăng ký làm giáo viên của <b>" + centerName + "</b>!</p>" +
                 "<p>Thông tin đăng nhập như sau</p>" +
                 "<p>Tên đăng nhập: <b>" + Email + "</b></p>" +
                 "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
@@ -180,14 +180,14 @@ namespace BaseCustomerMVC.Globals
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
         }
 
-        public async Task SendTeacherJoinClassNotify(string Name, string Email, string className, string skillname, DateTime startdate, DateTime enddate)
+        public async Task SendTeacherJoinClassNotify(string Name, string Email, string className, string skillname, DateTime startdate, DateTime enddate, string CenterName)
         {
-            string subject = "";
+            string subject = "Thông báo phân công giảng dạy - " + CenterName;
             string body = "Chào " + Name + ",";
 
             if (!string.IsNullOrEmpty(className) && !(string.IsNullOrEmpty(skillname)))
             {
-                body += ("<p>Bạn vừa được phân công dạy môn: <b>" + skillname + "</b> - lớp <b>" + className + "</b></p>");
+                body += ("<p>Bạn vừa được phân công dạy môn: <b>" + skillname + "</b> - lớp <b>" + className + "</b> tại <b>" + CenterName + "</b></p>");
                 body += ("<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>");
             }
             else
@@ -198,10 +198,34 @@ namespace BaseCustomerMVC.Globals
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
         }
 
-
-        public async Task SendStudentJoinClassNotify(StudentEntity student, ClassEntity joinClass)
+        public async Task SendStudentJoinClassNotify(string StudentName, string Email, string VisiblePassword, string ClassName, DateTime startdate, DateTime enddate, String CenterName)
         {
+            string subject = "Thông báo đăng ký học thành công - " + CenterName;
+            string body = "Chào " + StudentName + ",";
 
+            if (!String.IsNullOrEmpty(VisiblePassword))//register
+            {
+                subject = "Chúc mừng " + StudentName + " đã trở thành học viên của " + CenterName;
+                body = "<p>Bạn vừa được đăng ký học lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>" +
+                "<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>" +
+                "<br/>" +
+                "<p>Thông tin đăng nhập của bạn</p>" +
+                "<p>Tên đăng nhập: <b>" + Email + "</b></p>" +
+                "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
+                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            }
+            if (!string.IsNullOrEmpty(ClassName))
+            {
+                body += ("<p>Bạn vừa được đăng ký học lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>");
+                body += ("<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>");
+                body += "<p>Đăng nhập để bắt đầu học ngay trên <a href='https://eduso.vn/login'>Eduso.vn</a><p>";
+            }
+            else
+                return;
+
+            //body += "<p>Đăng nhập để trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            var toAddress = new List<string> { Email };
+            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.STUDENT_JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
         }
 
         public async Task SendUpdateCurriculumNotify(ClassSubjectEntity subjectEntity)
@@ -220,7 +244,7 @@ namespace BaseCustomerMVC.Globals
 
     public class MailPhase
     {
-        public const int REGISTER = 1, RESET_PASS = 2, JOIN_CLASS = 3, LEAVE_CLASS = 4, WEEKLY_SCHEDULE = 5;
+        public const int REGISTER = 1, RESET_PASS = 2, JOIN_CLASS = 3, LEAVE_CLASS = 4, WEEKLY_SCHEDULE = 5, STUDENT_JOIN_CLASS = 6;
     }
 
     public class ResultState

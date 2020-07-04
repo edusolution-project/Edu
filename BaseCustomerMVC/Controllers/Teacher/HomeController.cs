@@ -49,7 +49,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
             if (teacher != null)
-                ViewBag.AllCenters = teacher.Centers;
+                ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
 
             if (!string.IsNullOrEmpty(basis))
             {
@@ -74,7 +74,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
             if (teacher != null)
-                ViewBag.AllCenters = teacher.Centers;
+                ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
             if (teacher == null)
                 return Redirect("/login");
 

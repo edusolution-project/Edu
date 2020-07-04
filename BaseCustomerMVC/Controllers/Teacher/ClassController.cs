@@ -967,7 +967,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var dCursor = _classSubjectService.Collection
                 .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty);
             var data = dCursor.ToList();
-               
+
             if (!string.IsNullOrEmpty(TeacherID))
             {
                 classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
@@ -1036,27 +1036,37 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [Obsolete]
         public JsonResult Create(ClassEntity item, string CenterCode, List<ClassSubjectEntity> classSubjects, IFormFile fileUpload)
         {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Vui lòng đăng nhập lại" }
+                        });
+            }
+            var cm = _teacherService.GetItemByID(userId);
+            if (cm == null)
+            {
+                return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Vui lòng đăng nhập lại" }
+                        });
+            }
+            var center = _centerService.GetItemByCode(CenterCode);
+            if (center == null || cm.Centers.Count(t => t.Code == CenterCode) == 0)
+            {
+                return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Cơ sở không đúng" }
+                        });
+            }
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.ID = null;
                 item.Created = DateTime.Now;
-                var userId = User.Claims.GetClaimByType("UserID").Value;
 
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return new JsonResult(new Dictionary<string, object>()
-                        {
-                            {"Error", "Vui lòng đăng nhập lại" }
-                        });
-                }
-                var teacher = _teacherService.GetItemByID(userId);
-                if (teacher == null)
-                {
-                    return new JsonResult(new Dictionary<string, object>()
-                        {
-                            {"Error", "Vui lòng đăng nhập lại" }
-                        });
-                }
+
                 if (classSubjects == null || classSubjects.Count == 0)
                 {
                     return new JsonResult(new Dictionary<string, object>()
@@ -1065,19 +1075,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         });
                 }
 
-                var center = _centerService.GetItemByCode(CenterCode);
-                if (center == null || teacher.Centers.Count(t => t.Code == CenterCode) == 0)
-                {
-                    return new JsonResult(new Dictionary<string, object>()
-                        {
-                            {"Error", "Cơ sở không đúng" }
-                        });
-                }
-
                 item.TeacherID = userId; // creator
                 item.Skills = new List<string>();
                 item.Subjects = new List<string>();
-                item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER, Name = teacher.FullName } };
+                item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER, Name = cm.FullName } };
                 item.TotalLessons = 0;
                 item.IsActive = true;
                 item.StartDate = item.StartDate.ToUniversalTime();
@@ -1097,7 +1098,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     foreach (var csubject in classSubjects)
                     {
-
+                        var teacher = _teacherService.GetItemByID(csubject.TeacherID);
                         var newMember = new ClassMemberEntity();
                         long lessoncount = 0;
                         var nID = CreateNewClassSubject(csubject, item, out newMember, out lessoncount);
@@ -1107,6 +1108,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             item.Subjects.Add(csubject.SubjectID);
                         if (!item.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             item.Members.Add(newMember);
+                        //var skill = _skillService.GetItemByID(csubject.SkillID);
+                        //if (skill == null) continue;
+                        //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
                     }
                     _service.Save(item);
                 }
@@ -1124,7 +1128,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var oldData = _service.GetItemByID(item.ID);
                 if (oldData == null) return new JsonResult(new Dictionary<string, object>()
                 {
-                    {"Error", "Class not found" }
+                    {"Error", "Không tìm thấy lớp" }
                 });
 
                 oldData.Updated = DateTime.Now;
@@ -1164,7 +1168,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             long lessoncount = 0;
                             if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                             {
-                                nSbj.ID = CreateNewClassSubject(nSbj, item, out newMember, out lessoncount);
+                                nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount);
                                 if (string.IsNullOrEmpty(nSbj.ID))//Error
                                     continue;
                             }
@@ -1173,11 +1177,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //update period
                                 oSbj.StartDate = item.StartDate.ToUniversalTime();
                                 oSbj.EndDate = item.EndDate.ToUniversalTime();
-                                oSbj.TeacherID = nSbj.TeacherID;
-                                _classSubjectService.Save(oSbj);
-
                                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
                                 if (teacher == null) continue;
+
+                                if (oSbj.TeacherID != nSbj.TeacherID) //chage teacher
+                                {
+                                    oSbj.TeacherID = nSbj.TeacherID;
+                                    var skill = _skillService.GetItemByID(oSbj.SkillID);
+                                    if (skill == null) continue;
+                                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                                }
+                                _classSubjectService.Save(oSbj);
                                 newMember = new ClassMemberEntity
                                 {
                                     TeacherID = teacher.ID,
@@ -1206,7 +1216,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //create new subject
                         var newMember = new ClassMemberEntity();
                         long lessoncount = 0;
-                        var nID = CreateNewClassSubject(nSbj, item, out newMember, out lessoncount);
+                        var nID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount);
                         if (string.IsNullOrEmpty(nSbj.ID))//Error
                             continue;
 
@@ -1295,9 +1305,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var skill = _skillService.GetItemByID(nSbj.SkillID);
 
-                _classSubjectService.Save(nSbj);
+                var center = _centerService.GetItemByID(@class.Center);
 
-                _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate);
+                _classSubjectService.Save(nSbj);
+                _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
                 //Clone Course
                 _courseHelper.CloneForClassSubject(nSbj);
 
