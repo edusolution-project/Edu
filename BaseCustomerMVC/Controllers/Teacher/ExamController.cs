@@ -5,6 +5,7 @@ using Core_v2.Globals;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -110,26 +111,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 // 1 - lay danh sach lesson 
                 // 2 - lay danh sach student theo lesson
                 // 3 - lay chi tiet bai 
-                var list = _service.CreateQuery().Find(o => o.ClassID == ClassID)?.ToList()?
-                    .GroupBy(o => new { o.LessonID }).Select(r => new ExamEntity { ID = r.Max(t => t.ID), LessonID = r.Key.LessonID })?.ToList();
+                var list = _service.CreateQuery().Find(o => o.ClassID == ClassID && o.Status == false)?.ToList()?
+                    .GroupBy(o => new { o.LessonID}).Select(r => new ExamEntity { ID = r.Max(t => t.ID), LessonID = r.Key.LessonID })?.ToList();
                 var returnData = (from r in list
-                                  //let student = _studentService.GetItemByID(r.StudentID)
-                                  //let exam = _service.GetItemByID(r.ID)
+                                  let exam = _service.GetItemByID(r.ID)
+                                  let student = _studentService.GetItemByID(exam.StudentID)
                                   let lesson = _lessonService.GetItemByID(r.LessonID)
                                   select new ExamViewModel
                                   {
                                       LessonID = r.LessonID,
                                       LessonScheduleName = lesson.Title,
                                       ID = r.ID,
-                                      //StudentID = student.ID,
-                                      //StudentName = student.FullName,
+                                      StudentID = student.ID,
+                                      StudentName = student.FullName,
                                       //Created = exam.Created,
                                       //Status = exam.Status,
                                       //Marked = exam.Marked,
                                       //Point = exam.Point,
                                       //MaxPoint = exam.MaxPoint,
                                       //Number = exam.Number
-                                  }).ToList()?.OrderBy(z => z.Status);
+                                  }).ToList()?.GroupBy(z => z.LessonID);
+                model.TotalRecord = returnData.Count();
+
+
+
                 var response = new Dictionary<string, object>
                 {
                     { "Data", returnData },
@@ -142,7 +147,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [System.Obsolete]
         [HttpPost]
         [HttpGet]
-        public JsonResult GetDetail(string ID)
+        public JsonResult GetDetail(string ID, bool CheckPoint)
         {
             try
             {

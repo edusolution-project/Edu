@@ -51,6 +51,7 @@
                         <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Môn học</a></li>
                         <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Học viên</a></li>
                         <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>
+                        <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Chấm điểm " v-on:click="tabChange(4)">Exam Student</a></li>
                         @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(4)">Thảo luận</a></li>*@
                     </ul>
                 </div>
@@ -179,7 +180,65 @@
                 </div>
             </div>
             <div class="box" v-if="tab[4]">
-                Thảo luận
+                <div class="row ls-doc" v-if="ref.data.length > 0">
+                    <div class="col-md-12" v-for="data in ref.data">
+                        <div class="list-item">
+                            <div class="item">
+                                <div class="item-title">{{data[0].LessonScheduleName}} ({{data.length}})</div>
+                                <div class="itme-body" v-for="item in data">
+                                    <a class="btn btn-success" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)">{{item.StudentName}}</a>
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="inner flex">
+                            <a href="#" title="" class="thumb">
+                                <img src="/pictures/doc1.png" alt="">
+                            </a>
+                            <div class="entry">
+                                <div>
+                                    <div>
+                                        <a href="#" title="" class="title">{{data.Title}}</a>
+                                    </div>
+                                    <div>
+                                        <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                        <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
+                                    </div>
+                                </div>
+                                <div class="pt-2 pb-2">
+                                    <p>{{domDecoder(replaceBrkLine(data.Description))}}</p>
+                                </div>
+                                <div>
+                                    <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
+                                    <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
+                                    <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteRef(data)" v-if="data.OwnerID == '@currentuser'">Xóa</a>
+                                    <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showRefModal(data)" v-if="data.OwnerID == '@currentuser'">Sửa</a>
+                                </div>
+                            </div>
+                        </div>*@
+                    </div>
+
+                </div>
+                <div class="row ls-doc text-center d-block" v-else>
+                    Không có tài liệu
+                </div>
+            </div>
+            <div class="box" v-if="tab[4]">
+                <div class="paging-view">
+                    Hiển thị:
+                    <select v-model="ref.view" v-on:change="loadExamStudent()">
+                        <option value="10">10 kết quả</option>
+                        <option value="20">20 kết quả</option>
+                        <option value="30">30 kết quả</option>
+                    </select>
+                </div>
+                <div class="page-control">
+                    <div class="right">
+                        <b-pagination v-model="ref.page"
+                                      :total-rows="ref.totalRec"
+                                      :per-page="ref.view"
+                                      v-on:input="loadExamStudent()"></b-pagination>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -441,7 +500,7 @@
                         case 'reference':
                             this.tabChange(3);
                             break;
-                        case 'discuss':
+                        case 'exam-student':
                             this.tabChange(4);
                             break;
                     }
@@ -453,7 +512,8 @@
             components: {
           	    LocalQuillEditor: VueQuillEditor.quillEditor
             },
-            data: {
+           data: {
+                id: null,
                 isLoading: false,
                 editorOption: {
                     theme: 'snow'
@@ -562,7 +622,8 @@
                             this.loadPreference();
                             break;
                         case 4:
-                            this.loadComment();
+                            history.replaceState({ tab: a }, this.className + " - exam student", "#exam-student");
+                            this.loadExamStudent();
                             break;
                     }
                     this.$forceUpdate()
@@ -710,6 +771,27 @@
                     _form.append('PageIndex', _that.ref.page)
 
                     let _url = '@processUrl("GetClassList", "Reference")'
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.ref.data = response.data.Data;
+                            this.ref.data = _that.ref.data
+                            this.ref.totalRec = response.data.Model.totalRecord
+                            console.log(totalRec)
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
+                            //console.log(_that.active_course);
+                        }).catch(e => { })
+                },
+                loadExamStudent() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('SearchText', "")
+                    _form.append('ClassID', _that.ref.target)
+                    _form.append('PageSize', _that.ref.view)
+                    _form.append('PageIndex', _that.ref.page)
+
+                    let _url = '@processUrl("GetListStudents", "Exam")'
 
                     axios.post(_url, _form)
                         .then(response => {
@@ -965,6 +1047,26 @@
                     _that.addRef.file = {};
                     _that.$bvModal.show('modal_event')
                 },
+                showPointModal(obj) {
+                    let _that = this;
+                    let _url = '@processUrl("GetDetail", "Exam")'
+                    let _form = new FormData()
+                    _form.append('ID', obj);
+                    _form.append('CheckPoint', true);
+                    axios.post(_url, _form)
+                        .then(response => {
+                            console.log(response);
+                            if (response.Error == null) {
+                                
+                            }
+                            else {
+                                
+                            }
+
+                        }).catch(e => { })
+
+                    _that.$bvModal.show('modal_chamdiem');
+                },
                 openLink(obj) {
                     obj.Viewed = obj.Viewed + 1;
                     window.open('@processUrl("OpenLink", "Reference")/' + obj.ID);
@@ -1108,6 +1210,51 @@
 
     @section Modals{
         <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Cập nhật tài liệu tham khảo">
+            <b-col class="form-group">
+                <label for="">Tên tài liệu</label>
+                <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addRef.Title">
+            </b-col>
+            <b-col class="form-group">
+                <label for="">Mô tả</label>
+                <quill-editor v-model="addRef.Description"
+                              ref="quillEditorA"
+                              :options="editorOption">
+                </quill-editor>
+            </b-col>
+            <b-col class="form-group">
+                <label for="">Link liên kết</label>
+                <input type="text" name="" value="" class="form-control" placeholder="Link liên kết" v-model="addRef.Link">
+            </b-col>
+            <b-col class="form-group">
+                <label class="col-form-label">File đính kèm:</label>
+                <i class="ic ic-paper-clip"></i><label class="p-1" ref="filedsp" v-on:click="$refs.file.click()">{{shortenString(addRef.FileName)}} - (Click để chọn)</label>
+                <input type="file" ref="file" class="d-none" v-on:change="changeFile()">
+            </b-col>
+            <b-col class="form-group">
+                <label class="col-form-label">Phạm vi chia sẻ:</label>
+                <select name="range" onchange="ChooseRange()" id="refRange" class="form-control d-inline w-25" v-model="addRef.Range">
+                    <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
+                    <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
+                    <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Riêng trong lớp</option>
+                </select>
+                <select name="target" id="refTarget" v-model="addRef.Target" class="form-control d-inline w-25" v-if="addRef.Range == '@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+                    <option value="@currentClass.ID">@currentClass.Name</option>
+                </select>
+            </b-col>
+
+            <template v-slot:modal-footer="{ ok, cancel}">
+                <template v-if="isLoading">
+                    <b-button>Đang thực hiện...</b-button>
+                </template>
+                <template v-else>
+                    <b-button variant="success" v-on:click="updateRef()">Lưu</b-button>
+                    <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+                </template>
+            </template>
+        </b-modal>
+
+
+        <b-modal :no-close-on-backdrop="true" id="modal_chamdiem" centered title="Chấm điểm tự luận">
             <b-col class="form-group">
                 <label for="">Tên tài liệu</label>
                 <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addRef.Title">
