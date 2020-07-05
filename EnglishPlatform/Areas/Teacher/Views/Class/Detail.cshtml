@@ -186,40 +186,15 @@
                             <div class="item">
                                 <div class="item-title">{{data[0].LessonScheduleName}} ({{data.length}})</div>
                                 <div class="itme-body" v-for="item in data">
-                                    <a class="btn btn-success" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)">{{item.StudentName}}</a>
+                                    <div>{{item.StudentName}}</div> <button type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
                                 </div>
                             </div>
                         </div>
-                        @*<div class="inner flex">
-                            <a href="#" title="" class="thumb">
-                                <img src="/pictures/doc1.png" alt="">
-                            </a>
-                            <div class="entry">
-                                <div>
-                                    <div>
-                                        <a href="#" title="" class="title">{{data.Title}}</a>
-                                    </div>
-                                    <div>
-                                        <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                        <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                    </div>
-                                </div>
-                                <div class="pt-2 pb-2">
-                                    <p>{{domDecoder(replaceBrkLine(data.Description))}}</p>
-                                </div>
-                                <div>
-                                    <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-                                    <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
-                                    <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteRef(data)" v-if="data.OwnerID == '@currentuser'">Xóa</a>
-                                    <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showRefModal(data)" v-if="data.OwnerID == '@currentuser'">Sửa</a>
-                                </div>
-                            </div>
-                        </div>*@
                     </div>
 
                 </div>
                 <div class="row ls-doc text-center d-block" v-else>
-                    Không có tài liệu
+                    Không có exam để chấm
                 </div>
             </div>
             <div class="box" v-if="tab[4]">
@@ -467,130 +442,136 @@
 
         Vue.component('datepicker', datepickerComponent);
 
-       var mainInstance = new Vue({
-            el: "#main",
-            mounted() {
-                this.loadClassDetail()
-                window.loadContent = this.loadContent
-                window.updateSchedule = this.updateSchedule
-                window.updateChapPoint = this.updateChapPoint
-                window.updateChapSchedule = this.updateChapSchedule
-                window.updateChapCondition = this.updateChapCondition
-                window.clearSchedule = this.clearSchedule
-                window.clearChapSchedule = this.clearChapSchedule
-                window.toggleLessonState = this.toggleLessonState
-                window.toggleOnlineClass = this.toggleOnlineClass
-                window.filterChap = this.filterChap
-                window.filterLesson = this.filterLesson
-                window.formatTime = this.formatTime
-                var hash = window.location.hash;
-                if (hash.startsWith('#')) {
-                    hash = hash.split('#')[1]
-                    //console.log(hash)
-                    switch (hash) {
-                        case 'info':
-                            this.tabChange(0);
-                            break;
-                        case 'module':
-                            this.tabChange(1);
-                            break;
-                        case 'student':
-                            this.tabChange(2);
-                            break;
-                        case 'reference':
-                            this.tabChange(3);
-                            break;
-                        case 'exam-student':
-                            this.tabChange(4);
-                            break;
+            var mainInstance = new Vue({
+                el: "#main",
+                mounted() {
+                    this.loadClassDetail()
+                    window.updateCheckPoint = this.updateCheckPoint;
+                    window.loadContent = this.loadContent
+                    window.updateSchedule = this.updateSchedule
+                    window.updateChapPoint = this.updateChapPoint
+                    window.updateChapSchedule = this.updateChapSchedule
+                    window.updateChapCondition = this.updateChapCondition
+                    window.clearSchedule = this.clearSchedule
+                    window.clearChapSchedule = this.clearChapSchedule
+                    window.toggleLessonState = this.toggleLessonState
+                    window.toggleOnlineClass = this.toggleOnlineClass
+                    window.filterChap = this.filterChap
+                    window.filterLesson = this.filterLesson
+                    window.formatTime = this.formatTime
+                    var hash = window.location.hash;
+                    if (hash.startsWith('#')) {
+                        hash = hash.split('#')[1]
+                        //console.log(hash)
+                        switch (hash) {
+                            case 'info':
+                                this.tabChange(0);
+                                break;
+                            case 'module':
+                                this.tabChange(1);
+                                break;
+                            case 'student':
+                                this.tabChange(2);
+                                break;
+                            case 'reference':
+                                this.tabChange(3);
+                                break;
+                            case 'exam-student':
+                                this.tabChange(4);
+                                break;
+                        }
                     }
-                }
-                else {
-                    this.tabChange(1);
-                }
-            },
-            components: {
-          	    LocalQuillEditor: VueQuillEditor.quillEditor
-            },
-           data: {
-                id: null,
-                isLoading: false,
-                editorOption: {
-                    theme: 'snow'
-                },
-                classID: '@currentClass.ID',
-                className: '@currentClass.Name',
-                startDate: '@currentClass.StartDate',
-                endDate: '@currentClass.EndDate',
-                classDescription: '@currentClass.Description',
-                classImg: '@currentClass.Image',
-                subjectName: '@currentClass.SubjectName',
-                skillName: '@currentClass.SkillName',
-                classSubjects: [],
-                list_data: [],
-                list_subjects: [],
-                list_chapters: [],
-                list_lessons:[],
-                loaded_chapter: [],
-                loaded_subject: [],
-                init: true,
-                fields: [
-                    {
-                        key: 'stt',
-                        label: '#'
-                    },
-                    {
-                        key: 'name',
-                        label: 'Họ tên'
-                    },
-                    //{
-                    //    key: 'email',
-                    //    label: 'Email'
-                    //},
-                    //{
-                    //    key: 'phone',
-                    //    label: 'SĐT'
-                    //},
-                    {
-                        key: 'per',
-                        label: 'Tiến độ'
-                    },
-                    {
-                        key: 'last_update',
-                        label: 'Lần học cuối'
-                    },
-                    {
-                        key: 'score',
-                        label: 'Điểm trung bình'
-                    },
-                    {
-                        key: 'rank',
-                        label: 'Xếp hạng'
+                    else {
+                        this.tabChange(1);
                     }
-                ],
-                studentData: [
-                ],
-                //view: 10,
-                //page: 1,
-                tab: [true, false, false, false, false],
-                ref: {
-                    range: '@BaseCustomerEntity.Database.REF_RANGE.CLASS',
-                    target: '@currentClass.ID',
-                    searchTerm: '',
-                    data: [],
-                    view: 10,
-                    page: 1
                 },
-                addRef: {
-                    ID: '',
-                    Title: '',
-                    Range: '',
-                    Link: '',
-                    Target: '',
-                    Description: '',
-                    FileName: '',
-                    file: null,
-                }
+                components: {
+                    LocalQuillEditor: VueQuillEditor.quillEditor
+                },
+                data: {
+                    id: null,
+                    isLoading: false,
+                    editorOption: {
+                        theme: 'snow'
+                    },
+                    classID: '@currentClass.ID',
+                    className: '@currentClass.Name',
+                    startDate: '@currentClass.StartDate',
+                    endDate: '@currentClass.EndDate',
+                    classDescription: '@currentClass.Description',
+                    classImg: '@currentClass.Image',
+                    subjectName: '@currentClass.SubjectName',
+                    skillName: '@currentClass.SkillName',
+                    classSubjects: [],
+                    list_data: [],
+                    list_subjects: [],
+                    list_chapters: [],
+                    list_lessons: [],
+                    loaded_chapter: [],
+                    loaded_subject: [],
+                    init: true,
+                    fields: [
+                        {
+                            key: 'stt',
+                            label: '#'
+                        },
+                        {
+                            key: 'name',
+                            label: 'Họ tên'
+                        },
+                        //{
+                        //    key: 'email',
+                        //    label: 'Email'
+                        //},
+                        //{
+                        //    key: 'phone',
+                        //    label: 'SĐT'
+                        //},
+                        {
+                            key: 'per',
+                            label: 'Tiến độ'
+                        },
+                        {
+                            key: 'last_update',
+                            label: 'Lần học cuối'
+                        },
+                        {
+                            key: 'score',
+                            label: 'Điểm trung bình'
+                        },
+                        {
+                            key: 'rank',
+                            label: 'Xếp hạng'
+                        }
+                    ],
+                    studentData: [
+                    ],
+                    //view: 10,
+                    //page: 1,
+                    tab: [true, false, false, false, false],
+                    ref: {
+                        range: '@BaseCustomerEntity.Database.REF_RANGE.CLASS',
+                        target: '@currentClass.ID',
+                        searchTerm: '',
+                        data: [],
+                        view: 10,
+                        page: 1
+                    },
+                    addRef: {
+                        ID: '',
+                        Title: '',
+                        Range: '',
+                        Link: '',
+                        Target: '',
+                        Description: '',
+                        FileName: '',
+                        file: null,
+                    },
+                    checkpoint: {
+                        ID: '',
+                        Point: '',
+                        Answer:''
+                    }
             },
             watch: {
             },
@@ -1055,17 +1036,22 @@
                     _form.append('CheckPoint', true);
                     axios.post(_url, _form)
                         .then(response => {
-                            console.log(response);
-                            if (response.Error == null) {
-                                
-                            }
-                            else {
-                                
+                            var data = response.data.Data;
+                            _that.checkpoint = data;
+                            if (data != null) {
+                                var questionEssay = [];
+                                for (var i = 0; i < data.Parts.length; i++) {
+                                    var part = data.Parts[i];
+                                    if (part.Type == "ESSAY") {
+                                        questionEssay = questionEssay.length == 0 ? [...part.ExamDetails] : [...questionEssay,...part.ExamDetails];
+                                    }
+                                }
+                                //loadCheckPointData(data, questionEssay);
                             }
 
                         }).catch(e => { })
 
-                    _that.$bvModal.show('modal_chamdiem');
+                    _that.$bvModal.show('modal_essay');
                 },
                 openLink(obj) {
                     obj.Viewed = obj.Viewed + 1;
@@ -1076,6 +1062,37 @@
                         return false;
                     obj.Downloaded = obj.Downloaded + 1;
                     window.open('@processUrl("Download", "Reference")/' + obj.ID);
+                },
+                updateCheckPoint() {
+                    let _that = this
+                    for (var i = 0; i < _that.checkpoint.Parts.length; i++) {
+                        var part = _that.checkpoint.Parts[i];
+                        if (part.Type == "ESSAY") {
+                            for (var j = 0; j < part.ExamDetails.length; j++) {
+                                var question = part.ExamDetails[j];
+                                let _form = new FormData();
+                                _form.append("ID", question.ID);
+                                _form.append("Point", question.Point);
+                                _form.append("RealAnswerValue", question.RealAnswerValue);
+                                let _url = '@processUrl("UpdatePoint", "Exam")'
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        console.log(response.data);
+
+                                }).catch(e => { })
+
+                            }
+                        }
+                    }
+                    if (_that.checkpoint.RealAnswer == '') {
+                        swal.fire({
+                            title: "Có lỗi",
+                            text: "Vui lòng nhập đủ thông tin",
+                            icon: 'warning',
+                        });
+                        //this.$refs["addName"].focus();
+                        return false;
+                    }
                 },
                 updateRef() {
                     let _that = this
@@ -1204,10 +1221,48 @@
                 }
 
             }
-        });
+            });
+
+            var loadCheckPointData = function (data, questions) {
+                var className = data.ClassName;
+                var lessonName = data.LessonName;
+                var studentName = data.StudentName;
+                var teacherName = data.TeacherName;
+                var point = data.Point;
+                var questionsDone = data.QuestionsDone;
+                var questionsPass = data.QuestionsPass;
+                var questionsTotal = data.QuestionsTotal;
+                var number = data.Number;
+                var modalBody = $('#modal_essay')[0].querySelector('.modal-body');
+                modalBody.innerHTML = '<div class="form-group"><label> Bài tự luận của ' + studentName + '</label></div>';
+                for (var i = 0; i < data.Parts.length; i++) {
+                    var part = data.Parts[i];
+                    if (part.Type == "ESSAY") {
+                        var title = part.Title;
+                        var des = part.Description;
+                        modalBody.innerHTML += '<div class="form-group"><label>Tiêu đề : </label><div>' + title + '</div></div>';
+                        modalBody.innerHTML += '<div class="form-group"><label>Nội dung : </label><div>' + des + '</div></div>';
+                        var htmlQuestion = '';
+                        for (var j = 0; j < part.ExamDetails.length; j++) {
+                            var question = part.ExamDetails[j];
+                            htmlQuestion += '<div class="item-question">';
+                            htmlQuestion += '<div class="form-group"><label>Đáp án : </label><div>' + question.AnswerValue + '</div></div>';
+                            htmlQuestion += '<div class="form-group"><label>Điểm : </label><div><input type="number" value="0"/></div></div>';
+                            htmlQuestion += '<div class="form-group"><label>Lời giải : </label><quill-editor  ref="quillEditorC" :options="editorOption"></quill-editor></div>';
+                            htmlQuestion += '</div>';
+                        }
+                        modalBody.innerHTML += '<div class="list-question">' + htmlQuestion+'</div>';
+                    }
+                }
+
+            }
+
+            var createInfoParts = function () {
+
+            }
+
         </script>
     }
-
     @section Modals{
         <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Cập nhật tài liệu tham khảo">
             <b-col class="form-group">
@@ -1252,47 +1307,41 @@
                 </template>
             </template>
         </b-modal>
-
-
-        <b-modal :no-close-on-backdrop="true" id="modal_chamdiem" centered title="Chấm điểm tự luận">
+        <b-modal :no-close-on-backdrop="true" id="modal_essay" centered title="Check point">
             <b-col class="form-group">
-                <label for="">Tên tài liệu</label>
-                <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addRef.Title">
+                <label>Bài tự luận của {{checkpoint.StudentName}}</label>
             </b-col>
-            <b-col class="form-group">
-                <label for="">Mô tả</label>
-                <quill-editor v-model="addRef.Description"
-                              ref="quillEditorA"
-                              :options="editorOption">
-                </quill-editor>
+            <b-col class="list-item" v-for="part in checkpoint.Parts">
+                <b-col class="item" v-if="part.Type=='ESSAY'">
+                    <b-col class="form-group">
+                        <label>Tiêu đề : </label>
+                        <b-col v-html="part.Title"></b-col>
+                        <label>Nội dung :</label>
+                        <b-col v-html="part.Description"></b-col>
+                    </b-col>
+                    <b-col class="list-question" v-for="question in part.ExamDetails">
+                        <b-col class="question">
+                            <label>Câu trả lời : </label>
+                            <b-col v-html="question.AnswerValue"></b-col>
+                        </b-col>
+                        <b-col class="answer" :data-id="question.ID">
+                            <label>Điểm : <input type="number" v-model="question.Point"/></label>
+                            <br />
+                            <label>Đáp án :</label>
+                            <quill-editor v-model="question.RealAnswerValue"
+                                          ref="quillEditorA"
+                                          :options="editorOption">
+                            </quill-editor>
+                        </b-col>
+                    </b-col>
+                </b-col>
             </b-col>
-            <b-col class="form-group">
-                <label for="">Link liên kết</label>
-                <input type="text" name="" value="" class="form-control" placeholder="Link liên kết" v-model="addRef.Link">
-            </b-col>
-            <b-col class="form-group">
-                <label class="col-form-label">File đính kèm:</label>
-                <i class="ic ic-paper-clip"></i><label class="p-1" ref="filedsp" v-on:click="$refs.file.click()">{{shortenString(addRef.FileName)}} - (Click để chọn)</label>
-                <input type="file" ref="file" class="d-none" v-on:change="changeFile()">
-            </b-col>
-            <b-col class="form-group">
-                <label class="col-form-label">Phạm vi chia sẻ:</label>
-                <select name="range" onchange="ChooseRange()" id="refRange" class="form-control d-inline w-25" v-model="addRef.Range">
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Riêng trong lớp</option>
-                </select>
-                <select name="target" id="refTarget" v-model="addRef.Target" class="form-control d-inline w-25" v-if="addRef.Range == '@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
-                    <option value="@currentClass.ID">@currentClass.Name</option>
-                </select>
-            </b-col>
-
             <template v-slot:modal-footer="{ ok, cancel}">
                 <template v-if="isLoading">
                     <b-button>Đang thực hiện...</b-button>
                 </template>
                 <template v-else>
-                    <b-button variant="success" v-on:click="updateRef()">Lưu</b-button>
+                    <b-button variant="success" onclick="updateCheckPoint()">Lưu</b-button>
                     <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
                 </template>
             </template>

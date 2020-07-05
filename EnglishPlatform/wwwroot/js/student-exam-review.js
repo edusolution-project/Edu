@@ -459,11 +459,7 @@ var ExamReview = (function () {
             html += '<fieldset class="answer-item student-answer col-md-6" id="essay-' + item.ID + '">';
             html += '<i>Trả lời</i>';
             html += '</fieldset>';
-            var content = "";
-            for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
-                var answer = item.CloneAnswers[x];
-                content += content == "" ? answer.Content : " | " + answer.Content;
-            }
+            var content = item.RealAnswerValue;
             html += '<fieldset class="answer-item col-md-6" id="essay-' + item.ID + '">';
             html += '<i>Đáp án đúng :</i> <span class="text-success">' + content + '<span>';
             html += '</fieldset>';

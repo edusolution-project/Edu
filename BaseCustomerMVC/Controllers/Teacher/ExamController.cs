@@ -111,7 +111,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 // 1 - lay danh sach lesson 
                 // 2 - lay danh sach student theo lesson
                 // 3 - lay chi tiet bai 
-                var list = _service.CreateQuery().Find(o => o.ClassID == ClassID && o.Status == false)?.ToList()?
+                var list = _service.CreateQuery().Find(o => o.ClassID == ClassID)?.ToList()?
                     .GroupBy(o => new { o.LessonID}).Select(r => new ExamEntity { ID = r.Max(t => t.ID), LessonID = r.Key.LessonID })?.ToList();
                 var returnData = (from r in list
                                   let exam = _service.GetItemByID(r.ID)
@@ -121,7 +121,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                   {
                                       LessonID = r.LessonID,
                                       LessonScheduleName = lesson.Title,
-                                      ID = r.ID,
+                                      ID = exam.ID,
                                       StudentID = student.ID,
                                       StudentName = student.FullName,
                                       //Created = exam.Created,
@@ -249,6 +249,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Class = _classService.GetItemByID(currentExam.ClassID);
             ViewBag.Exam = currentExam;
             return View();
+        }
+        [HttpPost]
+        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point)
+        {
+            try {
+                var oldItem = _examDetailService.GetItemByID(ID);
+                oldItem.RealAnswerValue = RealAnswerValue;
+                oldItem.Point = Point;
+                _examDetailService.CreateOrUpdate(oldItem);
+                var response = new Dictionary<string, object>
+                {
+
+                    { "Data", oldItem }
+                };
+                return new JsonResult(response);
+            }
+            catch(Exception ex)
+            {
+                var response = new Dictionary<string, object>
+                {
+
+                    { "Data", null },
+                    {"Error",ex }
+                };
+                return new JsonResult(response);
+            }
+            return new JsonResult(new { ID, RealAnswerValue , Point });
         }
     }
 }
