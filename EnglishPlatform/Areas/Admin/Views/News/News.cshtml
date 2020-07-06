@@ -22,9 +22,9 @@
                         <div class="float-right">
                             @*<button type="button" class="btn btn-primary" onclick="window.location.href='/admin/News/NewsForm'" title="Thêm tin"> <i class="fas fa-plus"></i> </button>*@
                             <button type="button" class="btn btn-primary" data-placement="top" title="Thêm tin" onclick="Adds(this)" data-toggle="modal" data-target="#ModalNews"> <i class="fas fa-plus"></i> </button>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-placement="top" title="Nhập file dữ liệu" data-target="#importModal"> <i class="fas fa-upload"></i> </button>
-                            <button type="button" class="btn btn-primary" data-placement="top" title="Xuất file dữ liệu" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>
-                            @*<button type="button" class="btn btn-danger" data-placement="top" title="Xóa" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","News")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>*@
+                            @*<button type="button" class="btn btn-primary" data-toggle="modal" data-placement="top" title="Nhập file dữ liệu" data-target="#importModal"> <i class="fas fa-upload"></i> </button>
+                                <button type="button" class="btn btn-primary" data-placement="top" title="Xuất file dữ liệu" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>
+                                <button type="button" class="btn btn-danger" data-placement="top" title="Xóa" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","News")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>*@
                         </div>
                     </div>
                 </div>
@@ -182,18 +182,18 @@
                                 </div>
 
                                 @*<div class="form-row">
-                                    <div class="input-group col-md-6">
-                                        <div class="col-sm-10">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive">
-                                                <label class="form-check-label">Hoạt động</label>
+                                        <div class="input-group col-md-6">
+                                            <div class="col-sm-10">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive">
+                                                    <label class="form-check-label">Hoạt động</label>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>*@
+                                    </div>*@
                             </div>
                             <div class="form-group col-md-4">
-                                <div class="form-row"><img id="img" style="max-height:200px;max-width:200px;margin:auto" /></div>
+                                <div class="form-row"><img id="img" style="max-height:112px;max-width:200px;margin:auto" /></div>
                                 <div class="form-row"><a class="hide" id="linkImage" href="" target="_blank" style="margin:auto">Link ảnh</a></div>
                             </div>
                         </div>
@@ -216,17 +216,6 @@
 </style>
 
 <script>
-    //$('.datepicker').each(function () {
-    //    var fieldID = $(this).next().attr("id");
-    //    $(this).datepicker({
-    //        changeMonth: true,
-    //        changeYear: true,
-    //        dateFormat: 'dd/mm/yy',
-    //        altField: '#' + fieldID,
-    //        altFormat: 'yy-mm-dd'
-    //    }).val("");
-    //})
-
     function LoadData() {
         var searchText = $('#searchText').val();
         var categoryID = $('#categoryID').val();
@@ -251,7 +240,6 @@
                 {
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
-
                         var activeTop = "";
                         if (item.IsTop) {
                             activeTop = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("unpublish","News")',LoadData,'IsTop')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' name='IsTop'> <div class='handle'></div> </button></td>";
@@ -458,8 +446,28 @@
         if (CKEDITOR.instances.Content) CKEDITOR.instances.Content.destroy();
         CKEDITOR.replace("Content");
 
+        $("#Thumbnail").change(function () {
+            document.getElementById("linkImage").setAttribute("class", "hide")
+            readURL(this);
+        });
+
     });
     }
+
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#img').attr('src', e.target.result);
+                //debugger
+            }
+
+            reader.readAsDataURL(input.files[0]); // convert to base64 string
+            //debugger
+        }
+    }
+
 
     function Adds(_this) {
         var modal = document.querySelector(_this.getAttribute("data-target"));
@@ -492,6 +500,11 @@
 
         $(form).find('#linkImage').attr('class', 'hide');
         $(form).find('#img').removeAttr('src');
+
+        $("#Thumbnail").change(function () {
+            readURL(this);
+            //debugger;
+        });
 
         $(form).find("input:disabled").removeAttr("disabled");
     }

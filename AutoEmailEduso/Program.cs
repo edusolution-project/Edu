@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
@@ -48,8 +49,14 @@ namespace AutoEmailEduso
             isTest = configuration["Test"] == "1";
 
             Console.WriteLine("Processing Schedule...");
-            await SendIncomingLesson();
-            Console.WriteLine(count + " mail Sent!");
+            //await SendIncomingLesson();
+            //Console.WriteLine(count + " mail Sent!");
+
+            using (EventLog eventLog = new EventLog("Application"))
+            {
+                eventLog.Source = "Application";
+                eventLog.WriteEntry(count + " mail Sent!", EventLogEntryType.Information, 101, 1);
+            }
             //Console.ReadKey();
         }
 

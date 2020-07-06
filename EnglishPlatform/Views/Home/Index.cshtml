@@ -3,17 +3,17 @@
     ViewData["Title"] = "Trang chủ";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-    <div id="app">
-        <agile :initial-slide="3" :autoplay-speed="5000" :speed="2500" fade pause-on-hover pause-on-dots-hover autoplay v-if="items.length > 0">
-            <img v-for="item in items" class="slide" :src="item" style="max-height:500px;max-width:1366px" />
-            <template slot="prevButton">
-                <i class="fas fa-chevron-left"></i>
-            </template>
-            <template slot="nextButton">
-                <i class="fas fa-chevron-right"></i>
-            </template>
-        </agile>
-    </div>
+<div id="app">
+    <agile :initial-slide="3" :autoplay-speed="5000" :speed="2500" fade pause-on-hover pause-on-dots-hover autoplay v-if="items.length > 0">
+        <img v-for="item in items" class="slide" :src="item" style="max-height:500px;max-width:1366px" />
+        <template slot="prevButton">
+            <i class="fas fa-chevron-left"></i>
+        </template>
+        <template slot="nextButton">
+            <i class="fas fa-chevron-right"></i>
+        </template>
+    </agile>
+</div>
 <br>
 
 <!-- The dots/circles -->
@@ -168,8 +168,8 @@
                 <div class="news-hot media-body pr-md-4" style="border-right:solid 0.5px #CCC">
                     <div class="news-item w-100 pb-3" v-for="item in newshot">
                         <div class="thumb w-100 pb-2">
-                            <a :href="'/tin-tuc/tin-tuc/'+item.Code">
-                                <img v-bind:src="'/Upload/News/'+item.Thumbnail" class="w-100" style="max-width:100%;max-height:100%" />
+                            <a :href="'/tin-tuc/tin-tuc/' + item.Code">
+                                <img v-bind:src="'/Upload/News/' + item.Thumbnail" class="w-100" style="max-width:100%;max-height:100%" />
                             </a>
                         </div>
                         <div class="news-title">
@@ -191,7 +191,7 @@
                     <div class="news-item pb-3 pt-3 d-flex" v-for="item in newstop">
                         <div class="thumb" style="text-align:center">
                             <a :href="'/tin-tuc/tin-tuc/'+item.Code">
-                                <img v-bind:src="'/Upload/News/'+item.Thumbnail" style="max-width:100%;max-height:100%" />
+                                <img v-bind:src="'/Upload/News/' + item.Thumbnail" style="max-width:100%;max-height:100%" />
                             </a>
                         </div>
                         <div class=" media-body">
@@ -223,7 +223,6 @@
             <div class="carousel-wrap" id="partner">
                 <div class="owl-carousel">
                     <div class="item" v-for="img in images"><a :href="'/tin-tuc/doi-tac/'+img.Code"><img :src="'/Upload/News/'+img.Thumbnail" :title="img.Title"></a></div>
-
                 </div>
             </div>
 
@@ -257,37 +256,26 @@
             dataType: "json",
             data: { CatCode: 'doi-tac'},
             success: function (result) {
-
                 new Vue({
                     el: '#partner',
                     data: {
                         images: result
                     },
                     mounted() {
-                        callCarousel()
+                        callCarousel(result.length)
                     }
                 })
-
             }
         });
 
     }
 
     function callAgile() {
-
         Vue.use(VueAgile);
 
         app = new Vue({
             el: '#app',
-            method: {
-                //getData() {
-                //    let _url = '@Url.Action("GetList", "News")'
-                //    axios.post(_url, _form)
-                //        .then(response => {
-                //            _that.tableData = response.data.Data;
-                //            this.tableData = _that.tableData
-                //        }).catch(e => { })
-                //},
+            method: {         
             },
             components: {
                 agile: VueAgile
@@ -336,7 +324,9 @@
         return false;
     }
 
-    function callCarousel() {
+    function callCarousel(countItem) {
+        var item = 0;
+        var isloop = false;
         var $owl = $('.owl-carousel');
         $owl.trigger('destroy.owl.carousel');
         //debugger
@@ -347,30 +337,40 @@
         //   We have to remove that before the new initialization.
         $owl.html($owl.find('.owl-stage-outer').html()).removeClass('owl-loaded');
         //debugger
+        switch (countItem) {
+            case 1:
+            case 2:
+            case 3:
+                item = countItem;
+                isloop = false;
+                break;
+            default:
+                item = 4;
+                isloop = true;
+                break;
+        }
         $owl.owlCarousel({
             // your initial option here, again.
-            items: 4,
-            loop: true,
+            items: item,
+            loop: isloop,
             margin: 10,
             nav: true,
             navText: [
                 "<i class='fa fa-caret-left'></i>",
                 "<i class='fa fa-caret-right'></i>"
             ],
+            //responsive: {
+            //    0: {
+            //        items: 1
+            //    },
+            //    600: {
+            //        items: 3
+            //    },
+            //    1000: {
+            //        items: 5
+            //    }
+            //}
         });
-
-        //$('.owl-carousel').owlCarousel({
-        //    items: 4,
-        //    loop: true,
-        //    margin: 10,
-        //    nav: true,
-        //    navText: [
-        //        "<i class='fa fa-caret-left'></i>",
-        //        "<i class='fa fa-caret-right'></i>"
-        //    ],
-        //    //autoplay: true,
-        //    //autoplayHoverPause: true,
-        //})
     }
 
     function getDataForBanner() {
@@ -399,6 +399,7 @@
         loadData();
         getDataForPartner();
         getDataForBanner();
+        //callCarousel();
         //callAgile()
     });
 
@@ -476,7 +477,7 @@
     .carousel-wrap {
         margin: auto;
         padding: 10px 6%;
-        /*        width: 80%;*/
+        /*width: 80%;*/
         position: relative;
     }
 

@@ -168,27 +168,18 @@
                         var enddate = $.datepicker.formatDate('dd/mm/yy', new Date(item.EndDate));
 
                         var action = "";
-                        var isActive = "";
+                        var toggleAction = "";
                         console.log(item);
                         if (item.IsActive) {
-                            isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("unpublish","QC")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' name='isActive'> <div class='handle'></div> </button></td>";
-                            @*if (publishdate <= new Date().toLocaleDateString() && enddate >= new Date().toLocaleDateString()) {
-                                action =
-                                    "<td class='text-center' style='width: 130px;'><button onclick=\"Edits('" + item.ID + "','@Url.Action("getDetailAds", "QC")','@Url.Action("getDetailAds", "QC")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalNews'> <i class='fas fa-edit'></i> </button>" +
-                                    "<button onclick=\"var result = confirm('bạn muốn xóa " + item.NameCampaign + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("DeleteCampaign", "QC")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
-                                    "</td > ";
-                            }
-                            else {*@
-                            isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("unpublish","QC")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' name='isActive'> <div class='handle'></div> </button></td>";
+                            toggleAction = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("unpublish","QC")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' name='isActive'> <div class='handle'></div> </button></td>";
                             action =
                                 "<td class='text-center' style='width: 130px;'>" +
                                     "<button disabled onclick =\"Edits('" + item.ID + "','@Url.Action("getDetailAds", "QC")','@Url.Action("getDetailAds", "QC")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalNews'> <i class='fas fa-edit'></i> </button>" +
                                     "<button disabled onclick=\"var result = confirm('bạn muốn xóa " + item.NameCampaign + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("DeleteCampaign", "QC")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                                 "</td > ";
-                            //}
                         }
                         else {
-                            isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "QC")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isActive'> <div class='handle'></div> </button></td>";
+                            toggleAction = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "QC")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isActive'> <div class='handle'></div> </button></td>";
                             action =
                                     "<td class='text-center' style='width: 130px;'><button onclick=\"Edits('" + item.ID + "','@Url.Action("getDetailAds", "QC")','@Url.Action("getDetailAds", "QC")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalNews'> <i class='fas fa-edit'></i> </button>" +
                                     "<button onclick=\"var result = confirm('bạn muốn xóa " + item.NameCampaign + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("DeleteCampaign", "QC")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
@@ -200,17 +191,12 @@
                         body.append("<tr>" +
                             "<td class='text-center'>" + (data.Model.pageSize * data.Model.pageIndex + i + 1) + "</td>" +
                             "<td class='text-center'>" +
-                            "<img src='" + item.Banner+"' style='max-height:50px;max-width:50px;' />"+
+                            "<img src='" + item.Banner + "' style='max-height:50px;max-width:50px;' />"+
                             "</td>" +
                             "<td 'text-center'>" + item.NameCampaign + "</td>" +
-
-
                             "<td class='text-center'>" + publishdate+"</td>" +
                             "<td class='text-center'>" + enddate + "</td>" +
-                            isActive +
-                            @*"<td class='text-center' style='width: 130px;'><button onclick=\"Edits('" + item.ID + "','@Url.Action("getDetailAds", "QC")','@Url.Action("getDetailAds", "QC")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalNews'> <i class='fas fa-edit'></i> </button>" +
-                                    "<button onclick=\"var result = confirm('bạn muốn tin " + item.NameCampaign + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("DeleteCampaign", "QC")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
-                                    "</td > "*@
+                            toggleAction +
                             action +
                             "</tr>"
                         );
@@ -390,6 +376,11 @@
         var enddate = item.Data.EndDate.toLocaleString().toString().substring(0, item.Data.EndDate.toLocaleString().toString().length - 1);
         document.getElementById("EndDate").value = enddate;
 
+        $("#Banner").change(function () {
+            document.getElementById("linkImage").setAttribute("class", "hide")
+            readURL(this);
+        });
+
     });
     }
 
@@ -415,6 +406,11 @@
         $(form).find('#linkImage').attr('class', 'hide');
         $(form).find('#img').removeAttr('src');
 
+        $("#Banner").change(function () {
+            document.getElementById("linkImage").setAttribute("class", "hide")
+            readURL(this);
+        });
+
         $(form).find("input:disabled").removeAttr("disabled");
     }
 
@@ -427,5 +423,19 @@
         //console.log(res);
         return false;
     })
-}
+    }
+
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#img').attr('src', e.target.result);
+                //debugger
+            }
+
+            reader.readAsDataURL(input.files[0]); // convert to base64 string
+            //debugger
+        }
+    }
 </script>
