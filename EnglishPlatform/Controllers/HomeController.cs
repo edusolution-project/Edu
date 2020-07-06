@@ -124,9 +124,9 @@ namespace EnglishPlatform.Controllers
                         {
                             if (st.Centers != null && st.Centers.Count > 0)
                             {
-                                var allcenters = tc.Centers
-                                    .Where(ct => _centerService.GetItemByID(ct.CenterID)?.ExpireDate > DateTime.Now)
-                                    .Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
+                                var allcenters = st.Centers
+                                    .Where(ct => _centerService.GetItemByID(ct)?.ExpireDate > DateTime.Now)
+                                    .Select(t => _centerService.GetItemByID(t)).ToList();
                                 centerCode = allcenters.Count > 0 ? allcenters.FirstOrDefault().Code : center.Code;
                                 ViewBag.AllCenters = allcenters;
                             }
