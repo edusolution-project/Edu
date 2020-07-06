@@ -22,7 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BaseCoreEmail\BaseCoreEmail.csproj" />
     <ProjectReference Include="..\BaseCustomer\BaseCustomerEntity.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Libs\" />
   </ItemGroup>
 
 </Project>

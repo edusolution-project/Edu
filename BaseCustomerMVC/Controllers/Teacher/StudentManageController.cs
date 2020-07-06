@@ -384,6 +384,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                             RoleID = _roleService.GetItemByCode("student").ID
                                         };
                                         _accountService.CreateQuery().InsertOne(account);
+                                        _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
                                     }
                                     else
                                     {
@@ -404,6 +405,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     if (student.Centers == null) student.Centers = new List<string> { center.ID };
                                     else if (!student.Centers.Contains(center.ID))
                                         student.Centers.Add(center.ID);
+
+                                    if (student.JoinedClasses == null) student.JoinedClasses = new List<string> { };
                                     _studentService.Save(student);
                                     if (classStudents.Any(t => t == student.ID)) continue;
                                     _studentService.JoinClass(ClassID, student.ID, @class.Center);

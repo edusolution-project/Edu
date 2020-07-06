@@ -128,7 +128,7 @@
                         <i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}
                         <span class="bg-transparent text-primary font-weight-bold" v-if="data.BasePoint > 0 && data.PracticeAvgPoint > 0" v-bind:class="{'text-danger' : parseInt(data.PracticeAvgPoint) < data.BasePoint, 'text-success' : data.PracticeAvgPoint > data.BasePoint}">{{Math.floor(data.PracticeAvgPoint) + '/' + data.BasePoint.toFixed(0)}}</span>
                         <template v-else>
-                            <span class="bg-transparent text-primary font-weight-bold" v-if="data.PracticeCount > 0" v-bind:class="{'text-danger' : parseInt(data.PracticeAvgPoint) < 50, 'text-success' : parseInt(data.PracticeAvgPoint) > 70}">{{data.PracticeAvgPoint.toFixed(2)}}%</span>
+                            <span class="bg-transparent text-primary font-weight-bold" v-if="data.PracticeCount > 0" v-bind:class="{'text-danger' : parseInt(data.PracticeAvgPoint) < 50, 'text-success' : parseInt(data.PracticeAvgPoint) > 70}">{{ data.PracticeAvgPoint >= 0 ? (data.PracticeAvgPoint.toFixed(2) + '%') : ''}}</span>
                         </template>
                         <i class="ic ic-collapse"></i>
                     </a>

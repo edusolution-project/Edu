@@ -1,16 +1,13 @@
 ﻿using BaseCustomerEntity.Database;
 using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Mail;
 using System.Net.Mime;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace BaseCustomerMVC.Globals
+namespace BaseCoreEmail
 {
     public class MailHelper
     {
@@ -27,6 +24,15 @@ namespace BaseCustomerMVC.Globals
         {
             _configuration = iConfig;
             _mailLogService = mailLogService;
+            _defaultSender = _configuration.GetValue<string>("MailConfig:Email");
+            _defaultPassword = _configuration.GetValue<string>("MailConfig:Password");
+            _defaultSenderName = _configuration.GetValue<string>("MailConfig:Name");
+        }
+
+        public MailHelper(IConfigurationRoot iConfig)
+        {
+            _configuration = iConfig;
+            _mailLogService = new MailLogService(iConfig);
             _defaultSender = _configuration.GetValue<string>("MailConfig:Email");
             _defaultPassword = _configuration.GetValue<string>("MailConfig:Password");
             _defaultSenderName = _configuration.GetValue<string>("MailConfig:Name");
@@ -212,12 +218,15 @@ namespace BaseCustomerMVC.Globals
                 "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
                 "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             }
-            else
+            if (!string.IsNullOrEmpty(ClassName))
             {
                 body += ("<p>Bạn vừa được đăng ký học lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>");
                 body += ("<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>");
                 body += "<p>Đăng nhập để bắt đầu học ngay trên <a href='https://eduso.vn/login'>Eduso.vn</a><p>";
             }
+            else
+                return;
+
             //body += "<p>Đăng nhập để trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             var toAddress = new List<string> { Email };
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.STUDENT_JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
@@ -246,5 +255,4 @@ namespace BaseCustomerMVC.Globals
     {
         public const int OK = 1, ERR = 0;
     }
-
 }

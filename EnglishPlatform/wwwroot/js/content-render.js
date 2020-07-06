@@ -654,10 +654,9 @@ var Lesson = (function () {
                             if (exam == null) {
                                 localStorage.clear();
                                 console.log("New Fresh Exam");
-
+                                renderLectureExam(exam, false);
                             }
                             else {
-
                                 //
                                 if (isNull(getLocalData("CurrentExam")) || (getLocalData("CurrentExam") != exam.ID)) //display last result & render new exam
                                 {
@@ -2556,7 +2555,6 @@ var Lesson = (function () {
     }
 
     var renderLectureExam = function (data, isContinue) {
-
         var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
         $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
