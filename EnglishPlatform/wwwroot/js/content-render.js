@@ -2668,17 +2668,17 @@ var Lesson = (function () {
     }
 
     var doLectureExam = function (obj) {
-        $(obj).parent().remove();
-        console.log(_openingPart);
+        //$(obj).parent().remove();
+        //console.log(_openingPart);
         redoExam(obj);
         $('#rightCol').find('.tab-pane').hide();
     }
 
     var startExam = function (obj) {
+        //console.log(obj);
         if (obj != null)
             $(obj).prop("disabled", true);
         console.log("Create Exam");
-
         var dataform = new FormData();
         dataform.append("LessonID", config.lesson_id);
         dataform.append("ClassSubjectID", config.class_subject_id);
@@ -2687,6 +2687,7 @@ var Lesson = (function () {
             .then(function (res) {
                 var data = JSON.parse(res);
                 if (data.Error == null) {
+                    $(obj).parent().remove();
                     //notification("success", "Bắt đầu làm bài", 1500);
                     //console.log("NewID: " + data.Data.ID);
                     $("#ExamID").val(data.Data.ID);
@@ -2780,10 +2781,10 @@ var Lesson = (function () {
 
         itembox.append(boxHeader);
 
-        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer" });
-        $(collapseSwitch).click(function () {
-            toggleExpand(this);
-        });
+        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer", onclick: "toggleExpand(this)"  });
+        //$(collapseSwitch).click(function () {
+        //    toggleExpand(this);
+        //});
         //itembox.append(ItemRow);
         switch (data.Type) {
             case "TEXT":

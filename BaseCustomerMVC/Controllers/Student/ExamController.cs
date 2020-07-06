@@ -191,22 +191,26 @@ namespace BaseCustomerMVC.Controllers.Student
                        { "Error", "Bạn đã hết lượt làm bài!" }
                     });
                 }
+                if (_lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
 
-                if (_schedule.StartDate.ToLocalTime() > DateTime.Now)
+                    if (_schedule.StartDate.ToLocalTime() > DateTime.Now)
+                    {
+                        return new JsonResult(new Dictionary<string, object>
+                        {
+                           { "Error", "Bài kiểm tra chưa được mở!" }
+                        });
+                    }
+                }
+
+                if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
-                       { "Error", "Bài kiểm tra chưa được mở!" }
+                       { "Error", "Bài đã quá hạn!" }
                     });
                 }
-                if (_lesson.TemplateType == LESSON_TEMPLATE.EXAM)
-                    if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
-                    {
-                        return new JsonResult(new Dictionary<string, object>
-                    {
-                       { "Error", "Bài kiểm tra đã quá hạn!" }
-                    });
-                    }
+
 
                 item.LessonScheduleID = _schedule.ID;
                 item.Timer = _lesson.Timer;
@@ -443,7 +447,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (deleted.DeletedCount > 0 && exam.QuestionsDone > 0)
                         exam.QuestionsDone -= 1;
 
-                    _examService.CreateQuery().ReplaceOne(t=> t.ID == exam.ID, exam);
+                    _examService.CreateQuery().ReplaceOne(t => t.ID == exam.ID, exam);
                 }
                 return new JsonResult(item);
             }

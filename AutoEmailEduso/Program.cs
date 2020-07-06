@@ -49,7 +49,7 @@ namespace AutoEmailEduso
             isTest = configuration["Test"] == "1";
 
             Console.WriteLine("Processing Schedule...");
-            //await SendIncomingLesson();
+            await SendIncomingLesson();
             //Console.WriteLine(count + " mail Sent!");
 
             using (EventLog eventLog = new EventLog("Application"))
@@ -101,8 +101,8 @@ namespace AutoEmailEduso
                                     var skill = _skillService.GetItemByID(currentSubject.ID);
                                     count++;
                                     //Send Mail for lastest class subject
-                                    await SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                                    await SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                    _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                    _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
                                 }
                                 subjectID = schedule.ClassSubjectID;
                                 currentSubject = _classSubjectService.GetItemByID(subjectID);
@@ -121,8 +121,8 @@ namespace AutoEmailEduso
                             var skill = _skillService.GetItemByID(currentSubject.SkillID);
                             count++;
                             //Send Mail for lastest class subject
-                            await SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                            await SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                            _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                            _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
                         }
                     }
                 }
