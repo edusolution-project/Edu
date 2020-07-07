@@ -699,6 +699,58 @@ namespace EnglishPlatform.Controllers
             return new JsonResult(Response);
         }
         #endregion
+
+        #region Fix Data
+        public JsonResult FixAcc()
+        {
+            var students = _studentService.GetAll().ToList();
+            var count = 0;
+            var countdelete = 0;
+            foreach (var student in students)
+            {
+                if (student.Email != student.Email.ToLower().Trim())
+                {
+                    student.Email = student.Email.ToLower().Trim();
+                    _studentService.Save(student);
+                }
+                try
+                {
+                    var acc = _accountService.GetAccountByEmail(student.Email);
+                    if (acc == null)
+                    {
+                        var _defaultPass = "Eduso123";
+                        acc = new AccountEntity()
+                        {
+                            CreateDate = DateTime.Now,
+                            IsActive = true,
+                            PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                            PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                            UserCreate = student.UserCreate,
+                            Type = ACCOUNT_TYPE.STUDENT,
+                            UserID = student.ID,
+                            UserName = student.Email.ToLower().Trim(),
+                            RoleID = _roleService.GetItemByCode("student").ID
+                        };
+                        _accountService.CreateQuery().InsertOne(acc);
+                        count++;
+                    }
+                }
+                catch (Exception e)
+                {
+                    var accs = _accountService.CreateQuery().Find(t => t.UserName == student.Email).SortBy(t => t.ID).ToList();
+                    if (accs.Count > 1)
+                    {
+                        for (int i = 1; i < accs.Count; i++)
+                        {
+                            _accountService.Remove(accs[i].ID);
+                        }
+                        countdelete++;
+                    }
+                }
+            }
+            return Json("OK " + count + " - " + countdelete);
+        }
+        #endregion
     }
 
     public class UserModel

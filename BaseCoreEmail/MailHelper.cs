@@ -106,6 +106,7 @@ namespace BaseCoreEmail
             }
             catch (Exception ex)
             {
+                throw ex;
                 return ResultState.ERR;
             }
         }

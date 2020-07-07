@@ -50,7 +50,7 @@ namespace AutoEmailEduso
 
             Console.WriteLine("Processing Schedule...");
             await SendIncomingLesson();
-            //Console.WriteLine(count + " mail Sent!");
+            Console.WriteLine(count + " mail Sent!");
 
             using (EventLog eventLog = new EventLog("Application"))
             {
@@ -63,6 +63,7 @@ namespace AutoEmailEduso
         public static async Task SendIncomingLesson()
         {
             var currentTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, 0, 0).AddHours(1).ToUniversalTime();
+            Console.WriteLine(currentTime);
             var activeClasses = _classService.GetActiveClass(time: currentTime, Center: null).ToList();
             var period = 60;
             if (activeClasses != null && activeClasses.Count() > 0)
@@ -168,6 +169,7 @@ namespace AutoEmailEduso
                         <tr style='font-weight:bold'>
                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Tên bài</td>
                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Thời gian bắt đầu</td>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Thời gian phải hoàn thành</td>
                         </tr>
                     </thead>
                     <tbody>";
@@ -176,6 +178,7 @@ namespace AutoEmailEduso
                 body += @"<tr>
                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'><a href='https://eduso.vn/" + center.Code + "/student/Lesson/Detail/" + schedule.LessonID + "/" + subjectID + "' target='_blank'>" + schedule.LessonName + @"</a></td>
                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>" + schedule.StartDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm:tt") + @"</td>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>" + schedule.EndDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm:tt") + @"</td>
                           </tr>";
             }
             body += @"</tbody>

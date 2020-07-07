@@ -369,11 +369,11 @@ var Lesson = (function () {
                 lessonButton.append(toggleMode);
                 toggleMode.append(iconToggle).append("Sửa");
 
-                var previewMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Học thử", "onclick": "openPreview()" });
+                var previewMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Trình chiếu", "onclick": "openPreview()" });
                 var iconPreview = $("<i>", { "class": "far fa-paper-plane mr-2" });
 
                 lessonButton.append(previewMode);
-                previewMode.append(iconPreview).append("Học thử");
+                previewMode.append(iconPreview).append("Trình chiếu");
                 //headerRow.append(lessonButton);
                 lesson_action_holder.prepend(lessonButton);
                 break;
@@ -2781,7 +2781,7 @@ var Lesson = (function () {
 
         itembox.append(boxHeader);
 
-        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer", onclick: "toggleExpand(this)"  });
+        var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer", onclick: "toggleExpand(this)" });
         //$(collapseSwitch).click(function () {
         //    toggleExpand(this);
         //});
@@ -3242,7 +3242,7 @@ var Lesson = (function () {
             stopCountdown();
             //calculateResult();
             renderCompleteExam({
-                maxPoint: 100, point: 1, limit: 0, number: 1, 
+                maxPoint: 100, point: 1, limit: 0, number: 1,
                 questionPass: 0,
                 questionsTotal: document.querySelectorAll(".quiz-item").length
             });
@@ -3332,7 +3332,7 @@ var Lesson = (function () {
             }
             console.log(doButton);
             $(lesson_action_holder).append(doButton);
-            if(config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM)
+            if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM)
                 $(lesson_action_holder).append(reviewButton);
             console.log(lesson_action_holder);
             //.append(backButton);

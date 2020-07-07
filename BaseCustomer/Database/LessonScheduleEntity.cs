@@ -63,7 +63,7 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<LessonScheduleEntity> GetIncomingSchedules(DateTime time, int period, string ClassID)
         {
-            return Collection.Find(o => o.ClassID == ClassID && o.StartDate >= time && o.StartDate <= time.AddMinutes(period)).ToEnumerable();
+            return Collection.Find(o => o.ClassID == ClassID && o.StartDate >= time && o.StartDate < time.AddMinutes(period)).ToEnumerable();
         }
 
         public LessonScheduleEntity GetItemByLessonID_ClassSubjectID(string lessonid, string classsubjectid)
