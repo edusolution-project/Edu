@@ -28,7 +28,7 @@ namespace BaseEasyRealTime.Entities
 
         public GroupEntity CreateNewGroup(MemberGroupInfo sender, MemberGroupInfo receiver)
         {
-            if(sender.ID == receiver.ID)
+            if (sender.ID == receiver.ID)
             {
                 var listFilter = new List<FilterDefinition<GroupEntity>>()
                 {
@@ -36,7 +36,7 @@ namespace BaseEasyRealTime.Entities
                     Builders<GroupEntity>.Filter.AnyEq("Members",new HashSet<MemberGroupInfo>(){ sender}),
                 };
                 var item = CreateQuery().Find(Builders<GroupEntity>.Filter.And(listFilter))?.FirstOrDefault();
-                if(item == null)
+                if (item == null)
                 {
                     item = new GroupEntity()
                     {
@@ -45,8 +45,8 @@ namespace BaseEasyRealTime.Entities
                         DisplayName = sender.Name,
                         Name = Guid.NewGuid().ToString(),
                         IsPrivateChat = true,
-                        MasterGroup = new HashSet<MemberGroupInfo>() { sender},
-                        Members = new HashSet<MemberGroupInfo>() { sender},
+                        MasterGroup = new HashSet<MemberGroupInfo>() { sender },
+                        Members = new HashSet<MemberGroupInfo>() { sender },
                         Status = true
                     };
                     CreateOrUpdate(item);
@@ -67,7 +67,7 @@ namespace BaseEasyRealTime.Entities
                         Builders<GroupEntity>.Filter.AnyEq("Members",new HashSet<MemberGroupInfo>(){ sender,receiver})),
                 };
                 var item = CreateQuery().Find(Builders<GroupEntity>.Filter.And(listFilter))?.FirstOrDefault();
-                if(item == null)
+                if (item == null)
                 {
                     item = new GroupEntity()
                     {
@@ -76,8 +76,8 @@ namespace BaseEasyRealTime.Entities
                         DisplayName = "",
                         Name = Guid.NewGuid().ToString(),
                         IsPrivateChat = true,
-                        MasterGroup = new HashSet<MemberGroupInfo>() { sender,receiver },
-                        Members = new HashSet<MemberGroupInfo>() { sender,receiver },
+                        MasterGroup = new HashSet<MemberGroupInfo>() { sender, receiver },
+                        Members = new HashSet<MemberGroupInfo>() { sender, receiver },
                         Status = true
                     };
                     CreateOrUpdate(item);
@@ -88,6 +88,13 @@ namespace BaseEasyRealTime.Entities
                     return item;
                 }
             }
+        }
+
+        public long UpdateGroupDisplayName(string Name, string DisplayName)
+        {
+            var filter = Builders<GroupEntity>.Filter.Eq(t => t.Name, Name);
+            var update = Builders<GroupEntity>.Update.Set(t => t.DisplayName, DisplayName);
+            return Collection.UpdateMany(Builders<GroupEntity>.Filter.And(filter), update, new UpdateOptions { IsUpsert = false }).ModifiedCount;
         }
 
     }

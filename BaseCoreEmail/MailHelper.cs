@@ -17,6 +17,7 @@ namespace BaseCoreEmail
         private readonly string _defaultSender;
         private readonly string _defaultSenderName;
         private readonly string _defaultPassword;
+        private readonly bool isTest = false;
 
         public MailHelper(IConfiguration iConfig,
             MailLogService mailLogService
@@ -27,6 +28,7 @@ namespace BaseCoreEmail
             _defaultSender = _configuration.GetValue<string>("MailConfig:Email");
             _defaultPassword = _configuration.GetValue<string>("MailConfig:Password");
             _defaultSenderName = _configuration.GetValue<string>("MailConfig:Name");
+            isTest = _configuration.GetValue<string>("Test") == "1";
         }
 
         public MailHelper(IConfigurationRoot iConfig)
@@ -92,7 +94,8 @@ namespace BaseCoreEmail
                 if (files != null)
                     foreach (var t in files)
                         AddAttachment(message, t);
-                smtp.Send(message);
+                if (!isTest)
+                    smtp.Send(message);
                 var maillog = new MailLogEntity
                 {
                     ActionType = action_type,
@@ -134,7 +137,8 @@ namespace BaseCoreEmail
                 "<p>Mật khẩu: <b>" + Password + "</b></p>" +
                 "<p>Đăng nhập để trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             var toAddress = new List<string> { user.UserName };
-            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.REGISTER, bccAddressses: new List<string> { _defaultSender });
+            
+                _ = await SendBaseEmail(toAddress, subject, body, MailPhase.REGISTER, bccAddressses: new List<string> { _defaultSender });
         }
 
         public async Task SendResetPassConfirm(AccountEntity user, string resetLink)

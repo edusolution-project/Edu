@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using BaseCoreEmail;
 using BaseCustomerEntity.Database;
@@ -132,8 +133,10 @@ namespace AutoEmailEduso
 
         private static async Task SendTeacherSchedule(List<ScheduleView> schedules, TeacherEntity currentTeacher, ClassEntity currentClass, string currentSkill, string subjectID, DateTime startTime, DateTime endTime, CenterEntity center)
         {
-            string subject = "Thông báo lịch dạy lớp " + currentClass.Name + " - Môn: " + currentSkill +
-                " (" + startTime.ToLocalTime().ToString("HH:mm") + "-" + endTime.ToLocalTime().ToString("HH:mm") + " ngày " + startTime.ToLocalTime().ToString("dd/MM/yyyy") + ")";
+            string subject =
+                "Nhắc lịch dạy " +
+                //"Thông báo lịch dạy lớp " + currentClass.Name + " - Môn: " + currentSkill +
+                startTime.ToLocalTime().ToString("HH:mm") + "-" + endTime.ToLocalTime().ToString("HH:mm") + " ngày " + startTime.ToLocalTime().ToString("dd/MM/yyyy");
             string body = "Chào " + currentTeacher.FullName + "," +
                 "<p>Lịch dạy của bạn trong lớp " + currentClass.Name + " - Môn: " + currentSkill + "</p>" +
                 @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
@@ -160,8 +163,10 @@ namespace AutoEmailEduso
         private static async Task SendStudentSchedule(List<ScheduleView> schedules, TeacherEntity teacher, List<StudentEntity> studentList, ClassEntity currentClass, string currentSkill, string subjectID, DateTime startTime, DateTime endTime, CenterEntity center)
         {
 
-            string subject = "Thông báo lịch học lớp " + currentClass.Name + " - Môn: " + currentSkill + " - Giáo viên: " + teacher.FullName +
-                " (" + startTime.ToLocalTime().ToString("HH:mm") + "-" + endTime.ToLocalTime().ToString("HH:mm") + " ngày " + startTime.ToLocalTime().ToString("dd/MM/yyyy") + ")";
+            string subject =
+                "Nhắc lịch học " +
+            //"Thông báo lịch học lớp " + currentClass.Name + " - Môn: " + currentSkill + " - Giáo viên: " + teacher.FullName +
+            startTime.ToLocalTime().ToString("HH:mm") + "-" + endTime.ToLocalTime().ToString("HH:mm") + " ngày " + startTime.ToLocalTime().ToString("dd/MM/yyyy");
             string body = "Chào bạn," +
                 "<p>Lịch học của bạn trong lớp " + currentClass.Name + " - Môn: " + currentSkill + "</p>" +
                 @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
@@ -196,6 +201,7 @@ namespace AutoEmailEduso
         {
             LessonID = schedule.LessonID;
             StartDate = schedule.StartDate;
+            EndDate = schedule.EndDate;
         }
     }
 

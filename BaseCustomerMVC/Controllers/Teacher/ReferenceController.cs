@@ -147,7 +147,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
         }
 
-        public async Task<JsonResult> Save(ReferenceEntity entity)
+        public async Task<JsonResult> Save(ReferenceEntity entity, string basis)
         {
             try
             {
@@ -173,7 +173,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             entity.Media.Name = entity.Media.OriginalName = file.FileName;
                             entity.Media.Created = DateTime.Now;
                             entity.Media.Size = file.Length;
-                            entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName);
+                            entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "", basis);
                         }
                     }
                 }
@@ -206,7 +206,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             entity.Media.Name = entity.Media.OriginalName = file.FileName;
                             entity.Media.Created = DateTime.Now;
                             entity.Media.Size = file.Length;
-                            entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName);
+                            entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "", basis);
                         }
                     }
                 }

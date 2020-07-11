@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using MongoDB.Bson.Serialization.Serializers;
+using BaseEasyRealTime.Entities;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -44,6 +45,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly ChapterProgressService _chapterProgressService;
 
+
         //private readonly LessonPartService _lessonPartService;
         //private readonly LessonPartAnswerService _lessonPartAnswerService;
         //private readonly LessonPartQuestionService _lessonPartQuestionService;
@@ -60,6 +62,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly CenterService _centerService;
         private readonly RoleService _roleService;
+
+        private readonly GroupService _groupService;
 
 
         public ClassController(
@@ -97,8 +101,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             ChapterProgressService chapterProgressService,
             CenterService centerService,
-            RoleService roleService
+            RoleService roleService,
 
+            GroupService groupService
             )
         {
             _accountService = accountService;
@@ -142,6 +147,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _chapterProgressService = chapterProgressService;
             _centerService = centerService;
             _roleService = roleService;
+            _groupService = groupService;
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -1087,7 +1093,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (fileUpload != null)
                 {
-                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG").Result;
+                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG", center.Code).Result;
                     item.Image = pathImage;
                 }
 
@@ -1132,7 +1138,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
 
                 oldData.Updated = DateTime.Now;
-                oldData.Name = item.Name;
+                var mustUpdateName = false;
+                if (oldData.Name != item.Name)
+                {
+                    oldData.Name = item.Name;
+                    mustUpdateName = true;
+                }
                 oldData.Code = item.Code;
                 oldData.StartDate = item.StartDate.ToUniversalTime();
                 oldData.EndDate = item.EndDate.ToUniversalTime();
@@ -1232,12 +1243,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (fileUpload != null)
                 {
-                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG").Result;
+                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG", center.Code).Result;
                     oldData.Image = pathImage;
                 }
 
                 //update data
                 _service.Save(oldData);
+                if (mustUpdateName)
+                {
+                    var change = _groupService.UpdateGroupDisplayName(oldData.ID, oldData.Name);
+                }    
+                    
                 //refresh class total lesson => no need
                 _ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
 

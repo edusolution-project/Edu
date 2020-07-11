@@ -38,8 +38,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         //private readonly LessonExtendService _lessonExtendService;
         private readonly TeacherService _teacherService;
-        //private readonly ClassService _classService;
-        //private readonly ClassSubjectService _classSubjectService;
+
 
         private readonly ModCourseService _modservice;
         //private readonly ModProgramService _modprogramService;
@@ -63,26 +62,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
         //fixing data
-        //private readonly ChapterService _newchapterService;
-        //private readonly LessonService _newlessonService;
+        private readonly ChapterService _newchapterService;
+        private readonly LessonService _newlessonService;
+        private readonly ClassService _classService;
+        private readonly ClassSubjectService _classSubjectService;
+        private readonly ClassProgressService _classProgressService;
+        private readonly ClassSubjectProgressService _classSubjectProgressService;
+        private readonly ChapterProgressService _chapterProgressService;
+        private readonly LessonProgressService _lessonProgressService;
+        private readonly ExamService _examService;
+        private readonly ExamDetailService _examDetailService;
+        private readonly CloneLessonPartService _cloneLessonPartService;
+        private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
+        private readonly LessonScheduleService _lessonScheduleService;
+        private readonly StudentService _studentService;
 
-        //private readonly ClassProgressService _classProgressService;
-        //private readonly ClassSubjectProgressService _classSubjectProgressService;
-        //private readonly ChapterProgressService _chapterProgressService;
-        //private readonly LessonProgressService _lessonProgressService;
-        //private readonly ExamService _examService;
-        //private readonly ExamDetailService _examDetailService;
-        //private readonly CloneLessonPartService _cloneLessonPartService;
-        //private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
-        //private readonly LessonScheduleService _lessonScheduleService;
-        //private readonly StudentService _studentService;
-
-
-
-        //private readonly MappingEntity<ChapterEntity, CourseChapterEntity> _chapterMappingRev = new MappingEntity<ChapterEntity, CourseChapterEntity>();
-        //private readonly MappingEntity<CourseChapterEntity, ChapterEntity> _chapterMapping = new MappingEntity<CourseChapterEntity, ChapterEntity>();
-        //private readonly MappingEntity<LessonEntity, CourseLessonEntity> _lessonMappingRev = new MappingEntity<LessonEntity, CourseLessonEntity>();
-        //private readonly MappingEntity<CourseLessonEntity, LessonEntity> _lessonMapping = new MappingEntity<CourseLessonEntity, LessonEntity>();
+        private readonly MappingEntity<ChapterEntity, CourseChapterEntity> _chapterMappingRev = new MappingEntity<ChapterEntity, CourseChapterEntity>();
+        private readonly MappingEntity<CourseChapterEntity, ChapterEntity> _chapterMapping = new MappingEntity<CourseChapterEntity, ChapterEntity>();
+        private readonly MappingEntity<LessonEntity, CourseLessonEntity> _lessonMappingRev = new MappingEntity<LessonEntity, CourseLessonEntity>();
+        private readonly MappingEntity<CourseLessonEntity, LessonEntity> _lessonMapping = new MappingEntity<CourseLessonEntity, LessonEntity>();
 
 
         public CurriculumController(CourseService service,
@@ -97,8 +95,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  //LessonExtendService lessonExtendService,
                  TeacherService teacherService,
                  ModCourseService modservice
-                //ClassService classService,
-                //ClassSubjectService classSubjectService
+
                 , RoleService roleService
                 , ModSubjectService modsubjectService
                 , ModChapterService modchapterService
@@ -114,19 +111,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 , CenterService centerService
 
                  //use for fixing data
-                 //, CloneLessonPartService cloneLessonPartService
-                 //, CloneLessonPartQuestionService cloneLessonPartQuestionService
-                 //, ChapterService newchapterService
-                 //, LessonService newlessonService
-                 //, ChapterProgressService chapterProgressService
-                 //, ClassSubjectProgressService classSubjectProgressService
-                 //, ClassProgressService classProgressService
-                 //, LessonProgressService lessonProgressService
-                 //, ExamService examService
-                 //, ClassService classService
-                 //, LessonScheduleService lessonScheduleService
-                 //, ExamDetailService examDetailService
-                 //, StudentService studentService
+                 , ClassSubjectService classSubjectService
+                 , CloneLessonPartService cloneLessonPartService
+                 , CloneLessonPartQuestionService cloneLessonPartQuestionService
+                 , ChapterService newchapterService
+                 , LessonService newlessonService
+                 , ChapterProgressService chapterProgressService
+                 , ClassSubjectProgressService classSubjectProgressService
+                 , ClassProgressService classProgressService
+                 , LessonProgressService lessonProgressService
+                 , ExamService examService
+                 , ClassService classService
+                 , LessonScheduleService lessonScheduleService
+                 , ExamDetailService examDetailService
+                 , StudentService studentService
 
                  )
         {
@@ -165,20 +163,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _publisherHost = config.GetValue<string>("SysConfig:PublisherDomain");
 
             //fix
-            //_classService = classService;
-            //_cloneLessonPartService = cloneLessonPartService;
-            //_cloneLessonPartQuestionService = cloneLessonPartQuestionService;
-            //_classSubjectService = classSubjectService;
-            //_newchapterService = newchapterService;
-            //_newlessonService = newlessonService;
-            //_chapterProgressService = chapterProgressService;
-            //_classProgressService = classProgressService;
-            //_classSubjectProgressService = classSubjectProgressService;
-            //_lessonProgressService = lessonProgressService;
-            //_examService = examService;
-            //_examDetailService = examDetailService;
-            //_lessonScheduleService = lessonScheduleService;
-            //_studentService = studentService;
+            _classService = classService;
+            _cloneLessonPartService = cloneLessonPartService;
+            _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
+            _classSubjectService = classSubjectService;
+            _newchapterService = newchapterService;
+            _newlessonService = newlessonService;
+            _chapterProgressService = chapterProgressService;
+            _classProgressService = classProgressService;
+            _classSubjectProgressService = classSubjectProgressService;
+            _lessonProgressService = lessonProgressService;
+            _examService = examService;
+            _examDetailService = examDetailService;
+            _lessonScheduleService = lessonScheduleService;
+            _studentService = studentService;
 
 
         }
@@ -749,7 +747,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [DisableRequestSizeLimit]
-        public async Task<JsonResult> SaveInfo(CourseEntity entity)
+        public async Task<JsonResult> SaveInfo(CourseEntity entity, string basis)
         //public async Task<JsonResult> SaveInfo(CourseEntity entity)
         {
 
@@ -784,7 +782,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var file = files[0];
 
                     var filename = currentCourse.ID + "_" + DateTime.Now.ToUniversalTime().ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
-                    currentCourse.Image = await _fileProcess.SaveMediaAsync(file, filename);
+                    currentCourse.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER", basis);
                 }
                 //currentClass.Description = entity.Description ?? "";
                 //currentClass.Syllabus = entity.Syllabus ?? "";
@@ -1986,83 +1984,96 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         //#region Fix resources
 
-        //[HttpGet]
-        //public JsonResult FixResourcesV2()
-        //{
-        //    var chapters = _chapterService.GetAll().ToList();
-        //    foreach (var chapter in chapters)
-        //    {
-        //        chapter.TotalLessons = 0;
-        //        _chapterService.Save(chapter);
-        //    }
-        //    var courses = _service.GetAll().ToList();
-        //    foreach (var course in courses)
-        //    {
-        //        course.TotalLessons = 0;
-        //        _service.Save(course);
-        //    }
-        //    var subjects = _classSubjectService.GetAll().ToList();
-        //    foreach (var sbj in subjects)
-        //    {
-        //        sbj.TotalLessons = 0;
-        //        _classSubjectService.Save(sbj);
-        //    }
-        //    var allclass = _classService.GetAll().ToList();
-        //    foreach (var @class in allclass)
-        //    {
-        //        @class.TotalLessons = 0;
-        //        _classService.Save(@class);
-        //    }
-        //    var alllessons = _lessonService.GetAll().ToList();
-        //    foreach (var lesson in alllessons)
-        //    {
-        //        var course = _service.GetItemByID(lesson.CourseID);
-        //        if (course == null)
-        //        {
-        //            _lessonService.Remove(lesson.ID);
-        //        }
-        //    }
-        //    int count = 0;
-        //    foreach (var chapter in chapters)
-        //    {
-        //        count++;
-        //        var course = _service.GetItemByID(chapter.CourseID);
-        //        if (course == null)//not valid
-        //            _chapterService.Remove(chapter.ID);
-        //        chapter.TotalLessons = _lessonService.CountChapterLesson(chapter.ID);
-        //        if (chapter.TotalLessons > 0)
-        //        {
-        //            _chapterService.Save(chapter);
-        //            if (string.IsNullOrEmpty(chapter.ParentID) || chapter.ParentID == "0")
-        //            {
-        //                _ = _service.IncreaseLessonCount(chapter.CourseID, chapter.TotalLessons);
-        //            }
-        //            else
-        //            {
-        //                _ = _chapterService.IncreaseLessonCount(chapter.ParentID, chapter.TotalLessons);
-        //            }
-        //        }
-        //    }
-        //    //update classsubject && class
-        //    var classes = _classService.GetAll().ToList();
-        //    foreach (var @class in classes)
-        //    {
-        //        @class.TotalLessons = 0;
-        //        var sbjs = _classSubjectService.GetByClassID(@class.ID);
-        //        foreach (var sbj in sbjs)
-        //        {
-        //            var course = _service.GetItemByID(sbj.CourseID);
-        //            if (course != null)
-        //            {
-        //                sbj.TotalLessons = course.TotalLessons;
-        //                @class.TotalLessons += course.TotalLessons;
-        //                _classSubjectService.Save(sbj);
-        //            }
-        //        }
-        //        _classService.Save(@class);
-        //    }
-        //    return new JsonResult("Update " + count + " chapter");
-        //}
+
+
+        [HttpGet]
+        public JsonResult FixResourcesV2()
+        {
+            var chapters = _chapterService.GetAll().ToList();
+            foreach (var chapter in chapters)
+            {
+                chapter.TotalLessons = 0;
+                _chapterService.Save(chapter);
+            }
+            var courses = _service.GetAll().ToList();
+            foreach (var course in courses)
+            {
+                course.TotalLessons = 0;
+                _service.Save(course);
+            }
+            var subjects = _classSubjectService.GetAll().ToList();
+            foreach (var sbj in subjects)
+            {
+                sbj.TotalLessons = 0;
+                _classSubjectService.Save(sbj);
+            }
+            var allclass = _classService.GetAll().ToList();
+            foreach (var @class in allclass)
+            {
+                @class.TotalLessons = 0;
+                _classService.Save(@class);
+            }
+            var alllessons = _lessonService.GetAll().ToList();
+            foreach (var lesson in alllessons)
+            {
+                var course = _service.GetItemByID(lesson.CourseID);
+                if (course == null)
+                {
+                    _lessonService.Remove(lesson.ID);
+                }
+            }
+            int count = 0;
+            foreach (var chapter in chapters)
+            {
+                count++;
+                var course = _service.GetItemByID(chapter.CourseID);
+                if (course == null)//not valid
+                    _chapterService.Remove(chapter.ID);
+                chapter.TotalLessons = _lessonService.CountChapterLesson(chapter.ID);
+                if (chapter.TotalLessons > 0)
+                {
+                    _chapterService.Save(chapter);
+                    if (string.IsNullOrEmpty(chapter.ParentID) || chapter.ParentID == "0")
+                    {
+                        _ = _service.IncreaseLessonCount(chapter.CourseID, chapter.TotalLessons);
+                    }
+                    else
+                    {
+                        _ = _chapterService.IncreaseLessonCount(chapter.ParentID, chapter.TotalLessons);
+                    }
+                }
+            }
+            //update classsubject && class
+            var classes = _classService.GetAll().ToList();
+            foreach (var @class in classes)
+            {
+                @class.TotalLessons = 0;
+                var sbjs = _classSubjectService.GetByClassID(@class.ID);
+                foreach (var sbj in sbjs)
+                {
+                    var course = _service.GetItemByID(sbj.CourseID);
+                    if (course != null)
+                    {
+                        sbj.TotalLessons = course.TotalLessons;
+                        @class.TotalLessons += course.TotalLessons;
+                        _classSubjectService.Save(sbj);
+                    }
+                }
+                _classService.Save(@class);
+            }
+
+            var _newchapters = _newchapterService.GetAll().ToList();
+            foreach (var chapter in _newchapters)
+            {
+                var orgChap = _chapterService.GetItemByID(chapter.OriginID);
+                if (orgChap != null)
+                {
+                    chapter.TotalLessons = orgChap.TotalLessons;
+                    _newchapterService.CreateQuery().ReplaceOne(t => t.ID == chapter.ID, chapter);
+                }
+            }
+            return new JsonResult("Update " + count + " chapter");
+        }
 
         //public async Task<JsonResult> FixResourcesV3()
         //{

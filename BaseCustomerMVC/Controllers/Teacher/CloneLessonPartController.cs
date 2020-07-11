@@ -190,7 +190,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [DisableRequestSizeLimit]
-        public async Task<JsonResult> CreateOrUpdate(CloneLessonPartViewModel item, string ClassSubjectID, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
+        public async Task<JsonResult> CreateOrUpdate(string basis, CloneLessonPartViewModel item, string ClassSubjectID, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
         {
             var createduser = User.Claims.GetClaimByType("UserID").Value;
             var parentLesson = _lessonService.GetItemByID(item.ParentID);
@@ -226,7 +226,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         item.Media.Created = DateTime.Now;
                         item.Media.Size = file.Length;
-                        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
+                        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
                     }
                 }
             }
@@ -253,7 +253,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();//update media
                     item.Media.Created = DateTime.Now;
                     item.Media.Size = file.Length;
-                    item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
+                    item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
                 }
                 item.OriginID = olditem.OriginID;
                 item.Created = olditem.Created;
@@ -323,7 +323,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     if (item.Questions != null && item.Questions.Count > 0)
                     {
-                        await SaveQuestionFromView(item, createduser, files);
+                        await SaveQuestionFromView(item, createduser, files, basis);
                     }
 
                     break;
@@ -763,7 +763,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return questionList;
         }
 
-        private async Task SaveQuestionFromView(CloneLessonPartViewModel item, string createuser = "auto", IFormFileCollection files = null)
+        private async Task SaveQuestionFromView(CloneLessonPartViewModel item, string createuser = "auto", IFormFileCollection files = null, string centerCode = "")
         {
             foreach (var questionVM in item.Questions)
             {
@@ -790,7 +790,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             quiz.Media.Created = DateTime.Now;
                             quiz.Media.Size = file.Length;
-                            quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                            quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName, "", centerCode);
                         }
                     }
                 }
@@ -811,7 +811,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();//update media
                             quiz.Media.Created = DateTime.Now;
                             quiz.Media.Size = file.Length;
-                            quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                            quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName, "", centerCode);
                         }
                     }
 
@@ -853,7 +853,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {
                                     answer.Media.Created = DateTime.Now;
                                     answer.Media.Size = file.Length;
-                                    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName, "", centerCode);
                                 }
                             }
                         }
@@ -874,7 +874,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();//update media
                                     answer.Media.Created = DateTime.Now;
                                     answer.Media.Size = file.Length;
-                                    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName, "", centerCode);
                                 }
                             }
                             //else // No Media
@@ -975,257 +975,257 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return questionList;
         }
 
-        private async Task SaveQuestionFromView(LessonPartViewModel item, string createuser = "auto", IFormFileCollection files = null)
-        {
-            foreach (var questionVM in item.Questions)
-            {
-                questionVM.ParentID = item.ID;
-                questionVM.CourseID = item.CourseID;
+        //private async Task SaveQuestionFromView(LessonPartViewModel item, string createuser = "auto", IFormFileCollection files = null)
+        //{
+        //    foreach (var questionVM in item.Questions)
+        //    {
+        //        questionVM.ParentID = item.ID;
+        //        questionVM.CourseID = item.CourseID;
 
-                var quiz = questionVM.ToEntity();
+        //        var quiz = questionVM.ToEntity();
 
-                if (questionVM.Media != null && questionVM.Media.Name == null) questionVM.Media = null;
+        //        if (questionVM.Media != null && questionVM.Media.Name == null) questionVM.Media = null;
 
-                if (questionVM.ID == "0" || questionVM.ID == null || _lessonPartQuestionService.GetItemByID(quiz.ID) == null)
-                {
-                    var maxItem = _lessonPartQuestionService.CreateQuery()
-                        .Find(o => o.ParentID == item.ID)
-                        .SortByDescending(o => o.Order).FirstOrDefault();
-                    quiz.Order = maxItem != null ? maxItem.Order + 1 : 0;
-                    quiz.Created = DateTime.Now;
-                    quiz.Updated = DateTime.Now;
-                    quiz.CreateUser = createuser;
+        //        if (questionVM.ID == "0" || questionVM.ID == null || _lessonPartQuestionService.GetItemByID(quiz.ID) == null)
+        //        {
+        //            var maxItem = _lessonPartQuestionService.CreateQuery()
+        //                .Find(o => o.ParentID == item.ID)
+        //                .SortByDescending(o => o.Order).FirstOrDefault();
+        //            quiz.Order = maxItem != null ? maxItem.Order + 1 : 0;
+        //            quiz.Created = DateTime.Now;
+        //            quiz.Updated = DateTime.Now;
+        //            quiz.CreateUser = createuser;
 
-                    if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || (!quiz.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == quiz.Media.Name))))
-                        quiz.Media = null;
-                    else
-                    {
-                        if (quiz.Media.Name.ToLower().StartsWith("http")) //file url (import)
-                        {
-                            quiz.Media.Created = DateTime.Now;
-                            quiz.Media.Size = 0;
-                            quiz.Media.Path = quiz.Media.Name.Trim();
-                        }
-                        else
-                        {
-                            var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
-                            if (file != null)
-                            {
-                                quiz.Media.Created = DateTime.Now;
-                                quiz.Media.Size = file.Length;
-                                quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    var oldquiz = _lessonPartQuestionService.GetItemByID(quiz.ID);
-                    if ((oldquiz.Media != null && quiz.Media != null && oldquiz.Media.Path != quiz.Media.Path)
-                        || (oldquiz.Media == null && quiz.Media != null))//Media change
-                    {
+        //            if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || (!quiz.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == quiz.Media.Name))))
+        //                quiz.Media = null;
+        //            else
+        //            {
+        //                if (quiz.Media.Name.ToLower().StartsWith("http")) //file url (import)
+        //                {
+        //                    quiz.Media.Created = DateTime.Now;
+        //                    quiz.Media.Size = 0;
+        //                    quiz.Media.Path = quiz.Media.Name.Trim();
+        //                }
+        //                else
+        //                {
+        //                    var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
+        //                    if (file != null)
+        //                    {
+        //                        quiz.Media.Created = DateTime.Now;
+        //                        quiz.Media.Size = file.Length;
+        //                        quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            var oldquiz = _lessonPartQuestionService.GetItemByID(quiz.ID);
+        //            if ((oldquiz.Media != null && quiz.Media != null && oldquiz.Media.Path != quiz.Media.Path)
+        //                || (oldquiz.Media == null && quiz.Media != null))//Media change
+        //            {
 
-                        if (oldquiz.Media != null && !string.IsNullOrEmpty(oldquiz.Media.Path))//Delete old file
-                            _fileProcess.DeleteFile(oldquiz.Media.Path);
+        //                if (oldquiz.Media != null && !string.IsNullOrEmpty(oldquiz.Media.Path))//Delete old file
+        //                    _fileProcess.DeleteFile(oldquiz.Media.Path);
 
-                        if (files == null || !files.Any(f => f.Name == quiz.Media.Name))
-                            quiz.Media = null;
-                        else
-                        {
+        //                if (files == null || !files.Any(f => f.Name == quiz.Media.Name))
+        //                    quiz.Media = null;
+        //                else
+        //                {
 
-                            var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();//update media
-                            quiz.Media.Created = DateTime.Now;
-                            quiz.Media.Size = file.Length;
-                            quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
-                        }
-                    }
+        //                    var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();//update media
+        //                    quiz.Media.Created = DateTime.Now;
+        //                    quiz.Media.Size = file.Length;
+        //                    quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+        //                }
+        //            }
 
-                    quiz.Order = oldquiz.Order;
-                    quiz.Created = oldquiz.Created;
-                    quiz.Updated = DateTime.Now;
-                }
+        //            quiz.Order = oldquiz.Order;
+        //            quiz.Created = oldquiz.Created;
+        //            quiz.Updated = DateTime.Now;
+        //        }
 
-                //_questionService.CreateOrUpdate(quiz);
-                if (quiz.ID != null)
-                {
-                    _lessonPartQuestionService.CreateQuery().ReplaceOne(t => t.ID == quiz.ID, quiz);
-                }
-                else
-                {
-                    _lessonPartQuestionService.CreateQuery().InsertOne(quiz);
-                }
-                questionVM.ID = quiz.ID;
+        //        //_questionService.CreateOrUpdate(quiz);
+        //        if (quiz.ID != null)
+        //        {
+        //            _lessonPartQuestionService.CreateQuery().ReplaceOne(t => t.ID == quiz.ID, quiz);
+        //        }
+        //        else
+        //        {
+        //            _lessonPartQuestionService.CreateQuery().InsertOne(quiz);
+        //        }
+        //        questionVM.ID = quiz.ID;
 
-                if (questionVM.Answers != null && questionVM.Answers.Count > 0)
-                {
-                    foreach (var answer in questionVM.Answers)
-                    {
-                        answer.ParentID = questionVM.ID;
-                        if (answer.Media != null && answer.Media.Name == null) answer.Media = null;
+        //        if (questionVM.Answers != null && questionVM.Answers.Count > 0)
+        //        {
+        //            foreach (var answer in questionVM.Answers)
+        //            {
+        //                answer.ParentID = questionVM.ID;
+        //                if (answer.Media != null && answer.Media.Name == null) answer.Media = null;
 
-                        if (answer.ID == "0" || answer.ID == null || _lessonPartAnswerService.GetItemByID(answer.ID) == null)
-                        {
-                            var maxItem = _lessonPartAnswerService.CreateQuery().Find(o => o.ParentID == quiz.ID).SortByDescending(o => o.Order).FirstOrDefault();
-                            answer.Order = maxItem != null ? maxItem.Order + 1 : 0;
-                            answer.Created = DateTime.Now;
-                            answer.Updated = DateTime.Now;
-                            answer.CreateUser = quiz.CreateUser;
-                            answer.CourseID = quiz.CourseID;
+        //                if (answer.ID == "0" || answer.ID == null || _lessonPartAnswerService.GetItemByID(answer.ID) == null)
+        //                {
+        //                    var maxItem = _lessonPartAnswerService.CreateQuery().Find(o => o.ParentID == quiz.ID).SortByDescending(o => o.Order).FirstOrDefault();
+        //                    answer.Order = maxItem != null ? maxItem.Order + 1 : 0;
+        //                    answer.Created = DateTime.Now;
+        //                    answer.Updated = DateTime.Now;
+        //                    answer.CreateUser = quiz.CreateUser;
+        //                    answer.CourseID = quiz.CourseID;
 
-                            if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || (!answer.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == answer.Media.Name))))
-                                answer.Media = null;
-                            else
-                            {
-                                if (answer.Media.Name.ToLower().StartsWith("http")) //file url (import)
-                                {
-                                    answer.Media.Created = DateTime.Now;
-                                    answer.Media.Size = 0;
-                                    answer.Media.Path = answer.Media.Name.Trim();
-                                }
-                                else
-                                {
-                                    var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
-                                    if (file != null)
-                                    {
-                                        answer.Media.Created = DateTime.Now;
-                                        answer.Media.Size = file.Length;
-                                        answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
-                                    }
-                                }
+        //                    if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || (!answer.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == answer.Media.Name))))
+        //                        answer.Media = null;
+        //                    else
+        //                    {
+        //                        if (answer.Media.Name.ToLower().StartsWith("http")) //file url (import)
+        //                        {
+        //                            answer.Media.Created = DateTime.Now;
+        //                            answer.Media.Size = 0;
+        //                            answer.Media.Path = answer.Media.Name.Trim();
+        //                        }
+        //                        else
+        //                        {
+        //                            var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
+        //                            if (file != null)
+        //                            {
+        //                                answer.Media.Created = DateTime.Now;
+        //                                answer.Media.Size = file.Length;
+        //                                answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+        //                            }
+        //                        }
 
-                                //var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
-                                //if (file != null)
-                                //{
-                                //    answer.Media.Created = DateTime.Now;
-                                //    answer.Media.Size = file.Length;
-                                //    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
-                                //}
-                            }
-                        }
-                        else
-                        {
-                            var oldanswer = _lessonPartAnswerService.GetItemByID(answer.ID);
-                            if ((oldanswer.Media != null && answer.Media != null && oldanswer.Media.Path != answer.Media.Path)
-                        || (oldanswer.Media == null && answer.Media != null))//Media change
-                            {
-                                if (oldanswer.Media != null && !string.IsNullOrEmpty(oldanswer.Media.Path))//Delete old file
-                                    _fileProcess.DeleteFile(oldanswer.Media.Path);
+        //                        //var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
+        //                        //if (file != null)
+        //                        //{
+        //                        //    answer.Media.Created = DateTime.Now;
+        //                        //    answer.Media.Size = file.Length;
+        //                        //    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+        //                        //}
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    var oldanswer = _lessonPartAnswerService.GetItemByID(answer.ID);
+        //                    if ((oldanswer.Media != null && answer.Media != null && oldanswer.Media.Path != answer.Media.Path)
+        //                || (oldanswer.Media == null && answer.Media != null))//Media change
+        //                    {
+        //                        if (oldanswer.Media != null && !string.IsNullOrEmpty(oldanswer.Media.Path))//Delete old file
+        //                            _fileProcess.DeleteFile(oldanswer.Media.Path);
 
-                                if (files == null || !files.Any(f => f.Name == answer.Media.Name))
-                                    answer.Media = null;
-                                else
-                                {
-                                    var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();//update media
-                                    answer.Media.Created = DateTime.Now;
-                                    answer.Media.Size = file.Length;
-                                    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
-                                }
-                            }
-                            //else // No Media
-                            //{
-                            //    quiz.Media = null;
-                            //}
-                            answer.Order = oldanswer.Order;
-                            answer.Created = oldanswer.Created;
-                            answer.Updated = DateTime.Now;
-                        }
-                        //_answerService.CreateOrUpdate(answer);
-                        if (answer.ID != null)
-                        {
-                            _lessonPartAnswerService.CreateQuery().ReplaceOne(t => t.ID == answer.ID, answer);
-                        }
-                        else
-                        {
-                            _lessonPartAnswerService.CreateQuery().InsertOne(answer);
-                        }
-                    }
-                }
-            }
-        }
+        //                        if (files == null || !files.Any(f => f.Name == answer.Media.Name))
+        //                            answer.Media = null;
+        //                        else
+        //                        {
+        //                            var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();//update media
+        //                            answer.Media.Created = DateTime.Now;
+        //                            answer.Media.Size = file.Length;
+        //                            answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+        //                        }
+        //                    }
+        //                    //else // No Media
+        //                    //{
+        //                    //    quiz.Media = null;
+        //                    //}
+        //                    answer.Order = oldanswer.Order;
+        //                    answer.Created = oldanswer.Created;
+        //                    answer.Updated = DateTime.Now;
+        //                }
+        //                //_answerService.CreateOrUpdate(answer);
+        //                if (answer.ID != null)
+        //                {
+        //                    _lessonPartAnswerService.CreateQuery().ReplaceOne(t => t.ID == answer.ID, answer);
+        //                }
+        //                else
+        //                {
+        //                    _lessonPartAnswerService.CreateQuery().InsertOne(answer);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
-        private string NormalizeDescription(string desc)
-        {
-            var _result = desc ?? "";
-            //var listRegex = ["\.\.\.\."]
+        //private string NormalizeDescription(string desc)
+        //{
+        //    var _result = desc ?? "";
+        //    //var listRegex = ["\.\.\.\."]
 
-            var repArr = new List<string> { ".....", "_____", "-----" };
+        //    var repArr = new List<string> { ".....", "_____", "-----" };
 
-            _result = _result.Replace("&hellip;", ".").Replace("…", "...");
+        //    _result = _result.Replace("&hellip;", ".").Replace("…", "...");
 
-            while (_result.IndexOf("__ ") >= 0)
-                _result = _result.Replace("__ ", "__");
-
-
-            foreach (var repStr in repArr)
-            {
-                while (_result.IndexOf(repStr) >= 0)
-                    _result = _result.Replace(repStr, repStr.Substring(0, 4));
-                _result = _result.Replace(repStr.Substring(0, 4), "----");
-            }
-
-            _result = Regex.Replace(_result, "([\\.-]){2,4}\\(.*\\)([\\.-]){2,4}", "----");
-            return _result;
-        }
+        //    while (_result.IndexOf("__ ") >= 0)
+        //        _result = _result.Replace("__ ", "__");
 
 
-        public async Task<JsonResult> ConvertFillQuestion()
-        {
-            try
-            {
-                var fillparts = _lessonPartService.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
-                if (fillparts != null && fillparts.Count > 0)
-                {
-                    foreach (var part in fillparts)
-                    {
-                        if (part.Description == null)
-                            part.Description = "";
-                        var questions = _lessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
-                        if (String.IsNullOrEmpty(part.Description) && (questions == null || questions.Count == 0))
-                            continue;//No question
+        //    foreach (var repStr in repArr)
+        //    {
+        //        while (_result.IndexOf(repStr) >= 0)
+        //            _result = _result.Replace(repStr, repStr.Substring(0, 4));
+        //        _result = _result.Replace(repStr.Substring(0, 4), "----");
+        //    }
 
-                        if (questions == null || questions.Count == 0)//lost Question
-                        {
-                            var newdes = "";
-                            var vQuiz = ExtractFillQuestionList(part, "auto", out newdes);
-                            if (vQuiz == null || vQuiz.Count == 0)
-                                continue;//no valid fillquiz
-                            part.Description = newdes;
-                            await SaveQuestionFromView(new LessonPartViewModel { ID = part.ID, CourseID = part.CourseID, Questions = vQuiz });
-                            _lessonPartService.Save(part);
-                        }
-                    }
-                }
-                var clonefillparts = _service.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
-                if (clonefillparts != null && clonefillparts.Count > 0)
-                {
-                    foreach (var part in clonefillparts)
-                    {
-                        if (part.Description == null)
-                            part.Description = "";
-                        var questions = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
-                        if (String.IsNullOrEmpty(part.Description) && (questions == null || questions.Count == 0))
-                            continue;//No question
+        //    _result = Regex.Replace(_result, "([\\.-]){2,4}\\(.*\\)([\\.-]){2,4}", "----");
+        //    return _result;
+        //}
 
-                        if (questions == null || questions.Count == 0)//lost Question
-                        {
-                            var newdes = "";
-                            var vQuiz = ExtractFillQuestionList(part, "auto", out newdes);
-                            if (vQuiz == null || vQuiz.Count == 0)
-                                continue;//no valid fillquiz
-                            part.Description = newdes;
-                            await SaveQuestionFromView(new CloneLessonPartViewModel { ID = part.ID, CourseID = part.CourseID, Questions = vQuiz });
-                            _service.Save(part);
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                return new JsonResult(new { Error = e.Message });
-            }
 
-            return new JsonResult("Convert Done");
-        }
+        //public async Task<JsonResult> ConvertFillQuestion()
+        //{
+        //    try
+        //    {
+        //        var fillparts = _lessonPartService.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
+        //        if (fillparts != null && fillparts.Count > 0)
+        //        {
+        //            foreach (var part in fillparts)
+        //            {
+        //                if (part.Description == null)
+        //                    part.Description = "";
+        //                var questions = _lessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
+        //                if (String.IsNullOrEmpty(part.Description) && (questions == null || questions.Count == 0))
+        //                    continue;//No question
+
+        //                if (questions == null || questions.Count == 0)//lost Question
+        //                {
+        //                    var newdes = "";
+        //                    var vQuiz = ExtractFillQuestionList(part, "auto", out newdes);
+        //                    if (vQuiz == null || vQuiz.Count == 0)
+        //                        continue;//no valid fillquiz
+        //                    part.Description = newdes;
+        //                    await SaveQuestionFromView(new LessonPartViewModel { ID = part.ID, CourseID = part.CourseID, Questions = vQuiz });
+        //                    _lessonPartService.Save(part);
+        //                }
+        //            }
+        //        }
+        //        var clonefillparts = _service.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
+        //        if (clonefillparts != null && clonefillparts.Count > 0)
+        //        {
+        //            foreach (var part in clonefillparts)
+        //            {
+        //                if (part.Description == null)
+        //                    part.Description = "";
+        //                var questions = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
+        //                if (String.IsNullOrEmpty(part.Description) && (questions == null || questions.Count == 0))
+        //                    continue;//No question
+
+        //                if (questions == null || questions.Count == 0)//lost Question
+        //                {
+        //                    var newdes = "";
+        //                    var vQuiz = ExtractFillQuestionList(part, "auto", out newdes);
+        //                    if (vQuiz == null || vQuiz.Count == 0)
+        //                        continue;//no valid fillquiz
+        //                    part.Description = newdes;
+        //                    await SaveQuestionFromView(new CloneLessonPartViewModel { ID = part.ID, CourseID = part.CourseID, Questions = vQuiz });
+        //                    _service.Save(part);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return new JsonResult(new { Error = e.Message });
+        //    }
+
+        //    return new JsonResult("Convert Done");
+        //}
 
 
     }

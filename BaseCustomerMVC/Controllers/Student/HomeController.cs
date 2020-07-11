@@ -119,7 +119,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 account.Skype = entity.Skype;
                 if (fileUpload != null)
                 {
-                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
+                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName, "Avatar").Result;
                     account.Avatar = pathImage;
                     _session.SetString("userAvatar", account.Avatar);
                 }
@@ -146,7 +146,7 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public JsonResult UploadPhoto(IFormFile fileUpload)
         {
-            var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
+            var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName,"Avatar").Result;
             // Cap nhat vao truong avartar
             string _studentId = User.Claims.GetClaimByType("UserID").Value;
             StudentEntity oldAcc = _studentService.GetItemByID(_studentId);

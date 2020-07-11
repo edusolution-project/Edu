@@ -226,7 +226,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.QuestionsTotal = _cloneLessonPartQuestionService.CreateQuery().CountDocuments(o => o.LessonID == item.LessonID);
                 item.QuestionsDone = 0;
                 item.Marked = false;
-                //_examService.ResetLesssonPoint(_lesson, item.StudentID);
+                _examService.ResetLesssonPoint(_lesson, item.StudentID);
             }
 
             item.Updated = DateTime.Now;

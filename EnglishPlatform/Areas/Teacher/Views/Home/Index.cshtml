@@ -68,7 +68,7 @@
             </div>
         </div>
         <div class="row margin-b20">
-            <div class="col-md-6">
+            <div class="col-md-6 col-12">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Lớp đang hoạt động</h4>
@@ -95,7 +95,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 col-12">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Thảo luận</h4>
@@ -134,7 +134,7 @@
             <ul class="row">
                 <li class="col-md-4 less-done list" v-for="(item,k) in finish_course">
                     <div class="box radius">
-                        <a :href="'@processUrl("Detail","Class")/' + item.id" :title="item.title" class="flex">
+                        <a :href="'@processUrl("Detail","Class")/' + item.id" :title="item.title" class="flex flex-row align-items-center">
                             <span class="per checked"><i class="ic ic-checked"></i></span>
                             <div class="info">
                                 <span>{{item.title}}</span>

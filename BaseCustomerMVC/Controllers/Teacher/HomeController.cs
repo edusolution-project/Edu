@@ -139,7 +139,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult UploadPhoto(IFormFile fileUpload)
         {
-            var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
+            var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName, "Avatar").Result;
             // Cap nhat vao truong avartar
             string _userID = User.Claims.GetClaimByType("UserID").Value;
             TeacherEntity oldAcc = _teacherService.GetItemByID(_userID);
@@ -256,7 +256,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 account.ZoomID = entity.ZoomID;
                 if (fileUpload != null)
                 {
-                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
+                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName, "Avatar").Result;
                     account.Avatar = pathImage;
                     _session.SetString("userAvatar", account.Avatar);
                 }

@@ -410,7 +410,7 @@
         }
 
     .chatstyle-01 .ca-received__msg {
-        background: #1995d4;
+        background: #FFF;
         box-shadow: 0 5px 20px rgba(0,0,0,.1);
     }
 
@@ -422,9 +422,10 @@
         color: #666;
         font-style: italic;
     }
-    .chatstyle-01 .metadata .sender {
-        font-size: 0.625rem;
-    }
+
+        .chatstyle-01 .metadata .sender {
+            font-size: 0.625rem;
+        }
 
     .chatstyle-01 .ca-received__msg {
         border-radius: .8rem .8rem .8rem 0;
@@ -432,12 +433,12 @@
         padding: 1rem;
         font-weight: 500;
         min-width: 15.625rem;
-        color: #fff;
+        color: #222;
     }
 
     .chatstyle-01 .ca-send__msg {
-        background: #b82121;
-        color: #fff;
+        background: #dae9ff;
+        color: #222;
         box-shadow: 0 5px 20px rgba(0,0,0,.1);
         width: 100%;
     }
@@ -460,6 +461,23 @@
         padding: 0;
         margin: 0;
     }
+
+    .user-avatar .capAvatar {
+        height: 2.25rem;
+        width: 2.25rem;
+        display: block;
+        overflow: hidden;
+        border-radius: 2.25rem;
+        text-align: center;
+        color: #FFF;
+        line-height: 2.25rem;
+        font-weight: normal;
+        font-size: 110%;
+    }
+
+        .user-avatar .capAvatar::before {
+            content: attr(data-cap);
+        }
 </style>
 <style>
     .box-chat-eduso {
@@ -481,6 +499,7 @@
             width: 1200px;
             max-height: 90vh;
             max-width: 100%;
+            opacity: 1;
         }
 
         .box-chat-eduso .box-chat-eduso--container-app {
@@ -494,6 +513,25 @@
 
     .chatstyle-01 {
         margin-top: 60px;
+    }
+
+    @@media only screen and (max-width: 1024px) {
+        .box-chat-eduso {
+            position: fixed;
+            width: 100%;
+            height: auto;
+            bottom: 0px;
+            left: 0px;
+            background: #00304b;
+            border-radius: 0;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+
+            .box-chat-eduso .fn-box-chat-eduso {
+                padding: 11px !important;
+                height: auto !important;
+            }
     }
 </style>
 <div class="box-chat-eduso">
@@ -997,6 +1035,7 @@
             localStorage.setItem(localStoredKey.user, g_CurrentUser.id);
         }
     }
+    removeAllLocalStored();
 
     var saveDataFromLocalStored = function (data) {
         localStorage.setItem(localStoredKey.group, JSON.stringify(data.group));
@@ -1264,7 +1303,8 @@
                                 className = "ca-send";
                             }
                             var time = new Date(message.created);
-                            var html = CreateMessage(className, '/images/icon/people.png', message.sender.name, message.content, `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`, message.code, message.medias);
+                            //var html = CreateMessage(className, '/images/icon/people.png', message.sender.name, message.content, `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`, message.code, message.medias);
+                            var html = CreateMessage(className, '', message.sender.name, message.content, `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`, message.code, message.medias);
                             chat.querySelector('div.chatstyle-01').innerHTML += html;
                             if (i == messages.length - 1) {
                                 var el = chat.querySelector('div.chatstyle-01').querySelector("div#message_chat_item_"+message.code);
@@ -1552,7 +1592,7 @@
                                 </audio></div>`;
                     break;
                 case "image":
-                    listItem += `<div class="box-metadata-item"><img src="${item.path}"></div>`;
+                    listItem += `<div class="box-metadata-item"><a href='${item.path}' target='_blank'><img src="${item.path}"></a></div>`;
                     break;
                 default:
                     var name = item.path.split('/');
@@ -1873,7 +1913,20 @@
     }
     /// className = ca-send / ca-received
     var CreateMessage = function (className, avatar, name, content, time, code, medias) {
-        if (avatar == "") avatar = "/images/icon/people.png";
+        var imgAvatar = ""
+        if (avatar != "") {
+            imgAvatar = `<img src="${avatar}" alt="${name}" title="${name}">`;
+            console.log(1);
+        }
+        else {
+            shortCap = getCapitalize(name);
+            if (shortCap == '') {
+                imgAvatar = `<img src="/images/icon/people.png" alt="${name}" title="${name}">`
+            }
+            else {
+                imgAvatar = `<div data-cap='${shortCap}' style='background:${renderRandomBG(shortCap)}' title='${name}' class='capAvatar'></div>`
+            }
+        }
         var media = "";
         if (medias != null && medias != void 0 && medias.length > 0) {
             media = createMetaData(medias);
@@ -1887,8 +1940,10 @@
         var receiver = className == "ca-received" ? `<div class="${className}__msg">${content}${media}</div>` : "";
         var sender = className == "ca-received" ? "" : `<div class="${className}__msg">${content}${media}</div>`;
 
-        var avatar1 = className != "ca-received" ? "" : `<div class="user-avatar user-avatar-sm user-avatar-rounded online"><img src="${avatar}" alt="${name}" title="${name}"></div>`;
-        var avatar2 = className == "ca-received" ? "" : `<div class="user-avatar user-avatar-sm user-avatar-rounded online"><img src="${avatar}" alt="${name}" title="${name}"></div>`;
+
+
+        var avatar1 = className != "ca-received" ? "" : `<div class="user-avatar user-avatar-sm user-avatar-rounded online">${imgAvatar}</div>`;
+        var avatar2 = className == "ca-received" ? "" : `<div class="user-avatar user-avatar-sm user-avatar-rounded online">${imgAvatar}</div>`;
 
         return `<div class="${className}" id="message_chat_item_${code}">
             ${avatar1}
@@ -1923,6 +1978,7 @@
     }
 </script>
 <script>
+    var cachedBG = [];
     var checkStateNotification = function () {
         var liActiveLeft = document.querySelector('ul[data-ul-id="ul-slider-bar-left"]>li.active');
         if (liActiveLeft != null) {
@@ -1989,6 +2045,37 @@
     }
     var UpdateNotification = function () {
 
+    }
+
+    var getCapitalize = function(str)
+    {
+        if (str.length <= 2)
+            return str.toString().toUpperCase();
+        var capArr = str.split(' ');
+        var ret = '';
+        if (capArr.length > 0) {
+            capArr.forEach(function (item, index) {
+                ret += item[0];
+            });
+        }
+        return ret.toUpperCase().substring(0,2);
+    }
+
+    var renderRandomBG = function (capName) {
+        randombg = ['#3299b1', '#43a930', '#b79f2b', '#8c3c82', '#3f27c5'];
+        if (cachedBG == null) {
+            cachedBG = [];
+        }
+        var _bg = randombg[Math.floor(Math.random() * randombg.length)];
+        var cached = cachedBG.filter(function (item) { return item.cap == capName });
+        if (cached.length == 0) {
+            cachedBG.push({ cap: capName, bg: _bg })
+
+        }
+        else {
+            _bg = cached[0].bg;
+        }
+        return _bg;
     }
 
 </script>

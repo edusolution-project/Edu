@@ -352,7 +352,23 @@ namespace EnglishPlatform.Controllers
 
             return NotFoundData();
         }
+
+        [HttpGet]
+        public JsonResult FixName()
+        {
+            var groups = _groupService.GetAll().ToEnumerable();
+            foreach(var group in groups)
+            {
+                var @class = _classService.GetItemByID(group.Name);
+                if(@class != null)
+                {
+                    _groupService.UpdateGroupDisplayName(group.Name, @class.Name);
+                }    
+            }    
+            return NotFoundData();
+        }
         #endregion
+
         #region Message
         [HttpGet]
         public JsonResult GetListMessage(string groupName, int state, DateTime startDate, DateTime endDate, bool IsUser, bool IsTeacher)
@@ -637,8 +653,6 @@ namespace EnglishPlatform.Controllers
         #endregion
 
         #region Protect Func
-
-
         protected bool IsAuthenticated()
         {
             if (User == null) return false;

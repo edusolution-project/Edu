@@ -703,52 +703,109 @@ namespace EnglishPlatform.Controllers
         #region Fix Data
         public JsonResult FixAcc()
         {
-            var students = _studentService.GetAll().ToList();
+            var students = _studentService.GetAll().ToEnumerable();
             var count = 0;
             var countdelete = 0;
+            var str = "";
             foreach (var student in students)
             {
-                if (student.Email != student.Email.ToLower().Trim())
-                {
-                    student.Email = student.Email.ToLower().Trim();
-                    _studentService.Save(student);
-                }
-                try
-                {
-                    var acc = _accountService.GetAccountByEmail(student.Email);
-                    if (acc == null)
-                    {
-                        var _defaultPass = "Eduso123";
-                        acc = new AccountEntity()
-                        {
-                            CreateDate = DateTime.Now,
-                            IsActive = true,
-                            PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
-                            PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
-                            UserCreate = student.UserCreate,
-                            Type = ACCOUNT_TYPE.STUDENT,
-                            UserID = student.ID,
-                            UserName = student.Email.ToLower().Trim(),
-                            RoleID = _roleService.GetItemByCode("student").ID
-                        };
-                        _accountService.CreateQuery().InsertOne(acc);
-                        count++;
-                    }
-                }
-                catch (Exception e)
-                {
-                    var accs = _accountService.CreateQuery().Find(t => t.UserName == student.Email).SortBy(t => t.ID).ToList();
-                    if (accs.Count > 1)
-                    {
-                        for (int i = 1; i < accs.Count; i++)
-                        {
-                            _accountService.Remove(accs[i].ID);
-                        }
-                        countdelete++;
-                    }
-                }
+                if (student == null)
+                    continue;
+
+                var alias = _studentService.CreateQuery().Find(t => t.Email == student.Email).ToList();
+                var accs = _accountService.CreateQuery().Find(t => t.UserName == student.Email).ToList();
+                if (alias != null && alias.Count == 1 && accs != null && accs.Count == 1) continue;
+
+                str += (student.Email + "<br/>");
+                //if (alias == null) continue;
+                //var JoinClasses = new List<string>();
+                //var JoinCenters = new List<string>();
+
+                //if (alias.Count >= 1)
+                //{
+                //    foreach(var st in alias)
+                //    {
+                //        JoinClasses.AddRange(st.JoinedClasses);
+                //        JoinCenters.AddRange(st.Centers);
+                //    }    
+                //}    
+
+                //if(accs.Count() == 1)
+                //{
+                //    var acc = accs[0];
+                //    if(acc.Type == "student")
+                //    {
+                //        if(acc.UserID == student.ID)
+                //        {
+                //            student.JoinedClasses = JoinClasses;
+                //            student.Centers = JoinCenters;
+                //        }
+                //        _studentService.CreateQuery().ReplaceOne(t => t.ID == student.ID, student);
+                //        _studentService.CreateQuery().DeleteMany(t => t.Email == student.Email && t.ID != student.ID);
+                //    }   
+                //    else
+                //    {
+                //        acc.UserId = student.ID;
+                //    }    
+                //}    
+
+                //if (student.Email != student.Email.ToLower().Trim())
+                //{
+                //    student.Email = student.Email.ToLower().Trim();
+                //    _studentService.Save(student);
+                //}
+                //try
+                //{
+                //    var acc = _accountService.GetAccountByEmail(student.Email);
+                //    if (acc == null)
+                //    {
+                //        var _defaultPass = "Eduso123";
+                //        acc = new AccountEntity()
+                //        {
+                //            CreateDate = DateTime.Now,
+                //            IsActive = true,
+                //            PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                //            PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                //            UserCreate = student.UserCreate,
+                //            Type = ACCOUNT_TYPE.STUDENT,
+                //            UserID = student.ID,
+                //            UserName = student.Email.ToLower().Trim(),
+                //            RoleID = _roleService.GetItemByCode("student").ID
+                //        };
+                //        _accountService.CreateQuery().InsertOne(acc);
+                //        count++;
+                //    }
+                //    else
+                //    {
+                //        if (acc.Type == "student" && acc.UserID != student.ID)
+                //        {
+                //            var exactStudent = _studentService.GetItemByID(acc.UserID);
+                //            if (exactStudent == null)
+                //            {
+                //                acc.UserID = student.ID;
+                //                _accountService.CreateQuery().ReplaceOne(t => t.ID == acc.ID, acc);
+                //            }
+                //            else
+                //            {
+                //                _studentService.CreateQuery().DeleteMany(t => t.Email.ToLower() == student.Email.ToLower() && t.ID != acc.UserID);
+                //            }
+                //        }
+                //    }
+                //}
+                //catch (Exception e)
+                //{
+                //    var accs = _accountService.CreateQuery().Find(t => t.UserName == student.Email).SortBy(t => t.ID).ToList();
+                //    if (accs.Count > 1)
+                //    {
+                //        for (int i = 1; i < accs.Count; i++)
+                //        {
+                //            _accountService.Remove(accs[i].ID);
+                //        }
+                //        countdelete++;
+                //    }
+                //}
             }
-            return Json("OK " + count + " - " + countdelete);
+            return Json("OK " + count + " - " + countdelete + " _ " + str);
         }
         #endregion
     }

@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
@@ -151,6 +152,9 @@ namespace BaseCustomerEntity.Database
             await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<LessonProgressEntity>.Update.Set("ClassSubjectID", classSubject.ID));
         }
 
-
+        public void ResetPoint(LessonProgressEntity item)
+        {
+            Collection.UpdateMany(t => t.ID == item.ID, Builders<LessonProgressEntity>.Update.Set(t => t.LastPoint, 0));
+        }
     }
 }

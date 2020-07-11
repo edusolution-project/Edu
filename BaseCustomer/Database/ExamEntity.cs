@@ -236,34 +236,20 @@ namespace BaseCustomerEntity.Database
         public bool ResetLesssonPoint(LessonEntity lesson, string studentID)
         {
             var result = false;
-            var lastestExam = GetLastestExam(lesson.ID);
-            var lessonProgress = new LessonProgressEntity {
-                ChapterID = lesson.ChapterID,
-                StudentID = studentID,
-                ClassSubjectID = lesson.ClassSubjectID,
-                Tried = lastestExam.Number,
-                PointChange = 0 - lastestExam.Point,
-            };
-            if (lastestExam.Status == false)
+            var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(lesson.ClassSubjectID, studentID, lesson.ID);
+            if (lessonProgress != null)
             {
-                lastestExam = Complete(lastestExam, lesson, out _);
-                lessonProgress = _lessonProgressService.UpdateLastPoint(lastestExam).Result;
-            }
-            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
-            {
-                var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
-                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
-                var ctask = _classProgressService.UpdatePoint(lessonProgress);
-                Task.WhenAll(cttask, cstask, ctask);
-            }
-            else
-            {
-                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
-                //var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
-                //var ctask = _classProgressService.UpdatePoint(lessonProgress);
-                Task.WhenAll(cttask
-                    //, cstask, ctask
-                    );
+                if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
+                    _chapterProgressService.DecreasePoint(lessonProgress);
+                    _classSubjectProgressService.DecreasePoint(lessonProgress);
+                    _classProgressService.DecreasePoint(lessonProgress);
+                }
+                else
+                {
+                    _chapterProgressService.DecreasePracticePoint(lessonProgress);
+                }
+                _lessonProgressService.ResetPoint(lessonProgress);
             }
             return result;
         }
