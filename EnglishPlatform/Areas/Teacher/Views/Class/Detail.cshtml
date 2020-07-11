@@ -196,7 +196,7 @@
                             <div class="item">
                                 <div class="item-title">{{data[0].LessonScheduleName}} ({{data.length}})</div>
                                 <div class="itme-body" v-for="item in data">
-                                    <div>{{item.StudentName}}</div> <button type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
+                                    <div>{{item.StudentName}}</div> <button v-if="!checkpoint.Marked || !item.Marked" type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
                                 </div>
                             </div>
                         </div>
@@ -1084,18 +1084,35 @@
                                 _form.append("ID", question.ID);
                                 _form.append("Point", question.Point);
                                 _form.append("RealAnswerValue", question.RealAnswerValue);
+                                _form.append("isLast", j == (part.ExamDetails.length - 1));
                                 let _url = '@processUrl("UpdatePoint", "Exam")'
                                 axios.post(_url, _form)
                                     .then(response => {
                                         console.log(response.data);
-
+                                        var data = response.data.Data;
+                                        if (data != null && data != void 0) {
+                                            if (j == (part.ExamDetails.length - 1)) {
+                                                Swal.fire({
+                                                    title: "Đã chấm xong",
+                                                    text: "Success",
+                                                    icon: 'Success',
+                                                });
+                                                _that.checkpoint.Marked = true;
+                                            }
+                                        } else {
+                                            Swal.fire({
+                                                title: "Có lỗi",
+                                                text: "Vui lòng nhập đủ thông tin",
+                                                icon: 'warning',
+                                            });
+                                        }
                                 }).catch(e => { })
 
                             }
                         }
                     }
                     if (_that.checkpoint.RealAnswer == '') {
-                        swal.fire({
+                        Swal.fire({
                             title: "Có lỗi",
                             text: "Vui lòng nhập đủ thông tin",
                             icon: 'warning',

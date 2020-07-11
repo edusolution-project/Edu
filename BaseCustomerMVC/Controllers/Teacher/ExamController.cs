@@ -126,7 +126,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                       StudentName = student.FullName,
                                       //Created = exam.Created,
                                       //Status = exam.Status,
-                                      //Marked = exam.Marked,
+                                      Marked = exam.Marked,
                                       //Point = exam.Point,
                                       //MaxPoint = exam.MaxPoint,
                                       //Number = exam.Number
@@ -251,16 +251,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [HttpPost]
-        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point)
+        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, [FromForm] bool isLast)
         {
             try {
                 var oldItem = _examDetailService.GetItemByID(ID);
                 oldItem.RealAnswerValue = RealAnswerValue;
                 oldItem.Point = Point;
                 _examDetailService.CreateOrUpdate(oldItem);
+
+                if (isLast)
+                {
+                    var currentExam = _service.GetItemByID(oldItem.ExamID);
+                    currentExam.Marked = true;
+                    _service.CreateQuery().UpdateOne(Builders<ExamEntity>.Filter.Eq(o => o.ID, oldItem.ExamID),Builders<ExamEntity>.Update.Set(o=>o.Marked, true));
+                }
                 var response = new Dictionary<string, object>
                 {
-
                     { "Data", oldItem }
                 };
                 return new JsonResult(response);
@@ -275,7 +281,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 };
                 return new JsonResult(response);
             }
-            return new JsonResult(new { ID, RealAnswerValue , Point });
         }
     }
 }
