@@ -155,7 +155,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var lesson = _lessonService.GetItemByID(exam.LessonID);
                 var student = _studentService.GetItemByID(exam.StudentID);
                 var currentClass = _classService.GetItemByID(exam.ClassID);
-                var parts = _cloneLessonPartService.CreateQuery().Find(t => t.ParentID == lesson.ID && t.TeacherID == currentClass.TeacherID).ToList();
+                var parts = _cloneLessonPartService.CreateQuery().Find(t => t.ParentID == lesson.ID).ToList();
 
                 if (exam == null || lesson == null || student == null || currentClass == null)
                     return new JsonResult(new Dictionary<string, object>
