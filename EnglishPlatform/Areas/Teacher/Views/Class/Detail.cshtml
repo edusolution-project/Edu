@@ -13,16 +13,6 @@
     }
 }
 
-    <style>
-         .itme-body {
-    padding-left: 30px;
-}
-
-.itme-body>div {
-    display: inline-block;
-    margin-right: 10px;
-}
-    </style>
 
     @*<script src="/libs/vuejs-datepicker.min.js"></script>*@
     <link href="~/js/lib/datetimepicker/jq.datetimepicker.css" rel="stylesheet" />
@@ -193,10 +183,12 @@
                 <div class="row ls-doc" v-if="ref.data.length > 0">
                     <div class="col-md-12" v-for="data in ref.data">
                         <div class="list-item">
-                            <div class="item">
-                                <div class="item-title">{{data[0].LessonScheduleName}} ({{data.length}})</div>
+                            <div class="item" onclick="this.classList.toggle('open');">
+                                <div class="item-title">{{data[0].LessonScheduleName}} ({{data.length}}) {{data.Marked}}</div>
                                 <div class="itme-body" v-for="item in data">
-                                    <div>{{item.StudentName}}</div> <button v-if="!checkpoint.Marked || !item.Marked" type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
+                                    <div>{{item.StudentName}} - {{item.Point}}</div>
+                                    <button v-if="!item.Marked" type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
+                                    <button v-else type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm lại</button>
                                 </div>
                             </div>
                         </div>
@@ -231,6 +223,17 @@
     @section Scripts{
 
         <style>
+            
+            .itme-body {
+                padding: 10px;
+                display: none;
+            }
+            .open > .itme-body {
+                display: block;
+            }
+            .itme-body > div {
+                display: inline-block;
+            }
             .ls-pratice .card-body {
                 overflow: visible;
             }

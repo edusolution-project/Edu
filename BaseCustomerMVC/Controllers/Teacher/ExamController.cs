@@ -33,6 +33,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
         private readonly LearningHistoryService _learningHistoryService;
+        private readonly ScoreService _scoreService;
 
         public ExamController(ExamService service,
             ExamDetailService examDetailService
@@ -47,6 +48,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , LearningHistoryService learningHistoryService
             , LessonPartQuestionService lessonPartQuestionService
             , LessonPartAnswerService lessonPartAnswerService
+            , ScoreService scoreService
             )
         {
             _learningHistoryService = learningHistoryService;
@@ -62,6 +64,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _teacherService = teacherService;
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
+            _scoreService = scoreService;
         }
 
         [Obsolete]
@@ -124,12 +127,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                       ID = exam.ID,
                                       StudentID = student.ID,
                                       StudentName = student.FullName,
-                                      //Created = exam.Created,
-                                      //Status = exam.Status,
+                                      Created = exam.Created,
+                                      Status = exam.Status,
                                       Marked = exam.Marked,
-                                      //Point = exam.Point,
-                                      //MaxPoint = exam.MaxPoint,
-                                      //Number = exam.Number
+                                      Point = exam.Point,
+                                      MaxPoint = exam.MaxPoint,
+                                      Number = exam.Number
                                   }).ToList()?.GroupBy(z => z.LessonID);
                 model.TotalRecord = returnData.Count();
 
@@ -264,6 +267,44 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var currentExam = _service.GetItemByID(oldItem.ExamID);
                     currentExam.Marked = true;
                     _service.CreateQuery().UpdateOne(Builders<ExamEntity>.Filter.Eq(o => o.ID, oldItem.ExamID),Builders<ExamEntity>.Update.Set(o=>o.Marked, true));
+                    currentExam.Marked = true;
+                    currentExam.Updated = DateTime.Now;
+                    var lesson = _lessonService.GetItemByID(currentExam.LessonID);
+                    var score = new ScoreEntity()
+                    {
+                        ClassID = currentExam.ClassID,
+                        LessonID = currentExam.LessonID,
+                        Multiple = lesson.Multiple,
+                        ScoreType = lesson.Etype,
+                        StudentID = currentExam.StudentID,
+                        TeacherID = currentExam.TeacherID,
+                        Updated = DateTime.Now,
+                        Point = 0,
+                        MaxPoint = lesson.Point
+                    };
+                    var point = 0.0;
+                    var ExamDetails = _examDetailService.Collection.Find(o => o.ExamID == currentExam.ID)?.ToList();
+                    if (ExamDetails != null && ExamDetails.Count > 0)
+                    {
+                        foreach (var detail in ExamDetails)
+                        {
+                            var _detail = _examDetailService.GetItemByID(detail.ID);
+                            if (_detail != null)
+                            {
+                                _detail.Point = detail.Point;
+                                point += detail.Point;
+                                _detail.Updated = DateTime.Now;
+                                _examDetailService.CreateQuery().ReplaceOne(e => e.ID == _detail.ID, _detail);
+                            }
+
+                        }
+                    }
+
+                    currentExam.Point = point;
+                    score.Point = point;
+
+                    _service.CreateQuery().ReplaceOne(e => e.ID == currentExam.ID, currentExam);
+                    _scoreService.CreateQuery().InsertOne(score);
                 }
                 var response = new Dictionary<string, object>
                 {
