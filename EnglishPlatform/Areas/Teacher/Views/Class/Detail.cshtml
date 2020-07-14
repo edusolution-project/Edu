@@ -183,8 +183,8 @@
                 <div class="row ls-doc" v-if="ref.data.length > 0">
                     <div class="col-md-12" v-for="data in ref.data">
                         <div class="list-item">
-                            <div class="item" onclick="this.classList.toggle('open');">
-                                <div class="item-title">{{data[0].LessonScheduleName}} ({{data.length}}) {{data.Marked}}</div>
+                            <div class="item">
+                                <div class="item-title"  onclick="this.parentElement.classList.toggle('open');">{{data[0].LessonScheduleName}} ({{data.length}}) {{data.Marked}}</div>
                                 <div class="itme-body" v-for="item in data">
                                     <div>{{item.StudentName}} - {{item.Point}}</div>
                                     <button v-if="!item.Marked" type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
