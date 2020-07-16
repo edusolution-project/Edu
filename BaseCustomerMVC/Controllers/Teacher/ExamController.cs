@@ -3,6 +3,8 @@ using BaseCustomerMVC.Globals;
 using BaseCustomerMVC.Models;
 using Core_v2.Globals;
 using Core_v2.Interfaces;
+using FileManagerCore.Globals;
+using FileManagerCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
@@ -34,6 +36,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassService _classService;
         private readonly LearningHistoryService _learningHistoryService;
         private readonly ScoreService _scoreService;
+        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
         public ExamController(ExamService service,
             ExamDetailService examDetailService
@@ -49,6 +52,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , LessonPartQuestionService lessonPartQuestionService
             , LessonPartAnswerService lessonPartAnswerService
             , ScoreService scoreService
+            , IRoxyFilemanHandler roxyFilemanHandler
             )
         {
             _learningHistoryService = learningHistoryService;
@@ -65,6 +69,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
             _scoreService = scoreService;
+            _roxyFilemanHandler = roxyFilemanHandler;
         }
 
         [Obsolete]
@@ -258,10 +263,41 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try {
                 var oldItem = _examDetailService.GetItemByID(ID);
+
+                Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadNewFeed("UpdatePoint", HttpContext);
+                if (listFilesUpload.TryGetValue("success", out List<MediaResponseModel> listFiles) && listFiles.Count > 0)
+                {
+                    var answer = new LessonPartAnswerEntity();
+                    var listMedia = new List<Media>();
+                    for (int i = 0; i < listFiles.Count; i++)
+                    {
+                        var media = new Media()
+                        {
+                            Created = DateTime.Now,
+                            Extension = listFiles[i].Extends,
+                            Name = listFiles[i].Path,
+                            OriginalName = listFiles[i].Path,
+                            Path = listFiles[i].Path
+                        };
+                        listMedia.Add(media);
+                    }
+                    answer = new LessonPartAnswerEntity()
+                    {
+                        Content = RealAnswerValue,
+                        IsCorrect = true,
+                        ParentID = oldItem.LessonPartID,
+                        CreateUser = User.FindFirst("UserID")?.Value,
+                        Created = DateTime.Now,
+                        Medias = listMedia
+                    };
+                    _lessonPartAnswerService.CreateOrUpdate(answer);
+                    oldItem.RealAnswerID = answer.ID;
+                }
+
                 oldItem.RealAnswerValue = RealAnswerValue;
                 oldItem.Point = Point;
                 _examDetailService.CreateOrUpdate(oldItem);
-
+                
                 if (isLast)
                 {
                     var currentExam = _service.GetItemByID(oldItem.ExamID);

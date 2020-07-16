@@ -1088,6 +1088,14 @@
                                 _form.append("Point", question.Point);
                                 _form.append("RealAnswerValue", question.RealAnswerValue);
                                 _form.append("isLast", j == (part.ExamDetails.length - 1));
+
+                                var files = document.querySelector('input[data-target="' + question.ID + '"]');
+                                if (files != null) {
+                                    for (var x = 0; x < files.files.length; x++) {
+                                        _form.append("files", files.files[x]);
+                                    }
+                                }
+
                                 let _url = '@processUrl("UpdatePoint", "Exam")'
                                 axios.post(_url, _form)
                                     .then(response => {
@@ -1356,9 +1364,10 @@
                             <b-col v-html="question.AnswerValue"></b-col>
                         </b-col>
                         <b-col class="answer" :data-id="question.ID">
-                            <label>Điểm : <input type="number" v-model="question.Point"/></label>
+                            <label>Điểm : <input type="number" v-model="question.Point" /></label>
                             <br />
                             <label>Đáp án :</label>
+                            <label> File : </label><input type="file" name="files" :data-target="question.ID" value="" multiple />
                             <quill-editor v-model="question.RealAnswerValue"
                                           ref="quillEditorA"
                                           :options="editorOption">
