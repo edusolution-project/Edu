@@ -10,7 +10,6 @@ using BaseCustomerEntity.Globals;
 using BaseCustomerMVC.Globals;
 using BaseEasyRealTime.Globals;
 using BaseHub;
-using com.wiris.plugin.api;
 using Core_v2.Globals;
 using EasyZoom;
 using EnglishPlatform.Controllers;
@@ -64,8 +63,8 @@ namespace EnglishPlatform
             services.AddSingleton<MailHelper>();
             services.AddSingleton<CourseHelper>();
             services.AddSingleton<StudentHelper>();
-            services.AddSingleton<TeacherHelper>();
             services.AddSingleton<LessonHelper>();
+            services.AddSingleton<TeacherHelper>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddMvc(options =>
             {
@@ -102,7 +101,9 @@ namespace EnglishPlatform
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseEndpointRouting();
+
             app.UseCookiePolicy();
             app.UseSession();
             app.UseAuthentication();
@@ -119,11 +120,10 @@ namespace EnglishPlatform
                     List<AuthorityEntity> data = authorityService.GetAll()?.ToList();
                     CacheExtends.SetObjectFromCache(CacheExtends.DefaultPermission, 3600 * 24 * 360, data);
                 }
-
                 var routingFeature = context.Features[typeof(IRoutingFeature)] as IRoutingFeature;
                 //context.Features[typeof(IEndpointFeature)];
                 RouteData routeValues = routingFeature?.RouteData;
-                if (routeValues != null)
+                if(routeValues != null)
                 {
                     if (routeValues.Values.Keys.Contains("basis"))
                     {
@@ -213,7 +213,6 @@ namespace EnglishPlatform
                         }
                     }
                 }
-                // Do work that doesn't write to the Response.
                 await next.Invoke();
                 // Do logging or other work that doesn't write to the Response.
             });

@@ -1686,7 +1686,7 @@ var Lesson = (function () {
         $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn đáp án đúng</option>")
             .append("<option value='QUIZ2'>QUIZ: Điền từ</option>")
             .append("<option value='QUIZ3'>QUIZ: Nối đáp án</option>")
-        //.append("<option value='ESSAY'>QUIZ: Essay</option>");
+            .append("<option value='ESSAY'>QUIZ: Essay</option>");
         //}
         $(modalForm).append($("<div>", { "class": "lesson_parts" }));
         $(modalForm).append($("<div>", { "class": "question_template hide" }));
@@ -2794,14 +2794,11 @@ var Lesson = (function () {
         itembox.append(boxHeader);
 
         var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer", onclick: "toggleExpand(this)" });
-        //$(collapseSwitch).click(function () {
-        //    toggleExpand(this);
-        //});
+       
         //itembox.append(ItemRow);
         switch (data.Type) {
             default:
             case "TEXT":
-                console.log("TEXT");
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "content-wrapper collapsable collapse" });
                 //console.log(itemBody);
@@ -2951,7 +2948,7 @@ var Lesson = (function () {
                     itembox.append($("<textarea>", { id: esid, class: "w-100" }));
                     CKEDITOR.replace(esid);
                     itembox.append($("<button>", { text: "Đính kèm file", class: "btn btn-primary mt-2 btnAddfile", onclick: "AddAttachment(this)" }));
-                    itembox.append($("<button>", { text: "Lưu đáp án", class: "btn btn-primary mt-2 ml-2", onclick: "SaveEssay('" + data.Questions[0].ID + "')" }));
+                    itembox.append($("<button>", { text: "Lưu đáp án", class: "btn btn-primary mt-2 ml-2", onclick: "SaveEssay('" + data.Questions[0].ID + "',this)" }));
                     itembox.append($("<input>", { type: "file", name: "ESF_" + data.Questions[0].ID, class: "hide", accept: " audio/*, .doc, .docx", onchange: "UpdateFilename(this)" }));
                 }
 
@@ -3375,7 +3372,6 @@ var Lesson = (function () {
     }
 
     var redoExam = function (obj) {
-
         var lesson_action_holder = $('.top-menu[for=lesson-info]')
         lesson_action_holder.empty()
         console.log("Redo Exam");
@@ -3478,7 +3474,6 @@ var Lesson = (function () {
                 questionId = dataset.questionId;
                 //answerID = dataset.id;
                 // value là data động tự điền
-                debugger;
                 value = _this.text;
                 break;
             case "QUIZ3":
@@ -3498,7 +3493,7 @@ var Lesson = (function () {
             case "ESSAY":
                 partID = dataset.partId;
                 value = _this.value;
-                answerID = _this.id;
+                questionId = _this.id;
                 break;
             default:
                 break;
@@ -3506,16 +3501,16 @@ var Lesson = (function () {
         var dataform = new FormData();
         dataform.append("ExamID", $("input[name=ExamID]").val());
         //console.log($("input[name=ExamID]"));
-        if (type != "ESSAY") {
+        //if (type != "ESSAY") {
 
             dataform.append("LessonPartID", partID);
             dataform.append("AnswerID", answerID);
             dataform.append("QuestionID", questionId);
             dataform.append("AnswerValue", value);
-        } else {
-            dataform.append("LessonPartID", partID);
-            dataform.append("AnswerValue", value);
-        }
+        //} else {
+        //    dataform.append("LessonPartID", partID);
+        //    dataform.append("AnswerValue", value);
+        //}
 
         if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
             Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
@@ -3729,8 +3724,20 @@ var Lesson = (function () {
         $(obj).siblings(".btnAddfile").text(obj.files[0].name);
     }
 
-    var SaveEssay = function (id) {
-        saveAnswerForStudent
+    var SaveEssay = function (id, self) {
+        var vInstance = CKEDITOR.instances["inputES-" + id];
+        var value = vInstance.getData();
+        saveAnswerForStudent(id, "0", value, "ESSAY");
+        var obj = {
+            dataset: {
+                partId: self.parentElement.id,
+                type: "ESSAY",
+                questionId:id
+            },
+            id: id,
+            value: value,
+        }
+        AnswerQuestion(obj);
     }
 
     var ApplyAdditionVocabStyle = function () {

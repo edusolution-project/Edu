@@ -326,7 +326,7 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public async Task<JsonResult> CreateDetail(ExamDetailEntity item)
+        public JsonResult CreateDetail(ExamDetailEntity item)
         {
             if (item.ExamID == null)
             {

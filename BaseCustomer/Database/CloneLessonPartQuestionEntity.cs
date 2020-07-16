@@ -44,7 +44,7 @@ namespace BaseCustomerEntity.Database
 
         public async Task RemoveManyAsync(List<string> Ids)
         {
-            _ = Collection.DeleteManyAsync(t => Ids.Contains(t.ID));
+           await Collection.DeleteManyAsync(t => Ids.Contains(t.ID));
         }
     }
 

@@ -9,8 +9,6 @@ namespace BaseCustomerMVC.Models
 {
     public class AccountViewModel : AccountEntity
     {
-        [JsonProperty("Name")]
-        public string Name { get; set; }
         [JsonProperty("RoleName")]
         public string RoleName { get; set; }
     }

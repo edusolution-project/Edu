@@ -9,8 +9,6 @@ namespace BaseCustomerMVC.Models
     {
         [JsonProperty("CompletedLessons")]
         public int CompletedLessons { get; set; }
-        [JsonProperty("TotalLessons")]
-        public long TotalLessons { get; set; }
         [JsonProperty("LastLessonID")]
         public string LastLessonID { get; set; }
         [JsonProperty("LastDate")]

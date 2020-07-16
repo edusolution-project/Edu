@@ -913,7 +913,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult GetClassList(DefaultModel model, string Center, string SubjectID = "", string GradeID = "")
         {
-            string TeacherID = "";
             var center = new CenterEntity();
 
 
@@ -1344,7 +1343,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public async Task<JsonResult> Remove(DefaultModel model)
+        public JsonResult Remove(DefaultModel model)
         {
             if (model.ArrID.Length <= 0)
             {

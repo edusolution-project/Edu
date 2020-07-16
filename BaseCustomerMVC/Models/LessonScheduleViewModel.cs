@@ -21,8 +21,6 @@ namespace BaseCustomerMVC.Models
         public long StudentJoins { get; set; }
         [JsonProperty("ClassName")]
         public string ClassName { get; set; }
-        [JsonProperty("ClassID")]
-        public string ClassID { get; set; }
         [JsonProperty("SubjectName")]
         public string SubjectName { get; set; }
         [JsonProperty("LastJoin")]

@@ -23,7 +23,6 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
-//using com.wiris.std;
 
 namespace EnglishPlatform.Controllers
 {
