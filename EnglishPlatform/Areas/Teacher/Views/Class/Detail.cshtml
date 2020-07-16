@@ -46,7 +46,7 @@
         </div>
         <div class="flex j-between border-b">
             <div class="tab bg-none">
-                <ul class="flex">
+                <ul class="flex flex-row">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Môn học</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Học viên</a></li>
@@ -54,7 +54,7 @@
                     @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(4)">Thảo luận</a></li>*@
                 </ul>
             </div>
-            <div class="c-right">
+            <div class="c-right mb-1">
                 <b-button class="btn-addevent" v-on:click="showRefModal()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
             </div>
         </div>
@@ -245,9 +245,9 @@
     <script type="text/x-template" id="chapContentTemp">
         <li class="pr-0 ml-3 chap-item">
             <div class="inner pt-3 pb-3">
-                <div class="d-flex align-items-center">
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center">
                     <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color btn-collapse flex-grow-1 mb-0" v-on:click="loadContent(data.ClassSubject, data.ID)">
-                        <span class="align-self-center"><i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></span>
+                        <span class="align-self-center" style="line-height:24px;"><i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></span>
                     </a>
                     <div class="d-flex" v-if="owner == '@currentuser'">
                         <select v-model="data.ConditionChapter" style="max-width:200px; font-size:90%; height: 31px; margin-top: 2px;" v-on:change="updateChapCondition(data)">
@@ -288,7 +288,7 @@
 
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice pt-2 pb-1 pl-2 rounded">
-            <div class="d-flex w-100 align-items-start">
+            <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
                 <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
                     <span>
                         <i v-if="data.TemplateType === 2" class="ic far fa-edit mr-2"></i>
@@ -825,7 +825,7 @@
                                     item.ConditionChapter = parent.ConditionChapter;
                                 else
                                     item.ConditionChapter = "";
-                                
+
                                 Vue.nextTick(function () {
                                     this.updateSubchapCondition(item);
                                     item.PreventEvent = false

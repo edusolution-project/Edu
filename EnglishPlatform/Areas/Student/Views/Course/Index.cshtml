@@ -23,26 +23,27 @@
 
 <section class="module" id="dashboard_content">
     <div class="card-header">
-        <div class="flex border-b padding-b25">
-            <div class="box filter-box">
+
+        <div class="flex flex-row border-b flex-wrap pb-2 align-items-center">
+            <div class="box filter-box d-none">
                 <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
                 <span class="ic ic-picker inactive"></span>
             </div>
-            <div class="box filter-box w-152">
+            <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
                 <select v-model="subject" v-on:change="changeSubject()">
-                    <option value="">Choose Subject</option>
+                    <option value="">Chọn chương trình</option>
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                 </select>
             </div>
-            <div class="box filter-box w-152">
+            <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
                 <select name="" v-model="grade" v-on:change="changeGrade()">
-                    <option value="">Choose Level</option>
+                    <option value="">Chọn cấp độ</option>
                     <option v-for="(item,k) in list_grades" :value="item.ID">{{item.Name}}</option>
                 </select>
             </div>
-            <div class="search-box">
+            <div class="search-box col-12 col-md-3 mb-1 ml-0 ml-md-2">
                 <button><i class="ic ic-find"></i></button>
-                <input type="text" name="" placeholder="Search">
+                <input type="text" name="" placeholder="Tên lớp cần tìm">
             </div>
         </div>
     </div>
@@ -50,7 +51,7 @@
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
-    <div class="card-body"  v-cloak>
+    <div class="card-body" v-cloak>
         <div class="row row-list">
             <div class="col-md-3 course-item" v-for="(item,k) in list_course">
                 <div class="box radius">
@@ -58,10 +59,10 @@
                     <div class="detail box">
                         <a :href="'@processUrl("Detail", "Course")/' + item.ID" title="" class="title">{{item.Name}}</a>
                         <p><i class="ti-time"></i>{{formatShortDate(item.EndDate)}}</p>
-                        <div class="c-bot flex">
+                        <div class="c-bot flex-row flex align-items-center">
                             <a :href="'@processUrl("Detail", "Course")/' + item.ID" title="Học ngay" class="btn-learn">Học ngay</a>
-                            <div class="c-right">
-                                {{item.CompletePercent + '%'}}<span class="ic ic-subtag"></span>
+                            <div class="ml-auto">
+                                {{item.CompletePercent + '%'}}<span class="ic ic-subtag ml-1" style="margin-bottom: -1px"></span>
                             </div>
                         </div>
                     </div>

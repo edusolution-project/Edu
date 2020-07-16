@@ -67,7 +67,7 @@
                                 <div class="c-bot">
                                     <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.className" class="title">{{item.className}}</a>
                                     <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
-                                    <div class="flex">
+                                    <div class="flex-row">
                                         <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
                                     </div>
                                 </div>
@@ -78,7 +78,7 @@
                                 <div class="c-bot">
                                     <a href="javascript:;" :title="item.className" class="title" v-on:click="showLockNotify(item)">{{item.className}}</a>
                                     <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
-                                    <div class="flex">
+                                    <div class="flex-row">
                                         <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
                                     </div>
                                 </div>
