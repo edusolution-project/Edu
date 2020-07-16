@@ -25,6 +25,9 @@ namespace BaseCustomerEntity.Database
         public DateTime Updated { get; set; }
         [JsonProperty("Media")]
         public Media Media { get; set; }
+
+        [JsonProperty("Medias")]
+        public List<Media> Medias { get; set; }
         [JsonProperty("Order")]
         public int Order { get; set; }
         [JsonProperty("CourseID")]

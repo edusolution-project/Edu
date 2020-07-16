@@ -3194,7 +3194,15 @@ var Lesson = (function () {
             dataform.append("LessonPartID", partID);
             dataform.append("AnswerID", answerID);
             dataform.append("QuestionID", questionId);
-            dataform.append("AnswerValue", value);
+        dataform.append("AnswerValue", value);
+        debugger;
+        var files = document.querySelector("input[type='file']") != null ? document.querySelector("input[type='file']").files : null;
+        if (files) {
+            for (var i = 0; i < files.length; i++) {
+                dataform.append("files", files[i]);
+            }
+        }
+
         //} else {
         //    dataform.append("LessonPartID", partID);
         //    dataform.append("AnswerValue", value);
@@ -3392,6 +3400,7 @@ var Lesson = (function () {
     }
 
     var AddAttachment = function (obj) {
+        $(obj).siblings("input[type=file]").attr("multiple", true);
         $(obj).siblings("input[type=file]").focus().click();
     }
 
