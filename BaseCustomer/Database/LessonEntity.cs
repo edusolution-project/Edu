@@ -20,7 +20,7 @@ namespace BaseCustomerEntity.Database
 
         }
 
-        public LessonEntity(CourseLessonEntity o)
+        public LessonEntity(CourseLessonEntity o, string suffix = "")
         {
             Media = o.Media;
             ChapterID = o.ChapterID;
@@ -33,7 +33,7 @@ namespace BaseCustomerEntity.Database
             Timer = o.Timer;
             Point = o.Point;
             IsActive = o.IsActive;
-            Title = o.Title + " (Copy)";
+            Title = o.Title + suffix;
             TemplateType = o.TemplateType;
             Order = o.Order;
             Created = DateTime.Now;

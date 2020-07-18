@@ -1,16 +1,13 @@
 ﻿using BaseCustomerEntity.Database;
 using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Mail;
 using System.Net.Mime;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace BaseCustomerMVC.Globals
+namespace BaseCoreEmail
 {
     public class MailHelper
     {
@@ -20,6 +17,7 @@ namespace BaseCustomerMVC.Globals
         private readonly string _defaultSender;
         private readonly string _defaultSenderName;
         private readonly string _defaultPassword;
+        private readonly bool isTest = false;
 
         public MailHelper(IConfiguration iConfig,
             MailLogService mailLogService
@@ -27,6 +25,16 @@ namespace BaseCustomerMVC.Globals
         {
             _configuration = iConfig;
             _mailLogService = mailLogService;
+            _defaultSender = _configuration.GetValue<string>("MailConfig:Email");
+            _defaultPassword = _configuration.GetValue<string>("MailConfig:Password");
+            _defaultSenderName = _configuration.GetValue<string>("MailConfig:Name");
+            isTest = _configuration.GetValue<string>("Test") == "1";
+        }
+
+        public MailHelper(IConfigurationRoot iConfig)
+        {
+            _configuration = iConfig;
+            _mailLogService = new MailLogService(iConfig);
             _defaultSender = _configuration.GetValue<string>("MailConfig:Email");
             _defaultPassword = _configuration.GetValue<string>("MailConfig:Password");
             _defaultSenderName = _configuration.GetValue<string>("MailConfig:Name");
@@ -86,7 +94,8 @@ namespace BaseCustomerMVC.Globals
                 if (files != null)
                     foreach (var t in files)
                         AddAttachment(message, t);
-                smtp.Send(message);
+                if (!isTest)
+                    smtp.Send(message);
                 var maillog = new MailLogEntity
                 {
                     ActionType = action_type,
@@ -98,8 +107,9 @@ namespace BaseCustomerMVC.Globals
                 _mailLogService.Save(maillog);
                 return ResultState.OK;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                throw ex;
                 return ResultState.ERR;
             }
         }
@@ -117,7 +127,7 @@ namespace BaseCustomerMVC.Globals
             message.Attachments.Add(attachment);
         }
 
-        public void SendRegisterEmail(AccountEntity user, string Password)
+        public async Task SendRegisterEmail(AccountEntity user, string Password)
         {
             string subject = "Chúc mừng " + user.Name + " đã đăng ký tài khoản thành công tại Eduso";
             string body = "Chào " + user.Name + "," +
@@ -127,12 +137,33 @@ namespace BaseCustomerMVC.Globals
                 "<p>Mật khẩu: <b>" + Password + "</b></p>" +
                 "<p>Đăng nhập để trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             var toAddress = new List<string> { user.UserName };
-            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.REGISTER, bccAddressses: new List<string> { _defaultSender });
+            
+                _ = await SendBaseEmail(toAddress, subject, body, MailPhase.REGISTER, bccAddressses: new List<string> { _defaultSender });
         }
 
         public async Task SendResetPassConfirm(AccountEntity user, string resetLink)
         {
+            string subject = "Xác nhận yêu cầu đổi mật khẩu đăng nhập tại Eduso";
+            string body = "Chào " + user.Name + "," +
+                "<p>Bạn hoặc ai đó đã yêu cầu thay đổi mật khẩu đăng nhập tại website Eduso.vn</p>" +
+                "<p>Vui lòng click vào link xác thực gửi kèm để xác nhận yêu cầu đổi mật khẩu</p>" +
+                "<p><i><a href='" + resetLink + ">" + resetLink + "</a></i></p>" +
+                "<p>Nếu bạn không thực hiện yêu cầu trên, vui lòng liên hệ với quản trị hệ thống để được trợ giúp.<p>" +
+                "<p><a href='https://eduso.vn'>Eduso.vn</a><p>";
+            var toAddress = new List<string> { user.UserName };
+            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.RESET_PASS, bccAddressses: new List<string> { _defaultSender });
+        }
 
+        public async Task SendPasswordChangeNotify(AccountEntity user)
+        {
+            string subject = "Xác nhận đổi mật khẩu đăng nhập tại Eduso";
+            string body = "Chào " + user.Name + "," +
+                "<p>Tài khoản đăng nhập của bạn vừa được thay đổi mật khẩu.</p>" +
+                "<p>Vui lòng bỏ qua email này nếu bạn đã thực hiện thao tác trên.</p>" +
+                "<p>Nếu người thực hiện thao tác trên không phải là bạn, vui lòng liên hệ với quản trị hệ thống để được trợ giúp.<p>" +
+                "<p><a href='https://eduso.vn'>Eduso.vn</a><p>";
+            var toAddress = new List<string> { user.UserName };
+            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.RESET_PASS, bccAddressses: new List<string> { _defaultSender });
         }
 
         public async Task SendTeacherJoinCenterNotify(string Name, string Email, string VisiblePassword, string centerName)
@@ -184,21 +215,23 @@ namespace BaseCustomerMVC.Globals
             if (!String.IsNullOrEmpty(VisiblePassword))//register
             {
                 subject = "Chúc mừng " + StudentName + " đã trở thành học viên của " + CenterName;
-                body = "<p>Bạn vừa đăng ký học lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>" +
+                body = "<p>Bạn vừa được đăng ký học lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>" +
                 "<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>" +
                 "<br/>" +
                 "<p>Thông tin đăng nhập của bạn</p>" +
-                "<p>Website đăng nhập: <b><a href='https://eduso.vn/login' target='_blank'>Eduso.vn</a></b></p>" +
                 "<p>Tên đăng nhập: <b>" + Email + "</b></p>" +
                 "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
-                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn' target='_blank'>Eduso.vn</a><p>";
+                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             }
-            else
+            if (!string.IsNullOrEmpty(ClassName))
             {
                 body += ("<p>Bạn vừa được đăng ký học lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>");
                 body += ("<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>");
                 body += "<p>Đăng nhập để bắt đầu học ngay trên <a href='https://eduso.vn/login'>Eduso.vn</a><p>";
             }
+            else
+                return;
+
             //body += "<p>Đăng nhập để trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             var toAddress = new List<string> { Email };
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.STUDENT_JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
@@ -227,5 +260,4 @@ namespace BaseCustomerMVC.Globals
     {
         public const int OK = 1, ERR = 0;
     }
-
 }

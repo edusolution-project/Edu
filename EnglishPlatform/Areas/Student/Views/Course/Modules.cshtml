@@ -126,7 +126,10 @@
                 <div class="d-flex justify-content-between w-100 align-items-center btn-collapse">
                     <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color" v-on:click="getSubList(data.ID, pos)" :id="data.ID">
                         <i class="ic far fa-folder mr-2"></i>{{data.Name + ' (' + data.TotalLessons + ')'}}
-                    <span class="bg-transparent text-primary font-weight-bold" v-if="data.BasePoint > 0" v-bind:class="{'text-danger' : parseInt(data.PracticeAvgPoint) < data.BasePoint, 'text-success' : data.PracticeAvgPoint > data.BasePoint}">{{Math.floor(data.PracticeAvgPoint) + '/' + data.BasePoint.toFixed(0)}}</span>
+                        <span class="bg-transparent text-primary font-weight-bold" v-if="data.BasePoint > 0 && data.PracticeAvgPoint > 0" v-bind:class="{'text-danger' : parseInt(data.PracticeAvgPoint) < data.BasePoint, 'text-success' : data.PracticeAvgPoint > data.BasePoint}">{{Math.floor(data.PracticeAvgPoint) + '/' + data.BasePoint.toFixed(0)}}</span>
+                        <template v-else>
+                            <span class="bg-transparent text-primary font-weight-bold" v-if="data.PracticeCount > 0" v-bind:class="{'text-danger' : parseInt(data.PracticeAvgPoint) < 50, 'text-success' : parseInt(data.PracticeAvgPoint) > 70}">{{ data.PracticeAvgPoint >= 0 ? (data.PracticeAvgPoint.toFixed(2) + '%') : ''}}</span>
+                        </template>
                         <i class="ic ic-collapse"></i>
                     </a>
                     <ul class="time-line flex">
@@ -154,9 +157,10 @@
         <li class="sub-practice d-flex flex-column" :id="lesson.ID">
             <div class="d-flex justify-content-between w-100 align-items-center">
                 <a :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/@currentCs.ID'" v-on:click.prevent="GoLesson(lesson.ID)" class="text-dark">
-                <i v-if="lesson.TemplateType === 2" class="ic far fa-edit mr-2"></i>
-                <i v-else class="ic far fa-file-alt mr-2"></i>
-                {{lesson.Title}}</a>
+                    <i v-if="lesson.TemplateType === 2" class="ic far fa-edit mr-2"></i>
+                    <i v-else class="ic far fa-file-alt mr-2"></i>
+                    {{lesson.Title}}
+                </a>
                 <ul class="time-line flex">
                     <li v-if="isValidTime(lesson.StartDate)"><i class="ti-time"></i>{{formatTime(lesson.StartDate)}} </li>
                     <li v-if="isValidTime(lesson.EndDate)"><i class="ti-time"></i>{{formatTime(lesson.EndDate)}} </li>
@@ -190,7 +194,8 @@
                         @*<span class="ml-2">Học lần cuối: </span>*@
                         <span class="ml-2">{{formatTime(lesson.LastJoin)}}</span>
                         <template v-if="lesson.Tried > 0">
-                            - <span class="bg-transparent text-primary font-weight-bold" v-bind:class="{'text-danger' : parseInt(lesson.DoPoint) < 50, 'text-success' : parseInt(lesson.DoPoint) > 70}">{{lesson.DoPoint.toFixed(2)}}%</span>
+                            -
+                            <span class="bg-transparent text-primary font-weight-bold" v-bind:class="{'text-danger' : parseInt(lesson.DoPoint) < 50, 'text-success' : parseInt(lesson.DoPoint) > 70}">{{lesson.DoPoint.toFixed(2)}}%</span>
                         </template>
                     </div>
                 </template>

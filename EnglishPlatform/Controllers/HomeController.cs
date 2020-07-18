@@ -43,6 +43,9 @@ namespace EnglishPlatform.Controllers
         private readonly UserAndRoleService _userAndRoleService;
         private readonly CenterService _centerService;
         private readonly AuthorityService _authorityService;
+        private readonly NewsService _newsService;
+        private readonly NewsCategoryService _newsCategoryService;
+        private readonly QCService _QCService;
         public DefaultConfigs _default { get; }
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
@@ -57,7 +60,11 @@ namespace EnglishPlatform.Controllers
             , UserAndRoleService userAndRoleService
             , CenterService centerService
             , AuthorityService authorityService
-            , ILog log)
+            , ILog log
+            , NewsService newsService
+            , NewsCategoryService newsCategoryService
+            , QCService QCService
+            )
         {
             _accessesService = accessesService;
             _authenService = authenService;
@@ -75,6 +82,9 @@ namespace EnglishPlatform.Controllers
             _userAndRoleService = userAndRoleService;
             _centerService = centerService;
             _authorityService = authorityService;
+            _newsService = newsService;
+            _newsCategoryService = newsCategoryService;
+            _QCService = QCService;
         }
 
         public IActionResult Index()
@@ -92,7 +102,6 @@ namespace EnglishPlatform.Controllers
                 //var user = _accountService.GetItemByID(userID);
                 //var defaultUser = new UserModel() { };
 
-
                 switch (type.Value)
                 {
                     case ACCOUNT_TYPE.ADMIN:
@@ -101,15 +110,30 @@ namespace EnglishPlatform.Controllers
                     case ACCOUNT_TYPE.TEACHER:
                         if (tc != null)
                         {
-                            centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
-                            ViewBag.AllCenters = tc.Centers.Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
+                            var centers = tc.Centers
+                                .Where(ct => _centerService.GetItemByID(ct.CenterID)?.ExpireDate > DateTime.Now)
+                                .Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
+                            if (centers != null)
+                                centerCode = centers.FirstOrDefault().Code;
+                            else
+                                centerCode = center.Code;
                         }
                         break;
                     default:
                         if (st != null)
                         {
-                            centerCode = st.Centers != null && st.Centers.Count > 0 ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
-                            ViewBag.AllCenters = st.Centers != null ? st.Centers.Select(t => _centerService.GetItemByID(t)).ToList() : null;
+                            if (st.Centers != null && st.Centers.Count > 0)
+                            {
+                                var allcenters = st.Centers
+                                    .Where(ct => _centerService.GetItemByID(ct)?.ExpireDate > DateTime.Now)
+                                    .Select(t => _centerService.GetItemByID(t)).ToList();
+                                centerCode = allcenters.Count > 0 ? allcenters.FirstOrDefault().Code : center.Code;
+                                ViewBag.AllCenters = allcenters;
+                            }
+                            else
+                            {
+                                centerCode = center.Code;
+                            }
                         }
                         break;
                 }
@@ -181,6 +205,9 @@ namespace EnglishPlatform.Controllers
                             var tc = _teacherService.GetItemByID(user.UserID);
                             var st = _studentService.GetItemByID(user.UserID);
 
+
+
+
                             var defaultUser = new UserModel() { };
                             switch (Type)
                             {
@@ -188,8 +215,34 @@ namespace EnglishPlatform.Controllers
                                     if (tc != null)
                                     {
                                         defaultUser = new UserModel(tc.ID, tc.FullName);
-                                        centerCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().Code : center.Code;
-                                        roleCode = tc.Centers != null && tc.Centers.Count > 0 ? tc.Centers.FirstOrDefault().RoleID : "";
+
+                                        if (tc.Centers != null && tc.Centers.Count > 0)//return to first valid center
+                                        {
+                                            foreach (var ct in tc.Centers)
+                                            {
+                                                var _ct = _centerService.GetItemByID(ct.CenterID);
+                                                if (_ct == null || _ct.ExpireDate <= DateTime.Now)
+                                                {
+                                                    continue;
+                                                    //return Json(new ReturnJsonModel
+                                                    //{
+                                                    //    StatusCode = ReturnStatus.ERROR,
+                                                    //    StatusDesc = "Cơ sở không hoạt động hoặc đã hết hạn, vui lòng liên hệ quản trị để được hỗ trợ"
+                                                    //});
+                                                }
+                                                else
+                                                {
+                                                    centerCode = _ct.Code;
+                                                    roleCode = _roleService.GetItemByID(ct.RoleID).Code;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            centerCode = center.Code;
+                                            roleCode = "";
+                                        }
                                     }
                                     break;
                                 case ACCOUNT_TYPE.ADMIN:
@@ -208,7 +261,9 @@ namespace EnglishPlatform.Controllers
                             }
                             if (Type != ACCOUNT_TYPE.ADMIN)
                             {
-                                var role = roleCode != "student" ? _roleService.GetItemByID(roleCode) : _roleService.GetItemByCode(roleCode);
+                                var role =
+                                    //roleCode != "student" ? _roleService.GetItemByID(roleCode) : 
+                                    _roleService.GetItemByCode(roleCode);
                                 if (role != null)
                                 {
                                     var listAccess = _accessesService.GetAccessByRole(role.Code);
@@ -305,6 +360,8 @@ namespace EnglishPlatform.Controllers
                 }
                 else
                 {
+                    var defCenter = _centerService.GetItemByCode("eduso");
+
                     var user = new AccountEntity()
                     {
                         PassWord = _sPass,
@@ -337,13 +394,15 @@ namespace EnglishPlatform.Controllers
                                 Email = _username,
                                 Phone = user.Phone,
                                 IsActive = false,
-                                CreateDate = DateTime.Now
+                                CreateDate = DateTime.Now,
+                                Centers = new List<CenterMemberEntity> { new CenterMemberEntity { CenterID = defCenter.ID, Code = defCenter.Code, Name = defCenter.Name, RoleID = user.RoleID } }
                             };
                             _teacherService.CreateQuery().InsertOne(teacher);
                             user.UserID = teacher.ID;
                             //send email for teacher
+                            _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, PassWord, defCenter.Name);
                             break;
-                        default:
+                        default: //temporary block
                             //create student
                             var student = new StudentEntity()
                             {
@@ -578,7 +637,7 @@ namespace EnglishPlatform.Controllers
                     if (teacher.ZoomID == @event.UrlRoom)
                     {
                         //var roomID = "6725744943";//test
-                        ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "") + "/join";
+                        ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "").Replace(" ", "") + "/join";
                         //ViewBag.URL = Url.Action("ZoomClass", "Home", new { roomID });
                     }
                     else
@@ -587,7 +646,7 @@ namespace EnglishPlatform.Controllers
                 else
                 {
                     //ViewBag.Role = "0";
-                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "") });
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "").Replace(" ", "") });
                 }
             }
             return View();
@@ -598,6 +657,157 @@ namespace EnglishPlatform.Controllers
             ViewBag.RoomID = roomID;
             return View();
         }
+
+        #region LoadNews
+        [HttpPost]
+        [Route("/home/getnewslist")]
+        public JsonResult getNewsList()
+        {
+            var NewsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true && tbl.PublishDate < DateTime.Now && tbl.IsActive == true).Limit(5);
+            var NewsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && tbl.PublishDate < DateTime.Now && tbl.IsActive == true).Limit(2);
+            var response = new Dictionary<string, object>
+            {
+                {"NewsTop",NewsTop.ToList() },
+                {"NewsHot",NewsHot.ToList() }
+            };
+
+            return Json(response);
+        }
+
+        public JsonResult getDataForPartner(string CatCode)
+        {
+            var category = _newsCategoryService.Collection.Find(tbl => tbl.Code.Equals(CatCode)).FirstOrDefault();
+            List<NewsEntity> data = null;
+            if (category != null)
+                data = _newsService.Collection.Find(tbl => tbl.CategoryID.Equals(category.ID)).Limit(10).SortByDescending(tbl => tbl.PublishDate).ToList();
+            return Json(data);
+        }
+        #endregion
+
+        #region load Banner
+        public JsonResult getDataForBanner()
+        {
+            var filter = new List<FilterDefinition<QCEntity>>();
+            filter.Add(Builders<QCEntity>.Filter.Where(tbl => tbl.PublishDate <= DateTime.UtcNow));
+            filter.Add(Builders<QCEntity>.Filter.Where(tbl => tbl.EndDate >= DateTime.UtcNow));
+            filter.Add(Builders<QCEntity>.Filter.Where(tbl => tbl.IsActive == true));
+            var data = _QCService.Collection.Find(Builders<QCEntity>.Filter.And(filter)).Project(tbl => tbl.Banner).ToList();
+            Dictionary<string, object> Response = new Dictionary<string, object>
+            {
+                {"Data",data }
+            };
+            return new JsonResult(Response);
+        }
+        #endregion
+
+        #region Fix Data
+        public JsonResult FixAcc()
+        {
+            var students = _studentService.GetAll().ToEnumerable();
+            var count = 0;
+            var countdelete = 0;
+            var str = "";
+            foreach (var student in students)
+            {
+                if (student == null)
+                    continue;
+
+                var alias = _studentService.CreateQuery().Find(t => t.Email == student.Email).ToList();
+                var accs = _accountService.CreateQuery().Find(t => t.UserName == student.Email).ToList();
+                if (alias != null && alias.Count == 1 && accs != null && accs.Count == 1) continue;
+
+                str += (student.Email + "<br/>");
+                //if (alias == null) continue;
+                //var JoinClasses = new List<string>();
+                //var JoinCenters = new List<string>();
+
+                //if (alias.Count >= 1)
+                //{
+                //    foreach(var st in alias)
+                //    {
+                //        JoinClasses.AddRange(st.JoinedClasses);
+                //        JoinCenters.AddRange(st.Centers);
+                //    }    
+                //}    
+
+                //if(accs.Count() == 1)
+                //{
+                //    var acc = accs[0];
+                //    if(acc.Type == "student")
+                //    {
+                //        if(acc.UserID == student.ID)
+                //        {
+                //            student.JoinedClasses = JoinClasses;
+                //            student.Centers = JoinCenters;
+                //        }
+                //        _studentService.CreateQuery().ReplaceOne(t => t.ID == student.ID, student);
+                //        _studentService.CreateQuery().DeleteMany(t => t.Email == student.Email && t.ID != student.ID);
+                //    }   
+                //    else
+                //    {
+                //        acc.UserId = student.ID;
+                //    }    
+                //}    
+
+                //if (student.Email != student.Email.ToLower().Trim())
+                //{
+                //    student.Email = student.Email.ToLower().Trim();
+                //    _studentService.Save(student);
+                //}
+                //try
+                //{
+                //    var acc = _accountService.GetAccountByEmail(student.Email);
+                //    if (acc == null)
+                //    {
+                //        var _defaultPass = "Eduso123";
+                //        acc = new AccountEntity()
+                //        {
+                //            CreateDate = DateTime.Now,
+                //            IsActive = true,
+                //            PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                //            PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                //            UserCreate = student.UserCreate,
+                //            Type = ACCOUNT_TYPE.STUDENT,
+                //            UserID = student.ID,
+                //            UserName = student.Email.ToLower().Trim(),
+                //            RoleID = _roleService.GetItemByCode("student").ID
+                //        };
+                //        _accountService.CreateQuery().InsertOne(acc);
+                //        count++;
+                //    }
+                //    else
+                //    {
+                //        if (acc.Type == "student" && acc.UserID != student.ID)
+                //        {
+                //            var exactStudent = _studentService.GetItemByID(acc.UserID);
+                //            if (exactStudent == null)
+                //            {
+                //                acc.UserID = student.ID;
+                //                _accountService.CreateQuery().ReplaceOne(t => t.ID == acc.ID, acc);
+                //            }
+                //            else
+                //            {
+                //                _studentService.CreateQuery().DeleteMany(t => t.Email.ToLower() == student.Email.ToLower() && t.ID != acc.UserID);
+                //            }
+                //        }
+                //    }
+                //}
+                //catch (Exception e)
+                //{
+                //    var accs = _accountService.CreateQuery().Find(t => t.UserName == student.Email).SortBy(t => t.ID).ToList();
+                //    if (accs.Count > 1)
+                //    {
+                //        for (int i = 1; i < accs.Count; i++)
+                //        {
+                //            _accountService.Remove(accs[i].ID);
+                //        }
+                //        countdelete++;
+                //    }
+                //}
+            }
+            return Json("OK " + count + " - " + countdelete + " _ " + str);
+        }
+        #endregion
     }
 
     public class UserModel

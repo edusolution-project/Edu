@@ -77,16 +77,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [Obsolete]
         public Task<JsonResult> GetList(DefaultModel model, DateTime start, DateTime end)
         {
-            if (TempData["center_router"] != null)
+            try
             {
-                var userId = User?.FindFirst("UserID").Value;
-                var listClass = _classService.Collection.Find(o => o.TeacherID == userId && o.Center == _centerService.GetItemByCode(TempData["center_router"].ToString()).ID)?.ToList();
-                if (listClass == null || listClass.Count <= 0) return Task.FromResult(new JsonResult(new { }));
-                var data = _calendarHelper.GetListEvent(start, end, listClass.Select(o => o.ID).ToList(), userId);
-                if (data == null) return Task.FromResult(new JsonResult(new { }));
-                return Task.FromResult(new JsonResult(data));
+                if (TempData["center_router"] != null)
+                {
+                    var center = _centerService.GetItemByCode(TempData["center_router"].ToString());
+                    var userId = User?.FindFirst("UserID").Value;
+                    if (center != null && userId != null)
+                    {
+                        var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId) && o.Center == center.ID)?.ToList();
+                        if (listClass == null || listClass.Count <= 0) return Task.FromResult(new JsonResult(new { }));
+                        var data = _calendarHelper.GetListEvent(start, end, listClass.Select(o => o.ID).ToList(), userId);
+                        if (data == null) return Task.FromResult(new JsonResult(new { }));
+                        return Task.FromResult(new JsonResult(data));
+                    }
+                }
+                return Task.FromResult(new JsonResult(new { }));
             }
-            return Task.FromResult(new JsonResult(new { }));
+            catch (Exception e)
+            {
+                return Task.FromResult(new JsonResult(new { msg = e.Message }));
+            }
         }
 
         [HttpPost]

@@ -5,8 +5,8 @@
     var roomid = ViewBag.RoomID;
 }
 
-<link type="text/css" rel="stylesheet" href="https://source.zoom.us/1.7.0/css/bootstrap.css" />
-<link type="text/css" rel="stylesheet" href="https://source.zoom.us/1.7.0/css/react-select.css" />
+<link type="text/css" rel="stylesheet" href="https://source.zoom.us/1.7.9/css/bootstrap.css" />
+<link type="text/css" rel="stylesheet" href="https://source.zoom.us/1.7.9/css/react-select.css" />
 
 <style>
     /*body {
@@ -17,7 +17,7 @@
     }
 
     #nav-tool {
-        display: none !important;
+        /*display: none !important;*/
     }
 </style>
 
@@ -27,28 +27,29 @@
 <nav id="nav-tool" class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">Test Zoom LONGHT</a>
+            <a class="navbar-brand" href="#">VÀO LỚP HỌC</a>
         </div>
         <div id="navbar">
             <form class="navbar-form navbar-right" id="meeting_form">
                 <div class="form-group">
-                    <input type="text" name="display_name" id="display_name" value="" placeholder="Name" class="form-control" required>
+                    <input type="password" name="password" id="password" value="" placeholder="Nhập mật khẩu của lớp học" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-primary" id="join_meeting">Join</button>
+                <button type="submit" class="btn btn-primary" id="join_meeting">Vào lớp</button>
             </form>
         </div><!--/.navbar-collapse -->
     </div>
 </nav>
+<
 
-<script src="https://source.zoom.us/1.7.4/lib/vendor/react.min.js"></script>
-<script src="https://source.zoom.us/1.7.4/lib/vendor/react-dom.min.js"></script>
-<script src="https://source.zoom.us/1.7.4/lib/vendor/redux.min.js"></script>
-<script src="https://source.zoom.us/1.7.4/lib/vendor/redux-thunk.min.js"></script>
-<script src="https://source.zoom.us/1.7.4/lib/vendor/jquery.min.js"></script>
-<script src="https://source.zoom.us/1.7.4/lib/vendor/lodash.min.js"></script>
+<script src="https://source.zoom.us/1.7.9/lib/vendor/react.min.js"></script>
+<script src="https://source.zoom.us/1.7.9/lib/vendor/react-dom.min.js"></script>
+<script src="https://source.zoom.us/1.7.9/lib/vendor/redux.min.js"></script>
+<script src="https://source.zoom.us/1.7.9/lib/vendor/redux-thunk.min.js"></script>
+<script src="https://source.zoom.us/1.7.9/lib/vendor/jquery.min.js"></script>
+<script src="https://source.zoom.us/1.7.9/lib/vendor/lodash.min.js"></script>
 
 <!-- import ZoomMtg -->
-<script src="https://source.zoom.us/zoom-meeting-1.7.4.min.js"></script>
+<script src="https://source.zoom.us/zoom-meeting-1.7.9.min.js"></script>
 <script>
         (function () {
 
@@ -71,26 +72,28 @@
                 if (e != null) {
                      e.preventDefault();
 
-                    if (!this.form.checkValidity()) {
-                        alert("Enter Name and Meeting Number");
+                    if (document.getElementById('password').value == "") {
+                        alert("Vui lòng nhập mật khẩu đã được cấp");
                         return false;
                     }
                 }
 
+                $('#nav-tool').hide();
                 name = document.getElementById("stuName").innerHTML;
                 console.log(name);
                 var meetConfig = {
                     apiKey: API_KEY,
                     apiSecret: API_SECRET,
                     // tên zoom mặc định của longht (ZOOMID = 9083792841) = 1 host
-                    meetingNumber: @roomid,
+                    meetingNumber:@roomid,
                     userName: name,//document.getElementById('display_name').value,
-                    passWord: "",
+                    passWord: document.getElementById('password').value,
                     leaveUrl: "https://zoom.us",
                     role: 0 // 0 member - 1 admin
                 };
                 var signature = ZoomMtg.generateSignature({
-                    meetingNumber: meetConfig.meetingNumber,
+                    meetingNumber:
+                        meetConfig.meetingNumber,
                     apiKey: meetConfig.apiKey,
                     apiSecret: meetConfig.apiSecret,
                     role: meetConfig.role,
@@ -131,7 +134,7 @@
                 joinRoom(e)
             });
 
-            joinRoom();
+            //joinRoom();
         })();
 </script>
 

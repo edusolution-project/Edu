@@ -19,7 +19,7 @@ namespace BaseCustomerMVC.Globals
             _evn = evn;
             RootPath = _evn.WebRootPath + "/Files";
         }
-        public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "", string folder = "")
+        public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "", string folder = "", string center = "")
         {
             string extension = Path.GetExtension(formFile.FileName);
             string type = extension.Replace(".", string.Empty).ToUpper();
@@ -29,7 +29,8 @@ namespace BaseCustomerMVC.Globals
                 else if (_videoType.Contains(type)) folder = "VIDEO";
                 else if (_audioType.Contains(type)) folder = "AUDIO";
                 else folder = "OTHERS";
-
+            if (!string.IsNullOrEmpty(center))
+                folder = center + "/" + folder;
             folder += ("/" + DateTime.Now.ToString("yyyyMMdd"));
             string uploads = Path.Combine(RootPath, folder);
             if (!Directory.Exists(uploads))

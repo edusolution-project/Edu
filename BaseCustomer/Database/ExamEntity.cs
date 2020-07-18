@@ -229,8 +229,34 @@ namespace BaseCustomerEntity.Database
                     //, cstask, ctask
                     );
             }
-            
+
             return exam;
+        }
+
+        public bool ResetLesssonPoint(LessonEntity lesson, string studentID)
+        {
+            var result = false;
+            var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(lesson.ClassSubjectID, studentID, lesson.ID);
+            if (lessonProgress != null)
+            {
+                if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
+                    _chapterProgressService.DecreasePoint(lessonProgress);
+                    _classSubjectProgressService.DecreasePoint(lessonProgress);
+                    _classProgressService.DecreasePoint(lessonProgress);
+                }
+                else
+                {
+                    _chapterProgressService.DecreasePracticePoint(lessonProgress);
+                }
+                _lessonProgressService.ResetPoint(lessonProgress);
+            }
+            return result;
+        }
+
+        public ExamEntity GetLastestExam(string LessonID)
+        {
+            return Collection.Find(o => o.LessonID == LessonID).SortByDescending(o => o.Number).FirstOrDefault();
         }
 
         public async Task RemoveClassExam(string ClassID)

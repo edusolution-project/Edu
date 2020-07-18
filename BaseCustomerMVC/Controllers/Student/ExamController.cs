@@ -197,22 +197,26 @@ namespace BaseCustomerMVC.Controllers.Student
                        { "Error", "Bạn đã hết lượt làm bài!" }
                     });
                 }
+                if (_lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
 
-                if (_schedule.StartDate.ToLocalTime() > DateTime.Now)
+                    if (_schedule.StartDate.ToLocalTime() > DateTime.Now)
+                    {
+                        return new JsonResult(new Dictionary<string, object>
+                        {
+                           { "Error", "Bài kiểm tra chưa được mở!" }
+                        });
+                    }
+                }
+
+                if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
-                       { "Error", "Bài kiểm tra chưa được mở!" }
+                       { "Error", "Bài đã quá hạn!" }
                     });
                 }
-                if (_lesson.TemplateType == LESSON_TEMPLATE.EXAM)
-                    if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
-                    {
-                        return new JsonResult(new Dictionary<string, object>
-                    {
-                       { "Error", "Bài kiểm tra đã quá hạn!" }
-                    });
-                    }
+
 
                 item.LessonScheduleID = _schedule.ID;
                 item.Timer = _lesson.Timer;
@@ -228,14 +232,16 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.QuestionsTotal = _cloneLessonPartQuestionService.CreateQuery().CountDocuments(o => o.LessonID == item.LessonID);
                 item.QuestionsDone = 0;
                 item.Marked = false;
+                _examService.ResetLesssonPoint(_lesson, item.StudentID);
             }
+
             item.Updated = DateTime.Now;
             //_examService.CreateOrUpdate(item);//MAPPING BUG
             _examService.Save(item);
             return new JsonResult(new Dictionary<string, object>
-                    {
-                       { "Data", item }
-                    });
+            {
+                { "Data", item }
+            });
         }
 
         [HttpPost]
@@ -478,7 +484,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (deleted.DeletedCount > 0 && exam.QuestionsDone > 0)
                         exam.QuestionsDone -= 1;
 
-                    _examService.CreateQuery().ReplaceOne(t=> t.ID == exam.ID, exam);
+                    _examService.CreateQuery().ReplaceOne(t => t.ID == exam.ID, exam);
                 }
                 return new JsonResult(item);
             }
@@ -617,12 +623,12 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public IActionResult Details(DefaultModel model, string id, string ClassID)
+        public IActionResult Details(DefaultModel model, string id, string ClassID, string basis)
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["Error"] = "Bạn chưa chọn khóa học";
-                return RedirectToAction("Index");
+                TempData["Error"] = "Bài học không đúng";
+                return Redirect($"/{basis}{Url.Action("Index")}");
             }
             ViewBag.CourseID = id;
             ViewBag.ClassID = ClassID;

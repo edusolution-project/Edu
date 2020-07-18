@@ -169,5 +169,14 @@ namespace BaseCustomerEntity.Database
                 TotalPoint = t.TotalPoint
             }).ToEnumerable();
         }
+
+        public long DecreasePoint(LessonProgressEntity item)
+        {
+            var filter = Builders<ClassProgressEntity>.Filter.Where(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID);
+            var update = Builders<ClassProgressEntity>.Update.Inc(t => t.TotalPoint, 0 - item.LastPoint);
+            return Collection.UpdateMany(Builders<ClassProgressEntity>.Filter.And(filter),
+                update
+                ).ModifiedCount;
+        }
     }
 }

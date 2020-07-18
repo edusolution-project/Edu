@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using MongoDB.Bson.Serialization.Serializers;
+using BaseEasyRealTime.Entities;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -44,6 +45,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly ChapterProgressService _chapterProgressService;
 
+
         //private readonly LessonPartService _lessonPartService;
         //private readonly LessonPartAnswerService _lessonPartAnswerService;
         //private readonly LessonPartQuestionService _lessonPartQuestionService;
@@ -54,6 +56,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly StudentHelper _studentHelper;
         private readonly TeacherHelper _teacherHelper;
         private readonly LessonHelper _lessonHelper;
+        private readonly MailHelper _mailHelper;
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
 
@@ -64,6 +67,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
         private readonly LessonPartService _lessonPartService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
+
+        private readonly GroupService _groupService;
+
 
         public ClassController(
             AccountService accountService,
@@ -96,15 +102,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonHelper lessonHelper,
             StudentHelper studentHelper,
             TeacherHelper teacherHelper,
+            MailHelper mailHelper,
 
             ChapterProgressService chapterProgressService,
-            CenterService centerService,
-            RoleService roleService
+            CenterService centerService
             , CloneLessonPartService cloneLessonPartService
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
             ,LessonPartService lessonPartService
             ,LessonPartQuestionService lessonPartQuestionService
+            RoleService roleService,
+            GroupService groupService
             )
         {
             _accountService = accountService;
@@ -139,12 +147,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             _studentHelper = studentHelper;
             _teacherHelper = teacherHelper;
-
             _lessonHelper = lessonHelper;
+            _mailHelper = mailHelper;
 
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
-
 
             _chapterProgressService = chapterProgressService;
             _centerService = centerService;
@@ -154,6 +161,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonPartService = lessonPartService;
             _lessonPartQuestionService = lessonPartQuestionService;
             _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
+            _groupService = groupService;
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -200,7 +208,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             var vm = new ClassViewModel(currentClass);
             var subjects = _classSubjectService.GetByClassID(currentClass.ID);
             var skillIDs = subjects.Select(t => t.SkillID).Distinct();
@@ -218,7 +226,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    var UserID = User.Claims.GetClaimByType("UserID").Value;
         //    var myClasses = _service.CreateQuery()
@@ -242,7 +250,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             ViewBag.Class = currentClass;
             return View();
         }
@@ -252,7 +260,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    return View();
         //}
@@ -262,7 +270,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    return View();
         //}
@@ -272,7 +280,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    return View();
         //}
@@ -282,7 +290,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    if (model == null) return null;
         //    var currentClass = _service.GetItemByID(model.ID);
         //    if (currentClass == null)
-        //        return RedirectToAction("Index");
+        //        return Redirect($"/{basis}{Url.Action("Index");
         //    ViewBag.Class = currentClass;
         //    ViewBag.Managable = CheckPermission(PERMISSION.MEMBER_COURSE_EDIT);
         //    return View();
@@ -297,18 +305,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ViewBag.Center = center;
             }
             if (string.IsNullOrEmpty(ClassID))
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             var currentClass = _service.GetItemByID(ClassID);
             if (currentClass == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             ViewBag.Class = currentClass;
 
             if (string.IsNullOrEmpty(ID))
-                return RedirectToAction("Member", "Class", new { ID = ClassID });
+                return Redirect($"/{basis}{Url.Action("Member", "Class", new { ID = ClassID })}");
 
             var student = _studentService.GetItemByID(ID);
             if (student == null)
-                return RedirectToAction("Member", "Class", new { ID = ClassID });
+                return Redirect($"/{basis}{Url.Action("Member", "Class", new { ID = ClassID })}");
 
             ViewBag.Student = student;
 
@@ -949,14 +957,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var filter = new List<FilterDefinition<ClassSubjectEntity>>();
             var classfilter = new List<FilterDefinition<ClassEntity>>();
 
-            //var deep_filter = false;
+            var skip_owned = false;
             FilterDefinition<ClassEntity> ownerfilter = null;
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(UserID);
 
             if (!string.IsNullOrEmpty(SubjectID))
             {
-                //deep_filter = true;
+                skip_owned = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
             else
@@ -965,7 +973,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             if (!string.IsNullOrEmpty(GradeID))
             {
-                //deep_filter = true;
+                skip_owned = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
 
@@ -978,7 +986,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var dCursor = _classSubjectService.Collection
                 .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty);
             var data = dCursor.ToList();
-               
+
             if (!string.IsNullOrEmpty(TeacherID))
             {
                 classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
@@ -1002,6 +1010,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var classResult = _service.Collection.Find(
                 Builders<ClassEntity>.Filter.And(
                     Builders<ClassEntity>.Filter.Where(o => o.Center == Center),
+                    skip_owned ?
+                    Builders<ClassEntity>.Filter.And(classfilter) :
                     Builders<ClassEntity>.Filter.Or(
                         Builders<ClassEntity>.Filter.And(ownerfilter),
                         Builders<ClassEntity>.Filter.And(classfilter)
@@ -1045,27 +1055,37 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [Obsolete]
         public JsonResult Create(ClassEntity item, string CenterCode, List<ClassSubjectEntity> classSubjects, IFormFile fileUpload)
         {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Vui lòng đăng nhập lại" }
+                        });
+            }
+            var cm = _teacherService.GetItemByID(userId);
+            if (cm == null)
+            {
+                return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Vui lòng đăng nhập lại" }
+                        });
+            }
+            var center = _centerService.GetItemByCode(CenterCode);
+            if (center == null || cm.Centers.Count(t => t.Code == CenterCode) == 0)
+            {
+                return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Cơ sở không đúng" }
+                        });
+            }
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.ID = null;
                 item.Created = DateTime.Now;
-                var userId = User.Claims.GetClaimByType("UserID").Value;
 
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return new JsonResult(new Dictionary<string, object>()
-                        {
-                            {"Error", "Vui lòng đăng nhập lại" }
-                        });
-                }
-                var teacher = _teacherService.GetItemByID(userId);
-                if (teacher == null)
-                {
-                    return new JsonResult(new Dictionary<string, object>()
-                        {
-                            {"Error", "Vui lòng đăng nhập lại" }
-                        });
-                }
+
                 if (classSubjects == null || classSubjects.Count == 0)
                 {
                     return new JsonResult(new Dictionary<string, object>()
@@ -1074,19 +1094,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         });
                 }
 
-                var center = _centerService.GetItemByCode(CenterCode);
-                if (center == null || teacher.Centers.Count(t => t.Code == CenterCode) == 0)
-                {
-                    return new JsonResult(new Dictionary<string, object>()
-                        {
-                            {"Error", "Cơ sở không đúng" }
-                        });
-                }
-
                 item.TeacherID = userId; // creator
                 item.Skills = new List<string>();
                 item.Subjects = new List<string>();
-                item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER, Name = teacher.FullName } };
+                item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER, Name = cm.FullName } };
                 item.TotalLessons = 0;
                 item.IsActive = true;
                 item.StartDate = item.StartDate.ToUniversalTime();
@@ -1095,7 +1106,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (fileUpload != null)
                 {
-                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG").Result;
+                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG", center.Code).Result;
                     item.Image = pathImage;
                 }
 
@@ -1106,7 +1117,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     foreach (var csubject in classSubjects)
                     {
-
+                        var teacher = _teacherService.GetItemByID(csubject.TeacherID);
                         var newMember = new ClassMemberEntity();
                         long lessoncount = 0;
                         var nID = CreateNewClassSubject(csubject, item, out newMember, out lessoncount);
@@ -1116,6 +1127,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             item.Subjects.Add(csubject.SubjectID);
                         if (!item.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             item.Members.Add(newMember);
+                        //var skill = _skillService.GetItemByID(csubject.SkillID);
+                        //if (skill == null) continue;
+                        //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
                     }
                     _service.Save(item);
                 }
@@ -1133,11 +1147,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var oldData = _service.GetItemByID(item.ID);
                 if (oldData == null) return new JsonResult(new Dictionary<string, object>()
                 {
-                    {"Error", "Class not found" }
+                    {"Error", "Không tìm thấy lớp" }
                 });
 
                 oldData.Updated = DateTime.Now;
-                oldData.Name = item.Name;
+                var mustUpdateName = false;
+                if (oldData.Name != item.Name)
+                {
+                    oldData.Name = item.Name;
+                    mustUpdateName = true;
+                }
                 oldData.Code = item.Code;
                 oldData.StartDate = item.StartDate.ToUniversalTime();
                 oldData.EndDate = item.EndDate.ToUniversalTime();
@@ -1173,7 +1192,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             long lessoncount = 0;
                             if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                             {
-                                nSbj.ID = CreateNewClassSubject(nSbj, item, out newMember, out lessoncount);
+                                nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount);
                                 if (string.IsNullOrEmpty(nSbj.ID))//Error
                                     continue;
                             }
@@ -1182,11 +1201,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //update period
                                 oSbj.StartDate = item.StartDate.ToUniversalTime();
                                 oSbj.EndDate = item.EndDate.ToUniversalTime();
-                                oSbj.TeacherID = nSbj.TeacherID;
-                                _classSubjectService.Save(oSbj);
-
                                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
                                 if (teacher == null) continue;
+
+                                if (oSbj.TeacherID != nSbj.TeacherID) //chage teacher
+                                {
+                                    oSbj.TeacherID = nSbj.TeacherID;
+                                    var skill = _skillService.GetItemByID(oSbj.SkillID);
+                                    if (skill == null) continue;
+                                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                                }
+                                _classSubjectService.Save(oSbj);
                                 newMember = new ClassMemberEntity
                                 {
                                     TeacherID = teacher.ID,
@@ -1215,7 +1240,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //create new subject
                         var newMember = new ClassMemberEntity();
                         long lessoncount = 0;
-                        var nID = CreateNewClassSubject(nSbj, item, out newMember, out lessoncount);
+                        var nID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount);
                         if (string.IsNullOrEmpty(nSbj.ID))//Error
                             continue;
 
@@ -1231,12 +1256,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (fileUpload != null)
                 {
-                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG").Result;
+                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG", center.Code).Result;
                     oldData.Image = pathImage;
                 }
 
                 //update data
                 _service.Save(oldData);
+                if (mustUpdateName)
+                {
+                    var change = _groupService.UpdateGroupDisplayName(oldData.ID, oldData.Name);
+                }    
+                    
                 //refresh class total lesson => no need
                 _ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
 
@@ -1302,8 +1332,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 nSbj.LearningOutcomes = course.LearningOutcomes;
                 nSbj.TotalLessons = course.TotalLessons;
 
-                _classSubjectService.Save(nSbj);
+                var skill = _skillService.GetItemByID(nSbj.SkillID);
 
+                var center = _centerService.GetItemByID(@class.Center);
+
+                _classSubjectService.Save(nSbj);
+                _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
                 //Clone Course
                 _courseHelper.CloneForClassSubject(nSbj);
 

@@ -131,5 +131,13 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.Members.Any(o => o.TeacherID == userID)).Project(t => t.ID).ToEnumerable();
         }
+
+        public IEnumerable<ClassEntity> GetActiveClass(DateTime time, string Center = null)
+        {
+            if (string.IsNullOrEmpty(Center))
+                return Collection.Find(t => t.StartDate < time && t.EndDate > time).ToEnumerable();
+            else
+                return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time).ToEnumerable();
+        }
     }
 }

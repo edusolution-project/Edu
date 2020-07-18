@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "Trải nghiệm học viên";
+    Layout = "~/Views/Shared/_LayoutTeacher_noChat.cshtml";
+
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var currentClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
+    var currentLesson = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
+
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
+}
+@section Sidebar
+{
+    @await Html.PartialAsync("_sidebarExam")
+}
+<div class="left-col">
+    <div class="main-container">
+        <!-- Begin Page Content -->
+        <div id="exam-teacher" class="h-100">
+        </div>
+        <!-- End of Main Content -->
+        @*<input type="hidden" name="ExamID" id="ExamID" value="" />*@
+    </div>
+
+    <div id="lessonSummary" class="shadow">
+    </div>
+</div>
+@section Scripts{
+
+    <script src="~/js/content-render.js"></script>
+
+    <script>
+        var config = {
+            container: "exam-teacher",
+            mod: @Html.Raw(currentLesson.TemplateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM ? "mod.TEACHERPREVIEWEXAM" : "mod.TEACHERPREVIEW"),
+            url: {
+                load: '@processUrl("GetTemplateLesson", "Lesson")',
+                current: '@processUrl("GetTemplateExam", "Lesson")',
+                start: '@processUrl("CreateTemplateExam", "Lesson")',
+                answer: 'answer',
+                removeans: 'removeans',
+                end: 'endexam',
+                review: 'review'
+            },
+            type: @currentLesson.TemplateType,
+            lesson_id: '@currentLesson.ID',
+            class_id: '@currentClass.ID',
+            class_subject_id: '@currentClassSubject.ID',
+            chap_id: '@currentLesson.ChapterID'
+        }
+    var widget = new Lesson.onReady(config);
+    </script>
+    <link href="~/css/detailui.css" rel="stylesheet" />
+}

@@ -78,6 +78,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<IndexService>();
             services.AddSingleton<NewsCategoryService>();
             services.AddSingleton<NewsService>();
+            services.AddSingleton<QCService>();
 			services.AddSingleton<UserAndRoleService>();
             return services;
         }

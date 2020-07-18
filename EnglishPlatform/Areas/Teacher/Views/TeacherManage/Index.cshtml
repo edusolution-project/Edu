@@ -505,7 +505,7 @@
 
         <b-col class="form-group">
             <label for="">Nhập mật khẩu mới</label>
-            <input class="form-control" v-model="add_member.pass" />
+            <input class="form-control" v-model="add_member.pass" type="password" autocomplete="off" />
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">

@@ -214,7 +214,8 @@
                                     if (_skype.startsWith('http'))
                                         window.open(`${_skype}`, "_blank");
                                     else {
-                                        var link = '@Url.Action("OnlineClass","Home")/' + jsonData.ID
+                                        console.log(jsonData.ID);
+                                        var link = '@Url.Action("OnlineClass","Home")/' + jsonData.ID.replace(" ","")
                                         window.open(`${link}`, "_blank");
                                     }
                                 }

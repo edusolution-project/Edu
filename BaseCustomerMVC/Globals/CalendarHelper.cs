@@ -214,7 +214,7 @@ namespace BaseCustomerMVC.Globals
 
         public CalendarEntity GetByScheduleId(string scheduleID)
         {
-            return _calendarService.CreateQuery().Find(t => t.ScheduleID == scheduleID).SingleOrDefault();
+            return _calendarService.CreateQuery().Find(t => t.ScheduleID == scheduleID).SortByDescending(t => t.ID).FirstOrDefault();
         }
 
         public CalendarEntity GetByEventID(string eventID)
@@ -225,6 +225,11 @@ namespace BaseCustomerMVC.Globals
         public long Remove(string ID)
         {
             return _calendarService.CreateQuery().DeleteMany(t => t.ID == ID).DeletedCount;
+        }
+
+        public long RemoveSchedule(string ScheduleID)
+        {
+            return _calendarService.CreateQuery().DeleteMany(t => t.ScheduleID == ScheduleID).DeletedCount;
         }
 
         [Obsolete]
@@ -250,7 +255,10 @@ namespace BaseCustomerMVC.Globals
             var ourClass = _classService.GetItemByID(item.ClassID);
             if (ourClass == null)
                 return false;
-            var teacher = _teacherService.GetItemByID(ourClass.TeacherID);
+            var classSbj = _classSubjectService.GetItemByID(item.ClassSubjectID);
+            if (classSbj == null)
+                return false;
+            var teacher = _teacherService.GetItemByID(classSbj.TeacherID);
             if (teacher == null)
                 return false;
             CalendarEntity oldItem = _calendarService.CreateQuery().Find(o => o.ScheduleID == item.ID && o.GroupID == item.ClassID)?.FirstOrDefault();

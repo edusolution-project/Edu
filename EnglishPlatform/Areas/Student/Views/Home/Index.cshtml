@@ -3,6 +3,8 @@
     ViewData["Title"] = "Trang chủ - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var student = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
+    BaseCustomerEntity.Database.CenterEntity _center = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity;
+    var allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl)
     {
@@ -24,13 +26,24 @@
     }
 </style>
 <section class="module" id="dashboard_content">
-    <div class="card-header">
-        <div class="flex border-b padding-b25">
-            <h2 class="title">Welcome to <font>EDUSO</font></h2>
-            @*<div class="search-box">
-                    <button><i class="ic ic-find"></i></button>
-                    <input type="text" name="" placeholder="Search">
-                </div>*@
+    <div class="card-header" v-cloak>
+        <div class="flex border-b justify-content-between align-items-start">
+            <div>
+                <h2 class="title">Welcome to <font>@_center.Name</font></h2>
+                <p>
+                    @_center.Description
+                </p>
+            </div>
+            @if (allcenters != null && allcenters.Count > 1)
+            {
+                <select id="owncenter" class="p-1 rounded" onchange="changeCenter()" style="display:none; border: solid 2px green">
+                    @foreach (var ct in allcenters)
+                    {
+                        <option value="@ct.Code">@ct.Name</option>
+                    }
+                </select>
+                @:<script>$(document).ready(function () { $('#owncenter').show().val('@center') });  var changeCenter = function () { document.location = "/" + $('#owncenter').val() + "/teacher" }</script>
+            }
         </div>
     </div>
 

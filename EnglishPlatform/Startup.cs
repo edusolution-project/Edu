@@ -235,22 +235,22 @@ namespace EnglishPlatform
                 );
                 routes.MapRoute(
                     name: "news-recruitment",
-                    template: "tuyen-dung",
+                    template: "tin-tuc/tuyen-dung",
                     defaults: new { controller = "News", action = "Category", catcode = "tuyen-dung" }
                 );
                 routes.MapRoute(
                    name: "news-event",
-                   template: "su-kien",
+                   template: "tin-tuc/su-kien",
                    defaults: new { controller = "News", action = "Category", catcode = "su-kien" }
                );
                 routes.MapRoute(
                     name: "news-product",
-                    template: "san-pham",
+                    template: "tin-tuc/san-pham",
                     defaults: new { controller = "News", action = "Category", catcode = "san-pham" }
                 );
                 routes.MapRoute(
                     name: "news-about-us",
-                    template: "ve-eduso",
+                    template: "tin-tuc/ve-eduso",
                     defaults: new { controller = "News", action = "Detail", catcode = "gioi-thieu", newscode = "ve-eduso" }
                 );
                 routes.MapRoute(

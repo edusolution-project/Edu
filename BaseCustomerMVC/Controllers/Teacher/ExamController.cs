@@ -246,12 +246,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        public IActionResult Detail(DefaultModel model)
+        public IActionResult Detail(DefaultModel model, string basis)
         {
             if (model == null) return null;
             var currentExam = _service.GetItemByID(model.ID);
             if (currentExam == null)
-                return RedirectToAction("Index", "Class");
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
             var lesson = _lessonService.GetItemByID(currentExam.LessonID);
             ViewBag.Lesson = lesson;
             ViewBag.Class = _classService.GetItemByID(currentExam.ClassID);

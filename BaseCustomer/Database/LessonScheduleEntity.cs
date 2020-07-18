@@ -61,6 +61,11 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+        public IEnumerable<LessonScheduleEntity> GetIncomingSchedules(DateTime time, int period, string ClassID)
+        {
+            return Collection.Find(o => o.ClassID == ClassID && o.StartDate >= time && o.StartDate < time.AddMinutes(period)).ToEnumerable();
+        }
+
         public LessonScheduleEntity GetItemByLessonID_ClassSubjectID(string lessonid, string classsubjectid)
         {
             if (string.IsNullOrEmpty(lessonid) || lessonid == "0" || string.IsNullOrEmpty(classsubjectid)) return null;
