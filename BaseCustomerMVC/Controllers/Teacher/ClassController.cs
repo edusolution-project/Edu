@@ -59,7 +59,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly CenterService _centerService;
         private readonly RoleService _roleService;
-
+        private readonly CloneLessonPartService _cloneLessonPartService;
+        private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
+        private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
+        private readonly LessonPartService _lessonPartService;
+        private readonly LessonPartQuestionService _lessonPartQuestionService;
 
         public ClassController(
             AccountService accountService,
@@ -96,7 +100,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ChapterProgressService chapterProgressService,
             CenterService centerService,
             RoleService roleService
-
+            , CloneLessonPartService cloneLessonPartService
+            , CloneLessonPartAnswerService cloneLessonPartAnswerService
+            , CloneLessonPartQuestionService cloneLessonPartQuestionService
+            ,LessonPartService lessonPartService
+            ,LessonPartQuestionService lessonPartQuestionService
             )
         {
             _accountService = accountService;
@@ -141,6 +149,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _chapterProgressService = chapterProgressService;
             _centerService = centerService;
             _roleService = roleService;
+            _cloneLessonPartService = cloneLessonPartService;
+            _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
+            _lessonPartService = lessonPartService;
+            _lessonPartQuestionService = lessonPartQuestionService;
+            _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -1646,5 +1659,38 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Fix Data
 
         #endregion
+
+
+        public IActionResult CheckPoint(DefaultModel model)
+        {
+            if (!string.IsNullOrEmpty(model.ID)) { 
+                ExamEntity data = _examService.GetItemByID(model.ID);
+                if (data != null)
+                {
+                    LessonEntity lesson = _lessonService.GetItemByID(data.LessonID);
+
+                    //TeacherEntity teacher = _teacherService.GetItemByID(data.TeacherID);
+                    //StudentEntity student = _studentService.GetItemByID(data.StudentID);
+
+                    List<ExamDetailEntity> listdata = _examDetailService.CreateQuery().Find(o => o.ExamID == data.ID)?.ToList();
+                    var listQuestionID = listdata.Select(o => o.QuestionID);
+                    var listAnswerID = listdata.Select(o => o.AnswerID);
+                    List<CloneLessonPartEntity> cParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == data.LessonID)?.ToList();
+
+                    List<LessonPartEntity> lParts = _lessonPartService.CreateQuery().Find(o => o.ParentID == data.LessonID)?.ToList();
+                    List<CloneLessonPartAnswerEntity> clAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.ParentID == data.LessonID)?.ToList();
+
+                    List<CloneLessonPartQuestionEntity> clQuestions = _cloneLessonPartQuestionService.CreateQuery().Find(o => listQuestionID.Contains(o.ID))?.ToList();
+                    List<LessonPartQuestionEntity> lQuestions = _lessonPartQuestionService.CreateQuery().Find(o => listQuestionID.Contains(o.ID))?.ToList();
+
+                    ViewBag.Lesson = lesson;
+                    ViewBag.Exam = data;
+                    ViewBag.ExamDetail = listdata;
+                    ViewBag.Questions = clQuestions; //lQuestions;
+                }
+             }
+            ViewBag.Model = model;
+            return View();
+        }
     }
 }

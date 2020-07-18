@@ -1,0 +1,20 @@
+﻿@using BaseCustomerEntity.Database;
+@{
+    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    ExamEntity exam = ViewBag.Exam as ExamEntity;
+    LessonEntity lesson = ViewBag.Lesson;
+    List<ExamDetailEntity> listExamDetails = ViewBag.ExamDetail as List<ExamDetailEntity>;
+    ViewData["Title"] = "CheckPoint";
+}
+    <section class="module" id="dashboard_content">
+        <div class="card-header">
+            <div class="flex mb-2">
+                <h2 class="title">@lesson.Title</h2>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="box">
+
+            </div>
+        </div>
+    </section>
