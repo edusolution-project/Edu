@@ -110,7 +110,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
             ,LessonPartService lessonPartService
-            ,LessonPartQuestionService lessonPartQuestionService
+            ,LessonPartQuestionService lessonPartQuestionService,
             RoleService roleService,
             GroupService groupService
             )

@@ -117,7 +117,7 @@ namespace BaseCustomerMVC.Globals
             message.Attachments.Add(attachment);
         }
 
-        public void SendRegisterEmail(AccountEntity user, string Password)
+        public async Task SendRegisterEmailAsync(AccountEntity user, string Password)
         {
             string subject = "Chúc mừng " + user.Name + " đã đăng ký tài khoản thành công tại Eduso";
             string body = "Chào " + user.Name + "," +

@@ -429,7 +429,7 @@ namespace EnglishPlatform.Controllers
                     var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
                     _accountService.CreateQuery().ReplaceOne(filter, user);
                     ViewBag.Data = user;
-                    _mailHelper.SendRegisterEmail(user, PassWord);
+                    _mailHelper.SendRegisterEmailAsync(user, PassWord);
                     return Json(new ReturnJsonModel
                     {
                         StatusCode = ReturnStatus.SUCCESS,
