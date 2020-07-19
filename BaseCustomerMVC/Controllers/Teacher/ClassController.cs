@@ -1701,26 +1701,41 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ExamEntity data = _examService.GetItemByID(model.ID);
                 if (data != null)
                 {
-                    LessonEntity lesson = _lessonService.GetItemByID(data.LessonID);
+                    List<string> ExamTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "ESSAY" };
 
-                    //TeacherEntity teacher = _teacherService.GetItemByID(data.TeacherID);
-                    //StudentEntity student = _studentService.GetItemByID(data.StudentID);
+                    var lesson = _lessonService.GetItemByID(data.LessonID);
 
-                    List<ExamDetailEntity> listdata = _examDetailService.CreateQuery().Find(o => o.ExamID == data.ID)?.ToList();
-                    var listQuestionID = listdata.Select(o => o.QuestionID);
-                    var listAnswerID = listdata.Select(o => o.AnswerID);
-                    List<CloneLessonPartEntity> cParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == data.LessonID)?.ToList();
+                    var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == data.LessonID && o.ClassID == data.ClassID && ExamTypes.Contains(o.Type)).ToList();
 
-                    List<LessonPartEntity> lParts = _lessonPartService.CreateQuery().Find(o => o.ParentID == data.LessonID)?.ToList();
-                    List<CloneLessonPartAnswerEntity> clAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.ParentID == data.LessonID)?.ToList();
+                    var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
+                    var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+                    var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
+                    var mapExam = new MappingEntity<ExamEntity, ExamReviewViewModel>();
 
-                    List<CloneLessonPartQuestionEntity> clQuestions = _cloneLessonPartQuestionService.CreateQuery().Find(o => listQuestionID.Contains(o.ID))?.ToList();
-                    List<LessonPartQuestionEntity> lQuestions = _lessonPartQuestionService.CreateQuery().Find(o => listQuestionID.Contains(o.ID))?.ToList();
+                    var lessonview = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
+                    {
+                        Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                        {
+                            Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                                .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                                {
+                                    CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
+                                }))?.ToList()
+                        })).ToList()
+                    });
 
-                    ViewBag.Lesson = lesson;
-                    ViewBag.Exam = data;
-                    ViewBag.ExamDetail = listdata;
-                    ViewBag.Questions = clQuestions; //lQuestions;
+                    var examview = mapExam.AutoOrtherType(data, new ExamReviewViewModel()
+                    {
+                        Details = _examDetailService.Collection.Find(t => t.ExamID == data.ID).ToList()
+                    });
+
+                    ViewBag.Lesson = lessonview;
+                    //ViewBag.Class = currentClass;
+                    //ViewBag.Subject = currentCs;
+                    //ViewBag.NextLesson = nextLesson;
+                    //ViewBag.Chapter = chapter;
+                    ViewBag.Type = lesson.TemplateType;
+                    ViewBag.Exam = examview;
                 }
              }
             ViewBag.Model = model;
