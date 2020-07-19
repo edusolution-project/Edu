@@ -253,17 +253,27 @@ var Lesson = (function () {
         //render 2 columns layout base on UIMode
         switch (_UImode) {
             case UIMode.EXAM_ONLY:
-                partsHolder.append($("<div>", { "class": "col-md-4 h-100 main-column pr-2 pl-1", "id": "leftCol" }))
-                    .append($("<div>", { "class": "col-md-8 h-100 main-column pr-1 pl-2", "id": "rightCol" }));
+                partsHolder.append($("<div>", { "class": "col-md-4 h-100 h-responsive main-column pr-2 pl-1", "id": "leftCol" }))
+                    .append($("<div>", { "class": "col-md-8 h-100 h-responsive main-column pr-1 pl-2", "id": "rightCol" }));
                 break;
             default:
-                partsHolder.append($("<div>", { "class": "col-md-6 h-100 main-column pr-2 pl-1", "id": "leftCol" }))
-                    .append($("<div>", { "class": "col-md-6 h-100 main-column pr-1 pl-2", "id": "rightCol" }));
+                partsHolder.append($("<div>", { "class": "col-md-6 h-100 h-responsive main-column pr-2 pl-1", "id": "leftCol" }))
+                    .append($("<div>", { "class": "col-md-6 h-100 h-responsive main-column pr-1 pl-2", "id": "rightCol" }));
                 break;
         }
 
         lessonBody.append(partsHolder);
-        $('.main-column').addClass('scrollbar-outer').scrollbar();
+        if (isMobileDevice()) {
+            console.log("Mobile detected");
+            $('#pills-tabContent').addClass("col-12 m-0 p-0");
+            $('#pills-tabContent .main-column:first-child').addClass("border-right-0");
+        }
+        else {
+            console.log("Desktop detected");
+            $('.main-column').addClass('scrollbar-outer').scrollbar();
+
+        }
+
     }
 
     var renderLessonData = function () {
@@ -433,9 +443,7 @@ var Lesson = (function () {
                 //no header
                 break;
         }
-
         for (var i = 0; data.Part != null && i < data.Part.length; i++) {
-
             var item = data.Part[i];
             switch (item.Type) {
                 case "QUIZ1":
@@ -464,11 +472,12 @@ var Lesson = (function () {
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
                     renderPreviewPart(item);
-                    console.log(item);
+                    //console.log(item);
                 }
                 //if (data.Part != null && data.Part.length == 1) {
                 //    $('.fas.fa-caret-down:first').click();
                 //}
+
                 if (_UImode == UIMode.EXAM_ONLY) {
                     $('#rightCol .tab-pane').each(function () {
                         var media = null;
@@ -885,9 +894,11 @@ var Lesson = (function () {
         else {
             $('#leftCol .fa-caret-down[part=' + _openingPart + ']').focus().click()
         }
-        if ($('.tab-pane.show .QUIZ2').length > 0) {
-            $('.tab-pane.show .QUIZ2').parent().parent().addClass("d-none");
-            $('.tab-pane-quiz.show').parent().parent().addClass("col-md-12");
+        if (_UImode == UIMode.EXAM_ONLY) {
+            if ($('.tab-pane.show .QUIZ2').length > 0) {
+                $('#pills-tabContent>.scroll-wrapper:first').addClass('col-md-12');
+                $('#pills-tabContent>.scroll-wrapper:last').addClass('d-none');
+            }
         }
 
     }
@@ -1111,6 +1122,7 @@ var Lesson = (function () {
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
+                console.log(itemBody);
                 //Render Question
                 totalQuiz = data.Questions.length;
                 var fillquizs = itembox.find("fillquiz");
@@ -2782,11 +2794,10 @@ var Lesson = (function () {
         itembox.append(boxHeader);
 
         var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer", onclick: "toggleExpand(this)" });
-        //$(collapseSwitch).click(function () {
-        //    toggleExpand(this);
-        //});
+       
         //itembox.append(ItemRow);
         switch (data.Type) {
+            default:
             case "TEXT":
                 boxHeader.find(".title").append(collapseSwitch);
                 var itemBody = $("<div>", { "class": "content-wrapper collapsable collapse" });
@@ -3361,7 +3372,6 @@ var Lesson = (function () {
     }
 
     var redoExam = function (obj) {
-
         var lesson_action_holder = $('.top-menu[for=lesson-info]')
         lesson_action_holder.empty()
         console.log("Redo Exam");
@@ -3509,11 +3519,14 @@ var Lesson = (function () {
         //    dataform.append("LessonPartID", partID);
         //    dataform.append("AnswerValue", value);
         //}
-        Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
-        })
-            .catch(function (err) {
-                notification("error", err, 3000);
-            });
+
+        if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
+            Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
+            })
+                .catch(function (err) {
+                    notification("error", err, 3000);
+                });
+        }
         if (value == "") {
             delAnswerForStudent(questionId);
         } else {
@@ -4062,3 +4075,6 @@ var toggleExpand = function (obj) {
 
 }
 
+var isMobileDevice = function () {
+    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+};

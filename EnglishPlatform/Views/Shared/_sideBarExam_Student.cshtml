@@ -62,16 +62,17 @@
         background: #FFF;
         border-bottom-color: #CCC;
     }
-        .top-menu:hover > a {
-            color: #d03239 !important;
-        }
 
-        .top-menu[for=path_menu].active > a,
-        .top-menu[for=path_menu]:hover > a {
-            border-radius: 10px 10px 0 0;
-            border: solid 1px #CCC !important;
-            border-bottom: transparent !important;
-        }
+    .top-menu:hover > a {
+        color: #d03239 !important;
+    }
+
+    .top-menu[for=path_menu].active > a,
+    .top-menu[for=path_menu]:hover > a {
+        border-radius: 10px 10px 0 0;
+        border: solid 1px #CCC !important;
+        border-bottom: transparent !important;
+    }
 
 
     .top-menu .sub-menu {
@@ -255,7 +256,7 @@
 
         .menu-bar .btn-primary:focus {
             outline: none;
-            box-shadow:none;
+            box-shadow: none;
         }
 
 
@@ -267,15 +268,14 @@
             color: #007bff;
         }
 
-        .menu-bar .btn-primary:disabled
-        {
-            color:#999;
+        .menu-bar .btn-primary:disabled {
+            color: #999;
             opacity: 0.4;
         }
 
-        .menu-bar .btn-primary:disabled:hover {
-            cursor: default;
-        }
+            .menu-bar .btn-primary:disabled:hover {
+                cursor: default;
+            }
 </style>
 <aside class="d-flex justify-content-start bg-white" id="sidebar">
     <div class="menu-bar w-100">
@@ -296,14 +296,7 @@
                     </div>
                 </div>
             </li>
-            @*<li for="quiz" class="top-menu">
-            <a title="Câu hỏi">
-                <i class="ic far fa-question-circle"></i>Câu hỏi
-            </a>
-        </li>*@
             <li for="lesson-info" class="top-menu flex-grow-1 d-flex justify-content-end">
-                @*<div class="action-holder">
-            </div>*@
             </li>
             <div id="QuizNav" style="z-index:-1"></div>
         </ul>

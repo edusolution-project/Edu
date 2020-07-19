@@ -28,26 +28,24 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header" v-cloak>
-        <div class="flex border-b padding-b25 justify-content-between">
-            <div class="flex">
-                <div class="box filter-box w-152">
-                    <select v-model="subject">
-                        <option value="">Chương trình</option>
-                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="box filter-box w-152">
-                    <select name="" v-model="grade">
-                        <option value="">Cấp độ</option>
-                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="search-box">
-                    <button><i class="ic ic-find"></i></button>
-                    <input type="text" name="" v-model="searchTerm" placeholder="Tên bài giảng cần tìm">
-                </div>
+        <div class="flex flex-row border-b flex-wrap align-items-center">
+            <div class="box filter-box w-152 m-1 ">
+                <select v-model="subject">
+                    <option value="">Chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
             </div>
-            <b-button class="btn-addevent" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
+            <div class="box filter-box w-152 m-1">
+                <select name="" v-model="grade">
+                    <option value="">Cấp độ</option>
+                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="search-box m-1">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" v-model="searchTerm" placeholder="Tên bài giảng cần tìm">
+            </div>
+            <b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
         </div>
     </div>
     <div class="card-body" v-cloak>
@@ -504,7 +502,7 @@
                     }
                 },
                 errorImgUrl() {
-                 
+
                 },
                 chooseFile(obj) {
                     $(obj).siblings("input[type=file]").focus().click()

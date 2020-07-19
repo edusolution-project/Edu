@@ -357,14 +357,18 @@ namespace EnglishPlatform.Controllers
         public JsonResult FixName()
         {
             var groups = _groupService.GetAll().ToEnumerable();
-            foreach(var group in groups)
+            foreach (var group in groups)
             {
-                var @class = _classService.GetItemByID(group.Name);
-                if(@class != null)
+                try
                 {
-                    _groupService.UpdateGroupDisplayName(group.Name, @class.Name);
-                }    
-            }    
+                    var @class = _classService.GetItemByID(group.Name);
+                    if (@class != null)
+                    {
+                        _groupService.UpdateGroupDisplayName(group.Name, @class.Name);
+                    }
+                }
+                catch { }
+            }
             return NotFoundData();
         }
         #endregion

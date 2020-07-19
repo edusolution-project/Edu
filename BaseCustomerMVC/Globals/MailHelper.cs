@@ -98,7 +98,7 @@ namespace BaseCustomerMVC.Globals
                 _mailLogService.Save(maillog);
                 return ResultState.OK;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return ResultState.ERR;
             }
@@ -117,7 +117,7 @@ namespace BaseCustomerMVC.Globals
             message.Attachments.Add(attachment);
         }
 
-        public async Task SendRegisterEmailAsync(AccountEntity user, string Password)
+        public async Task SendRegisterEmail(AccountEntity user, string Password)
         {
             string subject = "Chúc mừng " + user.Name + " đã đăng ký tài khoản thành công tại Eduso";
             string body = "Chào " + user.Name + "," +
@@ -132,7 +132,27 @@ namespace BaseCustomerMVC.Globals
 
         public async Task SendResetPassConfirm(AccountEntity user, string resetLink)
         {
+            string subject = "Xác nhận yêu cầu đổi mật khẩu đăng nhập tại Eduso";
+            string body = "Chào " + user.Name + "," +
+                "<p>Bạn hoặc ai đó đã yêu cầu thay đổi mật khẩu đăng nhập tại website Eduso.vn</p>" +
+                "<p>Vui lòng click vào link xác thực gửi kèm để xác nhận yêu cầu đổi mật khẩu</p>" +
+                "<p><i><a href='" + resetLink + ">" + resetLink + "</a></i></p>" +
+                "<p>Nếu bạn không thực hiện yêu cầu trên, vui lòng liên hệ với quản trị hệ thống để được trợ giúp.<p>" +
+                "<p><a href='https://eduso.vn'>Eduso.vn</a><p>";
+            var toAddress = new List<string> { user.UserName };
+            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.RESET_PASS, bccAddressses: new List<string> { _defaultSender });
+        }
 
+        public async Task SendPasswordChangeNotify(AccountEntity user)
+        {
+            string subject = "Xác nhận đổi mật khẩu đăng nhập tại Eduso";
+            string body = "Chào " + user.Name + "," +
+                "<p>Tài khoản đăng nhập của bạn vừa được thay đổi mật khẩu.</p>" +
+                "<p>Vui lòng bỏ qua email này nếu bạn đã thực hiện thao tác trên.</p>" +
+                "<p>Nếu người thực hiện thao tác trên không phải là bạn, vui lòng liên hệ với quản trị hệ thống để được trợ giúp.<p>" +
+                "<p><a href='https://eduso.vn'>Eduso.vn</a><p>";
+            var toAddress = new List<string> { user.UserName };
+            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.RESET_PASS, bccAddressses: new List<string> { _defaultSender });
         }
 
         public async Task SendTeacherJoinCenterNotify(string Name, string Email, string VisiblePassword, string centerName)

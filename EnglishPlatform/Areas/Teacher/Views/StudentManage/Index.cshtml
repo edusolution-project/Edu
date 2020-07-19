@@ -26,7 +26,7 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header" v-cloak>
-        <div class="flex border-b flex-wrap">
+        <div class="flex flex-row border-b flex-wrap align-items-center">
             @*<div class="flex flex-grow-1 mb-2">*@
             <div class="box filter-box w-152 m-1">
                 <autocomplete v-on:chooseitem="chooseClass" :items="list_ac_class" v-on:input="autocompleteClass" :plhd="'Nhập để tìm lớp'" />
@@ -122,7 +122,7 @@
 
     <style>
         .card-header .search-box {
-            width: auto;
+            width: 100%;
         }
 
         #app {
