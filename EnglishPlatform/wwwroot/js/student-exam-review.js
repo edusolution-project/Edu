@@ -98,8 +98,9 @@ var ExamReview = (function () {
         renderExam();
         renderQuizCounter();
         renderResult();
-
-        $('.tab-pane .part-column').addClass('scrollbar-outer').scrollbar();
+        if (!config.isTeacher) {
+            $('.tab-pane .part-column').addClass('scrollbar-outer').scrollbar();
+        }
     }
 
     var renderExam = function () {

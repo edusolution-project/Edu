@@ -62,6 +62,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly CenterService _centerService;
         private readonly RoleService _roleService;
+        private readonly CloneLessonPartService _cloneLessonPartService;
+        private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
+        private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
+        private readonly LessonPartService _lessonPartService;
+        private readonly LessonPartQuestionService _lessonPartQuestionService;
 
         private readonly GroupService _groupService;
 
@@ -100,9 +105,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             MailHelper mailHelper,
 
             ChapterProgressService chapterProgressService,
-            CenterService centerService,
+            CenterService centerService
+            , CloneLessonPartService cloneLessonPartService
+            , CloneLessonPartAnswerService cloneLessonPartAnswerService
+            , CloneLessonPartQuestionService cloneLessonPartQuestionService
+            ,LessonPartService lessonPartService
+            ,LessonPartQuestionService lessonPartQuestionService,
             RoleService roleService,
-
             GroupService groupService
             )
         {
@@ -147,6 +156,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _chapterProgressService = chapterProgressService;
             _centerService = centerService;
             _roleService = roleService;
+            _cloneLessonPartService = cloneLessonPartService;
+            _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
+            _lessonPartService = lessonPartService;
+            _lessonPartQuestionService = lessonPartQuestionService;
+            _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
             _groupService = groupService;
         }
 
@@ -1685,5 +1699,53 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #region Fix Data
 
         #endregion
+
+
+        public IActionResult CheckPoint(DefaultModel model)
+        {
+            if (!string.IsNullOrEmpty(model.ID)) { 
+                ExamEntity data = _examService.GetItemByID(model.ID);
+                if (data != null)
+                {
+                    List<string> ExamTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "ESSAY" };
+
+                    var lesson = _lessonService.GetItemByID(data.LessonID);
+
+                    var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == data.LessonID && o.ClassID == data.ClassID && ExamTypes.Contains(o.Type)).ToList();
+
+                    var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
+                    var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+                    var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
+                    var mapExam = new MappingEntity<ExamEntity, ExamReviewViewModel>();
+
+                    var lessonview = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
+                    {
+                        Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                        {
+                            Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                                .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                                {
+                                    CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
+                                }))?.ToList()
+                        })).ToList()
+                    });
+
+                    var examview = mapExam.AutoOrtherType(data, new ExamReviewViewModel()
+                    {
+                        Details = _examDetailService.Collection.Find(t => t.ExamID == data.ID).ToList()
+                    });
+
+                    ViewBag.Lesson = lessonview;
+                    //ViewBag.Class = currentClass;
+                    //ViewBag.Subject = currentCs;
+                    //ViewBag.NextLesson = nextLesson;
+                    //ViewBag.Chapter = chapter;
+                    ViewBag.Type = lesson.TemplateType;
+                    ViewBag.Exam = examview;
+                }
+             }
+            ViewBag.Model = model;
+            return View();
+        }
     }
 }
