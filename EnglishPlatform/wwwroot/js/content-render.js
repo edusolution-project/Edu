@@ -3507,7 +3507,7 @@ var Lesson = (function () {
             dataform.append("AnswerID", answerID);
             dataform.append("QuestionID", questionId);
         dataform.append("AnswerValue", value);
-        debugger;
+        //debugger;
         var files = document.querySelector("input[type='file']") != null ? document.querySelector("input[type='file']").files : null;
         if (files) {
             for (var i = 0; i < files.length; i++) {

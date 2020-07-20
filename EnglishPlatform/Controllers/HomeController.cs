@@ -623,6 +623,9 @@ namespace EnglishPlatform.Controllers
         public IActionResult OnlineClass(string ID)
         {
             var @event = _calendarHelper.GetByEventID(ID);
+            var teacher = _teacherService.GetItemByID(@event.TeacherID);//check teacher of class
+            if (teacher == null)
+                throw (new Exception("Teacher not found"));
             if (@event != null)
             {
                 //@event.UrlRoom = "6725744943";
@@ -632,7 +635,7 @@ namespace EnglishPlatform.Controllers
                 if (type == "teacher")
                 {
                     //ViewBag.Role = "1";
-                    var teacher = _teacherService.GetItemByID(UserID);
+                    //var teacher = _teacherService.GetItemByID(UserID);
                     //if (!string.IsNullOrEmpty(teacher.ZoomID))
                     if (teacher.ZoomID == @event.UrlRoom)
                     {
@@ -646,7 +649,7 @@ namespace EnglishPlatform.Controllers
                 else
                 {
                     //ViewBag.Role = "0";
-                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "").Replace(" ", "") });
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = (string.IsNullOrEmpty(teacher.ZoomID) ? @event.UrlRoom : teacher.ZoomID).Replace("-", "").Replace(" ", "") });
                 }
             }
             return View();

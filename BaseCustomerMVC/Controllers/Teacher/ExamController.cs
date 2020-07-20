@@ -6,7 +6,9 @@ using Core_v2.Interfaces;
 using FileManagerCore.Globals;
 using FileManagerCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
@@ -120,7 +122,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 // 2 - lay danh sach student theo lesson
                 // 3 - lay chi tiet bai 
                 var list = _service.CreateQuery().Find(o => o.ClassID == ClassID)?.ToList()?
-                    .GroupBy(o => new { o.LessonID}).Select(r => new ExamEntity { ID = r.Max(t => t.ID), LessonID = r.Key.LessonID })?.ToList();
+                    .GroupBy(o => new { o.LessonID }).Select(r => new ExamEntity { ID = r.Max(t => t.ID), LessonID = r.Key.LessonID })?.ToList();
                 var returnData = (from r in list
                                   let exam = _service.GetItemByID(r.ID)
                                   let student = _studentService.GetItemByID(exam.StudentID)
@@ -152,6 +154,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(response);
             }
         }
+
         [System.Obsolete]
         [HttpPost]
         [HttpGet]
@@ -172,7 +175,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         { "Data", null },
                         {"Error", "Data Error" }
                     });
-                var examdetails = _examDetailService.Collection.Find(o=>o.ExamID == exam.ID)?.ToList();
+                var examdetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID)?.ToList();
 
                 if (examdetails == null || examdetails.Count() == 0)
                 {
@@ -246,6 +249,46 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        public JsonResult GetLessonProgressList(string ID)
+        {
+            var result = new List<StudentLessonResultViewModel>();
+            var lesson = _lessonService.GetItemByID(ID);
+            if (lesson == null)
+                return Json("No data");
+            var listStudent = _studentService.GetStudentsByClassId(lesson.ClassID);
+            if (listStudent != null && listStudent.Count() > 0)
+            {
+                foreach (var student in listStudent)
+                {
+                    var examresult = _service.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == lesson.ID).SortByDescending(t => t.ID).ToList();
+                    var tried = examresult.Count();
+                    var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
+                    var minpoint = tried == 0 ? 0 : examresult.Min(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
+                    var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
+
+                    var lastEx = examresult.FirstOrDefault();
+                    result.Add(new StudentLessonResultViewModel(student)
+                    {
+                        LastTried = lastEx?.Created ?? new DateTime(1900, 1, 1),
+                        MaxPoint = maxpoint,
+                        MinPoint = minpoint,
+                        AvgPoint = avgpoint,
+                        TriedCount = tried,
+                        LastPoint = lastEx != null ? (lastEx.QuestionsTotal > 0 ? lastEx.QuestionsPass * 100 / lastEx.QuestionsTotal : 0) : 0,
+                        IsCompleted = lastEx != null && lastEx.Status,
+                        ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList()
+                    });
+                }
+            }
+
+            var response = new Dictionary<string, object>
+                {
+                    { "Data", result }
+                };
+            return new JsonResult(response);
+        }
+
+
         public IActionResult Detail(DefaultModel model, string basis)
         {
             if (model == null) return null;
@@ -261,7 +304,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, [FromForm] bool isLast)
         {
-            try {
+            try
+            {
                 var oldItem = _examDetailService.GetItemByID(ID);
 
                 Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadNewFeed("UpdatePoint", HttpContext);
@@ -297,12 +341,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldItem.RealAnswerValue = RealAnswerValue;
                 oldItem.Point = Point;
                 _examDetailService.CreateOrUpdate(oldItem);
-                
+
                 if (isLast)
                 {
                     var currentExam = _service.GetItemByID(oldItem.ExamID);
                     currentExam.Marked = true;
-                    _service.CreateQuery().UpdateOne(Builders<ExamEntity>.Filter.Eq(o => o.ID, oldItem.ExamID),Builders<ExamEntity>.Update.Set(o=>o.Marked, true));
+                    _service.CreateQuery().UpdateOne(Builders<ExamEntity>.Filter.Eq(o => o.ID, oldItem.ExamID), Builders<ExamEntity>.Update.Set(o => o.Marked, true));
                     currentExam.Marked = true;
                     currentExam.Updated = DateTime.Now;
                     var lesson = _lessonService.GetItemByID(currentExam.LessonID);
@@ -348,7 +392,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 };
                 return new JsonResult(response);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var response = new Dictionary<string, object>
                 {

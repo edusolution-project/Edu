@@ -201,9 +201,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var subjectIDs = subjects.Select(t => t.SubjectID).Distinct();
             vm.SkillName = string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList());
             vm.SubjectName = string.Join(", ", _subjectService.Collection.Find(t => subjectIDs.Contains(t.ID)).Project(t => t.Name).ToList());
+            vm.TotalStudents = _studentService.CountByClass(currentClass.ID);
             ViewBag.Class = vm;
             ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
             ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
+            return View();
+        }
+
+        public IActionResult CheckPoint(DefaultModel model, string basis, string ExamID)
+        {
             return View();
         }
 
@@ -554,7 +560,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    return new JsonResult(response);
         //}
 
-        public JsonResult GetListTeacher(string SubjectID = "")
+        public JsonResult GetListTeacher(string basis, string SubjectID = "")
         {
             var filter = new List<FilterDefinition<TeacherEntity>>();
 
@@ -562,7 +568,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (string.IsNullOrEmpty(SubjectID))
                 return new JsonResult(new Dictionary<string, object> { });
-
+            filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Centers.Any(c => c.Code == basis)));
             filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Subjects.Contains(SubjectID)));
             var teachers = _teacherService.Collection.Find(Builders<TeacherEntity>.Filter.And(filter));
             var response = new Dictionary<string, object>
@@ -1251,8 +1257,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (mustUpdateName)
                 {
                     var change = _groupService.UpdateGroupDisplayName(oldData.ID, oldData.Name);
-                }    
-                    
+                }
+
                 //refresh class total lesson => no need
                 _ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
 

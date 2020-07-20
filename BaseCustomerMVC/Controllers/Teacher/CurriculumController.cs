@@ -1461,26 +1461,44 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult("OK");
         }
 
+        /*
+        * Hòa thêm
+        */
         [HttpPost]
-        public async Task<JsonResult> CopyLesson(string ArrID)
+        public async Task<JsonResult> CopyLesson(string ArrID, string Title, string ChapterID, string CourseID)
         {
-            var orgLesson = _lessonService.GetItemByID(ArrID);
-            if (orgLesson == null)
+            var orgLesson = _lessonService.Collection.Find(tbl => tbl.ID.Equals(ArrID)).FirstOrDefault();
+            if (orgLesson.ChapterID.Equals(ChapterID))
             {
-                return new JsonResult(new Dictionary<string, object>
-                    {
-                        {"Error", "Không tìm thấy bài học" }
-                    });
+                await CloneLesson(new LessonEntity(orgLesson)
+                {
+                    Order = (int)_lessonService.CountChapterLesson(orgLesson.ChapterID) + 1,
+                    Title = Title,
+                }, orgLesson.CreateUser); ;
+                await _chapterService.IncreaseLessonCount(orgLesson.ChapterID, 1);
+                return new JsonResult("OK");
             }
-
-            await CloneLesson(new LessonEntity(orgLesson, "(Copy)")
+            else
             {
-                Order = (int)_lessonService.CountChapterLesson(orgLesson.ChapterID) + 1,
-            }, orgLesson.CreateUser);
-            await _chapterService.IncreaseLessonCount(orgLesson.ID, 1);
-            return new JsonResult("OK");
-        }
+                //CourseLessonEntity item = new CourseLessonEntity();
 
+                //item.CourseID = CourseID;
+                //item.ChapterID = ChapterIDs;
+                //item.Title = Title;
+                //item.Created = DateTime.Now;
+                //CreateOrUpdateLesson(item);
+                var oldChapID = orgLesson.ChapterID;
+                await CloneLesson(new LessonEntity(orgLesson)
+                {
+                    Order = (int)_lessonService.CountChapterLesson(ChapterID) + 1,
+                    ChapterID = ChapterID,
+                    Title = Title
+                }, orgLesson.CreateUser);
+                await _chapterService.IncreaseLessonCount(oldChapID, -1);
+                await _chapterService.IncreaseLessonCount(orgLesson.ChapterID, 1);
+                return new JsonResult("OK");
+            }
+        }
         private async Task CloneModChapter(ChapterEntity item, string _userCreate)
         {
             _chapterService.Collection.InsertOne(item);

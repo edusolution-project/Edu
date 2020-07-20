@@ -332,7 +332,7 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult CreateDetail(ExamDetailEntity item)
+        public JsonResult CreateDetail(string basis, ExamDetailEntity item)
         {
             if (item.ExamID == null)
             {

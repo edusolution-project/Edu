@@ -18,6 +18,8 @@ namespace BaseCustomerMVC.Models
         public string GradeName { get; set; }
         [JsonProperty("TeacherName")]
         public string TeacherName { get; set; }
+        [JsonProperty("TotalStudents")]
+        public long TotalStudents { get; set; }
 
         public ClassViewModel(ClassEntity item)
         {
