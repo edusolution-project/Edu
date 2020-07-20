@@ -69,7 +69,7 @@
 </div>
 
 <div class="form-event form-event-class" id="form-event-class">
-    <div class="header-form-event">Thêm lớp học trực tuyến  <button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button></div>
+    <div class="header-form-event">Thông tin lớp học trực tuyến<button class="btn btn-o btn-close-event" onclick="javascript: document.body.classList.remove('open-add-event'); document.body.classList.remove('open-add-event-class');" style="position: absolute;top: 0;right: 0;bottom: 0;width: 50px;height: 30px;">X</button></div>
     <div class="body-form-event">
         <input type="hidden" name="ID" value="" />
         <input type="hidden" name="Status" value="5" />
@@ -103,7 +103,7 @@
             <label for="Content">Link lớp học </label>
             @if (currentTeacher != null)
             {
-                ZoomUrl = string.IsNullOrEmpty(currentTeacher.ZoomID) ? "" : "https://zoom.us/wc/" + currentTeacher.ZoomID.Replace("-", "") + "/start";
+                ZoomUrl = string.IsNullOrEmpty(currentTeacher.ZoomID) ? "" : "https://zoom.us/j/" + currentTeacher.ZoomID.Replace("-", "");
             }
             <input type="text" name="UrlRoom" value="@ZoomUrl" class="form-control" placeholder="appear / zoom / skype join">
         </div>
@@ -175,6 +175,8 @@
                 if (data != null) {
                     var jsonData = JSON.parse(data);
 
+                    console.log(jsonData);
+
                     var formEventxxx = document.getElementById("form-event-class");
                     if (formEventxxx != null) {
                         formEventxxx.classList.remove("show_go_to_class");
@@ -193,6 +195,7 @@
 
                     if ((jsonData.CreateUser == "@User.FindFirst("UserID")?.Value" && jsonData.ScheduleID == null) ||
                         (jsonData.TeacherID == "@User.FindFirst("UserID")?.Value" && jsonData.ScheduleID != null)) {
+
                         if (jsonData.Status != 5) {
                             document.body.classList.add("open-add-event");
                             var startDate = new Date(jsonData.StartDate);
@@ -202,7 +205,7 @@
                             var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
                             var formEvent = document.getElementById("form-event");
                             var bodyEvent = formEvent.querySelector(".body-form-event");
-                            
+
                             bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
                             if (bodyEvent != null) {
                                 var Title = bodyEvent.querySelector("input[name='Title']");
@@ -231,7 +234,6 @@
                                 // cho phép xóa
                             }
                         } else {
-
                             //teacher show
                             document.body.classList.add("open-add-event-class");
                             var startDate = new Date(jsonData.StartDate);
@@ -244,12 +246,16 @@
                             //longht them
                             var btnMo = formEvent.querySelector("button#btn-mo-bai-hoc");
                             var btnOnline = formEvent.querySelector("button#btn-vao-lop-online");
-                            if (jsonData.LinkLesson != null && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "" && jsonData.LinkLesson != "null") {
+                            console.log(jsonData);
+                            if (jsonData.LinkLesson != null && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "" && jsonData.LinkLesson != "null")
+                            {
                                 if (btnMo != null) {
                                     btnMo.setAttribute("data-url", `/@center${jsonData.LinkLesson}`);
                                     btnMo.removeAttribute("style");
                                 }
-                            } else {
+                            }
+                            else
+                            {
                                 if (btnMo != null) {
                                     btnMo.removeAttribute("data-url");
                                     btnMo.style.display = "none";
@@ -290,7 +296,7 @@
                                 if (select != null) {
                                     select.value = jsonData.GroupID;
                                 }
-                               
+
 
                                 formEvent.classList.remove("view-form");
                                 formEvent.classList.add("edit-form");

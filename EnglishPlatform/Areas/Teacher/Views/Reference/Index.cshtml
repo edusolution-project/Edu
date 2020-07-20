@@ -27,36 +27,32 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header" v-cloak>
-        <div class="flex border-b padding-b25">
-            <div class="width-100 flex">
-                <div class="box filter-box w-152">
-                    <select v-model="range">
-                        <option value="">-- Chọn phạm vi chia sẻ --</option>
-                        <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
-                        <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
-                        <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
-                        @*<option value="@BaseCustomerEntity.Database.REF_RANGE.CLASSSUBJECT">Môn</option>*@
-                    </select>
-                </div>
-                <div class="box filter-box w-152" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
-                    <select v-model="target">
-                        <option value="">-- Chọn lớp --</option>
-                        @if (myClasses != null && myClasses.Count > 0)
-                        {
-                            foreach (var _class in myClasses)
-                            {
-                                <option value="@_class.ID">@_class.Name</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="search-box mr-2">
-                    <button><i class="ic ic-find"></i></button>
-                    <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
-                </div>
+        <div class="flex border-b flex-wrap align-items-center">
+            <div class="box filter-box m-1 col-12 col-md-3">
+                <select v-model="range">
+                    <option value="">-- Chọn phạm vi chia sẻ --</option>
+                    <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
+                    <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
+                    <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
+                </select>
             </div>
-
-            <b-button class="btn-addevent" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
+            <div class="box filter-box m-1 col-12 col-md-3" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+                <select v-model="target">
+                    <option value="">-- Chọn lớp --</option>
+                    @if (myClasses != null && myClasses.Count > 0)
+                    {
+                        foreach (var _class in myClasses)
+                        {
+                            <option value="@_class.ID">@_class.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="search-box m-1 col-12 col-md-3">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
+            </div>
+            <b-button class="btn-addevent col-12 col-md-2 ml-auto" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
         </div>
     </div>
     <div class="card-body" v-cloak>

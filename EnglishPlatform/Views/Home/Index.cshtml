@@ -1,15 +1,28 @@
 ﻿
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Trang chủ";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="top-banner">
+<div id="app">
+    <agile :initial-slide="3" :autoplay-speed="5000" :speed="2500" fade pause-on-hover pause-on-dots-hover autoplay v-if="items.length > 0">
+        <img v-for="item in items" class="slide" :src="item" style="max-height:500px;max-width:1366px" />
+        <template slot="prevButton">
+            <i class="fas fa-chevron-left"></i>
+        </template>
+        <template slot="nextButton">
+            <i class="fas fa-chevron-right"></i>
+        </template>
+    </agile>
 </div>
+<br>
+
+<!-- The dots/circles -->
+
 <div class="about-us mt-5 mb-5">
     <div class="inner-content">
         <div class="content-box">
             <div class="box-title text-left">
-                Về Eduso
+                <a href="@Url.RouteUrl("news-about-us")" style="font-size: 32px; line-height: 44px; color: #05517B; display: inline-block; font-weight: 600;text-decoration:none"> Về Eduso</a>
                 <div class="underline w-50"></div>
             </div>
             <div class="content">
@@ -22,7 +35,7 @@
     <div class="inner-content d-flex">
         <div class="content-box text-center">
             <div class="box-title text-center">
-                Chúng tôi giúp gì cho bạn
+                <a href="/chung-toi-giup-gi-cho-ban/" style="font-size: 32px; line-height: 44px; color: #05517B; display: inline-block; font-weight: 600;text-decoration:none">Chúng tôi giúp gì cho bạn</a>
                 <div class="underline w-50"></div>
             </div>
             <div class="d-flex flex-column flex-md-row" style="width: 100%">
@@ -33,7 +46,10 @@
                     <div class="title">
                         Học sinh
                     </div>
-                    <div class="content">
+                    <div class="content" style="max-height:65px;max-width:350px;overflow:hidden">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </div>
                 </div>
@@ -44,7 +60,7 @@
                     <div class="title">
                         Giáo viên
                     </div>
-                    <div class="content">
+                    <div class="content" style="max-height:65px;max-width:350px;overflow:hidden">
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </div>
                 </div>
@@ -55,7 +71,7 @@
                     <div class="title">
                         Quản lý
                     </div>
-                    <div class="content">
+                    <div class="content" style="max-height:65px;max-width:350px;overflow:hidden">
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </div>
                 </div>
@@ -66,16 +82,32 @@
 <div class="our-product-top d-none d-md-block"></div>
 <div class="our-product">
     <div class="inner-content d-block d-md-flex justify-content-md-between" style="width:100%;">
-        <div class="media">
-            <img src="~/images/Product.png" />
+        <div class="media" style="">
+            @*<img src="/Upload/News/132358189348479311_WINDOWS_10_microsoft_computer_3840x2160.jpg" style="margin:auto"/>*@
+            @*<iframe width="560" height="315" src="https://www.youtube.com/embed/EjZY-uK41Yw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>*@
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLEfslnTHZZmdw_o_S65Q5jGWD-IxLaCyk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
-        <div class="content-box">
+        <div class="content-box" style="height: 300px;overflow: hidden;font-family: Open Sans;">
             <div class="box-title text-left">
-                Sản phẩm
-                <div class="underline w-50"></div>
+                <a href="/san-pham/" )" style="font-size: 32px; line-height: 44px; color: #05517B; display: inline-block; font-weight: 600;text-decoration:none;margin-left:10px"> Sản phẩm</a>
+                <div class="underline w-50" style="margin-left:10px"></div>
             </div>
             <div class="content text-justify">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                <div class="col-sm-12" style="padding-bottom:10px">
+                    <span style="font-size:22px;font-weight:bold">Sản phẩm 1: </span> <span style="font-size:18px;">
+                        Nền tảng quản lý học tập ngoại ngữ trong đào tạo kết hợp online và offline
+                    </span>
+                </div>
+                <div class="col-sm-12" style="padding-bottom:10px">
+                    <span style="font-size:22px;font-weight:bold">Sản phẩm 2: </span> <span style="font-size:18px;">
+                        Nền tảng booking học Online Tiếng Anh qua Zoom - Skype(giống Grap)
+                    </span>
+                </div>
+                <div class="col-sm-12" style="padding-bottom:10px">
+                    <span style="font-size:22px;font-weight:bold">Sản phẩm 3: </span> <span style="font-size:18px;">
+                        Tư vấn xây dựng chương trình đào tạo tích hợp (Kỹ năng và kiến thức), đào tạo giáo viên về phương pháp dạy học tích cực và đánh giá theo chuẩn đầu ra.
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -90,24 +122,28 @@
             <div class="box-title text-center text-white">
                 Đăng ký dùng thử miễn phí
             </div>
-            <div class="trial-form">
-                <div>
-                    <label>Họ và tên</label>
-                    <input type="text" class="form-control" />
-                </div>
-                <div>
-                    <label>Số điện thoại</label>
-                    <input type="text" class="form-control" />
-                </div>
-                <div>
-                    <label>Địa chỉ</label>
-                    <input type="text" class="form-control" />
-                </div>
+            <form name="cform" id="cform" target="_self" onsubmit="return postToGoogle();" action="">
+                <div class="trial-form">
 
-            </div>
-            <div class="text-center">
-                <button> Đăng ký ngay</button>
-            </div>
+                    <div>
+                        <label>Họ và tên</label>
+                        <input type="text" class="form-control" name="entry.1872061179" id="nameField" required />
+                    </div>
+                    <div>
+                        <label>Số điện thoại</label>
+                        <input type="text" class="form-control" name="entry.1629149102" id="phoneNumberField" required />
+                    </div>
+                    <div>
+                        <label>Địa chỉ</label>
+                        <input type="text" class="form-control" name="entry.1747641881" id="addressField" required />
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="submit" id="send" name="send"> Đăng ký ngay</button>
+                </div>
+            </form>
+
+            @*<h3 id="success-msg" class="text-center" style="display: none;"> Your Message has been sended!</h3>*@
         </div>
     </div>
 </div>
@@ -119,149 +155,56 @@
                 <div class="underline w-50"></div>
             </div>
             <div class="categories">
-                <a href="#" class="active">Sự kiện</a> |
-                <a href="#">Ngôi sao đổi mới</a> |
-                <a href="#">Chuyện Nghề </a> |
-                <a href="#">Câu chuyện đối tác</a>
+                <a href="/tin-tuc/su-kien" class="active">Sự kiện</a> |
+                <a href="/tin-tuc/ngoi-sao-doi-moi">Ngôi sao đổi mới</a> |
+                <a href="/tin-tuc/chuyen-nghe">Chuyện Nghề </a> |
+                <a href="/tin-tuc/cau-chuyen-doi-tac">Câu chuyện đối tác</a>
 
             </div>
-            <div class="news-list d-flex flex-column flex-md-row pt-3" style="border-top:solid 0.5px #CCC">
+
+            <!--News-->
+            <div class="news-list d-flex flex-column flex-md-row pt-3" style="border-top:solid 0.5px #CCC" id="news">
+                <!--Tin Top-->
                 <div class="news-hot media-body pr-md-4" style="border-right:solid 0.5px #CCC">
-                    <div class="news-item w-100 pb-3">
+                    <div class="news-item w-100 pb-3" v-for="item in newshot">
                         <div class="thumb w-100 pb-2">
-                            <a href="#">
-                                <img src="~/images/news1.png" class="w-100" />
+                            <a :href="'/tin-tuc/tin-tuc/' + item.Code">
+                                <img v-bind:src="'/Upload/News/' + item.Thumbnail" class="w-100" style="max-width:100%;max-height:100%" />
                             </a>
                         </div>
                         <div class="news-title">
-                            <a href="#">
-                                Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                            <a :href="'/tin-tuc/tin-tuc/'+item.Code">
+                                {{item.Title}}
                             </a>
                         </div>
                         <div class="news-desc">
-                            Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
+                            {{item.Summary}}
                         </div>
                         <div class="news-time">
-                            12/08/2019
-                        </div>
-                    </div>
-                    <div class="news-item w-100 pb-3 pt-3">
-                        <div class="thumb w-100 pb-2">
-                            <a href="#">
-                                <img src="~/images/news2.png" />
-                            </a>
-                        </div>
-                        <div class="news-title">
-                            <a href="#">
-                                Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                            </a>
-                        </div>
-                        <div class="news-desc">
-                            Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                        </div>
-                        <div class="news-time">
-                            12/08/2019
+                            {{moment(String(item.PublishDate)).format('MM-DD-YYYY')}}
                         </div>
                     </div>
                 </div>
+
+                <!--Tin Hot-->
                 <div class="news-top  media-body pl-md-4">
-                    <div class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb">
-                            <a href="#">
-                                <img src="~/images/news3.png" />
+                    <div class="news-item pb-3 pt-3 d-flex" v-for="item in newstop">
+                        <div class="thumb" style="text-align:center">
+                            <a :href="'/tin-tuc/tin-tuc/'+item.Code">
+                                <img v-bind:src="'/Upload/News/' + item.Thumbnail" style="max-width:100%;max-height:100%" />
                             </a>
                         </div>
                         <div class=" media-body">
                             <div class="news-title">
-                                <a href="#">
-                                    Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+                                <a :href="'/tin-tuc/tin-tuc/'+item.Code">
+                                    {{item.Title}}
                                 </a>
                             </div>
-                            <div class="news-desc">
-                                Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
+                            <div class="news-desc" style="font-family: Open Sans;font-style: normal;font-weight: normal;font-size: 14px;line-height: 30px;color: #000000;height: 60px;overflow: hidden;" v-html="item.Summary">
+                                {{item.Summary}}
                             </div>
                             <div class="news-time">
-                                12/08/2019
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb">
-                            <a href="#">
-                                <img src="~/images/news4.png" />
-                            </a>
-                        </div>
-                        <div class=" media-body">
-                            <div class="news-title">
-                                <a href="#">
-                                    Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                                </a>
-                            </div>
-                            <div class="news-desc">
-                                Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                            </div>
-                            <div class="news-time">
-                                12/08/2019
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb">
-                            <a href="#">
-                                <img src="~/images/news5.png" />
-                            </a>
-                        </div>
-                        <div class=" media-body">
-                            <div class="news-title">
-                                <a href="#">
-                                    Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                                </a>
-                            </div>
-                            <div class="news-desc">
-                                Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                            </div>
-                            <div class="news-time">
-                                12/08/2019
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb">
-                            <a href="#">
-                                <img src="~/images/news6.png" />
-                            </a>
-                        </div>
-                        <div class=" media-body">
-                            <div class="news-title">
-                                <a href="#">
-                                    Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                                </a>
-                            </div>
-                            <div class="news-desc">
-                                Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                            </div>
-                            <div class="news-time">
-                                12/08/2019
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb">
-                            <a href="#">
-                                <img src="~/images/news7.png" />
-                            </a>
-                        </div>
-                        <div class=" media-body">
-                            <div class="news-title">
-                                <a href="#">
-                                    Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
-                                </a>
-                            </div>
-                            <div class="news-desc">
-                                Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                            </div>
-                            <div class="news-time">
-                                12/08/2019
+                                {{moment(String(item.PublishDate)).format('MM-DD-YYYY')}}
                             </div>
                         </div>
                     </div>
@@ -274,24 +217,313 @@
     <div class="inner-content">
         <div class="content-box text-center">
             <div class="box-title text-center">
-                Đối tác
+                <a href="@Url.RouteUrl("news-partner")" style="font-size: 32px; line-height: 44px; color: #05517B; display: inline-block; font-weight: 600;text-decoration:none">Đối tác</a>
                 <div class="underline w-50"></div>
             </div>
-            <div class="d-flex flex-column flex-md-row justify-content-between" style="width: 100%">
-                <div class="media-body m-2">
-                    <img src="~/images/PN-1.png" />
+            <div class="carousel-wrap" id="partner">
+                <div class="owl-carousel">
+                    <div class="item" v-for="img in images"><a :href="'/tin-tuc/doi-tac/'+img.Code"><img :src="'/Upload/News/'+img.Thumbnail" :title="img.Title"></a></div>
                 </div>
-                <div class="media-body m-2">
-                    <img src="~/images/PN-2.png" />
-                </div>
-                <div class="media-body m-2">
-                    <img src="~/images/PN-3.png" />
-                </div>
-                <div class="media-body m-2">
-                    <img src="~/images/PN-4.png" />
-                </div>
-
             </div>
+
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    function loadData() {
+       $.ajax({
+            url: '@Url.Action("getnewslist", "home")',
+            type: "post",
+            dataType: "json",
+           success: function (result) {
+
+                var data=new Vue({
+                    el: '#news',
+                    data: {
+                        newstop: result.NewsTop,
+                        newshot: result.NewsHot
+                    }
+                })
+            }
+        });
+    };
+
+    function getDataForPartner() {
+        $.ajax({
+            url: '@Url.Action("getDataForPartner", "home")',
+            type: "post",
+            dataType: "json",
+            data: { CatCode: 'doi-tac'},
+            success: function (result) {
+                new Vue({
+                    el: '#partner',
+                    data: {
+                        images: result
+                    },
+                    mounted() {
+                        callCarousel(result.length)
+                    }
+                })
+            }
+        });
+
+    }
+
+    function callAgile() {
+        Vue.use(VueAgile);
+
+        app = new Vue({
+            el: '#app',
+            method: {         
+            },
+            components: {
+                agile: VueAgile
+            },
+
+        });
+    }
+
+    function postToGoogle() {
+        //Xử lý lấy dữ liệu các input vào biến tương ứng thông qua ID của input
+        var name = $("#nameField").val();
+        var phone = $("#phoneNumberField").val();
+        var address = $("#addressField").val();
+        //Đoạn giữa này có thể sử dụng để validate dữ liệu 1 lần nữa hoăc... bỏ qua nhé :D
+
+        requires.each(function () {
+            if ($(this).val() == "" || $(this).val() == null) {
+                alert("Vui lòng điền đủ thông tin");
+                $(this).focus();
+                err = true;
+                return false;
+            }
+        });
+
+        if (err) return false;
+
+        //Xử lý gửi dữ liệu lên form
+        $.ajax({
+            //Chỉ định đích gửi dữ liệu đến: là form response đã tạo ở trên
+            url: "https://docs.google.com/forms/d/e/1FAIpQLSc-oUHqQR9EDb7teIfzZw-MPY0cMsYlhdKIxknbawFZlRZIng//formResponse?",
+            //URL lấy từ link đã note ở trên nhé
+            data: { //gán các giá trị tương ứng vào các Input name tương ứng đã lấy ở trên
+                "entry.1872061179": name,
+                "entry.1629149102": phone,
+                "entry.1747641881": address
+            },
+            type: "POST",
+            dataType: "jsonp", //các bạn có thể để xml, nhưng khi bật console lên sẽ thấy báo đỏ lòm vì ko cho cross, còn cái này nó vẫn cảnh báo nhưng màu xám thôi, ko đỏ :v
+            success: function (d) { }, //do đã bảo ở trên là nó ko cho cross đâu, nên khi gửi data xong ko trả về success được, ko cần điền cái này nhé
+            error: function (x, y, z) {
+                //$('#success-msg').show(); //hiện ra cái mess báo thành công khi gửi xong
+                alert("Đăng kí thành công")
+            }
+        });
+
+        return false;
+    }
+
+    function callCarousel(countItem) {
+        var item = 0;
+        var isloop = false;
+        var $owl = $('.owl-carousel');
+        $owl.trigger('destroy.owl.carousel');
+        //debugger
+        // After destory, the markup is still not the same with the initial.
+        // The differences are:
+        //   1. The initial content was wrapped by a 'div.owl-stage-outer';
+        //   2. The '.owl-carousel' itself has an '.owl-loaded' class attached;
+        //   We have to remove that before the new initialization.
+        $owl.html($owl.find('.owl-stage-outer').html()).removeClass('owl-loaded');
+        //debugger
+        switch (countItem) {
+            case 1:
+            case 2:
+            case 3:
+                item = countItem;
+                isloop = false;
+                break;
+            default:
+                item = 4;
+                isloop = true;
+                break;
+        }
+        $owl.owlCarousel({
+            // your initial option here, again.
+            items: item,
+            loop: isloop,
+            margin: 10,
+            nav: true,
+            navText: [
+                "<i class='fa fa-caret-left'></i>",
+                "<i class='fa fa-caret-right'></i>"
+            ],
+            //responsive: {
+            //    0: {
+            //        items: 1
+            //    },
+            //    600: {
+            //        items: 3
+            //    },
+            //    1000: {
+            //        items: 5
+            //    }
+            //}
+        });
+    }
+
+    function getDataForBanner() {
+        $.ajax({
+            url: '@Url.Action("getDataForBanner", "home")',
+            type: "post",
+            dataType: "json",
+            success: function (result) {
+
+                new Vue({
+                    el: '#app',
+                    data: {
+                        items: result.Data
+                    },
+                    mounted() {
+                        callAgile()
+                    }
+                })
+                //debugger
+            }
+        });
+
+    }
+
+    $(document).ready(function ($) {
+        loadData();
+        getDataForPartner();
+        getDataForBanner();
+        //callCarousel();
+        //callAgile()
+    });
+
+
+
+</script>
+<style>
+    .top-banner {
+        overflow: hidden;
+        width: 1366px;
+        height: 396px;
+        position: relative;
+    }
+
+        .top-banner img {
+            width: 1366px;
+            height: 396px;
+        }
+        /* Next & previous buttons */
+        .top-banner .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            margin-top: -22px;
+            padding: 16px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.6s ease;
+            border-radius: 0 3px 3px 0;
+            user-select: none;
+        }
+
+    /* Position the "next button" to the right */
+    .next {
+        right: 0;
+        border-radius: 3px 0 0 3px;
+    }
+
+        /* On hover, add a black background color with a little bit see-through */
+        .prev:hover, .next:hover {
+            background-color: rgb(255, 255, 255);
+        }
+    /* The dots/bullets/indicators */
+    .dot {
+        cursor: pointer;
+        height: 15px;
+        width: 15px;
+        margin: 0 2px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+        transition: background-color 0.6s ease;
+    }
+
+    #dot {
+        position: absolute;
+        bottom: 10px;
+        left: 50%
+    }
+
+    .top-banner .active, .dot:hover {
+        background-color: #717171;
+    }
+
+    /* Fading animation */
+    .fade {
+        -webkit-animation-name: fade;
+        -webkit-animation-duration: 1.5s;
+        animation-name: fade;
+        animation-duration: 1.5s;
+    }
+
+    .carousel-wrap {
+        margin: auto;
+        padding: 10px 6%;
+        /*width: 80%;*/
+        position: relative;
+    }
+
+    /* fix blank or flashing items on carousel */
+    /*.owl-carousel .item {
+        position: relative;
+        z-index: 100;
+        -webkit-backface-visibility: hidden;
+    }*/
+
+    /* end fix */
+    .owl-nav {
+        position: absolute;
+        top: 34%;
+        width: 100%;
+    }
+
+        .owl-nav > div {
+            margin-top: -26px;
+            position: absolute;
+            top: 50%;
+            color: #cdcbcd;
+        }
+
+        .owl-nav i {
+            font-size: 52px;
+        }
+
+        .owl-nav .owl-prev {
+            left: -30px;
+            position: absolute;
+        }
+
+        .owl-nav .owl-next {
+            right: -30px;
+            position: absolute
+        }
+
+    .owl-carousel .item:hover {
+        cursor: pointer;
+    }
+
+
+    #send:hover {
+        opacity: 0.8;
+        cursor: pointer;
+        border: 1px solid white
+    }
+</style>

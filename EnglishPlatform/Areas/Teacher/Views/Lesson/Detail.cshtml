@@ -13,7 +13,11 @@
     }
 }
 <style>
-    
+    @@media (max-width: 1024px) {
+        .h-responsive {
+            height: auto !important;
+        }
+    }
 </style>
 <div class="left-col">
     <div class="main-container">
@@ -31,9 +35,11 @@
 }
 
 @section Scripts{
-
+    <script src="~/js/lib/jquery.ui.touch-punch.min.js"></script>
     <script src="~/js/content-render.js"></script>
     @*<script src="~/js/minify/detail.fn.min.js?20200615"></script>*@
+
+
 
     <script>
     var config = {

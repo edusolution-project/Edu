@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using Core_v2.Globals;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -29,6 +30,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly CenterService _centerService;
 
+        private readonly CloneLessonPartService _clonepartService;
+        private readonly CloneLessonPartQuestionService _clonequestionService;
+        private readonly CloneLessonPartAnswerService _cloneanswerService;
+        private readonly VocabularyService _vocabularyService;
+
+
         public LessonController(
             GradeService gradeservice,
             SubjectService subjectService,
@@ -42,7 +49,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonPartQuestionService questionService,
             LessonPartAnswerService answerService,
             LessonScheduleService lessonScheduleService,
-            CenterService centerService)
+            CenterService centerService,
+            CloneLessonPartService cloneLessonPartService,
+            CloneLessonPartQuestionService cloneLessonPartQuestionService,
+            CloneLessonPartAnswerService cloneLessonPartAnswerService,
+            VocabularyService vocabularyService
+            )
         {
             _gradeService = gradeservice;
             _subjectService = subjectService;
@@ -57,6 +69,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _answerService = answerService;
             _lessonScheduleService = lessonScheduleService;
             _centerService = centerService;
+
+            _clonepartService = cloneLessonPartService;
+            _clonequestionService = cloneLessonPartQuestionService;
+            _cloneanswerService = cloneLessonPartAnswerService;
+            _vocabularyService = vocabularyService;
         }
 
         public IActionResult Detail(DefaultModel model, string basis, string ClassID, int frameview = 0)
@@ -71,16 +88,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             if (model == null) return null;
             if (ClassID == null)
-                return RedirectToAction("Index", "Class");
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
             var currentClassSubject = _classSubjectService.GetItemByID(ClassID);
             if (currentClassSubject == null)
-                return RedirectToAction("Index", "Class");
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
             var currentClass = _classService.GetItemByID(currentClassSubject.ClassID);
             if (currentClass == null)
-                return RedirectToAction("Index", "Class");
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
             var Data = _lessonService.GetItemByID(model.ID);
             if (Data == null)
-                return RedirectToAction("Index", "Class");
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
             ViewBag.Class = currentClass;
             ViewBag.Subject = currentClassSubject;
             ViewBag.Lesson = Data;
@@ -90,6 +107,38 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return View("FrameDetails");
             return View();
         }
+
+        public IActionResult Preview(DefaultModel model, string basis, string ClassID)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (ClassID == null)
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
+            var currentClassSubject = _classSubjectService.GetItemByID(ClassID);
+            if (currentClassSubject == null)
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
+            var currentClass = _classService.GetItemByID(currentClassSubject.ClassID);
+            if (currentClass == null)
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
+            var lesson = _lessonService.GetItemByID(model.ID);
+            if (lesson == null)
+                return Redirect($"/{basis}{Url.Action("Index", "Class")}");
+
+            var chapter = _chapterService.GetItemByID(lesson.ChapterID);
+            var pass = true;
+            ViewBag.Lesson = lesson;
+            ViewBag.Type = lesson.TemplateType;
+            string condChap = "";
+
+            var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
+            ViewBag.Class = currentClass;
+            ViewBag.Subject = currentClassSubject;
+            ViewBag.NextLesson = nextLesson;
+            ViewBag.Chapter = chapter;
+            return View();
+        }
+
+
+
 
         [HttpPost]
         public JsonResult GetDetailsLesson(string ID)
@@ -363,8 +412,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     { "Model", model }
                 });
             }
-            chapter.ConditionChapter = ConditionChapter;
-            _chapterService.Save(chapter);
+            UpdateConditionChapter(chapter, ConditionChapter);
+
+
             return new JsonResult(new Dictionary<string, object> {
                         {"Data", chapter },
                         {"Msg","Cập nhật thành công" }
@@ -607,5 +657,208 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return pos;
         }
 
+        private void UpdateConditionChapter(ChapterEntity chapter, string ConditionChapter)
+        {
+            chapter.ConditionChapter = ConditionChapter;
+            _chapterService.Save(chapter);
+            var subchaps = _chapterService.GetSubChapters(chapter.ClassSubjectID, chapter.ID);
+            if (subchaps != null && subchaps.Count > 0)
+                subchaps.ForEach((ChapterEntity item) => UpdateConditionChapter(item, ConditionChapter));
+        }
+
+
+        #region Preview
+
+        [HttpPost]
+        public JsonResult GetTemplateExam(string ClassSubjectID, string LessonID)
+        {
+            var userID = User.Claims.GetClaimByType("UserID").Value;
+            var lesson = _lessonService.GetItemByID(LessonID);
+            if (lesson == null)
+                return new JsonResult(new { Error = "Bài học không đúng" });
+            var x = new ExamEntity
+            {
+                ClassID = lesson.ClassID,
+                ClassSubjectID = lesson.ClassSubjectID,
+                LessonID = lesson.ID,
+                ID = "",
+                Created = DateTime.Now,
+                CurrentDoTime = DateTime.Now,
+                LessonScheduleID = "",
+                Point = lesson.Point,
+                Timer = lesson.Timer
+            };
+            //hết hạn => đóng luôn
+            var schedule = new LessonScheduleEntity();
+            return new JsonResult(new { exam = x, schedule, limit = lesson.Limit });
+        }
+
+        [HttpPost]
+        public JsonResult CreateTemplateExam(ExamEntity item)
+        {
+            var userid = User.Claims.GetClaimByType("UserID").Value;
+
+            if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
+            {
+                var _lesson = _lessonService.GetItemByID(item.LessonID);
+                var _class = _classService.GetItemByID(item.ClassID);
+
+                if (_class == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Thông tin không đúng" }
+                    });
+                }
+
+                var _schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID).FirstOrDefault();
+                if (_schedule == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Thông tin không đúng" }
+                    });
+                }
+
+                item.StudentID = userid;
+                item.Number = 1;
+
+                item.LessonScheduleID = _schedule.ID;
+                item.Timer = _lesson.Timer;
+                item.Point = 0;
+                item.MaxPoint = _lesson.Point;
+
+                item.TeacherID = _class.TeacherID;
+                item.ID = "TEMPLATE";
+                item.Created = DateTime.Now;
+                item.CurrentDoTime = DateTime.Now;
+                item.Status = false;
+                item.QuestionsTotal = _clonequestionService.CreateQuery().CountDocuments(o => o.LessonID == item.LessonID);
+                item.QuestionsDone = 0;
+                item.Marked = false;
+            }
+            item.Updated = DateTime.Now;
+            return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Data", item }
+                    });
+        }
+
+        public JsonResult GetTemplateLesson(string LessonID, string ClassID, string ClassSubjectID)
+        {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+                return new JsonResult(
+                new Dictionary<string, object> { { "Error", "Student not found" } });
+
+            var lesson = _lessonService.GetItemByID(LessonID);
+            if (lesson == null)
+                return new JsonResult(
+                new Dictionary<string, object> { { "Error", "Lesson not found" } });
+
+            if (string.IsNullOrEmpty(ClassSubjectID))
+                ClassSubjectID = ClassID;
+
+            var currentcs = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (currentcs == null)
+                return new JsonResult(
+                new Dictionary<string, object> { { "Error", "Subject not found" } });
+
+            //if (string.IsNullOrEmpty(ClassID))
+            //    ClassID = currentcs.ClassID;
+
+            var currentClass = _classService.GetItemByID(currentcs.ClassID);
+            if (currentClass == null)
+                return new JsonResult(
+                new Dictionary<string, object> { { "Error", "Class not found" } });
+
+            var listParts = _clonepartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassSubjectID == currentcs.ID).ToList();
+
+            var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
+            var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+            var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
+
+
+
+            var result = new List<PartViewModel>();
+            foreach (var part in listParts)
+            {
+                var convertedPart = mapPart.AutoOrtherType(part, new PartViewModel());
+                switch (part.Type)
+                {
+                    case "QUIZ1":
+                    case "QUIZ3":
+                    case "ESSAY":
+                        convertedPart.Questions = _clonequestionService.CreateQuery()
+                            .Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList()
+                            .Select(q => new QuestionViewModel(q)
+                            {
+                                CloneAnswers = _cloneanswerService.CreateQuery().Find(x => x.ParentID == q.ID).ToList(),
+                                Description = q.Description
+                            }).ToList();
+                        break;
+                    case "QUIZ2":
+                        convertedPart.Questions = _clonequestionService.CreateQuery().Find(q => q.ParentID == part.ID)
+                            //.SortBy(q => q.Order).ThenBy(q => q.ID)
+                            .ToList()
+                            .Select(q => new QuestionViewModel(q)
+                            {
+                                CloneAnswers = null,
+                                Description = null
+                            }).ToList();
+                        break;
+                    case "VOCAB":
+                        convertedPart.Description = RenderVocab(part.Description);
+                        break;
+                    default:
+                        break;
+                }
+                result.Add(convertedPart);
+            }
+
+            var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
+            {
+                Part = result
+                //listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                //{
+                //    Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                //        .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                //        {
+                //            CloneAnswers = o.Type == "QUIZ2" ? null : _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
+                //            Description = o.Type == "QUIZ2" ? null : z.Description
+                //        }))?.ToList()
+                //})).ToList()
+            });
+
+            return new JsonResult(new Dictionary<string, object> { { "Data", dataResponse } });
+
+        }
+
+        private string RenderVocab(string description)
+        {
+            string result = "";
+            var vocabs = description.Split('|');
+            if (vocabs == null || vocabs.Count() == 0)
+                return description;
+            foreach (var vocab in vocabs)
+            {
+                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace("-", ""));
+                if (vocabularies != null && vocabularies.Count > 0)
+                {
+                    result +=
+                        $"<div class='vocab-box'>" +
+                            $"<b class='word-title'>{vocab.Trim()}</b><span class='word-pron'>{vocabularies[0].Pronunciation}</span>" +
+                            $"<div class='vocab-audio'>" +
+                                $"<button onclick='PlayPronun(this)'><i class='ic fas fa-volume-up'></i></button>" +
+                                $"<audio class='d-none' id='audio' controls><source src='{vocabularies[0].PronunAudioPath}' type='audio/mpeg' />Your browser does not support the audio tag</audio>" +
+                            $"</div>" +
+                            //$"<div class='vocab-type'>{string.Join(",", vocabularies.Select(t => t.WordType).ToList())}<div/>" +
+                            $"<div class='vocab-meaning'>{string.Join("<br/>", vocabularies.Where(t => !string.IsNullOrEmpty(t.Description)).Select(t => "<b>" + WordType.GetShort(t.WordType) + "</b>: " + t.Description).ToList())}</div>" +
+                        $"</div>";
+                }
+            }
+            return result;
+        }
+        #endregion
     }
 }

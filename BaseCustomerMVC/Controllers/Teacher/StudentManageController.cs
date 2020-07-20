@@ -41,6 +41,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ExamService _examService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly CenterService _centerService;
+        private readonly MailHelper _mailHelper;
         private readonly IHostingEnvironment _env;
         private IConfiguration _configuration;
         private readonly string _defaultPass;
@@ -65,6 +66,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonScheduleService lessonScheduleService,
             StudentService studentService,
             CenterService centerService,
+            MailHelper mailHelper,
             IHostingEnvironment evn,
             IConfiguration iConfig
             )
@@ -88,6 +90,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _studentService = studentService;
             _centerService = centerService;
             _env = evn;
+            _mailHelper = mailHelper;
             _configuration = iConfig;
             _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
 
@@ -114,7 +117,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
                 grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
-
             }
 
             ViewBag.Grade = grade;
@@ -137,7 +139,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             var student = _studentService.GetItemByID(model.ID);
             if (student == null)
-                return RedirectToAction("Index");
+                return Redirect($"/{basis}{Url.Action("Index")}");
             ViewBag.Student = student;
             return View();
         }
@@ -333,7 +335,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 if (left <= 0) continue;
                                 if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
-                                var email = workSheet.Cells[i, keyCol].Value == null ? "" : workSheet.Cells[i, keyCol].Value.ToString();
+                                var email = (workSheet.Cells[i, keyCol].Value == null ? "" : workSheet.Cells[i, keyCol].Value.ToString()).ToLower().Trim();
                                 if (string.IsNullOrEmpty(email)) continue;
                                 string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
                                 string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
@@ -344,7 +346,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 var phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString();
 
                                 var student = _studentService.GetStudentByEmail(email);
-
+                                var visiblePass = "";
                                 if (student == null)
                                 {
                                     //create student
@@ -361,13 +363,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         UserCreate = UserID,
                                         IsActive = true,
                                         Centers = new List<string> { center.ID },
-                                        JoinedClasses = new List<string> { @class.ID}
+                                        JoinedClasses = new List<string> { @class.ID }
                                     };
                                     if (acc == null)
                                     {
                                         await _studentService.CreateQuery().InsertOneAsync(student);
                                         left--;
                                         //counter++;
+                                        visiblePass = _defaultPass;
                                         var account = new AccountEntity()
                                         {
                                             CreateDate = DateTime.Now,
@@ -381,12 +384,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                             RoleID = _roleService.GetItemByCode("student").ID
                                         };
                                         _accountService.CreateQuery().InsertOne(account);
+                                        _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
                                     }
                                     else
                                     {
                                         if (acc.Type != ACCOUNT_TYPE.STUDENT)
                                         {
                                             await _studentService.CreateQuery().InsertOneAsync(student);
+                                            _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
                                             //counter++;
                                         }
                                         else //acc = student & student not found ????
@@ -400,12 +405,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     if (student.Centers == null) student.Centers = new List<string> { center.ID };
                                     else if (!student.Centers.Contains(center.ID))
                                         student.Centers.Add(center.ID);
+
+                                    if (student.JoinedClasses == null) student.JoinedClasses = new List<string> { };
                                     _studentService.Save(student);
                                     if (classStudents.Any(t => t == student.ID)) continue;
                                     _studentService.JoinClass(ClassID, student.ID, @class.Center);
+                                    _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
                                 }
                                 counter++;
-                                
+
                             }
                         }
                     }

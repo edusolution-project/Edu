@@ -1817,7 +1817,8 @@ button, input, a {
     }
 
 #profile_detail {
-    width: 435px
+    width: 435px;
+    max-width: 100%;
 }
 
     #profile_detail label {

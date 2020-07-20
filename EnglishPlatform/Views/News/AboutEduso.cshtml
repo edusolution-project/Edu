@@ -1,0 +1,127 @@
+﻿@{ var category = ViewBag.Category as BaseCustomerEntity.Database.NewsCategoryEntity;
+
+    ViewData["Title"] = category.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="category-box pt-5 pb-5">
+    <div class="inner-content">
+        <div class="content-box">
+            <div class="box-title d-flex justify-content-center mb-5">
+                @category.Name
+                <div class="underline"></div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-12" style="text-align:center;background-color:#4d9eff">
+                    Tầm nhìn sản phẩm(Vision)
+                </div>
+                <div class="col-sm-12" style="background-color:#f2f3f5">
+                    1.
+                    2.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-12" style="text-align:center;background-color:#00c2a8">
+                    Sứ mệnh
+                </div>
+                <div class="col-sm-12" style="background-color:#f2f3f5">
+                    1.
+                    2.
+                </div>
+            </div>
+
+            <div class=" row form-group">
+                <div class="col-sm-6" >
+                    <div class="col-sm-12" style="text-align:center;background-color:#fc9432">
+                        Sản phẩm
+                    </div>
+                    <div class="col-sm-12" style="background-color:#f2f3f5">
+                        Sản phẩm 1
+                        sản phẩm 2
+                        sản phẩm 3
+                    </div>
+                </div>
+                <div class="col-sm-6"  >
+                    <div class="col-sm-12" style="text-align:center;background-color:#ffbd50">
+                       Đặc tính sản phẩm và dịch vụ tại Eduso
+                    </div>
+                    <div class="col-sm-12" style="background-color:#f2f3f5">
+                        Sản phẩm 1
+                        sản phẩm 2
+                        sản phẩm 3
+                    </div>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-sm-4">
+                    <div class="col-sm-12" style="text-align:center;background-color:#635dff" >
+                        Thách thức số 1
+                    </div>
+                    <div class="col-sm-12" style="background-color:#f2f3f5">
+                        1.
+                        2.
+                    </div>
+                    <div class="col-sm-12" style="text-align:center;background-color:#fe7070">
+                        Giải pháp số 1
+                    </div>
+                    <div class="col-sm-12" style="background-color:#f2f3f5">
+                        1.
+                        2.
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="col-sm-12" style="text-align:center;background-color:#9391ff" >
+                        Thách thức số 2
+                    </div>
+                    <div class="col-sm-12" style="background-color:#f2f3f5">
+                        1.
+                        2.
+                    </div>
+                    <div class="col-sm-12" style="text-align:center;background-color:#ff8f8f" >
+                        Giải pháp số 2
+                    </div>
+                    <div class="col-sm-12" style="background-color:#f2f3f5">
+                        1.
+                        2.
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="col-sm-12" style="text-align:center;background-color:#a7a6ff" >
+                        Thách thức số 3
+                    </div>
+                    <div class="col-sm-12" style="background-color:#f2f3f5">
+                        1.
+                        2.
+                    </div>
+                    <div class="col-sm-12" style="text-align:center;background-color:#ffc4c4" >
+                        Giải pháp số 3
+                    </div>
+                    <div class="col-sm-12" style="background-color:#f2f3f5">
+                        1.
+                        2.
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-12" style="text-align:center;background-color:#6f7681">
+                    Tuyên bố định vị sản phẩm
+                </div>
+                <div class="col-sm-12" style="background-color:#f2f3f5">
+                    Sản phẩm của chúng tôi
+                </div>
+            </div>
+
+            <div class="row form-group" style="text-align:center">
+                <div class="col-sm-12">
+
+                    web:<span style="color:#f2a24a">Eduso.vn</span>; Email: <span style="color:#d86870">eduso.vn@gmail.com</span>; Hot-line: <span style="color:#19967d">0989085398</span>
+
+                </div>
+            </div>
+    </div>
+</div>
+<style>
+    .form-group div{
+        border-radius:5px
+    }
+</style>

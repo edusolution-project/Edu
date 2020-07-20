@@ -49,7 +49,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
             if (teacher != null)
-                ViewBag.AllCenters = teacher.Centers;
+                ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
 
             if (!string.IsNullOrEmpty(basis))
             {
@@ -74,7 +74,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
             if (teacher != null)
-                ViewBag.AllCenters = teacher.Centers;
+                ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
             if (teacher == null)
                 return Redirect("/login");
 
@@ -139,7 +139,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult UploadPhoto(IFormFile fileUpload)
         {
-            var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
+            var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName, "Avatar").Result;
             // Cap nhat vao truong avartar
             string _userID = User.Claims.GetClaimByType("UserID").Value;
             TeacherEntity oldAcc = _teacherService.GetItemByID(_userID);
@@ -256,7 +256,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 account.ZoomID = entity.ZoomID;
                 if (fileUpload != null)
                 {
-                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName).Result;
+                    var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName, "Avatar").Result;
                     account.Avatar = pathImage;
                     _session.SetString("userAvatar", account.Avatar);
                 }

@@ -6,7 +6,7 @@
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
-    var isHeadteacher = ViewBag.IsHeadTeacher;
+    var isHeadteacher = ViewBag.IsHeadTeacher ?? false;
     var userid = User.Claims.Single(t => t.Type == "UserID").Value;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     List<BaseCustomerEntity.Database.CenterMemberEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterMemberEntity>;
@@ -30,28 +30,28 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header" v-cloak>
-        <div class="flex border-b  border-b flex-wrap">
-            <div class="box filter-box  m-1">
+        <div class="flex flex-row border-b flex-wrap pb-2 align-items-center">
+            <div class="box filter-box d-none m-1">
                 <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
                 <span class="ic ic-picker inactive"></span>
             </div>
-            <div class="box filter-box w-152  m-1">
+            <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
                 <select v-model="subject">
                     <option value="">Chọn chương trình</option>
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                 </select>
             </div>
-            <div class="search-box  m-1">
+            <div class="search-box col-12 col-md-3 mb-1 ml-0 ml-md-2">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên lớp cần tìm">
             </div>
             @if (isHeadteacher)
             {
-                <div class="box private_box  m-1">
+                <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2">
                     <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
                 </div>
             }
-            <b-button class="btn-addevent btn-sm ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+            <b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
         </div>
     </div>
     <div class="card-body" v-cloak>
@@ -617,7 +617,7 @@
                                 valid = false
                                 return false;
                             }
-                            if (item.ID != null && item.ID != '')
+                            if (item.OldID != null && item.OldID != '')
                                 notify = true
                             _form.append('ClassSubjects[' + k + '].ID', item.ID)
                             _form.append('ClassSubjects[' + k + '].SubjectID', item.SubjectID)
@@ -905,15 +905,16 @@
                 refreshSubject(k, obj) {
                     if (this.class_info.subject[k].ID != "") {
                         $(obj.target).attr('oldID', this.class_info.subject[k].ID);
-                        $(obj.target).addClass('text-danger')
+                        $(obj.target).addClass('text-danger');
+                        this.class_info.subject[k].OldID = this.class_info.subject[k].ID;
                         this.class_info.subject[k].ID = "";
                     }
                     else {
                         var oldId = $(obj.target).attr('oldID');
                         this.class_info.subject[k].ID = oldId;
                         $(obj.target).removeClass('text-danger');
+                        this.class_info.subject[k].OldID = null;
                     }
-
                 },
                 errorImgUrl() {
                     this.class_info.thumbnail.src = null;
@@ -971,8 +972,8 @@
                     $('input[name="dates"]').val('-- Chọn thời gian --');
                     $('input[name="dates"]').siblings().addClass('inactive');
                     isSearchDate = false;
-                    _that.startdate = moment(new Date(1800,1,1)),
-                    _that.enddate = moment(new Date(1800,1,1)),
+                    _that.startdate = moment(new Date(1800, 1, 1));
+                    _that.enddate = moment(new Date(1800, 1, 1));
                     GetData();
 
                 },
@@ -1165,7 +1166,7 @@
                     this.add_student.uploadfile.file = event.target.files[0]
                 },
                 downloadTemplate() {
-                    window.open("@processUrl("StudentTemplate", "StudentManage")");
+                    window.open("@processUrl("ExportTemplate", "StudentManage")");
                 },
                 //support
                 formatShortDate(date) {

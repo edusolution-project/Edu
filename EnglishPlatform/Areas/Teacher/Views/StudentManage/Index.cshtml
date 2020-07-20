@@ -26,7 +26,7 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header" v-cloak>
-        <div class="flex border-b flex-wrap">
+        <div class="flex flex-row border-b flex-wrap align-items-center">
             @*<div class="flex flex-grow-1 mb-2">*@
             <div class="box filter-box w-152 m-1">
                 <autocomplete v-on:chooseitem="chooseClass" :items="list_ac_class" v-on:input="autocompleteClass" :plhd="'Nhập để tìm lớp'" />
@@ -77,7 +77,7 @@
                     <td>{{item.ClassName}}</td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
-                    <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
+                    @*<td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>*@
                 </tr>
             </tbody>
         </table>
@@ -122,7 +122,7 @@
 
     <style>
         .card-header .search-box {
-            width: auto;
+            width: 100%;
         }
 
         #app {
@@ -322,10 +322,10 @@
                     //    key: 'score',
                     //    label: 'Kết quả'
                     //},
-                    {
-                        key: 'actions',
-                        label: 'Tác vụ'
-                    }
+                    //{
+                    //    key: 'actions',
+                    //    label: 'Tác vụ'
+                    //}
                 ],
                 tableData: [
                 ],
@@ -585,12 +585,12 @@
                         })
                 },
                 removeStudent(student) {
-                    if (!confirm('Xác nhận xóa học viên ' + student.FullName + ' khỏi lớp ' + student.ClassName + '?')) {
+                    if (!confirm('Xác nhận xóa học viên ' + student.FullName + ' khỏi cơ sở?')) {
                         return false;
                     }
                     let _that = this
                     let _form = new FormData()
-                    _form.append('ClassID', student.ClassID)
+                    //_form.append('ClassID', student.ClassID)
                     _form.append('StudentID', student.ID)
                     let _url = '@processUrl("RemoveStudent", "StudentManage")'
                     axios.post(_url, _form)

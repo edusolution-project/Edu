@@ -138,10 +138,10 @@ namespace BaseCustomerEntity.Database
                 //progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
-            await UpdatePracticePoint(progress, item.PointChange);
+            await UpdateParentChap_PracticePoint(progress, item.PointChange);
         }
 
-        public async Task UpdatePracticePoint(ChapterProgressEntity item, double pointchange)
+        public async Task UpdateParentChap_PracticePoint(ChapterProgressEntity item, double pointchange)
         {
             var progress = GetItemByChapterID(item.ParentID, item.StudentID, item.ClassSubjectID);
             if (progress == null)
@@ -152,7 +152,7 @@ namespace BaseCustomerEntity.Database
                 progress.PracticePoint += pointchange;
                 //progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
                 await Collection.InsertOneAsync(progress);
-                await UpdatePracticePoint(progress, pointchange);
+                await UpdateParentChap_PracticePoint(progress, pointchange);
             }
             else
             {
@@ -172,7 +172,7 @@ namespace BaseCustomerEntity.Database
                 //progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
 
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
-                await UpdatePracticePoint(progress, pointchange);
+                await UpdateParentChap_PracticePoint(progress, pointchange);
             }
         }
 
@@ -204,6 +204,46 @@ namespace BaseCustomerEntity.Database
                 LastDate = DateTime.Now,
                 //LastLessonID = lessonPrg.LessonID
             };
+        }
+
+        public void DecreasePoint(LessonProgressEntity item)
+        {
+            var filter = Builders<ChapterProgressEntity>.Filter.Where(t => t.ChapterID == item.ChapterID && t.StudentID == item.StudentID);
+            var update = Builders<ChapterProgressEntity>.Update.Inc(t => t.TotalPoint, 0 - item.LastPoint);
+            var updateResult = Collection.UpdateMany(Builders<ChapterProgressEntity>.Filter.And(filter),
+                update
+                ).ModifiedCount;
+            if (updateResult > 0)
+            {
+                var chap = Collection.Find(t => t.ChapterID == item.ChapterID && t.StudentID == item.StudentID).FirstOrDefault();
+                if (chap.ParentID != null && chap.ParentID != "0")
+                {
+                    var parentChap = _chapterService.GetItemByID(chap.ParentID);
+                    if (parentChap != null)
+                    {
+                        DecreasePoint(new LessonProgressEntity { ChapterID = parentChap.ID, StudentID = item.StudentID, LastPoint = item.LastPoint });
+                    }
+                }
+            }
+        }
+
+        public void DecreasePracticePoint(LessonProgressEntity item)
+        {
+            var filter = Builders<ChapterProgressEntity>.Filter.Where(t => t.ChapterID == item.ChapterID && t.StudentID == item.StudentID);
+            var update = Builders<ChapterProgressEntity>.Update.Inc(t => t.PracticePoint, 0 - item.LastPoint);
+            var updateResult = Collection.UpdateMany(Builders<ChapterProgressEntity>.Filter.And(filter), update).ModifiedCount;
+            if (updateResult > 0)
+            {
+                var chap = Collection.Find(t => t.ChapterID == item.ChapterID && t.StudentID == item.StudentID).FirstOrDefault();
+                if (chap.ParentID != null && chap.ParentID != "0")
+                {
+                    var parentChap = _chapterService.GetItemByID(chap.ParentID);
+                    if (parentChap != null)
+                    {
+                        DecreasePoint(new LessonProgressEntity { ChapterID = parentChap.ID, StudentID = item.StudentID, LastPoint = item.LastPoint });
+                    }
+                }
+            }
         }
 
         //private int CountChapterPractice(string chapterID, string classSubjectID)

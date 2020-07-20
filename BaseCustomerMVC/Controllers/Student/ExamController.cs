@@ -3,8 +3,11 @@ using BaseCustomerMVC.Globals;
 using BaseCustomerMVC.Models;
 using Core_v2.Globals;
 using Core_v2.Interfaces;
+using FileManagerCore.Globals;
+using FileManagerCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +32,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LearningHistoryService _learningHistoryService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
+        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
         public ExamController(ExamService examService,
             LessonPartAnswerService lessonPartAnswerService,
@@ -43,6 +47,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
             , TeacherService teacherService
             , LearningHistoryService learningHistoryService
+            , IRoxyFilemanHandler roxyFilemanHandler
             )
         {
             _lessonPartQuestionService = lessonPartQuestionService;
@@ -58,6 +63,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _examDetailService = examDetailService;
             _studentService = studentService;
             _teacherService = teacherService;
+            _roxyFilemanHandler = roxyFilemanHandler;
         }
 
         [Obsolete]
@@ -191,22 +197,26 @@ namespace BaseCustomerMVC.Controllers.Student
                        { "Error", "Bạn đã hết lượt làm bài!" }
                     });
                 }
+                if (_lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
 
-                if (_schedule.StartDate.ToLocalTime() > DateTime.Now)
+                    if (_schedule.StartDate.ToLocalTime() > DateTime.Now)
+                    {
+                        return new JsonResult(new Dictionary<string, object>
+                        {
+                           { "Error", "Bài kiểm tra chưa được mở!" }
+                        });
+                    }
+                }
+
+                if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
-                       { "Error", "Bài kiểm tra chưa được mở!" }
+                       { "Error", "Bài đã quá hạn!" }
                     });
                 }
-                if (_lesson.TemplateType == LESSON_TEMPLATE.EXAM)
-                    if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
-                    {
-                        return new JsonResult(new Dictionary<string, object>
-                    {
-                       { "Error", "Bài kiểm tra đã quá hạn!" }
-                    });
-                    }
+
 
                 item.LessonScheduleID = _schedule.ID;
                 item.Timer = _lesson.Timer;
@@ -222,14 +232,16 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.QuestionsTotal = _cloneLessonPartQuestionService.CreateQuery().CountDocuments(o => o.LessonID == item.LessonID);
                 item.QuestionsDone = 0;
                 item.Marked = false;
+                _examService.ResetLesssonPoint(_lesson, item.StudentID);
             }
+
             item.Updated = DateTime.Now;
             //_examService.CreateOrUpdate(item);//MAPPING BUG
             _examService.Save(item);
             return new JsonResult(new Dictionary<string, object>
-                    {
-                       { "Data", item }
-                    });
+            {
+                { "Data", item }
+            });
         }
 
         [HttpPost]
@@ -341,19 +353,47 @@ namespace BaseCustomerMVC.Controllers.Student
                 //    Time = DateTime.Now,
                 //    StudentID = User.Claims.GetClaimByType("UserID").Value
                 //});
+                var files = HttpContext.Request.Form?.Files;
                 if (string.IsNullOrEmpty(item.ID) || item.ID == "0" || item.ID == "null")
                 {
-                    if (item.AnswerID == null && item.AnswerValue == null)
+                    if (item.AnswerID == null && item.AnswerValue == null && files.Count == 0)
                     {
                         return new JsonResult(item);
                     }
 
+                    var dataFiles = _roxyFilemanHandler.UploadNewFeed("Answer", HttpContext);
 
                     var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();
                     var oldItem = _examDetailService.CreateQuery().Find(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).FirstOrDefault();
-
                     exam.Updated = DateTime.Now;
-
+                    
+                    var answer = new LessonPartAnswerEntity();
+                    if (dataFiles.TryGetValue("success", out List<MediaResponseModel> listFiles) && listFiles.Count > 0)
+                    {
+                        var listMedia = new List<Media>();
+                        for (int i = 0; i < listFiles.Count; i++)
+                        {
+                            var media = new Media()
+                            {
+                                Created = DateTime.Now,
+                                Extension = listFiles[i].Extends,
+                                Name = listFiles[i].Path,
+                                OriginalName = listFiles[i].Path,
+                                Path = listFiles[i].Path
+                            };
+                            listMedia.Add(media);
+                        }
+                        answer = new LessonPartAnswerEntity()
+                        {
+                            Content = item.AnswerValue,
+                            IsCorrect = true,
+                            ParentID = item.LessonPartID,
+                            CreateUser = User.FindFirst("UserID")?.Value,
+                            Created = DateTime.Now,
+                            Medias = listMedia
+                        };
+                        _lessonPartAnswerService.CreateOrUpdate(answer);
+                    }
                     if (oldItem == null)
                     {
                         exam.QuestionsDone += 1;
@@ -376,12 +416,13 @@ namespace BaseCustomerMVC.Controllers.Student
                         }
                         _examService.CreateOrUpdate(exam);
                         var xitem = map.AutoWithoutID(item, new ExamDetailEntity() { });
+                        xitem.AnswerID = answer.ID ?? xitem.AnswerID;
                         _examDetailService.CreateOrUpdate(xitem);
                         return new JsonResult(xitem);
                     }
                     else
                     {
-
+                        item.AnswerID = answer.ID ?? item.AnswerID;
                         if (item.AnswerID == null && item.AnswerValue == null)
                         {
                             var deleted = _examDetailService.CreateQuery().DeleteMany(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).DeletedCount;
@@ -443,7 +484,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (deleted.DeletedCount > 0 && exam.QuestionsDone > 0)
                         exam.QuestionsDone -= 1;
 
-                    _examService.CreateQuery().ReplaceOne(t=> t.ID == exam.ID, exam);
+                    _examService.CreateQuery().ReplaceOne(t => t.ID == exam.ID, exam);
                 }
                 return new JsonResult(item);
             }
@@ -582,12 +623,12 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public IActionResult Details(DefaultModel model, string id, string ClassID)
+        public IActionResult Details(DefaultModel model, string id, string ClassID, string basis)
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["Error"] = "Bạn chưa chọn khóa học";
-                return RedirectToAction("Index");
+                TempData["Error"] = "Bài học không đúng";
+                return Redirect($"/{basis}{Url.Action("Index")}");
             }
             ViewBag.CourseID = id;
             ViewBag.ClassID = ClassID;

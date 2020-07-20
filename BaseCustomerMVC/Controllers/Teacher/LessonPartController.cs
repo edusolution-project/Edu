@@ -163,7 +163,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        public async Task<JsonResult> CreateOrUpdate(LessonPartViewModel item, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
+        public async Task<JsonResult> CreateOrUpdate(string basis, LessonPartViewModel item, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
         {
             //try
             //{
@@ -202,7 +202,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 item.Media.Created = DateTime.Now;
                                 item.Media.Size = file.Length;
-                                item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
+                                item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
                             }
                         }
                     }
@@ -230,7 +230,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();//update media
                         item.Media.Created = DateTime.Now;
                         item.Media.Size = file.Length;
-                        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName);
+                        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
                     }
 
                     item.Updated = DateTime.Now;
@@ -275,8 +275,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 foreach (var vocab in vocabArr)
                                 {
-                                    var vocabulary = vocab.Trim();
-                                    _ = GetVocab(vocabulary);
+                                    var vocabulary = vocab.Trim().ToLower();
+                                    _ = GetVocabByCambridge(vocabulary);
+                                    _ = GetVocabByTraTu(vocabulary);
                                 }
                             }
                         }
@@ -304,7 +305,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         if (item.Questions != null && item.Questions.Count > 0)
                         {
-                            await SaveQuestionFromView(item, createduser, files);
+                            await SaveQuestionFromView(item, createduser, files, basis);
                         }
 
                         break;
@@ -513,7 +514,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private async Task GetVocab(string vocab)
+        #region GetVocabBy https://dictionary.cambridge.org/
+        private async Task GetVocabByCambridge(string vocab)
         {
             //check if vocab is exist
             var code = vocab.ToLower().Replace(" ", "-");
@@ -542,6 +544,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (listExp.Any(t => t.WordType == type))
                             continue;
                         var expNodes = expContent.SelectNodes(".//span[contains(@class,\"trans dtrans\")]");
+                        if (expNodes == null)
+                            return;
                         if (expNodes != null && expNodes.Count() > 0)
                         {
                             foreach (var node in expNodes)
@@ -571,9 +575,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     foreach (var content in contentHolder)
                     {
-                        var type = content.SelectSingleNode(".//span[contains(@class,\"pos dpos\")]").InnerText;
+                        var typeNode = content.SelectSingleNode(".//span[contains(@class,\"pos dpos\")]");
+                        var typeText = typeNode.InnerText;
 
-                        if (listVocab.Any(t => t.WordType == type))
+                        if (listVocab.Any(t => t.WordType == typeText))
                             continue;
                         try
                         {
@@ -587,11 +592,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 Name = vocab,
                                 Code = code,
                                 Language = "en-us",
-                                WordType = type,
+                                WordType = typeText,
                                 Pronunciation = pronunText,
                                 PronunAudioPath = pronunPath,
                                 Created = DateTime.Now,
-                                Description = string.Join(", ", listExp.Where(t => t.WordType == type).Select(t => t.Meaning))
+                                Description = string.Join(", ", listExp.Where(t => t.WordType == typeText).Select(t => t.Meaning))
                             };
                             listVocab.Add(vocabulary);
 
@@ -609,6 +614,116 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _vocabularyService.Save(vocal);
             return;
         }
+        #endregion
+
+        #region GetVocabBy http://tratu.coviet.vn/
+        private async Task GetVocabByTraTu(string vocab)
+        {
+            //check if vocab is exist
+            var code = vocab.ToLower().Replace(" ", "-");
+            var olditems = _vocabularyService.GetItemByCode(code);
+            if (olditems != null && olditems.Count > 0)
+                return;
+
+            var listVocab = new List<VocabularyEntity>();
+            var dictUrl = "http://tratu.coviet.vn/hoc-tieng-anh/tu-dien/lac-viet/A-V/" + code + ".html";
+            var listExp = new List<PronunExplain>();
+
+            using (var expclient = new WebClient())
+            {
+                var expDoc = new HtmlDocument();
+                string expHtml = expclient.DownloadString(dictUrl);
+                expDoc.LoadHtml(expHtml);
+                var expContents = expDoc.DocumentNode.SelectNodes("//div[@class=\"p10\"][1]");
+                if (expContents != null && expContents.Count() > 0)
+                {
+                    foreach (var expContent in expContents)
+                    {
+                        int index = 0;
+                        var typeNodes = expContent.SelectNodes(".//div[contains(@id,\"partofspeech\")]/div[@class=\"ub\"]");
+                        if (typeNodes == null) continue;
+                        foreach(var typeNode in typeNodes)
+                        {
+                            string[] type = typeNode.InnerText.Split(new char[] { ',' });
+                            if (listExp.Any(t => t.WordType == type[0]))
+                                continue;
+                            var expNodes = expContent.SelectNodes("//div[contains(@id,\"partofspeech_" + index + "\")]/div[@class=\"m\"]");
+                            if (expNodes == null)
+                                continue;
+                            if (expNodes != null && expNodes.Count() > 0)
+                            {
+                                foreach (var node in expNodes)
+                                {
+                                    listExp.Add(new PronunExplain
+                                    {
+                                        WordType = type[0],
+                                        Meaning = node.InnerText
+                                    });
+                                }
+                            }
+                            index++;
+                        }
+                    }
+                }
+            }
+            if (listExp == null || listExp.Count == 0)
+                return;
+
+            using (var client = new WebClient())
+            {
+                HtmlDocument doc = new HtmlDocument();
+                string html = client.DownloadString(dictUrl);
+                doc.LoadHtml(html);
+
+                var contentHolder = doc.DocumentNode.SelectNodes("//div[contains(@id,\"mtd_0\")]");
+                if (contentHolder != null && contentHolder.Count() > 0)
+                {
+                    foreach (var content in contentHolder)
+                    {
+                        var typeNodes = content.SelectNodes(".//div[contains(@class,\"ub\")]/span");
+                        if (typeNodes == null)
+                            continue;
+                        foreach (var typeNode in typeNodes)
+                        {
+                            string[] typeTxt = typeNode.InnerText.Split(new char[] { ',' });
+                           
+                            if (listVocab.Any(t => t.WordType == typeTxt[0]))
+                                continue;
+                            try
+                            {
+                                var pronunText = content.SelectSingleNode(".//div[contains(@class,\"p5l fl cB\")]").InnerText;
+                                var pronunPath = "";
+
+                                pronunPath = "http://tratu.coviet.vn/sounds/en/" + code.Substring(0, 1) + "/" + code + ".mp3";
+                                var vocabulary = new VocabularyEntity
+                                {
+                                    Name = vocab,
+                                    Code = code,
+                                    Language = "en-us",
+                                    WordType = typeTxt[0],
+                                    Pronunciation = pronunText,
+                                    PronunAudioPath = pronunPath,
+                                    Created = DateTime.Now,
+                                    Description = string.Join(", ", listExp.Where(t => t.WordType == typeTxt[0]).Select(t => t.Meaning))
+                                };
+                                listVocab.Add(vocabulary);
+                            }
+
+                            catch (Exception e)
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (listVocab.Count() == 0) return;
+            foreach (var vocal in listVocab)
+                _vocabularyService.Save(vocal);
+            return;
+        }
+        #endregion
 
         private List<QuestionViewModel> ExtractFillQuestionList(LessonPartEntity item, string creator, out string Description)
         {
@@ -689,7 +804,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return questionList;
         }
 
-        private async Task SaveQuestionFromView(LessonPartViewModel item, string createuser = "auto", IFormFileCollection files = null)
+        private async Task SaveQuestionFromView(LessonPartViewModel item, string createuser = "auto", IFormFileCollection files = null, string basis = "")
         {
             foreach (var questionVM in item.Questions)
             {
@@ -727,7 +842,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 quiz.Media.Created = DateTime.Now;
                                 quiz.Media.Size = file.Length;
-                                quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                                quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName, "", basis);
                             }
                         }
 
@@ -758,7 +873,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();//update media
                             quiz.Media.Created = DateTime.Now;
                             quiz.Media.Size = file.Length;
-                            quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
+                            quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName, "", basis);
                         }
                     }
 
@@ -811,7 +926,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     {
                                         answer.Media.Created = DateTime.Now;
                                         answer.Media.Size = file.Length;
-                                        answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                        answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName, "", basis);
                                     }
                                 }
 
@@ -840,7 +955,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();//update media
                                     answer.Media.Created = DateTime.Now;
                                     answer.Media.Size = file.Length;
-                                    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
+                                    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName, "", basis);
                                 }
                             }
                             //else // No Media

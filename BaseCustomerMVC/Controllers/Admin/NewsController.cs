@@ -81,6 +81,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         }
 
         [HttpPost]
+        [Route("/admin/news/GetList")]
         public JsonResult GetList(DefaultModel model)
         {
             var filter = new List<FilterDefinition<NewsCategoryEntity>>();
@@ -175,6 +176,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (item.PublishDate < new DateTime(1900, 1, 1))
                     item.PublishDate = item.CreateDate;//publish now
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
+                item.IsActive = true;
                 var pos = 0;
                 while (_serviceNews.GetItemByCode(item.Code) != null)
                 {
@@ -232,6 +234,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         }
 
         [HttpPost]
+        [Route("/admin/news/GetListNews")]
         public JsonResult GetListNews(DefaultModel model, string CategoryID)
         {
             var filter = new List<FilterDefinition<NewsEntity>>();

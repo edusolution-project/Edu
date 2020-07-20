@@ -69,7 +69,10 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             if (!string.IsNullOrEmpty(model.SearchText))
             {
-                filter.Add(Builders<StudentEntity>.Filter.Where(o => o.FullName.ToLower().Contains(model.SearchText.ToLower()) || o.Email.ToLower().Contains(model.SearchText.ToLower()) || o.Class.Contains(model.SearchText) || o.StudentId.ToLower().Contains(model.SearchText.ToLower())));
+                filter.Add(Builders<StudentEntity>.Filter.Where(o => o.FullName.ToLower().Contains(model.SearchText.ToLower()) ||
+                o.Email.ToLower().Contains(model.SearchText.ToLower()) ||
+                o.Class.Contains(model.SearchText) ||
+                o.StudentId.ToLower().Contains(model.SearchText.ToLower())));
             }
             if (model.StartDate > DateTime.MinValue)
             {
@@ -95,10 +98,10 @@ namespace BaseCustomerMVC.Controllers.Admin
                            let account = _accountService.CreateQuery().Find(o => o.UserName == r.Email
                            //&& o.Type == ACCOUNT_TYPE.STUDENT
                            ).FirstOrDefault()
-                           where account != null
+                           //where account != null
                            select _mapping.AutoOrtherType(r, new StudentViewModel()
                            {
-                               AccountID = account.ID
+                               AccountID = account?.ID
                            });
 
             var response = new Dictionary<string, object>
@@ -260,7 +263,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                                                                                    //string code = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
                                 string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
                                 string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
-                                string email = workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString();
+                                string email = (workSheet.Cells[i, 4].Value == null ? "" : workSheet.Cells[i, 4].Value.ToString()).ToLower().Trim();
                                 var birthdate = new DateTime();
                                 DateTime.TryParseExact(dateStr, "dd/MM/yyyy", CultureInfo.InvariantCulture,
                                                    DateTimeStyles.None,

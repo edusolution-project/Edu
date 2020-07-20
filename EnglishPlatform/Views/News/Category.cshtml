@@ -23,41 +23,42 @@
     }
 </style>
 <div class="category-box pt-5 pb-5">
-    <div class="inner-content">
-        <div class="content-box">
-            <div class="box-title d-flex justify-content-center mb-5">
-                @category.Name
-                <div class="underline"></div>
-            </div>
-            <div class="news-list flex-md-row pb-3">
-                <div v-for="(item,k) in tableData" class="news-item pb-3 pt-3 d-flex">
-                    <div class="thumb">
-                        <a :href="'tin-tuc/@category.Code/' + item.Code">
-                            <img src="~/images/news3.png" />
-                        </a>
-                    </div>
-                    <div class="ml-3 media-body">
-                        <div class="news-title">
-                            <a href="#">
-                                Học sinh tiểu học Sài Gòn ngày đầu trở lại trường
+        <div class="inner-content">
+            <div class="content-box">
+                <div class="box-title d-flex justify-content-center mb-5">
+                    @category.Name
+                    <div class="underline"></div>
+                </div>
+                <div class="news-list flex-md-row pb-3">
+                    <div v-for="(item,k) in tableData" class="news-item pb-3 pt-3 d-flex">
+                        <div class="thumb " style="width:216px;height:122px;text-align:center">
+                            <a :href="'/tin-tuc/@category.Code/' + item.Code">
+                                <img :src="'/Upload/News/'+item.Thumbnail"  style="max-width:100%;max-height:100%;text-align:center"/>
                             </a>
                         </div>
-                        <div class="news-desc">
-                            Hơn 630.000 học sinh tiểu học TP HCM đến trường hôm nay, sau hơn 3 tháng nghỉ vì Covid-19, để ổn định nề nếp trước khi học trở lại.
-                        </div>
-                        <div class="news-time">
-                            12/08/2019
+                        <div class="ml-3 media-body">
+                            <div class="news-title">
+                                <a :href="'/tin-tuc/@category.Code/' + item.Code">
+                                    {{item.Title}}
+                                </a>
+                            </div>
+                            <div class="news-desc">
+                                {{item.Summary}}
+                            </div>
+                            <div class="news-time">
+                                {{moment(String(item.PublishDate)).format('MM-DD-YYYY')}}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="page-control d-flex justify-content-lg-center">
-        <b-pagination v-model="page"
-                      :total-rows="totalRec"
-                      :per-page="view"
-                      v-on:input="getData()"></b-pagination>
+
+                <div class="page-control d-flex justify-content-lg-center">
+                    <b-pagination v-model="page"
+                                  :total-rows="totalRec"
+                                  :per-page="view"
+                                  v-on:input="getData()"></b-pagination>
     </div>
 </div>
 @section Scripts{
@@ -70,7 +71,7 @@
                 isLoading: false,
                 catID: '@category.ID',
                 tableData: @Html.Raw(Json.Serialize(firstPage)),
-                view: 20,
+                view: 12,
                 totalRec: @initTotalRec,
                 page: 1
             },

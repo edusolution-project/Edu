@@ -714,4 +714,8 @@ fillquiz, fillquiz.quiz-item {
         .part-box-header:hover .btn-toggle-width:hover {
             filter: none;
         }
+
+fillquiz, fillquiz span {
+    font-family: 'Arial,Helvetica,sans-serif' !important
+}
 /* css input dropdown */

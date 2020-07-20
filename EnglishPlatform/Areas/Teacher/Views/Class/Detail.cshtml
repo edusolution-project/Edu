@@ -14,23 +14,23 @@
 }
 
 
-    @*<script src="/libs/vuejs-datepicker.min.js"></script>*@
-    <link href="~/js/lib/datetimepicker/jq.datetimepicker.css" rel="stylesheet" />
-    <script src="~/js/lib/datetimepicker/php-date-formatter.min.js"></script>
-    <script src="~/js/lib/datetimepicker/jquery.mousewheel.js"></script>
-    <script src="~/js/lib/datetimepicker/jquery.datetimepicker.js"></script>
+@*<script src="/libs/vuejs-datepicker.min.js"></script>*@
+<link href="~/js/lib/datetimepicker/jq.datetimepicker.css" rel="stylesheet" />
+<script src="~/js/lib/datetimepicker/php-date-formatter.min.js"></script>
+<script src="~/js/lib/datetimepicker/jquery.mousewheel.js"></script>
+<script src="~/js/lib/datetimepicker/jquery.datetimepicker.js"></script>
 
-    <script src="/libs/quill-editor/quill.min.js"></script>
-    <script src="/libs/quill-editor/quill-vue.min.js"></script>
-    <link href="/libs/quill-editor/quill.core.css" rel="stylesheet">
-    <link href="/libs/quill-editor/quill.snow.css" rel="stylesheet">
-    <link href="/libs/quill-editor/quill.bubble.css" rel="stylesheet">
+<script src="/libs/quill-editor/quill.min.js"></script>
+<script src="/libs/quill-editor/quill-vue.min.js"></script>
+<link href="/libs/quill-editor/quill.core.css" rel="stylesheet">
+<link href="/libs/quill-editor/quill.snow.css" rel="stylesheet">
+<link href="/libs/quill-editor/quill.bubble.css" rel="stylesheet">
 
-    <script>
-        setActiveMenu("course");
-    </script>
+<script>
+    setActiveMenu("course");
+</script>
 
-    <section class="module" id="dashboard_content">
+<section class="module" id="dashboard_content">
 
         <div class="card-header" v-cloak>
             <div class="flex mb-2">
@@ -103,58 +103,58 @@
                                 </ul>
                             </b-collapse>
 
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            <div class="box" v-if="tab[2]">
-                <table id="ed_table" class="table">
-                    <thead>
-                        <tr>
-                            <th v-for="(field,k) in fields">{{field.label}}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(item,k) in studentData">
-                            <td>{{(k+1)}}</td>
-                            <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
-                            <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
-                            <td>{{formatTime(item.LastDate)}}</td>
-                            <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
-                            <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="box" v-if="tab[3]">
-                <div class="row ls-doc" v-if="ref.data.length > 0">
-                    <div class="col-md-12" v-for="data in ref.data">
-                        <div class="inner flex">
-                            <a href="#" title="" class="thumb">
-                                <img src="/pictures/doc1.png" alt="">
-                            </a>
-                            <div class="entry">
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="box" v-if="tab[2]">
+            <table id="ed_table" class="table">
+                <thead>
+                    <tr>
+                        <th v-for="(field,k) in fields">{{field.label}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item,k) in studentData">
+                        <td>{{(k+1)}}</td>
+                        <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
+                        <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
+                        <td>{{formatTime(item.LastDate)}}</td>
+                        <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
+                        <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="box" v-if="tab[3]">
+            <div class="row ls-doc" v-if="ref.data.length > 0">
+                <div class="col-md-12" v-for="data in ref.data">
+                    <div class="inner flex">
+                        <a href="#" title="" class="thumb">
+                            <img src="/pictures/doc1.png" alt="">
+                        </a>
+                        <div class="entry">
+                            <div>
                                 <div>
-                                    <div>
-                                        <a href="#" title="" class="title">{{data.Title}}</a>
-                                    </div>
-                                    <div>
-                                        <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                        <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                    </div>
-                                </div>
-                                <div class="pt-2 pb-2">
-                                    <p>{{domDecoder(replaceBrkLine(data.Description))}}</p>
+                                    <a href="#" title="" class="title">{{data.Title}}</a>
                                 </div>
                                 <div>
-                                    <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-                                    <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
-                                    <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteRef(data)" v-if="data.OwnerID == '@currentuser'">Xóa</a>
-                                    <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showRefModal(data)" v-if="data.OwnerID == '@currentuser'">Sửa</a>
+                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
                                 </div>
+                            </div>
+                            <div class="pt-2 pb-2">
+                                <p>{{domDecoder(replaceBrkLine(data.Description))}}</p>
+                            </div>
+                            <div>
+                                <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
+                                <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
+                                <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteRef(data)" v-if="data.OwnerID == '@currentuser'">Xóa</a>
+                                <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showRefModal(data)" v-if="data.OwnerID == '@currentuser'">Sửa</a>
                             </div>
                         </div>
                     </div>
+                </div>
 
                 </div>
                 <div class="row ls-doc text-center d-block" v-else>
@@ -184,9 +184,11 @@
                     <div class="col-md-12" v-for="data in ref.data">
                         <div class="list-item">
                             <div class="item">
-                                <div class="item-title">{{data[0].LessonScheduleName}} ({{data.length}})</div>
+                                <div class="item-title"  onclick="this.parentElement.classList.toggle('open');">{{data[0].LessonScheduleName}} ({{data.length}}) {{data.Marked}}</div>
                                 <div class="itme-body" v-for="item in data">
-                                    <div>{{item.StudentName}}</div> <button type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
+                                    <div>{{item.StudentName}} - {{item.Point}}</div>
+                                    <button v-if="!item.Marked" type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
+                                    <button v-else type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm lại</button>
                                 </div>
                             </div>
                         </div>
@@ -221,87 +223,101 @@
     @section Scripts{
 
         <style>
+            
+            .itme-body {
+                padding: 10px;
+                display: none;
+            }
+            .open > .itme-body {
+                display: block;
+            }
+            .itme-body > div {
+                display: inline-block;
+            }
             .ls-pratice .card-body {
                 overflow: visible;
             }
 
-            .ls-pratice .list {
-                max-height: none;
-                overflow: visible;
+        .ls-pratice .list {
+            max-height: none;
+            overflow: visible;
+        }
+
+        .ls-pratice .date {
+            width: 160px;
+            padding: 2px 12px;
+        }
+
+            .ls-pratice .date::after {
+                top: 7px;
             }
 
-            .ls-pratice .date {
-                width: 160px;
-                padding: 2px 12px;
+        .ls-pratice .sub-practice .status {
+            padding: 10px
+        }
+
+        .input-group.date input {
+            border: solid 1px #DDD !important;
+            padding: 0 5px !important;
+            width: 125px;
+            border: none;
+            padding: 0;
+        }
+
+            .input-group.date input:read-only {
+                background: #FFF;
             }
 
-                .ls-pratice .date::after {
-                    top: 7px;
-                }
-
-            .ls-pratice .sub-practice .status {
-                padding: 10px
+            .input-group.date input:focus {
+                outline: none !important;
             }
 
-            .input-group.date input {
-                border: solid 1px #DDD !important;
-                padding: 0 5px !important;
-                width: 125px;
-                border: none;
-                padding: 0;
-            }
+        .sub-practice:hover {
+            background: #DDD;
+        }
 
-                .input-group.date input:read-only {
-                    background: #FFF;
-                }
+        .chap-item {
+            border-bottom: dashed 1px #CCC;
+        }
 
-                .input-group.date input:focus {
-                    outline: none !important;
-                }
+        ul > .chap-item:last-child {
+            border-bottom: none;
+        }
 
-            .sub-practice:hover {
-                background: #DDD;
-            }
+        .basepoint::placeholder {
+            color: #CCC;
+        }
+    </style>
 
-            .chap-item {
-                border-bottom: dashed 1px #CCC;
-            }
-
-            ul > .chap-item:last-child {
-                border-bottom: none;
-            }
-
-            .basepoint::placeholder {
-                color: #CCC;
-            }
-        </style>
-
-        <script type="text/x-template" id="chapContentTemp">
-            <li class="pr-0 ml-3 chap-item">
-                <div class="inner pt-3 pb-3">
-                    <div class="d-flex align-items-center">
-                        <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color btn-collapse flex-grow-1 mb-0" v-on:click="loadContent(data.ClassSubject, data.ID)">
-                            <span class="align-self-center"><i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></span>
-
-                        </a>
-                        <div class="d-flex" v-if="owner == '@currentuser'">
-                            <select v-model="data.ConditionChapter" style="max-width:200px; font-size:90%; height: 31px; margin-top: 2px;" v-on:change="updateChapCondition(data)">
-                                <option value="">-- Chọn nội dung điều kiện (nếu có) --</option>
-                                <template v-for="(chap,j) in listchaps" v-if="chap.ID != data.ID">
-                                    <option :value='chap.ID'>{{chap.Title}}</option>
-                                </template>
-                            </select>
-                            <div class="picker-schedule d-flex">
-                                <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateChapSchedule(data, pos)"></datepicker>
-                                <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateChapSchedule(data, pos)"></datepicker>
-                                <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" title="Xóa lịch" v-on:click="clearChapSchedule(data, pos)"></i>
-                            </div>
-                            <input type="text" class="form-control bg-light text-right basepoint" style="margin: 2px 13.5px; width: 60px;" v-model="data.BasePoint" placeholder="0-100" v-on:blur="updateChapPoint(data)">
+    <script type="text/x-template" id="chapContentTemp">
+        <li class="pr-0 ml-3 chap-item">
+            <div class="inner pt-3 pb-3">
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center">
+                    <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color btn-collapse flex-grow-1 mb-0" v-on:click="loadContent(data.ClassSubject, data.ID)">
+                        <span class="align-self-center" style="line-height:24px;"><i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></span>
+                    </a>
+                    <div class="d-flex" v-if="owner == '@currentuser'">
+                        <select v-model="data.ConditionChapter" style="max-width:200px; font-size:90%; height: 31px; margin-top: 2px;" v-on:change="updateChapCondition(data)">
+                            <option value="">-- Chọn nội dung điều kiện (nếu có) --</option>
+                            <template v-for="(chap,j) in listchaps" v-if="(chap.ID != data.ID && chap.Parent == data.Parent) || (chap.ID == data.ConditionChapter)">
+                                <option :value='chap.ID'>{{chap.Title}}</option>
+                            </template>
+                        </select>
+                        <div class="picker-schedule d-flex">
+                            <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateChapSchedule(data, pos)"></datepicker>
+                            <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateChapSchedule(data, pos)"></datepicker>
+                            <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" title="Xóa lịch" v-on:click="clearChapSchedule(data, pos)"></i>
                         </div>
+                        <input type="text" class="form-control bg-light text-right basepoint" style="margin: 2px 13.5px; width: 60px;" v-model="data.BasePoint" placeholder="0-100" v-on:blur="updateChapPoint(data)">
                     </div>
-                    <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
-                        <b-card-body class="pr-0">
-                            <ul class="list">
+                </div>
+                <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
+                    <b-card-body class="pr-0">
+                        <ul class="list">
+                            <template v-if="data.IsLoading">
+                                <li><i class=""></i> Đang nạp dữ liệu</li>
+                            </template>
+                            <template v-else>
                                 <chap-content v-for="(subItem,j) in listchaps" v-if="subItem.ClassSubject + '-' + subItem.Parent == classbj + '-' + data.ID"
                                               v-bind:data="subItem"
                                               v-bind:classbj="classbj"
@@ -309,42 +325,43 @@
                                               v-bind:owner="owner"
                                               v-bind:listchaps="listchaps"></chap-content>
                                 <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:owner="owner" v-bind:classSubject="data.ClassSubject"></lesson-item>
-                            </ul>
-                        </b-card-body>
-                    </b-collapse>
-                </div>
-            </li>
-        </script>
+                            </template>
+                        </ul>
+                    </b-card-body>
+                </b-collapse>
+            </div>
+        </li>
+    </script>
 
-        <script type="text/x-template" id="lessonItemTemp">
-            <li class="sub-practice pt-2 pb-1 pl-2 rounded">
-                <div class="d-flex w-100 align-items-start">
-                    <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
-                        <span>
-                            <i v-if="data.TemplateType === 2" class="ic far fa-edit mr-2"></i>
-                            <i v-else class="ic far fa-file-alt mr-2"></i>
-                            {{data.Title}}
-                        </span>
-                    </a>
-                    <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
-                        <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
-                        <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
-                        <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" v-bind:class="{active: data.IsOnline == true}" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
-                        <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" v-on:click="toggleOnlineClass(data)"></i>
-                    </div>
-                    <div class="d-flex picker-schedule" v-else>
-                        <div class="input-group date date st bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
-                        <div class="input-group date date ed bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
-                        <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến"></i>
-                    </div>
-                    <div class="status" v-if="owner == '@currentuser'">
-                        <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                    </div>
+    <script type="text/x-template" id="lessonItemTemp">
+        <li class="sub-practice pt-2 pb-1 pl-2 rounded">
+            <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
+                <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
+                    <span>
+                        <i v-if="data.TemplateType === 2" class="ic far fa-edit mr-2"></i>
+                        <i v-else class="ic far fa-file-alt mr-2"></i>
+                        {{data.Title}}
+                    </span>
+                </a>
+                <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
+                    <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
+                    <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
+                    <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" v-bind:class="{active: data.IsOnline == true}" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
+                    <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" v-on:click="toggleOnlineClass(data)"></i>
                 </div>
-            </li>
-        </script>
+                <div class="d-flex picker-schedule" v-else>
+                    <div class="input-group date date st bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
+                    <div class="input-group date date ed bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
+                    <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến"></i>
+                </div>
+                <div class="status" v-if="owner == '@currentuser'">
+                    <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                </div>
+            </div>
+        </li>
+    </script>
 
-        <script>
+    <script>
         Vue.use(VueQuillEditor)
 
         Vue.component('chap-content', {
@@ -442,132 +459,130 @@
 
         Vue.component('datepicker', datepickerComponent);
 
-            var mainInstance = new Vue({
-                el: "#main",
-                mounted() {
-                    this.loadClassDetail()
-                    window.updateCheckPoint = this.updateCheckPoint;
-                    window.loadContent = this.loadContent
-                    window.updateSchedule = this.updateSchedule
-                    window.updateChapPoint = this.updateChapPoint
-                    window.updateChapSchedule = this.updateChapSchedule
-                    window.updateChapCondition = this.updateChapCondition
-                    window.clearSchedule = this.clearSchedule
-                    window.clearChapSchedule = this.clearChapSchedule
-                    window.toggleLessonState = this.toggleLessonState
-                    window.toggleOnlineClass = this.toggleOnlineClass
-                    window.filterChap = this.filterChap
-                    window.filterLesson = this.filterLesson
-                    window.formatTime = this.formatTime
-                    var hash = window.location.hash;
-                    if (hash.startsWith('#')) {
-                        hash = hash.split('#')[1]
-                        //console.log(hash)
-                        switch (hash) {
-                            case 'info':
-                                this.tabChange(0);
-                                break;
-                            case 'module':
-                                this.tabChange(1);
-                                break;
-                            case 'student':
-                                this.tabChange(2);
-                                break;
-                            case 'reference':
-                                this.tabChange(3);
-                                break;
-                            case 'exam-student':
-                                this.tabChange(4);
-                                break;
-                        }
+       var mainInstance = new Vue({
+            el: "#main",
+            mounted() {
+                this.loadClassDetail()
+                window.loadContent = this.loadContent
+                window.updateSchedule = this.updateSchedule
+                window.updateChapPoint = this.updateChapPoint
+                window.updateChapSchedule = this.updateChapSchedule
+                window.updateChapCondition = this.updateChapCondition
+                window.clearSchedule = this.clearSchedule
+                window.clearChapSchedule = this.clearChapSchedule
+                window.toggleLessonState = this.toggleLessonState
+                window.toggleOnlineClass = this.toggleOnlineClass
+                window.filterChap = this.filterChap
+                window.filterLesson = this.filterLesson
+                window.formatTime = this.formatTime
+                var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    //console.log(hash)
+                    switch (hash) {
+                        case 'info':
+                            this.tabChange(0);
+                            break;
+                        case 'module':
+                            this.tabChange(1);
+                            break;
+                        case 'student':
+                            this.tabChange(2);
+                            break;
+                        case 'reference':
+                            this.tabChange(3);
+                            break;
+                        case 'discuss':
+                            this.tabChange(4);
+                            break;
                     }
-                    else {
-                        this.tabChange(1);
+                }
+                else {
+                    this.tabChange(1);
+                }
+            },
+            components: {
+          	    LocalQuillEditor: VueQuillEditor.quillEditor
+            },
+            data: {
+                isLoading: false,
+                editorOption: {
+                    theme: 'snow'
+                },
+                classID: '@currentClass.ID',
+                className: '@currentClass.Name',
+                startDate: '@currentClass.StartDate',
+                endDate: '@currentClass.EndDate',
+                classDescription: '@currentClass.Description',
+                classImg: '@currentClass.Image',
+                subjectName: '@currentClass.SubjectName',
+                skillName: '@currentClass.SkillName',
+                classSubjects: [],
+                list_data: [],
+                list_subjects: [],
+                list_chapters: [],
+                list_lessons:[],
+                loaded_chapter: [],
+                loaded_subject: [],
+                init: true,
+                fields: [
+                    {
+                        key: 'stt',
+                        label: '#'
+                    },
+                    {
+                        key: 'name',
+                        label: 'Họ tên'
+                    },
+                    //{
+                    //    key: 'email',
+                    //    label: 'Email'
+                    //},
+                    //{
+                    //    key: 'phone',
+                    //    label: 'SĐT'
+                    //},
+                    {
+                        key: 'per',
+                        label: 'Tiến độ'
+                    },
+                    {
+                        key: 'last_update',
+                        label: 'Lần học cuối'
+                    },
+                    {
+                        key: 'score',
+                        label: 'Điểm trung bình'
+                    },
+                    {
+                        key: 'rank',
+                        label: 'Xếp hạng'
                     }
+                ],
+                studentData: [
+                ],
+                //view: 10,
+                //page: 1,
+                tab: [true, false, false, false, false],
+                ref: {
+                    range: '@BaseCustomerEntity.Database.REF_RANGE.CLASS',
+                    target: '@currentClass.ID',
+                    searchTerm: '',
+                    data: [],
+                    view: 10,
+                    page: 1
                 },
-                components: {
-                    LocalQuillEditor: VueQuillEditor.quillEditor
+                addRef: {
+                    ID: '',
+                    Title: '',
+                    Range: '',
+                    Link: '',
+                    Target: '',
+                    Description: '',
+                    FileName: '',
+                    file: null,
                 },
-                data: {
-                    id: null,
-                    isLoading: false,
-                    editorOption: {
-                        theme: 'snow'
-                    },
-                    classID: '@currentClass.ID',
-                    className: '@currentClass.Name',
-                    startDate: '@currentClass.StartDate',
-                    endDate: '@currentClass.EndDate',
-                    classDescription: '@currentClass.Description',
-                    classImg: '@currentClass.Image',
-                    subjectName: '@currentClass.SubjectName',
-                    skillName: '@currentClass.SkillName',
-                    classSubjects: [],
-                    list_data: [],
-                    list_subjects: [],
-                    list_chapters: [],
-                    list_lessons: [],
-                    loaded_chapter: [],
-                    loaded_subject: [],
-                    init: true,
-                    fields: [
-                        {
-                            key: 'stt',
-                            label: '#'
-                        },
-                        {
-                            key: 'name',
-                            label: 'Họ tên'
-                        },
-                        //{
-                        //    key: 'email',
-                        //    label: 'Email'
-                        //},
-                        //{
-                        //    key: 'phone',
-                        //    label: 'SĐT'
-                        //},
-                        {
-                            key: 'per',
-                            label: 'Tiến độ'
-                        },
-                        {
-                            key: 'last_update',
-                            label: 'Lần học cuối'
-                        },
-                        {
-                            key: 'score',
-                            label: 'Điểm trung bình'
-                        },
-                        {
-                            key: 'rank',
-                            label: 'Xếp hạng'
-                        }
-                    ],
-                    studentData: [
-                    ],
-                    //view: 10,
-                    //page: 1,
-                    tab: [true, false, false, false, false],
-                    ref: {
-                        range: '@BaseCustomerEntity.Database.REF_RANGE.CLASS',
-                        target: '@currentClass.ID',
-                        searchTerm: '',
-                        data: [],
-                        view: 10,
-                        page: 1
-                    },
-                    addRef: {
-                        ID: '',
-                        Title: '',
-                        Range: '',
-                        Link: '',
-                        Target: '',
-                        Description: '',
-                        FileName: '',
-                        file: null,
-                    },
-                    checkpoint: {
+                checkpoint: {
                         ID: '',
                         Point: '',
                         Answer:''
@@ -684,14 +699,23 @@
                             //{
                             //    if (item.ID == subject) {
 
+
+
                             _data.forEach(function (chapter, k) {
                                 var parent = chapter.ParentID;
                                 if (parent == "0") { parent = ""; }
+                                //var pr = _that.list_chapters.filter(t => t.ID == parent)[0];
+                                //var prline = [];
+                                //if (pr != null)
+                                //    prline = pr.ParentLine.slice();
+                                //prline.push(chapter.ID);
+                                //console.log(prline);
                                 _that.list_chapters.push({
                                     ID: chapter.ID,
                                     Title: chapter.Name,
                                     ClassSubject: subject,
                                     Parent: parent,
+                                    //ParentLine: prline,
                                     TotalLessons: chapter.TotalLessons,
                                     StartDate: chapter.StartDate,
                                     EndDate: chapter.EndDate,
@@ -840,6 +864,7 @@
                         }).catch(e => { })
                 },
                 updateChapCondition(obj) {
+                    if (obj.PreventEvent) return false;
                     obj.IsUpdating = true;
                     let _form = new FormData()
                     _form.append('ID', obj.ID)
@@ -848,7 +873,6 @@
 
                     axios.post(_url, _form)
                         .then(response => {
-                            console.log(obj);
                             obj.IsUpdating = false;
                             mainInstance.$forceUpdate();
                             var chapter = response.data.Data;
@@ -856,7 +880,31 @@
                                 alert("có lỗi, vui lòng tải lại trang & thực hiện lại thao tác");
                                 return false;
                             }
+                            else {
+                                this.updateSubchapCondition(chapter);
+                            }
                         }).catch(e => { })
+                },
+                updateSubchapCondition(parent) {
+                    if (parent != null) {
+                        var subchaps = this.list_chapters.filter(t => t.Parent == parent.ID);
+                        if (subchaps.length > 0) {
+                            subchaps.forEach(function (item, pos) {
+                                //console.log(item);
+                                item.PreventEvent = true;
+                                //console.log(parent);
+                                if (parent.ConditionChapter != null)
+                                    item.ConditionChapter = parent.ConditionChapter;
+                                else
+                                    item.ConditionChapter = "";
+
+                                Vue.nextTick(function () {
+                                    this.updateSubchapCondition(item);
+                                    item.PreventEvent = false
+                                })
+                            });
+                        }
+                    }
                 },
                 updateChapSchedule(obj, pos) {
                     obj.IsUpdating = true
@@ -1074,18 +1122,43 @@
                                 _form.append("ID", question.ID);
                                 _form.append("Point", question.Point);
                                 _form.append("RealAnswerValue", question.RealAnswerValue);
+                                _form.append("isLast", j == (part.ExamDetails.length - 1));
+
+                                var files = document.querySelector('input[data-target="' + question.ID + '"]');
+                                if (files != null) {
+                                    for (var x = 0; x < files.files.length; x++) {
+                                        _form.append("files", files.files[x]);
+                                    }
+                                }
+
                                 let _url = '@processUrl("UpdatePoint", "Exam")'
                                 axios.post(_url, _form)
                                     .then(response => {
                                         console.log(response.data);
-
+                                        var data = response.data.Data;
+                                        if (data != null && data != void 0) {
+                                            if (j == (part.ExamDetails.length - 1)) {
+                                                Swal.fire({
+                                                    title: "Đã chấm xong",
+                                                    text: "Success",
+                                                    icon: 'Success',
+                                                });
+                                                _that.checkpoint.Marked = true;
+                                            }
+                                        } else {
+                                            Swal.fire({
+                                                title: "Có lỗi",
+                                                text: "Vui lòng nhập đủ thông tin",
+                                                icon: 'warning',
+                                            });
+                                        }
                                 }).catch(e => { })
 
                             }
                         }
                     }
                     if (_that.checkpoint.RealAnswer == '') {
-                        swal.fire({
+                        Swal.fire({
                             title: "Có lỗi",
                             text: "Vui lòng nhập đủ thông tin",
                             icon: 'warning',
@@ -1093,6 +1166,7 @@
                         //this.$refs["addName"].focus();
                         return false;
                     }
+                    _that.hideModal();
                 },
                 updateRef() {
                     let _that = this
@@ -1325,9 +1399,10 @@
                             <b-col v-html="question.AnswerValue"></b-col>
                         </b-col>
                         <b-col class="answer" :data-id="question.ID">
-                            <label>Điểm : <input type="number" v-model="question.Point"/></label>
+                            <label>Điểm : <input type="number" v-model="question.Point" /></label>
                             <br />
                             <label>Đáp án :</label>
+                            <label> File : </label><input type="file" name="files" :data-target="question.ID" value="" multiple />
                             <quill-editor v-model="question.RealAnswerValue"
                                           ref="quillEditorA"
                                           :options="editorOption">

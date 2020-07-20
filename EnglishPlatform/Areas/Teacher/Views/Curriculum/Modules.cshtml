@@ -187,8 +187,8 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Thời gian (phút):</label>
+                            <div class="form-group col-md-6">
+                                <label class="col-form-label">Thời gian làm bài (phút):</label>
                                 <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required @if (isLock) { @: readonly="true"
                                        }>
                             </div>
@@ -239,6 +239,62 @@
             </div>
         </div>
     </div>
+
+    <!--    Hòa thêm 8/7/2020    -->
+    @*<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="copyLessonModel" aria-labelledby="copyLessonModel">*@
+<div class="modal fade" role="dialog" id="copyLessonModel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="titleClone">Nhân bản </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="@processUrl("CopyLesson","Curriculum")" name="copyLessonForm" enctype="multipart/form-data" method="post">
+                    <input type="hidden" name="LessonID" value="" />
+                    <input type="hidden" name="CourseID" value="@Data.ID" />
+                    <input type="hidden" name="ChapterID" value="" />
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label class="col-form-label">Tiêu đề:</label>
+                            <input type="text" class="form-control" name="Title" required @if (isLock) { @: readonly="true"
+                                   }>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label class="col-form-label">Chương:</label>
+                            <select name="ParentID" id="ParentID" class="form-control" @if (isLock) { @: readonly="true"
+                                    }>
+                                <option value="0">------</option>
+                                @{ for (int i = 0; listChapter != null && i < listChapter.Count; i++)
+                                    {
+                    <option value="@listChapter[i].ID">@listChapter[i].Name</option>
+ } }
+                            </select>
+                        </div>
+                    </div>
+
+                    @*<div class="row chooseOrder">
+                            <div class="form-group col-md-12">
+                                <label class="col-form-label">Thứ tự:</label>
+                                <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng">
+                            </div>
+                        </div>*@
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="return CloneLesson()">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+    <!--    End     -->
 
     <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="joinLessonModal">
         <div class="modal-dialog modal-lg">
@@ -348,7 +404,8 @@
         {
         @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
-@:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "tooltip", "data-placement": "top", "title": "Nhân bản", "onclick": "CloneLesson('" + item.ID + "'); return false;" }));
+//@:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "tooltip", "data-placement": "top", "title": "Nhân bản", "onclick": "CloneLesson('" + item.ID + "'); return false;" }));
+        @:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#copyLessonModel", "data-placement": "top", "title": "Nhân bản", "onclick": "showPupup('" + item.ID + "',this);return false" }));
         }
         rowData.append(leftPart);
         rowData.append(rightPart);
@@ -401,7 +458,8 @@
                 "class": "action-link",
                 "name": "Name",
                 "text": chapter.Name,
-                "onclick": "toggleCollapse(this, '" + chapter.ID + "')"
+                "onclick": "toggleCollapse(this, '" + chapter.ID + "')",
+                "value": chapter.ID
             }));
         title_cPart.append($("<input>", { "type": "hidden", "name": "Description", "value": chapter.Description }));
         title_cPart.append($("<input>", { "type": "hidden", "name": "Order", "value": chapter.Order + 1 }));
@@ -803,6 +861,50 @@
     function CloneLesson(ID) {
         ExcuteOnlyItem(ID, '@processUrl("CopyLesson", "Curriculum")', LoadData);
     }
+    /*
+     *Hòa thêm 10/7/2020
+     */
+
+    function showPupup(id, _this) {
+        $("#copyLessonModel").modal();
+        var modal = $("#copyLessonModel");
+        var title = $(_this).parent().parent().find("[name=Title]").text().trim();
+        var chapter_ID = $(_this).parent().parent().parent().parent().children().find("[name=Name]").attr("value");
+        var optionValue = chapter_ID;
+        $("#ParentID").val(optionValue)
+            .find("option[value=" + optionValue + "]").attr('selected', true);
+
+        modal.find("[name=LessonID]").val(id);
+        modal.find("[name=Title]").val(title);
+        debugger
+        return false;
+    }
+
+    function CloneLesson() {
+        var modal = $("#copyLessonModel");
+        var title = modal.find("[name=Title]").val();
+        var id = modal.find("[name=LessonID]").val();
+        var chapterid = document.getElementById("ParentID").value;
+        var courseid = modal.find("[name=CourseID]").val();
+        var data = new FormData();
+        data.append("ArrID", id);
+        data.append("Title", title);
+        data.append("ChapterIDs", chapterid);
+        data.append("CourseID", courseid);
+        _url = "@processUrl("CopyLesson", "Curriculum")";
+        _method = "POST";
+        fn = LoadData;
+        $('#copyLessonModel').modal('hide');
+        Ajax(_url, "POST", data, true).then(function (res) {
+            if (fn != void 0) fn(res);
+            console.log(res);
+            return false;
+        })
+    }
+
+    /*
+     * end Hòa thêm 
+     */
 
     function DeleteLessonCallback(res) {
 

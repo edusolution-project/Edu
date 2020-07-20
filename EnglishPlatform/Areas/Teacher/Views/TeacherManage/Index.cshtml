@@ -27,24 +27,14 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header" v-cloak>
-        <div class="flex border-b pb-2">
-            <div class="flex flex-grow-1">
-                @*<div class="box filter-box w-152">
-                        <select name="" v-model="search_skill_id">
-                            <option value="">Chuyên môn</option>
-                            <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                        </select>
-                    </div>*@
-                <div class="search-box mr-2">
-                    <button><i class="ic ic-find"></i></button>
-                    <input type="text" name="" v-model="searchTerm" placeholder="Tên giáo viên">
-                </div>
+        <div class="flex flex-row border-b flex-wrap align-items-center">
+            <div class="search-box m-1">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" v-model="searchTerm" placeholder="Tên giáo viên">
             </div>
 
-            <div class="flex">
-                <b-button class="btn-addevent btn-student btn-sm" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
-                <b-button class="btn-addevent btn-student btn-sm" style="margin-left:5px" v-on:click="showUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
-            </div>
+            <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
+            <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left:5px" v-on:click="showUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
         </div>
     </div>
     <div class="card-body" v-cloak>
@@ -505,7 +495,7 @@
 
         <b-col class="form-group">
             <label for="">Nhập mật khẩu mới</label>
-            <input class="form-control" v-model="add_member.pass" />
+            <input class="form-control" v-model="add_member.pass" type="password" autocomplete="off" />
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">
