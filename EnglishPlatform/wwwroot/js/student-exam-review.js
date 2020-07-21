@@ -481,11 +481,13 @@ var ExamReview = (function () {
             html += '</fieldset>';
 
             var medias = item.Medias;//file học viên upload
-
+            html += '<fieldset class="col-md-12">';
             for (var z = 0; medias != null && z < medias.length; z++) {
                 var itemMedia = medias[z];
                 html += renderMedia(itemMedia);
             }
+            html += '</fieldset>';
+
 
             var content = item.RealAnswerEssay;// cau tra loi cua giao vien
             var point = item.PointEssay; // điểm giáo viên chấm
