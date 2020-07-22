@@ -10,6 +10,27 @@ namespace BaseCustomerEntity.Database
 {
     public class CourseChapterEntity : EntityBase
     {
+        public CourseChapterEntity() { }
+
+        public CourseChapterEntity(CourseChapterEntity o)
+        {
+            this.OriginID = o.ID;
+            this.Name = o.Name;
+            this.Code = o.Code;
+            this.CourseID = o.CourseID;
+            this.ParentID = o.ParentID;
+            this.ParentType = o.ParentType;
+            this.Created = DateTime.Now;
+            this.Updated = DateTime.Now;
+            this.CreateUser = o.CreateUser;
+            this.IsAdmin = o.IsAdmin;
+            this.IsActive = o.IsActive;
+            this.Order = o.Order;
+            this.Description = o.Description;
+            this.TotalLessons = o.TotalLessons;
+            this.TotalExams = o.TotalExams;
+        }
+
         [JsonProperty("OriginID")]
         public string OriginID { get; set; }
         [JsonProperty("Name")]

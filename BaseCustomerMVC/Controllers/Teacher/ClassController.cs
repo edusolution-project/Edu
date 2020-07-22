@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using MongoDB.Bson.Serialization.Serializers;
 using BaseEasyRealTime.Entities;
+using System.Drawing;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -109,8 +110,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , CloneLessonPartService cloneLessonPartService
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
-            ,LessonPartService lessonPartService
-            ,LessonPartQuestionService lessonPartQuestionService,
+            , LessonPartService lessonPartService
+            , LessonPartQuestionService lessonPartQuestionService,
             RoleService roleService,
             GroupService groupService
             )
@@ -219,11 +220,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Class = vm;
             ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
             ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
-            return View();
-        }
-
-        public IActionResult CheckPoint(DefaultModel model, string basis, string ExamID)
-        {
             return View();
         }
 
@@ -989,9 +985,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (model.StartDate > new DateTime(1900, 1, 1))
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.StartDate <= model.EndDate));
 
-            var dCursor = _classSubjectService.Collection
-                .Distinct(t => t.ClassID, filter.Count > 0 ? Builders<ClassSubjectEntity>.Filter.And(filter) : Builders<ClassSubjectEntity>.Filter.Empty);
-            var data = dCursor.ToList();
+
+            var data = new List<string>();
+            if (filter.Count > 0)
+            {
+                var dCursor = _classSubjectService.Collection
+                .Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filter));
+                data = dCursor.ToList();
+            }
 
             if (!string.IsNullOrEmpty(TeacherID))
             {
@@ -1701,9 +1702,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
 
-        public IActionResult CheckPoint(DefaultModel model)
+        public IActionResult CheckPoint(DefaultModel model, string basis)
         {
-            if (!string.IsNullOrEmpty(model.ID)) { 
+            if (!string.IsNullOrEmpty(model.ID))
+            {
                 ExamEntity data = _examService.GetItemByID(model.ID);
                 if (data != null)
                 {
@@ -1743,7 +1745,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ViewBag.Type = lesson.TemplateType;
                     ViewBag.Exam = examview;
                 }
-             }
+            }
             ViewBag.Model = model;
             return View();
         }

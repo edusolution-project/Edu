@@ -27,7 +27,9 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("LastPoint")]
         public double LastPoint { get; set; }
         [JsonProperty("LastOpen")]
-        public string LastOpen { get; set; }
+        public DateTime LastOpen { get; set; }
+        [JsonProperty("OpenCount")]
+        public double OpenCount { get; set; }
         [JsonProperty("TriedCount")]
         public double TriedCount { get; set; }
         [JsonProperty("LastTried")]

@@ -115,7 +115,7 @@
                 <div class="modal-body">
                     <form action="@processUrl("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
                         <input type="hidden" name="ID" />
-                        <input type="hidden" name="CourseID" value="@Data.ID" />
+                        <input type="hidden" name="CourseID" id="CourseID" value="@Data.ID" />
                         <div class="form-group">
                             <label class="col-form-label">Tên chương:</label>
                             <input type="text" class="form-control" name="Name" required @if (isLock) { @: readonly="true"
@@ -273,8 +273,9 @@
                                 <option value="0">------</option>
                                 @{ for (int i = 0; listChapter != null && i < listChapter.Count; i++)
                                     {
-                    <option value="@listChapter[i].ID">@listChapter[i].Name</option>
- } }
+                    		<option value="@listChapter[i].ID">@listChapter[i].Name</option>
+				    } 
+			        }
                             </select>
                         </div>
                     </div>
@@ -473,6 +474,7 @@
         @if (!isLock)
         {
             @:title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
+            @:title_ePart.append($("<i>", { "class": "fas fa-clone", "title": "Nhân bản chương", "onclick": "CloneChapter('" + chapter.ID + "',this); return false;" }));
         }
         title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }));
         chapTitle.append(title_cPart);
@@ -715,8 +717,35 @@
             }
             else {
                 chapter = result.Data;
-                //console.log(chapter);
+                //console.log("chapter " + chapter.ID);
                 $('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
+                var o = new Option(chapter.Name, chapter.ID);
+                debugger
+                /// jquerify the DOM object 'o' so we can use the html method
+                $(o).html(chapter.Name);
+                $("#ParentID").append(o);
+                RenderChapter(chapter);
+                hideModal();
+            }
+        }
+    }
+
+    function CloneChapterCallBack(res) {
+        if (res != null) {
+            var result = $.parseJSON(res);
+            //console.log(result);
+            if (result.Error != null) {
+                alert(result.Error);
+                return false;
+            }
+            else {
+                chapter = result.Data;
+                //console.log("chapter " + chapter.ID);
+                $('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
+                var o = new Option(chapter.Name, chapter.ID);
+                /// jquerify the DOM object 'o' so we can use the html method
+                $(o).html(chapter.Name);
+                $("#ParentID").append(o);
                 RenderChapter(chapter);
                 hideModal();
             }
@@ -865,18 +894,41 @@
      *Hòa thêm 10/7/2020
      */
 
+    function CloneChapter(ID,_this) {
+        var courseID = document.getElementById("CourseID").value;
+        var cloneChapter = document.getElementById(ID);
+        
+        //var ArrLessonID = "";
+        //for (var i = 0; i < cloneChapter.children[1].childElementCount; i++) {
+        //    ArrLessonID += cloneChapter.children[1].children[i].getAttribute("id") + ",";
+        //}
+        //debugger
+        var data = new FormData();
+        data.append("CourseID", courseID);
+        data.append("ChapID", ID);
+        //data.append("ArrLessonID", ArrLessonID);
+        _url = "@processUrl("CopyChapter", "Curriculum")";
+        _method = "POST";
+        fn = LoadData;
+        Ajax(_url, "POST", data, true).then(function (res) {
+            if (fn != void 0) fn(res);
+            //console.log(res);
+            return false;
+        });
+        //debugger
+    }
+
     function showPupup(id, _this) {
         $("#copyLessonModel").modal();
         var modal = $("#copyLessonModel");
         var title = $(_this).parent().parent().find("[name=Title]").text().trim();
         var chapter_ID = $(_this).parent().parent().parent().parent().children().find("[name=Name]").attr("value");
         var optionValue = chapter_ID;
-        $("#ParentID").val(optionValue)
-            .find("option[value=" + optionValue + "]").attr('selected', true);
+        $("#ParentID").val(optionValue).find("option[value=" + optionValue + "]").attr('selected', true);
 
         modal.find("[name=LessonID]").val(id);
         modal.find("[name=Title]").val(title);
-        debugger
+        //debugger
         return false;
     }
 
@@ -936,6 +988,8 @@
             }
             else {
                 $('.modules#' + result.Data).remove();
+                //debugger
+                $("#ParentID option[value=" + result.Data+"]").remove();
             }
         }
 
@@ -1005,6 +1059,7 @@
             hideModal();
         }
     });
+
 </script>
 
 <style>

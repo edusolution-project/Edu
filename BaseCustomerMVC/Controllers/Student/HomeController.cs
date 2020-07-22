@@ -45,7 +45,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var student = _studentService.GetItemByID(_studentid);
             ViewBag.Student = student;
             if (student != null)
-                ViewBag.AllCenters = student.Centers.Where(t => _centerService.GetItemByID(t).ExpireDate >= DateTime.Now).Select(t => _centerService.GetItemByID(t));
+                ViewBag.AllCenters = student.Centers.Where(t => _centerService.GetItemByID(t).ExpireDate >= DateTime.Now).Select(t => _centerService.GetItemByID(t)).ToList();
 
             if (!string.IsNullOrEmpty(basis))
             {

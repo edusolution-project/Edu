@@ -25,6 +25,13 @@ namespace BaseCustomerEntity.Database
         public DateTime EndDate { get; set; }
         [JsonProperty("PracticeCount")]//Count of Completed Non-exam lesson 
         public double PracticeCount { get; set; }
+
+        public ChapterEntity()
+        {
+
+        }
+
+       
     }
     public class ChapterService : ServiceBase<ChapterEntity>
     {

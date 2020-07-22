@@ -274,12 +274,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            where schedule != null
                            let progress = _lessonProgressService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID)
                            let progressCount = progress.CountDocuments()
+                           let examCount = _examService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).Project(t=> t.StudentID).ToList().Distinct().Count()
                            select _resultMapping.AutoOrtherType(r, new LessonResultViewModel()
                            {
                                ScheduleID = schedule.ID,
                                StartDate = schedule.StartDate,
                                EndDate = schedule.EndDate,
                                LearntCount = progressCount,
+                               ExamCount = examCount,
                                AvgPoint = progressCount > 0 ? (r.TemplateType == LESSON_TEMPLATE.EXAM ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0,
                                AvgPracticePoint = progressCount > 0 ? (r.TemplateType == LESSON_TEMPLATE.LECTURE ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0
                            })).ToList();

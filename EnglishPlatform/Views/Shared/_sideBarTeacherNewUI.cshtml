@@ -1,6 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Http
 @{
-    BaseCustomerEntity.Database.CenterEntity _center = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity ?? new BaseCustomerEntity.Database.CenterEntity();
+    var _center = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity ?? new BaseCustomerEntity.Database.CenterEntity();
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     var isHeadTeacher = ViewBag.IsHeadTeacher ?? false;
     string processUrl(string act, string ctrl)

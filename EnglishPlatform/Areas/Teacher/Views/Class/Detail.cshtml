@@ -51,7 +51,7 @@
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Môn học</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Học viên</a></li>
                     <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>
-                    <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Kết quả" v-on:click="tabChange(4)">Bảng điểm</a></li>
+                    <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>
                     @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(4)">Thảo luận</a></li>*@
                 </ul>
             </div>
@@ -394,9 +394,9 @@
                     <div class="input-group date date ed bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
                     <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến"></i>
                 </div>
-                <div class="status" v-if="owner == '@currentuser'">
+                @*<div class="status" v-if="owner == '@currentuser'">
                     <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                </div>
+                </div>*@
             </div>
         </li>
     </script>
@@ -422,15 +422,23 @@
                                              v-bind:pos="j"
                                              v-bind:owner="owner"
                                              v-bind:listchaps="listchaps"></chap-result>
-                                <div>
-                                    @*<thead>
-                                            <tr>
-                                                <th v-for="(field,k) in progressFields">{{field.label}}</th>
-                                            </tr>
-                                        </thead>*@
-                                    <lesson-result v-for="lesson in filterResult(data)" v-bind:data="lesson" v-bind:classSubject="data.ClassSubject"></lesson-result>
-                                </div>
 
+
+
+                                <li class="sub-practice pt-2 pb-2 pl-2 rounded" v-if="filterResult(data).length > 0">
+                                    <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center font-weight-bold">
+                                        <span class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis">
+                                            Tên bài
+                                        </span>
+                                        <div class="flex-column col-3">
+                                            Tỉ lệ mở
+                                        </div>
+                                        <div class="flex-column col-3">
+                                            Tỉ lệ làm bài
+                                        </div>
+                                    </div>
+                                </li>
+                                <lesson-result v-for="lesson in filterResult(data)" v-bind:data="lesson" v-bind:classSubject="data.ClassSubject"></lesson-result>
                             </template>
                         </ul>
                     </b-card-body>
@@ -442,23 +450,43 @@
 
     <script type="text/x-template" id="lessonResultTemp">
         <li class="sub-practice pt-2 pb-2 pl-2 rounded">
-            <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
-                <a v-on:click="openLessonResult(data)" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
+            <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center" v-on:click="openLessonResult(data)">
+                <a class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
                     <span>
                         <i v-if="data.TemplateType === 2" class="ic far fa-edit mr-2"></i>
                         <i v-else class="ic far fa-file-alt mr-2"></i>
                         {{data.Title}}
                     </span>
                 </a>
-                <div class="progress col-2 m-0 p-0 ml-auto" style="height:1.5rem; font-size:110%;">
-                    @if (currentClass.TotalStudents > 0)
-                    {
-                        @:<div class="progress-bar bg-success progress-bar-striped" role="progressbar" :aria-valuenow="data.LearntCount"
-                                @: aria-valuemin="0" aria-valuemax="@currentClass.TotalStudents" :class="(data.LearntCount > 0) ? 'text-white':'text-dark'"
-                                @: :style="'width:' + (data.LearntCount*100/@currentClass.TotalStudents) + '%'">
-                            @:    <span>{{data.LearntCount}}/@currentClass.TotalStudents</span>
-                        @:</div>
-                    }
+                <div class="flex-column col-3">
+                    @*<span>
+                            Tỉ lệ mở
+                        </span>*@
+                    <div class="progress m-0 p-0" style="height:1.5rem; font-size:110%;">
+                        @if (currentClass.TotalStudents > 0)
+                        {
+                            @:<div class="progress-bar bg-success progress-bar-striped" role="progressbar" :aria-valuenow="data.LearntCount"
+                                    @: aria-valuemin="0" aria-valuemax="@currentClass.TotalStudents" :class="(data.LearntCount > 0) ? 'text-white':'text-dark'"
+                                    @: :style="'width:' + (data.LearntCount*100/@currentClass.TotalStudents) + '%'">
+                                @:    <span>{{data.LearntCount}}/@currentClass.TotalStudents</span>
+                            @:</div>
+                        }
+                    </div>
+                </div>
+                <div class="flex-column col-3">
+                    @*<span>
+                            Tỉ lệ làm bài
+                        </span>*@
+                    <div class="progress m-0 p-0" style="height:1.5rem; font-size:110%;">
+                        @if (currentClass.TotalStudents > 0)
+                        {
+                            @:<div class="progress-bar bg-info progress-bar-striped" role="progressbar" :aria-valuenow="data.ExamCount"
+                                    @: aria-valuemin="0" aria-valuemax="@currentClass.TotalStudents" :class="(data.ExamCount > 0) ? 'text-white':'text-dark'"
+                                    @: :style="'width:' + (data.ExamCount*100/@currentClass.TotalStudents) + '%'">
+                                @:    <span>{{data.ExamCount}}/@currentClass.TotalStudents</span>
+                            @:</div>
+                        }
+                    </div>
                 </div>
             </div>
         </li>
@@ -948,7 +976,8 @@
                                     IsActive: lesson.IsActive,
                                     IsUpdating: false,
                                     IsOnline: lesson.IsOnline,
-                                    LearntCount: lesson.LearntCount
+                                    LearntCount: lesson.LearntCount,
+                                    ExamCount: lesson.ExamCount
                                 })
 
                             })
@@ -1738,7 +1767,7 @@
                             <td class="text-center">{{item.MaxPoint.toFixed(2)}}</td>
                             <td class="text-center">{{item.AvgPoint.toFixed(2)}}</td>
                             <td class="text-center">{{formatTime(item.LastTried)}}</td>
-                            <td class="text-center">{{item.Status ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
+                            <td class="text-center">{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
                             <td class="text-center">{{item.AvgPoint.toFixed(2)}}</td>
                         </tr>
                     </tbody>
@@ -1770,7 +1799,7 @@
                             <td>{{formatTime(item.Created)}}</td>
                             <td class="text-center">{{item.Point.toFixed(2)}}</td>
                             <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
-                            <td class="text-center"><a v-if="item.Status" href="#" target="_blank">Xem chi tiết</a></td>
+                            <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
                         </tr>
                     </tbody>
                 </table>

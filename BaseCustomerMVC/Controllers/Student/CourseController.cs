@@ -44,6 +44,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ChapterExtendService _chapterExtendService;
         private readonly CalendarHelper _calendarHelper;
         private readonly LearningHistoryService _learningHistoryService;
+        private readonly CenterService _centerService;
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, StudentClassViewModel> _mappingList;
@@ -83,6 +84,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , LessonProgressService lessonProgressService
             , LearningHistoryService learningHistoryService
             , CalendarHelper calendarHelper
+            , CenterService centerService
             )
         {
             _lessonProgressService = lessonProgressService;
@@ -116,6 +118,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _studentMapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
             _calendarHelper = calendarHelper;
+            _centerService = centerService;
 
 
             _lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
@@ -125,14 +128,17 @@ namespace BaseCustomerMVC.Controllers.Student
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetList(DefaultModel model, ClassEntity entity)
+        public JsonResult GetList(DefaultModel model, ClassEntity entity, string basis)
         {
             var filter = new List<FilterDefinition<ClassEntity>>();
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { Err = "Không được phép truy cập" });
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Center == center.ID));
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return Json(new { });
+                return Json(new { Err = "Không được phép truy cập" });
             }
             else
             {
@@ -241,11 +247,14 @@ namespace BaseCustomerMVC.Controllers.Student
             return Json(new { Data = std });
         }
 
-        public JsonResult GetActiveListV2(DateTime today)
+        public JsonResult GetActiveListV2(DateTime today, string basis)
         {
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { Err = "Không được phép truy cập" });
             today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Center == center.ID));
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
@@ -295,11 +304,14 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
 
-        public JsonResult GetFinishList(DefaultModel model, DateTime today)
+        public JsonResult GetFinishList(DefaultModel model, DateTime today, string basis)
         {
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { Err = "Không được phép truy cập" });
             today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Center == center.ID));
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
@@ -338,86 +350,91 @@ namespace BaseCustomerMVC.Controllers.Student
             return Json(new { Data = std });
         }
 
-        public JsonResult GetThisWeekLesson(DateTime today)
+        public JsonResult GetThisWeekLesson(DateTime today, string basis)
         {
             //try
             //{
-                if (today < new DateTime(1900, 1, 1))
-                    return Json(new { });
-                today = today.ToUniversalTime();
-                var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
-                var endWeek = startWeek.AddDays(7);
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { Err = "Không được phép truy cập" });
+            if (today < new DateTime(1900, 1, 1))
+                return Json(new { });
+            today = today.ToUniversalTime();
+            var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
+            var endWeek = startWeek.AddDays(7);
 
-                var userId = User.Claims.GetClaimByType("UserID").Value;
-                if (string.IsNullOrEmpty(userId))
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new ReturnJsonModel
                 {
-                    return Json(new ReturnJsonModel
-                    {
-                        StatusCode = ReturnStatus.ERROR,
-                        StatusDesc = "Authentication Error"
-                    });
-                }
-                var currentStudent = _studentService.GetItemByID(userId);
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Authentication Error"
+                });
+            }
+            var currentStudent = _studentService.GetItemByID(userId);
 
-                if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
-                    return Json(new { });
+            if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
+                return Json(new { });
 
-                var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
-                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
-                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ClassID)));
+            var classids = _service.GetItemsByIDs(currentStudent.JoinedClasses, center.ID).Select(t => t.ID).ToList();
 
-                //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => classids.Contains(o.ClassID)));
 
-                //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
+            //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
 
-                var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+            //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
 
-                var std = (from o in data
-                           let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
-                           where _lesson != null
-                           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-                           where _class != null
-                           let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
-                           where _cs != null
-                           let skill = _skillService.GetItemByID(_cs.SkillID)
-                           let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
-                           where _subject != null
-                           let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID, o.ClassSubjectID) != null
-                           let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
-                           let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
-                           select new
-                           {
-                               id = o.ID,
-                               classID = _class.ID,
-                               className = _class.Name,
-                               classSubjectID = _cs.ID,
-                               subjectName = _subject.Name,
-                               title = _lesson.Title,
-                               lessonID = _lesson.ID,
-                               startDate = o.StartDate,
-                               endDate = o.EndDate,
-                               skill = skill,
-                               isLearnt = isLearnt,
-                               type = _lesson.TemplateType,
-                               onlineUrl = o.IsOnline ? onlineUrl : ""
-                           }).OrderBy(t => t.startDate).ToList();
-                //var std = (from o in data.ToList()
-                //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-                //           where _class != null
-                //           let skill = _skillService.GetItemByID(o.SkillID)
-                //           //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
-                //           select new
-                //           {
-                //               id = o.ID,
-                //               classID = _class.ID,
-                //               className = _class.Name,
-                //               endDate = o.EndDate,
-                //               students = _class.Students.Count,
-                //               skill = skill
-                //               //isLearnt = isLearnt
-                //           }).ToList();
-                return Json(new { Data = std });
+            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+
+            var std = (from o in data
+                       let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
+                       where _lesson != null
+                       let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+                       where _class != null
+                       let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
+                       where _cs != null
+                       let skill = _skillService.GetItemByID(_cs.SkillID)
+                       let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
+                       where _subject != null
+                       let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID, o.ClassSubjectID) != null
+                       let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
+                       let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
+                       select new
+                       {
+                           id = o.ID,
+                           classID = _class.ID,
+                           className = _class.Name,
+                           classSubjectID = _cs.ID,
+                           subjectName = _subject.Name,
+                           title = _lesson.Title,
+                           lessonID = _lesson.ID,
+                           startDate = o.StartDate,
+                           endDate = o.EndDate,
+                           skill = skill,
+                           isLearnt = isLearnt,
+                           type = _lesson.TemplateType,
+                           onlineUrl = o.IsOnline ? onlineUrl : ""
+                       }).OrderBy(t => t.startDate).ToList();
+            //var std = (from o in data.ToList()
+            //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+            //           where _class != null
+            //           let skill = _skillService.GetItemByID(o.SkillID)
+            //           //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
+            //           select new
+            //           {
+            //               id = o.ID,
+            //               classID = _class.ID,
+            //               className = _class.Name,
+            //               endDate = o.EndDate,
+            //               students = _class.Students.Count,
+            //               skill = skill
+            //               //isLearnt = isLearnt
+            //           }).ToList();
+            return Json(new { Data = std });
             //}
             //catch (Exception e)
             //{

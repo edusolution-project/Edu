@@ -642,7 +642,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         int index = 0;
                         var typeNodes = expContent.SelectNodes(".//div[contains(@id,\"partofspeech\")]/div[@class=\"ub\"]");
                         if (typeNodes == null) continue;
-                        foreach(var typeNode in typeNodes)
+                        foreach (var typeNode in typeNodes)
                         {
                             string[] type = typeNode.InnerText.Split(new char[] { ',' });
                             if (listExp.Any(t => t.WordType == type[0]))
@@ -686,7 +686,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         foreach (var typeNode in typeNodes)
                         {
                             string[] typeTxt = typeNode.InnerText.Split(new char[] { ',' });
-                           
+
                             if (listVocab.Any(t => t.WordType == typeTxt[0]))
                                 continue;
                             try
@@ -813,7 +813,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var quiz = questionVM.ToEntity();
 
-                if (questionVM.Media != null && questionVM.Media.Name == null) questionVM.Media = null;
+                //if (questionVM.Media != null && questionVM.Media.Name == null) questionVM.Media = null;
 
                 if (questionVM.ID == "0" || questionVM.ID == null || _questionService.GetItemByID(quiz.ID) == null)
                 {
@@ -825,34 +825,42 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     quiz.Updated = DateTime.Now;
                     quiz.CreateUser = createuser;
 
-                    if (quiz.Media == null || string.IsNullOrEmpty(quiz.Media.Name) || (!quiz.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == quiz.Media.Name))))
-                        quiz.Media = null;
-                    else
+                    if (quiz.Media != null)
                     {
-                        if (quiz.Media.Name.ToLower().StartsWith("http")) //file url (import)
+                        if (string.IsNullOrEmpty(quiz.Media.Name))
                         {
-                            quiz.Media.Created = DateTime.Now;
-                            quiz.Media.Size = 0;
-                            quiz.Media.Path = quiz.Media.Name.Trim();
+                            if (string.IsNullOrEmpty(quiz.Media.Path))
+                            {
+                                quiz.Media = null;
+                            }
                         }
                         else
                         {
-                            var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
-                            if (file != null)
+                            if (quiz.Media.Name.ToLower().StartsWith("http"))
                             {
                                 quiz.Media.Created = DateTime.Now;
-                                quiz.Media.Size = file.Length;
-                                quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName, "", basis);
+                                quiz.Media.Size = 0;
+                                quiz.Media.Path = quiz.Media.Name.Trim();
+                            }
+                            else
+                            {
+                                if (files == null || !files.Any(f => f.Name == quiz.Media.Name))
+                                {
+                                    if (string.IsNullOrEmpty(quiz.Media.Path))
+                                        quiz.Media = null;
+                                }
+                                else
+                                {
+                                    var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
+                                    if (file != null)
+                                    {
+                                        quiz.Media.Created = DateTime.Now;
+                                        quiz.Media.Size = file.Length;
+                                        quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName, "", basis);
+                                    }
+                                }
                             }
                         }
-
-                        //var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
-                        //if (file != null)
-                        //{
-                        //    quiz.Media.Created = DateTime.Now;
-                        //    quiz.Media.Size = file.Length;
-                        //    quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName);
-                        //}
                     }
                 }
                 else
@@ -882,7 +890,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     quiz.Updated = DateTime.Now;
                 }
 
-                //_questionService.CreateOrUpdate(quiz);
+                //quiz:
                 if (quiz.ID != null)
                 {
                     _questionService.CreateQuery().ReplaceOne(t => t.ID == quiz.ID, quiz);
@@ -898,7 +906,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     foreach (var answer in questionVM.Answers)
                     {
                         answer.ParentID = questionVM.ID;
-                        if (answer.Media != null && answer.Media.Name == null) answer.Media = null;
+                        //if (answer.Media != null && answer.Media.Name == null) answer.Media = null;
 
                         if (answer.ID == "0" || answer.ID == null || _answerService.GetItemByID(answer.ID) == null)
                         {
@@ -909,34 +917,41 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             answer.CreateUser = quiz.CreateUser;
                             answer.CourseID = quiz.CourseID;
 
-                            if (answer.Media == null || string.IsNullOrEmpty(answer.Media.Name) || (!answer.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == answer.Media.Name))))
-                                answer.Media = null;
-                            else
+                            if (answer.Media != null)
                             {
-                                if (answer.Media.Name.ToLower().StartsWith("http")) //file url (import)
+                                if (string.IsNullOrEmpty(answer.Media.Name))
                                 {
-                                    answer.Media.Created = DateTime.Now;
-                                    answer.Media.Size = 0;
-                                    answer.Media.Path = answer.Media.Name.Trim();
+                                    if (string.IsNullOrEmpty(answer.Media.Path))
+                                        answer.Media = null;
                                 }
                                 else
                                 {
-                                    var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
-                                    if (file != null)
+                                    if (answer.Media.Name.ToLower().StartsWith("http"))
                                     {
                                         answer.Media.Created = DateTime.Now;
-                                        answer.Media.Size = file.Length;
-                                        answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName, "", basis);
+                                        answer.Media.Size = 0;
+                                        answer.Media.Path = answer.Media.Name.Trim();
+                                    }
+                                    else
+                                    {
+                                        if (files == null || !files.Any(f => f.Name == answer.Media.Name))
+                                        {
+                                            if (string.IsNullOrEmpty(answer.Media.Path))
+                                                answer.Media = null;
+                                        }
+                                        else
+                                        {
+                                            var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
+                                            if (file != null)
+                                            {
+                                                answer.Media.Created = DateTime.Now;
+                                                answer.Media.Size = file.Length;
+                                                answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName, "", basis);
+                                            }
+                                        }
+
                                     }
                                 }
-
-                                //var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
-                                //if (file != null)
-                                //{
-                                //    answer.Media.Created = DateTime.Now;
-                                //    answer.Media.Size = file.Length;
-                                //    answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName);
-                                //}
                             }
                         }
                         else
@@ -945,8 +960,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             if ((oldanswer.Media != null && answer.Media != null && oldanswer.Media.Path != answer.Media.Path)
                         || (oldanswer.Media == null && answer.Media != null))//Media change
                             {
-                                if (oldanswer.Media != null && !string.IsNullOrEmpty(oldanswer.Media.Path))//Delete old file
-                                    _fileProcess.DeleteFile(oldanswer.Media.Path);
+                                //TODO: Fix clone on copy question
+                                //if (oldanswer.Media != null && !string.IsNullOrEmpty(oldanswer.Media.Path))//Delete old file
+                                //    _fileProcess.DeleteFile(oldanswer.Media.Path);
 
                                 if (files == null || !files.Any(f => f.Name == answer.Media.Name))
                                     answer.Media = null;

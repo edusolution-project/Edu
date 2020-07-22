@@ -1,4 +1,5 @@
-﻿using Core_v2.Repositories;
+﻿using Core_v2.Globals;
+using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Newtonsoft.Json;
@@ -78,6 +79,11 @@ namespace BaseCustomerEntity.Database
         public long CountCourseLesson(string CourseID)
         {
             return Collection.CountDocumentsAsync(t => t.CourseID == CourseID).Result;
+        }
+
+        public IEnumerable<CourseLessonEntity> GetChapterLesson(string ChapterID)
+        {
+            return Collection.Find(t => t.ChapterID == ChapterID).ToEnumerable();
         }
     }
 }

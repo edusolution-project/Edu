@@ -37,6 +37,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
         private readonly LearningHistoryService _learningHistoryService;
+        private readonly LessonProgressService _lessonProgressService;
         private readonly ScoreService _scoreService;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
@@ -53,6 +54,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , LearningHistoryService learningHistoryService
             , LessonPartQuestionService lessonPartQuestionService
             , LessonPartAnswerService lessonPartAnswerService
+            , LessonProgressService lessonProgressService
             , ScoreService scoreService
             , IRoxyFilemanHandler roxyFilemanHandler
             )
@@ -70,6 +72,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _teacherService = teacherService;
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
+            _lessonProgressService = lessonProgressService;
             _scoreService = scoreService;
             _roxyFilemanHandler = roxyFilemanHandler;
         }
@@ -261,6 +264,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 foreach (var student in listStudent)
                 {
                     var examresult = _service.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == lesson.ID).SortByDescending(t => t.ID).ToList();
+                    var progress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(lesson.ClassSubjectID, student.ID, lesson.ID);
                     var tried = examresult.Count();
                     var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
                     var minpoint = tried == 0 ? 0 : examresult.Min(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
@@ -274,6 +278,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         MinPoint = minpoint,
                         AvgPoint = avgpoint,
                         TriedCount = tried,
+                        LastOpen = progress?.LastDate ?? new DateTime(1900, 1, 1),
+                        OpenCount = progress?.TotalLearnt ?? 0,
                         LastPoint = lastEx != null ? (lastEx.QuestionsTotal > 0 ? lastEx.QuestionsPass * 100 / lastEx.QuestionsTotal : 0) : 0,
                         IsCompleted = lastEx != null && lastEx.Status,
                         ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList()

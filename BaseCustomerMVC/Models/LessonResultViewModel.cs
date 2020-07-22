@@ -14,11 +14,16 @@ namespace BaseCustomerMVC.Models
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }
+        [JsonProperty("ExamCount")]
+        public long ExamCount { get; set; }
         [JsonProperty("LearntCount")]
         public long LearntCount { get; set; }
         [JsonProperty("AvgPracticePoint")]
         public double AvgPracticePoint { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
+        [JsonProperty("IsExam")]
+        public bool IsExam { get; set; }
+
     }
 }

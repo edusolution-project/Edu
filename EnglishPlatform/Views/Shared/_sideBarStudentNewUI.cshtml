@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Http
 @{
+    var _center = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity ?? new BaseCustomerEntity.Database.CenterEntity();
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl)
     {
@@ -10,7 +11,7 @@
 }
 <aside class="sidebar" id="sidebar">
     <div class="card-header">
-        <a href="/@center/student" class="logo" title="educoo"><img src="/images/Logo.png" /></a>
+        <a href="/@center/student" class="logo" title="@_center.Name" style="max-height:100px;"><img src="@(_center.Image != null ? _center.Image : "/images/Logo.png")" /></a>
     </div>
     <div class="menu-bar">
         <ul>

@@ -80,7 +80,6 @@ var Lesson = (function () {
 
     var onReady = function (yourConfig) {
         config = groupConfig(yourConfig);
-        //console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
             case mod.TEACHEREDIT:
@@ -277,7 +276,6 @@ var Lesson = (function () {
     }
 
     var renderLessonData = function () {
-
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         if (isNull(_data)) {
             throw "No data";
@@ -290,8 +288,6 @@ var Lesson = (function () {
         var lessonFooter = mainContainer.find('.card-footer');
 
         _totalPart = data.Part != null ? data.Part.length : 0;
-
-
         //header
         //console.log(config.mod);
         switch (config.mod) {
@@ -350,7 +346,6 @@ var Lesson = (function () {
 
                 break;
             case mod.TEACHERVIEW:
-
                 var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
                 //lessonHeader.show().append(headerRow);
 
@@ -472,12 +467,10 @@ var Lesson = (function () {
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
                     renderPreviewPart(item);
-                    //console.log(item);
                 }
                 //if (data.Part != null && data.Part.length == 1) {
                 //    $('.fas.fa-caret-down:first').click();
                 //}
-
                 if (_UImode == UIMode.EXAM_ONLY) {
                     $('#rightCol .tab-pane').each(function () {
                         var media = null;
@@ -497,7 +490,6 @@ var Lesson = (function () {
                     });
                 }
                 break;
-
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
                 console.log("student exam");
@@ -625,7 +617,6 @@ var Lesson = (function () {
                 partMenu.append(lessontabs);
                 var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
                 lessontabs.append(tabs);
-
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
                     renderStudentPart(item, false);
@@ -647,7 +638,6 @@ var Lesson = (function () {
                             localStorage.clear();
                         }
                         var continue_exam = false;
-
                         //get lastest exam data from server
                         Ajax(config.url.current, dataform, "POST", true).then(function (res) {
                             var exam;
@@ -774,7 +764,6 @@ var Lesson = (function () {
                 else {
                     lessonFooter.hide();
                 }
-
                 break;
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
@@ -813,7 +802,6 @@ var Lesson = (function () {
                 nav_bottom.append(quiz_counter);
 
                 var complete_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "CompleteExam()" }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");;
-
                 var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
                     .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
                     .append($("<span>", { class: "time-counter " }));
@@ -1122,7 +1110,6 @@ var Lesson = (function () {
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
-                console.log(itemBody);
                 //Render Question
                 totalQuiz = data.Questions.length;
                 var fillquizs = itembox.find("fillquiz");
@@ -1797,6 +1784,7 @@ var Lesson = (function () {
         renderPartTemplate(type);
     }
 
+    //renderPartTemplate
     var renderPartTemplate = function (type, data = null) {
         var contentholder = $('.lesson_parts');
         contentholder.empty();
@@ -1858,8 +1846,8 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
-                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)" }));
-                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px" }));
+                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)", "title": "Xóa câu hỏi" }));
+                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px", "title": "Nhân bản câu hỏi" }));
 
                 questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
@@ -2064,6 +2052,7 @@ var Lesson = (function () {
         if (data != null && data.Media != null)
             renderMediaContent(data, contentholder.find(".media_preview:first"), type);
     }
+    //end renderPartTemplate
 
     var addNewQuestion = function (data = null) {
         var container = $('.lesson_parts > .part_content');
@@ -2202,6 +2191,7 @@ var Lesson = (function () {
         }
     }
 
+    //------------------ Xóa câu hỏi
     var removeQuestion = function (obj) {
 
         Swal.fire({
@@ -2357,7 +2347,6 @@ var Lesson = (function () {
 
     //Exam
     var renderExam = function () {
-
         //load lastest exam state from server
         var dataform = new FormData();
         dataform.append("ClassID", config.class_id);
@@ -2383,7 +2372,6 @@ var Lesson = (function () {
             //console.log(exam.ID);
             //console.log(getLocalData("CurrentExam"));
             //if no data is found => new attempt => clear all local storage
-            console.log(exam);
             if (exam == null) {
                 localStorage.clear();
                 console.log("New Fresh Exam");
@@ -2400,11 +2388,8 @@ var Lesson = (function () {
                     renderNewExam(exam, schedule, limit);
                 }
                 else {
-
-
                     if (getLocalData("CurrentExam") != exam.ID) //unmatched id => complete exam
                     {
-
                         console.log(getLocalData("CurrentExam"))
                         console.log(exam.ID)
                         console.log("Unmatched Exam");
@@ -2419,12 +2404,10 @@ var Lesson = (function () {
                             localStorage.clear();
                             console.log("New Exam");
                             //console.log(getLocalData("CurrentExam"))
-
                             renderNewExam(exam, schedule, limit);
                         }
                         else {
                             $('#ExamID').val(exam.ID);
-
                             var current = exam.CurrentDoTime;
                             var start = exam.Created;
                             var timer = moment(current) - moment(start);
@@ -2687,7 +2670,6 @@ var Lesson = (function () {
     }
 
     var startExam = function (obj) {
-        //console.log(obj);
         if (obj != null)
             $(obj).prop("disabled", true);
         console.log("Create Exam");
@@ -2707,12 +2689,12 @@ var Lesson = (function () {
 
                     renderExamDetail();
 
-                    console.log(data);
+                    //console.log(data);
                     if (data.Data.Timer > 0) {
                         var _minutes = data.Data.Timer;
                         //console.log(_minutes);
-                        var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
-                        setLocalData("Timer", _timer);
+                        var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
+                        setLocalData("Timer", timer);
                         //console.log($(".time-counter"));
                     }
                 } else {
@@ -3753,6 +3735,36 @@ var Lesson = (function () {
         $('.part-box.VOCAB .vocab-box').each(function (i, item) { $(item).prepend($("<b>", { text: (i + 1), class: 'vocab-pos' })) })
     }
 
+    var CloneQuestion = function (_this) {
+        var container = $('.lesson_parts > .part_content');
+        var template = $('.question_template > fieldset');
+        var currentpos = $(container).find(".fieldQuestion").length;
+
+        var cloneQuestion = $(_this).parent()[0].cloneNode(true);
+        debugger
+        var index = cloneQuestion.getAttribute("order");//vị trí câu hỏi cần nhân bản
+        cloneQuestion.firstChild.value = "";
+        //cloneQuestion.children[6].children[0].children[1].value = "";
+        //cloneQuestion.children[6].children[0].children[2].value = "";
+        var answerWrapper = $(cloneQuestion).find("[class=answer-wrapper]")[0];
+        for (var i = 0; i < answerWrapper.childElementCount - 1; i++) {
+            answerWrapper.children[i].children[1].value = "";
+        }
+
+        var question = "Questions[" + index + "].";
+        $(cloneQuestion).find("[name^='" + question + "']").each(function () {
+            $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + (currentpos) + "]."));
+        });
+        cloneQuestion.children[1].value = currentpos;
+        cloneQuestion.setAttribute("order", currentpos);
+        $(cloneQuestion).find("[class=fieldset_title]").text("Quiz " + (parseInt(currentpos) + 1).toString());
+
+        //new File([file], cloneQuestion.children[5].children[1].children[1].value);
+        debugger
+
+        $(_this).parent().parent().append(cloneQuestion);   
+    }
+
     window.LessonInstance = {} || Lesson;
 
     LessonInstance.onReady = onReady;
@@ -3779,6 +3791,7 @@ var Lesson = (function () {
     window.RemovePart = removePart;
     window.SortPart = sortPart;
 
+    window.CloneQuestion = CloneQuestion;
     window.RemoveQuestion = removeQuestion;
     window.AddNewQuestion = addNewQuestion;
     window.ShowCloneQuestion = showCloneQuestion;
