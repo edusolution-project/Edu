@@ -3425,7 +3425,7 @@ var Lesson = (function () {
         });
     }
 
-    var AnswerQuestion = function (_this) {
+    var AnswerQuestion = function (_this,_that) {
         //if (config.mod != mod.STUDENT_EXAM)
         //    return;
         // dataset trên item
@@ -3489,8 +3489,8 @@ var Lesson = (function () {
             dataform.append("AnswerID", answerID);
             dataform.append("QuestionID", questionId);
         dataform.append("AnswerValue", value);
-        //debugger;
-        var files = document.querySelector("input[type='file']") != null ? document.querySelector("input[type='file']").files : null;
+        debugger;
+        var files = _that != void 0 && _that.parentElement && _that.parentElement.querySelector("input[type='file']") != null ? _that.parentElement.querySelector("input[type='file']").files : null;
         if (files) {
             for (var i = 0; i < files.length; i++) {
                 dataform.append("files", files[i]);
@@ -3719,6 +3719,7 @@ var Lesson = (function () {
         var vInstance = CKEDITOR.instances["inputES-" + id];
         var value = vInstance.getData();
         saveAnswerForStudent(id, "0", value, "ESSAY");
+        
         var obj = {
             dataset: {
                 partId: self.parentElement.id,
@@ -3728,7 +3729,7 @@ var Lesson = (function () {
             id: id,
             value: value,
         }
-        AnswerQuestion(obj);
+        AnswerQuestion(obj,self);
     }
 
     var ApplyAdditionVocabStyle = function () {

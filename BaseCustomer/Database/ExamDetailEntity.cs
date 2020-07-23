@@ -42,7 +42,10 @@ namespace BaseCustomerEntity.Database
         public string ClassSubjectID { get; set; }
         [JsonProperty("StudentID")]
         public string StudentID { get; set; }
-
+        [JsonProperty("Medias")]
+        public List<Media> Medias { get; set; } // file học viên
+        [JsonProperty("MediasAnswers")]
+        public List<Media> MediasAnswers { get; set; } // file trả lời giáo viên nếu cần
     }
     public class ExamDetailService : ServiceBase<ExamDetailEntity>
     {

@@ -366,8 +366,6 @@ namespace BaseCustomerMVC.Controllers.Student
                     var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();
                     var oldItem = _examDetailService.CreateQuery().Find(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).FirstOrDefault();
                     exam.Updated = DateTime.Now;
-                    
-                    var answer = new LessonPartAnswerEntity();
                     if (dataFiles.TryGetValue("success", out List<MediaResponseModel> listFiles) && listFiles.Count > 0)
                     {
                         var listMedia = new List<Media>();
@@ -383,16 +381,7 @@ namespace BaseCustomerMVC.Controllers.Student
                             };
                             listMedia.Add(media);
                         }
-                        answer = new LessonPartAnswerEntity()
-                        {
-                            Content = item.AnswerValue,
-                            IsCorrect = true,
-                            ParentID = item.LessonPartID,
-                            CreateUser = User.FindFirst("UserID")?.Value,
-                            Created = DateTime.Now,
-                            Medias = listMedia
-                        };
-                        _lessonPartAnswerService.CreateOrUpdate(answer);
+                        item.Medias = listMedia;
                     }
                     if (oldItem == null)
                     {
@@ -416,13 +405,12 @@ namespace BaseCustomerMVC.Controllers.Student
                         }
                         _examService.CreateOrUpdate(exam);
                         var xitem = map.AutoWithoutID(item, new ExamDetailEntity() { });
-                        xitem.AnswerID = answer.ID ?? xitem.AnswerID;
                         _examDetailService.CreateOrUpdate(xitem);
                         return new JsonResult(xitem);
                     }
                     else
                     {
-                        item.AnswerID = answer.ID ?? item.AnswerID;
+                        item.AnswerID = item.AnswerID;
                         if (item.AnswerID == null && item.AnswerValue == null)
                         {
                             var deleted = _examDetailService.CreateQuery().DeleteMany(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).DeletedCount;

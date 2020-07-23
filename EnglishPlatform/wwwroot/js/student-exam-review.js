@@ -101,8 +101,29 @@ var ExamReview = (function () {
         if (!config.isTeacher) {
             $('.tab-pane .part-column').addClass('scrollbar-outer').scrollbar();
         }
+        renderNavition();
     }
 
+
+    var renderNavition = function () {
+        var exam = config.exam;
+        console.log(config);
+        var lateID = "";
+        for (var i = 0; i < exam.Details.length; i++) {
+            var item = exam.Details[i];
+            if (item.AnswerID == null || item.AnswerID == "" || item.AnswerID == void 0) {
+                if (item.AnswerValue != "" && item.AnswerValue != null && item.AnswerValue != void 0) {
+                    lateID = 'essay-' + item.QuestionID;
+                }
+            }
+        }
+
+        var late = document.getElementById(lateID);
+        if (late) {
+            late.dataset.last = true;
+        }
+
+    }
     var renderExam = function () {
         //writeLog("renderLesson", data);
         var data = config.lesson;
@@ -296,7 +317,6 @@ var ExamReview = (function () {
 
     var renderQUIZ1 = function (data) {
         //writeLog("renderQUIZ1", data);
-        console.log(data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
         if (data.Title != null)
@@ -436,7 +456,6 @@ var ExamReview = (function () {
     }
 
     var renderESSAY = function (data) {
-        console.log(data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
         if (data.Title != null)
@@ -454,16 +473,60 @@ var ExamReview = (function () {
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
             var itemContent = item.Content == null ? "Quiz " + (i + 1) + " : " : item.Content;
-            html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '" data-quiz-type="QUIZ2">';
+            html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '" data-quiz-type="ESSAY">';
             html += '<div class="quiz-box-header"><h5 class="title">' + itemContent + '</h5>' + renderMedia(item.Media) + '</div>';
             html += '<div class="answer-wrapper row">';
-            html += '<fieldset class="answer-item student-answer col-md-6" id="essay-' + item.ID + '">';
+            html += '<fieldset class="answer-item student-answer col-md-12" id="essay-' + item.ID + '">';
             html += '<i>Trả lời</i>';
             html += '</fieldset>';
-            var content = item.RealAnswerValue;
-            html += '<fieldset class="answer-item col-md-6" id="essay-' + item.ID + '">';
-            html += '<i>Đáp án đúng :</i> <span class="text-success">' + content + '<span>';
+
+            var medias = item.Medias;//file học viên upload
+            html += '<fieldset class="col-md-12">';
+            for (var z = 0; medias != null && z < medias.length; z++) {
+                var itemMedia = medias[z];
+                html += renderMedia(itemMedia);
+            }
             html += '</fieldset>';
+
+
+            var content = item.RealAnswerEssay;// cau tra loi cua giao vien
+            var point = item.PointEssay; // điểm giáo viên chấm
+
+            if (config.isTeacher) {
+
+                html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
+                if (point == 0 && content == "") {
+                    html += '<div style="display:none" class="alert alert-success"><span class="text-success">Đã chấm</span></div>';
+                } else {
+                    html += '<div class="alert alert-success"><span class="text-success">Đã chấm</span></div>';
+                }
+                html += '<div> Điểm : <input type="number" value="' + point + '" style="width:60px;text-align:center;margin-bottom:10px"></div>';
+                html += '<i>Đáp án đúng :</i>';
+                var realContent = content == null ? "" : content;
+                html += '<div><textarea style="width:100%; padding:5px" rows="6">' + realContent + '</textarea></div>';
+
+                var textBtn = content == null && point == 0 ? "chấm điểm" : "chấm lại";
+
+                var updatEvent = "updatePoint(this,'" + item.ExamDetailID + "')";
+
+                html += '<div style="margin-top:20px"><button type="button" class="btn btn-sm btn-success" onclick="' + updatEvent+'"> ' + textBtn + ' </button></div>';
+
+                html += '</fieldset>';
+            } else {
+                if (point == 0 && content == null) {
+                    html += '<fieldset class="answer-item col-md-12" id="essay-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
+                    html += 'Chưa chấm điểm';
+                    html += '</fieldset>';
+                } else {
+                    html += '<fieldset class="answer-item col-md-12" id="essay-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
+
+                    html += '<div> Điểm : ' + point+'</div>';
+                    html += '<i>Đáp án đúng :</i>';
+                    var realContent = content == null ? "" : content;
+                    html += '<div>' + realContent + '</div>';
+                    html += '</fieldset>';
+                }
+            }
             //var description = "";
             //if (item.Description != null)
             //    description = item.Description.replace(/\n/g, '<br/>').replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn");
@@ -479,7 +542,7 @@ var ExamReview = (function () {
         //html += '<div class="answer-wrapper">';
         //html += '<div class="answer-content"><textarea data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-type="ESSAY" id="essay-' + data.ID + '" class="form-control" row="3" placeholder="Answer" onfocusout="AnswerQuestion(this)"></textarea></div>';
         //html += '</div></div>';
-        html += '</div>';
+        html += '</div></div>';
         return html;
     }
 
@@ -625,6 +688,41 @@ var ExamReview = (function () {
         document.location = config.url.list + "/" + config.exam.ClassSubjectID + "#" + config.lesson.ChapterID;
     }
 
+    var updatePoint = function (_this, id) {
+        var _url = config.url.point;
+        var point = _this.offsetParent.querySelector('input[type="number"]').value;
+        var answer = _this.offsetParent.querySelector('textarea').value;
+        var isLAst = _this.offsetParent.dataset.last;
+        console.log(point, answer);
+
+        var _form = new FormData();
+        _form.append("ID", id);
+        _form.append("Point", point);
+        _form.append("RealAnswerValue", answer);
+        _form.append("isLast", isLAst);
+
+        //var files = document.querySelector('input[data-target="' + question.ID + '"]');
+        //if (files != null) {
+        //    for (var x = 0; x < files.files.length; x++) {
+        //        _form.append("files", files.files[x]);
+        //    }
+        //}
+
+        var _ajax = new MyAjax();
+        _ajax.proccess("POST", _url, _form).then(function (res) {
+            var dataJson = JSON.parse(res);
+            if (dataJson.Data != null && dataJson.Data.ExamID != void 0) {
+                _this.innerHTML = "chấm lại";
+                _this.offsetParent.querySelector('.alert').style.display='block';
+            }
+        })
+    }
+
+    var tinhLaiDiem = function (id) {
+
+    }
+
+    
     window.ExamReview = {} || ExamReview;
     ExamReview.onReady = onReady;
     ExamReview.Version = version;
@@ -636,6 +734,8 @@ var ExamReview = (function () {
     window.GoList = goList;
     window.Redo = redo;
     window.ToggleNav = toggleNav;
+    window.updatePoint = updatePoint;
+    window.tinhLaiDiem = tinhLaiDiem;
     return ExamReview;
 }());
 
