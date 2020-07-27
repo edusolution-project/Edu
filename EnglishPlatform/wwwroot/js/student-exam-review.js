@@ -151,6 +151,11 @@ var ExamReview = (function () {
 
             }).append("Kết quả: ").append($('<span>',
                 { class: "text-primary", text: _correctQuiz + "/" + _totalQuiz })).append(" (" + durationFormat(duration) + ")"));
+
+        var totalhead = document.getElementById('total-point-head');
+        if (totalhead) {
+            totalhead.innerHTML = document.querySelectorAll("#" + _idNaviton + " ul li").length;
+        }
     }
     var updateShowPoint = function (id) {
         var point = getNavitionRoot().querySelector('.number-reivew-point');
@@ -192,12 +197,12 @@ var ExamReview = (function () {
                                 title = "Làm sai";
                             }
                         }
-                        daCham++;
                     }
                     else {
                         _class = "bg-warning";
                         title = "chưa làm";
                     }
+                    daCham++;
                 } else {
                     if (detail) {
                         if (item.RealAnswerEssay) {
@@ -903,7 +908,6 @@ var ExamReview = (function () {
     var validate = function (_this) {
         var value = _this.value;
         var max = _this.getAttribute('max');
-        console.log(value, max);
         if (parseInt(value) > parseInt(max)) {
             alert("Điểm không thể lớn hơn " + max);
             _this.value = max;

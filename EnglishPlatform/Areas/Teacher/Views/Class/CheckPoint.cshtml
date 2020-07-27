@@ -21,7 +21,7 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b justify-content-between align-items-start">
-            <h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/@exam.Details.Count)</span></h2>
+            <h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/<span id="total-point-head"></span>)</span></h2>
             <button class="btn btn-sm btn-circle btn-primary" style="margin-right:10px" onclick="PrevPart()">PrevPart</button>
             <button class="btn btn-sm btn-circle btn-primary"  onclick="NextPart()">NextPart</button>
         </div>
