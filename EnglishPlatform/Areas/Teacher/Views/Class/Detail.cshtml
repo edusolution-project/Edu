@@ -85,7 +85,7 @@
                 <p v-html="replaceBrkLine(domDecoder(classDescription))"></p>
             </div>
         </div>
-        <div class="box" v-if="tab[1]">
+        <div class="box" v-show="tab[1]">
             <ul class="list ls-practice">
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
@@ -182,15 +182,15 @@
                 </div>
             </div>
         </div>
-        <div class="box" v-if="tab[4]">
+        <div class="box" v-show="tab[4]">
             <ul class="list ls-practice">
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`collapse-result-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadResult(obj.ID)" :style="'color: ' + obj.Color">
+                        <a href="javascript:;" v-b-toggle="`collapse-result-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2 collapsed" v-on:click="loadResult(obj.ID)" :style="'color: ' + obj.Color">
                             <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}
                             <i class="far fa-arrow-alt-circle-down ml-1"></i>
                         </a>
-                        <b-collapse :id="`collapse-result-${i}`" accordion="my-accordion-0" v-model="obj.Visible" role="tabpanel">
+                        <b-collapse :id="`collapse-result-${i}`" accordion="my-accordion-1" role="tabpanel">
                             <ul class="list">
                                 <chap-result v-for="(item,k) in list_chapters_result" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
                                              v-bind:data="item"
@@ -226,24 +226,6 @@
                     Không có exam để chấm
                 </div>*@
         </div>
-        @*<div class="box" v-if="tab[4]">
-                <div class="paging-view">
-                    Hiển thị:
-                    <select v-model="ref.view" v-on:change="loadExamStudent()">
-                        <option value="10">10 kết quả</option>
-                        <option value="20">20 kết quả</option>
-                        <option value="30">30 kết quả</option>
-                    </select>
-                </div>
-                <div class="page-control">
-                    <div class="right">
-                        <b-pagination v-model="ref.page"
-                                      :total-rows="ref.totalRec"
-                                      :per-page="ref.view"
-                                      v-on:input="loadExamStudent()"></b-pagination>
-                    </div>
-                </div>
-            </div>*@
     </div>
 
 </section>
@@ -409,7 +391,7 @@
                         <span class="align-self-center" style="line-height:24px;"><i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></span>
                     </a>
                 </div>
-                <b-collapse :id="`prc-result-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
+                <b-collapse :id="`prc-result-${data.ID}-${pos}`" :accordion="`my-accordion-result-${data.Parent}`" role="tabpanel">
                     <b-card-body class="pr-0">
                         <ul class="list">
                             <template v-if="data.IsLoading">
@@ -422,8 +404,6 @@
                                              v-bind:pos="j"
                                              v-bind:owner="owner"
                                              v-bind:listchaps="listchaps"></chap-result>
-
-
 
                                 <li class="sub-practice pt-2 pb-2 pl-2 rounded" v-if="filterResult(data).length > 0">
                                     <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center font-weight-bold">
@@ -446,7 +426,6 @@
             </div>
         </li>
     </script>
-
 
     <script type="text/x-template" id="lessonResultTemp">
         <li class="sub-practice pt-2 pb-2 pl-2 rounded">

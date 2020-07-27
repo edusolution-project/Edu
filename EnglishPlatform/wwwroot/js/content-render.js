@@ -451,7 +451,7 @@ var Lesson = (function () {
                     switchUIMode(UIMode.LECTURE_ONLY);
             }
         }
-        console.log(_UImode);
+        //console.log(_UImode);
         $('.mod_' + config.mod).addClass("uimod_" + _UImode);
         //body
         switch (config.mod) {
@@ -3489,7 +3489,7 @@ var Lesson = (function () {
             dataform.append("AnswerID", answerID);
             dataform.append("QuestionID", questionId);
         dataform.append("AnswerValue", value);
-        debugger;
+        //debugger;
         var files = _that != void 0 && _that.parentElement && _that.parentElement.querySelector("input[type='file']") != null ? _that.parentElement.querySelector("input[type='file']").files : null;
         if (files) {
             for (var i = 0; i < files.length; i++) {

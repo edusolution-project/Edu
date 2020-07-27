@@ -404,7 +404,7 @@ namespace BaseCustomerMVC.Controllers.Student
                             item.MaxPoint = exam.MaxPoint;
                         }
                         _examService.CreateOrUpdate(exam);
-                        var xitem = map.AutoWithoutID(item, new ExamDetailEntity() { });
+                        var xitem = map.Clone(item, new ExamDetailEntity() { });
                         _examDetailService.CreateOrUpdate(xitem);
                         return new JsonResult(xitem);
                     }

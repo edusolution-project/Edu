@@ -1321,7 +1321,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
             foreach (var o in lesson_root.ToEnumerable())
             {
-                var new_lesson = lessonMapping.AutoWithoutID(o, new CourseLessonEntity());
+                var new_lesson = lessonMapping.Clone(o, new CourseLessonEntity());
                 new_lesson.CreateUser = _userCreate;
                 new_lesson.Created = DateTime.Now;
                 new_lesson.CourseID = clone_course.ID;
@@ -1414,11 +1414,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public async Task<JsonResult> CopyLesson(string ArrID, string Title, string ChapterID, string CourseID)
         {
             var orgLesson = _lessonService.Collection.Find(tbl => tbl.ID.Equals(ArrID)).FirstOrDefault();
-            var new_lesson = new MappingEntity<CourseLessonEntity, CourseLessonEntity>().AutoWithoutID(orgLesson, new CourseLessonEntity());
+            var new_lesson = new MappingEntity<CourseLessonEntity, CourseLessonEntity>().Clone(orgLesson, new CourseLessonEntity());
             new_lesson.OriginID = orgLesson.ID;
             new_lesson.ChapterID = ChapterID;
             new_lesson.Created = DateTime.Now;
-            new_lesson.Order = (int)_lessonService.CountChapterLesson(ChapterID) + 1;
+            new_lesson.Order = (int)_lessonService.CountChapterLesson(ChapterID);
             new_lesson.Title = string.IsNullOrEmpty(Title) ? (orgLesson.Title + (orgLesson.ChapterID == ChapterID ? " (copy)" : "")) : Title;
             await CloneLesson(new_lesson, orgLesson.CreateUser);
             await _chapterService.IncreaseLessonCount(ChapterID, 1);
@@ -1617,7 +1617,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var mapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
             foreach (var o in lessons.ToEnumerable())
             {
-                var new_lesson = mapping.AutoWithoutID(o, new CourseLessonEntity());
+                var new_lesson = mapping.Clone(o, new CourseLessonEntity());
                 new_lesson.CourseID = item.CourseID;
                 new_lesson.ChapterID = item.ID;
                 new_lesson.CreateUser = _userCreate;
