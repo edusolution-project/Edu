@@ -308,7 +308,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [HttpPost]
-        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, [FromForm] bool isLast=false)
+        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] bool isLast=false)
         {
             try
             {
@@ -365,7 +365,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadNewFeed("UpdatePoint", HttpContext);
+                    Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadAnswerBasis(basis, HttpContext);
                     if (listFilesUpload.TryGetValue("success", out List<MediaResponseModel> listFiles) && listFiles.Count > 0)
                     {
                         var listMedia = new List<Media>();
@@ -381,7 +381,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             };
                             listMedia.Add(media);
                         }
-                        oldItem.Medias = listMedia;
+                        oldItem.MediasAnswers = listMedia;
                     }
 
                     oldItem.RealAnswerValue = RealAnswerValue;

@@ -372,7 +372,8 @@ namespace BaseCustomerMVC.Controllers.Student
                             TypeAnswer = o.Type,
                             RealAnswerEssay = o.Type == ExamTypes[3] ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
                             PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
-                            ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? ""
+                            ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
+                            MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers
                         }))?.ToList()
                 })).ToList()
             });
