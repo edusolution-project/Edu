@@ -316,23 +316,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (isLast)
                 {
                     var currentExam = _service.GetItemByID(oldItem.ExamID);
-                    currentExam.Marked = true;
-                    _service.CreateQuery().UpdateOne(Builders<ExamEntity>.Filter.Eq(o => o.ID, oldItem.ExamID), Builders<ExamEntity>.Update.Set(o => o.Marked, true));
-                    currentExam.Marked = true;
-                    currentExam.Updated = DateTime.Now;
-                    var lesson = _lessonService.GetItemByID(currentExam.LessonID);
-                    var score = new ScoreEntity()
-                    {
-                        ClassID = currentExam.ClassID,
-                        LessonID = currentExam.LessonID,
-                        Multiple = lesson.Multiple,
-                        ScoreType = lesson.Etype,
-                        StudentID = currentExam.StudentID,
-                        TeacherID = currentExam.TeacherID,
-                        Updated = DateTime.Now,
-                        Point = 0,
-                        MaxPoint = lesson.Point
-                    };
                     var point = 0.0;
                     var ExamDetails = _examDetailService.Collection.Find(o => o.ExamID == currentExam.ID)?.ToList();
                     if (ExamDetails != null && ExamDetails.Count > 0)
@@ -349,13 +332,36 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
 
                         }
+
+                        currentExam.Marked = true;
+                        _service.CreateQuery().UpdateOne(Builders<ExamEntity>.Filter.Eq(o => o.ID, currentExam.ID), Builders<ExamEntity>.Update.Set(o => o.Marked, true));
+                        currentExam.Marked = true;
+                        currentExam.Updated = DateTime.Now;
+                        var lesson = _lessonService.GetItemByID(currentExam.LessonID);
+                        var score = new ScoreEntity()
+                        {
+                            ClassID = currentExam.ClassID,
+                            LessonID = currentExam.LessonID,
+                            Multiple = lesson.Multiple,
+                            ScoreType = lesson.Etype,
+                            StudentID = currentExam.StudentID,
+                            TeacherID = currentExam.TeacherID,
+                            Updated = DateTime.Now,
+                            Point = 0,
+                            MaxPoint = lesson.Point
+                        };
+
+                        currentExam.Point = point;
+                        score.Point = point;
+
+                        _service.CreateQuery().ReplaceOne(e => e.ID == currentExam.ID, currentExam);
+                        _scoreService.CreateQuery().InsertOne(score);
+                        
+                        return new JsonResult(new Dictionary<string, object>
+                        {
+                            { "Data", _service.GetItemByID(oldItem.ExamID) }
+                        });
                     }
-
-                    currentExam.Point = point;
-                    score.Point = point;
-
-                    _service.CreateQuery().ReplaceOne(e => e.ID == currentExam.ID, currentExam);
-                    _scoreService.CreateQuery().InsertOne(score);
                 }
                 else
                 {
