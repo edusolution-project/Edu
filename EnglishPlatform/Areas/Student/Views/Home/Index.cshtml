@@ -62,10 +62,10 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner" v-if="validDate(item)">
-                                <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
-                                <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title">{{item.title}}</a>
+                                <a :href="'@processUrl("Detail", "Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.skill.Name" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.skill.Name}}</h4></a>
+                                <a :href="'@processUrl("Detail", "Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
-                                    <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.className" class="title">{{item.className}}</a>
+                                    <a :href="'@processUrl("Detail", "Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.className" class="title">{{item.className}}</a>
                                     <p><i class="ti-time"></i>{{formatTime(item.startDate)}}</p>
                                     <div class="flex-row">
                                         <span class="fo fo-check" v-if="item.isLearnt"></span><span class="fo fo-time" v-else></span>{{item.isLearnt ? 'Đã học' : 'Chưa học'}}
@@ -93,19 +93,19 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Môn học đang diễn ra</h4>
-                        <a href="@processUrl("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="@processUrl("Index", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in active_course">
-                                <a :href="'@processUrl("Modules","Course")/' + item.id" :title="item.courseName">
+                                <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName">
                                     <div class="box radius">
                                         <div class="thumb">
                                             <img v-if="item.thumb" :src="item.thumb" alt="">
                                             <img v-else src="/pictures/ielts1.png" alt="">
                                         </div>
                                         <div class="padding-15 inner">
-                                            <a :href="'@processUrl("Modules","Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
+                                            <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
                                             <p><i class="ti-time"></i>{{formatShortDate(item.endDate)}}</p>
                                             <div class="c-bot">
                                                 <div class="flex reverse">
@@ -151,11 +151,11 @@
                 </div>
             </div>
         </div>
-        <div class="module">
+        <div class="module d-none">
             <div class="col-md-12 margin-b20">
                 <div class="heading flex">
                     <h4 class="box-head">Lớp học đã kết thúc</h4>
-                    <a href="@processUrl("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                    <a href="@processUrl("Index", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                 </div>
             </div>
             <ul class="row">
@@ -173,6 +173,51 @@
                 </li>
             </ul>
         </div>
+        @if (center == "eduso")
+        {
+            <div class="module">
+                <div class="col-md-12">
+                    <div class="box mb-3">
+                        <div class="heading flex mb-2">
+                            <h4 class="box-head">Các khóa học khác</h4>
+                            <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        </div>
+                        <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
+                            <ul class="box list-scroll">
+                                <li v-for="(item,k) in hot_course">
+                                    <a href="#" :title="item.courseName">
+                                        <div class="box radius">
+                                            <div class="thumb" style="position:relative;">
+                                                <img v-if="item.thumb" :src="item.thumb" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
+                                                <img v-else src="/pictures/ielts1.png" alt="">
+                                            </div>
+                                            <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
+                                                <a href="#" :title="item.courseName" class="title">{{item.courseName}}</a>
+                                                @*<p>
+                                                        <i class="ti-files"></i>{{item.description}}
+                                                    </p>*@
+                                                <div class="c-bot" style="text-align:right;">
+                                                    <div>
+                                                        <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                                                    </div>
+                                                    <div class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">
+                                                        {{item.discount}} VND
+                                                    </div>
+                                                    <div>
+                                                        <span style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1">({{item.price}} VND)</span>
+                                                    </div>
+                                                    <button class="btn btn-danger w-100 mt-2">Mua ngay</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </section>
 
@@ -190,6 +235,35 @@
             lesson_week: [
             ],
             active_course: [
+            ],
+            hot_course: [
+                {
+                    courseid: 999,
+                    courseName: "Luyện thi IELTS cấp tốc",
+                    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
+                    lesson_count: 87,
+                    thumb: "/pictures/ielts.png",
+                    discount: '3,000,000',
+                    price: '7,999,000'
+                },
+                {
+                    courseid: 1000,
+                    courseName: "Kĩ năng mềm cho sinh viên",
+                    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
+                    lesson_count: 87,
+                    thumb: "/pictures/softskill.jpg",
+                    discount: '300,000',
+                    price: '799,000'
+                },
+                {
+                    courseid: 1001,
+                    courseName: "Thiết kế đồ họa chuyên nghiệp",
+                    description: "Thiết kế chuyên nghiệp trong 30 buổi",
+                    lesson_count: 39,
+                    thumb: "/pictures/design2.jpg",
+                    discount: '420,000',
+                    price: "1,500,000"
+                }
             ],
             discussion: [
             ],
