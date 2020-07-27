@@ -102,7 +102,7 @@ var ExamReview = (function () {
         config = groupConfig(yourConfig);
         //writeLog(this.__proto__.constructor.name, config);
         renderExam();
-        //renderQuizCounter();
+        renderQuizCounter();
         renderResult();
         if (!config.isTeacher) {
             $('.tab-pane .part-column').addClass('scrollbar-outer').scrollbar();
@@ -747,62 +747,11 @@ var ExamReview = (function () {
         return config;
     }
 
-    //var renderQuizCounter = function () {
-    //    var listQuiz = document.querySelectorAll(".quiz-item");
-    //    var count = 0;
-    //    var answerList = '';
-    //    //writeLog("renderQuizCounter", listQuiz);
-    //    for (var i = 0; listQuiz != null && i < listQuiz.length; i++) {
-    //        var item = listQuiz[i];
-    //        var answer = localStorage.getItem(config.lesson_id + config.class_id + item.id);
-    //        var compeleted = "";
-    //        if (answer != null && answer != void 0 && answer != "") {
-    //            count++;
-    //            compeleted = "completed";
-    //            rendAgain(answer);
-    //        }
-    //        answerList += '<button class="btn bg-secondary text-white rounded-quiz ' + compeleted + '" type="button" id="quizNav' + item.id + '" name="quizNav' + item.id + '" onclick="window.GoQuiz(\'' + item.id + '\')">' + (i + 1) + '</button>';
-    //    }
-
-    //    var quiz_number_holder = $("#quiz-counter-holder");
-    //    var quiz_number_counter = $('#quiz_number_counter');
-    //    if (quiz_number_counter.length > 0) {
-    //        quiz_number_counter.find(".completed").text(count);
-    //        quiz_number_counter.find(".total").text(listQuiz.length);
-    //    } else {
-    //        $(".top-menu[for=lesson-info] .prevtab")
-    //            //    .after($("<button>", {
-    //            //    id: "quiz_number_counter",
-    //            //    class: "quizNumber btn btn-success font-weight-bold"
-    //            //})
-    //            //    .append($("<span>", {
-    //            //        class: "completed",
-    //            //        text: count
-    //            //    })).append(" / ")
-    //            //    .append($("<span>", {
-    //            //        class: "total",
-    //            //        text: listQuiz.length
-    //            //    })))
-    //            .after($('<button>', { class: "quizNumber btn btn-primary mt-2 mr-2 mb-2", onclick: "window.ToggleNav(this)", tooltips: "Ẩn hiện bảng theo dõi" })
-    //                .append($("<i>", { class: "fas fa-question-circle mr-2" })).append("Danh sách câu trả lời"));
-    //    }
-
-    //    var quizNavigator = $('#quizNavigator');
-    //    if (quizNavigator.length == 0) {
-    //        quizNavigator = $('<div>', { id: "quizNavigator", class: "p-1" });
-    //        quizNavigator.append($('<div>', { class: "input-group quiz-wrapper" }).append(answerList));
-    //        $('#quizIdx_holder').append(quizNavigator);
-    //    }
-    //    $("#QuizNav").append(quizNavigator);
-    //    if (listQuiz != null && count >= listQuiz.length) {
-    //        console.log(count, listQuiz.length);
-    //        var btn = document.getElementById("btn-completed");
-    //        if (btn != null) btn.style.display = "block";
-    //    } else {
-    //        var btn = document.getElementById("btn-completed");
-    //        if (btn != null) btn.style.display = "none!important";
-    //    }
-    //}
+    var renderQuizCounter = function () {
+        $(".top-menu[for=lesson-info] .prevtab")
+            .after($('<button>', { class: "quizNumber btn btn-primary mt-2 mr-2 mb-2", onclick: "window.ToggleNav(this)", tooltips: "Ẩn hiện bảng theo dõi" })
+                .append($("<i>", { class: "fas fa-question-circle mr-2" })).append("Danh sách câu trả lời"));
+    }
 
     var redo = function () {
         document.location = config.url.exam + "/" + config.lesson.ID + "/" + config.exam.ClassSubjectID + "#redo";
