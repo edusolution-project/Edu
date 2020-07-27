@@ -332,7 +332,7 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult CreateDetail(ExamDetailEntity item)
+        public JsonResult CreateDetail(string basis, ExamDetailEntity item)
         {
             if (item.ExamID == null)
             {
@@ -361,7 +361,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         return new JsonResult(item);
                     }
 
-                    var dataFiles = _roxyFilemanHandler.UploadNewFeed("Answer", HttpContext);
+                    var dataFiles = _roxyFilemanHandler.UploadAnswerBasis($"{basis}", HttpContext);
 
                     var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();
                     var oldItem = _examDetailService.CreateQuery().Find(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).FirstOrDefault();
@@ -404,7 +404,7 @@ namespace BaseCustomerMVC.Controllers.Student
                             item.MaxPoint = exam.MaxPoint;
                         }
                         _examService.CreateOrUpdate(exam);
-                        var xitem = map.AutoWithoutID(item, new ExamDetailEntity() { });
+                        var xitem = map.Clone(item, new ExamDetailEntity() { });
                         _examDetailService.CreateOrUpdate(xitem);
                         return new JsonResult(xitem);
                     }

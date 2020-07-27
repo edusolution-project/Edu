@@ -13,6 +13,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -41,6 +42,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<StudentEntity, ClassStudentViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _lessonMapping;
+        private readonly MappingEntity<LessonEntity, LessonResultViewModel> _resultMapping;
         private readonly IHostingEnvironment _env;
 
 
@@ -138,6 +140,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
             _lessonMapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
+            _resultMapping = new MappingEntity<LessonEntity, LessonResultViewModel>();
         }
 
         public JsonResult GetClassSubjects(string ClassID)
@@ -170,7 +173,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               CourseID = r.CourseID,
                               CourseName = course.Name,
                               TeacherID = r.TeacherID,
-                              TeacherName = teacher.FullName                              
+                              TeacherName = teacher.FullName
                           }).ToList()
                 },
             };
@@ -216,6 +219,71 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                EndDate = schedule.EndDate,
                                IsActive = schedule.IsActive,
                                IsOnline = schedule.IsOnline
+                           })).ToList();
+
+            var response = new Dictionary<string, object>
+                {
+                    { "RootID", TopID },
+                    { "Data", chapters },
+                    { "Lesson", lessons }
+                };
+
+            return new JsonResult(response);
+            //}
+            //catch (Exception ex)
+            //{
+            //    return new JsonResult(new Dictionary<string, object>
+            //    {
+            //        { "Data", null },
+            //        {"Error", ex.Message }
+            //    });
+            //}
+        }
+
+        [HttpPost]
+        public JsonResult GetResults(string ID, string Parent)
+        {
+            //try
+            //{
+            var currentCs = _classSubjectService.GetItemByID(ID);
+            if (currentCs == null)
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy lớp học" }
+                    });
+
+            if (string.IsNullOrEmpty(Parent))
+                Parent = "0";
+
+            var TopID = "";
+            if (Parent != "0")
+            {
+                var top = _chapterService.GetItemByID(Parent);
+                if (top == null)
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy chương" }
+                    });
+                TopID = top.ParentID;
+            }
+
+            var chapters = _chapterService.GetSubChapters(currentCs.ID, Parent);
+
+            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
+                           where schedule != null
+                           let progress = _lessonProgressService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID)
+                           let progressCount = progress.CountDocuments()
+                           let examCount = _examService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).Project(t=> t.StudentID).ToList().Distinct().Count()
+                           select _resultMapping.AutoOrtherType(r, new LessonResultViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               StartDate = schedule.StartDate,
+                               EndDate = schedule.EndDate,
+                               LearntCount = progressCount,
+                               ExamCount = examCount,
+                               AvgPoint = progressCount > 0 ? (r.TemplateType == LESSON_TEMPLATE.EXAM ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0,
+                               AvgPracticePoint = progressCount > 0 ? (r.TemplateType == LESSON_TEMPLATE.LECTURE ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0
                            })).ToList();
 
             var response = new Dictionary<string, object>

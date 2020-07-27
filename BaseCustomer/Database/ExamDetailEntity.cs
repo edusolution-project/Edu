@@ -51,7 +51,17 @@ namespace BaseCustomerEntity.Database
     {
         public ExamDetailService(IConfiguration configuration) : base(configuration)
         {
+            var indexs = new List<CreateIndexModel<ExamDetailEntity>>
+            {
+                //ExamID_1_QuestionID_1
+                new CreateIndexModel<ExamDetailEntity>(
+                    new IndexKeysDefinitionBuilder<ExamDetailEntity>()
+                    .Ascending(t=> t.ExamID)
+                    .Ascending(t => t.QuestionID)
+                    )
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
 
         public async Task ConvertClassSubject(ClassSubjectEntity classSubject)

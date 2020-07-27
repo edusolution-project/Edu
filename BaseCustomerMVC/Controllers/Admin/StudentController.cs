@@ -182,7 +182,12 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 var oldData = _service.GetItemByID(item.ID);
                 if (oldData == null) return new JsonResult(null);
-                _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                oldData.Centers = item.Centers;
+                oldData.FullName = item.FullName;
+                oldData.DateBorn = item.DateBorn;
+                oldData.Phone = item.Phone;
+                oldData.IsActive = item.IsActive;
+                _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, oldData);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {

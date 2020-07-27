@@ -52,7 +52,10 @@ namespace BaseCustomerEntity.Database
                     .Text(t => t.FullName).Text(t=> t.Email)),
                 new CreateIndexModel<StudentEntity>(
                     new IndexKeysDefinitionBuilder<StudentEntity>()
-                    .Descending(t=> t.Centers))
+                    .Descending(t=> t.Centers)),
+                 new CreateIndexModel<StudentEntity>(
+                    new IndexKeysDefinitionBuilder<StudentEntity>()
+                    .Descending(t=> t.JoinedClasses))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

@@ -19,7 +19,7 @@ namespace BaseCustomerMVC.Globals
             _evn = evn;
             RootPath = _evn.WebRootPath + "/Files";
         }
-        public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "", string folder = "", string center = "")
+        public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "", string folder = "", string center = "", bool resize = false, double width = 600, double height = 800)
         {
             string extension = Path.GetExtension(formFile.FileName);
             string type = extension.Replace(".", string.Empty).ToUpper();
@@ -37,6 +37,7 @@ namespace BaseCustomerMVC.Globals
             {
                 Directory.CreateDirectory(uploads);
             }
+            //Resize from stream
             var fileName = Guid.NewGuid().ToString() + "_" + Path.GetExtension(string.IsNullOrEmpty(filename) ? formFile.FileName : filename);
             using (var fileStream = new FileStream(Path.Combine(uploads, fileName), FileMode.Create))
             {

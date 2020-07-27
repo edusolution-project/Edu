@@ -43,19 +43,15 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<LessonScheduleEntity>>
             {
-                //ClassID_1_StartDate_1
-                new CreateIndexModel<LessonScheduleEntity>(
-                    new IndexKeysDefinitionBuilder<LessonScheduleEntity>()
-                    .Ascending(t => t.ClassID)),
                 //ClassID_1_LessonID_1
                 new CreateIndexModel<LessonScheduleEntity>(
                     new IndexKeysDefinitionBuilder<LessonScheduleEntity>()
                     .Ascending(t => t.ClassID)
                     .Ascending(t => t.LessonID)),
-                //LessonID_1_StartDate_1
+                //LessonID_1_StartDate_1_EndDate_1
                 new CreateIndexModel<LessonScheduleEntity>(
                     new IndexKeysDefinitionBuilder<LessonScheduleEntity>()
-                    .Ascending(t=> t.LessonID).Ascending(t=> t.StartDate))
+                    .Ascending(t=> t.LessonID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

@@ -72,6 +72,59 @@ namespace FileManagerCore.Services
 
             return listUrl;
         }
+        public Dictionary<string, List<MediaResponseModel>> UploadAnswerBasis(string nameFolder, HttpContext httpContext)
+        {
+            var listUrl = new Dictionary<string, List<MediaResponseModel>>();
+            string path = Path.Combine(GetFilesRoot(), $"{nameFolder}");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            try
+            {
+                var success = new List<MediaResponseModel>();
+                var error = new List<MediaResponseModel>();
+                for (int i = 0; i < httpContext.Request.Form.Files.Count; i++)
+                {
+                    MediaResponseModel item = new MediaResponseModel();
+                    IFormFile file = httpContext.Request.Form.Files[i];
+                    if (CanHandleFile(file.FileName))
+                    {
+                        FileInfo f = new FileInfo(file.FileName);
+                        string filename = MakeUniqueFilename(path, DateTime.Now.Ticks.ToString()+f.Extension);
+                        string dest = Path.Combine(path, filename);
+                        item.Extends = GetFileType(f.Extension);
+                        using (var stream = new FileStream(dest, FileMode.Create))
+                        {
+                            file.CopyTo(stream);
+                            stream.Close();
+                        }
+                        if (item.Extends == "image")
+                        {
+                            int.TryParse(_gConfig.MAX_IMAGE_WIDTH, out int w);
+                            int.TryParse(_gConfig.MAX_IMAGE_HEIGHT, out int h);
+                            ImageResize(dest, dest, w, h);
+                        }
+                        var imgUrl = dest.Replace(_environment.WebRootPath, "").Replace("\\", "/").ToLower();
+                        item.Path = imgUrl;
+                        success.Add(item);
+                    }
+                    else
+                    {
+                        item.Path = file.Name;
+                        error.Add(item);
+                    }
+                }
+                listUrl.Add("success", success);
+                listUrl.Add("error", error);
+            }
+            catch (Exception ex)
+            {
+                return listUrl;
+            }
+
+            return listUrl;
+        }
         public Dictionary<string, List<MediaResponseModel>> UploadNewFeed(string nameFolder, HttpContext httpContext)
         {
             var listUrl = new Dictionary<string, List<MediaResponseModel>>();
@@ -547,7 +600,7 @@ namespace FileManagerCore.Services
             while (File.Exists(Path.Combine(dir, ret)))
             {
                 i++;
-                ret = Path.GetFileNameWithoutExtension(filename) + " - Copy " + i.ToString() + Path.GetExtension(filename);
+                ret = Path.GetFileNameWithoutExtension(filename) + "- Copy " + i.ToString() + Path.GetExtension(filename);
             }
             return ret;
         }

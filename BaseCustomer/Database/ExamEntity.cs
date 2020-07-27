@@ -74,7 +74,13 @@ namespace BaseCustomerEntity.Database
                     .Ascending(t=> t.ClassID)
                     .Ascending(t=> t.LessonID)
                     .Ascending(t=> t.StudentID)
-                    .Descending(t=> t.ID))
+                    .Descending(t=> t.ID)),
+                //LessonScheduleID_1_StudentID_1
+                new CreateIndexModel<ExamEntity>(
+                    new IndexKeysDefinitionBuilder<ExamEntity>()
+                    .Ascending(t=> t.LessonScheduleID)
+                    .Ascending(t=> t.StudentID)
+                    )
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

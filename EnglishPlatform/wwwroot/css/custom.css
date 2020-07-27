@@ -718,4 +718,8 @@ fillquiz, fillquiz.quiz-item {
 fillquiz, fillquiz span {
     font-family: 'Arial,Helvetica,sans-serif' !important
 }
+
+.part-description li {
+    list-style-position: inside;
+}
 /* css input dropdown */

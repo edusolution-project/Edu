@@ -33,6 +33,10 @@ namespace BaseCustomerEntity.Database
                 new CreateIndexModel<CloneLessonPartQuestionEntity>(
                     new IndexKeysDefinitionBuilder<CloneLessonPartQuestionEntity>()
                     .Ascending(t => t.ClassSubjectID)),
+                //LessonID_1
+                new CreateIndexModel<CloneLessonPartQuestionEntity>(
+                    new IndexKeysDefinitionBuilder<CloneLessonPartQuestionEntity>()
+                    .Ascending(t => t.LessonID)),
                 //ParentID_1
                 new CreateIndexModel<CloneLessonPartQuestionEntity>(
                     new IndexKeysDefinitionBuilder<CloneLessonPartQuestionEntity>()
@@ -44,7 +48,7 @@ namespace BaseCustomerEntity.Database
 
         public async Task RemoveManyAsync(List<string> Ids)
         {
-           await Collection.DeleteManyAsync(t => Ids.Contains(t.ID));
+            await Collection.DeleteManyAsync(t => Ids.Contains(t.ID));
         }
     }
 

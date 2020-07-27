@@ -28,5 +28,6 @@ namespace FileManagerCore.Interfaces
         string DownloadDir(string path);
         List<Dictionary<string, string>> UploadDynamic(string nameFolder, HttpContext httpContext);
         Dictionary<string, List<MediaResponseModel>> UploadNewFeed(string nameFolder, HttpContext httpContext);
+        Dictionary<string, List<MediaResponseModel>> UploadAnswerBasis(string nameFolder, HttpContext httpContext);
     }
 }

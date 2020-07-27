@@ -25,6 +25,12 @@ namespace BaseCustomerEntity.Database
         public DateTime EndDate { get; set; }
         [JsonProperty("PracticeCount")]//Count of Completed Non-exam lesson 
         public double PracticeCount { get; set; }
+
+        public ChapterEntity()
+        {
+        }
+
+
     }
     public class ChapterService : ServiceBase<ChapterEntity>
     {
@@ -43,17 +49,16 @@ namespace BaseCustomerEntity.Database
 
             var indexs = new List<CreateIndexModel<ChapterEntity>>
             {
-                //SubjectID_1_ParentID_1
+                //ClassSubjectID_1_ParentID_1
                 new CreateIndexModel<ChapterEntity>(
                     new IndexKeysDefinitionBuilder<ChapterEntity>()
-                    .Ascending(t => t.CourseID)
+                    .Ascending(t => t.ClassSubjectID)
                     .Ascending(t=> t.ParentID)),
                 //ParentID_1
                 new CreateIndexModel<ChapterEntity>(
                     new IndexKeysDefinitionBuilder<ChapterEntity>()
                     .Ascending(t=> t.ParentID))
             };
-
             Collection.Indexes.CreateManyAsync(indexs);
         }
 

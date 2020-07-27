@@ -139,7 +139,7 @@
 </div>
 @section Footer { }
 @section Scripts{
-    <script src="~/js/student-exam-review.js?20200525"></script>
+    <script src="~/js/student-exam-review.js"></script>
     <script>
         //localStorage.clear();
 
@@ -152,7 +152,8 @@
             lesson: @Html.Raw(Json.Serialize(currentLesson)),
             exam: @Html.Raw(Json.Serialize(exam))
         }
-        var widget = new ExamReview.onReady(config);
+        var widget = new ExamReview();
+        widget.onReady(config);
     </script>
     <style>
         #nav-menu {
