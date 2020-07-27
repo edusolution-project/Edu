@@ -648,7 +648,6 @@ namespace EnglishPlatform.Controllers
                 }
                 else
                 {
-                    var teacher = _teacherService.GetItemByID(@event.TeacherID);
                     string zoomId = teacher != null && !string.IsNullOrEmpty(teacher.ZoomID) ? teacher.ZoomID : @event.UrlRoom.Replace("-", "");
                     //ViewBag.Role = "0";
                     ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "") });
