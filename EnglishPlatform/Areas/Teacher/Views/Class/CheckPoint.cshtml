@@ -21,7 +21,9 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b justify-content-between align-items-start">
-            <h2 class="title">@lesson.Title</h2>
+            <h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/@exam.MaxPoint)</span></h2>
+            <button class="btn btn-sm btn-circle btn-primary" style="margin-right:10px" onclick="PrevPart()">PrevPart</button>
+            <button class="btn btn-sm btn-circle btn-primary"  onclick="NextPart()">NextPart</button>
         </div>
     </div>
     <div class="card-body" style="height:100%">
@@ -34,20 +36,75 @@
     <script src="~/js/student-exam-review.js?20200525"></script>
     <script>
         //localStorage.clear();
-
+        function stopAllMedia() {
+            $("video").each(function () {
+                $(this)[0].pause();
+            });
+            $("audio").each(function () {
+                $(this)[0].pause();
+            });
+        }
         var config = {
-            isTeacher :true,
+            isTeacher: true,
             id: "exam-review",
             url: {
-                    exam: '@processUrl("Detail", "Lesson")',
-                    list: '@processUrl("Modules", "Course")',
-                },
+                exam: '@processUrl("Detail", "Lesson")',
+                list: '@processUrl("Modules", "Course")',
+                point : '@processUrl("UpdatePoint", "Exam")',
+            },
             lesson: @Html.Raw(Json.Serialize(currentLesson)),
             exam: @Html.Raw(Json.Serialize(exam))
-        }
-        var widget = new ExamReview.onReady(config);
+        };
+        var widget = new ExamReview();
+        widget.onReady(config);
+        console.log(widget);
     </script>
     <style>
+        div#review_navition {
+            margin-bottom: 30px;
+            border-bottom:1px solid #ccc;
+        }
+        div#review_navition > ul {
+            list-style: none;
+            display: block;
+            margin: 0;
+            padding: 5px;
+        }
+
+        div#review_navition > ul > li {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius:50%;
+            margin-left: 5px;
+        }
+
+            div#review_navition > ul > li > a {
+                cursor: pointer;
+                display: block;
+                text-align: center;
+                padding: 4px;
+                color: #fff;
+                font-weight: 500;
+                border: 1px solid #ccc;
+                border-radius: 50%;
+                box-shadow: 0 0 10px #ccc;
+            }
+
+            div#review_navition > ul > li.unchecked > a{
+                background:#ccc;
+            }
+            div#review_navition > ul > li.success > a {
+                background: #385623;
+            }
+
+        div#review_navition > ul > li.danger > a {
+            background: #dc3545;
+        }
+            div#review_navition > ul > li > a.selection {
+                border-color: #004085;
+                box-shadow: 0 0 10px #004085;
+            }
         .right-content .left-col {
             padding: 0 12px;
             position: absolute;

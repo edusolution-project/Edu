@@ -259,65 +259,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [HttpPost]
-        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, [FromForm] bool isLast)
+        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, [FromForm] bool isLast=false)
         {
             try {
                 var oldItem = _examDetailService.GetItemByID(ID);
-
-                Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadNewFeed("UpdatePoint", HttpContext);
-                if (listFilesUpload.TryGetValue("success", out List<MediaResponseModel> listFiles) && listFiles.Count > 0)
-                {
-                    var answer = new LessonPartAnswerEntity();
-                    var listMedia = new List<Media>();
-                    for (int i = 0; i < listFiles.Count; i++)
-                    {
-                        var media = new Media()
-                        {
-                            Created = DateTime.Now,
-                            Extension = listFiles[i].Extends,
-                            Name = listFiles[i].Path,
-                            OriginalName = listFiles[i].Path,
-                            Path = listFiles[i].Path
-                        };
-                        listMedia.Add(media);
-                    }
-                    answer = new LessonPartAnswerEntity()
-                    {
-                        Content = RealAnswerValue,
-                        IsCorrect = true,
-                        ParentID = oldItem.LessonPartID,
-                        CreateUser = User.FindFirst("UserID")?.Value,
-                        Created = DateTime.Now,
-                        Medias = listMedia
-                    };
-                    _lessonPartAnswerService.CreateOrUpdate(answer);
-                    oldItem.RealAnswerID = answer.ID;
-                }
-
-                oldItem.RealAnswerValue = RealAnswerValue;
-                oldItem.Point = Point;
-                _examDetailService.CreateOrUpdate(oldItem);
-                
                 if (isLast)
                 {
                     var currentExam = _service.GetItemByID(oldItem.ExamID);
-                    currentExam.Marked = true;
-                    _service.CreateQuery().UpdateOne(Builders<ExamEntity>.Filter.Eq(o => o.ID, oldItem.ExamID),Builders<ExamEntity>.Update.Set(o=>o.Marked, true));
-                    currentExam.Marked = true;
-                    currentExam.Updated = DateTime.Now;
-                    var lesson = _lessonService.GetItemByID(currentExam.LessonID);
-                    var score = new ScoreEntity()
-                    {
-                        ClassID = currentExam.ClassID,
-                        LessonID = currentExam.LessonID,
-                        Multiple = lesson.Multiple,
-                        ScoreType = lesson.Etype,
-                        StudentID = currentExam.StudentID,
-                        TeacherID = currentExam.TeacherID,
-                        Updated = DateTime.Now,
-                        Point = 0,
-                        MaxPoint = lesson.Point
-                    };
                     var point = 0.0;
                     var ExamDetails = _examDetailService.Collection.Find(o => o.ExamID == currentExam.ID)?.ToList();
                     if (ExamDetails != null && ExamDetails.Count > 0)
@@ -334,13 +282,61 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
 
                         }
+
+                        currentExam.Marked = true;
+                        _service.CreateQuery().UpdateOne(Builders<ExamEntity>.Filter.Eq(o => o.ID, currentExam.ID), Builders<ExamEntity>.Update.Set(o => o.Marked, true));
+                        currentExam.Marked = true;
+                        currentExam.Updated = DateTime.Now;
+                        var lesson = _lessonService.GetItemByID(currentExam.LessonID);
+                        var score = new ScoreEntity()
+                        {
+                            ClassID = currentExam.ClassID,
+                            LessonID = currentExam.LessonID,
+                            Multiple = lesson.Multiple,
+                            ScoreType = lesson.Etype,
+                            StudentID = currentExam.StudentID,
+                            TeacherID = currentExam.TeacherID,
+                            Updated = DateTime.Now,
+                            Point = 0,
+                            MaxPoint = lesson.Point
+                        };
+
+                        currentExam.Point = point;
+                        score.Point = point;
+
+                        _service.CreateQuery().ReplaceOne(e => e.ID == currentExam.ID, currentExam);
+                        _scoreService.CreateQuery().InsertOne(score);
+                        
+                        return new JsonResult(new Dictionary<string, object>
+                        {
+                            { "Data", _service.GetItemByID(oldItem.ExamID) }
+                        });
+                    }
+                }
+                else
+                {
+                    Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadNewFeed("UpdatePoint", HttpContext);
+                    if (listFilesUpload.TryGetValue("success", out List<MediaResponseModel> listFiles) && listFiles.Count > 0)
+                    {
+                        var listMedia = new List<Media>();
+                        for (int i = 0; i < listFiles.Count; i++)
+                        {
+                            var media = new Media()
+                            {
+                                Created = DateTime.Now,
+                                Extension = listFiles[i].Extends,
+                                Name = listFiles[i].Path,
+                                OriginalName = listFiles[i].Path,
+                                Path = listFiles[i].Path
+                            };
+                            listMedia.Add(media);
+                        }
+                        oldItem.Medias = listMedia;
                     }
 
-                    currentExam.Point = point;
-                    score.Point = point;
-
-                    _service.CreateQuery().ReplaceOne(e => e.ID == currentExam.ID, currentExam);
-                    _scoreService.CreateQuery().InsertOne(score);
+                    oldItem.RealAnswerValue = RealAnswerValue;
+                    oldItem.Point = Point;
+                    _examDetailService.CreateOrUpdate(oldItem);
                 }
                 var response = new Dictionary<string, object>
                 {

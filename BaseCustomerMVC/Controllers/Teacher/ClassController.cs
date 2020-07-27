@@ -1712,6 +1712,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
                     var mapExam = new MappingEntity<ExamEntity, ExamReviewViewModel>();
 
+                    var examview = mapExam.AutoOrtherType(data, new ExamReviewViewModel()
+                    {
+                        Details = _examDetailService.Collection.Find(t => t.ExamID == data.ID).ToList()
+                    });
+
                     var lessonview = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
                     {
                         Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
@@ -1719,15 +1724,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
                                 .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
                                 {
-                                    CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList()
+                                    CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
+                                    AnswerEssay = o.Type == ExamTypes[3] ? _examDetailService.CreateQuery().Find(e=>e.QuestionID == z.ID && e.ExamID == data.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
+                                    Medias = examview.Details.FirstOrDefault(e=>e.QuestionID == z.ID)?.Medias,
+                                    TypeAnswer = o.Type,
+                                    RealAnswerEssay = o.Type == ExamTypes[3] ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
+                                    PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point??0,
+                                    ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? ""
                                 }))?.ToList()
                         })).ToList()
                     });
 
-                    var examview = mapExam.AutoOrtherType(data, new ExamReviewViewModel()
-                    {
-                        Details = _examDetailService.Collection.Find(t => t.ExamID == data.ID).ToList()
-                    });
+                    
 
                     ViewBag.Lesson = lessonview;
                     //ViewBag.Class = currentClass;

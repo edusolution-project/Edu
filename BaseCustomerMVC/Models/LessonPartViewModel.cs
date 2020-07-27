@@ -81,6 +81,23 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("CloneAnswers")]
         public List<CloneLessonPartAnswerEntity> CloneAnswers { get; set; }
 
+        [JsonProperty("Medias")]
+        public List<Media> Medias { get; set; }
+        [JsonProperty("AnswerEssay")]
+        public string AnswerEssay { get; set; }
+
+        [JsonProperty("RealAnswerEssay")]
+        public string RealAnswerEssay { get; set; }
+
+        [JsonProperty("TypeAnswer")]
+        public string TypeAnswer { get; set; }
+
+        [JsonProperty("ExamDetailID")]
+        public string ExamDetailID { get; set; }
+
+        [JsonProperty("PointEssay")]
+        public double PointEssay { get; set; }
+
         public LessonPartQuestionEntity ToEntity()
         {
             return new LessonPartQuestionEntity
