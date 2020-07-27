@@ -1,7 +1,8 @@
 ﻿@using BaseCustomerEntity.Database;
+@using BaseCustomerMVC.Models;
 @{
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
-    ExamEntity exam = ViewBag.Exam as ExamEntity;
+    ExamReviewViewModel exam = ViewBag.Exam as ExamReviewViewModel;
     LessonEntity lesson = ViewBag.Lesson;
     List<ExamDetailEntity> listExamDetails = ViewBag.ExamDetail as List<ExamDetailEntity>;
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
@@ -17,11 +18,10 @@
         return $"/{center}{url}";
     }
 }
-
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b justify-content-between align-items-start">
-            <h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/@exam.MaxPoint)</span></h2>
+            <h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/@exam.Details.Count)</span></h2>
             <button class="btn btn-sm btn-circle btn-primary" style="margin-right:10px" onclick="PrevPart()">PrevPart</button>
             <button class="btn btn-sm btn-circle btn-primary"  onclick="NextPart()">NextPart</button>
         </div>
@@ -32,6 +32,9 @@
         </div>
     </div>
 </section>
+@section style{ 
+    <link href="~/css/minify/detail.min.css" rel="stylesheet" />
+}
 @section Scripts{
     <script src="~/js/student-exam-review.js?20200525"></script>
     <script>

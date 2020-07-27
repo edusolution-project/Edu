@@ -127,16 +127,30 @@ var ExamReview = (function () {
         root.innerHTML = "";
         var number = 1;
         var ul = document.createElement("ul");
-        ul.style.width = "calc(100% - 50px)";
+        ul.style.width = "calc(100% - 100px)";
         ul.style.display = "inline-block";
         for (var i = 0; i < parts.length; i++) {
             var part = parts[i];
             number = renderItemNavtion(ul, part, number);
         }
         if (config.isTeacher) {
-            root.innerHTML = "<div class='number-reivew-point' style='width:50px;display:inline-block;'>(" + daCham + "/" + (number - 1) + ")</div>";
+            root.innerHTML = "<div class='number-reivew-point' style='width:100px;display:inline-block;'>(Đã chấm " + daCham + "/" + (number - 1) + ")</div>";
         }
         root.appendChild(ul);
+        var data = config.exam;
+        var completetime = moment(data.Updated);//.format("DD/MM/YYYY hh:mm:ss A");
+        var starttime = moment(data.Created);
+        var duration = moment.duration(completetime.diff(starttime));
+        _correctQuiz = $('#QuizNav ul li.success').length;
+        _totalQuiz = $('#QuizNav ul li').length;
+
+        $(".top-menu[for=lesson-info]").prepend($('<span>',
+            {
+                class: "m-2 text-muted font-weight-bold",
+                style: "font-size: 150%",
+
+            }).append("Kết quả: ").append($('<span>',
+                { class: "text-primary", text: _correctQuiz + "/" + _totalQuiz })).append(" (" + durationFormat(duration) + ")"));
     }
     var updateShowPoint = function (id) {
         var point = getNavitionRoot().querySelector('.number-reivew-point');
@@ -151,31 +165,51 @@ var ExamReview = (function () {
         //    point.style.background = "#fff";
         //}, 3000);
     }
-    var renderItemNavtion = function (el,data, index) {
+    var renderItemNavtion = function (el, data, index) {
+        var examDetails = config.exam.Details;
         for (var i = 0; i < data.Questions.length; i++) {
             var item = data.Questions[i];
-            var title = "Làm đúng";
-            var _class = "success";
-            if (item.TypeAnswer != "ESSAY") {
-                if (item.Point <= 0) {
-                    _class = "danger";
-                    title = "Làm sai";
-                }
-                daCham++;
-            } else {
 
-                if (item.RealAnswerEssay) {
-                    if (item.PointEssay <= 0) {
-                        _class = "danger";
-                    } else {
-                        _class = "success";
+            var examDetail = examDetails.filter(o => o.QuestionID == item.ID);
+            if (examDetail) {
+                var detail = examDetail[0];
+                var title = "Làm đúng";
+                var _class = "success";
+                if (item.TypeAnswer != "ESSAY") {
+
+                    // câu trắc nghiệm
+
+                    if (detail.AnswerID != null && detail.AnswerID != "") {
+                        if (item.TypeAnswer == "QUIZ3") {
+                            if (detail.AnswerID != detail.RealAnswerID) {
+                                _class = "danger";
+                                title = "Làm sai";
+                            }
+                        }
                     }
-                    _class += " checked";
-                    title = "Đã chấm";
-                }
-                else {
-                    _class = "unchecked";
-                    title = "chưa chấm";
+                    else {
+                        if (detail.Point <= 0) {
+                            _class = "danger";
+                            title = "Làm sai";
+                        }
+                    }
+                    daCham++;
+                } else {
+
+                    if (item.RealAnswerEssay) {
+                        if (item.PointEssay <= 0) {
+                            _class = "danger";
+                        } else {
+                            _class = "success";
+                        }
+                        _class += " checked";
+                        title = "Đã chấm";
+                        daCham++;
+                    }
+                    else {
+                        _class = "unchecked";
+                        title = "chưa chấm";
+                    }
                 }
             }
             var li = document.createElement("li");
@@ -274,17 +308,7 @@ var ExamReview = (function () {
         }
 
         $('#lessonSummary #nav-menu .text-center').prepend(lastExamResult);
-
-        _correctQuiz = $('#quizNavigator .quiz-wrapper .bg-success').length;
-        _totalQuiz = $('#quizNavigator .quiz-wrapper button').length;
-
-        $(".top-menu[for=lesson-info]").prepend($('<span>',
-            {
-                class: "m-2 text-muted font-weight-bold",
-                style: "font-size: 150%",
-
-            }).append("Kết quả: ").append($('<span>',
-                { class: "text-primary", text: _correctQuiz + "/" + _totalQuiz })).append(" (" + durationFormat(duration) + ")" ));
+        
     }
 
     var renderLessonPart = function (data, index, type) {
@@ -591,7 +615,7 @@ var ExamReview = (function () {
                 } else {
                     html += '<div class="alert alert-danger"><span class="text-danger">Chưa chấm</span></div>';
                 }
-                html += '<div> Điểm : <input type="number" value="' + point + '" style="width:60px;text-align:center;margin-bottom:10px"></div>';
+                html += '<div> Điểm : <input onkeyup="validate(this)" max="' + item.MaxPoint + '" min="0" type="number" value="' + point + '" style="width:60px;text-align:center;margin-bottom:10px">/' + item.MaxPoint + '</div>';
                 html += '<i>Đáp án đúng :</i>';
                 var realContent = content == null ? "" : content;
                 html += '<div><textarea style="width:100%; padding:5px" rows="6">' + realContent + '</textarea></div>';
@@ -849,6 +873,33 @@ var ExamReview = (function () {
             }
         }
     }
+
+    var togglePanelWidth = function (obj) {
+        var parent = $(obj).offsetParent();
+        if (parent.hasClass("col-md-6")) {
+            parent.removeClass("col-md-6").addClass("col-md-2");
+            parent.siblings().removeClass("col-md-6").addClass("col-md-10");
+        }
+        else {
+            if (parent.hasClass("col-md-4")) {
+                parent.removeClass("col-md-4").addClass("col-md-6");
+                parent.siblings().removeClass("col-md-8").addClass("col-md-6");
+            }
+            else {
+                parent.removeClass("col-md-2").addClass("col-md-4");
+                parent.siblings().removeClass("col-md-10").addClass("col-md-8");
+            }
+        }
+    }
+    var validate = function (_this) {
+        var value = _this.value;
+        var max = _this.getAttribute('max');
+        console.log(value, max);
+        if (parseInt(value) > parseInt(max)) {
+            alert("Điểm không thể lớn hơn " + max);
+            _this.value = max;
+        }
+    }
     window.ExamReview = {} || ExamReview;
     ExamReview.onReady = onReady;
     window.PrevPart = prevPart;
@@ -861,6 +912,8 @@ var ExamReview = (function () {
     window.updatePoint = updatePoint;
     window.tinhLaiDiem = tinhLaiDiem;
     window.uploadFile = uploadFile;
+    window.togglePanelWidth = togglePanelWidth;
+    window.validate = validate;
     return ExamReview;
 }());
 

@@ -101,6 +101,9 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("PointEssay")]
         public double PointEssay { get; set; }
 
+        [JsonProperty("MaxPoint")]
+        public double MaxPoint { get; set; }
+
         public LessonPartQuestionEntity ToEntity()
         {
             return new LessonPartQuestionEntity
