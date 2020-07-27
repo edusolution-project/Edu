@@ -83,6 +83,9 @@ namespace BaseCustomerMVC.Models
 
         [JsonProperty("Medias")]
         public List<Media> Medias { get; set; }
+
+        [JsonProperty("MediasAnswer")]
+        public List<Media> MediasAnswer { get; set; }
         [JsonProperty("AnswerEssay")]
         public string AnswerEssay { get; set; }
 

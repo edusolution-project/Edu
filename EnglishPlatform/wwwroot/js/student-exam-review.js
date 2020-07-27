@@ -111,27 +111,32 @@ var ExamReview = (function () {
     }
 
     var getNavitionRoot = function () {
-        return document.getElementById(_idNaviton);
+        id = config.isTeacher ? _idNaviton : 'QuizNav';
+        var doc = document.getElementById(id);
+        if (!config.isTeacher) {
+            doc.classList.add('show');
+        }
+        return doc;
     }
     var daCham = 0;
     var renderNavition = function () {
-        if (config.isTeacher) {
-            daCham = 0;
-            var lesson = config.lesson;
-            var parts = lesson.Part;
-            var root = getNavitionRoot();
-            root.innerHTML = "";
-            var number = 1;
-            var ul = document.createElement("ul");
-            ul.style.width = "calc(100% - 50px)";
-            ul.style.display = "inline-block";
-            for (var i = 0; i < parts.length; i++) {
-                var part = parts[i];
-                number = renderItemNavtion(ul, part, number);
-            }
-            root.innerHTML = "<div class='number-reivew-point' style='width:50px;display:inline-block;'>(" + daCham + "/" + (number - 1) + ")</div>";
-            root.appendChild(ul);
+        daCham = 0;
+        var lesson = config.lesson;
+        var parts = lesson.Part;
+        var root = getNavitionRoot();
+        root.innerHTML = "";
+        var number = 1;
+        var ul = document.createElement("ul");
+        ul.style.width = "calc(100% - 50px)";
+        ul.style.display = "inline-block";
+        for (var i = 0; i < parts.length; i++) {
+            var part = parts[i];
+            number = renderItemNavtion(ul, part, number);
         }
+        if (config.isTeacher) {
+            root.innerHTML = "<div class='number-reivew-point' style='width:50px;display:inline-block;'>(" + daCham + "/" + (number - 1) + ")</div>";
+        }
+        root.appendChild(ul);
     }
     var updateShowPoint = function (id) {
         var point = getNavitionRoot().querySelector('.number-reivew-point');
@@ -158,19 +163,19 @@ var ExamReview = (function () {
                 }
                 daCham++;
             } else {
-                if ((item.RealAnswerEssay != "" && item.RealAnswerEssay != null) || (item.Medias != null && item.Medias.length > 0)) {
+
+                if (item.RealAnswerEssay) {
                     if (item.PointEssay <= 0) {
                         _class = "danger";
+                    } else {
+                        _class = "success";
                     }
                     _class += " checked";
                     title = "Đã chấm";
-                    daCham++;
                 }
                 else {
-                    if (item.PointEssay <= 0) {
-                        _class = "unchecked";
-                        title = "chưa chấm";
-                    }
+                    _class = "unchecked";
+                    title = "chưa chấm";
                 }
             }
             var li = document.createElement("li");
@@ -565,9 +570,10 @@ var ExamReview = (function () {
             html += '<fieldset class="answer-item student-answer col-md-12" id="essay-' + item.ID + '">';
             html += '<i>Trả lời</i>';
             html += '</fieldset>';
-
+            var anwerMedia = item.MediasAnswer;
             var medias = item.Medias;//file học viên upload
-            html += '<fieldset class="col-md-12">';
+            //console.log(medias);
+            html += '<fieldset class="col-md-12"> 333';
             for (var z = 0; medias != null && z < medias.length; z++) {
                 var itemMedia = medias[z];
                 html += renderMedia(itemMedia);
@@ -579,9 +585,9 @@ var ExamReview = (function () {
             var point = item.PointEssay; // điểm giáo viên chấm
 
             if (config.isTeacher) {
-                html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
+                html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-teacher-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
                 if (content != "" && content != null) {
-                    html += '<div style="display:none" class="alert alert-success"><span class="text-success">Đã chấm</span></div>';
+                    html += '<div class="alert alert-success"><span class="text-success">Đã chấm</span></div>';
                 } else {
                     html += '<div class="alert alert-danger"><span class="text-danger">Chưa chấm</span></div>';
                 }
@@ -590,6 +596,17 @@ var ExamReview = (function () {
                 var realContent = content == null ? "" : content;
                 html += '<div><textarea style="width:100%; padding:5px" rows="6">' + realContent + '</textarea></div>';
 
+                //upload file
+                var type = "type='file'";
+                var strFile = "this.parentElement.querySelector('input[" + type+"]')";
+                html += '<div data-target="'+item.ID+'"><input type="file" name="files" multiple style="display:none">';
+                html += '<button class="btn btn-sm btn-success" onclick="uploadFile(this)">Upload file</button>';
+                html += '<div class="preview">';
+                for (var x = 0; anwerMedia != null && x < anwerMedia.length; x++) {
+                    var mediaFile = anwerMedia[x];
+                    html += renderMediaAnswer(mediaFile);
+                }
+                html += '</div>'
                 var textBtn = content == null && point == 0 ? "chấm điểm" : "chấm lại";
 
                 var updatEvent = "updatePoint(this,'" + item.ExamDetailID + "')";
@@ -599,17 +616,24 @@ var ExamReview = (function () {
                 html += '</fieldset>';
             } else {
                 if (point == 0 && content == null) {
-                    html += '<fieldset class="answer-item col-md-12" id="essay-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
+                    html += '<fieldset class="answer-item col-md-12" id="essay-teacher-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
                     html += 'Chưa chấm điểm';
                     html += '</fieldset>';
                 } else {
-                    html += '<fieldset class="answer-item col-md-12" id="essay-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
-
+                    html += '<fieldset class="answer-item col-md-12" id="essay-teacher-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
                     html += '<div> Điểm : ' + point+'</div>';
                     html += '<i>Đáp án đúng :</i>';
                     var realContent = content == null ? "" : content;
                     html += '<div>' + realContent + '</div>';
                     html += '</fieldset>';
+                    if (anwerMedia) {
+                        html += '<fieldset><div> File đính kèm : ';
+                        for (var x = 0; anwerMedia != null && x < anwerMedia.length; x++) {
+                            var mediaFile = anwerMedia[x];
+                            html += renderMedia(mediaFile);
+                        }
+                        html += '</div></fieldset>';
+                    }
                 }
             }
             //var description = "";
@@ -643,7 +667,22 @@ var ExamReview = (function () {
         if (arr.includes("image")) {
             return '<div class="media-holder "><img src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" class="img-fluid lazy" title="' + data.Name + '"></div>';
         }
-        return "";
+        return '<div class="media-holder"><a href="' + data.Path + '" style="display:block">Download</a></div>';
+    }
+
+    var renderMediaAnswer = function (data) {
+        if (data == null || data == void 0 || data == "") return "";
+        var arr = data.Extension.split('/');
+        if (arr.includes("video")) {
+            return '<div class="media-holder"><video controls=""><source src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" type="' + data.Extension + '">Your browser does not support the video tag</video></div>';
+        }
+        if (arr.includes("audio")) {
+            return '<div class="media-holder "><audio controls=""><source src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" type="' + data.Extension + '">Your browser does not support the audio tag</audio></div>'
+        }
+        if (arr.includes("image")) {
+            return '<div class="media-holder "><img src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" class="img-fluid lazy" title="' + data.Name + '"></div>';
+        }
+        return '<div class="media-holder"><a href="' + data.Path + '" style="display:block">Download</a></div>';
     }
 
     var renderContent = function (data) {
@@ -709,60 +748,9 @@ var ExamReview = (function () {
     }
 
     var renderQuizCounter = function () {
-        var listQuiz = document.querySelectorAll(".quiz-item");
-        var count = 0;
-        var answerList = '';
-        //writeLog("renderQuizCounter", listQuiz);
-        for (var i = 0; listQuiz != null && i < listQuiz.length; i++) {
-            var item = listQuiz[i];
-            var answer = localStorage.getItem(config.lesson_id + config.class_id + item.id);
-            var compeleted = "";
-            if (answer != null && answer != void 0 && answer != "") {
-                count++;
-                compeleted = "completed";
-                rendAgain(answer);
-            }
-            answerList += '<button class="btn bg-secondary text-white rounded-quiz ' + compeleted + '" type="button" id="quizNav' + item.id + '" name="quizNav' + item.id + '" onclick="window.GoQuiz(\'' + item.id + '\')">' + (i + 1) + '</button>';
-        }
-
-        var quiz_number_holder = $("#quiz-counter-holder");
-        var quiz_number_counter = $('#quiz_number_counter');
-        if (quiz_number_counter.length > 0) {
-            quiz_number_counter.find(".completed").text(count);
-            quiz_number_counter.find(".total").text(listQuiz.length);
-        } else {
-            $(".top-menu[for=lesson-info] .prevtab")
-                //    .after($("<button>", {
-                //    id: "quiz_number_counter",
-                //    class: "quizNumber btn btn-success font-weight-bold"
-                //})
-                //    .append($("<span>", {
-                //        class: "completed",
-                //        text: count
-                //    })).append(" / ")
-                //    .append($("<span>", {
-                //        class: "total",
-                //        text: listQuiz.length
-                //    })))
-                .after($('<button>', { class: "quizNumber btn btn-primary mt-2 mr-2 mb-2", onclick: "window.ToggleNav(this)", tooltips: "Ẩn hiện bảng theo dõi" })
-                    .append($("<i>", { class: "fas fa-question-circle mr-2" })).append("Danh sách câu trả lời"));
-        }
-
-        var quizNavigator = $('#quizNavigator');
-        if (quizNavigator.length == 0) {
-            quizNavigator = $('<div>', { id: "quizNavigator", class: "p-1" });
-            quizNavigator.append($('<div>', { class: "input-group quiz-wrapper" }).append(answerList));
-            $('#quizIdx_holder').append(quizNavigator);
-        }
-        $("#QuizNav").append(quizNavigator);
-        if (listQuiz != null && count >= listQuiz.length) {
-            console.log(count, listQuiz.length);
-            var btn = document.getElementById("btn-completed");
-            if (btn != null) btn.style.display = "block";
-        } else {
-            var btn = document.getElementById("btn-completed");
-            if (btn != null) btn.style.display = "none!important";
-        }
+        $(".top-menu[for=lesson-info] .prevtab")
+            .after($('<button>', { class: "quizNumber btn btn-primary mt-2 mr-2 mb-2", onclick: "window.ToggleNav(this)", tooltips: "Ẩn hiện bảng theo dõi" })
+                .append($("<i>", { class: "fas fa-question-circle mr-2" })).append("Danh sách câu trả lời"));
     }
 
     var redo = function () {
@@ -786,14 +774,14 @@ var ExamReview = (function () {
             _form.append("Point", point);
             _form.append("RealAnswerValue", answer);
             _form.append("isLast", isLAst);
-
-            //var files = document.querySelector('input[data-target="' + question.ID + '"]');
-            //if (files != null) {
-            //    for (var x = 0; x < files.files.length; x++) {
-            //        _form.append("files", files.files[x]);
-            //    }
-            //}
-            var qID = _this.parentElement.parentElement.id.replace("essay-", "");
+            var qID = _this.offsetParent.id.replace("essay-teacher-", "");
+            var files = document.querySelector('[data-target="' + qID + '"]>input[type="file"]');
+            if (files != null) {
+                for (var x = 0; x < files.files.length; x++) {
+                    _form.append("files", files.files[x]);
+                }
+            }
+            
             var _ajax = new MyAjax();
             _ajax.proccess("POST", _url, _form).then(function (res) {
                 var dataJson = JSON.parse(res);
@@ -801,12 +789,15 @@ var ExamReview = (function () {
                     _this.innerHTML = "chấm lại";
                     _this.offsetParent.querySelector('.alert').style.display = 'block';
                     var selection = document.querySelector("[data-id='" + qID + "']");
-                    selection.classList.remove(...["unchecked", "success", "danger"]);
-                    if (point > 0) {
-                        selection.classList.add(...["success", "checked"]);
-                    }
-                    else {
-                        selection.classList.add(...["danger", "checked"]);
+                    if (selection) {
+
+                        selection.classList.remove(...["unchecked", "success", "danger"]);
+                        if (point > 0) {
+                            selection.classList.add(...["success", "checked"]);
+                        }
+                        else {
+                            selection.classList.add(...["danger", "checked"]);
+                        }
                     }
                 }
                 updateShowPoint(id);
@@ -842,6 +833,22 @@ var ExamReview = (function () {
     var getConfig = function () {
         return config;
     }
+    var uploadFile = function (_that) {
+        var parent = _that.parentElement;
+        var file = parent.querySelector("input[type='file']");
+        var preview = parent.querySelector(".preview");
+        preview.innerHTML = "";
+        if (file) {
+            file.click();
+            file.onchange = function () {
+                var listFiles = file.files;
+                for (var i = 0; i < listFiles.length; i++) {
+                    var item = listFiles[i];
+                    preview.innerHTML += '<div>' + item.name + '</div>';
+                }
+            }
+        }
+    }
     window.ExamReview = {} || ExamReview;
     ExamReview.onReady = onReady;
     window.PrevPart = prevPart;
@@ -853,6 +860,7 @@ var ExamReview = (function () {
     window.ToggleNav = toggleNav;
     window.updatePoint = updatePoint;
     window.tinhLaiDiem = tinhLaiDiem;
+    window.uploadFile = uploadFile;
     return ExamReview;
 }());
 
