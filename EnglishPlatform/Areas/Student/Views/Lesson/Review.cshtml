@@ -122,6 +122,51 @@
     .QUIZ1 .answer-item {
         max-width: 25%;
     }
+    div#QuizNav {
+            margin-bottom: 30px;
+            border-bottom:1px solid #ccc;
+        }
+        div#QuizNav > ul {
+            list-style: none;
+            display: block;
+            margin: 0;
+            padding: 5px;
+        }
+
+        div#QuizNav > ul > li {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius:50%;
+            margin-left: 5px;
+        }
+
+            div#QuizNav > ul > li > a {
+                cursor: pointer;
+                display: block;
+                text-align: center;
+                padding: 4px;
+                color: #fff;
+                font-weight: 500;
+                border: 1px solid #ccc;
+                border-radius: 50%;
+                box-shadow: 0 0 10px #ccc;
+            }
+
+            div#QuizNav > ul > li.unchecked > a{
+                background:#ccc;
+            }
+            div#QuizNav > ul > li.success > a {
+                background: #385623;
+            }
+
+            div#QuizNav > ul > li.danger > a {
+                background: #dc3545;
+            }
+            div#QuizNav > ul > li > a.selection {
+                border-color: #004085;
+                box-shadow: 0 0 10px #004085;
+            }
 </style>
 
 <div class="left-col">
