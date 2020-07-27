@@ -172,43 +172,52 @@ var ExamReview = (function () {
 
             var examDetail = examDetails.filter(o => o.QuestionID == item.ID);
             if (examDetail) {
-                var detail = examDetail[0];
+                var detail = examDetail.length > 0? examDetail[0] : null;
                 var title = "Làm đúng";
                 var _class = "success";
                 if (item.TypeAnswer != "ESSAY") {
-
                     // câu trắc nghiệm
-
-                    if (detail.AnswerID != null && detail.AnswerID != "") {
-                        if (item.TypeAnswer == "QUIZ3") {
-                            if (detail.AnswerID != detail.RealAnswerID) {
+                    if (detail) {
+                        if (detail.AnswerID) {
+                            if (item.TypeAnswer == "QUIZ3") {
+                                if (detail.AnswerID != detail.RealAnswerID) {
+                                    _class = "danger";
+                                    title = "Làm sai";
+                                }
+                            }
+                        }
+                        else {
+                            if (detail.Point <= 0) {
                                 _class = "danger";
                                 title = "Làm sai";
                             }
                         }
-                    }
-                    else {
-                        if (detail.Point <= 0) {
-                            _class = "danger";
-                            title = "Làm sai";
-                        }
-                    }
-                    daCham++;
-                } else {
-
-                    if (item.RealAnswerEssay) {
-                        if (item.PointEssay <= 0) {
-                            _class = "danger";
-                        } else {
-                            _class = "success";
-                        }
-                        _class += " checked";
-                        title = "Đã chấm";
                         daCham++;
                     }
                     else {
-                        _class = "unchecked";
-                        title = "chưa chấm";
+                        _class = "bg-warning";
+                        title = "chưa làm";
+                    }
+                } else {
+                    if (detail) {
+                        if (item.RealAnswerEssay) {
+                            if (item.PointEssay <= 0) {
+                                _class = "danger";
+                            } else {
+                                _class = "success";
+                            }
+                            _class += " checked";
+                            title = "Đã chấm";
+                            daCham++;
+                        }
+                        else {
+                            _class = "unchecked";
+                            title = "chưa chấm";
+                        }
+                    }
+                    else {
+                        _class = "bg-warning";
+                        title = "chưa làm";
                     }
                 }
             }
