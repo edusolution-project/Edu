@@ -2192,8 +2192,10 @@ var Lesson = (function () {
     }
 
     //------------------ Xóa câu hỏi
-    var removeQuestion = function (obj) {
 
+    //Fix lỗi xóa câu hỏi
+    var removeQuestion = function (obj) {
+        //debugger
         Swal.fire({
             title: 'Xác nhận xóa câu hỏi?',
             icon: 'warning',
@@ -2203,6 +2205,22 @@ var Lesson = (function () {
             confirmButtonText: 'Xóa',
             cancelButtonText: 'Bỏ qua'
         }).then((result) => {
+            //alert(1);
+            var container = $('.lesson_parts > .part_content');
+            var template = $('.question_template > fieldset');
+            var listFieldQuestion = $(container).find(".fieldQuestion");
+            var currentpos = listFieldQuestion.length;
+            var removeQuestion = $(obj).parent()[0];
+            var index = removeQuestion.getAttribute("order");//vị trí câu hỏi cần xoa
+            for (var i = parseInt(index) + 1; i < parseInt(currentpos); i++) {
+                var question = "Questions[" + i + "].";
+                $(listFieldQuestion[i]).find("[name^='" + question + "']").each(function () {
+                    $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + (parseInt(i) - 1) + "]."));
+                    $(listFieldQuestion[i]).attr("order", (parseInt(i) - 1));
+                    $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Quiz " + i);
+                });   
+            }
+            //debugger
             if (result.value) {
                 var id = $(obj).siblings("[name$='.ID']").val();
                 var quizHolder = $(obj).parent();

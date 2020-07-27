@@ -1,5 +1,6 @@
 ﻿using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -54,7 +55,19 @@ namespace BaseCustomerEntity.Database
     {
         public CalendarService(IConfiguration configuration) : base(configuration)
         {
+            var indexs = new List<CreateIndexModel<CalendarEntity>>
+            {
+                //LessonID_1_StartDate_1_EndDate_1
+                new CreateIndexModel<CalendarEntity>(
+                    new IndexKeysDefinitionBuilder<CalendarEntity>()
+                    .Ascending(t=> t.GroupID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate)),
+                //CreateUser_1_StartDate_1_EndDate_1
+                new CreateIndexModel<CalendarEntity>(
+                    new IndexKeysDefinitionBuilder<CalendarEntity>()
+                    .Ascending(t=> t.CreateUser).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate))
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
 
     }

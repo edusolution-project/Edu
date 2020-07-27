@@ -361,7 +361,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         return new JsonResult(item);
                     }
 
-                    var dataFiles = _roxyFilemanHandler.UploadNewFeed("Answer", HttpContext);
+                    var dataFiles = _roxyFilemanHandler.UploadAnswerBasis($"{basis}", HttpContext);
 
                     var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();
                     var oldItem = _examDetailService.CreateQuery().Find(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).FirstOrDefault();

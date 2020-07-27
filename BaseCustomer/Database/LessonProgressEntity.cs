@@ -48,6 +48,19 @@ namespace BaseCustomerEntity.Database
         public LessonProgressService(IConfiguration config) : base(config)
         {
             _lessonService = new LessonService(config);
+
+            var indexs = new List<CreateIndexModel<LessonProgressEntity>>
+            {
+                //ClassSubjectID_1_StudentID_1_LessonID_1
+                new CreateIndexModel<LessonProgressEntity>(
+                    new IndexKeysDefinitionBuilder<LessonProgressEntity>()
+                    .Ascending(t=> t.ClassSubjectID)
+                    .Ascending(t => t.StudentID)
+                    .Ascending(t=> t.LessonID)
+                    )
+            };
+
+            Collection.Indexes.CreateManyAsync(indexs);
         }
 
         public async Task UpdateLastLearn(LearningHistoryEntity item)

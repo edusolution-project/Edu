@@ -10,6 +10,7 @@ namespace BaseCustomerEntity.Database
 {
     public class CourseChapterEntity : EntityBase
     {
+        
         public CourseChapterEntity() { }
 
         public CourseChapterEntity(CourseChapterEntity o)

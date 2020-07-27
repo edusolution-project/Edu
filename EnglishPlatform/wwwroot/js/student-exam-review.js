@@ -20,15 +20,6 @@ var ExamReview = (function () {
         this.onReady = onReady;
         this.Version = version;
         this.Notification = notification;
-        window.PrevPart = prevPart;
-        window.NextPart = nextPart;
-        window.GoQuiz = goQuiz;
-        window.ToggleExplain = toggleExplain;
-        window.GoList = goList;
-        window.Redo = redo;
-        window.ToggleNav = toggleNav;
-        window.updatePoint = updatePoint;
-        window.tinhLaiDiem = tinhLaiDiem;
         this.GetConfig = getConfig;
     }
     var prevPart = function () {
@@ -124,21 +115,23 @@ var ExamReview = (function () {
     }
     var daCham = 0;
     var renderNavition = function () {
-        daCham = 0;
-        var lesson = config.lesson;
-        var parts = lesson.Part;
-        var root = getNavitionRoot();
-        root.innerHTML = "";
-        var number = 1;
-        var ul = document.createElement("ul");
-        ul.style.width = "calc(100% - 50px)";
-        ul.style.display = "inline-block";
-        for (var i = 0; i < parts.length; i++) {
-            var part = parts[i];
-            number = renderItemNavtion(ul,part, number);
+        if (config.isTeacher) {
+            daCham = 0;
+            var lesson = config.lesson;
+            var parts = lesson.Part;
+            var root = getNavitionRoot();
+            root.innerHTML = "";
+            var number = 1;
+            var ul = document.createElement("ul");
+            ul.style.width = "calc(100% - 50px)";
+            ul.style.display = "inline-block";
+            for (var i = 0; i < parts.length; i++) {
+                var part = parts[i];
+                number = renderItemNavtion(ul, part, number);
+            }
+            root.innerHTML = "<div class='number-reivew-point' style='width:50px;display:inline-block;'>(" + daCham + "/" + (number - 1) + ")</div>";
+            root.appendChild(ul);
         }
-        root.innerHTML = "<div class='number-reivew-point' style='width:50px;display:inline-block;'>(" + daCham + "/" + (number-1) + ")</div>";
-        root.appendChild(ul);
     }
     var updateShowPoint = function (id) {
         var point = getNavitionRoot().querySelector('.number-reivew-point');
@@ -153,9 +146,6 @@ var ExamReview = (function () {
         //    point.style.background = "#fff";
         //}, 3000);
     }
-    var updateLatePoint = function (examDetailID) {
-
-    }
     var renderItemNavtion = function (el,data, index) {
         for (var i = 0; i < data.Questions.length; i++) {
             var item = data.Questions[i];
@@ -168,7 +158,7 @@ var ExamReview = (function () {
                 }
                 daCham++;
             } else {
-                if (item.RealAnswerEssay != "" || item.Medias != null) {
+                if ((item.RealAnswerEssay != "" && item.RealAnswerEssay != null) || (item.Medias != null && item.Medias.length > 0)) {
                     if (item.PointEssay <= 0) {
                         _class = "danger";
                     }
@@ -589,12 +579,11 @@ var ExamReview = (function () {
             var point = item.PointEssay; // điểm giáo viên chấm
 
             if (config.isTeacher) {
-
                 html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
-                if (point == 0 && content == "") {
+                if (content != "" && content != null) {
                     html += '<div style="display:none" class="alert alert-success"><span class="text-success">Đã chấm</span></div>';
                 } else {
-                    html += '<div class="alert alert-success"><span class="text-success">Đã chấm</span></div>';
+                    html += '<div class="alert alert-danger"><span class="text-danger">Chưa chấm</span></div>';
                 }
                 html += '<div> Điểm : <input type="number" value="' + point + '" style="width:60px;text-align:center;margin-bottom:10px"></div>';
                 html += '<i>Đáp án đúng :</i>';
@@ -855,6 +844,15 @@ var ExamReview = (function () {
     }
     window.ExamReview = {} || ExamReview;
     ExamReview.onReady = onReady;
+    window.PrevPart = prevPart;
+    window.NextPart = nextPart;
+    window.GoQuiz = goQuiz;
+    window.ToggleExplain = toggleExplain;
+    window.GoList = goList;
+    window.Redo = redo;
+    window.ToggleNav = toggleNav;
+    window.updatePoint = updatePoint;
+    window.tinhLaiDiem = tinhLaiDiem;
     return ExamReview;
 }());
 
