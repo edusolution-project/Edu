@@ -163,7 +163,7 @@ var ExamReview = (function () {
         var total = getNavitionRoot().querySelector("ul").childElementCount;
         point.innerHTML = '(' + (total - listUnChecked.length) + '/' + total + ')';
         if (listUnChecked.length == 0 && id != void 0) {
-            updatePoint(1,2,id);
+            updatePoint(1, 2, id);
         }
         //point.style.background = "red";
         //setTimeout(function () {
@@ -177,25 +177,25 @@ var ExamReview = (function () {
 
             var examDetail = examDetails.filter(o => o.QuestionID == item.ID);
             if (examDetail) {
-                var detail = examDetail.length > 0? examDetail[0] : null;
+                var detail = examDetail.length > 0 ? examDetail[0] : null;
                 var title = "Làm đúng";
                 var _class = "success";
                 if (item.TypeAnswer != "ESSAY") {
                     // câu trắc nghiệm
                     if (detail) {
-                        if (detail.AnswerID) {
-                            if (item.TypeAnswer == "QUIZ3") {
-                                if (detail.AnswerID != detail.RealAnswerID) {
-                                    _class = "danger";
-                                    title = "Làm sai";
-                                }
-                            }
+                        var cautraloidung = detail.RealAnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+                        var cautraloi = detail.AnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+                        var _check = false;
+                        if (cautraloidung == cautraloi) { _check = true; }
+                        if (detail.AnswerID == detail.RealAnswerID) { _check = true; }
+                        if (detail.Point > 0) { _check = true; }
+                        if (!_check) {
+                            _class = "danger";
+                            title = "Làm sai";
                         }
                         else {
-                            if (detail.Point <= 0) {
-                                _class = "danger";
-                                title = "Làm sai";
-                            }
+                            _class = "success";
+                            title = "Làm đúng";
                         }
                     }
                     else {
@@ -243,10 +243,10 @@ var ExamReview = (function () {
         var partID = this.parentElement.dataset.part;
         var part = document.getElementById("pills-part-" + partID);
         if (part != null) {
-            var el = part.querySelector("[id='"+id+"']");
+            var el = part.querySelector("[id='" + id + "']");
             if (!part.classList.contains("active")) {
                 part.parentElement.querySelector('.tab-pane.active').classList.remove(...["show", "active"]);
-                part.classList.add(...["show","active"]);
+                part.classList.add(...["show", "active"]);
             }
             var select = part.querySelector(".selection");
             if (select != null) {
@@ -322,7 +322,7 @@ var ExamReview = (function () {
         }
 
         $('#lessonSummary #nav-menu .text-center').prepend(lastExamResult);
-        
+
     }
 
     var renderLessonPart = function (data, index, type) {
@@ -334,7 +334,7 @@ var ExamReview = (function () {
 
         var styleTeacher = config.isTeacher ? "height: 80vh;overflow: auto;" : "";
 
-        var html = '<div id="pills-part-' + data.ID + '" style="' + styleTeacher+'"  class="tab-pane fade ' + active + '" role="tabpanel" aria-labelledby="pills-' + data.ID + '">';
+        var html = '<div id="pills-part-' + data.ID + '" style="' + styleTeacher + '"  class="tab-pane fade ' + active + '" role="tabpanel" aria-labelledby="pills-' + data.ID + '">';
         html += '<div class="part-box ' + data.Type + '" id="' + data.ID + '">';
 
         switch (data.Type) {
@@ -365,21 +365,26 @@ var ExamReview = (function () {
 
     var renderAnswer = function (data, type) {
         var quizId = data.QuestionID;
+
+        var cautraloidung = data.RealAnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+        var cautraloi = data.AnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+        var _check = false;
+        if (cautraloidung == cautraloi) { _check = true; }
+        if (data.AnswerID == data.RealAnswerID) { _check = true; }
+        if (data.Point > 0) { _check = true; }
+
         if (data.AnswerID != null && data.AnswerID != "") {
             var _answer = $('#' + data.AnswerID).clone().removeClass("d-none");
-            if (data.AnswerID != data.RealAnswerID)//wrong answer
-                switch (type) {
-                    case "QUIZ3":
-                        _answer.addClass("bg-danger");
-                        break;
-                }
+            if (!_check)//wrong answer
+                _answer.addClass("bg-danger");
             $('#' + quizId + ' .student-answer').append(_answer);
         }
         else { //"QUIZ2"
             if (type == "ESSAY") {
                 $('#' + quizId + ' .student-answer').append(" <span class='text-success'>" + data.AnswerValue + "</span>");
             } else {
-                if (data.Point > 0)
+
+                if (_check)
                     $('#' + quizId + ' .student-answer').append(" <span class='text-success'>" + data.AnswerValue + "</span>");
                 else
                     $('#' + quizId + ' .student-answer').append(" <span class='text-danger'><del>" + data.AnswerValue + "</del><span>");
@@ -636,8 +641,8 @@ var ExamReview = (function () {
 
                 //upload file
                 var type = "type='file'";
-                var strFile = "this.parentElement.querySelector('input[" + type+"]')";
-                html += '<div data-target="'+item.ID+'"><input type="file" name="files" multiple style="display:none">';
+                var strFile = "this.parentElement.querySelector('input[" + type + "]')";
+                html += '<div data-target="' + item.ID + '"><input type="file" name="files" multiple style="display:none">';
                 html += '<button class="btn btn-sm btn-success" onclick="uploadFile(this)">Upload file</button>';
                 html += '<div class="preview">';
                 for (var x = 0; anwerMedia != null && x < anwerMedia.length; x++) {
@@ -649,7 +654,7 @@ var ExamReview = (function () {
 
                 var updatEvent = "updatePoint(this,'" + item.ExamDetailID + "')";
 
-                html += '<div style="margin-top:20px"><button type="button" class="btn btn-sm btn-success" onclick="' + updatEvent+'"> ' + textBtn + ' </button></div>';
+                html += '<div style="margin-top:20px"><button type="button" class="btn btn-sm btn-success" onclick="' + updatEvent + '"> ' + textBtn + ' </button></div>';
 
                 html += '</fieldset>';
             } else {
@@ -659,7 +664,7 @@ var ExamReview = (function () {
                     html += '</fieldset>';
                 } else {
                     html += '<fieldset class="answer-item col-md-12" id="essay-teacher-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
-                    html += '<div> Điểm : ' + point+'</div>';
+                    html += '<div> Điểm : ' + point + '</div>';
                     html += '<i>Đáp án đúng :</i>';
                     var realContent = content == null ? "" : content;
                     html += '<div>' + realContent + '</div>';
@@ -697,7 +702,7 @@ var ExamReview = (function () {
         if (data == null || data == void 0 || data == "") return "";
         var arr = data.Extension.split('/');
         if (arr.includes("video")) {
-            return '<div class="media-holder "><video controls=""><source src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")  + '" type="' + data.Extension + '">Your browser does not support the video tag</video></div>';
+            return '<div class="media-holder "><video controls=""><source src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" type="' + data.Extension + '">Your browser does not support the video tag</video></div>';
         }
         if (arr.includes("audio")) {
             return '<div class="media-holder "><audio controls=""><source src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" type="' + data.Extension + '">Your browser does not support the audio tag</audio></div>'
@@ -739,9 +744,9 @@ var ExamReview = (function () {
 
         //if (_type != 1) {
         var explain_btn = $('<button>', { class: "btn btn-primary mt-2 mr-2 mb-2", onclick: "ToggleExplain(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
-            //var golist_btn = $('<button>', { class: "btn btn-success pl-3 pr-3 ml-1", onclick: "GoList(this)", text: "Về danh sách" });
+        //var golist_btn = $('<button>', { class: "btn btn-success pl-3 pr-3 ml-1", onclick: "GoList(this)", text: "Về danh sách" });
         var redo_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "Redo(this)" }).append($("<i>", { "class": "fas fa-play mr-2" })).append("Thực hiện lại");
-            lesson_info_holder.append(explain_btn).append(redo_btn);//.append(golist_btn);
+        lesson_info_holder.append(explain_btn).append(redo_btn);//.append(golist_btn);
         //}
         var next_btn_holder = $('<div>', { class: "text-right align-self-end" });
         var next_btn = $('<button>', { class: "nexttab btn btn-primary m-2", onclick: "window.NextPart()" }).append($('<i>', { class: "fas fa-arrow-circle-right mr-2" })).append("Câu sau");
@@ -819,7 +824,7 @@ var ExamReview = (function () {
                     _form.append("files", files.files[x]);
                 }
             }
-            
+
             var _ajax = new MyAjax();
             _ajax.proccess("POST", _url, _form).then(function (res) {
                 var dataJson = JSON.parse(res);

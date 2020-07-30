@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
@@ -128,10 +129,16 @@ namespace BaseCustomerEntity.Database
             point = 0;
             var pass = 0;
             var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
-
+            var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
             for (int i = 0; listDetails != null && i < listDetails.Count; i++)
             {
+                // check câu trả lời đúng
+                bool isTrue = false;
                 var examDetail = listDetails[i];
+                // câu trả lơi
+                var answerID = examDetail.AnswerID;
+                // giá trị câu trả lời
+                var answerValue = string.IsNullOrEmpty(examDetail.AnswerValue) ? string.Empty : regex.Replace(examDetail.AnswerValue, "")?.ToLower()?.Trim();
 
                 //bài tự luận
                 if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
@@ -142,15 +149,17 @@ namespace BaseCustomerEntity.Database
                 var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
                 if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
 
-                var _realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
+                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID);
+
+                var _realAnswers = realAnswers?.FirstOrDefault();
 
                 CloneLessonPartAnswerEntity _correctanswer = null;
 
-                var realanswer = _realAnswers.FirstOrDefault();
-                if (realanswer != null)
+                //var realanswer = _realAnswers.FirstOrDefault();
+                if (_realAnswers != null)
                 {
-                    examDetail.RealAnswerID = realanswer.ID;
-                    examDetail.RealAnswerValue = realanswer.Content;
+                    examDetail.RealAnswerID = _realAnswers.ID;
+                    examDetail.RealAnswerValue = _realAnswers.Content;
                 }
 
                 //bài chọn hoặc nối đáp án
@@ -158,24 +167,35 @@ namespace BaseCustomerEntity.Database
                 {
                     var answer = _cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID);
                     if (answer == null) continue;//Lưu lỗi => bỏ qua ko tính điểm
+                    //var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
+                    isTrue = 
+                        (!string.IsNullOrEmpty(answerID) && _realAnswers.ID == answerID) || 
+                        (!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(answerValue) && regex.Replace(_realAnswers.Content, "").ToLower().Trim() == answerValue);
 
+                    _correctanswer = isTrue
+                        ? _realAnswers 
+                        : null;//chọn đúng đáp án
 
-                    switch (part.Type)
-                    {
-                        case "QUIZ1": //chọn đáp án
-                            _correctanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID);//chọn đúng đáp án
-                            break;
-                        case "QUIZ3": //nối đáp án
-                            _correctanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID || (!string.IsNullOrEmpty(t.Content) && t.Content == answer.Content)); //chọn đúng đáp án (check trường hợp sai ID nhưng cùng content (2 đáp án có hình ảnh, ID khác nhau nhưng cùng content (nội dung như nhau)))
-                            break;
-                    }
+                    //switch (part.Type)
+                    //{
+                    //    case "QUIZ1": //chọn đáp án
+                    //        _correctanswer = !string.IsNullOrEmpty(answerID) && _realAnswers.ID == answerID ? _realAnswers :null;//chọn đúng đáp án
+                    //        break;
+                    //    //_realAnswers.FirstOrDefault(t => t.ID == answer.ID || (!string.IsNullOrEmpty(t.Content) && t.Content == answer.Content))
+                    //    case "QUIZ3": //nối đáp án
+                    //        _correctanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID || (!string.IsNullOrEmpty(t.Content) && t.Content == answer.Content)); //chọn đúng đáp án (check trường hợp sai ID nhưng cùng content (2 đáp án có hình ảnh, ID khác nhau nhưng cùng content (nội dung như nhau)))
+                    //        break;
+                    //}
                 }
                 else //bài điền từ
                 {
                     if (examDetail.AnswerValue != null)
                     {
+                        var _realAnwserQuiz2 = realAnswers?.ToList();
+
+                        if (_realAnwserQuiz2 == null) continue;
                         List<string> quiz2answer = new List<string>();
-                        foreach (var answer in _realAnswers)
+                        foreach (var answer in _realAnwserQuiz2)
                         {
                             if (!string.IsNullOrEmpty(answer.Content))
                                 foreach (var ans in answer.Content.Split('/'))
@@ -184,9 +204,8 @@ namespace BaseCustomerEntity.Database
                                         quiz2answer.Add(ans.Trim().ToLower());
                                 }
                         }
-
                         if (quiz2answer.Contains(examDetail.AnswerValue.ToLower().Trim()))
-                            _correctanswer = _realAnswers.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
+                            _correctanswer = _realAnwserQuiz2.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
                     }
 
                 }
