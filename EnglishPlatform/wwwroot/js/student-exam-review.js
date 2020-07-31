@@ -676,10 +676,10 @@ var ExamReview = (function () {
                     html += '</fieldset>';
                 } else {
                     html += '<fieldset class="answer-item col-md-12" id="essay-teacher-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
-                    html += '<div> Điểm : ' + point + '</div>';
-                    html += '<i>Đáp án đúng :</i>';
+                    html += '<div class="mb-3"> Điểm : <strong>' + point + '/' + item.MaxPoint + '</strong></div>';
+                    html += '<i>Nhận xét của giáo viên :</i>';
                     var realContent = content == null ? "" : content;
-                    html += '<div>' + realContent + '</div>';
+                    html += '<div class="text-info">' + realContent + '</div>';
                     html += '</fieldset>';
                     if (anwerMedia) {
                         html += '<fieldset><div> File đính kèm : ';
