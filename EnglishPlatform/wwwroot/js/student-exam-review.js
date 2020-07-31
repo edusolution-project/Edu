@@ -107,23 +107,24 @@ var ExamReview = (function () {
         if (!config.isTeacher) {
             $('.tab-pane .part-column').addClass('scrollbar-outer').scrollbar();
         }
-        renderNavition();
+        renderNavigation();
     }
 
-    var getNavitionRoot = function () {
+    var getNavigationRoot = function () {
         id = config.isTeacher ? _idNaviton : 'QuizNav';
         var doc = document.getElementById(id);
-        if (!config.isTeacher) {
-            doc.classList.add('show');
-        }
+        //if (!config.isTeacher) {
+        //    doc.classList.add('show');
+        //    $('.quizNumber').focus().click();
+        //}
         return doc;
     }
     var daCham = 0;
-    var renderNavition = function () {
+    var renderNavigation = function () {
         daCham = 0;
         var lesson = config.lesson;
         var parts = lesson.Part;
-        var root = getNavitionRoot();
+        var root = getNavigationRoot();
         root.innerHTML = "";
         var number = 1;
         var ul = document.createElement("ul");
@@ -131,7 +132,7 @@ var ExamReview = (function () {
         ul.style.display = "inline-block";
         for (var i = 0; i < parts.length; i++) {
             var part = parts[i];
-            number = renderItemNavtion(ul, part, number);
+            number = renderItemNavigation(ul, part, number);
         }
         if (config.isTeacher) {
             root.innerHTML = "<div class='number-reivew-point' style='width:100px;display:inline-block;'>(Đã chấm " + daCham + "/" + (number - 1) + ")</div>";
@@ -158,9 +159,9 @@ var ExamReview = (function () {
         }
     }
     var updateShowPoint = function (id) {
-        var point = getNavitionRoot().querySelector('.number-reivew-point');
-        var listUnChecked = getNavitionRoot().querySelectorAll('.unchecked');
-        var total = getNavitionRoot().querySelector("ul").childElementCount;
+        var point = getNavigationRoot().querySelector('.number-reivew-point');
+        var listUnChecked = getNavigationRoot().querySelectorAll('.unchecked');
+        var total = getNavigationRoot().querySelector("ul").childElementCount;
         point.innerHTML = '(' + (total - listUnChecked.length) + '/' + total + ')';
         if (listUnChecked.length == 0 && id != void 0) {
             updatePoint(1, 2, id);
@@ -170,7 +171,7 @@ var ExamReview = (function () {
         //    point.style.background = "#fff";
         //}, 3000);
     }
-    var renderItemNavtion = function (el, data, index) {
+    var renderItemNavigation = function (el, data, index) {
         var examDetails = config.exam.Details;
         for (var i = 0; i < data.Questions.length; i++) {
             var item = data.Questions[i];
@@ -252,15 +253,20 @@ var ExamReview = (function () {
             if (select != null) {
                 select.classList.remove("selection");
             }
-            var aSelect = getNavitionRoot().querySelector('.selection');
+            var aSelect = getNavigationRoot().querySelector('.selection');
             if (aSelect != null) {
                 aSelect.classList.remove("selection");
             }
+            //console.log(getNavigationRoot());
             this.classList.add("selection");
             el.classList.add("selection");
+            //console.log(el);
             el.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+
+
         }
     }
+
     var renderExam = function () {
         //writeLog("renderLesson", data);
         var data = config.lesson;
@@ -366,7 +372,7 @@ var ExamReview = (function () {
     var renderAnswer = function (data, type) {
         var quizId = data.QuestionID;
 
-        var cautraloidung = data.RealAnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+        var cautraloidung = data.RealAnswerEssay == null ? '':  data.RealAnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         var cautraloi = data.AnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         var _check = false;
         if (cautraloidung == cautraloi) { _check = true; }
@@ -376,12 +382,13 @@ var ExamReview = (function () {
         if (data.AnswerID != null && data.AnswerID != "") {
             var _answer = $('#' + data.AnswerID).clone().removeClass("d-none");
             if (!_check)//wrong answer
-                _answer.addClass("bg-danger");
+                if (type == "QUIZ3")
+                    _answer.addClass("bg-danger");
             $('#' + quizId + ' .student-answer').append(_answer);
         }
         else { //"QUIZ2"
             if (type == "ESSAY") {
-                $('#' + quizId + ' .student-answer').append(" <span class='text-success'>" + data.AnswerValue + "</span>");
+                $('#' + quizId + ' .student-answer').append(" <span class='text-dark'>" + data.AnswerValue + "</span>");
             } else {
 
                 if (_check)
@@ -481,7 +488,7 @@ var ExamReview = (function () {
                 var answer = item.CloneAnswers[x];
                 //if(!answer.IsCorrect) continue;
                 html += '<fieldset class="answer-item d-inline mr-3 align-top" id="' + answer.ID + '">';
-                html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '" onclick="AnswerQuestion(this)">';
+                html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '">';
                 if (answer.IsCorrect)
                     html += '<label class="answer-text form-check-label text-success" for="' + answer.ID + '">' + answer.Content + '</label>';
                 else
@@ -615,11 +622,16 @@ var ExamReview = (function () {
             html += '</fieldset>';
             var anwerMedia = item.MediasAnswer;
             var medias = item.Medias;//file học viên upload
-            //console.log(medias);
-            html += '<fieldset class="col-md-12"> 333';
-            for (var z = 0; medias != null && z < medias.length; z++) {
-                var itemMedia = medias[z];
-                html += renderMedia(itemMedia);
+            console.log(item);
+            html += '<fieldset class="col-md-12">';
+            if (medias != null && medias.length > 0) {
+                html += '<div class="attachment mt-3"><strong>File đính kèm:</strong> ';
+                html += '<div>'
+                for (var z = 0; medias != null && z < medias.length; z++) {
+                    var itemMedia = medias[z];
+                    html += renderMedia(itemMedia);
+                }
+                html += '</div></div>';
             }
             html += '</fieldset>';
 
@@ -634,7 +646,7 @@ var ExamReview = (function () {
                 } else {
                     html += '<div class="alert alert-danger"><span class="text-danger">Chưa chấm</span></div>';
                 }
-                html += '<div> Điểm : <input onkeyup="validate(this)" max="' + item.MaxPoint + '" min="0" type="number" value="' + point + '" style="width:60px;text-align:center;margin-bottom:10px">/' + item.MaxPoint + '</div>';
+                html += '<div> Điểm :<input onkeyup="validate(this)" max="' + item.MaxPoint + '" min="0" type="number" value="' + point + '" style="width:40px;text-align:right;margin-bottom:10px"> /' + item.MaxPoint + '</div>';
                 html += '<i>Đáp án đúng :</i>';
                 var realContent = content == null ? "" : content;
                 html += '<div><textarea style="width:100%; padding:5px" rows="6">' + realContent + '</textarea></div>';
@@ -794,6 +806,8 @@ var ExamReview = (function () {
         $(".top-menu[for=lesson-info] .prevtab")
             .after($('<button>', { class: "quizNumber btn btn-primary mt-2 mr-2 mb-2", onclick: "window.ToggleNav(this)", tooltips: "Ẩn hiện bảng theo dõi" })
                 .append($("<i>", { class: "fas fa-question-circle mr-2" })).append("Danh sách câu trả lời"));
+        $(".quizNumber").focus().click();
+
     }
 
     var redo = function () {
@@ -864,6 +878,7 @@ var ExamReview = (function () {
                                 curentPoint.innerHTML = data.Point;
                             }
                         }
+
                     }
                 });
             }

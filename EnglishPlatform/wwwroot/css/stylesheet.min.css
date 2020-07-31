@@ -2806,15 +2806,19 @@ fillquiz {
 .fillquiz {
     background: #e6712d4d;
     display: inline;
-    padding: 5px 8px;
+    padding: 8px;
     border-radius: 3px;
-    line-height: 33px;
+    line-height: 25px;
     border: solid 1px #999;
 }
 
 fillquiz, fillquiz.quiz-item {
     display: inline-block !important;
     width: auto;
+}
+
+.quiz-item.selection {
+    background: #EEE;
 }
 
 .fillquiz:empty::before {

@@ -623,5 +623,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Model = model;
             return View();
         }
+
+        
     }
 }

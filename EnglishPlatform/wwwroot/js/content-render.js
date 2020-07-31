@@ -1183,8 +1183,7 @@ var Lesson = (function () {
                 }
 
                 itembox.append(ItemRow);
-
-                var itemBody = $("<div>", { "class": "quiz-wrapper col-8 pl-3" });
+                var itemBody = $("<div>", { "class": "quiz-wrapper pl-3 col-12" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
 
                 renderMediaContent(data, itemBody, "");

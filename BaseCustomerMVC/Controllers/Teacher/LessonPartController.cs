@@ -411,7 +411,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return description;
             foreach (var vocab in vocabs)
             {
-                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace("-", ""));
+                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace(" ","-"));
                 if (vocabularies != null && vocabularies.Count > 0)
                 {
                     result +=
@@ -561,8 +561,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                 }
             }
-            if (listExp == null || listExp.Count == 0)
-                return;
+            //if (listExp == null || listExp.Count == 0)
+            //    return;
 
             using (var client = new WebClient())
             {

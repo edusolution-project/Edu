@@ -137,8 +137,8 @@ namespace BaseCustomerEntity.Database
                 var examDetail = listDetails[i];
                 // câu trả lơi
                 var answerID = examDetail.AnswerID;
-                // giá trị câu trả lời
-                var answerValue = string.IsNullOrEmpty(examDetail.AnswerValue) ? string.Empty : regex.Replace(examDetail.AnswerValue, "")?.ToLower()?.Trim();
+                // giá trị câu trả lời 
+                //var answerValue = string.IsNullOrEmpty(examDetail.AnswerValue) ? string.Empty : regex.Replace(examDetail.AnswerValue, "")?.ToLower()?.Trim();
 
                 //bài tự luận
                 if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
@@ -149,31 +149,32 @@ namespace BaseCustomerEntity.Database
                 var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
                 if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
 
-                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID);
-
-                var _realAnswers = realAnswers?.FirstOrDefault();
+                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID);//prevent limit
 
                 CloneLessonPartAnswerEntity _correctanswer = null;
-
-                //var realanswer = _realAnswers.FirstOrDefault();
-                if (_realAnswers != null)
-                {
-                    examDetail.RealAnswerID = _realAnswers.ID;
-                    examDetail.RealAnswerValue = _realAnswers.Content;
-                }
 
                 //bài chọn hoặc nối đáp án
                 if (!string.IsNullOrEmpty(examDetail.AnswerID))
                 {
+
+                    var _realAnswers = realAnswers?.FirstOrDefault();
+                    //var realanswer = _realAnswers.FirstOrDefault();
+                    if (_realAnswers != null)
+                    {
+                        examDetail.RealAnswerID = _realAnswers.ID;
+                        examDetail.RealAnswerValue = _realAnswers.Content;
+                    }
+
                     var answer = _cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID);
                     if (answer == null) continue;//Lưu lỗi => bỏ qua ko tính điểm
                     //var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
-                    isTrue = 
-                        (!string.IsNullOrEmpty(answerID) && _realAnswers.ID == answerID) || 
-                        (!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(answerValue) && regex.Replace(_realAnswers.Content, "").ToLower().Trim() == answerValue);
+                    isTrue =
+                        (!string.IsNullOrEmpty(answerID) && _realAnswers.ID == answerID) ||
+                        //(!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(answerValue) && regex.Replace(_realAnswers.Content, "").ToLower().Trim() == answerValue);
+                        (!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(examDetail.AnswerValue) && _realAnswers.Content == examDetail.AnswerValue);
 
                     _correctanswer = isTrue
-                        ? _realAnswers 
+                        ? _realAnswers
                         : null;//chọn đúng đáp án
 
                     //switch (part.Type)
@@ -201,10 +202,10 @@ namespace BaseCustomerEntity.Database
                                 foreach (var ans in answer.Content.Split('/'))
                                 {
                                     if (!string.IsNullOrEmpty(ans.Trim()))
-                                        quiz2answer.Add(ans.Trim().ToLower());
+                                        quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim().ToLower()));
                                 }
                         }
-                        if (quiz2answer.Contains(examDetail.AnswerValue.ToLower().Trim()))
+                        if (quiz2answer.Contains(NormalizeSpecialApostrophe(examDetail.AnswerValue.ToLower().Trim())))
                             _correctanswer = _realAnwserQuiz2.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
                     }
 
@@ -317,6 +318,13 @@ namespace BaseCustomerEntity.Database
             await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ExamEntity>.Update.Set("ClassSubjectID", classSubject.ID));
         }
 
-
+        private string NormalizeSpecialApostrophe(string originStr)
+        {
+            return originStr
+                .Replace("‘", "'")
+                .Replace("’", "'")
+                .Replace("“", "\"")
+                .Replace("”", "\"");
+        }
     }
 }

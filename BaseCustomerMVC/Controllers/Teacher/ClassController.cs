@@ -1733,18 +1733,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
                                 {
                                     CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
-                                    AnswerEssay = o.Type == ExamTypes[3] ? _examDetailService.CreateQuery().Find(e=>e.QuestionID == z.ID && e.ExamID == data.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
-                                    Medias = examview.Details.FirstOrDefault(e=>e.QuestionID == z.ID)?.Medias,
+                                    AnswerEssay = o.Type == ExamTypes[3] ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == data.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
+                                    Medias = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Medias,
                                     TypeAnswer = o.Type,
                                     RealAnswerEssay = o.Type == ExamTypes[3] ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
-                                    PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point??0,
+                                    PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
                                     ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
-                                    MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers
+                                    MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
+                                    MaxPoint = examview.MaxPoint
                                 }))?.ToList()
                         })).ToList()
                     });
 
-                    
+
 
                     ViewBag.Lesson = lessonview;
                     //ViewBag.Class = currentClass;
