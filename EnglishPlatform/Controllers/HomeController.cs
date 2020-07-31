@@ -141,12 +141,12 @@ namespace EnglishPlatform.Controllers
                 //cache
                 return Redirect($"{centerCode}/{type.Value}");
             }
-            else
-            {
-                _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-                HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                return RedirectToAction("Login");
-            }
+            //else
+            //{
+            //    _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
+            //    HttpContext.SignOutAsync(Cookies.DefaultLogin);
+            //    return RedirectToAction("Login");
+            //}
             return View();
         }
 
