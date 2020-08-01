@@ -71,6 +71,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
+        private readonly CourseLessonService _courseLessonService;
 
         private readonly MappingEntity<ChapterEntity, CourseChapterEntity> _chapterMappingRev = new MappingEntity<ChapterEntity, CourseChapterEntity>();
         private readonly MappingEntity<CourseChapterEntity, ChapterEntity> _chapterMapping = new MappingEntity<CourseChapterEntity, ChapterEntity>();
@@ -118,7 +119,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  , ClassService classService
                  , LessonScheduleService lessonScheduleService
                  , ExamDetailService examDetailService
-                 , StudentService studentService
+                 , StudentService studentService,
+                 CourseLessonService courseLessonService
 
                  )
         {
@@ -170,6 +172,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _examDetailService = examDetailService;
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
+            _courseLessonService = courseLessonService;
 
         }
 
@@ -1100,6 +1103,84 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     { "Error", ex.Message }
                 });
             }
+        }
+
+        /*
+         * 
+         */
+
+        [HttpPost]
+        public async Task<JsonResult> JoinChapter(string ID, string JoinChapter, string newName)
+        {
+            try
+            {
+                var _userCreate = User.Claims.GetClaimByType("UserID").Value;
+                var rootItem = _chapterService.GetItemByID(ID);
+                var joinItem = _chapterService.GetItemByID(JoinChapter);
+                if (rootItem == null || joinItem == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        { "Error", "Dữ liệu không đúng" }
+                    });
+                }
+
+                var currentIndex = _lessonService.CreateQuery().CountDocuments(o => o.ChapterID == rootItem.ID);
+                var orgChapter = _chapterService.Collection.Find(tbl => tbl.ID.Equals(ID)).FirstOrDefault();
+                var joinLessons = _lessonService.CreateQuery().Find(o => o.ChapterID == joinItem.ID).SortBy(o => o.Order);
+
+                //if (joinLessons != null && joinLessons.Count > 0)
+                //{
+                //    foreach (var lesson in joinLessons)
+                //    {
+                //        lesson.ChapterID = rootItem.ID;
+                //        lesson.Order = (int)currentIndex++;
+                //        _lessonService.CreateQuery().ReplaceOne(o => o.ID == lesson.ID, lesson);
+                //    }
+                //}
+                //ChangeChapterPosition(joinItem, int.MaxValue);
+
+                //var new_chapter = new CourseChapterEntity();
+                //new_chapter=rootItem;
+                //new_chapter.ID = null;
+                //_chapterService.CreateQuery().InsertOne(new_chapter);
+                if (newName != null || newName != "")
+                    orgChapter.Name = newName;
+                var chapter = await CloneChapter(new CourseChapterEntity(orgChapter)
+                {
+                    Order = int.MaxValue - 1,
+                }, _userCreate, orgChapter.CourseID); ;
+
+                var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
+                //var new_lesson = new CourseLessonEntity();
+                foreach (var o in joinLessons.ToEnumerable())
+                {
+                    var new_lesson = lessonMapping.Clone(o, new CourseLessonEntity());
+                    new_lesson.CreateUser = _userCreate;
+                    new_lesson.Created = DateTime.Now;
+                    new_lesson.ChapterID = chapter.ID;
+                    new_lesson.OriginID = o.ID;
+                    await CloneLesson(new_lesson, _userCreate);
+                }
+
+                var new_chapter = _chapterService.GetItemByID(chapter.ID);
+
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", new_chapter },
+                    { "Error", null }
+                });
+            }
+            catch(Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    { "Error", ex.Message }
+                });
+            }
+            //return Json(new {data="sussces"});
         }
 
         [HttpPost]
