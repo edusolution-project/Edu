@@ -723,7 +723,7 @@ var ExamReview = (function () {
         if (arr.includes("image")) {
             return '<div class="media-holder "><img src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" class="img-fluid lazy" title="' + data.Name + '"></div>';
         }
-        return '<div class="media-holder"><a href="' + data.Path + '" style="display:block">Download</a></div>';
+        return '<div class="media-holder"><a target="_blank" href="' + data.Path + '" style="display:block">Download</a></div>';
     }
 
     var renderMediaAnswer = function (data) {
@@ -738,7 +738,7 @@ var ExamReview = (function () {
         if (arr.includes("image")) {
             return '<div class="media-holder "><img src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" class="img-fluid lazy" title="' + data.Name + '"></div>';
         }
-        return '<div class="media-holder"><a href="' + data.Path + '" style="display:block">Download</a></div>';
+        return '<div class="media-holder"><a target="_blank" href="' + data.Path + '" style="display:block">Download</a></div>';
     }
 
     var renderContent = function (data) {
