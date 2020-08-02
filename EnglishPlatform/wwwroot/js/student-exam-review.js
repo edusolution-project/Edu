@@ -119,7 +119,9 @@ var ExamReview = (function () {
         //}
         return doc;
     }
+
     var daCham = 0;
+
     var renderNavigation = function () {
         daCham = 0;
         var lesson = config.lesson;
@@ -158,6 +160,7 @@ var ExamReview = (function () {
             totalhead.innerHTML = document.querySelectorAll("#" + _idNaviton + " ul li").length;
         }
     }
+
     var updateShowPoint = function (id) {
         var point = getNavigationRoot().querySelector('.number-reivew-point');
         var listUnChecked = getNavigationRoot().querySelectorAll('.unchecked');
@@ -171,6 +174,7 @@ var ExamReview = (function () {
         //    point.style.background = "#fff";
         //}, 3000);
     }
+
     var renderItemNavigation = function (el, data, index) {
         var examDetails = config.exam.Details;
         for (var i = 0; i < data.Questions.length; i++) {
@@ -184,11 +188,11 @@ var ExamReview = (function () {
                 if (item.TypeAnswer != "ESSAY") {
                     // câu trắc nghiệm
                     if (detail) {
-                        var cautraloidung = detail.RealAnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
-                        var cautraloi = detail.AnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+                        var cautraloidung = detail.RealAnswerValue == null ? '' : detail.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+                        var cautraloi = detail.AnswerValue;//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
                         var _check = false;
-                        if (cautraloidung == cautraloi) { _check = true; }
-                        if (detail.AnswerID == detail.RealAnswerID) { _check = true; }
+                        if (cautraloidung == cautraloi) { _check = true; }                        
+                        if (detail.AnswerID != null && detail.AnswerID == detail.RealAnswerID) { _check = true; }
                         if (detail.Point > 0) { _check = true; }
                         if (!_check) {
                             _class = "danger";
@@ -372,11 +376,11 @@ var ExamReview = (function () {
     var renderAnswer = function (data, type) {
         var quizId = data.QuestionID;
 
-        var cautraloidung = data.RealAnswerEssay == null ? '':  data.RealAnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
-        var cautraloi = data.AnswerValue.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+        var cautraloidung = data.RealAnswerEssay == null ? '':  data.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+        var cautraloi = data.AnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         var _check = false;
         if (cautraloidung == cautraloi) { _check = true; }
-        if (data.AnswerID == data.RealAnswerID) { _check = true; }
+        if (data.AnswerID != null && data.AnswerID == data.RealAnswerID) { _check = true; }
         if (data.Point > 0) { _check = true; }
 
         if (data.AnswerID != null && data.AnswerID != "") {

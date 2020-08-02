@@ -1,4 +1,5 @@
-﻿using Core_v2.Repositories;
+﻿using Core_v2.Globals;
+using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Newtonsoft.Json;
@@ -149,7 +150,7 @@ namespace BaseCustomerEntity.Database
                 var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
                 if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
 
-                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID);//prevent limit
+                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID);
 
                 CloneLessonPartAnswerEntity _correctanswer = null;
 
@@ -157,7 +158,7 @@ namespace BaseCustomerEntity.Database
                 if (!string.IsNullOrEmpty(examDetail.AnswerID))
                 {
 
-                    var _realAnswers = realAnswers?.FirstOrDefault();
+                    var _realAnswers = realAnswers?.FirstOrDefault();//multiple correct answers
                     //var realanswer = _realAnswers.FirstOrDefault();
                     if (_realAnswers != null)
                     {
@@ -169,7 +170,7 @@ namespace BaseCustomerEntity.Database
                     if (answer == null) continue;//Lưu lỗi => bỏ qua ko tính điểm
                     //var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
                     isTrue =
-                        (!string.IsNullOrEmpty(answerID) && _realAnswers.ID == answerID) ||
+                        (!string.IsNullOrEmpty(answerID) && realAnswers.ToList().Any(t => t.ID == answerID)) ||
                         //(!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(answerValue) && regex.Replace(_realAnswers.Content, "").ToLower().Trim() == answerValue);
                         (!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(examDetail.AnswerValue) && _realAnswers.Content == examDetail.AnswerValue);
 
