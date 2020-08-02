@@ -150,7 +150,7 @@ namespace BaseCustomerEntity.Database
                 var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
                 if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
 
-                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID);
+                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
 
                 CloneLessonPartAnswerEntity _correctanswer = null;
 
@@ -170,7 +170,7 @@ namespace BaseCustomerEntity.Database
                     if (answer == null) continue;//Lưu lỗi => bỏ qua ko tính điểm
                     //var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
                     isTrue =
-                        (!string.IsNullOrEmpty(answerID) && realAnswers.ToList().Any(t => t.ID == answerID)) ||
+                        (!string.IsNullOrEmpty(answerID) && realAnswers.Any(t => t.ID == answerID)) ||
                         //(!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(answerValue) && regex.Replace(_realAnswers.Content, "").ToLower().Trim() == answerValue);
                         (!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(examDetail.AnswerValue) && _realAnswers.Content == examDetail.AnswerValue);
 
