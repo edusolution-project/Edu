@@ -6,6 +6,7 @@
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
     var allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    var courses = ViewBag.Courses as List<BaseCustomerEntity.Database.CourseEntity>;
     string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
@@ -78,6 +79,7 @@
                         <div class="d-flex btn-group">
                             <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
                             <a class="btn-act btn-edit" title="Sao chép" href="javascript:;" v-on:click="showCloneItem(item)"><i class="ti-layers"></i></a>
+                            <a class="btn-act btn-edit" title="Ghép chương" href="javascript:;" v-on:click="showMergeItem(item)"><i class="ti-layout-accordion-merged"></i></a>
                             <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
                         </div>
                     </td>
@@ -113,8 +115,10 @@
             el: "#main",
             mounted() {
                  this.list_subject = @Html.Raw(Json.Serialize(subjects));
-                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
-                 this.list_skills = @Html.Raw(Json.Serialize(skills));
+                this.list_grades_full = @Html.Raw(Json.Serialize(grades));
+                debugger
+                this.list_skills = @Html.Raw(Json.Serialize(skills));
+                this.list_courses=@Html.Raw(Json.Serialize(courses));
                  //this.changeSubject()
                 this.getData();
                 window.chooseFile = this.chooseFile
@@ -176,6 +180,7 @@
                 list_data: [],
                 list_subject: [],
                 list_grades_full: [],
+                list_courses: [],
                 list_centers: @Html.Raw(Json.Serialize(allcenters)),
                 addItem: {
                     ID: '',
@@ -189,6 +194,17 @@
                 },
                 cloneItem: {
                     OriginID: '',
+                    Name: '',
+                    SubjectID: '',
+                    GradeID: '',
+                    SkillID: '',
+                    Description: '',
+                    Center: ''
+                },
+                mergeItem: {
+                    OriginID: '',
+                    //JoinCourseID:'',
+                    //JoinCourseName:'',
                     Name: '',
                     SubjectID: '',
                     GradeID: '',
@@ -220,6 +236,9 @@
                  clone_subject() {
                      return this.cloneItem.SubjectID;
                  },
+                 merge_subject() {
+                     return this.mergeItem.SubjectID;
+                 }
             },
             watch: {
                 subject: function () {
@@ -233,6 +252,9 @@
                 },
                 clone_subject: function () {
                     this.cloneItem.GradeID = ""
+                },
+                merge_subject: function () {
+                    this.mergeItem.GradeID = ""
                 },
                 searchTerm: function(){
                     if(this.searchTimeout != null)
@@ -271,6 +293,7 @@
                             else {
                                 _that.list_data = response.data.Data;
                                 this.list_data = _that.list_data
+                                debugger
                                 this.totalRec = response.data.Model.totalRecord
                                 //var tt = response.data.Model.totalRecord;
                                 //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
@@ -345,6 +368,25 @@
                         _that.cloneItem.SkillID = obj.SkillID == null ? '' : obj.SkillID;
                     }
                     _that.$bvModal.show('clone_event')
+                },
+                showMergeItem(obj) {
+                    let _that = this;
+                    if (obj == null) {
+                        return false;
+                    }
+                    else {
+                        debugger
+                        _that.mergeItem.OriginID = obj.ID;
+                        _that.mergeItem.OriginName = obj.Name;
+                        _that.mergeItem.SubjectID = obj.SubjectID;
+                        _that.$nextTick(() => {
+                            _that.mergeItem.GradeID = obj.GradeID;
+                        })
+                        _that.mergeItem.Description = obj.Description;
+                        _that.mergeItem.Name = obj.Name + " _ " + moment().format("DD-MM-YY");
+                        _that.mergeItem.SkillID = obj.SkillID == null ? '' : obj.SkillID;
+                    }
+                    _that.$bvModal.show('merge_event')
                 },
                 addData() {
                     let _that = this
@@ -462,6 +504,76 @@
                             alert("Error: " + e)
                         })
                 },
+                mergeData() {
+                    //alert(1);
+                    let _that = this
+                    let _form = new FormData()
+
+                    if (_that.mergeItem.Name == '') {
+                        alert("Please fill in required fields");
+                        this.$refs["cloneName"].focus();
+                        return false;
+                    }
+
+                    if (_that.mergeItem.SubjectID == '') {
+                        alert("Chưa chọn chương trình");
+                        return false;
+                    }
+
+                    if (_that.mergeItem.SkillID == '') {
+                        alert("Chưa chọn kỹ năng");
+                        return false;
+                    }
+
+                    if (_that.mergeItem.GradeID == '') {
+                        alert("Chưa chọn cấp độ");
+                        return false;
+                    }
+
+                    if (_that.mergeItem.Center == '') {
+                        alert("Chưa chọn cơ sở");
+                        return false;
+                    }
+
+                    if ($("#newName").val() == "" || $("#newName").val() == null) {
+                        alert("Chưa ghi tên chương mới sau khi ghép");
+                        return false;
+                    }
+
+                    _form.append('CourseID', _that.mergeItem.OriginID)
+                    _form.append('GradeID', _that.mergeItem.GradeID)
+                    _form.append('SubjectID', _that.mergeItem.SubjectID)
+                    _form.append('SkillID', _that.mergeItem.SkillID)
+                    _form.append('Center', _that.mergeItem.Center)
+                    _form.append('Name', $("#newName").val())
+                    _form.append('Description', _that.mergeItem.Description)
+                    _form.append('joinCourseID', $("#joinCourseID option:selected").val())
+                    let _url = '@processUrl("MergeCourse","Curriculum")'
+                    _that.isLoading = true
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.isLoading = false
+                            console.log(response.data);
+                            if (response.data.error != null)
+                                Swal.fire({
+                                    title: 'Có lỗi',
+                                    html: response.data.error,
+                                    icon: 'error'
+                                });
+                            else {
+                                Swal.fire({
+                                    title: 'Hoàn thành',
+                                    html: 'Bài giảng đã sao chép thành công!',
+                                    icon: 'success'
+                                });
+                                this.getData();
+                                _that.$bvModal.hide('merge_event');
+                            }
+                        }).catch(e => {
+                            _that.isLoading = false;
+                            alert("Error: " + e)
+                        })
+                },
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
@@ -543,7 +655,8 @@
                 <label for="">Cấp độ</label>
                 <select class="form-control" v-model="addItem.GradeID">
                     <option value="">Chọn cấp độ</option>
-                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == addItem.SubjectID">{{item.Name}}</option>
+                    @*<option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == addItem.SubjectID">{{item.Name}}</option>*@
+                    <option v-for="(item,k) in list_grades_full" :value="item.ID">{{item.Name}}</option>
                 </select>
             </b-col>
             <b-col class="form-group">
@@ -639,6 +752,81 @@
             </template>
             <template v-else>
                 <b-button variant="success" v-on:click="cloneData()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
+
+
+    <!--Hoa them 02-08-2020-->
+    <b-modal id="merge_event" centered title="Ghép bài giảng">
+        <input type="hidden" name="OriginID" v-model="mergeItem.OriginID" />
+        <div>
+            <div class="form-group">
+                <label class="col-form-label">Bài giảng gốc:</label>
+                <input type="text" class="form-control lock" id="rootCourseName" :value="mergeItem.OriginName" readonly>
+            </div>
+        </div>
+
+        <div>
+            <div class="form-group">
+                <label class="col-form-label">Ghép với bài giảng:</label>
+                @*<input type="text" class="form-control lock" id="joinCourseName" :value="mergeItem.OriginName">*@
+            <select name="joinCourseID" id="joinCourseID" class="form-control" required>
+                <option value="">Chọn khóa học</option>m
+                <option v-for="(item) in list_courses" v-if="item.ID!=mergeItem.OriginID" :value="item.ID">{{item.Name}}</option>
+            </select>
+            </div>
+        </div>
+        <b-col class="form-group">
+            <label for="">Tên bài giảng mới *</label>
+            @*<input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng mới" v-model="mergeItem.Name" ref="cloneName">*@
+            <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng mới" id="newName" required>
+        </b-col>
+        <div class="d-flex">
+            <b-col class="form-group">
+                <label for="">Chương trình</label>
+                <select class="form-control" v-model="mergeItem.SubjectID">
+                    <option value="">Chọn chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </b-col>
+            <b-col class="form-group">
+                <label for="">Cấp độ</label>
+                <select class="form-control" v-model="mergeItem.GradeID">
+                    <option value="">Chọn cấp độ</option>
+                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == mergeItem.SubjectID">{{item.Name}}</option>
+                </select>
+            </b-col>
+            <b-col class="form-group">
+                <label for="">Môn học</label>
+                <select class="form-control" v-model="mergeItem.SkillID">
+                    <option value="">Chọn môn học</option>
+                    <option v-for="(item,k) in list_skills" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </b-col>
+
+            <b-col class="form-group">
+                <label for="">Cơ sở</label>
+                <select class="form-control" v-model="mergeItem.Center">
+                    <option value="">Chọn cơ sở</option>
+                    <option v-for="(item,k) in list_centers" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </b-col>
+        </div>
+        <b-col class="form-group">
+            <label for="">Mô tả</label>
+            <quill-editor v-model="mergeItem.Description"
+                          ref="quillEditorA"
+                          :options="editorOption">
+            </quill-editor>
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="mergeData()">Lưu</b-button>
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
             </template>
         </template>

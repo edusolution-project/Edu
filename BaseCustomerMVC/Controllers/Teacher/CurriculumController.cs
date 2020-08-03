@@ -178,9 +178,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
+            CenterEntity center = null;
             if (!string.IsNullOrEmpty(basis))
             {
-                var center = _centerService.GetItemByCode(basis);
+                center = _centerService.GetItemByCode(basis);
                 if (center != null)
                     ViewBag.Center = center;
             }
@@ -195,9 +196,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
                 var grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
                 var skills = _skillService.GetList();
+                var courses = _service.CreateQuery().Find(t => t.Center.Equals(center.ID)).SortByDescending(o=>o.ID).ToList();
                 ViewBag.Grades = grade;
                 ViewBag.Subjects = subject;
                 ViewBag.Skills = skills;
+                ViewBag.Courses = courses;
             }
 
             ViewBag.AllCenters = teacher.Centers.Select(t => new CenterEntity { Code = t.Code, Name = t.Name, ID = t.CenterID }).ToList();
@@ -1348,22 +1351,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
+        /*
+         * Hòa viết 02-08-2020
+         * 
+         */
 
-        [HttpPost]
-        public async Task<JsonResult> CloneCourse(string CourseID, CourseEntity newcourse)
+        public async Task<string> CopyCourse(string CourseID, CourseEntity newcourse,CourseEntity course=null, string _userCreate="")
         {
-            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
-
-            //var grade = _modgradeService.GetItemByID(item.GradeID);
-            //var subject = _modsubjectService.GetItemByID(item.SubjectID);
-            //var programe = _modprogramService.GetItemByID(item.ProgramID);
-            var course = _service.GetItemByID(CourseID);//Clone
-
-            if (course == null)
-            {
-                return Json(new { error = "Dữ liệu không đúng, vui lòng kiểm tra lại" });
-            }
-
             var chapter_root = _chapterService.CreateQuery().Find(o => o.CourseID == CourseID && o.ParentID == "0");
             var lesson_root = _lessonService.CreateQuery().Find(o => o.CourseID == CourseID && o.ChapterID == "0");
 
@@ -1409,8 +1403,82 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 new_lesson.OriginID = o.ID;
                 await CloneLesson(new_lesson, _userCreate);
             }
-            return new JsonResult("OK");
+            return clone_course.ID;
         }
+
+
+        [HttpPost]
+        public async Task<JsonResult> CloneCourse(string CourseID, CourseEntity newcourse)
+        {
+            var _userCreate = User.Claims.GetClaimByType("UserID").Value;
+
+            //var grade = _modgradeService.GetItemByID(item.GradeID);
+            //var subject = _modsubjectService.GetItemByID(item.SubjectID);
+            //var programe = _modprogramService.GetItemByID(item.ProgramID);
+            var course = _service.GetItemByID(CourseID);//Clone
+
+            if (course == null)
+            {
+                return Json(new { error = "Dữ liệu không đúng, vui lòng kiểm tra lại" });
+            }
+
+            await CopyCourse(CourseID, newcourse, course, _userCreate);
+
+            return Json("OK");
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> MergeCourse(string CourseID, CourseEntity newcourse,string joinCourseID)
+        {
+            try
+            {
+                var _userCreate = User.Claims.GetClaimByType("UserID").Value;
+                var course = _service.GetItemByID(CourseID);//Clone
+
+                if (course == null)
+                {
+                    return Json(new { error = "Dữ liệu không đúng, vui lòng kiểm tra lại" });
+                }
+
+                var chapterOfJoinCourse = _chapterService.CreateQuery().Find(o => o.CourseID == joinCourseID && o.ParentID == "0");
+                //var lessonOfJoinCourse = _lessonService.CreateQuery().Find(o => o.CourseID == joinCourseID && o.ChapterID == "0");
+
+                var id= await CopyCourse(CourseID, newcourse, course, _userCreate);
+                foreach (var chapter in chapterOfJoinCourse.ToEnumerable())
+                {
+                    var item= await CloneChapter(new CourseChapterEntity(chapter)
+                    {
+                        CourseID = id,
+                        CreateUser = _userCreate,
+                        IsActive = true,
+                        IsAdmin = false,
+                        Order= int.MaxValue - 1,
+                    }, _userCreate, CourseID);
+                    var lessonOfJoinCourse = _lessonService.CreateQuery().Find(o => o.CourseID == joinCourseID && o.ChapterID == chapter.ID);
+                    var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
+                    foreach (var o in lessonOfJoinCourse.ToEnumerable())
+                    {
+                        var new_lesson = lessonMapping.Clone(o, new CourseLessonEntity());
+                        new_lesson.CreateUser = _userCreate;
+                        new_lesson.Created = DateTime.Now;
+                        new_lesson.CourseID = id;
+                        new_lesson.OriginID = o.ID;
+                        new_lesson.ChapterID = item.ID;
+                        await CloneLesson(new_lesson, _userCreate);
+                    }
+                }
+
+                return Json("OK");
+            }
+            catch( Exception ex)
+            {
+                return new JsonResult(ex.Message);
+            }
+        }
+
+        /*
+         * End
+         */
 
         [HttpPost]
         public async Task<JsonResult> Clone(string CourseID, CourseEntity newcourse)
@@ -1758,7 +1826,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     CourseID = item.CourseID,
                 };
                 if (_item.Media != null && _item.Media.Path != null)
-                    if (!_item.Media.Path.StartsWith("http://"))
+                    //if (!_item.Media.Path.StartsWith("http://"))
+                    //    _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
+                    if (_item.Media.Path.StartsWith("http://"))
                         _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneLessonPart(_item, _userCreate);
             }
@@ -1812,7 +1882,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     CourseID = item.CourseID
                 };
                 if (_item.Media != null && _item.Media.Path != null)
-                    if (!_item.Media.Path.StartsWith("http://"))
+                    //if (!_item.Media.Path.StartsWith("http://"))
+                    //    _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
+                    if (_item.Media.Path.StartsWith("http://"))
                         _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneLessonAnswer(_item);
             }
