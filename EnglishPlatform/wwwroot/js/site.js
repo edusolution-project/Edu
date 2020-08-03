@@ -80,6 +80,8 @@ function Submit(formName, url, actionName, fn) {
         }
     }
     $(form).find("input:disabled").removeAttr("disabled");
+    //data.append("Name", $(form).find("[name=newName]").text());
+    debugger
 
     var data = new FormData(form);
     showLoading("Sending data ...");
