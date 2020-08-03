@@ -6,6 +6,7 @@ using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly FileProcess _fileProcess;
         private readonly AccountService _accountService;
         private readonly CenterService _centerService;
+        private readonly NewsService _newsService;
         private readonly ISession _session;
         private readonly IHttpContextAccessor _httpContextAccessor;
         public DefaultConfigs _default { get; }
@@ -28,7 +30,9 @@ namespace BaseCustomerMVC.Controllers.Student
             IHttpContextAccessor httpContextAccessor,
             IOptions<DefaultConfigs> defaultvalue,
             CenterService centerService,
-            StudentService studentService)
+            StudentService studentService,
+            NewsService newsService
+            )
         {
             _studentService = studentService;
             _accountService = accountService;
@@ -37,6 +41,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _httpContextAccessor = httpContextAccessor;
             _session = _httpContextAccessor.HttpContext.Session;
             _default = defaultvalue.Value;
+            _newsService = newsService;
         }
 
         public IActionResult Index(string basis)
@@ -232,5 +237,28 @@ namespace BaseCustomerMVC.Controllers.Student
                         { "Message", "Password Updated Successfully" }
                     });
         }
+
+        #region getCourse
+        [HttpPost]
+        public JsonResult getListCourse()
+        {
+            string _studentid = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(_studentid);
+            var centerID = student.Centers[0];
+            var filter = new List<FilterDefinition<NewsEntity>>();
+            if (!string.IsNullOrEmpty(centerID))
+            {
+                filter.Add(Builders<NewsEntity>.Filter.Where(o => o.CenterID == centerID));
+            }
+
+            var data = _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter));
+            Dictionary<string, object> response = new Dictionary<string, object>()
+            {
+                {"Data",data.ToList() },
+                {"Message","Success" }
+            };
+            return new JsonResult(response);
+        }
+        #endregion
     }
 }
