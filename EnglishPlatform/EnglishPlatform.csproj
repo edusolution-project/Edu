@@ -85,6 +85,8 @@
     <Content Remove="Areas\Teacher\Views\Class\References.cshtml" />
     <Content Remove="Areas\Teacher\Views\Class\Schedule.cshtml" />
     <Content Remove="Areas\Teacher\Views\Class\StudentDetail - o.cshtml" />
+    <Content Remove="Areas\Teacher\Views\Curriculum\Assignments.cshtml" />
+    <Content Remove="Areas\Teacher\Views\Curriculum\Detail.cshtml" />
     <Content Remove="Areas\Teacher\Views\Curriculum\Index_o.cshtml" />
     <Content Remove="Areas\Teacher\Views\Home\Index_o.cshtml" />
     <Content Remove="Areas\Teacher\Views\Home\Profile_o.cshtml" />
@@ -126,7 +128,6 @@
     <None Include="Areas\Teacher\Views\Schedule\Lesson.cshtml" />
     <None Include="Areas\Teacher\Views\Class\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Class\Index.cshtml" />
-    <None Include="Areas\Teacher\Views\Curriculum\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Lesson.cshtml" />
     <None Include="Areas\Teacher\Views\Discuss\Index_o.cshtml" />

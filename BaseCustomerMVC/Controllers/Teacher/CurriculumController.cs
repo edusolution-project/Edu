@@ -196,7 +196,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
                 var grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
                 var skills = _skillService.GetList();
-                var courses = _service.CreateQuery().Find(t => t.Center.Equals(center.ID)).SortByDescending(o=>o.ID).ToList();
+                var courses = _service.CreateQuery().Find(t => t.Center.Equals(center.ID)).SortByDescending(o => o.ID).ToList();
                 ViewBag.Grades = grade;
                 ViewBag.Subjects = subject;
                 ViewBag.Skills = skills;
@@ -772,7 +772,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #region Chapter
         [HttpPost]
-        public JsonResult CreateOrUpdateChapter(ChapterEntity item)
+        public JsonResult CreateOrUpdateChapter(CourseChapterEntity item)
         {
             try
             {
@@ -791,7 +791,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (data == null)
                 {
                     item.Created = DateTime.Now;
-
                     item.IsAdmin = true;
                     item.IsActive = false;
                     item.Updated = DateTime.Now;
@@ -1128,8 +1127,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         { "Error", "Dữ liệu không đúng" }
                     });
                 }
-
-                var currentIndex = _lessonService.CreateQuery().CountDocuments(o => o.ChapterID == rootItem.ID);
+                var currentChapIndex = (int)_chapterService.Collection.CountDocuments(o => o.ParentID == rootItem.ParentID && o.CourseID == rootItem.CourseID);
+                var currentLessonIndex = (int)_lessonService.CreateQuery().CountDocuments(o => o.ChapterID == rootItem.ID);
                 var orgChapter = _chapterService.Collection.Find(tbl => tbl.ID.Equals(ID)).FirstOrDefault();
                 var joinLessons = _lessonService.CreateQuery().Find(o => o.ChapterID == joinItem.ID).SortBy(o => o.Order);
 
@@ -1152,7 +1151,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     orgChapter.Name = newName;
                 var chapter = await CloneChapter(new CourseChapterEntity(orgChapter)
                 {
-                    Order = int.MaxValue - 1,
+                    Order = currentChapIndex,
                 }, _userCreate, orgChapter.CourseID); ;
 
                 var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
@@ -1164,6 +1163,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     new_lesson.Created = DateTime.Now;
                     new_lesson.ChapterID = chapter.ID;
                     new_lesson.OriginID = o.ID;
+                    new_lesson.Order = currentLessonIndex++;
                     await CloneLesson(new_lesson, _userCreate);
                 }
 
@@ -1175,7 +1175,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     { "Error", null }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new JsonResult(new Dictionary<string, object>
                 {
@@ -1356,7 +1356,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
          * 
          */
 
-        public async Task<string> CopyCourse(string CourseID, CourseEntity newcourse,CourseEntity course=null, string _userCreate="")
+        public async Task<string> CopyCourse(string CourseID, CourseEntity newcourse, CourseEntity course = null, string _userCreate = "")
         {
             var chapter_root = _chapterService.CreateQuery().Find(o => o.CourseID == CourseID && o.ParentID == "0");
             var lesson_root = _lessonService.CreateQuery().Find(o => o.CourseID == CourseID && o.ChapterID == "0");
@@ -1428,7 +1428,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        public async Task<JsonResult> MergeCourse(string CourseID, CourseEntity newcourse,string joinCourseID)
+        public async Task<JsonResult> MergeCourse(string CourseID, CourseEntity newcourse, string joinCourseID)
         {
             try
             {
@@ -1440,37 +1440,42 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return Json(new { error = "Dữ liệu không đúng, vui lòng kiểm tra lại" });
                 }
 
-                var chapterOfJoinCourse = _chapterService.CreateQuery().Find(o => o.CourseID == joinCourseID && o.ParentID == "0");
                 //var lessonOfJoinCourse = _lessonService.CreateQuery().Find(o => o.CourseID == joinCourseID && o.ChapterID == "0");
-
-                var id= await CopyCourse(CourseID, newcourse, course, _userCreate);
-                foreach (var chapter in chapterOfJoinCourse.ToEnumerable())
+                var rootchapOrder = (int)_chapterService.CreateQuery().CountDocuments(o => o.CourseID == CourseID && o.ParentID == "0");
+                var rootlessonOrder = (int)_lessonService.CreateQuery().CountDocuments(o => o.CourseID == CourseID && o.ChapterID == "0");
+                var id = await CopyCourse(CourseID, newcourse, course, _userCreate);
+                var rootchapterOfJoinCourse = _chapterService.CreateQuery().Find(o => o.CourseID == joinCourseID && o.ParentID == "0").SortBy(o => o.Order).ToEnumerable();
+                //*** clone JoinCourse's chapters ***
+                foreach (var chapter in rootchapterOfJoinCourse)
                 {
-                    var item= await CloneChapter(new CourseChapterEntity(chapter)
+                    var item = await CloneChapter(new CourseChapterEntity(chapter)
                     {
                         CourseID = id,
                         CreateUser = _userCreate,
                         IsActive = true,
                         IsAdmin = false,
-                        Order= int.MaxValue - 1,
-                    }, _userCreate, CourseID);
-                    var lessonOfJoinCourse = _lessonService.CreateQuery().Find(o => o.CourseID == joinCourseID && o.ChapterID == chapter.ID);
-                    var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
-                    foreach (var o in lessonOfJoinCourse.ToEnumerable())
-                    {
-                        var new_lesson = lessonMapping.Clone(o, new CourseLessonEntity());
-                        new_lesson.CreateUser = _userCreate;
-                        new_lesson.Created = DateTime.Now;
-                        new_lesson.CourseID = id;
-                        new_lesson.OriginID = o.ID;
-                        new_lesson.ChapterID = item.ID;
-                        await CloneLesson(new_lesson, _userCreate);
-                    }
+                        Order = rootchapOrder++,
+                        OriginID = chapter.ID
+                    }, _userCreate, joinCourseID);
+                }
+                //** clone joinCourse's root lesson
+                var rootlessonOfJoinCourse = _lessonService.CreateQuery().Find(o => o.CourseID == joinCourseID && o.ChapterID == "0").SortBy(o => o.Order).ToEnumerable();
+                var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
+                foreach (var o in rootlessonOfJoinCourse)
+                {
+                    var new_lesson = lessonMapping.Clone(o, new CourseLessonEntity());
+                    new_lesson.CreateUser = _userCreate;
+                    new_lesson.Created = DateTime.Now;
+                    new_lesson.CourseID = id;
+                    new_lesson.OriginID = o.ID;
+                    new_lesson.ChapterID = "0";
+                    new_lesson.Order = rootlessonOrder++;
+                    await CloneLesson(new_lesson, _userCreate);
                 }
 
                 return Json("OK");
             }
-            catch( Exception ex)
+            catch (Exception ex)
             {
                 return new JsonResult(ex.Message);
             }
@@ -1590,7 +1595,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var chapter = await CloneChapter(new CourseChapterEntity(orgChapter)
                 {
                     Order = int.MaxValue - 1,
-                }, orgChapter.CreateUser, orgChapter.CourseID); ;
+                }, orgChapter.CreateUser, orgChapter.CourseID);
 
                 //var chapterID = _chapterService.Collection.Find(tbl => tbl.CourseID.Equals(CourseID)).SortByDescending(tbl => tbl.ID).FirstOrDefault();
                 //var lessons = _lessonService.GetChapterLesson(orgChapter.ID);

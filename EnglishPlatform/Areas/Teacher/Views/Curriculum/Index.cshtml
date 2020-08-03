@@ -114,12 +114,12 @@
         new Vue({
             el: "#main",
             mounted() {
-                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
-                debugger
+                //debugger
                 this.list_skills = @Html.Raw(Json.Serialize(skills));
-                this.list_courses=@Html.Raw(Json.Serialize(courses));
-                 //this.changeSubject()
+                this.list_courses =@Html.Raw(Json.Serialize(courses));
+                //this.changeSubject()
                 this.getData();
                 window.chooseFile = this.chooseFile
                 window.updateFile = this.updateFile
@@ -293,7 +293,7 @@
                             else {
                                 _that.list_data = response.data.Data;
                                 this.list_data = _that.list_data
-                                debugger
+                                //debugger
                                 this.totalRec = response.data.Model.totalRecord
                                 //var tt = response.data.Model.totalRecord;
                                 //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
@@ -375,7 +375,7 @@
                         return false;
                     }
                     else {
-                        debugger
+                        //debugger
                         _that.mergeItem.OriginID = obj.ID;
                         _that.mergeItem.OriginName = obj.Name;
                         _that.mergeItem.SubjectID = obj.SubjectID;
@@ -772,10 +772,10 @@
             <div class="form-group">
                 <label class="col-form-label">Ghép với bài giảng:</label>
                 @*<input type="text" class="form-control lock" id="joinCourseName" :value="mergeItem.OriginName">*@
-            <select name="joinCourseID" id="joinCourseID" class="form-control" required>
-                <option value="">Chọn khóa học</option>m
-                <option v-for="(item) in list_courses" v-if="item.ID!=mergeItem.OriginID" :value="item.ID">{{item.Name}}</option>
-            </select>
+                <select name="joinCourseID" id="joinCourseID" class="form-control" required>
+                    <option value="">Chọn khóa học</option>m
+                    <option v-for="(item) in list_courses" v-if="item.ID!=mergeItem.OriginID" :value="item.ID">{{item.Name}}</option>
+                </select>
             </div>
         </div>
         <b-col class="form-group">
