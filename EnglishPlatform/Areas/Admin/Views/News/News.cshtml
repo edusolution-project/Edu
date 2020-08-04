@@ -88,7 +88,7 @@
 </div>
 
 <!-- Modal Create Form -->
-<div class="modal fade" id="ModalNews" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true">
+<div class="modal fade" id="ModalNews" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
         @using (Html.BeginForm("CreateNews", "News", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
         {
@@ -138,7 +138,7 @@
                                 <input type="number" class="form-control" name="Price" id="Price" placeholder="Giá sản phẩm" />
                             </div>
                             <div class="form-group col-sm-6">
-                                <input type="number" class="form-control" name="Sale" id="Sale" placeholder="Giảm giá" />
+                                <input type="number" class="form-control" name="Discount" id="Discount" placeholder="Giảm giá(%)" />
                             </div>
                         </div>
 

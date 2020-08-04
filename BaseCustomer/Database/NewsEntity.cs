@@ -43,8 +43,10 @@ namespace BaseCustomerEntity.Database
         public string ClassID { get; set; }
         [JsonProperty("Price")]
         public double Price { get; set; }
-        [JsonProperty("Sale")]
-        public double Sale { get; set; }
+        [JsonProperty("Discount")]
+        public double Discount { get; set; }
+        //[JsonProperty("PriceSale")]
+        //public double PriceSale { get; set; }
 
     }
 

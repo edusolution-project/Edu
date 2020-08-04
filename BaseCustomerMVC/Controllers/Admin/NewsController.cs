@@ -181,6 +181,11 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (item.CategoryID == null)
                 item.CategoryID = _serviceNewCate.GetItemByCode(CategoryCode).ID;
 
+            //if (item.Sale != 0)
+            //{
+            //    item.PriceSale = item.Price - item.Price * item.Sale / 100;
+            //}
+
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.CreateDate = DateTime.UtcNow;
