@@ -1592,9 +1592,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             else
             {
+
                 var chapter = await CloneChapter(new CourseChapterEntity(orgChapter)
                 {
-                    Order = int.MaxValue - 1,
+                    Order = (int)_chapterService.Collection.CountDocuments(t => t.CourseID == CourseID && t.ParentID == orgChapter.ParentID),
                 }, orgChapter.CreateUser, orgChapter.CourseID);
 
                 //var chapterID = _chapterService.Collection.Find(tbl => tbl.CourseID.Equals(CourseID)).SortByDescending(tbl => tbl.ID).FirstOrDefault();

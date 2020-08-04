@@ -496,16 +496,16 @@
         title_cPart.append($("<input>", { "type": "hidden", "name": "Order", "value": chapter.Order + 1 }));
         @if (!isLock)
         {
-        @:title_ePart.append($("<i>", { "class": "far fa-folder", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương", "onclick": "AddChapter('" + chapter.ID + "'); return false;" }));
+            @:title_ePart.append($("<i>", { "class": "far fa-folder", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương", "onclick": "AddChapter('" + chapter.ID + "'); return false;" }));
             @:title_ePart.append($("<i>", { "class": "far fa-file", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài", "onclick": "AddLesson('" + chapter.ID + "');" }));
             //title_ePart.append($("<i>", { "class": "fas fa-sort", "title": "Sắp xếp", "onclick": "Sort('" + chapter.ID + "'); return false;" }));
         }
         title_ePart.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Sửa", "pid": chapter.ParentID, "onclick": "EditChapter(this, '" + chapter.ID + "'); return false;" }));
         @if (!isLock)
         {
-            @:title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
             @:title_ePart.append($("<i>", { "class": "fas fa-clone", "title": "Nhân bản chương", "onclick": "CloneChapter('" + chapter.ID + "',this); return false;" }));
             @:title_ePart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinChapterModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinChapter(this,'" + chapter.ID + "'); return false;" }));
+            @:title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
         }
         title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }));
         chapTitle.append(title_cPart);

@@ -79,7 +79,7 @@
                         <div class="d-flex btn-group">
                             <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
                             <a class="btn-act btn-edit" title="Sao chép" href="javascript:;" v-on:click="showCloneItem(item)"><i class="ti-layers"></i></a>
-                            <a class="btn-act btn-edit" title="Ghép chương" href="javascript:;" v-on:click="showMergeItem(item)"><i class="ti-layout-accordion-merged"></i></a>
+                            <a class="btn-act btn-edit" title="Ghép bài giảng" href="javascript:;" v-on:click="showMergeItem(item)"><i class="fa fa-first-aid"></i></a>
                             <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
                         </div>
                     </td>
@@ -203,7 +203,7 @@
                 },
                 mergeItem: {
                     OriginID: '',
-                    //JoinCourseID:'',
+                    JoinCourseID:'',
                     //JoinCourseName:'',
                     Name: '',
                     SubjectID: '',
@@ -510,8 +510,13 @@
                     let _form = new FormData()
 
                     if (_that.mergeItem.Name == '') {
-                        alert("Please fill in required fields");
-                        this.$refs["cloneName"].focus();
+                        alert("Chưa điền tên bài giảng");
+                        this.$refs["mergeName"].focus();
+                        return false;
+                    }
+
+                    if (_that.mergeItem.JoinCourseID == '') {
+                        alert("Chưa chọn bài giảng được ghép");
                         return false;
                     }
 
@@ -535,19 +540,23 @@
                         return false;
                     }
 
-                    if ($("#newName").val() == "" || $("#newName").val() == null) {
-                        alert("Chưa ghi tên chương mới sau khi ghép");
-                        return false;
-                    }
+                    if ($("#joinCourseID option:selected").val())
+
+                    //if ($("#newName").val() == "" || $("#newName").val() == null) {
+                    //    alert("Chưa ghi tên chương mới sau khi ghép");
+                    //    return false;
+                    //}
 
                     _form.append('CourseID', _that.mergeItem.OriginID)
                     _form.append('GradeID', _that.mergeItem.GradeID)
                     _form.append('SubjectID', _that.mergeItem.SubjectID)
                     _form.append('SkillID', _that.mergeItem.SkillID)
                     _form.append('Center', _that.mergeItem.Center)
-                    _form.append('Name', $("#newName").val())
+                    //_form.append('Name', $("#newName").val())
+                    _form.append('Name', _that.mergeItem.Name)
                     _form.append('Description', _that.mergeItem.Description)
-                    _form.append('joinCourseID', $("#joinCourseID option:selected").val())
+                    //_form.append('joinCourseID', $("#joinCourseID option:selected").val())
+                    _form.append('joinCourseID', _that.mergeItem.JoinCourseID)
                     let _url = '@processUrl("MergeCourse","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
@@ -655,8 +664,7 @@
                 <label for="">Cấp độ</label>
                 <select class="form-control" v-model="addItem.GradeID">
                     <option value="">Chọn cấp độ</option>
-                    @*<option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == addItem.SubjectID">{{item.Name}}</option>*@
-                    <option v-for="(item,k) in list_grades_full" :value="item.ID">{{item.Name}}</option>
+                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == addItem.SubjectID">{{item.Name}}</option>
                 </select>
             </b-col>
             <b-col class="form-group">
@@ -683,7 +691,6 @@
                           ref="quillEditorA"
                           :options="editorOption">
             </quill-editor>
-            @*<textarea name="name" rows="3" class="form-control" v-model="addItem.description"></textarea>*@
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">
@@ -772,7 +779,7 @@
             <div class="form-group">
                 <label class="col-form-label">Ghép với bài giảng:</label>
                 @*<input type="text" class="form-control lock" id="joinCourseName" :value="mergeItem.OriginName">*@
-                <select name="joinCourseID" id="joinCourseID" class="form-control" required>
+                <select v-model="mergeItem.JoinCourseID" class="form-control" required>
                     <option value="">Chọn khóa học</option>m
                     <option v-for="(item) in list_courses" v-if="item.ID!=mergeItem.OriginID" :value="item.ID">{{item.Name}}</option>
                 </select>
@@ -780,8 +787,8 @@
         </div>
         <b-col class="form-group">
             <label for="">Tên bài giảng mới *</label>
-            @*<input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng mới" v-model="mergeItem.Name" ref="cloneName">*@
-            <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng mới" id="newName" required>
+            <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng mới" v-model="mergeItem.Name" ref="mergeName">
+            @*<input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng mới" id="newName" required>*@
         </b-col>
         <div class="d-flex">
             <b-col class="form-group">
