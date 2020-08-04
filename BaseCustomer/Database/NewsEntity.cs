@@ -47,7 +47,10 @@ namespace BaseCustomerEntity.Database
         public double Discount { get; set; }
         //[JsonProperty("PriceSale")]
         //public double PriceSale { get; set; }
-
+        [JsonProperty("Type")]
+        public string Type { get; set; }
+        [JsonProperty("IsPublic")]
+        public bool IsPublic { get; set; }
     }
 
     public class NewsService : ServiceBase<NewsEntity>
@@ -77,10 +80,10 @@ namespace BaseCustomerEntity.Database
 
         public void ChangeStatus(List<string> IDs, bool status, string check)
         {
-            if (check.Equals("IsTop"))
-            {
-                CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsTop, status));
-            }
+            //if (check.Equals("IsTop"))
+            //{
+            //    CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsTop, status));
+            //}
             if (check.Equals("IsHot"))
             {
                 CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsHot, status));
@@ -88,6 +91,10 @@ namespace BaseCustomerEntity.Database
             if (check.Equals("IsActive"))
             {
                 CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsActive, status));
+            }
+            if (check.Equals("IsPublic"))
+            {
+                CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsPublic, status));
             }
         }
 
